@@ -10,24 +10,33 @@ import SkillGapPage from './pages/SkillGapPage'
 import RoadmapPage from './pages/RoadmapPage'
 import ResourcesPage from './pages/ResourcesPage'
 
+/**
+ * AppShell wraps inner pages with the full layout (Navbar + Sidebar).
+ * Landing page bypasses this entirely for full cinematic control.
+ */
+function AppShell({ children }) {
+  return <PageLayout>{children}</PageLayout>
+}
+
 export default function App() {
   return (
     <AppProvider>
       <BrowserRouter>
-        <PageLayout>
-          <AnimatePresence mode="wait">
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/resume" element={<ResumeUploadPage />} />
-              <Route path="/skill-gap" element={<SkillGapPage />} />
-              <Route path="/roadmap" element={<RoadmapPage />} />
-              <Route path="/resources" element={<ResourcesPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </AnimatePresence>
-        </PageLayout>
+        <Routes>
+          {/* ── Landing — no layout, full cinematic control ── */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* ── Inner app pages — wrapped in PageLayout ── */}
+          <Route path="/dashboard"  element={<AppShell><DashboardPage /></AppShell>} />
+          <Route path="/profile"    element={<AppShell><ProfilePage /></AppShell>} />
+          <Route path="/resume"     element={<AppShell><ResumeUploadPage /></AppShell>} />
+          <Route path="/skill-gap"  element={<AppShell><SkillGapPage /></AppShell>} />
+          <Route path="/roadmap"    element={<AppShell><RoadmapPage /></AppShell>} />
+          <Route path="/resources"  element={<AppShell><ResourcesPage /></AppShell>} />
+
+          {/* ── Fallback ── */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </BrowserRouter>
     </AppProvider>
   )

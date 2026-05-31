@@ -1,301 +1,359 @@
 /**
- * DashboardPage — AI Career Intelligence Command Center
- * Premium glassmorphism dashboard with live animated metrics
+ * DashboardPage — AI Career Intelligence Operating System
+ *
+ * Layout:
+ *   Top: Command bar (search, goal, status, AI toggle)
+ *   Left col (4/12): Readiness ring + Career matches + Interview prep
+ *   Center col (5/12): Welcome hero + Skill network + Future projection
+ *   Right col (3/12): AI Insights + Roadmap timeline + Resources
+ *   Floating: AI Assistant panel (collapsible)
  */
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
-  BarChart3, Map, BookOpen, Upload, ArrowRight,
-  TrendingUp, Target, Zap, Clock, CheckCircle2,
-  Activity, Sparkles, ChevronRight, Star, Brain,
-  Rocket, Shield, Globe
+  Search, Bell, Sparkles, ChevronRight, Zap,
+  BarChart3, Map, BookOpen, User, Target,
+  TrendingUp, Activity, Settings
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
-import Card from '../components/ui/Card'
-import Badge from '../components/ui/Badge'
-import ProgressBar from '../components/ui/ProgressBar'
 
-const recentActivity = [
-  { action: 'Profile updated', time: '2 hours ago', icon: CheckCircle2, color: '#34d399' },
-  { action: 'Resume uploaded & parsed', time: '1 day ago', icon: Upload, color: '#818cf8' },
-  { action: 'Skill gap analyzed', time: '2 days ago', icon: BarChart3, color: '#a78bfa' },
-  { action: 'Roadmap generated', time: '2 days ago', icon: Map, color: '#60a5fa' },
-]
+import ReadinessRing      from '../components/dashboard/ReadinessRing'
+import SkillNetwork       from '../components/dashboard/SkillNetwork'
+import RoadmapTimeline    from '../components/dashboard/RoadmapTimeline'
+import AIInsightsPanel    from '../components/dashboard/AIInsightsPanel'
+import FutureProjection   from '../components/dashboard/FutureProjection'
+import CareerMatchRanking from '../components/dashboard/CareerMatchRanking'
+import InterviewPrep      from '../components/dashboard/InterviewPrep'
+import ResourceHub        from '../components/dashboard/ResourceHub'
+import AIAssistant        from '../components/dashboard/AIAssistant'
 
-const quickActions = [
-  { label: 'Analyze Skill Gap', to: '/skill-gap', icon: BarChart3, color: 'from-brand-500 to-violet-500', desc: 'See what you\'re missing', glow: 'rgba(99,102,241,0.3)' },
-  { label: 'View Roadmap', to: '/roadmap', icon: Map, color: 'from-violet-500 to-purple-500', desc: 'Your learning path', glow: 'rgba(139,92,246,0.3)' },
-  { label: 'Browse Resources', to: '/resources', icon: BookOpen, color: 'from-purple-500 to-pink-500', desc: 'Courses & certs', glow: 'rgba(192,132,252,0.3)' },
-  { label: 'Update Resume', to: '/resume', icon: Upload, color: 'from-emerald-500 to-teal-500', desc: 'Upload latest version', glow: 'rgba(52,211,153,0.3)' },
-]
-
-const roadmapPreview = [
-  { week: 'Week 1', title: 'TypeScript Fundamentals', status: 'completed', progress: 100 },
-  { week: 'Week 2', title: 'System Design Basics', status: 'in-progress', progress: 60 },
-  { week: 'Week 3', title: 'Machine Learning Intro', status: 'upcoming', progress: 0 },
-]
-
-const kpis = [
-  { label: 'Career Match', value: '73%', change: '+8%', icon: Target, color: '#818cf8', bg: 'rgba(99,102,241,0.08)', border: 'rgba(99,102,241,0.15)' },
-  { label: 'Roadmap Progress', value: '45%', change: '+12%', icon: Map, color: '#34d399', bg: 'rgba(52,211,153,0.08)', border: 'rgba(52,211,153,0.15)' },
-  { label: 'Resources Done', value: '12', change: '+3 this week', icon: BookOpen, color: '#a78bfa', bg: 'rgba(167,139,250,0.08)', border: 'rgba(167,139,250,0.15)' },
-  { label: 'Skills in Profile', value: '8', change: 'active', icon: TrendingUp, color: '#60a5fa', bg: 'rgba(96,165,250,0.08)', border: 'rgba(96,165,250,0.15)' },
-]
-
-const stagger = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.07 } },
+// ── Panel wrapper ─────────────────────────────────────────────────────────────
+function Panel({ title, subtitle, icon: Icon, iconColor = '#818cf8', children, className = '', action, onAction }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={`rounded-3xl overflow-hidden ${className}`}
+      style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)' }}
+    >
+      {(title || subtitle) && (
+        <div className="flex items-center justify-between px-5 pt-5 pb-4">
+          <div className="flex items-center gap-2.5">
+            {Icon && (
+              <div className="w-7 h-7 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: iconColor + '15' }}
+              >
+                <Icon size={13} style={{ color: iconColor }} />
+              </div>
+            )}
+            <div>
+              {title && <p className="text-sm font-bold text-slate-200">{title}</p>}
+              {subtitle && <p className="text-xs text-slate-600 mt-0.5">{subtitle}</p>}
+            </div>
+          </div>
+          {action && (
+            <button onClick={onAction}
+              className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer flex items-center gap-1"
+            >
+              {action} <ChevronRight size={11} />
+            </button>
+          )}
+        </div>
+      )}
+      <div className={title ? 'px-5 pb-5' : 'p-5'}>
+        {children}
+      </div>
+    </motion.div>
+  )
 }
-const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } },
+
+// ── Command Bar ───────────────────────────────────────────────────────────────
+function CommandBar({ onToggleAI, aiOpen }) {
+  const { profile } = useApp()
+  const navigate = useNavigate()
+  const [search, setSearch] = useState('')
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="flex items-center gap-3 px-4 py-3 rounded-2xl mb-6"
+      style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)' }}
+    >
+      {/* Search */}
+      <div className="relative flex-1 max-w-xs">
+        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none" />
+        <input value={search} onChange={e => setSearch(e.target.value)}
+          placeholder="Search skills, roles, resources..."
+          className="w-full pl-8 pr-3 py-2 rounded-xl text-xs text-slate-300 placeholder-slate-700 focus:outline-none transition-all"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+        />
+      </div>
+
+      {/* Career goal chip */}
+      <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl"
+        style={{ background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)' }}
+      >
+        <Target size={11} className="text-indigo-400" />
+        <span className="text-xs text-indigo-300 font-medium max-w-[120px] truncate">{profile.targetJobRole}</span>
+      </div>
+
+      {/* Readiness score */}
+      <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl"
+        style={{ background: 'rgba(52,211,153,0.08)', border: '1px solid rgba(52,211,153,0.2)' }}
+      >
+        <motion.div className="w-2 h-2 rounded-full bg-emerald-400"
+          animate={{ scale: [1, 1.4, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
+        />
+        <span className="text-xs text-emerald-300 font-bold">73% Ready</span>
+      </div>
+
+      <div className="flex items-center gap-2 ml-auto">
+        {/* Notifications */}
+        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+          className="relative w-8 h-8 rounded-xl flex items-center justify-center cursor-pointer transition-all"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+        >
+          <Bell size={13} className="text-slate-400" />
+          <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-indigo-400" />
+        </motion.button>
+
+        {/* AI toggle */}
+        <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+          onClick={onToggleAI}
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all"
+          style={aiOpen
+            ? { background: 'linear-gradient(135deg, rgba(99,102,241,0.3), rgba(139,92,246,0.3))', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc' }
+            : { background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)', color: '#818cf8' }
+          }
+        >
+          <Sparkles size={12} />
+          <span className="hidden sm:inline">AI Mentor</span>
+        </motion.button>
+
+        {/* Profile */}
+        <button onClick={() => navigate('/profile')}
+          className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold text-white cursor-pointer flex-shrink-0"
+          style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)' }}
+        >
+          {profile.fullName?.charAt(0) || 'A'}
+        </button>
+      </div>
+    </motion.div>
+  )
 }
 
+// ── Welcome Hero ──────────────────────────────────────────────────────────────
+function WelcomeHero({ profile }) {
+  const navigate = useNavigate()
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+      className="relative rounded-3xl overflow-hidden p-6 sm:p-8 mb-5"
+      style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.08) 50%, rgba(10,10,20,0) 100%)', border: '1px solid rgba(99,102,241,0.2)' }}
+    >
+      {/* Ambient glow */}
+      <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-[80px] pointer-events-none"
+        style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%)' }}
+      />
+
+      <div className="relative z-10">
+        <p className="text-xs text-slate-600 uppercase tracking-widest font-mono mb-2">Career Intelligence · Active</p>
+        <motion.h1
+          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          className="text-3xl sm:text-4xl font-display font-bold text-white leading-tight mb-1"
+        >
+          Your Future Is{' '}
+          <span className="bg-gradient-to-r from-indigo-300 to-violet-300 bg-clip-text text-transparent"
+            style={{ filter: 'drop-shadow(0 0 20px rgba(139,92,246,0.4))' }}
+          >
+            68% Ready.
+          </span>
+        </motion.h1>
+        <p className="text-slate-500 text-sm mb-5">
+          Targeting <span className="text-indigo-300 font-medium">{profile.targetJobRole}</span> · 27% gap remaining
+        </p>
+
+        {/* Quick stats row */}
+        <div className="flex flex-wrap gap-3">
+          {[
+            { label: 'Skills', value: profile.skills.length, color: '#818cf8', icon: Zap },
+            { label: 'Match Score', value: '73%', color: '#34d399', icon: TrendingUp },
+            { label: 'Roadmap', value: '45%', color: '#a78bfa', icon: Map },
+            { label: 'Resources', value: '12/28', color: '#fbbf24', icon: BookOpen },
+          ].map(({ label, value, color, icon: Icon }) => (
+            <div key={label} className="flex items-center gap-2 px-3 py-2 rounded-xl"
+              style={{ background: color + '10', border: `1px solid ${color}20` }}
+            >
+              <Icon size={11} style={{ color }} />
+              <span className="text-xs font-bold" style={{ color }}>{value}</span>
+              <span className="text-xs text-slate-600">{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+// ── Tab navigation for center column ─────────────────────────────────────────
+const CENTER_TABS = [
+  { id: 'skills',   label: 'Skill Network',    icon: Activity },
+  { id: 'future',   label: 'Future Projection', icon: TrendingUp },
+  { id: 'resources',label: 'Resources',         icon: BookOpen },
+]
+
+// ── Main Dashboard ────────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const { profile } = useApp()
   const navigate = useNavigate()
+  const [aiOpen, setAiOpen] = useState(true)
+  const [centerTab, setCenterTab] = useState('skills')
 
   return (
-    <div className="min-h-screen p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto">
-
-        {/* ── Header ── */}
-        <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <div className="flex items-start justify-between flex-wrap gap-4">
-            <div>
-              <p className="text-xs text-slate-600 uppercase tracking-widest mb-1">Career Intelligence</p>
-              <h1 className="text-2xl font-display font-bold text-white">
-                Welcome back, <span className="bg-gradient-to-r from-brand-300 to-violet-300 bg-clip-text text-transparent">{profile.fullName?.split(' ')[0] || 'Explorer'}</span> 👋
-              </h1>
-              <p className="text-slate-500 text-sm mt-1">Your AI career system is active and monitoring your progress.</p>
-            </div>
-            <motion.div
-              className="flex items-center gap-2 glass rounded-xl px-4 py-2 border border-emerald-500/20"
-              animate={{ boxShadow: ['0 0 0px rgba(52,211,153,0)', '0 0 15px rgba(52,211,153,0.1)', '0 0 0px rgba(52,211,153,0)'] }}
-              transition={{ duration: 2.5, repeat: Infinity }}
-            >
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-xs text-emerald-300 font-medium">AI Analysis Active</span>
-            </motion.div>
-          </div>
-        </motion.div>
-
-        <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
-
-          {/* ── KPI Row ── */}
-          <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {kpis.map(({ label, value, change, icon: Icon, color, bg, border }, i) => (
-              <motion.div key={label}
-                whileHover={{ y: -3, scale: 1.02 }}
-                className="relative rounded-2xl p-5 overflow-hidden cursor-default"
-                style={{ background: bg, border: `1px solid ${border}` }}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: color + '20' }}>
-                    <Icon size={16} style={{ color }} />
-                  </div>
-                  <span className="text-xs font-medium" style={{ color }}>{change}</span>
-                </div>
-                <p className="text-2xl font-display font-bold text-white mb-0.5">{value}</p>
-                <p className="text-xs text-slate-500">{label}</p>
-                {/* Subtle glow */}
-                <div className="absolute -bottom-4 -right-4 w-16 h-16 rounded-full blur-2xl opacity-30" style={{ background: color }} />
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* ── Main grid ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-            {/* Profile Summary */}
-            <motion.div variants={fadeUp}>
-              <Card className="h-full">
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-sm font-semibold text-slate-200">Profile Summary</h2>
-                  <button onClick={() => navigate('/profile')}
-                    className="text-xs text-brand-400 hover:text-brand-300 transition-colors cursor-pointer flex items-center gap-1"
-                  >Edit <ChevronRight size={11} /></button>
-                </div>
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-500 to-violet-600 flex items-center justify-center text-lg font-bold text-white shadow-lg shadow-brand-900/40">
-                      {profile.fullName?.charAt(0) || 'A'}
-                    </div>
-                    <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-[#0a0a0f]" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-200">{profile.fullName || 'Your Name'}</p>
-                    <p className="text-xs text-slate-500">{profile.email || 'email@example.com'}</p>
-                  </div>
-                </div>
-                <div className="space-y-2.5 text-xs">
-                  {[
-                    { label: 'Education', value: profile.education || 'Not set' },
-                    { label: 'Target Role', value: profile.targetJobRole || 'Not set' },
-                    { label: 'Skills', value: `${profile.skills.length} skills added` },
-                  ].map(({ label, value }) => (
-                    <div key={label} className="flex items-center justify-between py-2 border-b border-white/[0.04] last:border-0">
-                      <span className="text-slate-600">{label}</span>
-                      <span className="text-slate-300 font-medium text-right max-w-[140px] truncate">{value}</span>
-                    </div>
-                  ))}
-                </div>
-                {profile.skills.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {profile.skills.slice(0, 4).map((s) => (
-                      <Badge key={s} variant="default" size="sm">{s}</Badge>
-                    ))}
-                    {profile.skills.length > 4 && <Badge variant="ghost" size="sm">+{profile.skills.length - 4}</Badge>}
-                  </div>
-                )}
-              </Card>
-            </motion.div>
-
-            {/* Skill Gap Radial */}
-            <motion.div variants={fadeUp}>
-              <Card className="h-full">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-sm font-semibold text-slate-200">Skill Gap Overview</h2>
-                  <button onClick={() => navigate('/skill-gap')}
-                    className="text-xs text-brand-400 hover:text-brand-300 transition-colors cursor-pointer flex items-center gap-1"
-                  >Full Analysis <ChevronRight size={11} /></button>
-                </div>
-                <div className="flex items-center justify-center mb-5">
-                  <div className="relative w-28 h-28">
-                    <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                      <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="8" />
-                      <motion.circle cx="50" cy="50" r="40" fill="none" stroke="url(#sg)" strokeWidth="8"
-                        strokeLinecap="round" strokeDasharray="251.2"
-                        initial={{ strokeDashoffset: 251.2 }}
-                        animate={{ strokeDashoffset: 251.2 * 0.27 }}
-                        transition={{ duration: 1.8, ease: 'easeOut', delay: 0.4 }}
-                      />
-                      <defs>
-                        <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="0%">
-                          <stop offset="0%" stopColor="#6366f1" /><stop offset="100%" stopColor="#8b5cf6" />
-                        </linearGradient>
-                      </defs>
-                    </svg>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-2xl font-display font-bold bg-gradient-to-r from-brand-300 to-violet-300 bg-clip-text text-transparent">73%</span>
-                      <span className="text-xs text-slate-600">Match</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  {[
-                    { skill: 'TypeScript', pct: 90, color: 'success' },
-                    { skill: 'System Design', pct: 61, color: 'warning' },
-                    { skill: 'Machine Learning', pct: 35, color: 'danger' },
-                  ].map(({ skill, pct, color }) => (
-                    <ProgressBar key={skill} label={skill} value={pct} color={color} size="sm" />
-                  ))}
-                </div>
-              </Card>
-            </motion.div>
-
-            {/* Activity + AI Insight */}
-            <motion.div variants={fadeUp}>
-              <Card className="h-full">
-                <div className="flex items-center gap-2 mb-4">
-                  <Activity size={13} className="text-slate-500" />
-                  <h2 className="text-sm font-semibold text-slate-200">Recent Activity</h2>
-                </div>
-                <div className="space-y-1">
-                  {recentActivity.map(({ action, time, icon: Icon, color }) => (
-                    <div key={action} className="flex items-center gap-3 py-2.5 border-b border-white/[0.04] last:border-0">
-                      <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: color + '15' }}>
-                        <Icon size={12} style={{ color }} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-300 font-medium">{action}</p>
-                        <p className="text-xs text-slate-600">{time}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 rounded-xl p-3 border border-brand-500/15 bg-brand-500/[0.06]">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <Sparkles size={11} className="text-brand-400" />
-                    <span className="text-xs font-semibold text-brand-300">AI Insight</span>
-                  </div>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    You're 27% away from your target role. Focus on System Design this week to make the biggest impact.
-                  </p>
-                </div>
-              </Card>
-            </motion.div>
-          </div>
-
-          {/* ── Roadmap Preview ── */}
-          <motion.div variants={fadeUp}>
-            <Card>
-              <div className="flex items-center justify-between mb-5">
-                <div className="flex items-center gap-2">
-                  <Map size={14} className="text-violet-400" />
-                  <h2 className="text-sm font-semibold text-slate-200">Learning Roadmap</h2>
-                </div>
-                <button onClick={() => navigate('/roadmap')}
-                  className="text-xs text-brand-400 hover:text-brand-300 transition-colors cursor-pointer flex items-center gap-1"
-                >View Full <ChevronRight size={11} /></button>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {roadmapPreview.map(({ week, title, status, progress }, i) => (
-                  <motion.div key={week}
-                    initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 + i * 0.1 }}
-                    className={`rounded-2xl p-4 border transition-all ${
-                      status === 'completed' ? 'bg-emerald-500/[0.06] border-emerald-500/20'
-                      : status === 'in-progress' ? 'bg-brand-500/[0.06] border-brand-500/20'
-                      : 'bg-white/[0.02] border-white/[0.05]'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-medium text-slate-600">{week}</span>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-lg ${
-                        status === 'completed' ? 'text-emerald-400 bg-emerald-500/10'
-                        : status === 'in-progress' ? 'text-brand-400 bg-brand-500/10'
-                        : 'text-slate-600 bg-white/5'
-                      }`}>
-                        {status === 'completed' ? '✓ Done' : status === 'in-progress' ? '● Active' : '○ Next'}
-                      </span>
-                    </div>
-                    <p className="text-sm font-semibold text-slate-200 mb-3">{title}</p>
-                    <ProgressBar value={progress} size="sm" showValue={false} color={status === 'completed' ? 'success' : 'brand'} />
-                  </motion.div>
-                ))}
-              </div>
-            </Card>
-          </motion.div>
-
-          {/* ── Quick Actions ── */}
-          <motion.div variants={fadeUp}>
-            <Card>
-              <div className="flex items-center gap-2 mb-5">
-                <Zap size={13} className="text-brand-400" />
-                <h2 className="text-sm font-semibold text-slate-200">Quick Actions</h2>
-              </div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                {quickActions.map(({ label, to, icon: Icon, color, desc, glow }) => (
-                  <motion.button key={label}
-                    whileHover={{ y: -4, boxShadow: `0 8px 30px ${glow}` }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => navigate(to)}
-                    className="glass rounded-2xl p-4 border border-white/[0.05] hover:border-white/10 text-left transition-all cursor-pointer group"
-                  >
-                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center mb-3 shadow-lg`}>
-                      <Icon size={17} className="text-white" />
-                    </div>
-                    <p className="text-xs font-semibold text-slate-200 group-hover:text-white transition-colors">{label}</p>
-                    <p className="text-xs text-slate-600 mt-0.5">{desc}</p>
-                  </motion.button>
-                ))}
-              </div>
-            </Card>
-          </motion.div>
-
-        </motion.div>
+    <div className="min-h-screen p-4 sm:p-6 relative">
+      {/* Background particles */}
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-20">
+        <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-indigo-600/10 rounded-full blur-[100px]" />
+        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-violet-600/8 rounded-full blur-[80px]" />
       </div>
+
+      <div className="relative z-10 max-w-[1600px] mx-auto">
+
+        {/* Command Bar */}
+        <CommandBar onToggleAI={() => setAiOpen(o => !o)} aiOpen={aiOpen} />
+
+        {/* Main grid */}
+        <div className={`grid gap-4 transition-all duration-300 ${aiOpen ? 'grid-cols-1 lg:grid-cols-[280px_1fr_300px]' : 'grid-cols-1 lg:grid-cols-[280px_1fr]'}`}>
+
+          {/* ── LEFT COLUMN ── */}
+          <div className="space-y-4">
+            {/* Readiness Ring */}
+            <Panel title="Career Readiness" subtitle="5 dimensions analyzed" icon={Target} iconColor="#818cf8"
+              action="Full Analysis" onAction={() => navigate('/skill-gap')}
+            >
+              <ReadinessRing />
+            </Panel>
+
+            {/* Career Match Ranking */}
+            <Panel title="Career Matches" subtitle="Live probability ranking" icon={TrendingUp} iconColor="#34d399"
+              action="Explore" onAction={() => navigate('/skill-gap')}
+            >
+              <CareerMatchRanking />
+            </Panel>
+
+            {/* Interview Prep */}
+            <Panel title="Interview Prep" subtitle="Confidence assessment" icon={Zap} iconColor="#fbbf24">
+              <InterviewPrep />
+            </Panel>
+          </div>
+
+          {/* ── CENTER COLUMN ── */}
+          <div className="space-y-4 min-w-0">
+            {/* Welcome hero */}
+            <WelcomeHero profile={profile} />
+
+            {/* Tab switcher */}
+            <div className="flex gap-1 p-1 rounded-2xl mb-1"
+              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}
+            >
+              {CENTER_TABS.map(({ id, label, icon: Icon }) => (
+                <button key={id} onClick={() => setCenterTab(id)}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer transition-all"
+                  style={centerTab === id
+                    ? { background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.3)', color: '#818cf8' }
+                    : { color: '#475569', border: '1px solid transparent' }
+                  }
+                >
+                  <Icon size={12} />{label}
+                </button>
+              ))}
+            </div>
+
+            {/* Tab content */}
+            <AnimatePresence mode="wait">
+              {centerTab === 'skills' && (
+                <motion.div key="skills"
+                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Panel title="Skill Intelligence Hub" subtitle="Known · Missing · Connections" icon={Activity} iconColor="#818cf8"
+                    action="Full Gap Analysis" onAction={() => navigate('/skill-gap')}
+                  >
+                    <SkillNetwork />
+                  </Panel>
+                </motion.div>
+              )}
+              {centerTab === 'future' && (
+                <motion.div key="future"
+                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Panel title="Future Projection" subtitle="Your career evolution over 12 months" icon={TrendingUp} iconColor="#34d399">
+                    <FutureProjection />
+                  </Panel>
+                </motion.div>
+              )}
+              {centerTab === 'resources' && (
+                <motion.div key="resources"
+                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Panel title="Resource Hub" subtitle="Curated for your skill gaps" icon={BookOpen} iconColor="#a78bfa"
+                    action="Browse All" onAction={() => navigate('/resources')}
+                  >
+                    <ResourceHub />
+                  </Panel>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* ── RIGHT COLUMN — AI Panel ── */}
+          <AnimatePresence>
+            {aiOpen && (
+              <motion.div
+                key="ai-panel"
+                initial={{ opacity: 0, x: 20, width: 0 }}
+                animate={{ opacity: 1, x: 0, width: 'auto' }}
+                exit={{ opacity: 0, x: 20, width: 0 }}
+                transition={{ duration: 0.35 }}
+                className="space-y-4 overflow-hidden"
+              >
+                {/* AI Insights */}
+                <div className="rounded-3xl overflow-hidden"
+                  style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}
+                >
+                  <div className="p-5">
+                    <AIInsightsPanel />
+                  </div>
+                </div>
+
+                {/* Roadmap Timeline */}
+                <Panel title="Learning Roadmap" subtitle="Your week-by-week journey" icon={Map} iconColor="#a78bfa"
+                  action="Full Roadmap" onAction={() => navigate('/roadmap')}
+                >
+                  <RoadmapTimeline />
+                </Panel>
+
+                {/* AI Assistant Chat */}
+                <div className="rounded-3xl overflow-hidden" style={{ height: '420px', border: '1px solid rgba(99,102,241,0.15)' }}>
+                  <AIAssistant collapsed={false} onToggle={() => setAiOpen(false)} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* Floating AI button when panel is closed */}
+      {!aiOpen && <AIAssistant collapsed={true} onToggle={() => setAiOpen(true)} />}
     </div>
   )
 }
