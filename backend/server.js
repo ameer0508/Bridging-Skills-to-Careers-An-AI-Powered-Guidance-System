@@ -8,6 +8,7 @@ require('dotenv').config();
 
 const app = require('./src/app');
 const connectDB = require('./src/config/db');
+const { disconnectDB } = require('./src/config/db');
 const config = require('./src/config/env');
 
 /**
@@ -33,7 +34,8 @@ const startServer = async () => {
   // ── Graceful Shutdown ──────────────────────────────────────────────────────
   const shutdown = (signal) => {
     console.log(`\n⚠️  ${signal} received. Shutting down gracefully...`);
-    server.close(() => {
+    server.close(async () => {
+      await disconnectDB();
       console.log('✅ HTTP server closed.');
       process.exit(0);
     });
