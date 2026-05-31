@@ -1,0 +1,358 @@
+{
+  "frontend": {
+    "id": "frontend",
+    "title": "Frontend Development Path",
+    "targetRole": "frontend_developer",
+    "totalWeeks": 24,
+    "phases": [
+      {
+        "phase": 1,
+        "title": "Foundations",
+        "weeks": "1-4",
+        "skills": [
+          "git"
+        ],
+        "milestone": "Version control proficiency"
+      },
+      {
+        "phase": 2,
+        "title": "Core Language",
+        "weeks": "5-8",
+        "skills": [
+          "typescript"
+        ],
+        "milestone": "TypeScript fundamentals"
+      },
+      {
+        "phase": 3,
+        "title": "UI Framework",
+        "weeks": "9-16",
+        "skills": [
+          "react"
+        ],
+        "milestone": "Build a full React app"
+      },
+      {
+        "phase": 4,
+        "title": "Backend Basics",
+        "weeks": "17-20",
+        "skills": [
+          "nodejs"
+        ],
+        "milestone": "REST API integration"
+      },
+      {
+        "phase": 5,
+        "title": "Deployment",
+        "weeks": "21-24",
+        "skills": [
+          "docker"
+        ],
+        "milestone": "Containerized deployment"
+      }
+    ]
+  },
+  "backend": {
+    "id": "backend",
+    "title": "Backend Development Path",
+    "targetRole": "backend_developer",
+    "totalWeeks": 28,
+    "phases": [
+      {
+        "phase": 1,
+        "title": "Foundations",
+        "weeks": "1-2",
+        "skills": [
+          "git"
+        ],
+        "milestone": "Version control proficiency"
+      },
+      {
+        "phase": 2,
+        "title": "Databases",
+        "weeks": "3-6",
+        "skills": [
+          "sql"
+        ],
+        "milestone": "Complex SQL queries"
+      },
+      {
+        "phase": 3,
+        "title": "Server Runtime",
+        "weeks": "7-12",
+        "skills": [
+          "nodejs"
+        ],
+        "milestone": "Build REST API"
+      },
+      {
+        "phase": 4,
+        "title": "NoSQL",
+        "weeks": "13-16",
+        "skills": [
+          "mongodb"
+        ],
+        "milestone": "MongoDB CRUD operations"
+      },
+      {
+        "phase": 5,
+        "title": "Containers",
+        "weeks": "17-21",
+        "skills": [
+          "docker"
+        ],
+        "milestone": "Dockerized application"
+      },
+      {
+        "phase": 6,
+        "title": "Cloud",
+        "weeks": "22-28",
+        "skills": [
+          "aws"
+        ],
+        "milestone": "Deploy to AWS"
+      }
+    ]
+  },
+  "fullstack": {
+    "id": "fullstack",
+    "title": "Full Stack Development Path",
+    "targetRole": "fullstack_developer",
+    "totalWeeks": 36,
+    "phases": [
+      {
+        "phase": 1,
+        "title": "Foundations",
+        "weeks": "1-2",
+        "skills": [
+          "git"
+        ],
+        "milestone": "Version control proficiency"
+      },
+      {
+        "phase": 2,
+        "title": "Databases",
+        "weeks": "3-6",
+        "skills": [
+          "sql"
+        ],
+        "milestone": "Relational database design"
+      },
+      {
+        "phase": 3,
+        "title": "Backend",
+        "weeks": "7-12",
+        "skills": [
+          "nodejs"
+        ],
+        "milestone": "Full REST API"
+      },
+      {
+        "phase": 4,
+        "title": "Frontend",
+        "weeks": "13-20",
+        "skills": [
+          "react"
+        ],
+        "milestone": "React SPA"
+      },
+      {
+        "phase": 5,
+        "title": "NoSQL",
+        "weeks": "21-24",
+        "skills": [
+          "mongodb"
+        ],
+        "milestone": "MongoDB integration"
+      },
+      {
+        "phase": 6,
+        "title": "TypeScript",
+        "weeks": "25-28",
+        "skills": [
+          "typescript"
+        ],
+        "milestone": "Typed full-stack app"
+      },
+      {
+        "phase": 7,
+        "title": "DevOps",
+        "weeks": "29-36",
+        "skills": [
+          "docker",
+          "aws"
+        ],
+        "milestone": "CI/CD pipeline"
+      }
+    ]
+  },
+  "data_science": {
+    "id": "data_science",
+    "title": "Data Science Path",
+    "targetRole": "data_analyst",
+    "totalWeeks": 28,
+    "phases": [
+      {
+        "phase": 1,
+        "title": "SQL Foundations",
+        "weeks": "1-4",
+        "skills": [
+          "sql"
+        ],
+        "milestone": "Complex analytical queries"
+      },
+      {
+        "phase": 2,
+        "title": "Python",
+        "weeks": "5-10",
+        "skills": [
+          "python"
+        ],
+        "milestone": "Data manipulation with pandas"
+      },
+      {
+        "phase": 3,
+        "title": "Version Control",
+        "weeks": "11-12",
+        "skills": [
+          "git"
+        ],
+        "milestone": "Collaborative workflows"
+      },
+      {
+        "phase": 4,
+        "title": "ML Basics",
+        "weeks": "13-24",
+        "skills": [
+          "machine_learning"
+        ],
+        "milestone": "Train and evaluate models"
+      },
+      {
+        "phase": 5,
+        "title": "Cloud",
+        "weeks": "25-28",
+        "skills": [
+          "aws"
+        ],
+        "milestone": "Deploy ML pipeline"
+      }
+    ]
+  },
+  "cybersecurity": {
+    "id": "cybersecurity",
+    "title": "Cybersecurity Path",
+    "targetRole": "cybersecurity_analyst",
+    "totalWeeks": 32,
+    "phases": [
+      {
+        "phase": 1,
+        "title": "Foundations",
+        "weeks": "1-2",
+        "skills": [
+          "git"
+        ],
+        "milestone": "Dev workflow basics"
+      },
+      {
+        "phase": 2,
+        "title": "Scripting",
+        "weeks": "3-8",
+        "skills": [
+          "python"
+        ],
+        "milestone": "Automation scripts"
+      },
+      {
+        "phase": 3,
+        "title": "Databases",
+        "weeks": "9-12",
+        "skills": [
+          "sql"
+        ],
+        "milestone": "Database security"
+      },
+      {
+        "phase": 4,
+        "title": "Security Core",
+        "weeks": "13-28",
+        "skills": [
+          "cybersecurity"
+        ],
+        "milestone": "CompTIA Security+"
+      },
+      {
+        "phase": 5,
+        "title": "Cloud Security",
+        "weeks": "29-32",
+        "skills": [
+          "aws",
+          "docker"
+        ],
+        "milestone": "Cloud security posture"
+      }
+    ]
+  },
+  "ml_engineering": {
+    "id": "ml_engineering",
+    "title": "Machine Learning Engineering Path",
+    "targetRole": "ml_engineer",
+    "totalWeeks": 40,
+    "phases": [
+      {
+        "phase": 1,
+        "title": "Python Mastery",
+        "weeks": "1-6",
+        "skills": [
+          "python"
+        ],
+        "milestone": "Advanced Python"
+      },
+      {
+        "phase": 2,
+        "title": "Data & SQL",
+        "weeks": "7-10",
+        "skills": [
+          "sql"
+        ],
+        "milestone": "Data querying"
+      },
+      {
+        "phase": 3,
+        "title": "Version Control",
+        "weeks": "11-12",
+        "skills": [
+          "git"
+        ],
+        "milestone": "Git workflows"
+      },
+      {
+        "phase": 4,
+        "title": "ML Core",
+        "weeks": "13-32",
+        "skills": [
+          "machine_learning"
+        ],
+        "milestone": "Production ML model"
+      },
+      {
+        "phase": 5,
+        "title": "Containers",
+        "weeks": "33-36",
+        "skills": [
+          "docker"
+        ],
+        "milestone": "Containerized ML app"
+      },
+      {
+        "phase": 6,
+        "title": "Cloud ML",
+        "weeks": "37-40",
+        "skills": [
+          "aws"
+        ],
+        "milestone": "AWS SageMaker deployment"
+      }
+    ]
+  }
+}

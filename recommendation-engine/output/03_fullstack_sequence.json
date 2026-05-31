@@ -1,0 +1,75 @@
+{
+  "success": true,
+  "message": "Learning sequence for: Full Stack Developer",
+  "timestamp": "2026-05-31T07:33:14.528Z",
+  "data": {
+    "careerGoalId": "fullstack_developer",
+    "careerTitle": "Full Stack Developer",
+    "sequence": [
+      {
+        "order": 1,
+        "skillId": "git",
+        "skillName": "Git",
+        "difficultyLevel": "beginner",
+        "durationWeeks": 2,
+        "priority": 9
+      },
+      {
+        "order": 2,
+        "skillId": "sql",
+        "skillName": "SQL",
+        "difficultyLevel": "beginner",
+        "durationWeeks": 4,
+        "priority": 8
+      },
+      {
+        "order": 3,
+        "skillId": "nodejs",
+        "skillName": "Node.js",
+        "difficultyLevel": "intermediate",
+        "durationWeeks": 6,
+        "priority": 10
+      },
+      {
+        "order": 4,
+        "skillId": "react",
+        "skillName": "React",
+        "difficultyLevel": "intermediate",
+        "durationWeeks": 8,
+        "priority": 10
+      },
+      {
+        "order": 5,
+        "skillId": "mongodb",
+        "skillName": "MongoDB",
+        "difficultyLevel": "beginner",
+        "durationWeeks": 4,
+        "priority": 8
+      },
+      {
+        "order": 6,
+        "skillId": "typescript",
+        "skillName": "TypeScript",
+        "difficultyLevel": "intermediate",
+        "durationWeeks": 4,
+        "priority": 7
+      },
+      {
+        "order": 7,
+        "skillId": "docker",
+        "skillName": "Docker",
+        "difficultyLevel": "intermediate",
+        "durationWeeks": 5,
+        "priority": 6
+      },
+      {
+        "order": 8,
+        "skillId": "aws",
+        "skillName": "AWS",
+        "difficultyLevel": "intermediate",
+        "durationWeeks": 12,
+        "priority": 5
+      }
+    ]
+  }
+}

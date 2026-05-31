@@ -1,0 +1,147 @@
+{
+  "success": true,
+  "message": "Resources for skill: React",
+  "timestamp": "2026-05-31T07:33:14.532Z",
+  "data": {
+    "skillId": "react",
+    "skillName": "React",
+    "courses": [
+      {
+        "title": "React - The Complete Guide",
+        "provider": "Udemy",
+        "url": "https://www.udemy.com/course/react-the-complete-guide-incl-redux/",
+        "free": false,
+        "level": "beginner-to-advanced",
+        "duration": "48 hours",
+        "rating": 4.8,
+        "type": "course",
+        "skillId": "react",
+        "priority": 10,
+        "priorityLabel": "High"
+      },
+      {
+        "title": "Full Stack Open",
+        "provider": "University of Helsinki",
+        "url": "https://fullstackopen.com/en/",
+        "free": true,
+        "level": "intermediate",
+        "duration": "20 hours",
+        "rating": 4.9,
+        "type": "course",
+        "skillId": "react",
+        "priority": 10,
+        "priorityLabel": "High"
+      },
+      {
+        "title": "React Official Tutorial",
+        "provider": "React.dev",
+        "url": "https://react.dev/learn",
+        "free": true,
+        "level": "beginner",
+        "duration": "10 hours",
+        "rating": 4.7,
+        "type": "course",
+        "skillId": "react",
+        "priority": 10,
+        "priorityLabel": "High"
+      }
+    ],
+    "certifications": [
+      {
+        "title": "Meta Front-End Developer Certificate",
+        "provider": "Meta / Coursera",
+        "url": "https://www.coursera.org/professional-certificates/meta-front-end-developer",
+        "free": null,
+        "level": "beginner",
+        "duration": "7 months",
+        "rating": null,
+        "type": "certification",
+        "skillId": "react",
+        "priority": 10,
+        "priorityLabel": "High"
+      },
+      {
+        "title": "React Developer Certification",
+        "provider": "HackerRank",
+        "url": "https://www.hackerrank.com/skills-verification/react_basic",
+        "free": null,
+        "level": "intermediate",
+        "duration": "1 day",
+        "rating": null,
+        "type": "certification",
+        "skillId": "react",
+        "priority": 10,
+        "priorityLabel": "High"
+      }
+    ],
+    "practicePlatforms": [
+      {
+        "title": "Frontend Mentor",
+        "provider": "project-based",
+        "url": "https://www.frontendmentor.io/",
+        "free": true,
+        "level": null,
+        "duration": null,
+        "rating": null,
+        "type": "practicePlatform",
+        "skillId": "react",
+        "priority": 10,
+        "priorityLabel": "High"
+      },
+      {
+        "title": "CodeSandbox",
+        "provider": "online-ide",
+        "url": "https://codesandbox.io/",
+        "free": true,
+        "level": null,
+        "duration": null,
+        "rating": null,
+        "type": "practicePlatform",
+        "skillId": "react",
+        "priority": 10,
+        "priorityLabel": "High"
+      },
+      {
+        "title": "LeetCode",
+        "provider": "challenges",
+        "url": "https://leetcode.com/",
+        "free": true,
+        "level": null,
+        "duration": null,
+        "rating": null,
+        "type": "practicePlatform",
+        "skillId": "react",
+        "priority": 10,
+        "priorityLabel": "High"
+      }
+    ],
+    "documentation": [
+      {
+        "title": "React Official Docs",
+        "provider": "official",
+        "url": "https://react.dev/",
+        "free": null,
+        "level": null,
+        "duration": null,
+        "rating": null,
+        "type": "documentation",
+        "skillId": "react",
+        "priority": 10,
+        "priorityLabel": "High"
+      },
+      {
+        "title": "React Patterns",
+        "provider": "reference",
+        "url": "https://reactpatterns.com/",
+        "free": null,
+        "level": null,
+        "duration": null,
+        "rating": null,
+        "type": "documentation",
+        "skillId": "react",
+        "priority": 10,
+        "priorityLabel": "High"
+      }
+    ]
+  }
+}

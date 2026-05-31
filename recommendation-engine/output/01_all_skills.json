@@ -1,0 +1,200 @@
+{
+  "success": true,
+  "message": "12 skills found",
+  "timestamp": "2026-05-31T07:33:14.510Z",
+  "data": [
+    {
+      "id": "aws",
+      "name": "AWS",
+      "category": "cloud",
+      "difficultyLevel": "intermediate",
+      "durationWeeks": 12,
+      "tags": [
+        "cloud",
+        "devops",
+        "infrastructure",
+        "serverless",
+        "storage"
+      ],
+      "courseCount": 3,
+      "certCount": 3
+    },
+    {
+      "id": "cybersecurity",
+      "name": "Cybersecurity",
+      "category": "security",
+      "difficultyLevel": "intermediate",
+      "durationWeeks": 16,
+      "tags": [
+        "security",
+        "networking",
+        "ethical-hacking",
+        "compliance",
+        "defense"
+      ],
+      "courseCount": 3,
+      "certCount": 3
+    },
+    {
+      "id": "docker",
+      "name": "Docker",
+      "category": "devops",
+      "difficultyLevel": "intermediate",
+      "durationWeeks": 5,
+      "tags": [
+        "devops",
+        "containers",
+        "deployment",
+        "microservices",
+        "cloud"
+      ],
+      "courseCount": 3,
+      "certCount": 2
+    },
+    {
+      "id": "git",
+      "name": "Git",
+      "category": "tools",
+      "difficultyLevel": "beginner",
+      "durationWeeks": 2,
+      "tags": [
+        "version-control",
+        "collaboration",
+        "devops",
+        "workflow",
+        "tools"
+      ],
+      "courseCount": 3,
+      "certCount": 2
+    },
+    {
+      "id": "java",
+      "name": "Java",
+      "category": "backend",
+      "difficultyLevel": "intermediate",
+      "durationWeeks": 10,
+      "tags": [
+        "backend",
+        "oop",
+        "enterprise",
+        "android",
+        "spring"
+      ],
+      "courseCount": 3,
+      "certCount": 2
+    },
+    {
+      "id": "machine_learning",
+      "name": "Machine Learning",
+      "category": "ai-ml",
+      "difficultyLevel": "advanced",
+      "durationWeeks": 20,
+      "tags": [
+        "ai",
+        "ml",
+        "deep-learning",
+        "data-science",
+        "python",
+        "neural-networks"
+      ],
+      "courseCount": 3,
+      "certCount": 3
+    },
+    {
+      "id": "mongodb",
+      "name": "MongoDB",
+      "category": "database",
+      "difficultyLevel": "beginner",
+      "durationWeeks": 4,
+      "tags": [
+        "database",
+        "nosql",
+        "backend",
+        "document-store",
+        "cloud"
+      ],
+      "courseCount": 3,
+      "certCount": 2
+    },
+    {
+      "id": "nodejs",
+      "name": "Node.js",
+      "category": "backend",
+      "difficultyLevel": "intermediate",
+      "durationWeeks": 6,
+      "tags": [
+        "backend",
+        "server",
+        "javascript",
+        "api",
+        "runtime"
+      ],
+      "courseCount": 3,
+      "certCount": 2
+    },
+    {
+      "id": "python",
+      "name": "Python",
+      "category": "general",
+      "difficultyLevel": "beginner",
+      "durationWeeks": 6,
+      "tags": [
+        "general",
+        "scripting",
+        "data-science",
+        "automation",
+        "backend"
+      ],
+      "courseCount": 3,
+      "certCount": 3
+    },
+    {
+      "id": "react",
+      "name": "React",
+      "category": "frontend",
+      "difficultyLevel": "intermediate",
+      "durationWeeks": 8,
+      "tags": [
+        "frontend",
+        "ui",
+        "javascript",
+        "spa",
+        "component-based"
+      ],
+      "courseCount": 3,
+      "certCount": 2
+    },
+    {
+      "id": "sql",
+      "name": "SQL",
+      "category": "database",
+      "difficultyLevel": "beginner",
+      "durationWeeks": 4,
+      "tags": [
+        "database",
+        "relational",
+        "data",
+        "queries",
+        "backend"
+      ],
+      "courseCount": 3,
+      "certCount": 2
+    },
+    {
+      "id": "typescript",
+      "name": "TypeScript",
+      "category": "frontend",
+      "difficultyLevel": "intermediate",
+      "durationWeeks": 4,
+      "tags": [
+        "frontend",
+        "javascript",
+        "typed",
+        "angular",
+        "scalable"
+      ],
+      "courseCount": 3,
+      "certCount": 1
+    }
+  ]
+}
