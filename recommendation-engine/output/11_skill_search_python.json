@@ -1,0 +1,32 @@
+{
+  "success": true,
+  "message": "2 skills matched \"python\"",
+  "timestamp": "2026-05-31T07:33:14.682Z",
+  "data": [
+    {
+      "id": "machine_learning",
+      "name": "Machine Learning",
+      "category": "ai-ml",
+      "tags": [
+        "ai",
+        "ml",
+        "deep-learning",
+        "data-science",
+        "python",
+        "neural-networks"
+      ]
+    },
+    {
+      "id": "python",
+      "name": "Python",
+      "category": "general",
+      "tags": [
+        "general",
+        "scripting",
+        "data-science",
+        "automation",
+        "backend"
+      ]
+    }
+  ]
+}

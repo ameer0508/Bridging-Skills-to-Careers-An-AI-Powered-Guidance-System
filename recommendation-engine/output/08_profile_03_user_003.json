@@ -1,0 +1,831 @@
+{
+  "success": true,
+  "message": "Recommendations generated for Backend Developer",
+  "timestamp": "2026-05-31T07:33:14.630Z",
+  "data": {
+    "user": {
+      "userId": "user_003",
+      "name": "James Okafor",
+      "currentSkills": []
+    },
+    "careerGoal": {
+      "id": "backend_developer",
+      "title": "Backend Developer",
+      "description": "Builds server-side logic, APIs, and database integrations",
+      "demandLevel": "high",
+      "matchScore": 0
+    },
+    "skillGap": {
+      "missingRequired": [
+        "nodejs",
+        "mongodb",
+        "sql",
+        "git"
+      ],
+      "missingOptional": [
+        "docker",
+        "aws",
+        "python"
+      ],
+      "totalMissing": 7
+    },
+    "recommendations": {
+      "courses": [
+        {
+          "title": "Node.js Full Course",
+          "provider": "freeCodeCamp",
+          "url": "https://www.youtube.com/watch?v=Oe421EPjeBE",
+          "free": true,
+          "level": "beginner",
+          "duration": "8 hours",
+          "rating": 4.6,
+          "skillId": "nodejs",
+          "priority": "High",
+          "score": 99
+        },
+        {
+          "title": "SQL Tutorial",
+          "provider": "freeCodeCamp",
+          "url": "https://www.youtube.com/watch?v=HXV3zeQKqGY",
+          "free": true,
+          "level": "beginner",
+          "duration": "4 hours",
+          "rating": 4.7,
+          "skillId": "sql",
+          "priority": "High",
+          "score": 95
+        },
+        {
+          "title": "Full Stack Open - Node.js",
+          "provider": "University of Helsinki",
+          "url": "https://fullstackopen.com/en/",
+          "free": true,
+          "level": "intermediate",
+          "duration": "15 hours",
+          "rating": 4.9,
+          "skillId": "nodejs",
+          "priority": "High",
+          "score": 94
+        },
+        {
+          "title": "The Complete Node.js Developer Course",
+          "provider": "Udemy",
+          "url": "https://www.udemy.com/course/the-complete-nodejs-developer-course-2/",
+          "free": false,
+          "level": "beginner-to-advanced",
+          "duration": "35 hours",
+          "rating": 4.7,
+          "skillId": "nodejs",
+          "priority": "High",
+          "score": 93
+        },
+        {
+          "title": "MongoDB University M001",
+          "provider": "MongoDB University",
+          "url": "https://university.mongodb.com/courses/M001/about",
+          "free": true,
+          "level": "beginner",
+          "duration": "12 hours",
+          "rating": 4.8,
+          "skillId": "mongodb",
+          "priority": "High",
+          "score": 92
+        },
+        {
+          "title": "SQL for Data Science",
+          "provider": "Coursera / UC Davis",
+          "url": "https://www.coursera.org/learn/sql-for-data-science",
+          "free": false,
+          "level": "beginner",
+          "duration": "16 hours",
+          "rating": 4.6,
+          "skillId": "sql",
+          "priority": "High",
+          "score": 92
+        },
+        {
+          "title": "MongoDB Crash Course",
+          "provider": "Traversy Media",
+          "url": "https://www.youtube.com/watch?v=-56x56UppqQ",
+          "free": true,
+          "level": "beginner",
+          "duration": "2 hours",
+          "rating": 4.5,
+          "skillId": "mongodb",
+          "priority": "High",
+          "score": 91
+        },
+        {
+          "title": "Git and GitHub for Beginners",
+          "provider": "freeCodeCamp",
+          "url": "https://www.youtube.com/watch?v=RGOj5yH7evk",
+          "free": true,
+          "level": "beginner",
+          "duration": "1 hours",
+          "rating": 4.7,
+          "skillId": "git",
+          "priority": "High",
+          "score": 91
+        },
+        {
+          "title": "The Complete SQL Bootcamp",
+          "provider": "Udemy",
+          "url": "https://www.udemy.com/course/the-complete-sql-bootcamp/",
+          "free": false,
+          "level": "beginner-to-advanced",
+          "duration": "9 hours",
+          "rating": 4.7,
+          "skillId": "sql",
+          "priority": "High",
+          "score": 89
+        },
+        {
+          "title": "Version Control with Git",
+          "provider": "Coursera / Atlassian",
+          "url": "https://www.coursera.org/learn/version-control-with-git",
+          "free": false,
+          "level": "beginner",
+          "duration": "13 hours",
+          "rating": 4.7,
+          "skillId": "git",
+          "priority": "High",
+          "score": 88
+        },
+        {
+          "title": "MongoDB - The Complete Developer Guide",
+          "provider": "Udemy",
+          "url": "https://www.udemy.com/course/mongodb-the-complete-developers-guide/",
+          "free": false,
+          "level": "beginner-to-advanced",
+          "duration": "17 hours",
+          "rating": 4.7,
+          "skillId": "mongodb",
+          "priority": "High",
+          "score": 85
+        },
+        {
+          "title": "Git Complete: The Definitive Guide",
+          "provider": "Udemy",
+          "url": "https://www.udemy.com/course/git-complete/",
+          "free": false,
+          "level": "beginner-to-advanced",
+          "duration": "12 hours",
+          "rating": 4.6,
+          "skillId": "git",
+          "priority": "High",
+          "score": 85
+        },
+        {
+          "title": "Docker Tutorial for Beginners",
+          "provider": "TechWorld with Nana",
+          "url": "https://www.youtube.com/watch?v=3c-iBn73dDE",
+          "free": true,
+          "level": "beginner",
+          "duration": "3 hours",
+          "rating": 4.8,
+          "skillId": "docker",
+          "priority": "Medium",
+          "score": 76
+        },
+        {
+          "title": "AWS Cloud Practitioner Essentials",
+          "provider": "AWS Training",
+          "url": "https://aws.amazon.com/training/learn-about/cloud-practitioner/",
+          "free": true,
+          "level": "beginner",
+          "duration": "6 hours",
+          "rating": 4.7,
+          "skillId": "aws",
+          "priority": "Medium",
+          "score": 71
+        },
+        {
+          "title": "Docker and Kubernetes: The Complete Guide",
+          "provider": "Udemy",
+          "url": "https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/",
+          "free": false,
+          "level": "beginner-to-advanced",
+          "duration": "22 hours",
+          "rating": 4.6,
+          "skillId": "docker",
+          "priority": "Medium",
+          "score": 69
+        },
+        {
+          "title": "Docker Mastery",
+          "provider": "Udemy",
+          "url": "https://www.udemy.com/course/docker-mastery/",
+          "free": false,
+          "level": "beginner-to-advanced",
+          "duration": "19 hours",
+          "rating": 4.7,
+          "skillId": "docker",
+          "priority": "Medium",
+          "score": 69
+        },
+        {
+          "title": "AWS Fundamentals Specialization",
+          "provider": "Coursera / AWS",
+          "url": "https://www.coursera.org/specializations/aws-fundamentals",
+          "free": false,
+          "level": "beginner",
+          "duration": "40 hours",
+          "rating": 4.6,
+          "skillId": "aws",
+          "priority": "Medium",
+          "score": 68
+        },
+        {
+          "title": "Python Tutorial",
+          "provider": "freeCodeCamp",
+          "url": "https://www.youtube.com/watch?v=rfscVS0vtbw",
+          "free": true,
+          "level": "beginner",
+          "duration": "4 hours",
+          "rating": 4.7,
+          "skillId": "python",
+          "priority": "Medium",
+          "score": 67
+        },
+        {
+          "title": "Python for Everybody",
+          "provider": "Coursera / University of Michigan",
+          "url": "https://www.coursera.org/specializations/python",
+          "free": false,
+          "level": "beginner",
+          "duration": "32 hours",
+          "rating": 4.8,
+          "skillId": "python",
+          "priority": "Medium",
+          "score": 65
+        },
+        {
+          "title": "AWS Certified Solutions Architect - Associate",
+          "provider": "Udemy",
+          "url": "https://www.udemy.com/course/aws-certified-solutions-architect-associate-saa-c03/",
+          "free": false,
+          "level": "intermediate",
+          "duration": "27 hours",
+          "rating": 4.7,
+          "skillId": "aws",
+          "priority": "Medium",
+          "score": 62
+        },
+        {
+          "title": "100 Days of Code - Python Bootcamp",
+          "provider": "Udemy",
+          "url": "https://www.udemy.com/course/100-days-of-code/",
+          "free": false,
+          "level": "beginner-to-advanced",
+          "duration": "60 hours",
+          "rating": 4.8,
+          "skillId": "python",
+          "priority": "Medium",
+          "score": 62
+        }
+      ],
+      "certifications": [
+        {
+          "title": "Oracle Database SQL Certified Associate",
+          "provider": "Oracle",
+          "url": "https://education.oracle.com/oracle-database-sql/pexam_1Z0-071",
+          "level": "beginner",
+          "duration": "90 min exam",
+          "skillId": "sql",
+          "priority": "High",
+          "score": 89
+        },
+        {
+          "title": "Microsoft Certified: Azure Data Fundamentals",
+          "provider": "Microsoft",
+          "url": "https://learn.microsoft.com/en-us/certifications/azure-data-fundamentals/",
+          "level": "beginner",
+          "duration": "45 min exam",
+          "skillId": "sql",
+          "priority": "High",
+          "score": 89
+        },
+        {
+          "title": "OpenJS Node.js Application Developer",
+          "provider": "Linux Foundation",
+          "url": "https://training.linuxfoundation.org/certification/jsnad/",
+          "level": "intermediate",
+          "duration": "2 hours exam",
+          "skillId": "nodejs",
+          "priority": "High",
+          "score": 87
+        },
+        {
+          "title": "Node.js Certification",
+          "provider": "HackerRank",
+          "url": "https://www.hackerrank.com/skills-verification/nodejs_intermediate",
+          "level": "intermediate",
+          "duration": "1 day",
+          "skillId": "nodejs",
+          "priority": "High",
+          "score": 87
+        },
+        {
+          "title": "GitHub Foundations Certification",
+          "provider": "GitHub",
+          "url": "https://resources.github.com/learn/certifications/",
+          "level": "beginner",
+          "duration": "120 min exam",
+          "skillId": "git",
+          "priority": "High",
+          "score": 85
+        },
+        {
+          "title": "MongoDB Associate Developer",
+          "provider": "MongoDB",
+          "url": "https://university.mongodb.com/certification/developer/about",
+          "level": "intermediate",
+          "duration": "3 hours exam",
+          "skillId": "mongodb",
+          "priority": "High",
+          "score": 79
+        },
+        {
+          "title": "GitHub Actions Certification",
+          "provider": "GitHub",
+          "url": "https://resources.github.com/learn/certifications/",
+          "level": "intermediate",
+          "duration": "120 min exam",
+          "skillId": "git",
+          "priority": "High",
+          "score": 79
+        },
+        {
+          "title": "MongoDB Associate DBA",
+          "provider": "MongoDB",
+          "url": "https://university.mongodb.com/certification/dba/about",
+          "level": "advanced",
+          "duration": "3 hours exam",
+          "skillId": "mongodb",
+          "priority": "High",
+          "score": 76
+        },
+        {
+          "title": "Kubernetes and Cloud Native Associate",
+          "provider": "CNCF",
+          "url": "https://training.linuxfoundation.org/certification/kubernetes-cloud-native-associate/",
+          "level": "beginner",
+          "duration": "90 min exam",
+          "skillId": "docker",
+          "priority": "Medium",
+          "score": 69
+        },
+        {
+          "title": "AWS Certified Cloud Practitioner",
+          "provider": "AWS",
+          "url": "https://aws.amazon.com/certification/certified-cloud-practitioner/",
+          "level": "beginner",
+          "duration": "90 min exam",
+          "skillId": "aws",
+          "priority": "Medium",
+          "score": 65
+        },
+        {
+          "title": "Docker Certified Associate (DCA)",
+          "provider": "Docker",
+          "url": "https://training.mirantis.com/certification/dca-certification-exam/",
+          "level": "intermediate",
+          "duration": "90 min exam",
+          "skillId": "docker",
+          "priority": "Medium",
+          "score": 63
+        },
+        {
+          "title": "PCEP - Certified Entry-Level Python Programmer",
+          "provider": "Python Institute",
+          "url": "https://pythoninstitute.org/pcep",
+          "level": "beginner",
+          "duration": "45 min exam",
+          "skillId": "python",
+          "priority": "Medium",
+          "score": 61
+        },
+        {
+          "title": "AWS Certified Solutions Architect Associate",
+          "provider": "AWS",
+          "url": "https://aws.amazon.com/certification/certified-solutions-architect-associate/",
+          "level": "intermediate",
+          "duration": "130 min exam",
+          "skillId": "aws",
+          "priority": "Medium",
+          "score": 59
+        },
+        {
+          "title": "AWS Certified Developer Associate",
+          "provider": "AWS",
+          "url": "https://aws.amazon.com/certification/certified-developer-associate/",
+          "level": "intermediate",
+          "duration": "130 min exam",
+          "skillId": "aws",
+          "priority": "Medium",
+          "score": 59
+        },
+        {
+          "title": "PCAP - Certified Associate Python Programmer",
+          "provider": "Python Institute",
+          "url": "https://pythoninstitute.org/pcap",
+          "level": "intermediate",
+          "duration": "65 min exam",
+          "skillId": "python",
+          "priority": "Medium",
+          "score": 55
+        },
+        {
+          "title": "Google IT Automation with Python",
+          "provider": "Google / Coursera",
+          "url": "https://www.coursera.org/professional-certificates/google-it-automation",
+          "level": "intermediate",
+          "duration": "6 months",
+          "skillId": "python",
+          "priority": "Medium",
+          "score": 55
+        }
+      ],
+      "practicePlatforms": [
+        {
+          "title": "Exercism - JavaScript",
+          "url": "https://exercism.org/tracks/javascript",
+          "free": true,
+          "type": "exercises",
+          "skillId": "nodejs",
+          "priority": "High",
+          "score": 88
+        },
+        {
+          "title": "Replit",
+          "url": "https://replit.com/",
+          "free": true,
+          "type": "online-ide",
+          "skillId": "nodejs",
+          "priority": "High",
+          "score": 88
+        },
+        {
+          "title": "HackerRank",
+          "url": "https://www.hackerrank.com/",
+          "free": true,
+          "type": "challenges",
+          "skillId": "nodejs",
+          "priority": "High",
+          "score": 88
+        },
+        {
+          "title": "SQLZoo",
+          "url": "https://sqlzoo.net/",
+          "free": true,
+          "type": "interactive",
+          "skillId": "sql",
+          "priority": "High",
+          "score": 84
+        },
+        {
+          "title": "Mode SQL Tutorial",
+          "url": "https://mode.com/sql-tutorial/",
+          "free": true,
+          "type": "tutorials",
+          "skillId": "sql",
+          "priority": "High",
+          "score": 84
+        },
+        {
+          "title": "HackerRank - SQL",
+          "url": "https://www.hackerrank.com/domains/sql",
+          "free": true,
+          "type": "challenges",
+          "skillId": "sql",
+          "priority": "High",
+          "score": 84
+        },
+        {
+          "title": "LeetCode - Database",
+          "url": "https://leetcode.com/problemset/database/",
+          "free": true,
+          "type": "challenges",
+          "skillId": "sql",
+          "priority": "High",
+          "score": 84
+        },
+        {
+          "title": "MongoDB Atlas (Free Tier)",
+          "url": "https://www.mongodb.com/cloud/atlas",
+          "free": true,
+          "type": "cloud-database",
+          "skillId": "mongodb",
+          "priority": "High",
+          "score": 80
+        },
+        {
+          "title": "MongoDB Compass",
+          "url": "https://www.mongodb.com/products/compass",
+          "free": true,
+          "type": "gui-tool",
+          "skillId": "mongodb",
+          "priority": "High",
+          "score": 80
+        },
+        {
+          "title": "Learn Git Branching",
+          "url": "https://learngitbranching.js.org/",
+          "free": true,
+          "type": "interactive",
+          "skillId": "git",
+          "priority": "High",
+          "score": 80
+        },
+        {
+          "title": "GitHub",
+          "url": "https://github.com/",
+          "free": true,
+          "type": "platform",
+          "skillId": "git",
+          "priority": "High",
+          "score": 80
+        },
+        {
+          "title": "GitLab",
+          "url": "https://gitlab.com/",
+          "free": true,
+          "type": "platform",
+          "skillId": "git",
+          "priority": "High",
+          "score": 80
+        },
+        {
+          "title": "Play with Docker",
+          "url": "https://labs.play-with-docker.com/",
+          "free": true,
+          "type": "sandbox",
+          "skillId": "docker",
+          "priority": "Medium",
+          "score": 64
+        },
+        {
+          "title": "Katacoda Docker",
+          "url": "https://www.katacoda.com/courses/docker",
+          "free": true,
+          "type": "interactive",
+          "skillId": "docker",
+          "priority": "Medium",
+          "score": 64
+        },
+        {
+          "title": "Docker Hub",
+          "url": "https://hub.docker.com/",
+          "free": true,
+          "type": "registry",
+          "skillId": "docker",
+          "priority": "Medium",
+          "score": 64
+        },
+        {
+          "title": "AWS Free Tier",
+          "url": "https://aws.amazon.com/free/",
+          "free": true,
+          "type": "cloud-sandbox",
+          "skillId": "aws",
+          "priority": "Medium",
+          "score": 60
+        },
+        {
+          "title": "A Cloud Guru Labs",
+          "url": "https://acloudguru.com/",
+          "free": false,
+          "type": "hands-on-labs",
+          "skillId": "aws",
+          "priority": "Medium",
+          "score": 57
+        },
+        {
+          "title": "Whizlabs",
+          "url": "https://www.whizlabs.com/",
+          "free": false,
+          "type": "practice-tests",
+          "skillId": "aws",
+          "priority": "Medium",
+          "score": 57
+        },
+        {
+          "title": "HackerRank - Python",
+          "url": "https://www.hackerrank.com/domains/python",
+          "free": true,
+          "type": "challenges",
+          "skillId": "python",
+          "priority": "Medium",
+          "score": 56
+        },
+        {
+          "title": "LeetCode",
+          "url": "https://leetcode.com/",
+          "free": true,
+          "type": "challenges",
+          "skillId": "python",
+          "priority": "Medium",
+          "score": 56
+        },
+        {
+          "title": "Exercism - Python",
+          "url": "https://exercism.org/tracks/python",
+          "free": true,
+          "type": "exercises",
+          "skillId": "python",
+          "priority": "Medium",
+          "score": 56
+        },
+        {
+          "title": "Kaggle",
+          "url": "https://www.kaggle.com/learn",
+          "free": true,
+          "type": "data-science",
+          "skillId": "python",
+          "priority": "Medium",
+          "score": 56
+        }
+      ],
+      "documentation": [
+        {
+          "title": "Node.js Official Docs",
+          "url": "https://nodejs.org/en/docs/",
+          "type": "official",
+          "skillId": "nodejs",
+          "priority": "High",
+          "score": 85
+        },
+        {
+          "title": "Node.js Best Practices",
+          "url": "https://github.com/goldbergyoni/nodebestpractices",
+          "type": "reference",
+          "skillId": "nodejs",
+          "priority": "High",
+          "score": 85
+        },
+        {
+          "title": "W3Schools SQL",
+          "url": "https://www.w3schools.com/sql/",
+          "type": "reference",
+          "skillId": "sql",
+          "priority": "High",
+          "score": 81
+        },
+        {
+          "title": "PostgreSQL Docs",
+          "url": "https://www.postgresql.org/docs/",
+          "type": "official",
+          "skillId": "sql",
+          "priority": "High",
+          "score": 81
+        },
+        {
+          "title": "Pro Git Book",
+          "url": "https://git-scm.com/book/en/v2",
+          "type": "book",
+          "skillId": "git",
+          "priority": "High",
+          "score": 80
+        },
+        {
+          "title": "MongoDB Official Docs",
+          "url": "https://www.mongodb.com/docs/",
+          "type": "official",
+          "skillId": "mongodb",
+          "priority": "High",
+          "score": 77
+        },
+        {
+          "title": "Mongoose Docs",
+          "url": "https://mongoosejs.com/docs/",
+          "type": "library",
+          "skillId": "mongodb",
+          "priority": "High",
+          "score": 77
+        },
+        {
+          "title": "Git Official Docs",
+          "url": "https://git-scm.com/doc",
+          "type": "official",
+          "skillId": "git",
+          "priority": "High",
+          "score": 77
+        },
+        {
+          "title": "Docker Official Docs",
+          "url": "https://docs.docker.com/",
+          "type": "official",
+          "skillId": "docker",
+          "priority": "Medium",
+          "score": 61
+        },
+        {
+          "title": "Docker Compose Docs",
+          "url": "https://docs.docker.com/compose/",
+          "type": "official",
+          "skillId": "docker",
+          "priority": "Medium",
+          "score": 61
+        },
+        {
+          "title": "AWS Documentation",
+          "url": "https://docs.aws.amazon.com/",
+          "type": "official",
+          "skillId": "aws",
+          "priority": "Medium",
+          "score": 57
+        },
+        {
+          "title": "AWS Well-Architected Framework",
+          "url": "https://aws.amazon.com/architecture/well-architected/",
+          "type": "framework",
+          "skillId": "aws",
+          "priority": "Medium",
+          "score": 57
+        },
+        {
+          "title": "Python Official Docs",
+          "url": "https://docs.python.org/3/",
+          "type": "official",
+          "skillId": "python",
+          "priority": "Medium",
+          "score": 53
+        },
+        {
+          "title": "Real Python",
+          "url": "https://realpython.com/",
+          "type": "tutorials",
+          "skillId": "python",
+          "priority": "Medium",
+          "score": 53
+        }
+      ],
+      "advanced": {}
+    },
+    "learningPath": {
+      "title": "Backend Development Path",
+      "totalWeeks": 28,
+      "phases": [
+        {
+          "phase": 1,
+          "title": "Foundations",
+          "weeks": "1-2",
+          "skills": [
+            "git"
+          ],
+          "milestone": "Version control proficiency"
+        },
+        {
+          "phase": 2,
+          "title": "Databases",
+          "weeks": "3-6",
+          "skills": [
+            "sql"
+          ],
+          "milestone": "Complex SQL queries"
+        },
+        {
+          "phase": 3,
+          "title": "Server Runtime",
+          "weeks": "7-12",
+          "skills": [
+            "nodejs"
+          ],
+          "milestone": "Build REST API"
+        },
+        {
+          "phase": 4,
+          "title": "NoSQL",
+          "weeks": "13-16",
+          "skills": [
+            "mongodb"
+          ],
+          "milestone": "MongoDB CRUD operations"
+        },
+        {
+          "phase": 5,
+          "title": "Containers",
+          "weeks": "17-21",
+          "skills": [
+            "docker"
+          ],
+          "milestone": "Dockerized application"
+        },
+        {
+          "phase": 6,
+          "title": "Cloud",
+          "weeks": "22-28",
+          "skills": [
+            "aws"
+          ],
+          "milestone": "Deploy to AWS"
+        }
+      ]
+    },
+    "meta": {
+      "generatedAt": "2026-05-31T07:33:14.630Z",
+      "engineVersion": "1.0.0",
+      "totalResources": 73
+    }
+  }
+}

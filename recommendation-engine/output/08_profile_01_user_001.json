@@ -1,0 +1,433 @@
+{
+  "success": true,
+  "message": "Recommendations generated for Data Analyst",
+  "timestamp": "2026-05-31T07:33:14.613Z",
+  "data": {
+    "user": {
+      "userId": "user_001",
+      "name": "Alex Chen",
+      "currentSkills": [
+        "git",
+        "python"
+      ]
+    },
+    "careerGoal": {
+      "id": "data_analyst",
+      "title": "Data Analyst",
+      "description": "Analyzes data to extract insights and support business decisions",
+      "demandLevel": "high",
+      "matchScore": 53
+    },
+    "skillGap": {
+      "missingRequired": [
+        "sql"
+      ],
+      "missingOptional": [
+        "machine_learning",
+        "aws"
+      ],
+      "totalMissing": 3
+    },
+    "recommendations": {
+      "courses": [
+        {
+          "title": "SQL Tutorial",
+          "provider": "freeCodeCamp",
+          "url": "https://www.youtube.com/watch?v=HXV3zeQKqGY",
+          "free": true,
+          "level": "beginner",
+          "duration": "4 hours",
+          "rating": 4.7,
+          "skillId": "sql",
+          "priority": "High",
+          "score": 99
+        },
+        {
+          "title": "SQL for Data Science",
+          "provider": "Coursera / UC Davis",
+          "url": "https://www.coursera.org/learn/sql-for-data-science",
+          "free": false,
+          "level": "beginner",
+          "duration": "16 hours",
+          "rating": 4.6,
+          "skillId": "sql",
+          "priority": "High",
+          "score": 96
+        },
+        {
+          "title": "The Complete SQL Bootcamp",
+          "provider": "Udemy",
+          "url": "https://www.udemy.com/course/the-complete-sql-bootcamp/",
+          "free": false,
+          "level": "beginner-to-advanced",
+          "duration": "9 hours",
+          "rating": 4.7,
+          "skillId": "sql",
+          "priority": "High",
+          "score": 93
+        },
+        {
+          "title": "Machine Learning with Python",
+          "provider": "freeCodeCamp",
+          "url": "https://www.freecodecamp.org/learn/machine-learning-with-python/",
+          "free": true,
+          "level": "beginner",
+          "duration": "20 hours",
+          "rating": 4.6,
+          "skillId": "machine_learning",
+          "priority": "Medium",
+          "score": 71
+        },
+        {
+          "title": "Fast.ai Practical Deep Learning",
+          "provider": "fast.ai",
+          "url": "https://course.fast.ai/",
+          "free": true,
+          "level": "intermediate",
+          "duration": "30 hours",
+          "rating": 4.9,
+          "skillId": "machine_learning",
+          "priority": "Medium",
+          "score": 66
+        },
+        {
+          "title": "AWS Cloud Practitioner Essentials",
+          "provider": "AWS Training",
+          "url": "https://aws.amazon.com/training/learn-about/cloud-practitioner/",
+          "free": true,
+          "level": "beginner",
+          "duration": "6 hours",
+          "rating": 4.7,
+          "skillId": "aws",
+          "priority": "Low",
+          "score": 63
+        },
+        {
+          "title": "Machine Learning Specialization",
+          "provider": "Coursera / DeepLearning.AI",
+          "url": "https://www.coursera.org/specializations/machine-learning-introduction",
+          "free": false,
+          "level": "beginner-to-intermediate",
+          "duration": "100 hours",
+          "rating": 4.9,
+          "skillId": "machine_learning",
+          "priority": "Medium",
+          "score": 61
+        },
+        {
+          "title": "AWS Fundamentals Specialization",
+          "provider": "Coursera / AWS",
+          "url": "https://www.coursera.org/specializations/aws-fundamentals",
+          "free": false,
+          "level": "beginner",
+          "duration": "40 hours",
+          "rating": 4.6,
+          "skillId": "aws",
+          "priority": "Low",
+          "score": 60
+        },
+        {
+          "title": "AWS Certified Solutions Architect - Associate",
+          "provider": "Udemy",
+          "url": "https://www.udemy.com/course/aws-certified-solutions-architect-associate-saa-c03/",
+          "free": false,
+          "level": "intermediate",
+          "duration": "27 hours",
+          "rating": 4.7,
+          "skillId": "aws",
+          "priority": "Low",
+          "score": 54
+        }
+      ],
+      "certifications": [
+        {
+          "title": "Oracle Database SQL Certified Associate",
+          "provider": "Oracle",
+          "url": "https://education.oracle.com/oracle-database-sql/pexam_1Z0-071",
+          "level": "beginner",
+          "duration": "90 min exam",
+          "skillId": "sql",
+          "priority": "High",
+          "score": 93
+        },
+        {
+          "title": "Microsoft Certified: Azure Data Fundamentals",
+          "provider": "Microsoft",
+          "url": "https://learn.microsoft.com/en-us/certifications/azure-data-fundamentals/",
+          "level": "beginner",
+          "duration": "45 min exam",
+          "skillId": "sql",
+          "priority": "High",
+          "score": 93
+        },
+        {
+          "title": "TensorFlow Developer Certificate",
+          "provider": "Google",
+          "url": "https://www.tensorflow.org/certificate",
+          "level": "intermediate",
+          "duration": "5 hours exam",
+          "skillId": "machine_learning",
+          "priority": "Medium",
+          "score": 59
+        },
+        {
+          "title": "AWS Certified Cloud Practitioner",
+          "provider": "AWS",
+          "url": "https://aws.amazon.com/certification/certified-cloud-practitioner/",
+          "level": "beginner",
+          "duration": "90 min exam",
+          "skillId": "aws",
+          "priority": "Low",
+          "score": 57
+        },
+        {
+          "title": "AWS Certified Machine Learning Specialty",
+          "provider": "AWS",
+          "url": "https://aws.amazon.com/certification/certified-machine-learning-specialty/",
+          "level": "advanced",
+          "duration": "3 hours exam",
+          "skillId": "machine_learning",
+          "priority": "Medium",
+          "score": 56
+        },
+        {
+          "title": "Professional Machine Learning Engineer",
+          "provider": "Google Cloud",
+          "url": "https://cloud.google.com/certification/machine-learning-engineer",
+          "level": "advanced",
+          "duration": "2 hours exam",
+          "skillId": "machine_learning",
+          "priority": "Medium",
+          "score": 56
+        },
+        {
+          "title": "AWS Certified Solutions Architect Associate",
+          "provider": "AWS",
+          "url": "https://aws.amazon.com/certification/certified-solutions-architect-associate/",
+          "level": "intermediate",
+          "duration": "130 min exam",
+          "skillId": "aws",
+          "priority": "Low",
+          "score": 51
+        },
+        {
+          "title": "AWS Certified Developer Associate",
+          "provider": "AWS",
+          "url": "https://aws.amazon.com/certification/certified-developer-associate/",
+          "level": "intermediate",
+          "duration": "130 min exam",
+          "skillId": "aws",
+          "priority": "Low",
+          "score": 51
+        }
+      ],
+      "practicePlatforms": [
+        {
+          "title": "SQLZoo",
+          "url": "https://sqlzoo.net/",
+          "free": true,
+          "type": "interactive",
+          "skillId": "sql",
+          "priority": "High",
+          "score": 88
+        },
+        {
+          "title": "Mode SQL Tutorial",
+          "url": "https://mode.com/sql-tutorial/",
+          "free": true,
+          "type": "tutorials",
+          "skillId": "sql",
+          "priority": "High",
+          "score": 88
+        },
+        {
+          "title": "HackerRank - SQL",
+          "url": "https://www.hackerrank.com/domains/sql",
+          "free": true,
+          "type": "challenges",
+          "skillId": "sql",
+          "priority": "High",
+          "score": 88
+        },
+        {
+          "title": "LeetCode - Database",
+          "url": "https://leetcode.com/problemset/database/",
+          "free": true,
+          "type": "challenges",
+          "skillId": "sql",
+          "priority": "High",
+          "score": 88
+        },
+        {
+          "title": "Kaggle",
+          "url": "https://www.kaggle.com/",
+          "free": true,
+          "type": "competitions",
+          "skillId": "machine_learning",
+          "priority": "Medium",
+          "score": 60
+        },
+        {
+          "title": "Google Colab",
+          "url": "https://colab.research.google.com/",
+          "free": true,
+          "type": "notebook",
+          "skillId": "machine_learning",
+          "priority": "Medium",
+          "score": 60
+        },
+        {
+          "title": "Hugging Face",
+          "url": "https://huggingface.co/",
+          "free": true,
+          "type": "models-hub",
+          "skillId": "machine_learning",
+          "priority": "Medium",
+          "score": 60
+        },
+        {
+          "title": "AWS Free Tier",
+          "url": "https://aws.amazon.com/free/",
+          "free": true,
+          "type": "cloud-sandbox",
+          "skillId": "aws",
+          "priority": "Low",
+          "score": 52
+        },
+        {
+          "title": "A Cloud Guru Labs",
+          "url": "https://acloudguru.com/",
+          "free": false,
+          "type": "hands-on-labs",
+          "skillId": "aws",
+          "priority": "Low",
+          "score": 49
+        },
+        {
+          "title": "Whizlabs",
+          "url": "https://www.whizlabs.com/",
+          "free": false,
+          "type": "practice-tests",
+          "skillId": "aws",
+          "priority": "Low",
+          "score": 49
+        }
+      ],
+      "documentation": [
+        {
+          "title": "W3Schools SQL",
+          "url": "https://www.w3schools.com/sql/",
+          "type": "reference",
+          "skillId": "sql",
+          "priority": "High",
+          "score": 85
+        },
+        {
+          "title": "PostgreSQL Docs",
+          "url": "https://www.postgresql.org/docs/",
+          "type": "official",
+          "skillId": "sql",
+          "priority": "High",
+          "score": 85
+        },
+        {
+          "title": "Scikit-learn Docs",
+          "url": "https://scikit-learn.org/stable/",
+          "type": "library",
+          "skillId": "machine_learning",
+          "priority": "Medium",
+          "score": 57
+        },
+        {
+          "title": "TensorFlow Docs",
+          "url": "https://www.tensorflow.org/api_docs",
+          "type": "library",
+          "skillId": "machine_learning",
+          "priority": "Medium",
+          "score": 57
+        },
+        {
+          "title": "PyTorch Docs",
+          "url": "https://pytorch.org/docs/stable/index.html",
+          "type": "library",
+          "skillId": "machine_learning",
+          "priority": "Medium",
+          "score": 57
+        },
+        {
+          "title": "AWS Documentation",
+          "url": "https://docs.aws.amazon.com/",
+          "type": "official",
+          "skillId": "aws",
+          "priority": "Low",
+          "score": 49
+        },
+        {
+          "title": "AWS Well-Architected Framework",
+          "url": "https://aws.amazon.com/architecture/well-architected/",
+          "type": "framework",
+          "skillId": "aws",
+          "priority": "Low",
+          "score": 49
+        }
+      ],
+      "advanced": {}
+    },
+    "learningPath": {
+      "title": "Data Science Path",
+      "totalWeeks": 28,
+      "phases": [
+        {
+          "phase": 1,
+          "title": "SQL Foundations",
+          "weeks": "1-4",
+          "skills": [
+            "sql"
+          ],
+          "milestone": "Complex analytical queries"
+        },
+        {
+          "phase": 2,
+          "title": "Python",
+          "weeks": "5-10",
+          "skills": [
+            "python"
+          ],
+          "milestone": "Data manipulation with pandas"
+        },
+        {
+          "phase": 3,
+          "title": "Version Control",
+          "weeks": "11-12",
+          "skills": [
+            "git"
+          ],
+          "milestone": "Collaborative workflows"
+        },
+        {
+          "phase": 4,
+          "title": "ML Basics",
+          "weeks": "13-24",
+          "skills": [
+            "machine_learning"
+          ],
+          "milestone": "Train and evaluate models"
+        },
+        {
+          "phase": 5,
+          "title": "Cloud",
+          "weeks": "25-28",
+          "skills": [
+            "aws"
+          ],
+          "milestone": "Deploy ML pipeline"
+        }
+      ]
+    },
+    "meta": {
+      "generatedAt": "2026-05-31T07:33:14.613Z",
+      "engineVersion": "1.0.0",
+      "totalResources": 34
+    }
+  }
+}

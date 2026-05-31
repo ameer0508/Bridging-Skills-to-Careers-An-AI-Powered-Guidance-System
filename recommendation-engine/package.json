@@ -1,0 +1,22 @@
+{
+  "name": "learning-resource-recommendation-engine",
+  "version": "1.0.0",
+  "description": "AI-Powered Learning Resource Recommendation Engine — Bridging Skills to Careers",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "dev": "node --watch main.js"
+  },
+  "keywords": [
+    "recommendation-engine",
+    "learning",
+    "skills",
+    "career",
+    "content-based-filtering"
+  ],
+  "author": "Bridging Skills to Careers",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

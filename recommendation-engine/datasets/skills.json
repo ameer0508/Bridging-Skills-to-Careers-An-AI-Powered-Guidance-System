@@ -1,0 +1,1156 @@
+{
+  "aws": {
+    "id": "aws",
+    "name": "AWS",
+    "category": "cloud",
+    "difficultyLevel": "intermediate",
+    "learningDurationWeeks": 12,
+    "courses": [
+      {
+        "title": "AWS Certified Solutions Architect - Associate",
+        "provider": "Udemy",
+        "url": "https://www.udemy.com/course/aws-certified-solutions-architect-associate-saa-c03/",
+        "free": false,
+        "rating": 4.7,
+        "durationHours": 27,
+        "level": "intermediate"
+      },
+      {
+        "title": "AWS Cloud Practitioner Essentials",
+        "provider": "AWS Training",
+        "url": "https://aws.amazon.com/training/learn-about/cloud-practitioner/",
+        "free": true,
+        "rating": 4.7,
+        "durationHours": 6,
+        "level": "beginner"
+      },
+      {
+        "title": "AWS Fundamentals Specialization",
+        "provider": "Coursera / AWS",
+        "url": "https://www.coursera.org/specializations/aws-fundamentals",
+        "free": false,
+        "rating": 4.6,
+        "durationHours": 40,
+        "level": "beginner"
+      }
+    ],
+    "certifications": [
+      {
+        "title": "AWS Certified Cloud Practitioner",
+        "provider": "AWS",
+        "url": "https://aws.amazon.com/certification/certified-cloud-practitioner/",
+        "cost": "paid",
+        "duration": "90 min exam",
+        "level": "beginner"
+      },
+      {
+        "title": "AWS Certified Solutions Architect Associate",
+        "provider": "AWS",
+        "url": "https://aws.amazon.com/certification/certified-solutions-architect-associate/",
+        "cost": "paid",
+        "duration": "130 min exam",
+        "level": "intermediate"
+      },
+      {
+        "title": "AWS Certified Developer Associate",
+        "provider": "AWS",
+        "url": "https://aws.amazon.com/certification/certified-developer-associate/",
+        "cost": "paid",
+        "duration": "130 min exam",
+        "level": "intermediate"
+      }
+    ],
+    "practicePlatforms": [
+      {
+        "title": "AWS Free Tier",
+        "url": "https://aws.amazon.com/free/",
+        "type": "cloud-sandbox",
+        "free": true
+      },
+      {
+        "title": "A Cloud Guru Labs",
+        "url": "https://acloudguru.com/",
+        "type": "hands-on-labs",
+        "free": false
+      },
+      {
+        "title": "Whizlabs",
+        "url": "https://www.whizlabs.com/",
+        "type": "practice-tests",
+        "free": false
+      }
+    ],
+    "documentation": [
+      {
+        "title": "AWS Documentation",
+        "url": "https://docs.aws.amazon.com/",
+        "type": "official"
+      },
+      {
+        "title": "AWS Well-Architected Framework",
+        "url": "https://aws.amazon.com/architecture/well-architected/",
+        "type": "framework"
+      }
+    ],
+    "tags": [
+      "cloud",
+      "devops",
+      "infrastructure",
+      "serverless",
+      "storage"
+    ]
+  },
+  "cybersecurity": {
+    "id": "cybersecurity",
+    "name": "Cybersecurity",
+    "category": "security",
+    "difficultyLevel": "intermediate",
+    "learningDurationWeeks": 16,
+    "courses": [
+      {
+        "title": "Google Cybersecurity Certificate",
+        "provider": "Google / Coursera",
+        "url": "https://www.coursera.org/professional-certificates/google-cybersecurity",
+        "free": false,
+        "rating": 4.8,
+        "durationHours": 160,
+        "level": "beginner"
+      },
+      {
+        "title": "Introduction to Cybersecurity",
+        "provider": "Cisco NetAcad",
+        "url": "https://www.netacad.com/courses/cybersecurity/introduction-cybersecurity",
+        "free": true,
+        "rating": 4.6,
+        "durationHours": 15,
+        "level": "beginner"
+      },
+      {
+        "title": "Cybersecurity Fundamentals",
+        "provider": "IBM / Coursera",
+        "url": "https://www.coursera.org/learn/cybersecurity-fundamentals",
+        "free": false,
+        "rating": 4.7,
+        "durationHours": 20,
+        "level": "beginner"
+      }
+    ],
+    "certifications": [
+      {
+        "title": "CompTIA Security+",
+        "provider": "CompTIA",
+        "url": "https://www.comptia.org/certifications/security",
+        "cost": "paid",
+        "duration": "90 min exam",
+        "level": "beginner"
+      },
+      {
+        "title": "Certified Ethical Hacker (CEH)",
+        "provider": "EC-Council",
+        "url": "https://www.eccouncil.org/programs/certified-ethical-hacker-ceh/",
+        "cost": "paid",
+        "duration": "4 hours exam",
+        "level": "intermediate"
+      },
+      {
+        "title": "CISSP",
+        "provider": "ISC2",
+        "url": "https://www.isc2.org/Certifications/CISSP",
+        "cost": "paid",
+        "duration": "6 hours exam",
+        "level": "advanced"
+      }
+    ],
+    "practicePlatforms": [
+      {
+        "title": "TryHackMe",
+        "url": "https://tryhackme.com/",
+        "type": "hands-on-labs",
+        "free": true
+      },
+      {
+        "title": "Hack The Box",
+        "url": "https://www.hackthebox.com/",
+        "type": "ctf-labs",
+        "free": true
+      },
+      {
+        "title": "OverTheWire",
+        "url": "https://overthewire.org/wargames/",
+        "type": "wargames",
+        "free": true
+      },
+      {
+        "title": "PicoCTF",
+        "url": "https://picoctf.org/",
+        "type": "ctf",
+        "free": true
+      }
+    ],
+    "documentation": [
+      {
+        "title": "OWASP Top 10",
+        "url": "https://owasp.org/www-project-top-ten/",
+        "type": "reference"
+      },
+      {
+        "title": "NIST Cybersecurity Framework",
+        "url": "https://www.nist.gov/cyberframework",
+        "type": "framework"
+      }
+    ],
+    "tags": [
+      "security",
+      "networking",
+      "ethical-hacking",
+      "compliance",
+      "defense"
+    ]
+  },
+  "docker": {
+    "id": "docker",
+    "name": "Docker",
+    "category": "devops",
+    "difficultyLevel": "intermediate",
+    "learningDurationWeeks": 5,
+    "courses": [
+      {
+        "title": "Docker and Kubernetes: The Complete Guide",
+        "provider": "Udemy",
+        "url": "https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide/",
+        "free": false,
+        "rating": 4.6,
+        "durationHours": 22,
+        "level": "beginner-to-advanced"
+      },
+      {
+        "title": "Docker Tutorial for Beginners",
+        "provider": "TechWorld with Nana",
+        "url": "https://www.youtube.com/watch?v=3c-iBn73dDE",
+        "free": true,
+        "rating": 4.8,
+        "durationHours": 3,
+        "level": "beginner"
+      },
+      {
+        "title": "Docker Mastery",
+        "provider": "Udemy",
+        "url": "https://www.udemy.com/course/docker-mastery/",
+        "free": false,
+        "rating": 4.7,
+        "durationHours": 19,
+        "level": "beginner-to-advanced"
+      }
+    ],
+    "certifications": [
+      {
+        "title": "Docker Certified Associate (DCA)",
+        "provider": "Docker",
+        "url": "https://training.mirantis.com/certification/dca-certification-exam/",
+        "cost": "paid",
+        "duration": "90 min exam",
+        "level": "intermediate"
+      },
+      {
+        "title": "Kubernetes and Cloud Native Associate",
+        "provider": "CNCF",
+        "url": "https://training.linuxfoundation.org/certification/kubernetes-cloud-native-associate/",
+        "cost": "paid",
+        "duration": "90 min exam",
+        "level": "beginner"
+      }
+    ],
+    "practicePlatforms": [
+      {
+        "title": "Play with Docker",
+        "url": "https://labs.play-with-docker.com/",
+        "type": "sandbox",
+        "free": true
+      },
+      {
+        "title": "Katacoda Docker",
+        "url": "https://www.katacoda.com/courses/docker",
+        "type": "interactive",
+        "free": true
+      },
+      {
+        "title": "Docker Hub",
+        "url": "https://hub.docker.com/",
+        "type": "registry",
+        "free": true
+      }
+    ],
+    "documentation": [
+      {
+        "title": "Docker Official Docs",
+        "url": "https://docs.docker.com/",
+        "type": "official"
+      },
+      {
+        "title": "Docker Compose Docs",
+        "url": "https://docs.docker.com/compose/",
+        "type": "official"
+      }
+    ],
+    "tags": [
+      "devops",
+      "containers",
+      "deployment",
+      "microservices",
+      "cloud"
+    ]
+  },
+  "git": {
+    "id": "git",
+    "name": "Git",
+    "category": "tools",
+    "difficultyLevel": "beginner",
+    "learningDurationWeeks": 2,
+    "courses": [
+      {
+        "title": "Git Complete: The Definitive Guide",
+        "provider": "Udemy",
+        "url": "https://www.udemy.com/course/git-complete/",
+        "free": false,
+        "rating": 4.6,
+        "durationHours": 12,
+        "level": "beginner-to-advanced"
+      },
+      {
+        "title": "Git and GitHub for Beginners",
+        "provider": "freeCodeCamp",
+        "url": "https://www.youtube.com/watch?v=RGOj5yH7evk",
+        "free": true,
+        "rating": 4.7,
+        "durationHours": 1,
+        "level": "beginner"
+      },
+      {
+        "title": "Version Control with Git",
+        "provider": "Coursera / Atlassian",
+        "url": "https://www.coursera.org/learn/version-control-with-git",
+        "free": false,
+        "rating": 4.7,
+        "durationHours": 13,
+        "level": "beginner"
+      }
+    ],
+    "certifications": [
+      {
+        "title": "GitHub Foundations Certification",
+        "provider": "GitHub",
+        "url": "https://resources.github.com/learn/certifications/",
+        "cost": "paid",
+        "duration": "120 min exam",
+        "level": "beginner"
+      },
+      {
+        "title": "GitHub Actions Certification",
+        "provider": "GitHub",
+        "url": "https://resources.github.com/learn/certifications/",
+        "cost": "paid",
+        "duration": "120 min exam",
+        "level": "intermediate"
+      }
+    ],
+    "practicePlatforms": [
+      {
+        "title": "Learn Git Branching",
+        "url": "https://learngitbranching.js.org/",
+        "type": "interactive",
+        "free": true
+      },
+      {
+        "title": "GitHub",
+        "url": "https://github.com/",
+        "type": "platform",
+        "free": true
+      },
+      {
+        "title": "GitLab",
+        "url": "https://gitlab.com/",
+        "type": "platform",
+        "free": true
+      }
+    ],
+    "documentation": [
+      {
+        "title": "Git Official Docs",
+        "url": "https://git-scm.com/doc",
+        "type": "official"
+      },
+      {
+        "title": "Pro Git Book",
+        "url": "https://git-scm.com/book/en/v2",
+        "type": "book",
+        "free": true
+      }
+    ],
+    "tags": [
+      "version-control",
+      "collaboration",
+      "devops",
+      "workflow",
+      "tools"
+    ]
+  },
+  "java": {
+    "id": "java",
+    "name": "Java",
+    "category": "backend",
+    "difficultyLevel": "intermediate",
+    "learningDurationWeeks": 10,
+    "courses": [
+      {
+        "title": "Java Masterclass",
+        "provider": "Udemy",
+        "url": "https://www.udemy.com/course/java-the-complete-java-developer-course/",
+        "free": false,
+        "rating": 4.7,
+        "durationHours": 80,
+        "level": "beginner-to-advanced"
+      },
+      {
+        "title": "Java Programming and Software Engineering Fundamentals",
+        "provider": "Coursera / Duke",
+        "url": "https://www.coursera.org/specializations/java-programming",
+        "free": false,
+        "rating": 4.7,
+        "durationHours": 40,
+        "level": "beginner"
+      },
+      {
+        "title": "Java Full Course",
+        "provider": "freeCodeCamp",
+        "url": "https://www.youtube.com/watch?v=grEKMHGYyns",
+        "free": true,
+        "rating": 4.6,
+        "durationHours": 12,
+        "level": "beginner"
+      }
+    ],
+    "certifications": [
+      {
+        "title": "Oracle Certified Associate Java SE 8",
+        "provider": "Oracle",
+        "url": "https://education.oracle.com/java-se-8-programmer-i/pexam_1Z0-808",
+        "cost": "paid",
+        "duration": "150 min exam",
+        "level": "beginner"
+      },
+      {
+        "title": "Oracle Certified Professional Java SE 11",
+        "provider": "Oracle",
+        "url": "https://education.oracle.com/java-se-11-developer/pexam_1Z0-819",
+        "cost": "paid",
+        "duration": "90 min exam",
+        "level": "intermediate"
+      }
+    ],
+    "practicePlatforms": [
+      {
+        "title": "HackerRank - Java",
+        "url": "https://www.hackerrank.com/domains/java",
+        "type": "challenges",
+        "free": true
+      },
+      {
+        "title": "Exercism - Java",
+        "url": "https://exercism.org/tracks/java",
+        "type": "exercises",
+        "free": true
+      },
+      {
+        "title": "LeetCode",
+        "url": "https://leetcode.com/",
+        "type": "challenges",
+        "free": true
+      }
+    ],
+    "documentation": [
+      {
+        "title": "Java SE Documentation",
+        "url": "https://docs.oracle.com/en/java/",
+        "type": "official"
+      },
+      {
+        "title": "Baeldung",
+        "url": "https://www.baeldung.com/",
+        "type": "tutorials"
+      }
+    ],
+    "tags": [
+      "backend",
+      "oop",
+      "enterprise",
+      "android",
+      "spring"
+    ]
+  },
+  "machine_learning": {
+    "id": "machine_learning",
+    "name": "Machine Learning",
+    "category": "ai-ml",
+    "difficultyLevel": "advanced",
+    "learningDurationWeeks": 20,
+    "courses": [
+      {
+        "title": "Machine Learning Specialization",
+        "provider": "Coursera / DeepLearning.AI",
+        "url": "https://www.coursera.org/specializations/machine-learning-introduction",
+        "free": false,
+        "rating": 4.9,
+        "durationHours": 100,
+        "level": "beginner-to-intermediate"
+      },
+      {
+        "title": "Fast.ai Practical Deep Learning",
+        "provider": "fast.ai",
+        "url": "https://course.fast.ai/",
+        "free": true,
+        "rating": 4.9,
+        "durationHours": 30,
+        "level": "intermediate"
+      },
+      {
+        "title": "Machine Learning with Python",
+        "provider": "freeCodeCamp",
+        "url": "https://www.freecodecamp.org/learn/machine-learning-with-python/",
+        "free": true,
+        "rating": 4.6,
+        "durationHours": 20,
+        "level": "beginner"
+      }
+    ],
+    "certifications": [
+      {
+        "title": "TensorFlow Developer Certificate",
+        "provider": "Google",
+        "url": "https://www.tensorflow.org/certificate",
+        "cost": "paid",
+        "duration": "5 hours exam",
+        "level": "intermediate"
+      },
+      {
+        "title": "AWS Certified Machine Learning Specialty",
+        "provider": "AWS",
+        "url": "https://aws.amazon.com/certification/certified-machine-learning-specialty/",
+        "cost": "paid",
+        "duration": "3 hours exam",
+        "level": "advanced"
+      },
+      {
+        "title": "Professional Machine Learning Engineer",
+        "provider": "Google Cloud",
+        "url": "https://cloud.google.com/certification/machine-learning-engineer",
+        "cost": "paid",
+        "duration": "2 hours exam",
+        "level": "advanced"
+      }
+    ],
+    "practicePlatforms": [
+      {
+        "title": "Kaggle",
+        "url": "https://www.kaggle.com/",
+        "type": "competitions",
+        "free": true
+      },
+      {
+        "title": "Google Colab",
+        "url": "https://colab.research.google.com/",
+        "type": "notebook",
+        "free": true
+      },
+      {
+        "title": "Hugging Face",
+        "url": "https://huggingface.co/",
+        "type": "models-hub",
+        "free": true
+      }
+    ],
+    "documentation": [
+      {
+        "title": "Scikit-learn Docs",
+        "url": "https://scikit-learn.org/stable/",
+        "type": "library"
+      },
+      {
+        "title": "TensorFlow Docs",
+        "url": "https://www.tensorflow.org/api_docs",
+        "type": "library"
+      },
+      {
+        "title": "PyTorch Docs",
+        "url": "https://pytorch.org/docs/stable/index.html",
+        "type": "library"
+      }
+    ],
+    "tags": [
+      "ai",
+      "ml",
+      "deep-learning",
+      "data-science",
+      "python",
+      "neural-networks"
+    ]
+  },
+  "mongodb": {
+    "id": "mongodb",
+    "name": "MongoDB",
+    "category": "database",
+    "difficultyLevel": "beginner",
+    "learningDurationWeeks": 4,
+    "courses": [
+      {
+        "title": "MongoDB - The Complete Developer Guide",
+        "provider": "Udemy",
+        "url": "https://www.udemy.com/course/mongodb-the-complete-developers-guide/",
+        "free": false,
+        "rating": 4.7,
+        "durationHours": 17,
+        "level": "beginner-to-advanced"
+      },
+      {
+        "title": "MongoDB University M001",
+        "provider": "MongoDB University",
+        "url": "https://university.mongodb.com/courses/M001/about",
+        "free": true,
+        "rating": 4.8,
+        "durationHours": 12,
+        "level": "beginner"
+      },
+      {
+        "title": "MongoDB Crash Course",
+        "provider": "Traversy Media",
+        "url": "https://www.youtube.com/watch?v=-56x56UppqQ",
+        "free": true,
+        "rating": 4.5,
+        "durationHours": 2,
+        "level": "beginner"
+      }
+    ],
+    "certifications": [
+      {
+        "title": "MongoDB Associate Developer",
+        "provider": "MongoDB",
+        "url": "https://university.mongodb.com/certification/developer/about",
+        "cost": "paid",
+        "duration": "3 hours exam",
+        "level": "intermediate"
+      },
+      {
+        "title": "MongoDB Associate DBA",
+        "provider": "MongoDB",
+        "url": "https://university.mongodb.com/certification/dba/about",
+        "cost": "paid",
+        "duration": "3 hours exam",
+        "level": "advanced"
+      }
+    ],
+    "practicePlatforms": [
+      {
+        "title": "MongoDB Atlas (Free Tier)",
+        "url": "https://www.mongodb.com/cloud/atlas",
+        "type": "cloud-database",
+        "free": true
+      },
+      {
+        "title": "MongoDB Compass",
+        "url": "https://www.mongodb.com/products/compass",
+        "type": "gui-tool",
+        "free": true
+      }
+    ],
+    "documentation": [
+      {
+        "title": "MongoDB Official Docs",
+        "url": "https://www.mongodb.com/docs/",
+        "type": "official"
+      },
+      {
+        "title": "Mongoose Docs",
+        "url": "https://mongoosejs.com/docs/",
+        "type": "library"
+      }
+    ],
+    "tags": [
+      "database",
+      "nosql",
+      "backend",
+      "document-store",
+      "cloud"
+    ]
+  },
+  "nodejs": {
+    "id": "nodejs",
+    "name": "Node.js",
+    "category": "backend",
+    "difficultyLevel": "intermediate",
+    "learningDurationWeeks": 6,
+    "courses": [
+      {
+        "title": "The Complete Node.js Developer Course",
+        "provider": "Udemy",
+        "url": "https://www.udemy.com/course/the-complete-nodejs-developer-course-2/",
+        "free": false,
+        "rating": 4.7,
+        "durationHours": 35,
+        "level": "beginner-to-advanced"
+      },
+      {
+        "title": "Node.js Full Course",
+        "provider": "freeCodeCamp",
+        "url": "https://www.youtube.com/watch?v=Oe421EPjeBE",
+        "free": true,
+        "rating": 4.6,
+        "durationHours": 8,
+        "level": "beginner"
+      },
+      {
+        "title": "Full Stack Open - Node.js",
+        "provider": "University of Helsinki",
+        "url": "https://fullstackopen.com/en/",
+        "free": true,
+        "rating": 4.9,
+        "durationHours": 15,
+        "level": "intermediate"
+      }
+    ],
+    "certifications": [
+      {
+        "title": "OpenJS Node.js Application Developer",
+        "provider": "Linux Foundation",
+        "url": "https://training.linuxfoundation.org/certification/jsnad/",
+        "cost": "paid",
+        "duration": "2 hours exam",
+        "level": "intermediate"
+      },
+      {
+        "title": "Node.js Certification",
+        "provider": "HackerRank",
+        "url": "https://www.hackerrank.com/skills-verification/nodejs_intermediate",
+        "cost": "free",
+        "duration": "1 day",
+        "level": "intermediate"
+      }
+    ],
+    "practicePlatforms": [
+      {
+        "title": "Exercism - JavaScript",
+        "url": "https://exercism.org/tracks/javascript",
+        "type": "exercises",
+        "free": true
+      },
+      {
+        "title": "Replit",
+        "url": "https://replit.com/",
+        "type": "online-ide",
+        "free": true
+      },
+      {
+        "title": "HackerRank",
+        "url": "https://www.hackerrank.com/",
+        "type": "challenges",
+        "free": true
+      }
+    ],
+    "documentation": [
+      {
+        "title": "Node.js Official Docs",
+        "url": "https://nodejs.org/en/docs/",
+        "type": "official"
+      },
+      {
+        "title": "Node.js Best Practices",
+        "url": "https://github.com/goldbergyoni/nodebestpractices",
+        "type": "reference"
+      }
+    ],
+    "tags": [
+      "backend",
+      "server",
+      "javascript",
+      "api",
+      "runtime"
+    ]
+  },
+  "python": {
+    "id": "python",
+    "name": "Python",
+    "category": "general",
+    "difficultyLevel": "beginner",
+    "learningDurationWeeks": 6,
+    "courses": [
+      {
+        "title": "100 Days of Code - Python Bootcamp",
+        "provider": "Udemy",
+        "url": "https://www.udemy.com/course/100-days-of-code/",
+        "free": false,
+        "rating": 4.8,
+        "durationHours": 60,
+        "level": "beginner-to-advanced"
+      },
+      {
+        "title": "Python for Everybody",
+        "provider": "Coursera / University of Michigan",
+        "url": "https://www.coursera.org/specializations/python",
+        "free": false,
+        "rating": 4.8,
+        "durationHours": 32,
+        "level": "beginner"
+      },
+      {
+        "title": "Python Tutorial",
+        "provider": "freeCodeCamp",
+        "url": "https://www.youtube.com/watch?v=rfscVS0vtbw",
+        "free": true,
+        "rating": 4.7,
+        "durationHours": 4,
+        "level": "beginner"
+      }
+    ],
+    "certifications": [
+      {
+        "title": "PCEP - Certified Entry-Level Python Programmer",
+        "provider": "Python Institute",
+        "url": "https://pythoninstitute.org/pcep",
+        "cost": "paid",
+        "duration": "45 min exam",
+        "level": "beginner"
+      },
+      {
+        "title": "PCAP - Certified Associate Python Programmer",
+        "provider": "Python Institute",
+        "url": "https://pythoninstitute.org/pcap",
+        "cost": "paid",
+        "duration": "65 min exam",
+        "level": "intermediate"
+      },
+      {
+        "title": "Google IT Automation with Python",
+        "provider": "Google / Coursera",
+        "url": "https://www.coursera.org/professional-certificates/google-it-automation",
+        "cost": "paid",
+        "duration": "6 months",
+        "level": "intermediate"
+      }
+    ],
+    "practicePlatforms": [
+      {
+        "title": "HackerRank - Python",
+        "url": "https://www.hackerrank.com/domains/python",
+        "type": "challenges",
+        "free": true
+      },
+      {
+        "title": "LeetCode",
+        "url": "https://leetcode.com/",
+        "type": "challenges",
+        "free": true
+      },
+      {
+        "title": "Exercism - Python",
+        "url": "https://exercism.org/tracks/python",
+        "type": "exercises",
+        "free": true
+      },
+      {
+        "title": "Kaggle",
+        "url": "https://www.kaggle.com/learn",
+        "type": "data-science",
+        "free": true
+      }
+    ],
+    "documentation": [
+      {
+        "title": "Python Official Docs",
+        "url": "https://docs.python.org/3/",
+        "type": "official"
+      },
+      {
+        "title": "Real Python",
+        "url": "https://realpython.com/",
+        "type": "tutorials"
+      }
+    ],
+    "tags": [
+      "general",
+      "scripting",
+      "data-science",
+      "automation",
+      "backend"
+    ]
+  },
+  "react": {
+    "id": "react",
+    "name": "React",
+    "category": "frontend",
+    "difficultyLevel": "intermediate",
+    "learningDurationWeeks": 8,
+    "courses": [
+      {
+        "title": "React - The Complete Guide",
+        "provider": "Udemy",
+        "url": "https://www.udemy.com/course/react-the-complete-guide-incl-redux/",
+        "free": false,
+        "rating": 4.8,
+        "durationHours": 48,
+        "level": "beginner-to-advanced"
+      },
+      {
+        "title": "Full Stack Open",
+        "provider": "University of Helsinki",
+        "url": "https://fullstackopen.com/en/",
+        "free": true,
+        "rating": 4.9,
+        "durationHours": 20,
+        "level": "intermediate"
+      },
+      {
+        "title": "React Official Tutorial",
+        "provider": "React.dev",
+        "url": "https://react.dev/learn",
+        "free": true,
+        "rating": 4.7,
+        "durationHours": 10,
+        "level": "beginner"
+      }
+    ],
+    "certifications": [
+      {
+        "title": "Meta Front-End Developer Certificate",
+        "provider": "Meta / Coursera",
+        "url": "https://www.coursera.org/professional-certificates/meta-front-end-developer",
+        "cost": "paid",
+        "duration": "7 months",
+        "level": "beginner"
+      },
+      {
+        "title": "React Developer Certification",
+        "provider": "HackerRank",
+        "url": "https://www.hackerrank.com/skills-verification/react_basic",
+        "cost": "free",
+        "duration": "1 day",
+        "level": "intermediate"
+      }
+    ],
+    "practicePlatforms": [
+      {
+        "title": "Frontend Mentor",
+        "url": "https://www.frontendmentor.io/",
+        "type": "project-based",
+        "free": true
+      },
+      {
+        "title": "CodeSandbox",
+        "url": "https://codesandbox.io/",
+        "type": "online-ide",
+        "free": true
+      },
+      {
+        "title": "LeetCode",
+        "url": "https://leetcode.com/",
+        "type": "challenges",
+        "free": true
+      }
+    ],
+    "documentation": [
+      {
+        "title": "React Official Docs",
+        "url": "https://react.dev/",
+        "type": "official"
+      },
+      {
+        "title": "React Patterns",
+        "url": "https://reactpatterns.com/",
+        "type": "reference"
+      }
+    ],
+    "tags": [
+      "frontend",
+      "ui",
+      "javascript",
+      "spa",
+      "component-based"
+    ]
+  },
+  "sql": {
+    "id": "sql",
+    "name": "SQL",
+    "category": "database",
+    "difficultyLevel": "beginner",
+    "learningDurationWeeks": 4,
+    "courses": [
+      {
+        "title": "The Complete SQL Bootcamp",
+        "provider": "Udemy",
+        "url": "https://www.udemy.com/course/the-complete-sql-bootcamp/",
+        "free": false,
+        "rating": 4.7,
+        "durationHours": 9,
+        "level": "beginner-to-advanced"
+      },
+      {
+        "title": "SQL for Data Science",
+        "provider": "Coursera / UC Davis",
+        "url": "https://www.coursera.org/learn/sql-for-data-science",
+        "free": false,
+        "rating": 4.6,
+        "durationHours": 16,
+        "level": "beginner"
+      },
+      {
+        "title": "SQL Tutorial",
+        "provider": "freeCodeCamp",
+        "url": "https://www.youtube.com/watch?v=HXV3zeQKqGY",
+        "free": true,
+        "rating": 4.7,
+        "durationHours": 4,
+        "level": "beginner"
+      }
+    ],
+    "certifications": [
+      {
+        "title": "Oracle Database SQL Certified Associate",
+        "provider": "Oracle",
+        "url": "https://education.oracle.com/oracle-database-sql/pexam_1Z0-071",
+        "cost": "paid",
+        "duration": "90 min exam",
+        "level": "beginner"
+      },
+      {
+        "title": "Microsoft Certified: Azure Data Fundamentals",
+        "provider": "Microsoft",
+        "url": "https://learn.microsoft.com/en-us/certifications/azure-data-fundamentals/",
+        "cost": "paid",
+        "duration": "45 min exam",
+        "level": "beginner"
+      }
+    ],
+    "practicePlatforms": [
+      {
+        "title": "SQLZoo",
+        "url": "https://sqlzoo.net/",
+        "type": "interactive",
+        "free": true
+      },
+      {
+        "title": "Mode SQL Tutorial",
+        "url": "https://mode.com/sql-tutorial/",
+        "type": "tutorials",
+        "free": true
+      },
+      {
+        "title": "HackerRank - SQL",
+        "url": "https://www.hackerrank.com/domains/sql",
+        "type": "challenges",
+        "free": true
+      },
+      {
+        "title": "LeetCode - Database",
+        "url": "https://leetcode.com/problemset/database/",
+        "type": "challenges",
+        "free": true
+      }
+    ],
+    "documentation": [
+      {
+        "title": "W3Schools SQL",
+        "url": "https://www.w3schools.com/sql/",
+        "type": "reference"
+      },
+      {
+        "title": "PostgreSQL Docs",
+        "url": "https://www.postgresql.org/docs/",
+        "type": "official"
+      }
+    ],
+    "tags": [
+      "database",
+      "relational",
+      "data",
+      "queries",
+      "backend"
+    ]
+  },
+  "typescript": {
+    "id": "typescript",
+    "name": "TypeScript",
+    "category": "frontend",
+    "difficultyLevel": "intermediate",
+    "learningDurationWeeks": 4,
+    "courses": [
+      {
+        "title": "Understanding TypeScript",
+        "provider": "Udemy",
+        "url": "https://www.udemy.com/course/understanding-typescript/",
+        "free": false,
+        "rating": 4.7,
+        "durationHours": 22,
+        "level": "beginner-to-advanced"
+      },
+      {
+        "title": "TypeScript Full Course",
+        "provider": "freeCodeCamp",
+        "url": "https://www.youtube.com/watch?v=30LWjhZzg50",
+        "free": true,
+        "rating": 4.6,
+        "durationHours": 8,
+        "level": "beginner"
+      },
+      {
+        "title": "TypeScript Handbook",
+        "provider": "Microsoft",
+        "url": "https://www.typescriptlang.org/docs/handbook/intro.html",
+        "free": true,
+        "rating": 4.8,
+        "durationHours": 5,
+        "level": "beginner"
+      }
+    ],
+    "certifications": [
+      {
+        "title": "TypeScript Certification",
+        "provider": "HackerRank",
+        "url": "https://www.hackerrank.com/skills-verification",
+        "cost": "free",
+        "duration": "1 day",
+        "level": "intermediate"
+      }
+    ],
+    "practicePlatforms": [
+      {
+        "title": "TypeScript Playground",
+        "url": "https://www.typescriptlang.org/play",
+        "type": "online-ide",
+        "free": true
+      },
+      {
+        "title": "Exercism - TypeScript",
+        "url": "https://exercism.org/tracks/typescript",
+        "type": "exercises",
+        "free": true
+      }
+    ],
+    "documentation": [
+      {
+        "title": "TypeScript Official Docs",
+        "url": "https://www.typescriptlang.org/docs/",
+        "type": "official"
+      },
+      {
+        "title": "TypeScript Deep Dive",
+        "url": "https://basarat.gitbook.io/typescript/",
+        "type": "book",
+        "free": true
+      }
+    ],
+    "tags": [
+      "frontend",
+      "javascript",
+      "typed",
+      "angular",
+      "scalable"
+    ]
+  }
+}
