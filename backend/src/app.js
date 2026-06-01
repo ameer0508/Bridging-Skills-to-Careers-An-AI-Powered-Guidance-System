@@ -1,7 +1,6 @@
 /**
  * Express Application Setup
- * Configures middleware, routes, and error handlers.
- * Exported for use in server.js (and for testing).
+ * Production-ready configuration with security, CORS, and error handling.
  */
 
 const express = require('express');
@@ -14,11 +13,23 @@ const apiRoutes = require('./routes/index');
 const app = express();
 
 // ── Security & CORS ────────────────────────────────────────────────────────────
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',  // Vite dev server
+  'http://localhost:3000',  // CRA / fallback
+  'http://localhost:4173',  // Vite preview
+  config.corsOrigin,
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: config.corsOrigin,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
+      if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+      callback(new Error(`CORS: Origin ${origin} not allowed`));
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     credentials: true,
   })
 );
@@ -33,17 +44,13 @@ if (config.isDevelopment) {
 }
 
 // ── Health Check ───────────────────────────────────────────────────────────────
-/**
- * @route   GET /health
- * @desc    Server health check — confirms the API is running
- * @access  Public
- */
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'running',
     environment: config.nodeEnv,
     timestamp: new Date().toISOString(),
     version: process.env.npm_package_version || '1.0.0',
+    uptime: Math.floor(process.uptime()),
   });
 });
 
@@ -54,7 +61,6 @@ app.use('/api', apiRoutes);
 app.use(notFound);
 
 // ── Global Error Handler ───────────────────────────────────────────────────────
-// Must be last middleware registered
 app.use(errorHandler);
 
 module.exports = app;

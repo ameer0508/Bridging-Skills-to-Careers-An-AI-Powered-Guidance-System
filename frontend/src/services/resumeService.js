@@ -1,47 +1,38 @@
+/**
+ * Resume Service — matches backend /api/resume endpoints.
+ */
 import apiClient from './api'
 
-/**
- * Resume Service
- * Handles all /api/resume endpoints
- */
 const resumeService = {
-  /**
-   * Upload a resume file (PDF or DOCX)
-   * @param {File} file - The resume file
-   * @param {Function} onUploadProgress - Progress callback (percent: number) => void
-   * @returns {Promise<Object>} Upload result with parsed data
-   */
-  uploadResume: (file, onUploadProgress) => {
-    const formData = new FormData()
-    formData.append('resume', file)
-    return apiClient.post('/resume', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      onUploadProgress: (progressEvent) => {
-        if (onUploadProgress && progressEvent.total) {
-          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-          onUploadProgress(percent)
+  uploadResume: (file, onProgress) => {
+    return new Promise((resolve, reject) => {
+      // Simulate upload progress then send metadata to backend
+      let progress = 0
+      const interval = setInterval(() => {
+        progress += Math.random() * 20 + 8
+        if (progress >= 100) {
+          progress = 100
+          clearInterval(interval)
+          onProgress && onProgress(100)
+          // Send file metadata to backend for parsing simulation
+          apiClient.post('/resume/upload', {
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type,
+            userId: 'current_user',
+          }).then(resolve).catch(reject)
+        } else {
+          onProgress && onProgress(Math.round(progress))
         }
-      },
+      }, 150)
     })
   },
 
-  /**
-   * Get the currently uploaded resume metadata
-   * @returns {Promise<Object>} Resume metadata
-   */
-  getResume: () => apiClient.get('/resume'),
+  getResume: (userId = 'current_user') =>
+    apiClient.get(`/resume/${userId}`),
 
-  /**
-   * Delete the uploaded resume
-   * @returns {Promise<void>}
-   */
-  deleteResume: () => apiClient.delete('/resume'),
-
-  /**
-   * Re-parse an already uploaded resume
-   * @returns {Promise<Object>} Parsed resume data
-   */
-  parseResume: () => apiClient.post('/resume/parse'),
+  deleteResume: (userId = 'current_user') =>
+    apiClient.delete(`/resume/${userId}`),
 }
 
 export default resumeService

@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Map, CheckCircle2, Circle, Clock, ArrowRight,
   BookOpen, Trophy, Sparkles, ChevronDown, ChevronUp,
-  Play, Lock, Star
+  Play, Lock, Star, RefreshCw, AlertCircle
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import Card from '../components/ui/Card'
@@ -84,23 +84,45 @@ const statusConfig = {
 }
 
 export default function RoadmapPage() {
-  const { profile } = useApp()
+  const { profile, roadmap, roadmapLoading, roadmapError, generateRoadmap } = useApp()
   const navigate = useNavigate()
-  const [expandedWeek, setExpandedWeek] = useState(2)
-  const [milestones, setMilestones] = useState(
-    roadmapData.reduce((acc, week) => {
-      week.milestones.forEach((m) => { acc[m.id] = m.done })
-      return acc
-    }, {})
-  )
+  const [expandedWeek, setExpandedWeek] = useState(1)
+  const [milestones, setMilestones] = useState({})
+  const [hasGenerated, setHasGenerated] = useState(false)
 
-  const totalMilestones = roadmapData.flatMap((w) => w.milestones).length
+  // Use live roadmap from backend if available, else fall back to static
+  const activeData = roadmap?.roadmap
+    ? roadmap.roadmap.map((step, i) => ({
+        week: step.week,
+        title: step.topic,
+        status: i === 0 ? 'in-progress' : 'upcoming',
+        progress: i === 0 ? 30 : 0,
+        duration: '5-8 hours',
+        skills: step.resources ? [step.topic] : [step.topic],
+        milestones: [
+          { id: `${step.week}-1`, title: `Study: ${step.topic}`, done: false },
+          { id: `${step.week}-2`, title: `Practice: ${step.description?.slice(0, 50) || step.topic}`, done: false },
+        ],
+        resources: step.resources || [],
+        badge: `Week ${step.week} Complete`,
+      }))
+    : roadmapData
+
+  const totalMilestones = activeData.flatMap(w => w.milestones).length
   const completedMilestones = Object.values(milestones).filter(Boolean).length
-  const overallProgress = Math.round((completedMilestones / totalMilestones) * 100)
+  const overallProgress = totalMilestones > 0 ? Math.round((completedMilestones / totalMilestones) * 100) : 0
 
   const toggleMilestone = (id, weekStatus) => {
     if (weekStatus === 'locked') return
-    setMilestones((prev) => ({ ...prev, [id]: !prev[id] }))
+    setMilestones(prev => ({ ...prev, [id]: !prev[id] }))
+  }
+
+  const handleGenerate = async () => {
+    try {
+      await generateRoadmap(profile.skills, profile.targetJobRole)
+      setHasGenerated(true)
+      setExpandedWeek(1)
+    } catch {}
   }
 
   return (
@@ -116,14 +138,27 @@ export default function RoadmapPage() {
             <div>
               <h1 className="text-2xl font-display font-bold text-white mb-1">Learning Roadmap</h1>
               <p className="text-slate-400 text-sm">
-                Personalized 4-week plan for{' '}
-                <span className="text-brand-300 font-medium">{profile.targetJobRole}</span>
+                Personalized plan for{' '}
+                <span className="text-brand-300 font-medium">{profile.targetJobRole || 'your target role'}</span>
+                {roadmap && <span className="text-emerald-400 ml-2 text-xs">● Live from AI</span>}
               </p>
             </div>
-            <Button icon={Sparkles} onClick={() => {}}>
-              Regenerate
+            <Button icon={roadmapLoading ? RefreshCw : Sparkles}
+              onClick={handleGenerate} loading={roadmapLoading}
+            >
+              {roadmapLoading ? 'Generating...' : roadmap ? 'Regenerate' : 'Generate Roadmap'}
             </Button>
           </div>
+
+          {/* Error state */}
+          {roadmapError && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="mt-3 flex items-center gap-2 text-amber-400 text-xs glass rounded-xl px-4 py-2 border border-amber-500/20"
+            >
+              <AlertCircle size={13} />
+              {roadmapError} — showing demo data
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Overall progress */}
@@ -148,8 +183,8 @@ export default function RoadmapPage() {
               </div>
               <div className="flex items-center gap-6">
                 {[
-                  { label: 'Weeks', value: `${roadmapData.filter(w => w.status === 'completed').length}/${roadmapData.length}` },
-                  { label: 'Skills', value: roadmapData.flatMap(w => w.skills).length },
+                  { label: 'Weeks', value: `${activeData.filter(w => w.status === 'completed').length}/${activeData.length}` },
+                  { label: 'Skills', value: activeData.flatMap(w => w.skills).length },
                   { label: 'Hours', value: '35-44h' },
                 ].map(({ label, value }) => (
                   <div key={label} className="text-center">
@@ -171,7 +206,7 @@ export default function RoadmapPage() {
           <div className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-brand-500/40 via-brand-500/20 to-transparent hidden sm:block" />
 
           <div className="space-y-4">
-            {roadmapData.map((week, i) => {
+            {activeData.map((week, i) => {
               const config = statusConfig[week.status]
               const isExpanded = expandedWeek === week.week
               const isLocked = week.status === 'locked'

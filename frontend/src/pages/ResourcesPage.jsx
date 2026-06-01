@@ -1,13 +1,15 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   BookOpen, Search, Filter, Star, Clock, ExternalLink,
   Bookmark, BookmarkCheck, Sparkles, Award, Code2,
-  Play, ChevronDown, X, Globe
+  Play, ChevronDown, X, Globe, RefreshCw
 } from 'lucide-react'
 import Card from '../components/ui/Card'
 import Badge from '../components/ui/Badge'
 import Button from '../components/ui/Button'
+import { useApp } from '../context/AppContext'
+import resourcesService from '../services/resourcesService'
 
 const allResources = [
   // Courses
@@ -53,26 +55,60 @@ const priceColors = {
 }
 
 export default function ResourcesPage() {
+  const { profile } = useApp()
   const [search, setSearch] = useState('')
   const [activeType, setActiveType] = useState('All')
   const [activeSkill, setActiveSkill] = useState('All')
   const [activeLevel, setActiveLevel] = useState('All')
   const [bookmarked, setBookmarked] = useState(new Set())
   const [showFilters, setShowFilters] = useState(false)
+  const [apiResources, setApiResources] = useState([])
+  const [loadingApi, setLoadingApi] = useState(false)
+
+  // Try to load from backend on mount
+  useEffect(() => {
+    setLoadingApi(true)
+    resourcesService.getResources({ limit: 50 })
+      .then(res => {
+        const items = res?.data?.resources || res?.resources || []
+        if (items.length > 0) {
+          const mapped = items.map((r, i) => ({
+            id: r.id || i + 100,
+            title: r.title,
+            platform: r.platform,
+            type: r.type || 'Course',
+            skill: r.skill || 'General',
+            level: r.level || 'All Levels',
+            rating: r.rating || 4.5,
+            reviews: r.reviews || 1000,
+            duration: r.duration || 'Self-paced',
+            price: r.price || 'Paid',
+            url: r.url || '#',
+            color: 'from-brand-500 to-accent-500',
+            featured: i < 3,
+          }))
+          setApiResources(mapped)
+        }
+      })
+      .catch(() => {}) // silently fall back to static
+      .finally(() => setLoadingApi(false))
+  }, [])
+
+  const sourceResources = apiResources.length > 0 ? apiResources : allResources
 
   const types = ['All', 'Course', 'Certification', 'Practice']
   const skills = ['All', 'TypeScript', 'System Design', 'Machine Learning', 'AWS/Cloud', 'React', 'Node.js', 'Docker', 'GraphQL', 'Kubernetes']
   const levels = ['All', 'Beginner', 'Intermediate', 'Advanced']
 
   const filtered = useMemo(() => {
-    return allResources.filter((r) => {
+    return sourceResources.filter((r) => {
       const matchSearch = !search || r.title.toLowerCase().includes(search.toLowerCase()) || r.platform.toLowerCase().includes(search.toLowerCase()) || r.skill.toLowerCase().includes(search.toLowerCase())
       const matchType = activeType === 'All' || r.type === activeType
       const matchSkill = activeSkill === 'All' || r.skill === activeSkill
       const matchLevel = activeLevel === 'All' || r.level === activeLevel
       return matchSearch && matchType && matchSkill && matchLevel
     })
-  }, [search, activeType, activeSkill, activeLevel])
+  }, [search, activeType, activeSkill, activeLevel, sourceResources])
 
   const featured = filtered.filter((r) => r.featured)
   const rest = filtered.filter((r) => !r.featured)

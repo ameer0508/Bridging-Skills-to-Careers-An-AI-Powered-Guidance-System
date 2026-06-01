@@ -57,7 +57,7 @@ const interestOptions = [
 ]
 
 export default function ProfilePage() {
-  const { profile, updateProfile } = useApp()
+  const { profile, updateProfile, saveProfileToBackend, profileSaving, profileError, backendOnline } = useApp()
   const navigate = useNavigate()
   const [saved, setSaved] = useState(false)
   const [errors, setErrors] = useState({})
@@ -77,10 +77,11 @@ export default function ProfilePage() {
     return e
   }
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const e = validate()
     if (Object.keys(e).length) { setErrors(e); return }
     updateProfile(form)
+    const result = await saveProfileToBackend(form)
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
   }
@@ -145,8 +146,8 @@ export default function ProfilePage() {
                   </motion.div>
                 )}
               </AnimatePresence>
-              <Button onClick={handleSave} icon={Save}>
-                Save Profile
+              <Button onClick={handleSave} icon={Save} loading={profileSaving}>
+                {profileSaving ? 'Saving...' : 'Save Profile'}
               </Button>
             </div>
           </div>

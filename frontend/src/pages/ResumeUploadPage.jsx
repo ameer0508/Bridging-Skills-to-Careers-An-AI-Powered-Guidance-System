@@ -10,6 +10,7 @@ import { useApp } from '../context/AppContext'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Badge from '../components/ui/Badge'
+import resumeService from '../services/resumeService'
 
 const ACCEPTED_TYPES = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']
 const ACCEPTED_EXT = ['.pdf', '.docx']
@@ -22,15 +23,16 @@ function formatBytes(bytes) {
 }
 
 export default function ResumeUploadPage() {
-  const { resumeFile, setResumeFile } = useApp()
+  const { resumeFile, setResumeFile, resumeData, setResumeData, updateProfile } = useApp()
   const navigate = useNavigate()
   const inputRef = useRef(null)
 
   const [dragOver, setDragOver] = useState(false)
-  const [uploadState, setUploadState] = useState(resumeFile ? 'done' : 'idle') // idle | uploading | done | error
+  const [uploadState, setUploadState] = useState(resumeFile ? 'done' : 'idle')
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState('')
   const [file, setFile] = useState(resumeFile)
+  const [parsedData, setParsedData] = useState(resumeData)
 
   const validateFile = (f) => {
     if (!ACCEPTED_TYPES.includes(f.type) && !ACCEPTED_EXT.some((e) => f.name.endsWith(e))) {
@@ -42,28 +44,29 @@ export default function ResumeUploadPage() {
     return null
   }
 
-  const simulateUpload = useCallback((f) => {
+  const simulateUpload = useCallback(async (f) => {
     setFile(f)
     setUploadState('uploading')
     setProgress(0)
     setError('')
 
-    // Simulate upload progress
-    let p = 0
-    const interval = setInterval(() => {
-      p += Math.random() * 18 + 5
-      if (p >= 100) {
-        p = 100
-        clearInterval(interval)
-        setProgress(100)
-        setTimeout(() => {
-          setUploadState('done')
-          setResumeFile(f)
-        }, 400)
+    try {
+      const result = await resumeService.uploadResume(f, (pct) => setProgress(pct))
+      setProgress(100)
+      const parsed = result?.data?.parsed || result?.parsed || null
+      setParsedData(parsed)
+      setResumeData(parsed)
+      setResumeFile(f)
+      // Auto-update profile skills from parsed resume
+      if (parsed?.extractedSkills?.length) {
+        updateProfile({ skills: parsed.extractedSkills })
       }
-      setProgress(Math.min(p, 100))
-    }, 150)
-  }, [setResumeFile])
+      setTimeout(() => setUploadState('done'), 300)
+    } catch (err) {
+      setError(err.message || 'Upload failed. Please try again.')
+      setUploadState('error')
+    }
+  }, [setResumeFile, setResumeData, updateProfile])
 
   const handleFile = (f) => {
     const err = validateFile(f)
@@ -326,12 +329,12 @@ export default function ResumeUploadPage() {
                     {[
                       {
                         label: 'Extracted Skills',
-                        items: ['JavaScript', 'React', 'Node.js', 'Python', 'SQL', 'Docker'],
+                        items: parsedData?.extractedSkills || ['JavaScript', 'React', 'Node.js', 'Python', 'SQL', 'Docker'],
                         color: 'brand',
                       },
                       {
                         label: 'Experience Detected',
-                        items: ['3 years Frontend Dev', '1 year Backend', 'Team Lead (6 months)'],
+                        items: parsedData?.jobTitles || ['3 years Frontend Dev', '1 year Backend', 'Team Lead (6 months)'],
                         color: 'accent',
                       },
                     ].map(({ label, items, color }) => (

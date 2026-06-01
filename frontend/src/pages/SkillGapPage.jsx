@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   BarChart3, CheckCircle2, XCircle, AlertCircle,
   ArrowRight, Sparkles, TrendingUp, Target, Zap,
-  ChevronDown, ChevronUp
+  ChevronDown, ChevronUp, RefreshCw
 } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import Card from '../components/ui/Card'
@@ -57,13 +57,29 @@ const priorityColors = {
 }
 
 export default function SkillGapPage() {
-  const { profile } = useApp()
+  const { profile, skillGap, skillGapLoading, skillGapError, analyzeSkillGap } = useApp()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('overview')
   const [expandedSkill, setExpandedSkill] = useState(null)
 
-  const matchScore = 73
+  // Derive display data — use live API data if available, else static fallback
+  const matchScore = skillGap?.matchScore ?? 73
+  const liveCurrentSkills = profile.skills.map((s, i) => ({
+    name: s, level: Math.min(95, 60 + Math.floor(Math.random() * 35)), category: 'Skills'
+  }))
+  const displayCurrentSkills = liveCurrentSkills.length ? liveCurrentSkills : currentSkillsData
+
+  const liveMissing = skillGap?.skillGap?.missingRequired?.map(s => ({
+    name: s, importance: 'High', reason: `Required for ${profile.targetJobRole || 'your target role'}`
+  })) || missingSkills
+
   const circumference = 2 * Math.PI * 54
+
+  const handleAnalyze = async () => {
+    try {
+      await analyzeSkillGap(profile.skills, profile.targetJobRole)
+    } catch {}
+  }
 
   const tabs = [
     { id: 'overview', label: 'Overview' },
@@ -86,13 +102,23 @@ export default function SkillGapPage() {
               <h1 className="text-2xl font-display font-bold text-white mb-1">Skill Gap Analysis</h1>
               <p className="text-slate-400 text-sm">
                 AI-powered analysis for{' '}
-                <span className="text-brand-300 font-medium">{profile.targetJobRole}</span>
+                <span className="text-brand-300 font-medium">{profile.targetJobRole || 'your target role'}</span>
+                {skillGap && <span className="text-emerald-400 ml-2 text-xs">● Live Analysis</span>}
               </p>
             </div>
-            <Button icon={Zap} onClick={() => {}}>
-              Re-analyze
+            <Button icon={skillGapLoading ? RefreshCw : Zap}
+              onClick={handleAnalyze} loading={skillGapLoading}
+            >
+              {skillGapLoading ? 'Analyzing...' : skillGap ? 'Re-analyze' : 'Analyze Now'}
             </Button>
           </div>
+          {skillGapError && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="mt-3 flex items-center gap-2 text-amber-400 text-xs glass rounded-xl px-4 py-2 border border-amber-500/20"
+            >
+              <AlertCircle size={13} />{skillGapError} — showing demo data
+            </motion.div>
+          )}
         </motion.div>
 
         {/* Score cards row */}
@@ -274,7 +300,7 @@ export default function SkillGapPage() {
                   <Badge variant="success">{currentSkillsData.length} skills</Badge>
                 </div>
                 <div className="space-y-4">
-                  {currentSkillsData.map(({ name, level, category }, i) => (
+                  {displayCurrentSkills.map(({ name, level, category }, i) => (
                     <motion.div
                       key={name}
                       initial={{ opacity: 0, x: -16 }}
@@ -362,7 +388,7 @@ export default function SkillGapPage() {
                   <Badge variant="danger">{missingSkills.length} gaps</Badge>
                 </div>
                 <div className="space-y-3">
-                  {missingSkills.map(({ name, importance, reason }, i) => (
+                  {liveMissing.map(({ name, importance, reason }, i) => (
                     <motion.div
                       key={name}
                       initial={{ opacity: 0, y: 8 }}
