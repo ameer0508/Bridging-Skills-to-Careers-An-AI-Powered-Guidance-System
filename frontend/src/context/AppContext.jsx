@@ -1,84 +1,109 @@
 /**
- * AppContext — Global state with real API integration.
- *
- * Responsibilities:
- * - Profile: persisted to localStorage + synced to backend
- * - Resume: upload state + parsed data
- * - Roadmap: generated from backend
- * - SkillGap: analyzed from backend
- * - Backend status: live health check
+ * AppContext — Auth + Profile + AI data, all real API-backed.
  */
-import { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react'
-import profileService  from '../services/profileService'
+import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import authService     from '../services/authService'
 import roadmapService  from '../services/roadmapService'
 import skillGapService from '../services/skillGapService'
+import apiClient       from '../services/api'
 
 const AppContext = createContext(null)
 
-const STORAGE_KEY = 'sb_profile_v2'
-const PROFILE_ID_KEY = 'sb_profile_id'
-
-const DEFAULT_PROFILE = {
-  fullName: '',
-  email: '',
-  education: '',
-  skills: [],
-  careerInterests: [],
-  targetJobRole: '',
-  avatar: null,
-}
-
 export const AppProvider = ({ children }) => {
-  // ── Profile state ──────────────────────────────────────────
+  // ── Auth state ─────────────────────────────────────────────
+  const [user, setUser]           = useState(() => authService.getUser())
+  const [authLoading, setAuthLoading] = useState(false)
+  const [authError, setAuthError] = useState(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(() => authService.isAuthenticated())
+
+  // ── Profile (derived from user + local overrides) ──────────
   const [profile, setProfile] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY)
-      return saved ? { ...DEFAULT_PROFILE, ...JSON.parse(saved) } : {
-        ...DEFAULT_PROFILE,
-        fullName: 'Alex Johnson',
-        email: 'alex.johnson@example.com',
-        education: "Bachelor's in Computer Science",
-        skills: ['JavaScript', 'React', 'HTML', 'CSS', 'Git', 'Node.js'],
-        careerInterests: ['Full Stack Development', 'AI/ML Engineering'],
-        targetJobRole: 'Senior Full Stack Engineer',
-      }
-    } catch { return { ...DEFAULT_PROFILE } }
+    const u = authService.getUser()
+    if (u) return {
+      fullName: u.name || '',
+      email: u.email || '',
+      education: u.education || '',
+      skills: u.skills || [],
+      careerInterests: u.careerInterests || [],
+      targetJobRole: u.targetRole || '',
+    }
+    return {
+      fullName: '', email: '', education: '',
+      skills: [], careerInterests: [], targetJobRole: '',
+    }
   })
 
-  const [profileId, setProfileId] = useState(() => localStorage.getItem(PROFILE_ID_KEY))
-  const [profileSaving, setProfileSaving] = useState(false)
-  const [profileError, setProfileError] = useState(null)
-
   // ── Resume state ───────────────────────────────────────────
-  const [resumeFile, setResumeFile] = useState(null)
-  const [resumeData, setResumeData] = useState(null)
-  const [resumeUploading, setResumeUploading] = useState(false)
-  const [resumeProgress, setResumeProgress] = useState(0)
-  const [resumeError, setResumeError] = useState(null)
+  const [resumeFile, setResumeFile]     = useState(null)
+  const [resumeData, setResumeData]     = useState(null)
 
-  // ── Roadmap state ──────────────────────────────────────────
-  const [roadmap, setRoadmap] = useState(null)
+  // ── AI data state ──────────────────────────────────────────
+  const [roadmap, setRoadmap]           = useState(null)
   const [roadmapLoading, setRoadmapLoading] = useState(false)
   const [roadmapError, setRoadmapError] = useState(null)
 
-  // ── Skill gap state ────────────────────────────────────────
-  const [skillGap, setSkillGap] = useState(null)
+  const [skillGap, setSkillGap]         = useState(null)
   const [skillGapLoading, setSkillGapLoading] = useState(false)
   const [skillGapError, setSkillGapError] = useState(null)
 
-  // ── Backend status ─────────────────────────────────────────
-  const [backendOnline, setBackendOnline] = useState(null) // null=checking, true, false
+  const [readiness, setReadiness]       = useState(null)
+  const [careerMatches, setCareerMatches] = useState([])
+  const [interviewQuestions, setInterviewQuestions] = useState([])
 
-  // Persist profile to localStorage whenever it changes
-  useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(profile)) } catch {}
-  }, [profile])
+  const [backendOnline, setBackendOnline] = useState(null)
 
-  // Check backend health on mount
+  // Sync token into axios on mount
   useEffect(() => {
+    const token = authService.getToken()
+    if (token) apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`
     fetch('http://localhost:5000/health')
-      .then(r => r.ok ? setBackendOnline(true) : setBackendOnline(false))
+      .then(r => setBackendOnline(r.ok))
       .catch(() => setBackendOnline(false))
+  }, [])
+
+  // ── Auth actions ───────────────────────────────────────────
+  const register = useCallback(async (name, email, password) => {
+    setAuthLoading(true); setAuthError(null)
+    try {
+      const res = await authService.register(name, email, password)
+      const { token, user: u } = res.data
+      authService.saveToken(token)
+      authService.saveUser(u)
+      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      setUser(u)
+      setIsAuthenticated(true)
+      setProfile({ fullName: u.name, email: u.email, education: u.education || '', skills: u.skills || [], careerInterests: u.careerInterests || [], targetJobRole: u.targetRole || '' })
+      return { success: true }
+    } catch (err) {
+      setAuthError(err.message)
+      return { success: false, error: err.message }
+    } finally { setAuthLoading(false) }
+  }, [])
+
+  const login = useCallback(async (email, password) => {
+    setAuthLoading(true); setAuthError(null)
+    try {
+      const res = await authService.login(email, password)
+      const { token, user: u } = res.data
+      authService.saveToken(token)
+      authService.saveUser(u)
+      apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`
+      setUser(u)
+      setIsAuthenticated(true)
+      setProfile({ fullName: u.name, email: u.email, education: u.education || '', skills: u.skills || [], careerInterests: u.careerInterests || [], targetJobRole: u.targetRole || '' })
+      return { success: true }
+    } catch (err) {
+      setAuthError(err.message)
+      return { success: false, error: err.message }
+    } finally { setAuthLoading(false) }
+  }, [])
+
+  const logout = useCallback(async () => {
+    await authService.logout()
+    delete apiClient.defaults.headers.common['Authorization']
+    setUser(null); setIsAuthenticated(false)
+    setProfile({ fullName: '', email: '', education: '', skills: [], careerInterests: [], targetJobRole: '' })
+    setRoadmap(null); setSkillGap(null); setReadiness(null)
   }, [])
 
   // ── Profile actions ────────────────────────────────────────
@@ -87,8 +112,6 @@ export const AppProvider = ({ children }) => {
   }, [])
 
   const saveProfileToBackend = useCallback(async (profileData) => {
-    setProfileSaving(true)
-    setProfileError(null)
     try {
       const payload = {
         name: profileData.fullName,
@@ -96,94 +119,83 @@ export const AppProvider = ({ children }) => {
         skills: profileData.skills || [],
         careerInterests: profileData.careerInterests || [],
         targetRole: profileData.targetJobRole,
-        education: profileData.education ? [{ degree: profileData.education }] : [],
+        education: profileData.education,
       }
-
-      let result
-      if (profileId) {
-        result = await profileService.updateProfile(profileId, payload)
-      } else {
-        result = await profileService.createProfile(payload)
-        if (result?.data?._id) {
-          setProfileId(result.data._id)
-          localStorage.setItem(PROFILE_ID_KEY, result.data._id)
-        }
+      const res = await authService.updateMe(payload)
+      const updated = res.data?.user || res.user
+      if (updated) {
+        authService.saveUser(updated)
+        setUser(updated)
       }
-      return { success: true, data: result?.data }
+      return { success: true }
     } catch (err) {
-      setProfileError(err.message)
-      // Still save locally even if backend fails
-      return { success: false, error: err.message, savedLocally: true }
-    } finally {
-      setProfileSaving(false)
+      return { success: false, error: err.message }
     }
-  }, [profileId])
+  }, [])
 
-  // ── Roadmap actions ────────────────────────────────────────
+  // ── AI actions ─────────────────────────────────────────────
   const generateRoadmap = useCallback(async (skills, targetRole) => {
-    setRoadmapLoading(true)
-    setRoadmapError(null)
+    setRoadmapLoading(true); setRoadmapError(null)
     try {
-      const result = await roadmapService.generateRoadmap(
-        skills || profile.skills,
-        targetRole || profile.targetJobRole
-      )
-      setRoadmap(result?.data || result)
-      return result
-    } catch (err) {
-      setRoadmapError(err.message)
-      throw err
-    } finally {
-      setRoadmapLoading(false)
-    }
+      const res = await roadmapService.generateRoadmap(skills || profile.skills, targetRole || profile.targetJobRole)
+      setRoadmap(res?.data || res)
+      return res
+    } catch (err) { setRoadmapError(err.message); throw err }
+    finally { setRoadmapLoading(false) }
   }, [profile.skills, profile.targetJobRole])
 
-  // ── Skill gap actions ──────────────────────────────────────
   const analyzeSkillGap = useCallback(async (skills, targetRole) => {
-    setSkillGapLoading(true)
-    setSkillGapError(null)
+    setSkillGapLoading(true); setSkillGapError(null)
     try {
-      const result = await skillGapService.analyzeSkillGap(
-        skills || profile.skills,
-        targetRole || profile.targetJobRole
-      )
-      setSkillGap(result?.data || result)
-      return result
-    } catch (err) {
-      setSkillGapError(err.message)
-      throw err
-    } finally {
-      setSkillGapLoading(false)
-    }
+      const res = await skillGapService.analyzeSkillGap(skills || profile.skills, targetRole || profile.targetJobRole)
+      setSkillGap(res?.data || res)
+      return res
+    } catch (err) { setSkillGapError(err.message); throw err }
+    finally { setSkillGapLoading(false) }
   }, [profile.skills, profile.targetJobRole])
 
-  const isProfileComplete = Boolean(
-    profile.fullName && profile.email && profile.targetJobRole && profile.skills.length > 0
-  )
+  const fetchCareerMatches = useCallback(async (skills) => {
+    try {
+      const res = await skillGapService.matchCareers(skills || profile.skills)
+      const matches = res?.data?.matches || res?.matches || []
+      setCareerMatches(matches)
+      return matches
+    } catch { return [] }
+  }, [profile.skills])
+
+  const fetchReadiness = useCallback(async (skills, targetRole, hasResume, progress) => {
+    try {
+      const res = await skillGapService.getReadiness(skills || profile.skills, targetRole || profile.targetJobRole, hasResume, progress)
+      setReadiness(res?.data || res)
+      return res?.data || res
+    } catch { return null }
+  }, [profile.skills, profile.targetJobRole])
+
+  const fetchInterviewQuestions = useCallback(async (role, count = 5) => {
+    try {
+      const res = await skillGapService.getInterviewQuestions(role || profile.targetJobRole, count)
+      const qs = res?.data?.questions || res?.questions || []
+      setInterviewQuestions(qs)
+      return qs
+    } catch { return [] }
+  }, [profile.targetJobRole])
+
+  const isProfileComplete = Boolean(profile.fullName && profile.email && profile.targetJobRole && profile.skills.length > 0)
 
   const value = {
+    // Auth
+    user, isAuthenticated, authLoading, authError,
+    register, login, logout,
     // Profile
-    profile, updateProfile, saveProfileToBackend,
-    profileId, profileSaving, profileError,
-    isProfileComplete,
-
+    profile, updateProfile, saveProfileToBackend, isProfileComplete,
     // Resume
-    resumeFile, setResumeFile,
-    resumeData, setResumeData,
-    resumeUploading, setResumeUploading,
-    resumeProgress, setResumeProgress,
-    resumeError, setResumeError,
-
-    // Roadmap
-    roadmap, setRoadmap,
-    roadmapLoading, roadmapError,
-    generateRoadmap,
-
-    // Skill Gap
-    skillGap, setSkillGap,
-    skillGapLoading, skillGapError,
-    analyzeSkillGap,
-
+    resumeFile, setResumeFile, resumeData, setResumeData,
+    // AI
+    roadmap, setRoadmap, roadmapLoading, roadmapError, generateRoadmap,
+    skillGap, setSkillGap, skillGapLoading, skillGapError, analyzeSkillGap,
+    readiness, fetchReadiness,
+    careerMatches, fetchCareerMatches,
+    interviewQuestions, fetchInterviewQuestions,
     // System
     backendOnline,
   }

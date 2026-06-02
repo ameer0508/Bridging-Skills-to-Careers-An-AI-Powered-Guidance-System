@@ -4,11 +4,11 @@
  * Landing page has its own navigation-free cinematic experience.
  */
 import { useState, useEffect } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, User, Upload, BarChart3,
-  Map, BookOpen, Menu, X, Zap
+  Map, BookOpen, Menu, X, Zap, LogOut
 } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 
@@ -25,7 +25,13 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
-  const { profile } = useApp()
+  const navigate = useNavigate()
+  const { profile, user, logout } = useApp()
+
+  const handleLogout = async () => {
+    await logout()
+    navigate('/', { replace: true })
+  }
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20)
@@ -88,13 +94,21 @@ export default function Navbar() {
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex items-center gap-2 glass rounded-xl px-3 py-1.5 border border-white/8">
                 <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-brand-500 to-violet-600 flex items-center justify-center text-xs font-bold text-white">
-                  {profile.fullName?.charAt(0) || 'A'}
+                  {(user?.name || profile.fullName)?.charAt(0) || 'A'}
                 </div>
                 <span className="text-sm text-slate-300 font-medium max-w-[100px] truncate">
-                  {profile.fullName || 'User'}
+                  {user?.name || profile.fullName || 'User'}
                 </span>
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               </div>
+              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                onClick={handleLogout}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs text-slate-500 hover:text-red-400 transition-colors cursor-pointer"
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}
+                title="Sign out"
+              >
+                <LogOut size={13} />
+              </motion.button>
 
               <motion.button whileTap={{ scale: 0.95 }}
                 onClick={() => setMobileOpen(!mobileOpen)}
