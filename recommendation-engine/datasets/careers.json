@@ -3,240 +3,89 @@
     "id": "frontend_developer",
     "title": "Frontend Developer",
     "description": "Builds user interfaces and client-side web applications",
-    "requiredSkills": [
-      "react",
-      "typescript",
-      "git"
-    ],
-    "optionalSkills": [
-      "nodejs",
-      "docker"
-    ],
+    "requiredSkills": ["html", "css", "javascript", "react", "git"],
+    "optionalSkills": ["typescript", "nodejs", "docker"],
     "skillPriorities": {
-      "react": 10,
-      "typescript": 9,
-      "git": 8,
-      "nodejs": 5,
-      "docker": 4
+      "html": 9, "css": 9, "javascript": 10, "react": 10, "git": 8,
+      "typescript": 7, "nodejs": 5, "docker": 4
     },
-    "learningSequence": [
-      "git",
-      "typescript",
-      "react",
-      "nodejs",
-      "docker"
-    ],
+    "learningSequence": ["html", "css", "javascript", "git", "react", "typescript", "nodejs", "docker"],
     "averageSalaryUSD": 85000,
     "demandLevel": "high",
-    "tags": [
-      "frontend",
-      "ui",
-      "web",
-      "javascript"
-    ]
+    "tags": ["frontend", "ui", "web", "javascript"]
   },
   "backend_developer": {
     "id": "backend_developer",
     "title": "Backend Developer",
     "description": "Builds server-side logic, APIs, and database integrations",
-    "requiredSkills": [
-      "nodejs",
-      "mongodb",
-      "sql",
-      "git"
-    ],
-    "optionalSkills": [
-      "docker",
-      "aws",
-      "python"
-    ],
+    "requiredSkills": ["javascript", "nodejs", "mongodb", "sql", "git"],
+    "optionalSkills": ["docker", "aws", "python", "typescript"],
     "skillPriorities": {
-      "nodejs": 10,
-      "sql": 9,
-      "mongodb": 8,
-      "git": 8,
-      "docker": 7,
-      "aws": 6,
-      "python": 5
+      "javascript": 10, "nodejs": 10, "sql": 9, "mongodb": 8, "git": 8,
+      "docker": 7, "aws": 6, "python": 5, "typescript": 5
     },
-    "learningSequence": [
-      "git",
-      "sql",
-      "nodejs",
-      "mongodb",
-      "docker",
-      "aws"
-    ],
+    "learningSequence": ["javascript", "git", "sql", "nodejs", "mongodb", "docker", "aws"],
     "averageSalaryUSD": 90000,
     "demandLevel": "high",
-    "tags": [
-      "backend",
-      "api",
-      "server",
-      "database"
-    ]
+    "tags": ["backend", "api", "server", "database"]
   },
   "fullstack_developer": {
     "id": "fullstack_developer",
     "title": "Full Stack Developer",
     "description": "Builds both frontend and backend of web applications",
-    "requiredSkills": [
-      "react",
-      "nodejs",
-      "mongodb",
-      "sql",
-      "git"
-    ],
-    "optionalSkills": [
-      "typescript",
-      "docker",
-      "aws"
-    ],
+    "requiredSkills": ["html", "css", "javascript", "react", "nodejs", "mongodb", "sql", "git"],
+    "optionalSkills": ["typescript", "docker", "aws"],
     "skillPriorities": {
-      "react": 10,
-      "nodejs": 10,
-      "git": 9,
-      "mongodb": 8,
-      "sql": 8,
-      "typescript": 7,
-      "docker": 6,
-      "aws": 5
+      "html": 8, "css": 8, "javascript": 10, "react": 10, "nodejs": 10,
+      "git": 9, "mongodb": 8, "sql": 8, "typescript": 7, "docker": 6, "aws": 5
     },
-    "learningSequence": [
-      "git",
-      "sql",
-      "nodejs",
-      "react",
-      "mongodb",
-      "typescript",
-      "docker",
-      "aws"
-    ],
+    "learningSequence": ["html", "css", "javascript", "git", "sql", "nodejs", "react", "mongodb", "typescript", "docker", "aws"],
     "averageSalaryUSD": 95000,
     "demandLevel": "very-high",
-    "tags": [
-      "fullstack",
-      "frontend",
-      "backend",
-      "web"
-    ]
+    "tags": ["fullstack", "frontend", "backend", "web"]
   },
   "data_analyst": {
     "id": "data_analyst",
     "title": "Data Analyst",
     "description": "Analyzes data to extract insights and support business decisions",
-    "requiredSkills": [
-      "python",
-      "sql",
-      "git"
-    ],
-    "optionalSkills": [
-      "machine_learning",
-      "aws"
-    ],
+    "requiredSkills": ["python", "sql", "git"],
+    "optionalSkills": ["machine_learning", "aws", "javascript"],
     "skillPriorities": {
-      "sql": 10,
-      "python": 10,
-      "git": 7,
-      "machine_learning": 6,
-      "aws": 4
+      "sql": 10, "python": 10, "git": 7, "machine_learning": 6, "aws": 4, "javascript": 3
     },
-    "learningSequence": [
-      "sql",
-      "python",
-      "git",
-      "machine_learning",
-      "aws"
-    ],
+    "learningSequence": ["sql", "python", "git", "machine_learning", "aws"],
     "averageSalaryUSD": 75000,
     "demandLevel": "high",
-    "tags": [
-      "data",
-      "analytics",
-      "sql",
-      "python",
-      "visualization"
-    ]
+    "tags": ["data", "analytics", "sql", "python", "visualization"]
   },
   "cybersecurity_analyst": {
     "id": "cybersecurity_analyst",
     "title": "Cybersecurity Analyst",
     "description": "Protects systems and networks from digital attacks",
-    "requiredSkills": [
-      "cybersecurity",
-      "python",
-      "git"
-    ],
-    "optionalSkills": [
-      "aws",
-      "docker",
-      "sql"
-    ],
+    "requiredSkills": ["cybersecurity", "linux", "networking", "python", "git"],
+    "optionalSkills": ["aws", "docker", "sql"],
     "skillPriorities": {
-      "cybersecurity": 10,
-      "python": 8,
-      "git": 7,
-      "aws": 6,
-      "docker": 5,
-      "sql": 4
+      "cybersecurity": 10, "linux": 9, "networking": 9, "python": 8, "git": 7,
+      "aws": 6, "docker": 5, "sql": 4
     },
-    "learningSequence": [
-      "git",
-      "python",
-      "sql",
-      "cybersecurity",
-      "aws",
-      "docker"
-    ],
+    "learningSequence": ["linux", "networking", "git", "python", "cybersecurity", "aws", "docker"],
     "averageSalaryUSD": 95000,
     "demandLevel": "very-high",
-    "tags": [
-      "security",
-      "networking",
-      "ethical-hacking",
-      "compliance"
-    ]
+    "tags": ["security", "networking", "ethical-hacking", "compliance"]
   },
   "ml_engineer": {
     "id": "ml_engineer",
     "title": "Machine Learning Engineer",
     "description": "Designs and deploys machine learning models and pipelines",
-    "requiredSkills": [
-      "python",
-      "machine_learning",
-      "sql",
-      "git"
-    ],
-    "optionalSkills": [
-      "aws",
-      "docker",
-      "mongodb"
-    ],
+    "requiredSkills": ["python", "machine_learning", "sql", "git"],
+    "optionalSkills": ["aws", "docker", "mongodb", "linux"],
     "skillPriorities": {
-      "python": 10,
-      "machine_learning": 10,
-      "sql": 8,
-      "git": 8,
-      "docker": 7,
-      "aws": 7,
-      "mongodb": 4
+      "python": 10, "machine_learning": 10, "sql": 8, "git": 8,
+      "docker": 7, "aws": 7, "linux": 6, "mongodb": 4
     },
-    "learningSequence": [
-      "python",
-      "sql",
-      "git",
-      "machine_learning",
-      "docker",
-      "aws"
-    ],
+    "learningSequence": ["python", "sql", "git", "machine_learning", "docker", "aws", "linux"],
     "averageSalaryUSD": 120000,
     "demandLevel": "very-high",
-    "tags": [
-      "ai",
-      "ml",
-      "deep-learning",
-      "python",
-      "data-science"
-    ]
+    "tags": ["ai", "ml", "deep-learning", "python", "data-science"]
   }
 }

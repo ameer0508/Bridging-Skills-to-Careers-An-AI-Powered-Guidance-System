@@ -4,8 +4,10 @@
   "description": "AI-Powered Learning Resource Recommendation Engine — Bridging Skills to Careers",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js",
-    "dev": "node --watch main.js"
+    "start": "node server.js",
+    "demo":  "node main.js",
+    "dev":   "node --watch server.js",
+    "test":  "node tests/test_engine.js"
   },
   "keywords": [
     "recommendation-engine",

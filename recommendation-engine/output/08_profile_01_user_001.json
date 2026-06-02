@@ -1,7 +1,7 @@
 {
   "success": true,
   "message": "Recommendations generated for Data Analyst",
-  "timestamp": "2026-05-31T07:33:14.613Z",
+  "timestamp": "2026-05-31T08:00:14.489Z",
   "data": {
     "user": {
       "userId": "user_001",
@@ -425,7 +425,7 @@
       ]
     },
     "meta": {
-      "generatedAt": "2026-05-31T07:33:14.613Z",
+      "generatedAt": "2026-05-31T08:00:14.489Z",
       "engineVersion": "1.0.0",
       "totalResources": 34
     }

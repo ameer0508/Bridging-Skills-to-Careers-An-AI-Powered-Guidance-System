@@ -1,4 +1,123 @@
 {
+  "html": {
+    "id": "html",
+    "name": "HTML",
+    "category": "frontend",
+    "difficultyLevel": "beginner",
+    "learningDurationWeeks": 2,
+    "courses": [
+      { "title": "HTML Full Course", "provider": "freeCodeCamp", "url": "https://www.freecodecamp.org/learn/responsive-web-design/", "free": true, "rating": 4.8, "durationHours": 4, "level": "beginner" },
+      { "title": "The Web Developer Bootcamp", "provider": "Udemy", "url": "https://www.udemy.com/course/the-web-developer-bootcamp/", "free": false, "rating": 4.7, "durationHours": 63, "level": "beginner-to-advanced" }
+    ],
+    "certifications": [
+      { "title": "Responsive Web Design Certification", "provider": "freeCodeCamp", "url": "https://www.freecodecamp.org/certification/", "cost": "free", "duration": "300 hours", "level": "beginner" }
+    ],
+    "practicePlatforms": [
+      { "title": "Frontend Mentor", "url": "https://www.frontendmentor.io/", "type": "project-based", "free": true },
+      { "title": "CodePen", "url": "https://codepen.io/", "type": "online-ide", "free": true }
+    ],
+    "documentation": [
+      { "title": "MDN HTML Docs", "url": "https://developer.mozilla.org/en-US/docs/Web/HTML", "type": "official" }
+    ],
+    "tags": ["frontend", "web", "markup", "beginner"]
+  },
+  "css": {
+    "id": "css",
+    "name": "CSS",
+    "category": "frontend",
+    "difficultyLevel": "beginner",
+    "learningDurationWeeks": 3,
+    "courses": [
+      { "title": "CSS - The Complete Guide", "provider": "Udemy", "url": "https://www.udemy.com/course/css-the-complete-guide-incl-flexbox-grid-sass/", "free": false, "rating": 4.8, "durationHours": 22, "level": "beginner-to-advanced" },
+      { "title": "CSS Tutorial", "provider": "freeCodeCamp", "url": "https://www.freecodecamp.org/learn/responsive-web-design/", "free": true, "rating": 4.7, "durationHours": 5, "level": "beginner" }
+    ],
+    "certifications": [
+      { "title": "Responsive Web Design Certification", "provider": "freeCodeCamp", "url": "https://www.freecodecamp.org/certification/", "cost": "free", "duration": "300 hours", "level": "beginner" }
+    ],
+    "practicePlatforms": [
+      { "title": "CSS Battle", "url": "https://cssbattle.dev/", "type": "challenges", "free": true },
+      { "title": "Frontend Mentor", "url": "https://www.frontendmentor.io/", "type": "project-based", "free": true }
+    ],
+    "documentation": [
+      { "title": "MDN CSS Docs", "url": "https://developer.mozilla.org/en-US/docs/Web/CSS", "type": "official" }
+    ],
+    "tags": ["frontend", "web", "styling", "beginner"]
+  },
+  "javascript": {
+    "id": "javascript",
+    "name": "JavaScript",
+    "category": "frontend",
+    "difficultyLevel": "intermediate",
+    "learningDurationWeeks": 8,
+    "courses": [
+      { "title": "The Complete JavaScript Course", "provider": "Udemy", "url": "https://www.udemy.com/course/the-complete-javascript-course/", "free": false, "rating": 4.8, "durationHours": 69, "level": "beginner-to-advanced" },
+      { "title": "JavaScript Algorithms and Data Structures", "provider": "freeCodeCamp", "url": "https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/", "free": true, "rating": 4.7, "durationHours": 20, "level": "beginner" },
+      { "title": "JavaScript Full Course", "provider": "freeCodeCamp", "url": "https://www.youtube.com/watch?v=PkZNo7MFNFg", "free": true, "rating": 4.7, "durationHours": 3, "level": "beginner" }
+    ],
+    "certifications": [
+      { "title": "JavaScript Algorithms Certification", "provider": "freeCodeCamp", "url": "https://www.freecodecamp.org/certification/", "cost": "free", "duration": "300 hours", "level": "intermediate" },
+      { "title": "JavaScript Developer Certification", "provider": "HackerRank", "url": "https://www.hackerrank.com/skills-verification/javascript_intermediate", "cost": "free", "duration": "1 day", "level": "intermediate" }
+    ],
+    "practicePlatforms": [
+      { "title": "LeetCode", "url": "https://leetcode.com/", "type": "challenges", "free": true },
+      { "title": "JavaScript30", "url": "https://javascript30.com/", "type": "project-based", "free": true },
+      { "title": "Exercism - JavaScript", "url": "https://exercism.org/tracks/javascript", "type": "exercises", "free": true }
+    ],
+    "documentation": [
+      { "title": "MDN JavaScript Docs", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript", "type": "official" },
+      { "title": "javascript.info", "url": "https://javascript.info/", "type": "tutorials" }
+    ],
+    "tags": ["frontend", "backend", "web", "scripting", "dom"]
+  },
+  "linux": {
+    "id": "linux",
+    "name": "Linux",
+    "category": "devops",
+    "difficultyLevel": "intermediate",
+    "learningDurationWeeks": 6,
+    "courses": [
+      { "title": "Linux Command Line Basics", "provider": "Udemy", "url": "https://www.udemy.com/course/linux-command-line-volume1/", "free": false, "rating": 4.6, "durationHours": 6, "level": "beginner" },
+      { "title": "Linux for Beginners", "provider": "freeCodeCamp", "url": "https://www.youtube.com/watch?v=sWbUDq4S6Y8", "free": true, "rating": 4.7, "durationHours": 3, "level": "beginner" },
+      { "title": "The Linux Command Line Bootcamp", "provider": "Udemy", "url": "https://www.udemy.com/course/the-linux-command-line-bootcamp/", "free": false, "rating": 4.7, "durationHours": 27, "level": "beginner-to-advanced" }
+    ],
+    "certifications": [
+      { "title": "CompTIA Linux+", "provider": "CompTIA", "url": "https://www.comptia.org/certifications/linux", "cost": "paid", "duration": "90 min exam", "level": "intermediate" },
+      { "title": "Linux Foundation Certified System Administrator (LFCS)", "provider": "Linux Foundation", "url": "https://training.linuxfoundation.org/certification/linux-foundation-certified-sysadmin-lfcs/", "cost": "paid", "duration": "2 hours exam", "level": "intermediate" }
+    ],
+    "practicePlatforms": [
+      { "title": "OverTheWire: Bandit", "url": "https://overthewire.org/wargames/bandit/", "type": "wargames", "free": true },
+      { "title": "Linux Journey", "url": "https://linuxjourney.com/", "type": "interactive", "free": true },
+      { "title": "TryHackMe Linux Fundamentals", "url": "https://tryhackme.com/module/linux-fundamentals", "type": "hands-on", "free": true }
+    ],
+    "documentation": [
+      { "title": "Linux man pages", "url": "https://man7.org/linux/man-pages/", "type": "official" },
+      { "title": "The Linux Command Line (book)", "url": "https://linuxcommand.org/tlcl.php", "type": "book", "free": true }
+    ],
+    "tags": ["devops", "security", "sysadmin", "terminal", "os"]
+  },
+  "networking": {
+    "id": "networking",
+    "name": "Networking",
+    "category": "security",
+    "difficultyLevel": "intermediate",
+    "learningDurationWeeks": 8,
+    "courses": [
+      { "title": "The Complete Networking Fundamentals Course", "provider": "Udemy", "url": "https://www.udemy.com/course/complete-networking-fundamentals-course-ccna-start/", "free": false, "rating": 4.7, "durationHours": 44, "level": "beginner-to-advanced" },
+      { "title": "Computer Networking Course", "provider": "freeCodeCamp", "url": "https://www.youtube.com/watch?v=qiQR5rTSshw", "free": true, "rating": 4.7, "durationHours": 9, "level": "beginner" }
+    ],
+    "certifications": [
+      { "title": "CompTIA Network+", "provider": "CompTIA", "url": "https://www.comptia.org/certifications/network", "cost": "paid", "duration": "90 min exam", "level": "beginner" },
+      { "title": "Cisco CCNA", "provider": "Cisco", "url": "https://www.cisco.com/c/en/us/training-events/training-certifications/certifications/associate/ccna.html", "cost": "paid", "duration": "120 min exam", "level": "intermediate" }
+    ],
+    "practicePlatforms": [
+      { "title": "Cisco Packet Tracer", "url": "https://www.netacad.com/courses/packet-tracer", "type": "simulator", "free": true },
+      { "title": "GNS3", "url": "https://www.gns3.com/", "type": "simulator", "free": true }
+    ],
+    "documentation": [
+      { "title": "CompTIA Network+ Study Guide", "url": "https://www.comptia.org/certifications/network", "type": "reference" }
+    ],
+    "tags": ["security", "networking", "infrastructure", "protocols", "cisco"]
+  },
   "aws": {
     "id": "aws",
     "name": "AWS",

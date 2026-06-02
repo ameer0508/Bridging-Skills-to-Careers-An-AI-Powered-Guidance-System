@@ -1,7 +1,7 @@
 {
   "success": true,
   "message": "Recommendations generated successfully",
-  "timestamp": "2026-05-31T07:33:14.536Z",
+  "timestamp": "2026-05-31T08:00:14.463Z",
   "data": {
     "careerGoalId": "fullstack_developer",
     "careerTitle": "Full Stack Developer",

@@ -1,7 +1,7 @@
 {
   "success": true,
   "message": "Recommendations generated for Backend Developer",
-  "timestamp": "2026-05-31T07:33:14.630Z",
+  "timestamp": "2026-05-31T08:00:14.493Z",
   "data": {
     "user": {
       "userId": "user_003",
@@ -823,7 +823,7 @@
       ]
     },
     "meta": {
-      "generatedAt": "2026-05-31T07:33:14.630Z",
+      "generatedAt": "2026-05-31T08:00:14.493Z",
       "engineVersion": "1.0.0",
       "totalResources": 73
     }
