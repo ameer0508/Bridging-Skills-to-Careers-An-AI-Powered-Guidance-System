@@ -1,38 +1,49 @@
 /**
- * Resume Service — matches backend /api/resume endpoints.
+ * Resume Service — reads file as base64 and sends to backend for real AI parsing
  */
 import apiClient from './api'
 
+/** Convert a File object to base64 string */
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload  = () => resolve(reader.result.split(',')[1]) // strip data:...;base64,
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
+
 const resumeService = {
-  uploadResume: (file, onProgress) => {
-    return new Promise((resolve, reject) => {
-      // Simulate upload progress then send metadata to backend
-      let progress = 0
-      const interval = setInterval(() => {
-        progress += Math.random() * 20 + 8
-        if (progress >= 100) {
-          progress = 100
-          clearInterval(interval)
-          onProgress && onProgress(100)
-          // Send file metadata to backend for parsing simulation
-          apiClient.post('/resume/upload', {
-            fileName: file.name,
-            fileSize: file.size,
-            fileType: file.type,
-            userId: 'current_user',
-          }).then(resolve).catch(reject)
-        } else {
-          onProgress && onProgress(Math.round(progress))
-        }
-      }, 150)
+  uploadResume: async (file, onProgress) => {
+    // Report initial progress while reading file
+    onProgress && onProgress(10)
+
+    // Read actual file bytes as base64 for real AI parsing
+    let fileContent = null
+    try {
+      fileContent = await fileToBase64(file)
+      onProgress && onProgress(40)
+    } catch {
+      // If FileReader fails, fall back to metadata-only
+      fileContent = null
+    }
+
+    onProgress && onProgress(70)
+
+    const result = await apiClient.post('/resume/upload', {
+      fileName:    file.name,
+      fileSize:    file.size,
+      fileType:    file.type,
+      fileContent,                    // real base64 file content
+      userId:      'current_user',
     })
+
+    onProgress && onProgress(100)
+    return result
   },
 
-  getResume: (userId = 'current_user') =>
-    apiClient.get(`/resume/${userId}`),
-
-  deleteResume: (userId = 'current_user') =>
-    apiClient.delete(`/resume/${userId}`),
+  getResume:    (userId = 'current_user') => apiClient.get(`/resume/${userId}`),
+  deleteResume: (userId = 'current_user') => apiClient.delete(`/resume/${userId}`),
 }
 
 export default resumeService

@@ -17,12 +17,24 @@ const RESOURCES = [
 const TYPE_ICON = { Course: Play, Certification: Award, Practice: Code2 }
 const PRICE_COLOR = { Free: '#34d399', Freemium: '#fbbf24', Paid: '#64748b' }
 
-export default function ResourceHub() {
+export default function ResourceHub({ resources = [], loading = false }) {
   const [bookmarked, setBookmarked] = useState(new Set())
   const [filter, setFilter] = useState('All')
   const filters = ['All', 'Course', 'Certification', 'Practice']
 
-  const visible = filter === 'All' ? RESOURCES : RESOURCES.filter(r => r.type === filter)
+  // Use real API data if available, else static fallback
+  const sourceResources = resources.length > 0
+    ? resources.map((r, i) => ({
+        id: r.id || i + 100, title: r.title,
+        platform: r.provider || r.platform || 'Online',
+        type: r.type || 'Course', skill: r.skillId || r.skill || 'General',
+        rating: r.rating || 4.5, duration: r.duration || 'Self-paced',
+        price: r.free === true ? 'Free' : r.free === false ? 'Paid' : (r.price || 'Paid'),
+        url: r.url || '#', color: 'from-brand-500 to-accent-500',
+      }))
+    : RESOURCES
+
+  const visible = filter === 'All' ? sourceResources : sourceResources.filter(r => r.type === filter)
 
   return (
     <div className="space-y-4">

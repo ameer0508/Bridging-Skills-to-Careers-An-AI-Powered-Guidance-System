@@ -1,21 +1,18 @@
 /**
  * Central Route Registry
  */
+'use strict';
 const express = require('express');
-const router = express.Router();
+const router  = express.Router();
 
-const authRoutes      = require('./authRoutes');
-const profileRoutes   = require('./profileRoutes');
-const roadmapRoutes   = require('./roadmapRoutes');
-const skillGapRoutes  = require('./skillGapRoutes');
-const resourceRoutes  = require('./resourceRoutes');
-const resumeRoutes    = require('./resumeRoutes');
-
-router.use('/auth',      authRoutes);
-router.use('/profile',   profileRoutes);
-router.use('/roadmap',   roadmapRoutes);
-router.use('/skill-gap', skillGapRoutes);
-router.use('/resources', resourceRoutes);
-router.use('/resume',    resumeRoutes);
+router.use('/auth',      require('./authRoutes'));
+router.use('/profile',   require('./profileRoutes'));
+router.use('/roadmap',   require('./roadmapRoutes'));
+router.use('/skill-gap', require('./skillGapRoutes'));
+router.use('/resources', require('./resourceRoutes'));
+router.use('/resume',    require('./resumeRoutes'));
+router.use('/jobs',      require('./jobRoutes'));
+router.use('/projects',  require('./projectRoutes'));
+router.use('/decay',     require('./decayRoutes'));
 
 module.exports = router;
