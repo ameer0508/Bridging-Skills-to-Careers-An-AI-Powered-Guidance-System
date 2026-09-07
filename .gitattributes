@@ -1,0 +1,15 @@
+# Set default behavior to automatically normalize line endings.
+* text=auto eol=lf
+
+# Force bash scripts or cmd scripts to keep their endings if needed.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.sh text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary

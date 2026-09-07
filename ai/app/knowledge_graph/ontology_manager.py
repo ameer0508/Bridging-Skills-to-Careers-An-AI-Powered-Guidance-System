@@ -1,0 +1,31 @@
+from enum import Enum
+
+class EntityType(str, Enum):
+    SKILL = "Skill"
+    TECHNOLOGY = "Technology"
+    PROGRAMMING_LANGUAGE = "ProgrammingLanguage"
+    FRAMEWORK = "Framework"
+    COURSE = "Course"
+    CERTIFICATION = "Certification"
+    JOB = "Job"
+    CAREER_ROLE = "CareerRole"
+    COMPANY = "Company"
+    INDUSTRY = "Industry"
+    LEARNING_RESOURCE = "LearningResource"
+    UNIVERSITY = "University"
+    USER = "User"
+    PROJECT = "Project"
+
+class RelationshipType(str, Enum):
+    REQUIRES = "REQUIRES"
+    RELATED_TO = "RELATED_TO"
+    LEADS_TO = "LEADS_TO"
+    USES = "USES"
+    CERTIFIES = "CERTIFIES"
+    RECOMMENDS = "RECOMMENDS"
+    SIMILAR_TO = "SIMILAR_TO"
+    PART_OF = "PART_OF"
+    DEPENDS_ON = "DEPENDS_ON"
+    WORKS_WITH = "WORKS_WITH"
+    HIGH_DEMAND_FOR = "HIGH_DEMAND_FOR"
+    LOW_DEMAND_FOR = "LOW_DEMAND_FOR"

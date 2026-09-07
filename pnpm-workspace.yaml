@@ -1,0 +1,8 @@
+packages:
+  - 'frontend'
+  - 'backend'
+
+allowBuilds:
+  esbuild: true
+  bcrypt: true
+  mongodb-memory-server: true

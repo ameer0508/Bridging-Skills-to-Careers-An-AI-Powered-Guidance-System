@@ -1,0 +1,33 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "topbar",
+    "jspm",
+    "nuxt",
+    "ntvs",
+    "njsproj",
+    "venv",
+    "pycache",
+    "pytest",
+    "mypy",
+    "ipynb",
+    "Pipfile",
+    "Spacy",
+    "spacy",
+    "skillbridge",
+    "openxmlformats",
+    "officedocument",
+    "wordprocessingml",
+    "strongpassword",
+    "XVCJ",
+    "Uvicorn",
+    "scikit",
+    "Pydantic",
+    "Dockerization",
+    "pdfplumber",
+    "genai",
+    "glassmorphism",
+    "Glassmorphism"
+  ]
+}

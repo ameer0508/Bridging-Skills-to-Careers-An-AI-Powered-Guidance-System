@@ -1,0 +1,786 @@
+/* ============================================================
+   SkillBridge — Design Token System
+   Frontend Foundation Specification § 2
+   Primary: Dark Mode | Fallback: Light Mode
+   ============================================================ */
+
+@import 'tailwindcss';
+
+/* ──────────────────────────────────────────────────────────
+   TYPOGRAPHY — Font Families
+   ────────────────────────────────────────────────────────── */
+@theme {
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Outfit', 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+}
+
+/* ──────────────────────────────────────────────────────────
+   LAYER 1: PRIMITIVE COLOR SCALES
+   Raw named values — never referenced directly in components.
+   Referenced only by semantic tokens below.
+   ────────────────────────────────────────────────────────── */
+:root {
+  /* Neutral Scale — Backgrounds, surfaces, borders, muted text */
+  --primitive-neutral-50:  hsl(222, 47%, 97%);
+  --primitive-neutral-100: hsl(222, 40%, 94%);
+  --primitive-neutral-150: hsl(222, 30%, 90%);
+  --primitive-neutral-200: hsl(222, 25%, 84%);
+  --primitive-neutral-300: hsl(222, 20%, 72%);
+  --primitive-neutral-400: hsl(222, 18%, 58%);
+  --primitive-neutral-500: hsl(222, 16%, 44%);
+  --primitive-neutral-600: hsl(222, 20%, 32%);
+  --primitive-neutral-700: hsl(222, 22%, 22%);
+  --primitive-neutral-800: hsl(222, 24%, 16%);
+  --primitive-neutral-850: hsl(222, 26%, 12%);
+  --primitive-neutral-900: hsl(222, 28%, 9%);
+  --primitive-neutral-950: hsl(222, 30%, 5%);
+
+  /* Primary Scale — Brand identity, primary actions, active states */
+  --primitive-primary-50:  hsl(226, 100%, 97%);
+  --primitive-primary-100: hsl(226, 100%, 93%);
+  --primitive-primary-200: hsl(226, 95%, 86%);
+  --primitive-primary-300: hsl(226, 90%, 76%);
+  --primitive-primary-400: hsl(226, 85%, 65%);
+  --primitive-primary-500: hsl(226, 84%, 57%);
+  --primitive-primary-600: hsl(226, 76%, 49%);
+  --primitive-primary-700: hsl(226, 72%, 40%);
+  --primitive-primary-800: hsl(226, 68%, 30%);
+  --primitive-primary-900: hsl(226, 62%, 20%);
+
+  /* Accent Scale — Secondary emphasis, complementary to primary */
+  --primitive-accent-50:  hsl(262, 100%, 97%);
+  --primitive-accent-100: hsl(262, 95%, 93%);
+  --primitive-accent-200: hsl(262, 90%, 85%);
+  --primitive-accent-300: hsl(262, 85%, 75%);
+  --primitive-accent-400: hsl(262, 80%, 65%);
+  --primitive-accent-500: hsl(262, 76%, 57%);
+  --primitive-accent-600: hsl(262, 70%, 49%);
+  --primitive-accent-700: hsl(262, 65%, 40%);
+  --primitive-accent-800: hsl(262, 60%, 30%);
+  --primitive-accent-900: hsl(262, 55%, 20%);
+
+  /* Success Scale — Positive outcomes, completion, growth */
+  --primitive-success-50:  hsl(152, 76%, 96%);
+  --primitive-success-100: hsl(152, 70%, 90%);
+  --primitive-success-200: hsl(152, 65%, 80%);
+  --primitive-success-300: hsl(152, 60%, 68%);
+  --primitive-success-400: hsl(152, 57%, 55%);
+  --primitive-success-500: hsl(152, 55%, 44%);
+  --primitive-success-600: hsl(152, 56%, 36%);
+  --primitive-success-700: hsl(152, 54%, 28%);
+  --primitive-success-800: hsl(152, 50%, 20%);
+  --primitive-success-900: hsl(152, 48%, 13%);
+
+  /* Warning Scale — Caution, approaching limits */
+  --primitive-warning-50:  hsl(38, 100%, 96%);
+  --primitive-warning-100: hsl(38, 96%, 90%);
+  --primitive-warning-200: hsl(38, 92%, 80%);
+  --primitive-warning-300: hsl(38, 88%, 68%);
+  --primitive-warning-400: hsl(38, 85%, 57%);
+  --primitive-warning-500: hsl(38, 82%, 48%);
+  --primitive-warning-600: hsl(38, 78%, 40%);
+  --primitive-warning-700: hsl(38, 74%, 32%);
+  --primitive-warning-800: hsl(38, 68%, 24%);
+  --primitive-warning-900: hsl(38, 62%, 16%);
+
+  /* Error Scale — Error states, destructive actions, critical gaps */
+  --primitive-error-50:  hsl(0, 100%, 97%);
+  --primitive-error-100: hsl(0, 96%, 93%);
+  --primitive-error-200: hsl(0, 92%, 85%);
+  --primitive-error-300: hsl(0, 86%, 74%);
+  --primitive-error-400: hsl(0, 82%, 63%);
+  --primitive-error-500: hsl(0, 78%, 53%);
+  --primitive-error-600: hsl(0, 72%, 45%);
+  --primitive-error-700: hsl(0, 68%, 36%);
+  --primitive-error-800: hsl(0, 62%, 27%);
+  --primitive-error-900: hsl(0, 58%, 18%);
+
+  /* Info Scale — Informational, neutral highlights */
+  --primitive-info-50:  hsl(200, 100%, 96%);
+  --primitive-info-100: hsl(200, 95%, 91%);
+  --primitive-info-200: hsl(200, 88%, 82%);
+  --primitive-info-300: hsl(200, 82%, 70%);
+  --primitive-info-400: hsl(200, 78%, 58%);
+  --primitive-info-500: hsl(200, 74%, 48%);
+  --primitive-info-600: hsl(200, 70%, 40%);
+  --primitive-info-700: hsl(200, 66%, 32%);
+  --primitive-info-800: hsl(200, 60%, 24%);
+  --primitive-info-900: hsl(200, 55%, 16%);
+
+  /* AI Scale — AI-specific elements, architect responses, grounding */
+  --primitive-ai-50:  hsl(185, 90%, 96%);
+  --primitive-ai-100: hsl(185, 82%, 90%);
+  --primitive-ai-200: hsl(185, 76%, 80%);
+  --primitive-ai-300: hsl(185, 70%, 68%);
+  --primitive-ai-400: hsl(185, 66%, 57%);
+  --primitive-ai-500: hsl(185, 62%, 47%);
+  --primitive-ai-600: hsl(185, 58%, 39%);
+  --primitive-ai-700: hsl(185, 54%, 31%);
+  --primitive-ai-800: hsl(185, 50%, 22%);
+  --primitive-ai-900: hsl(185, 46%, 14%);
+}
+
+/* ──────────────────────────────────────────────────────────
+   LAYER 2: SEMANTIC TOKENS — DARK MODE (default)
+   Intent-based aliases. These encode "what is this for?"
+   All component tokens reference these. Never reference
+   primitive tokens directly in component code.
+   ────────────────────────────────────────────────────────── */
+:root,
+html.dark {
+  /* ── Background Tokens ── */
+  --color-bg-app:             var(--primitive-neutral-950);   /* Root application background */
+  --color-bg-surface:         var(--primitive-neutral-900);   /* Cards, panels */
+  --color-bg-surface-raised:  var(--primitive-neutral-850);   /* Modals, elevated panels */
+  --color-bg-surface-overlay: hsl(222, 26%, 9%, 0.85);        /* Command palette, overlays (with blur) */
+  --color-bg-surface-sunken:  hsl(222, 30%, 4%);              /* Inputs, code blocks */
+  --color-bg-inverse:         var(--primitive-neutral-100);   /* Inverted surfaces (tooltips) */
+
+  /* ── Text Tokens ── */
+  --color-text-primary:    var(--primitive-neutral-50);       /* Headings, body text, labels */
+  --color-text-secondary:  var(--primitive-neutral-300);      /* Descriptions, supporting text */
+  --color-text-tertiary:   var(--primitive-neutral-500);      /* Timestamps, metadata, placeholders */
+  --color-text-disabled:   var(--primitive-neutral-600);      /* Non-interactive labels */
+  --color-text-inverse:    var(--primitive-neutral-950);      /* Text on light/inverse backgrounds */
+  --color-text-link:       var(--primitive-primary-400);      /* Inline links */
+  --color-text-on-primary: var(--primitive-neutral-50);       /* Text on primary backgrounds */
+  --color-text-on-success: var(--primitive-neutral-50);       /* Text on success backgrounds */
+  --color-text-on-error:   var(--primitive-neutral-50);       /* Text on error backgrounds */
+
+  /* ── Border Tokens ── */
+  --color-border-default:  hsl(222, 20%, 16%);                /* Cards, panels, inputs */
+  --color-border-subtle:   hsl(222, 20%, 12%);                /* Separators, section dividers */
+  --color-border-strong:   var(--primitive-neutral-600);      /* Active tabs, selected items */
+  --color-border-focus:    var(--primitive-primary-400);      /* Focus rings */
+  --color-border-error:    var(--primitive-error-600);        /* Invalid inputs */
+  --color-border-success:  var(--primitive-success-600);      /* Valid inputs */
+  --color-border-disabled: var(--primitive-neutral-700);      /* Disabled elements */
+
+  /* ── Interactive Tokens ── */
+  --color-interactive-primary:             var(--primitive-primary-500);
+  --color-interactive-primary-hover:       var(--primitive-primary-400);
+  --color-interactive-primary-active:      var(--primitive-primary-600);
+  --color-interactive-secondary:           var(--primitive-neutral-700);
+  --color-interactive-secondary-hover:     var(--primitive-neutral-600);
+  --color-interactive-destructive:         var(--primitive-error-600);
+  --color-interactive-destructive-hover:   var(--primitive-error-500);
+  --color-interactive-disabled:            var(--primitive-neutral-800);
+
+  /* ── Status Tokens ── */
+  --color-status-success-bg:     hsl(152, 55%, 44%, 0.10);
+  --color-status-success-text:   var(--primitive-success-400);
+  --color-status-success-border: hsl(152, 56%, 36%, 0.30);
+
+  --color-status-warning-bg:     hsl(38, 82%, 48%, 0.10);
+  --color-status-warning-text:   var(--primitive-warning-400);
+  --color-status-warning-border: hsl(38, 78%, 40%, 0.30);
+
+  --color-status-error-bg:       hsl(0, 78%, 53%, 0.10);
+  --color-status-error-text:     var(--primitive-error-400);
+  --color-status-error-border:   hsl(0, 72%, 45%, 0.30);
+
+  --color-status-info-bg:        hsl(200, 74%, 48%, 0.10);
+  --color-status-info-text:      var(--primitive-info-400);
+  --color-status-info-border:    hsl(200, 70%, 40%, 0.30);
+
+  /* ── AI-Specific Tokens ── */
+  --color-ai-accent:        var(--primitive-ai-400);
+  --color-ai-accent-subtle: hsl(185, 66%, 57%, 0.10);
+  --color-ai-glow:          hsl(185, 62%, 47%, 0.40);
+  --color-ai-surface:       hsl(185, 50%, 10%);
+  --color-ai-text:          var(--primitive-ai-300);
+
+  /* ── Chart Tokens ── */
+  --color-chart-1: var(--primitive-primary-400);
+  --color-chart-2: var(--primitive-success-400);
+  --color-chart-3: var(--primitive-accent-400);
+  --color-chart-4: var(--primitive-warning-400);
+  --color-chart-5: var(--primitive-info-400);
+  --color-chart-6: var(--primitive-ai-400);
+  --color-chart-7: var(--primitive-error-400);
+  --color-chart-8: hsl(290, 70%, 60%);
+  --color-chart-positive: var(--primitive-success-400);
+  --color-chart-negative: var(--primitive-error-400);
+  --color-chart-neutral:  var(--primitive-neutral-500);
+  --color-chart-grid:     hsl(222, 20%, 16%);
+  --color-chart-axis:     var(--primitive-neutral-600);
+
+  /* ──────────────────────────────────────────────────────
+     RADIUS TOKENS
+     ────────────────────────────────────────────────────── */
+  --radius-none: 0px;
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   10px;
+  --radius-xl:   14px;
+  --radius-2xl:  20px;
+  --radius-full: 9999px;
+
+  /* ──────────────────────────────────────────────────────
+     SHADOW TOKENS
+     On dark surfaces, shadows are subtle — primarily
+     achieved through border and value differentiation.
+     ────────────────────────────────────────────────────── */
+  --shadow-none: none;
+  --shadow-xs:   0 1px 3px hsl(222, 30%, 2%, 0.4), 0 1px 2px hsl(222, 30%, 2%, 0.3);
+  --shadow-sm:   0 2px 6px hsl(222, 30%, 2%, 0.5), 0 1px 3px hsl(222, 30%, 2%, 0.4);
+  --shadow-md:   0 4px 12px hsl(222, 30%, 2%, 0.6), 0 2px 6px hsl(222, 30%, 2%, 0.4);
+  --shadow-lg:   0 8px 24px hsl(222, 30%, 2%, 0.7), 0 4px 12px hsl(222, 30%, 2%, 0.5);
+  --shadow-xl:   0 16px 48px hsl(222, 30%, 2%, 0.8), 0 8px 24px hsl(222, 30%, 2%, 0.6);
+  --shadow-inner: inset 0 2px 4px hsl(222, 30%, 2%, 0.4);
+  --shadow-glow-primary: 0 0 20px hsl(226, 84%, 57%, 0.35), 0 0 40px hsl(226, 84%, 57%, 0.15);
+  --shadow-glow-ai:      0 0 20px hsl(185, 62%, 47%, 0.40), 0 0 40px hsl(185, 62%, 47%, 0.15);
+
+  /* ──────────────────────────────────────────────────────
+     OPACITY TOKENS
+     ────────────────────────────────────────────────────── */
+  --opacity-0:   0;
+  --opacity-5:   0.05;
+  --opacity-10:  0.10;
+  --opacity-20:  0.20;
+  --opacity-40:  0.40;
+  --opacity-60:  0.60;
+  --opacity-80:  0.80;
+  --opacity-100: 1;
+
+  /* ──────────────────────────────────────────────────────
+     BLUR TOKENS
+     ────────────────────────────────────────────────────── */
+  --blur-none: blur(0px);
+  --blur-sm:   blur(4px);
+  --blur-md:   blur(12px);
+  --blur-lg:   blur(24px);
+  --blur-xl:   blur(48px);
+
+  /* ──────────────────────────────────────────────────────
+     Z-INDEX TOKENS
+     Large gaps between tiers to prevent collisions.
+     NEVER use arbitrary z-index values in components.
+     ────────────────────────────────────────────────────── */
+  --z-base:        0;
+  --z-sticky:    100;
+  --z-sidebar:   200;
+  --z-dropdown:  300;
+  --z-overlay:   400;
+  --z-modal:     500;
+  --z-toast:     600;
+  --z-top:       700;
+
+  /* ──────────────────────────────────────────────────────
+     MOTION TOKENS
+     ────────────────────────────────────────────────────── */
+  --duration-instant:  0ms;
+  --duration-fast:     100ms;
+  --duration-normal:   200ms;
+  --duration-moderate: 300ms;
+  --duration-slow:     400ms;
+  --duration-gentle:   600ms;
+
+  --ease-default:  cubic-bezier(0, 0, 0.2, 1);       /* ease-out — entering elements */
+  --ease-in:       cubic-bezier(0.4, 0, 1, 1);        /* ease-in — exiting elements */
+  --ease-in-out:   cubic-bezier(0.4, 0, 0.2, 1);      /* symmetrical transitions */
+  --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1); /* slight overshoot + settle */
+  --ease-linear:   linear;                             /* progress indicators */
+
+  /* ──────────────────────────────────────────────────────
+     SPACING SCALE — 4px base unit
+     ────────────────────────────────────────────────────── */
+  --spacing-0:    0px;
+  --spacing-0-5:  2px;
+  --spacing-1:    4px;
+  --spacing-1-5:  6px;
+  --spacing-2:    8px;
+  --spacing-3:    12px;
+  --spacing-4:    16px;
+  --spacing-5:    20px;
+  --spacing-6:    24px;
+  --spacing-8:    32px;
+  --spacing-10:   40px;
+  --spacing-12:   48px;
+  --spacing-16:   64px;
+  --spacing-20:   80px;
+  --spacing-24:   96px;
+
+  /* Semantic Spacing */
+  --spacing-component-padding-sm: var(--spacing-2);
+  --spacing-component-padding-md: var(--spacing-4);
+  --spacing-component-padding-lg: var(--spacing-6);
+  --spacing-component-gap-sm:     var(--spacing-2);
+  --spacing-component-gap-md:     var(--spacing-4);
+  --spacing-component-gap-lg:     var(--spacing-6);
+  --spacing-section-gap:          var(--spacing-8);
+  --spacing-workspace-padding:    var(--spacing-6);
+  --spacing-layout-gutter:        var(--spacing-6);
+
+  /* ──────────────────────────────────────────────────────
+     TYPOGRAPHY SCALE
+     ────────────────────────────────────────────────────── */
+  --font-size-display: 3rem;         /* 48px — Hero moments, celebration */
+  --font-size-h1:      2rem;         /* 32px — Workspace titles */
+  --font-size-h2:      1.5rem;       /* 24px — Section headings */
+  --font-size-h3:      1.25rem;      /* 20px — Sub-section headings */
+  --font-size-h4:      1.0625rem;    /* 17px — Item titles */
+  --font-size-body-lg: 1rem;         /* 16px — Large body, AI responses */
+  --font-size-body:    0.9375rem;    /* 15px — Standard body text */
+  --font-size-body-sm: 0.875rem;     /* 14px — Secondary descriptions */
+  --font-size-caption: 0.75rem;      /* 12px — Timestamps, metadata */
+  --font-size-label:   0.875rem;     /* 14px — Button text, tab labels */
+  --font-size-label-sm: 0.6875rem;   /* 11px — Status badges, micro-labels */
+  --font-size-code:    0.875rem;     /* 14px — Monospace content */
+
+  --font-weight-regular:  400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+  --font-weight-black:    800;
+
+  --line-height-tight:   1.25;
+  --line-height-normal:  1.5;
+  --line-height-relaxed: 1.75;
+
+  --letter-spacing-tight:  -0.025em;
+  --letter-spacing-normal:  0em;
+  --letter-spacing-wide:    0.06em;
+
+  /* ──────────────────────────────────────────────────────
+     LAYOUT TOKENS
+     ────────────────────────────────────────────────────── */
+  --sidebar-width-expanded:  240px;
+  --sidebar-width-collapsed:  64px;
+  --topbar-height:            56px;
+  --content-max-width-home:  960px;
+  --content-max-width-default: 1200px;
+  --content-max-width-settings: 720px;
+
+  /* ──────────────────────────────────────────────────────
+     COMPONENT TOKENS — Reference semantic tokens above.
+     Components only reference these — never primitives directly.
+     ────────────────────────────────────────────────────── */
+
+  /* Button — Primary */
+  --button-bg-primary:         var(--color-interactive-primary);
+  --button-bg-primary-hover:   var(--color-interactive-primary-hover);
+  --button-bg-primary-active:  var(--color-interactive-primary-active);
+  --button-text-primary:       var(--color-text-on-primary);
+
+  /* Button — Secondary */
+  --button-bg-secondary:       transparent;
+  --button-border-secondary:   var(--color-border-default);
+  --button-bg-secondary-hover: var(--color-interactive-secondary);
+  --button-text-secondary:     var(--color-text-secondary);
+
+  /* Button — Ghost */
+  --button-bg-ghost:       transparent;
+  --button-bg-ghost-hover: hsl(222, 20%, 16%, 0.5);
+  --button-text-ghost:     var(--color-text-secondary);
+
+  /* Button — Destructive */
+  --button-bg-destructive:       var(--color-interactive-destructive);
+  --button-bg-destructive-hover: var(--color-interactive-destructive-hover);
+  --button-text-destructive:     var(--color-text-on-error);
+
+  /* Card */
+  --card-bg-default:     var(--color-bg-surface);
+  --card-bg-elevated:    var(--color-bg-surface-raised);
+  --card-border-default: var(--color-border-default);
+  --card-border-hover:   var(--color-border-strong);
+  --card-shadow-default: var(--shadow-none);
+  --card-shadow-elevated: var(--shadow-sm);
+  --card-shadow-hover:   var(--shadow-xs);
+  --card-radius:         var(--radius-lg);
+  --card-padding:        var(--spacing-component-padding-lg);
+
+  /* Input */
+  --input-bg:              var(--color-bg-surface-sunken);
+  --input-border:          var(--color-border-default);
+  --input-border-hover:    var(--color-border-strong);
+  --input-border-focus:    var(--color-border-focus);
+  --input-border-error:    var(--color-border-error);
+  --input-border-success:  var(--color-border-success);
+  --input-text:            var(--color-text-primary);
+  --input-placeholder:     var(--color-text-tertiary);
+  --input-radius:          var(--radius-md);
+  --input-padding-x:       var(--spacing-4);
+  --input-padding-y:       var(--spacing-2);
+
+  /* Badge */
+  --badge-radius:          var(--radius-sm);
+  --badge-padding-x:       var(--spacing-2);
+  --badge-padding-y:       var(--spacing-0-5);
+
+  /* Sidebar */
+  --sidebar-bg:            var(--color-bg-surface);
+  --sidebar-border:        var(--color-border-subtle);
+  --sidebar-item-bg-hover: hsl(226, 84%, 57%, 0.06);
+  --sidebar-item-bg-active: hsl(226, 84%, 57%, 0.12);
+  --sidebar-item-text:     var(--color-text-secondary);
+  --sidebar-item-text-active: var(--color-text-primary);
+  --sidebar-accent-bar:    var(--color-interactive-primary);
+
+  /* TopBar */
+  --topbar-bg:             var(--color-bg-surface);
+  --topbar-border:         var(--color-border-subtle);
+
+  /* Modal */
+  --modal-bg:              var(--color-bg-surface-raised);
+  --modal-border:          var(--color-border-default);
+  --modal-shadow:          var(--shadow-xl);
+  --modal-backdrop:        hsl(222, 30%, 5%, 0.80);
+  --modal-radius:          var(--radius-xl);
+
+  /* Tooltip */
+  --tooltip-bg:            var(--color-bg-inverse);
+  --tooltip-text:          var(--color-text-inverse);
+  --tooltip-radius:        var(--radius-sm);
+  --tooltip-padding-x:     var(--spacing-2);
+  --tooltip-padding-y:     var(--spacing-1);
+
+  /* Focus Ring */
+  --focus-ring-color:      var(--color-border-focus);
+  --focus-ring-width:      2px;
+  --focus-ring-offset:     2px;
+  --focus-ring-style:      solid;
+}
+
+/* ──────────────────────────────────────────────────────────
+   LAYER 2: SEMANTIC TOKENS — LIGHT MODE OVERRIDES
+   Only tokens that differ between dark and light are listed.
+   ────────────────────────────────────────────────────── */
+html.light {
+  /* Backgrounds */
+  --color-bg-app:             var(--primitive-neutral-100);
+  --color-bg-surface:         hsl(0, 0%, 100%);
+  --color-bg-surface-raised:  var(--primitive-neutral-50);
+  --color-bg-surface-overlay: hsl(0, 0%, 100%, 0.90);
+  --color-bg-surface-sunken:  var(--primitive-neutral-100);
+  --color-bg-inverse:         var(--primitive-neutral-900);
+
+  /* Text */
+  --color-text-primary:   var(--primitive-neutral-900);
+  --color-text-secondary: var(--primitive-neutral-600);
+  --color-text-tertiary:  var(--primitive-neutral-400);
+  --color-text-disabled:  var(--primitive-neutral-300);
+  --color-text-inverse:   var(--primitive-neutral-50);
+  --color-text-link:      var(--primitive-primary-600);
+
+  /* Borders */
+  --color-border-default:  var(--primitive-neutral-200);
+  --color-border-subtle:   var(--primitive-neutral-150);
+  --color-border-strong:   var(--primitive-neutral-400);
+  --color-border-disabled: var(--primitive-neutral-200);
+
+  /* Interactive */
+  --color-interactive-secondary:       var(--primitive-neutral-200);
+  --color-interactive-secondary-hover: var(--primitive-neutral-300);
+  --color-interactive-disabled:        var(--primitive-neutral-150);
+
+  /* Status — lighter tints on white backgrounds */
+  --color-status-success-bg:     hsl(152, 55%, 44%, 0.08);
+  --color-status-warning-bg:     hsl(38, 82%, 48%, 0.08);
+  --color-status-error-bg:       hsl(0, 78%, 53%, 0.08);
+  --color-status-info-bg:        hsl(200, 74%, 48%, 0.08);
+
+  /* AI */
+  --color-ai-surface: hsl(185, 50%, 96%);
+  --color-ai-text:    var(--primitive-ai-700);
+
+  /* Shadows — visible on light backgrounds */
+  --shadow-xs: 0 1px 3px hsl(222, 30%, 20%, 0.08), 0 1px 2px hsl(222, 30%, 20%, 0.06);
+  --shadow-sm: 0 2px 6px hsl(222, 30%, 20%, 0.10), 0 1px 3px hsl(222, 30%, 20%, 0.08);
+  --shadow-md: 0 4px 12px hsl(222, 30%, 20%, 0.12), 0 2px 6px hsl(222, 30%, 20%, 0.10);
+  --shadow-lg: 0 8px 24px hsl(222, 30%, 20%, 0.14), 0 4px 12px hsl(222, 30%, 20%, 0.10);
+  --shadow-xl: 0 16px 48px hsl(222, 30%, 20%, 0.16), 0 8px 24px hsl(222, 30%, 20%, 0.12);
+  --shadow-inner: inset 0 2px 4px hsl(222, 30%, 20%, 0.08);
+
+  /* Component overrides for light mode */
+  --card-bg-default:  hsl(0, 0%, 100%);
+  --card-bg-elevated: var(--primitive-neutral-50);
+  --sidebar-bg:       hsl(0, 0%, 100%);
+  --topbar-bg:        hsl(0, 0%, 100%);
+  --input-bg:         var(--primitive-neutral-100);
+  --modal-bg:         hsl(0, 0%, 100%);
+  --modal-backdrop:   hsl(222, 30%, 20%, 0.60);
+  --tooltip-bg:       var(--primitive-neutral-900);
+  --sidebar-item-bg-hover:  hsl(226, 84%, 57%, 0.05);
+  --sidebar-item-bg-active: hsl(226, 84%, 57%, 0.10);
+}
+
+/* ──────────────────────────────────────────────────────────
+   REDUCED MOTION
+   Collapse all durations to instant when user prefers
+   reduced motion. State changes still occur; motion removed.
+   ────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast:     0ms;
+    --duration-normal:   0ms;
+    --duration-moderate: 0ms;
+    --duration-slow:     0ms;
+    --duration-gentle:   0ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────
+   BASE RESETS — Document & Body
+   ────────────────────────────────────────────────────── */
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-bg-app);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Text selection */
+::selection {
+  background-color: hsl(226, 84%, 57%, 0.30);
+  color: var(--color-text-on-primary);
+}
+
+/* Focus ring — global default */
+:focus-visible {
+  outline: var(--focus-ring-width) var(--focus-ring-style) var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: inherit;
+}
+
+/* Remove focus ring for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Scrollbar — consistent across Chrome/Edge */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-default) transparent;
+}
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-default);
+  border-radius: var(--radius-full);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-border-strong);
+}
+
+/* ──────────────────────────────────────────────────────────
+   UTILITY — Screen-reader only
+   ────────────────────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ──────────────────────────────────────────────────────────
+   UTILITY — Skip link (Accessibility)
+   ────────────────────────────────────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: var(--spacing-4);
+  z-index: var(--z-top);
+  padding: var(--spacing-2) var(--spacing-4);
+  background: var(--color-interactive-primary);
+  color: var(--color-text-on-primary);
+  border-radius: var(--radius-md);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-body-sm);
+  text-decoration: none;
+  transition: top var(--duration-fast) var(--ease-default);
+}
+.skip-link:focus {
+  top: var(--spacing-4);
+}
+
+/* ──────────────────────────────────────────────────────────
+   UTILITY — Workspace content area
+   ────────────────────────────────────────────────────── */
+.workspace-content {
+  max-width: var(--content-max-width-default);
+  margin-inline: auto;
+  padding: var(--spacing-workspace-padding);
+  width: 100%;
+}
+
+.workspace-content--home {
+  max-width: var(--content-max-width-home);
+}
+
+.workspace-content--settings {
+  max-width: var(--content-max-width-settings);
+}
+
+/* ──────────────────────────────────────────────────────────
+   ANIMATIONS — Only play when motion is acceptable
+   ────────────────────────────────────────────────────── */
+@keyframes sb-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes sb-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sb-scale-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes sb-slide-in-right {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes sb-slide-out-right {
+  from { transform: translateX(0); }
+  to   { transform: translateX(100%); }
+}
+
+@keyframes sb-shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position: 200% 0; }
+}
+
+@keyframes sb-pulse-once {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.05); }
+}
+
+@keyframes sb-typing-dot {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40%           { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Animation utility classes */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-fade-in {
+    animation: sb-fade-in var(--duration-normal) var(--ease-default) both;
+  }
+  .animate-fade-up {
+    animation: sb-fade-up var(--duration-normal) var(--ease-default) both;
+  }
+  .animate-scale-in {
+    animation: sb-scale-in var(--duration-normal) var(--ease-default) both;
+  }
+  .animate-slide-in-right {
+    animation: sb-slide-in-right var(--duration-moderate) var(--ease-in-out) both;
+  }
+  .animate-slide-out-right {
+    animation: sb-slide-out-right var(--duration-normal) var(--ease-in) both;
+  }
+  .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--color-bg-surface) 0%,
+      var(--color-bg-surface-raised) 50%,
+      var(--color-bg-surface) 100%
+    );
+    background-size: 200% 100%;
+    animation: sb-shimmer var(--duration-gentle) var(--ease-linear) infinite;
+  }
+  .animate-pulse-once {
+    animation: sb-pulse-once var(--duration-slow) var(--ease-spring);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────
+   GLOBAL EXPERIENCE SYSTEM KEYFRAMES & UTILITIES
+   ────────────────────────────────────────────────────────── */
+
+@keyframes sb-aurora {
+  0% { transform: translateY(0%) rotate(0deg) scale(1); }
+  50% { transform: translateY(-15%) rotate(180deg) scale(1.1); }
+  100% { transform: translateY(0%) rotate(360deg) scale(1); }
+}
+
+@keyframes sb-mesh-spin {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.15); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes sb-glow-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.08); }
+}
+
+@keyframes sb-text-gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes sb-ripple {
+  0% { transform: scale(0); opacity: 0.6; }
+  100% { transform: scale(4); opacity: 0; }
+}
+
+/* Glassmorphism Utilities */
+.glass-surface {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.light .glass-surface {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Gradient Text Helper */
+.animated-gradient-text {
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: sb-text-gradient 4s ease infinite;
+}
+
+/* Accessibility Focus & Micro-Interaction Polish */
+*:focus-visible {
+  outline: 2px solid var(--primitive-primary-400);
+  outline-offset: 2px;
+}
+
+button:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+

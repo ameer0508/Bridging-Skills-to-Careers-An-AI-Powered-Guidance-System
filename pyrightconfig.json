@@ -1,0 +1,12 @@
+{
+  "venvPath": "ai",
+  "venv": ".venv",
+  "executionEnvironments": [
+    {
+      "root": "ai",
+      "extraPaths": [
+        "ai"
+      ]
+    }
+  ]
+}

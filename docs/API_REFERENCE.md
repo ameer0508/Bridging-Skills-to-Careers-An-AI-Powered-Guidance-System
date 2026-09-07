@@ -1,910 +1,609 @@
-# AI Module - API Reference
+# API Reference: SkillBridge
 
-Complete reference for all functions, classes, and modules in the AI/NLP Engine.
-
----
-
-## Table of Contents
-
-1. [Parsers Module](#parsers-module)
-2. [Preprocess Module](#preprocess-module)
-3. [Extractors Module](#extractors-module)
-4. [Analyzers Module](#analyzers-module)
-5. [Models Module](#models-module)
-6. [Datasets Module](#datasets-module)
-7. [Utils Module](#utils-module)
-8. [Main Module](#main-module)
+This document outlines the API guidelines, request/response models, and the standard health check endpoints for the **SkillBridge** platform.
 
 ---
 
-## Parsers Module
+## 🛠️ API Guidelines
 
-### `extract_pdf(file_path: str) -> Optional[str]`
+- **Base URL:** `/api/v1`
+- **Format:** All requests and responses must use the `application/json` format.
+- **Status Codes:** Standard HTTP status codes are used to indicate request success or failure.
 
-Extract text from PDF file.
-
-**Parameters**:
-- `file_path` (str): Path to PDF file
-
-**Returns**:
-- `Optional[str]`: Extracted text or None if error
-
-**Example**:
-```python
-from parsers.pdf_parser import extract_pdf
-
-text = extract_pdf('resume.pdf')
-if text:
-    print(f"Extracted {len(text)} characters")
-```
-
-**Errors**:
-- `FileNotFoundError`: File doesn't exist
-- `PdfReadError`: Invalid PDF format
+| Code  | Status                | Description                                       |
+| :---- | :-------------------- | :------------------------------------------------ |
+| `200` | OK                    | Request completed successfully.                   |
+| `201` | Created               | Resource successfully created.                    |
+| `400` | Bad Request           | Validation error or invalid payload formats.      |
+| `401` | Unauthorized          | Missing or invalid auth credentials.              |
+| `403` | Forbidden             | Insufficient permissions to access this endpoint. |
+| `404` | Not Found             | Resource or route not found.                      |
+| `429` | Too Many Requests     | Rate limit exceeded.                              |
+| `500` | Internal Server Error | Unhandled server exception.                       |
 
 ---
 
-### `extract_docx(file_path: str) -> Optional[str]`
+## 🟢 Health Endpoints
 
-Extract text from DOCX file.
+### 1. Backend Service
 
-**Parameters**:
-- `file_path` (str): Path to DOCX file
+Used by monitoring tools or reverse proxies to check service availability.
 
-**Returns**:
-- `Optional[str]`: Extracted text or None if error
+- **URL:** `/health`
+- **Method:** `GET`
+- **Auth Required:** No
+- **Headers:** None
 
-**Example**:
-```python
-from parsers.docx_parser import extract_docx
+#### Response (`200 OK`)
 
-text = extract_docx('resume.docx')
-if text:
-    print(f"Extracted {len(text)} characters")
-```
-
-**Features**:
-- Extracts from paragraphs
-- Extracts from tables
-- Preserves structure
-
----
-
-### `extract_resume(file_path: str) -> Optional[str]`
-
-Universal resume parser with automatic format detection.
-
-**Parameters**:
-- `file_path` (str): Path to resume file (PDF or DOCX)
-
-**Returns**:
-- `Optional[str]`: Extracted text or None if error
-
-**Example**:
-```python
-from parsers.resume_parser import extract_resume
-
-text = extract_resume('resume.pdf')  # Auto-detects format
-```
-
-**Supported Formats**:
-- `.pdf`
-- `.docx`
-- `.doc`
-
----
-
-## Preprocess Module
-
-### `tokenize_text(text: str) -> List[str]`
-
-Tokenize text into words.
-
-**Parameters**:
-- `text` (str): Input text
-
-**Returns**:
-- `List[str]`: List of tokens
-
-**Example**:
-```python
-from preprocess.text_processor import tokenize_text
-
-tokens = tokenize_text("Hello World")
-# Output: ['Hello', 'World']
-```
-
----
-
-### `lemmatize_text(tokens: List[str]) -> List[str]`
-
-Lemmatize tokens to base form.
-
-**Parameters**:
-- `tokens` (List[str]): List of tokens
-
-**Returns**:
-- `List[str]`: Lemmatized tokens
-
-**Example**:
-```python
-from preprocess.text_processor import lemmatize_text
-
-tokens = ['running', 'ran', 'runs']
-lemmatized = lemmatize_text(tokens)
-# Output: ['running', 'ran', 'run']
-```
-
----
-
-### `preprocess_text(text: str, remove_stopwords: bool = True) -> List[str]`
-
-Complete preprocessing pipeline.
-
-**Parameters**:
-- `text` (str): Input text
-- `remove_stopwords` (bool): Whether to remove stop words (default: True)
-
-**Returns**:
-- `List[str]`: Preprocessed tokens
-
-**Pipeline**:
-1. Lowercase conversion
-2. URL/email removal
-3. Special character handling
-4. Tokenization
-5. Punctuation removal
-6. Stop-word removal (optional)
-7. Lemmatization
-8. Deduplication
-
-**Example**:
-```python
-from preprocess.text_processor import preprocess_text
-
-text = "Developed React Applications using TypeScript"
-tokens = preprocess_text(text)
-# Output: ['develop', 'react', 'application', 'typescript']
-```
-
----
-
-## Extractors Module
-
-### `extract_skills(text: str) -> List[str]`
-
-Extract technical skills from text.
-
-**Parameters**:
-- `text` (str): Input text (resume content)
-
-**Returns**:
-- `List[str]`: List of extracted skills
-
-**Example**:
-```python
-from extractors.skill_extractor import extract_skills
-
-text = "Experienced in Python, React, MongoDB, AWS"
-skills = extract_skills(text)
-# Output: ['Python', 'React', 'MongoDB', 'AWS']
-```
-
-**Extraction Methods**:
-1. Dictionary matching (200+ skills)
-2. Pattern-based extraction
-3. spaCy NER
-
----
-
-### Class: `SkillExtractor`
-
-Advanced skill extraction with categorization.
-
-#### `__init__()`
-
-Initialize skill extractor.
-
-**Example**:
-```python
-from extractors.skill_extractor import SkillExtractor
-
-extractor = SkillExtractor()
-```
-
----
-
-#### `extract_skills_from_text(text: str) -> List[str]`
-
-Extract skills using multiple strategies.
-
-**Parameters**:
-- `text` (str): Input text
-
-**Returns**:
-- `List[str]`: Extracted skills
-
-**Example**:
-```python
-extractor = SkillExtractor()
-skills = extractor.extract_skills_from_text("Python React MongoDB")
-```
-
----
-
-#### `categorize_skills(skills: List[str]) -> Dict[str, List[str]]`
-
-Categorize skills by type.
-
-**Parameters**:
-- `skills` (List[str]): List of skills
-
-**Returns**:
-- `Dict[str, List[str]]`: Skills grouped by category
-
-**Example**:
-```python
-extractor = SkillExtractor()
-skills = ['Python', 'React', 'MongoDB', 'AWS']
-categorized = extractor.categorize_skills(skills)
-# Output: {
-#   'programming_languages': ['Python'],
-#   'web_frameworks': ['React'],
-#   'databases': ['MongoDB'],
-#   'cloud_platforms': ['AWS']
-# }
-```
-
----
-
-## Analyzers Module
-
-### `analyze_skill_gap(user_skills: List[str], job_role: str) -> Dict`
-
-Analyze skill gap for a job role.
-
-**Parameters**:
-- `user_skills` (List[str]): User's skills
-- `job_role` (str): Target job role
-
-**Returns**:
-- `Dict`: Analysis results
-
-**Return Structure**:
-```python
+```json
 {
-    "job_role": str,
-    "overall_match_percentage": float,
-    "required_skills_match": float,
-    "preferred_skills_match": float,
-    "user_skills": List[str],
-    "existing_skills": {
-        "required": List[str],
-        "preferred": List[str]
+  "status": "UP",
+  "timestamp": "2026-07-19T14:50:00.000Z",
+  "uptime": 124.5,
+  "services": {
+    "database": "UP"
+  }
+}
+```
+
+#### Response (`503 Service Unavailable`)
+
+```json
+{
+  "status": "DOWN",
+  "timestamp": "2026-07-19T14:50:00.000Z",
+  "uptime": 124.5,
+  "services": {
+    "database": "DOWN"
+  }
+}
+```
+
+---
+
+### 2. AI Python Service
+
+Used by the Backend API to verify FastAPI service uptime before calling AI functions.
+
+- **URL:** `/health`
+- **Method:** `GET`
+- **Auth Required:** No
+- **Headers:** None
+
+#### Response (`200 OK`)
+
+```json
+{
+  "status": "healthy",
+  "timestamp": "2026-07-19T14:50:00Z",
+  "version": "0.1.0-alpha"
+}
+```
+
+---
+
+## 🔑 Authentication Endpoints
+
+### 1. Register User
+
+Creates a new user profile and returns access and refresh tokens.
+
+- **URL:** `/auth/register`
+- **Method:** `POST`
+- **Auth Required:** No (Rate-limited: 15 req/15 min)
+- **Body Schema:**
+  ```json
+  {
+    "fullName": "John Doe",
+    "email": "john.doe@example.com",
+    "password": "strongpassword123"
+  }
+  ```
+
+#### Response (`201 Created`)
+
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "60c72b2f9b1d8e1f845d8b8a",
+      "fullName": "John Doe",
+      "email": "john.doe@example.com",
+      "role": "user",
+      "onboardingCompleted": false,
+      "profileCompleted": false
     },
-    "missing_skills": {
-        "required": List[str],
-        "preferred": List[str]
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+}
+```
+
+---
+
+### 2. Login User
+
+Verifies email and password credentials and issues a fresh token pair.
+
+- **URL:** `/auth/login`
+- **Method:** `POST`
+- **Auth Required:** No (Rate-limited: 15 req/15 min)
+- **Body Schema:**
+  ```json
+  {
+    "email": "john.doe@example.com",
+    "password": "strongpassword123"
+  }
+  ```
+
+#### Response (`200 OK`)
+
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "id": "60c72b2f9b1d8e1f845d8b8a",
+      "fullName": "John Doe",
+      "email": "john.doe@example.com",
+      "role": "user",
+      "onboardingCompleted": false,
+      "profileCompleted": false
     },
-    "skill_level": str,  # "Beginner", "Intermediate", "Advanced"
-    "recommended_skills": List[str],
-    "total_user_skills": int,
-    "total_required_skills": int,
-    "total_preferred_skills": int
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
 }
 ```
 
-**Example**:
-```python
-from analyzers.skill_gap_analyzer import analyze_skill_gap
-
-user_skills = ['HTML', 'CSS', 'JavaScript', 'React']
-result = analyze_skill_gap(user_skills, 'Frontend Developer')
-
-print(f"Match: {result['overall_match_percentage']}%")
-print(f"Missing: {result['missing_skills']['required']}")
-```
-
 ---
 
-### Class: `SkillGapAnalyzer`
-
-Advanced skill gap analysis.
-
-#### `__init__()`
-
-Initialize analyzer.
-
-**Example**:
-```python
-from analyzers.skill_gap_analyzer import SkillGapAnalyzer
-
-analyzer = SkillGapAnalyzer()
-```
-
----
-
-#### `analyze(user_skills: List[str], job_role: str) -> Dict`
-
-Analyze skill gap.
-
-**Parameters**:
-- `user_skills` (List[str]): User's skills
-- `job_role` (str): Target job role
-
-**Returns**:
-- `Dict`: Analysis results
-
-**Example**:
-```python
-analyzer = SkillGapAnalyzer()
-result = analyzer.analyze(['Python', 'React'], 'Full Stack Developer')
-```
-
----
-
-#### `compare_multiple_roles(user_skills: List[str], roles: List[str] = None) -> List[Dict]`
-
-Compare skills against multiple roles.
-
-**Parameters**:
-- `user_skills` (List[str]): User's skills
-- `roles` (List[str], optional): Roles to compare (default: all roles)
-
-**Returns**:
-- `List[Dict]`: Analysis results for each role, sorted by match percentage
-
-**Example**:
-```python
-analyzer = SkillGapAnalyzer()
-results = analyzer.compare_multiple_roles(['Python', 'React', 'MongoDB'])
-
-for result in results[:3]:  # Top 3 matches
-    print(f"{result['job_role']}: {result['overall_match_percentage']}%")
-```
-
----
-
-## Models Module
-
-### Class: `TFIDFVectorizer`
-
-TF-IDF vectorization for skill comparison.
-
-#### `__init__()`
-
-Initialize vectorizer.
-
-**Example**:
-```python
-from models.vectorizer import TFIDFVectorizer
-
-vectorizer = TFIDFVectorizer()
-```
-
----
-
-#### `fit_transform(documents: List[str]) -> np.ndarray`
-
-Fit and transform documents.
-
-**Parameters**:
-- `documents` (List[str]): Text documents
-
-**Returns**:
-- `np.ndarray`: TF-IDF matrix
-
-**Example**:
-```python
-vectorizer = TFIDFVectorizer()
-vectors = vectorizer.fit_transform(['Python React', 'Java Spring'])
-```
-
----
-
-#### `transform(documents: List[str]) -> np.ndarray`
-
-Transform documents using fitted vectorizer.
-
-**Parameters**:
-- `documents` (List[str]): Text documents
-
-**Returns**:
-- `np.ndarray`: TF-IDF matrix
-
-**Example**:
-```python
-vectors = vectorizer.transform(['MongoDB AWS'])
-```
-
----
-
-### `compute_similarity(user_skills: List[str], job_skills: List[str]) -> Tuple[float, List[str], List[str]]`
-
-Compute similarity between skill sets.
-
-**Parameters**:
-- `user_skills` (List[str]): User's skills
-- `job_skills` (List[str]): Required job skills
-
-**Returns**:
-- `Tuple[float, List[str], List[str]]`:
-  - Match percentage (0-100)
-  - Existing skills (intersection)
-  - Missing skills (difference)
-
-**Example**:
-```python
-from models.vectorizer import compute_similarity
-
-user_skills = ['Python', 'JavaScript', 'React']
-job_skills = ['Python', 'JavaScript', 'React', 'Node.js', 'MongoDB']
-
-match_pct, existing, missing = compute_similarity(user_skills, job_skills)
-print(f"Match: {match_pct}%")
-print(f"Existing: {existing}")
-print(f"Missing: {missing}")
-```
-
----
-
-## Datasets Module
-
-### `get_all_skills() -> list`
-
-Get all skills from dictionary.
-
-**Returns**:
-- `list`: All available skills
-
-**Example**:
-```python
-from datasets.skill_dictionary import get_all_skills
-
-all_skills = get_all_skills()
-print(f"Total skills: {len(all_skills)}")
-```
-
----
-
-### `get_skills_by_category(category: str) -> list`
-
-Get skills for a specific category.
-
-**Parameters**:
-- `category` (str): Category name
-
-**Returns**:
-- `list`: Skills in that category
-
-**Categories**:
-- `programming_languages`
-- `web_frameworks`
-- `databases`
-- `cloud_platforms`
-- `devops_tools`
-- `version_control`
-- `data_science`
-- `ai_ml`
-- `cybersecurity`
-- `mobile_development`
-- `testing`
-- `design_tools`
-- `methodologies`
-- `certifications`
-
-**Example**:
-```python
-from datasets.skill_dictionary import get_skills_by_category
-
-languages = get_skills_by_category('programming_languages')
-print(languages)
-```
-
----
-
-### `get_job_skills(role: str) -> dict`
-
-Get skill requirements for a job role.
-
-**Parameters**:
-- `role` (str): Job role name
-
-**Returns**:
-- `dict`: Skill requirements
-
-**Return Structure**:
-```python
+### 3. Logout User
+
+Revokes the refresh token to terminate the session.
+
+- **URL:** `/auth/logout`
+- **Method:** `POST`
+- **Auth Required:** No (Validates Refresh Token in payload)
+- **Body Schema:**
+  ```json
+  {
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+  ```
+
+#### Response (`200 OK`)
+
+```json
 {
-    "required_skills": List[str],
-    "preferred_skills": List[str],
-    "beginner_skills": List[str],
-    "advanced_skills": List[str]
+  "success": true,
+  "message": "Logged out successfully."
 }
 ```
 
-**Example**:
-```python
-from datasets.job_skills import get_job_skills
-
-skills = get_job_skills('Frontend Developer')
-print(skills['required_skills'])
-```
-
 ---
 
-### `get_all_roles() -> list`
-
-Get all available job roles.
-
-**Returns**:
-- `list`: List of job role names
-
-**Example**:
-```python
-from datasets.job_skills import get_all_roles
-
-roles = get_all_roles()
-for role in roles:
-    print(role)
-```
-
----
-
-## Utils Module
-
-### `generate_json_response(analysis_result: Dict) -> Dict[str, Any]`
-
-Generate structured JSON response.
-
-**Parameters**:
-- `analysis_result` (Dict): Analysis result from skill gap analyzer
-
-**Returns**:
-- `Dict[str, Any]`: Formatted JSON response
-
-**Example**:
-```python
-from utils.json_generator import generate_json_response
-
-response = generate_json_response(analysis_result)
-print(response['status'])
-```
-
----
-
-### `save_json_output(data: Dict, filename: str, output_dir: str = "output") -> str`
-
-Save JSON data to file.
-
-**Parameters**:
-- `data` (Dict): Data to save
-- `filename` (str): Output filename
-- `output_dir` (str): Output directory (default: "output")
-
-**Returns**:
-- `str`: Path to saved file
-
-**Example**:
-```python
-from utils.json_generator import save_json_output
-
-filepath = save_json_output(result, "analysis.json")
-print(f"Saved to: {filepath}")
-```
-
----
-
-### `format_for_api(analysis_result: Dict) -> str`
-
-Format analysis result as JSON string.
-
-**Parameters**:
-- `analysis_result` (Dict): Analysis result
-
-**Returns**:
-- `str`: JSON string
-
-**Example**:
-```python
-from utils.json_generator import format_for_api
-
-json_string = format_for_api(analysis_result)
-```
-
----
-
-## Main Module
-
-### `parse_resume(file_path: str) -> Optional[str]`
-
-Parse resume and extract text.
-
-**Parameters**:
-- `file_path` (str): Path to resume file
-
-**Returns**:
-- `Optional[str]`: Extracted text
-
-**Example**:
-```python
-from main import parse_resume
-
-text = parse_resume('resume.pdf')
-```
-
----
-
-### `extract_skills_from_resume(resume_text: str) -> list`
-
-Extract skills from resume text.
-
-**Parameters**:
-- `resume_text` (str): Resume content
-
-**Returns**:
-- `list`: Extracted skills
-
-**Example**:
-```python
-from main import extract_skills_from_resume
-
-skills = extract_skills_from_resume(resume_text)
-```
-
----
-
-### `analyze_skill_gap_for_role(user_skills: list, job_role: str) -> Dict`
-
-Analyze skill gap for a role.
-
-**Parameters**:
-- `user_skills` (list): User's skills
-- `job_role` (str): Target job role
-
-**Returns**:
-- `Dict`: Analysis results
-
-**Example**:
-```python
-from main import analyze_skill_gap_for_role
-
-result = analyze_skill_gap_for_role(skills, 'Data Scientist')
-```
-
----
-
-### `process_resume_complete(file_path: str, job_role: str, save_output: bool = True) -> Dict`
-
-Complete pipeline: Parse → Extract → Analyze → Generate JSON.
-
-**Parameters**:
-- `file_path` (str): Path to resume file
-- `job_role` (str): Target job role
-- `save_output` (bool): Save output to file (default: True)
-
-**Returns**:
-- `Dict`: Complete analysis results
-
-**Example**:
-```python
-from main import process_resume_complete
-
-result = process_resume_complete('resume.pdf', 'Frontend Developer')
-print(f"Match: {result['data']['matchPercentage']}%")
-```
-
----
-
-### `compare_multiple_roles(file_path: str, roles: list = None) -> Dict`
-
-Compare resume against multiple roles.
-
-**Parameters**:
-- `file_path` (str): Path to resume file
-- `roles` (list, optional): Roles to compare (default: all roles)
-
-**Returns**:
-- `Dict`: Comparison results
-
-**Example**:
-```python
-from main import compare_multiple_roles
-
-result = compare_multiple_roles('resume.pdf')
-for role_result in result['results'][:3]:
-    print(f"{role_result['job_role']}: {role_result['overall_match_percentage']}%")
-```
-
----
-
-### `api_parse_resume(file_path: str) -> Dict`
-
-API endpoint: Parse resume.
-
-**Parameters**:
-- `file_path` (str): Path to resume file
-
-**Returns**:
-- `Dict`: JSON response with text
-
-**Example**:
-```python
-from main import api_parse_resume
-
-response = api_parse_resume('resume.pdf')
-if response['status'] == 'success':
-    print(response['text'])
-```
-
----
-
-### `api_extract_skills(resume_text: str) -> Dict`
-
-API endpoint: Extract skills.
-
-**Parameters**:
-- `resume_text` (str): Resume text
-
-**Returns**:
-- `Dict`: JSON response with skills
-
-**Example**:
-```python
-from main import api_extract_skills
-
-response = api_extract_skills(resume_text)
-print(response['skills'])
-```
-
----
-
-### `api_analyze_skill_gap(user_skills: list, job_role: str) -> Dict`
-
-API endpoint: Analyze skill gap.
-
-**Parameters**:
-- `user_skills` (list): User's skills
-- `job_role` (str): Target job role
-
-**Returns**:
-- `Dict`: JSON response with analysis
-
-**Example**:
-```python
-from main import api_analyze_skill_gap
-
-response = api_analyze_skill_gap(skills, 'Machine Learning Engineer')
-print(response['data']['matchPercentage'])
-```
-
----
-
-## Error Handling
-
-All functions include error handling and return appropriate error messages:
-
-```python
+### 4. Refresh Token Rotation
+
+Validates a refresh token and signs a rotated pair of access and refresh tokens.
+
+- **URL:** `/auth/refresh`
+- **Method:** `POST`
+- **Auth Required:** No (Validates Refresh Token in payload)
+- **Body Schema:**
+  ```json
+  {
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
+  ```
+
+#### Response (`200 OK`)
+
+```json
 {
-    "status": "error",
-    "error": "Error message",
-    "timestamp": "2026-05-31T10:30:00"
+  "success": true,
+  "data": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  }
 }
 ```
 
 ---
 
-## Type Hints
+## 👤 User Profile Endpoints
 
-All functions use Python type hints for clarity:
+### 1. Get My Profile
 
-```python
-def extract_skills(text: str) -> List[str]:
-    ...
+Retrieves metadata details for the authenticated user.
 
-def analyze_skill_gap(user_skills: List[str], job_role: str) -> Dict:
-    ...
+- **URL:** `/users/me`
+- **Method:** `GET`
+- **Headers:** `Authorization: Bearer <accessToken>`
+- **Auth Required:** Yes
+
+#### Response (`200 OK`)
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "60c72b2f9b1d8e1f845d8b8a",
+    "fullName": "John Doe",
+    "email": "john.doe@example.com",
+    "avatar": "https://example.com/avatar.png",
+    "role": "user",
+    "accountStatus": "active",
+    "onboardingCompleted": false,
+    "profileCompleted": false,
+    "createdAt": "2026-07-19T15:20:00.000Z",
+    "updatedAt": "2026-07-19T15:20:00.000Z",
+    "lastLogin": "2026-07-19T15:20:00.000Z"
+  }
+}
 ```
 
 ---
 
-## Logging
+### 2. Update My Profile
 
-All modules include logging for debugging:
+Updates specific user profile attributes.
 
-```python
-import logging
+- **URL:** `/users/me`
+- **Method:** `PUT`
+- **Headers:** `Authorization: Bearer <accessToken>`
+- **Auth Required:** Yes
+- **Body Schema:**
+  ```json
+  {
+    "fullName": "John H. Doe",
+    "avatar": "https://example.com/new_avatar.png"
+  }
+  ```
 
-logger = logging.getLogger(__name__)
-logger.info("Processing resume...")
-logger.error("Error occurred: ...")
+#### Response (`200 OK`)
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "60c72b2f9b1d8e1f845d8b8a",
+    "fullName": "John H. Doe",
+    "email": "john.doe@example.com",
+    "avatar": "https://example.com/new_avatar.png",
+    "role": "user",
+    "accountStatus": "active",
+    "onboardingCompleted": false,
+    "profileCompleted": true,
+    "createdAt": "2026-07-19T15:20:00.000Z",
+    "updatedAt": "2026-07-19T15:22:00.000Z",
+    "lastLogin": "2026-07-19T15:20:00.000Z"
+  }
+}
 ```
 
 ---
 
-## Constants
+## 🧠 Skill Intelligence Endpoints
 
-### File Size Limits
-- `MAX_FILE_SIZE`: 10 MB
+### Get User Skills
 
-### Supported Formats
-- `ALLOWED_EXTENSIONS`: {'.pdf', '.docx', '.doc'}
+- **URL:** `/api/v1/skills/me`
+- **Method:** `GET`
+- **Auth Required:** `Bearer Token`
+- **Description:** Retrieves the authenticated user's normalized skills, categorized and scored based on resume evidence.
 
-### Skill Categories
-- 14 categories
-- 200+ total skills
+**Response:** `200 OK`
 
-### Job Roles
-- 8 predefined roles
-- Extensible structure
-
----
-
-## Best Practices
-
-1. **Always check return values**:
-```python
-text = parse_resume('resume.pdf')
-if text:
-    # Process text
-else:
-    # Handle error
+```json
+{
+  "success": true,
+  "data": {
+    "categories": {
+      "Programming Languages": [
+        {
+          "id": "60d5ec49c1234a5b6789def0",
+          "skillId": "60d5ec49c1234a5b6789def1",
+          "name": "JavaScript",
+          "evidenceScore": 85,
+          "evidences": [
+            {
+              "sourceType": "resume_experience",
+              "description": "Used at TechCorp as Software Engineer",
+              "weight": 0.8
+            }
+          ],
+          "aliases": ["JS"]
+        }
+      ]
+    },
+    "totalSkills": 1
+  }
+}
 ```
 
-2. **Use try-except for robustness**:
-```python
-try:
-    result = process_resume_complete('resume.pdf', 'Frontend Developer')
-except Exception as e:
-    print(f"Error: {e}")
-```
+### Get Knowledge Graph
 
-3. **Validate inputs**:
-```python
-if job_role not in get_all_roles():
-    print("Invalid job role")
-```
+- **URL:** `/api/v1/skills/graph`
+- **Method:** `GET`
+- **Auth Required:** `Bearer Token`
+- **Description:** Retrieves the global Skill Knowledge Graph edges representing 'parent', 'sub', or 'related' relationships between technical skills.
 
-4. **Check status in responses**:
-```python
-if result['status'] == 'success':
-    # Process data
-else:
-    # Handle error
-```
+**Response:** `200 OK`
 
----
-
-## Performance Tips
-
-1. **Reuse extractors**:
-```python
-extractor = SkillExtractor()  # Initialize once
-skills1 = extractor.extract_skills_from_text(text1)
-skills2 = extractor.extract_skills_from_text(text2)
-```
-
-2. **Batch processing**:
-```python
-analyzer = SkillGapAnalyzer()
-results = analyzer.compare_multiple_roles(user_skills)  # Compare all at once
-```
-
-3. **Cache results**:
-```python
-# Save results to avoid reprocessing
-save_json_output(result, "cached_result.json")
+```json
+{
+  "success": true,
+  "data": {
+    "edges": [
+      {
+        "source": "React",
+        "target": "JavaScript",
+        "type": "parent"
+      }
+    ]
+  }
+}
 ```
 
 ---
 
-## Version Information
+## 🎯 Career Intelligence Endpoints
 
-- **API Version**: 1.0.0
-- **Python**: 3.8+
-- **spaCy Model**: en_core_web_sm
-- **Last Updated**: May 31, 2026
+### Get Career Matches
+
+- **URL:** `/api/v1/careers/matches`
+- **Method:** `GET`
+- **Auth Required:** `Bearer Token`
+- **Description:** Retrieves a user's deterministic career matches, ranked by score and accompanied by XAI (Explainable AI) strengths and missing skills.
+
+**Response:** `200 OK`
+
+```json
+{
+  "success": true,
+  "data": {
+    "matches": [
+      {
+        "id": "60d5ec49c1234a5b6789def0",
+        "careerId": {
+          "_id": "60d5ec49c1234a5b6789def1",
+          "title": "Software Engineer",
+          "category": "Engineering",
+          "description": "Builds and maintains software systems."
+        },
+        "matchScore": 85,
+        "matchingSkills": ["JavaScript", "Python"],
+        "missingSkills": ["CI/CD"],
+        "strengths": ["✓ Strong Python evidence"],
+        "weaknesses": ["✗ Missing critical requirement: CI/CD"],
+        "confidence": 75,
+        "relatedCareers": [
+          {
+            "career": {
+              "_id": "60d5ec49c1234a5b6789def2",
+              "title": "Backend Engineer",
+              "category": "Engineering"
+            },
+            "score": 80
+          }
+        ]
+      }
+    ]
+  }
+}
+```
 
 ---
 
-**For more information, see the complete documentation in `docs/`**
+## 📊 Career Readiness Endpoints
+
+### Get Career Readiness & Gaps
+
+- **URL:** `/api/v1/readiness`
+- **Method:** `GET`
+- **Auth Required:** `Bearer Token`
+- **Description:** Retrieves the user's readiness score, dimension breakdowns, and gap analysis for all matched careers.
+
+**Response:** `200 OK`
+
+```json
+{
+  "success": true,
+  "data": {
+    "readiness": [
+      {
+        "_id": "60d5ec49c1234a5b6789def3",
+        "careerId": {
+          "_id": "60d5ec49c1234a5b6789def1",
+          "title": "Software Engineer",
+          "category": "Engineering"
+        },
+        "overallScore": 64,
+        "readinessTier": "Mid Level Ready",
+        "dimensions": [
+          { "name": "Technical Skills", "score": 80, "weight": 0.5 },
+          { "name": "Professional Experience", "score": 60, "weight": 0.25 }
+        ],
+        "gaps": {
+          "criticalGaps": [
+            { "skillName": "CI/CD", "impactScore": 85, "reason": "Critical missing competency." }
+          ],
+          "weakAreas": [],
+          "strengthAreas": [
+            {
+              "skillName": "Python",
+              "impactScore": 90,
+              "reason": "Strong verified proficiency (90/100)."
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+```
+
+---
+
+## 🗺️ Learning Roadmap Endpoints
+
+### Get Learning Roadmap
+- **URL:** `/api/v1/roadmap/:careerId`
+- **Method:** `GET`
+- **Auth Required:** `Bearer Token`
+- **Description:** Retrieves the adaptive learning roadmap for a specific career target.
+
+**Response:** `200 OK`
+```json
+{
+  "success": true,
+  "data": {
+    "roadmap": {
+      "_id": "60d5ec49c1234a5b6789def8",
+      "progressPercentage": 25,
+      "status": "active",
+      "phases": [
+        {
+          "title": "Phase 1: Critical Foundations",
+          "order": 1,
+          "objective": "Resolve tier 1 dependencies and build necessary competencies.",
+          "items": [
+            {
+              "title": "Learn Docker",
+              "status": "completed"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+
+### Update Item Status
+- **URL:** `/api/v1/roadmap/:careerId/items/:itemId/status`
+- **Method:** `PATCH`
+- **Auth Required:** `Bearer Token`
+- **Body:**
+```json
+{
+  "status": "completed"
+}
+```
+- **Description:** Updates the status of a specific roadmap item and recalculates overall roadmap progress.
+
+**Response:** `200 OK`
+```json
+{
+  "success": true,
+  "data": {
+    "roadmap": { ... }
+  }
+}
+```
+
+---
+
+## 📈 Analytics Endpoints
+
+### Get Dashboard Analytics
+- **URL:** `/api/v1/analytics`
+- **Method:** `GET`
+- **Auth Required:** `Bearer Token`
+- **Query Params:** `period` (optional) - `weekly`, `monthly`, `quarterly`, `yearly` (default: `monthly`)
+- **Description:** Retrieves the progress intelligence dashboard data for the requested period.
+
+**Response:** `200 OK`
+```json
+{
+  "success": true,
+  "data": {
+    "period": "monthly",
+    "currentMetrics": {
+      "totalSkills": 12,
+      "averageReadinessScore": 75,
+      "totalGaps": 4,
+      "completedRecommendations": 3,
+      "completedRoadmapItems": 2
+    },
+    "trends": {
+      "readinessGrowth": 5,
+      "skillsAdded": 3,
+      "gapsClosed": 1,
+      "itemsCompleted": 2
+    },
+    "insights": [
+      {
+        "_id": "...",
+        "type": "trend",
+        "title": "Career Readiness Improving",
+        "description": "Your average career readiness score increased by 5%."
+      }
+    ],
+    "recentEvents": [],
+    "historicalSnapshots": []
+  }
+}
+```
+
+---
+
+## 🤖 AI Career Architect Endpoints
+
+### Get Conversations
+- **URL:** `/api/v1/ai`
+- **Method:** `GET`
+- **Auth Required:** `Bearer Token`
+- **Description:** Retrieves the user's active conversation history.
+
+### Create Conversation
+- **URL:** `/api/v1/ai`
+- **Method:** `POST`
+- **Auth Required:** `Bearer Token`
+- **Body:** `{ "careerId": "string (optional)", "title": "string" }`
+- **Description:** Instantiates a new chat session.
+
+### Get Conversation Messages
+- **URL:** `/api/v1/ai/:id`
+- **Method:** `GET`
+- **Auth Required:** `Bearer Token`
+- **Description:** Retrieves the messages for a specific conversation.
+
+### Send Message
+- **URL:** `/api/v1/ai/:id/messages`
+- **Method:** `POST`
+- **Auth Required:** `Bearer Token`
+- **Body:** `{ "content": "What are my biggest gaps?" }`
+- **Description:** Submits a message to the AI Architect. The backend automatically injects the latest verified platform context into the LLM prompt.
+
+### Switch Target Career
+- **URL:** `/api/v1/ai/:id/career`
+- **Method:** `PATCH`
+- **Auth Required:** `Bearer Token`
+- **Body:** `{ "careerId": "new_career_id" }`
+- **Description:** Switches the context of the active conversation to a different career target.
+
+---
+
+## ⚠️ Standard Error Response Model
+
+When an error occurs, the API returns a structured error object.
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Invalid request payload parameters.",
+    "details": [
+      {
+        "field": "email",
+        "issue": "Invalid email address format"
+      }
+    ]
+  }
+}
+```

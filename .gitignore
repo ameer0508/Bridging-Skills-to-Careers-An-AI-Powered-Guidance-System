@@ -1,8 +1,74 @@
+# Dependency directories
 node_modules/
-.env
+jspm_packages/
+web_modules/
+
+# Build outputs
 dist/
 build/
-__pycache__/
-*.pyc
+out/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+.svelte-kit/
+.astro/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.sync.prod
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Uploads & User Generated Files
 uploads/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# IDE Files
 .vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Python
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+pip-log.txt
+pip-delete-this-directory.txt
+poetry.lock
+Pipfile.lock
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Spacy / Model downloads
+models/
+.spacy/
+downloads/

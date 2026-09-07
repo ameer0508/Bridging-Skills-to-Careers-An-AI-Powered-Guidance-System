@@ -1,0 +1,19 @@
+{
+  "name": "skillbridge-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "dev:ai": "powershell -Command \"cd ai; .venv\\Scripts\\activate; uvicorn app.main:app --reload --host 127.0.0.1 --port 8000\"",
+    "dev": "npx concurrently \"pnpm dev:frontend\" \"pnpm dev:backend\" \"pnpm dev:ai\"",
+    "build:frontend": "pnpm --filter frontend build",
+    "build:backend": "pnpm --filter backend build",
+    "build": "pnpm run build:frontend && pnpm run build:backend",
+    "lint": "pnpm --filter frontend lint && pnpm --filter backend lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,css}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.2.5"
+  }
+}
