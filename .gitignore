@@ -14,13 +14,34 @@ out/
 .svelte-kit/
 .astro/
 
-# Environment files
+# Environment and Secret Files
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.sync.prod
+.env.*
+.env*.local
+*.env
+!.env.example
+!.env.*.example
+
+# Keys, Certificates, and Credentials
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+*.id_rsa
+*.id_ed25519
+*.keystore
+
+# Local Database & User Backups (never commit user data or local DB storage)
+data/
+backend/data/
+local_db/
+*.backup.json
+*.sqlite
+*.sqlite3
+*.db
+scratch/
 
 # Logs
 logs/
@@ -33,6 +54,8 @@ lerna-debug.log*
 
 # Uploads & User Generated Files
 uploads/
+backend/uploads/
+**/uploads/**
 
 # OS Files
 .DS_Store
@@ -69,6 +92,6 @@ coverage/
 .nyc_output/
 
 # Spacy / Model downloads
-models/
+ai/models/
 .spacy/
 downloads/

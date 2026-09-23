@@ -37,7 +37,7 @@ services:
     environment:
       - PORT=5000
       - MONGO_URI=mongodb://mongodb:27017/skillbridge
-      - JWT_SECRET=${JWT_SECRET:-supersecret}
+      - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRES_IN=1d
       - AI_SERVICE_URL=http://ai-service:8000
       - FRONTEND_URL=http://localhost:3000
