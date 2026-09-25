@@ -122,12 +122,12 @@ flowchart TB
         JSearchAPI["RapidAPI JSearch\n(Live Job Ingestion)"]
     end
 
-    StateStore <-->|REST / JSON • JWT Bearer| APIGateway
-    Repositories <-->|Mongoose ODM| MongoDB
-    ContextAssembler <-->|HTTP / JSON (15s Timeout)| FastAPIApp
+    StateStore <-->|"REST / JSON • JWT Bearer"| APIGateway
+    Repositories <-->|"Mongoose ODM"| MongoDB
+    ContextAssembler <-->|"HTTP / JSON • 15s Timeout"| FastAPIApp
     AIGatewayMod --> GeminiAPI
     AIGatewayMod -.-> OpenAIAPI
-    Services <-->|Live API Feeds| JSearchAPI
+    Services <-->|"Live API Feeds"| JSearchAPI
 ```
 
 ### Core Design Principles
