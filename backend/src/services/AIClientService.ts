@@ -1,4 +1,5 @@
 import { aiHttp } from './aiHttp.js';
+import path from 'path';
 import FormData from 'form-data';
 import logger from '../config/logger.js';
 
@@ -27,7 +28,9 @@ class AIClientService {
   async extractResume(fileBuffer: Buffer, fileName: string): Promise<unknown> {
     try {
       const form = new FormData();
-      form.append('file', fileBuffer, { filename: fileName });
+      // Only the extension is forwarded; the user's original file name never leaves the backend
+      const extension = path.extname(fileName).toLowerCase();
+      form.append('file', fileBuffer, { filename: `resume${extension}` });
 
       const response = await aiHttp.post(`/api/v1/extract`, form, {
         headers: {

@@ -5,6 +5,7 @@ import { LearningResource } from '../models/LearningResource.js';
 import { ProjectTemplate } from '../models/ProjectTemplate.js';
 import { Certification } from '../models/Certification.js';
 import logger from '../config/logger.js';
+import { AppError } from '../middlewares/errorHandler.js';
 
 class RecommendationService {
   /**
@@ -24,12 +25,15 @@ class RecommendationService {
     recommendationId: string,
     status: RecommendationStatus
   ) {
+    if (!mongoose.Types.ObjectId.isValid(recommendationId)) {
+      throw new AppError('Recommendation not found', 404, 'RECOMMENDATION_NOT_FOUND');
+    }
     const rec = await Recommendation.findOne({
       _id: new mongoose.Types.ObjectId(recommendationId),
       userId: new mongoose.Types.ObjectId(userId)
     });
 
-    if (!rec) throw new Error('Recommendation not found');
+    if (!rec) throw new AppError('Recommendation not found', 404, 'RECOMMENDATION_NOT_FOUND');
 
     const previousStatus = rec.status;
     rec.status = status;

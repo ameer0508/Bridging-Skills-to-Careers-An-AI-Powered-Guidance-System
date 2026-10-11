@@ -6,6 +6,7 @@ import { GapAnalysis, IGapItem } from '../models/GapAnalysis.js';
 import { Recommendation } from '../models/Recommendation.js';
 import { LearningRoadmap, IRoadmapPhase, IRoadmapItem } from '../models/LearningRoadmap.js';
 import logger from '../config/logger.js';
+import { AppError } from '../middlewares/errorHandler.js';
 
 export class SnapshotService {
   /**
@@ -87,7 +88,7 @@ export class SnapshotService {
    */
   public async getUnifiedCareerSnapshot(userId: string) {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      throw new Error('Invalid user ID provided');
+      throw new AppError('Invalid user ID provided', 400, 'INVALID_ID');
     }
 
     const userObjId = new mongoose.Types.ObjectId(userId);
@@ -173,7 +174,7 @@ export class SnapshotService {
     const userSkillsList = await UserSkill.find({ userId: userObjId }).limit(15);
     const categoryCounts: Record<string, number> = {};
     userSkillsList.forEach((us) => {
-      const cat = (us as any).category || 'General';
+      const cat = us.category || 'General';
       categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
     });
 
@@ -236,7 +237,12 @@ export class SnapshotService {
     const isInterviewEvaluated = completedSessions.length > 0;
 
     // 9. Active Resume ATS
-    const resumeDoc = await ParsedResume.findOne({ userId: userObjId }).sort({ updatedAt: -1 });
+    // The active upload carries the file name and parsing state; its parsed counterpart carries the content
+    const { default: Resume } = await import('../models/Resume.js');
+    const activeResume = await Resume.findOne({ userId: userObjId, isActive: true });
+    const resumeDoc = activeResume
+      ? await ParsedResume.findOne({ resumeId: activeResume._id })
+      : await ParsedResume.findOne({ userId: userObjId }).sort({ updatedAt: -1 });
 
     // 10. Canonical Career Health Calculation (Weighted Formula)
     // Formula Breakdown:
@@ -443,14 +449,14 @@ export class SnapshotService {
       },
       resumeInfo: {
         hasResume: Boolean(resumeDoc),
-        fileName: (resumeDoc as any)?.fileName || (resumeDoc as any)?.originalFileName || null,
-        detectedSkillsCount: (resumeDoc as any)?.skills?.length || 0,
-        atsScore: (resumeDoc as any)?.atsScore || null,
-        experienceCount: (resumeDoc as any)?.experience?.length || 0,
-        projectsCount: (resumeDoc as any)?.projects?.length || 0,
-        educationCount: (resumeDoc as any)?.education?.length || 0,
-        certificationsCount: (resumeDoc as any)?.certifications?.length || 0,
-        parsingStatus: (resumeDoc as any)?.parsingStatus || (resumeDoc ? 'completed' : 'none'),
+        fileName: activeResume?.originalFileName || null,
+        detectedSkillsCount: totalSkills,
+        atsScore: resumeDoc?.atsScore || null,
+        experienceCount: resumeDoc?.experience?.length || 0,
+        projectsCount: resumeDoc?.projects?.length || 0,
+        educationCount: resumeDoc?.education?.length || 0,
+        certificationsCount: resumeDoc?.certifications?.length || 0,
+        parsingStatus: activeResume?.parsingStatus || (resumeDoc ? 'completed' : 'none'),
         updatedAt: resumeDoc?.updatedAt || null,
       },
       skillsInfo: {
@@ -460,9 +466,9 @@ export class SnapshotService {
       pipeline,
       nextBestAction,
       telemetry: await (async () => {
-        let aiProviderName = 'Local AI Fallback (Deterministic Mode)';
-        let aiStatus: 'LIVE' | 'FALLBACK' = 'FALLBACK';
-        let marketStatus: 'LIVE' | 'SANDBOX' = 'SANDBOX';
+        let aiProviderName: string;
+        let aiStatus: 'LIVE' | 'FALLBACK';
+        let marketStatus: 'LIVE' | 'SANDBOX';
 
         try {
           const { default: aiClient } = await import('./AIClientService.js');

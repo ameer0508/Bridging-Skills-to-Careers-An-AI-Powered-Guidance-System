@@ -23,6 +23,12 @@ import rateLimit from 'express-rate-limit';
 
 const app = express();
 
+// Behind the bundled nginx proxy in production, trust one hop so rate limiting and
+// request logs see the real client address instead of the proxy's.
+if (env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 const allowedOrigins = [
   env.FRONTEND_URL,
   'http://localhost:3000',

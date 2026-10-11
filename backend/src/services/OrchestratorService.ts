@@ -522,10 +522,10 @@ export class OrchestratorService {
     return {
       executions: cachedRuns,
       recentEvents: recentEvents.map((ev) => ({
-        id: (ev as any)._id?.toString() || Math.random().toString(),
-        eventType: (ev as any).eventType,
-        timestamp: (ev as any).createdAt || (ev as any).timestamp,
-        details: (ev as any).details || (ev as any).data || {},
+        id: ev._id.toString(),
+        eventType: ev.eventType,
+        timestamp: ev.createdAt,
+        details: ev.details || {},
       }))
     };
   }

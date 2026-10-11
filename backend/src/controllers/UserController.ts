@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import UserService from '../services/UserService.js';
+import logger from '../config/logger.js';
 
 export class UserController {
   private userService: UserService;
@@ -63,7 +64,7 @@ export class UserController {
           import('../services/CareerReadinessService.js').then(m => m.default.evaluateUser(userId)),
           import('../services/SnapshotService.js').then(m => m.default.createSnapshot(userId)),
         ]).catch(err => {
-          console.error('Downstream evaluation failure after domain update:', err);
+          logger.error('Downstream evaluation failure after domain update:', err);
         });
       }
 

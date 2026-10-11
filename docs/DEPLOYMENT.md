@@ -11,9 +11,12 @@ The platform consists of three containerized services:
 Create a `.env` file at the root or within each service directory:
 ```env
 # Backend & AI Configuration
-MONGO_URI=mongodb://mongodb:27017/skillbridge
-JWT_SECRET=<your_secure_jwt_secret>
-JWT_EXPIRES_IN=1d
+MONGODB_URI=mongodb://mongodb:27017/skillbridge
+JWT_ACCESS_SECRET=<your_secure_access_secret>
+JWT_REFRESH_SECRET=<your_secure_refresh_secret>
+INTERNAL_SERVICE_KEY=<your_secure_internal_service_key>
+JWT_ACCESS_EXPIRATION=15m
+JWT_REFRESH_EXPIRATION=7d
 FRONTEND_URL=http://localhost:3000
 GEMINI_API_KEY=<your_gemini_api_key>
 ```

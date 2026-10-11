@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from contextlib import asynccontextmanager
@@ -7,6 +7,7 @@ import platform
 from datetime import datetime, timezone
 from app.core.config import settings
 from app.core.logging import logger
+from app.core.security import verify_internal_request, verify_internal_request_in_production
 from app.config.ai_config import ai_config
 from app.gateway.ai_gateway import ai_gateway
 from app.knowledge_graph.graph_engine import knowledge_graph_instance
@@ -36,55 +37,64 @@ app = FastAPI(
     title="SkillBridge AI Intelligence Layer",
     description="Enterprise Modular AI Gateway for Resume Parsing, Skill Extraction, Career Matching, and Guidance Services",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    # Interactive API docs are a development aid; they are not served in production
+    docs_url=None if settings.is_production else "/docs",
+    redoc_url=None if settings.is_production else "/redoc",
+    openapi_url=None if settings.is_production else "/openapi.json",
 )
 
-# CORS configuration
+# CORS: this is an internal service called server-to-server by the backend, so no browser
+# origin is trusted unless explicitly listed in CORS_ALLOWED_ORIGINS.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=settings.cors_origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "DELETE"],
+    allow_headers=["Content-Type", "X-Internal-Service-Key", "X-Acting-User-Id"],
 )
+
+# Every router except the health check requires the internal service key, and user-scoped
+# routes additionally require the caller to act for that same user.
+internal_only = [Depends(verify_internal_request)]
 
 # Route registries
 app.include_router(health.router)
-app.include_router(extract.router)
-app.include_router(skills.router)
-app.include_router(chat.router)
-app.include_router(career.router)
-app.include_router(readiness.router)
-app.include_router(recommendations.router)
-app.include_router(roadmap.router)
-app.include_router(analytics.router)
-app.include_router(resume_intelligence.router)
-app.include_router(salary.router)
-app.include_router(market.router)
-app.include_router(courses.router)
-app.include_router(certifications.router)
-app.include_router(external_gateway.router)
-app.include_router(knowledge_graph.router)
-app.include_router(events.router)
-app.include_router(feature_store.router)
-app.include_router(ai_operations.router)
-app.include_router(github.router)
-app.include_router(linkedin.router)
-app.include_router(portfolio.router)
-app.include_router(coding.router)
-app.include_router(opensource.router)
-app.include_router(brand.router)
-app.include_router(professional_graph.router)
-app.include_router(agent.router)
-app.include_router(job_agent_router.router)
-app.include_router(learning_agent_router.router)
-app.include_router(resume_agent_router.router)
-app.include_router(interview_agent_router.router)
-app.include_router(networking_agent_router.router)
-app.include_router(opportunity_agent_router.router)
-app.include_router(orchestrator_router.router)
-app.include_router(memory_router.router)
-app.include_router(dashboard_router.router)
+app.include_router(extract.router, dependencies=internal_only)
+app.include_router(skills.router, dependencies=internal_only)
+app.include_router(chat.router, dependencies=internal_only)
+app.include_router(career.router, dependencies=internal_only)
+app.include_router(readiness.router, dependencies=internal_only)
+app.include_router(recommendations.router, dependencies=internal_only)
+app.include_router(roadmap.router, dependencies=internal_only)
+app.include_router(analytics.router, dependencies=internal_only)
+app.include_router(resume_intelligence.router, dependencies=internal_only)
+app.include_router(salary.router, dependencies=internal_only)
+app.include_router(market.router, dependencies=internal_only)
+app.include_router(courses.router, dependencies=internal_only)
+app.include_router(certifications.router, dependencies=internal_only)
+app.include_router(external_gateway.router, dependencies=internal_only)
+app.include_router(knowledge_graph.router, dependencies=internal_only)
+app.include_router(events.router, dependencies=internal_only)
+app.include_router(feature_store.router, dependencies=internal_only)
+app.include_router(ai_operations.router, dependencies=internal_only)
+app.include_router(github.router, dependencies=internal_only)
+app.include_router(linkedin.router, dependencies=internal_only)
+app.include_router(portfolio.router, dependencies=internal_only)
+app.include_router(coding.router, dependencies=internal_only)
+app.include_router(opensource.router, dependencies=internal_only)
+app.include_router(brand.router, dependencies=internal_only)
+app.include_router(professional_graph.router, dependencies=internal_only)
+app.include_router(agent.router, dependencies=internal_only)
+app.include_router(job_agent_router.router, dependencies=internal_only)
+app.include_router(learning_agent_router.router, dependencies=internal_only)
+app.include_router(resume_agent_router.router, dependencies=internal_only)
+app.include_router(interview_agent_router.router, dependencies=internal_only)
+app.include_router(networking_agent_router.router, dependencies=internal_only)
+app.include_router(opportunity_agent_router.router, dependencies=internal_only)
+app.include_router(orchestrator_router.router, dependencies=internal_only)
+app.include_router(memory_router.router, dependencies=internal_only)
+app.include_router(dashboard_router.router, dependencies=internal_only)
 
 def get_realtime_ai_telemetry() -> dict:
     current_time = datetime.now(timezone.utc).isoformat()
@@ -459,11 +469,11 @@ def render_ai_dashboard_html(data: dict) -> str:
 </html>
 """
 
-@app.get("/api/v1/realtime")
+@app.get("/api/v1/realtime", dependencies=[Depends(verify_internal_request_in_production)])
 def get_realtime_api():
     return get_realtime_ai_telemetry()
 
-@app.get("/")
+@app.get("/", dependencies=[Depends(verify_internal_request_in_production)])
 def read_root(request: Request):
     data = get_realtime_ai_telemetry()
     accept_header = request.headers.get("accept", "")

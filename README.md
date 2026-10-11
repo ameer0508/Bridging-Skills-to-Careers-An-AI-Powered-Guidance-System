@@ -349,8 +349,10 @@ FRONTEND_URL=http://localhost:3000
 MONGODB_URI=mongodb://localhost:27017/skillbridge
 
 # Cryptographically secure secrets for JWT tokens
-JWT_SECRET=<your-development-jwt-secret>
-JWT_EXPIRES_IN=1d
+JWT_ACCESS_SECRET=<your-development-access-secret>
+JWT_REFRESH_SECRET=<your-development-refresh-secret>
+JWT_ACCESS_EXPIRATION=15m
+JWT_REFRESH_EXPIRATION=7d
 
 # URL pointing to the running Python AI Service
 AI_SERVICE_URL=http://127.0.0.1:8000
@@ -380,7 +382,7 @@ HUGGINGFACE_API_KEY=<your-huggingface-key>
 cp frontend/.env.example frontend/.env
 ```
 ```env
-VITE_API_BASE_URL=http://localhost:5000/api/v1
+VITE_API_URL=http://localhost:5000/api/v1
 ```
 
 ---

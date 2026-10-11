@@ -19,10 +19,6 @@ from app.career_agent.antigravity_schemas import (
 )
 from app.career_agent.antigravity_agent import AutonomousCareerIntelligenceAgent
 
-@pytest.fixture
-def client():
-    return TestClient(app)
-
 def test_benchmark_role_prerequisites_ai_engineer():
     res = benchmark_role_prerequisites("AI Engineer")
     assert res["target_role"] == "AI Engineer"

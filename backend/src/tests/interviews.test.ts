@@ -26,7 +26,7 @@ export async function runInterviewTests() {
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : '';
     if (!msg.includes('Interview session not found or access denied')) {
-      throw new Error(`Unexpected error message for unauthorized session access: ${msg}`);
+      throw new Error(`Unexpected error message for unauthorized session access: ${msg}`, { cause: err });
     }
   }
   console.log('  ✓ Multi-Tenant Session Isolation Security Verified');

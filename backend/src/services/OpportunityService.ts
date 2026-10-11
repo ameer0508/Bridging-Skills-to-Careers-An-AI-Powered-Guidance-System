@@ -90,7 +90,7 @@ class OpportunityService {
 
     // Deriving search keyword query if not provided
     const searchKeyword = query.keywords || targetTitle || 'Software Engineer';
-    let canonicalOpportunities: CanonicalOpportunity[] = [];
+    let canonicalOpportunities: CanonicalOpportunity[];
     try {
       canonicalOpportunities = await this.provider.search({ ...query, keywords: searchKeyword });
     } catch (err: unknown) {

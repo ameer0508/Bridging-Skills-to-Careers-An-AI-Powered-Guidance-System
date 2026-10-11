@@ -53,8 +53,10 @@ const UserSchema = new Schema<IUser>(
 );
 
 UserSchema.set('toJSON', {
+  // Mongoose types the serialised object loosely; `any` is required by its transform signature
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   transform: (_doc, ret: Record<string, any>) => {
-    ret.id = ret._id ? ret._id.toString() : ret.id;
+    ret.id = ret._id ? String(ret._id) : ret.id;
     delete ret.passwordHash;
     delete ret.__v;
     return ret;

@@ -6,6 +6,7 @@ import ContextAssembler from './ContextAssembler.js';
 import PromptBuilder from './PromptBuilder.js';
 import AIClientService from './AIClientService.js';
 import logger from '../config/logger.js';
+import { AppError } from '../middlewares/errorHandler.js';
 
 export class ConversationService {
   
@@ -15,7 +16,7 @@ export class ConversationService {
 
   public async getConversationHistory(conversationId: string, userId: string) {
     const conv = await Conversation.findOne({ _id: new mongoose.Types.ObjectId(conversationId), userId: new mongoose.Types.ObjectId(userId) });
-    if (!conv) throw new Error('Conversation not found');
+    if (!conv) throw new AppError('Conversation not found', 404, 'CONVERSATION_NOT_FOUND');
 
     const messages = await ConversationMessage.find({ conversationId: conv._id }).sort({ createdAt: 1 }).lean();
     return { conversation: conv, messages };
@@ -36,7 +37,7 @@ export class ConversationService {
       { careerId: new mongoose.Types.ObjectId(careerId) },
       { new: true }
     );
-    if (!conv) throw new Error('Conversation not found');
+    if (!conv) throw new AppError('Conversation not found', 404, 'CONVERSATION_NOT_FOUND');
 
     // Add a system message notifying context switch
     await ConversationMessage.create({
@@ -50,7 +51,7 @@ export class ConversationService {
 
   public async sendMessage(conversationId: string, userId: string, messageContent: string) {
     const conv = await Conversation.findOne({ _id: new mongoose.Types.ObjectId(conversationId), userId: new mongoose.Types.ObjectId(userId) });
-    if (!conv) throw new Error('Conversation not found');
+    if (!conv) throw new AppError('Conversation not found', 404, 'CONVERSATION_NOT_FOUND');
 
     // 1. Save User Message
     await ConversationMessage.create({

@@ -1,0 +1,25 @@
+# Keep secrets, user data and local artefacts out of every image build context.
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+
+**/node_modules
+**/dist
+**/.venv
+**/venv
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+
+# Local databases, uploads, logs and backups (may contain personal data)
+**/data
+**/uploads
+**/logs
+**/*.log
+**/*.backup.json
+scratch
+
+.git
+.vscode
+.idea

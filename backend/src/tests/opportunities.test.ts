@@ -15,7 +15,7 @@ export async function runOpportunityTests() {
   }
 
   // Test 2: Search Normalization & Resilience
-  let opportunities: any[] = [];
+  let opportunities: any[];
   try {
     opportunities = await provider.search({ keywords: 'FastAPI' });
   } catch (err: any) {
@@ -85,7 +85,7 @@ export async function runOpportunityTests() {
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : '';
     if (!msg.includes('Valid http/https application URL is required')) {
-      throw new Error(`Unexpected error message for insecure URL: ${msg}`);
+      throw new Error(`Unexpected error message for insecure URL: ${msg}`, { cause: err });
     }
   }
   console.log('  ✓ Insecure Protocol Rejection (javascript:/data:/file:) Security Verified');

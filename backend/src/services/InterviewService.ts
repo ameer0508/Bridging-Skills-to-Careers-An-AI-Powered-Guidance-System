@@ -4,6 +4,7 @@ import UserSkill from '../models/UserSkill.js';
 import CareerMatch from '../models/CareerMatch.js';
 import GapAnalysis from '../models/GapAnalysis.js';
 import ParsedResume from '../models/ParsedResume.js';
+import { AppError } from '../middlewares/errorHandler.js';
 
 export interface StartInterviewDTO {
   targetCareerId?: string;
@@ -23,14 +24,15 @@ export interface RespondQuestionDTO {
 }
 
 export class InterviewService {
-  private inMemorySessions = new Map<string, any>();
+  // Fallback store used only while the database is unreachable
+  private inMemorySessions = new Map<string, IInterviewSession>();
 
   /**
    * Start a new grounded AI interview session using candidate database context
    */
   public async startSession(userId: string, dto: StartInterviewDTO = {}): Promise<IInterviewSession> {
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      throw new Error('Invalid user ID provided');
+      throw new AppError('Invalid user ID provided', 400, 'INVALID_ID');
     }
 
     const userObjectId = new mongoose.Types.ObjectId(userId);
@@ -121,8 +123,9 @@ export class InterviewService {
       return session;
     } else {
       const key = `${userId}_${sessionData._id}`;
-      this.inMemorySessions.set(key, sessionData);
-      return sessionData as any;
+      const transient = sessionData as unknown as IInterviewSession;
+      this.inMemorySessions.set(key, transient);
+      return transient;
     }
   }
 
@@ -131,7 +134,7 @@ export class InterviewService {
    */
   public async getSession(userId: string, sessionId: string): Promise<IInterviewSession> {
     if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(sessionId)) {
-      throw new Error('Invalid session ID or user ID');
+      throw new AppError('Invalid session ID or user ID', 400, 'INVALID_ID');
     }
 
     if (mongoose.connection.readyState === 1) {
@@ -141,7 +144,7 @@ export class InterviewService {
       });
 
       if (!session) {
-        throw new Error('Interview session not found or access denied');
+        throw new AppError('Interview session not found or access denied', 404, 'INTERVIEW_NOT_FOUND');
       }
 
       return session;
@@ -149,9 +152,9 @@ export class InterviewService {
       const key = `${userId}_${sessionId}`;
       const session = this.inMemorySessions.get(key);
       if (!session) {
-        throw new Error('Interview session not found or access denied');
+        throw new AppError('Interview session not found or access denied', 404, 'INTERVIEW_NOT_FOUND');
       }
-      return session as any;
+      return session;
     }
   }
 
@@ -162,11 +165,11 @@ export class InterviewService {
     const session = await this.getSession(userId, sessionId);
 
     if (session.status !== 'active') {
-      throw new Error('Interview session is no longer active');
+      throw new AppError('Interview session is no longer active', 409, 'INTERVIEW_NOT_ACTIVE');
     }
 
     if (dto.questionIndex < 0 || dto.questionIndex >= session.questions.length) {
-      throw new Error('Invalid question index');
+      throw new AppError('Invalid question index', 400, 'INVALID_QUESTION_INDEX');
     }
 
     const q = session.questions[dto.questionIndex];
@@ -249,13 +252,13 @@ export class InterviewService {
     if (mongoose.connection.readyState === 1) {
       return InterviewSession.find({ userId: new mongoose.Types.ObjectId(userId) }).sort({ createdAt: -1 }).limit(20);
     } else {
-      const results: any[] = [];
+      const results: IInterviewSession[] = [];
       for (const [key, val] of this.inMemorySessions.entries()) {
         if (key.startsWith(`${userId}_`)) {
           results.push(val);
         }
       }
-      return results as any;
+      return results;
     }
   }
 

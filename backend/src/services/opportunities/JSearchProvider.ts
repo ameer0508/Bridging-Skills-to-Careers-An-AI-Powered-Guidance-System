@@ -153,7 +153,7 @@ export class JSearchProvider implements OpportunityProvider {
       const errorMsg = err instanceof Error ? err.message : 'Unknown JSearch API error';
       // When API credentials are configured, do not substitute fake sandbox data on failure.
       // Rethrow to allow caller to handle honest provider failure state.
-      throw new Error(`JSearch Provider Error: ${errorMsg}`);
+      throw new Error(`JSearch Provider Error: ${errorMsg}`, { cause: err });
     }
   }
 

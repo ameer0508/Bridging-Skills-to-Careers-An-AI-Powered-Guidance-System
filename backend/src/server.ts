@@ -20,7 +20,7 @@ const connectDatabase = async (): Promise<void> => {
     (!mongoUri.includes('localhost') && !mongoUri.includes('127.0.0.1'));
 
   if (isCloudUri) {
-    logger.info('☁️ Cloud MongoDB Atlas URI detected. Connecting directly to Cloud Database...');
+    logger.info('External MongoDB URI configured. Connecting directly...');
   } else if (env.NODE_ENV === 'development') {
     // Development convenience: run an embedded MongoDB whose files persist under data/local_db.
     // The package is a devDependency, so it is loaded lazily and never required in production.
