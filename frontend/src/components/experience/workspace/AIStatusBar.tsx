@@ -17,10 +17,10 @@ export interface AIStatusBarProps {
 
 export const AIStatusBar: React.FC<AIStatusBarProps> = ({
   status = 'active',
-  confidence = 98.4,
+  confidence,
   lastUpdated = 'Just now',
-  provider = 'Gemini 1.5 & Vector Engine',
-  latencyMs = 120,
+  provider = 'Gemini 1.5 Flash (Career Intelligence Layer)',
+  latencyMs,
   retryCount = 0,
   errorMessage,
   className = '',
@@ -51,7 +51,7 @@ export const AIStatusBar: React.FC<AIStatusBarProps> = ({
       case 'active':
         return {
           icon: <Brain className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />,
-          label: 'AI Gateway Active',
+          label: 'AI Gateway Connected',
           color: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
         };
       case 'synced':
@@ -83,10 +83,12 @@ export const AIStatusBar: React.FC<AIStatusBarProps> = ({
             {badge.icon}
             <span>{badge.label}</span>
           </span>
-          <span className="hidden sm:inline text-slate-400 font-mono text-[11px]">
-            Confidence: <strong className="text-emerald-400 font-bold">{confidence}%</strong>
-          </span>
-          {latencyMs > 0 && (
+          {typeof confidence === 'number' && (
+            <span className="hidden sm:inline text-slate-400 font-mono text-[11px]">
+              Confidence: <strong className="text-emerald-400 font-bold">{confidence}%</strong>
+            </span>
+          )}
+          {typeof latencyMs === 'number' && latencyMs > 0 && (
             <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-white/5 text-slate-400">
               <Zap className="w-3 h-3 text-cyan-400" />
               <span>{latencyMs}ms</span>
@@ -95,7 +97,7 @@ export const AIStatusBar: React.FC<AIStatusBarProps> = ({
         </div>
 
         <div className="flex items-center gap-3 text-slate-500 text-[11px] font-mono shrink-0">
-          <span>Updated: {lastUpdated}</span>
+          <span>Last verified: {lastUpdated}</span>
           <span className="hidden md:inline text-slate-600">•</span>
           <span className="hidden md:inline font-bold text-slate-300">{providerDisplay}</span>
 
@@ -112,13 +114,19 @@ export const AIStatusBar: React.FC<AIStatusBarProps> = ({
       {showDevTelemetry && (
         <div className="p-3 bg-slate-950 border border-cyan-500/30 rounded-xl text-[11px] font-mono text-slate-300 space-y-1">
           <div className="flex justify-between items-center text-cyan-400 font-bold border-b border-cyan-500/20 pb-1">
-            <span>[AI GATEWAY DEV TELEMETRY]</span>
+            <span>[AI GATEWAY GROUNDED TELEMETRY]</span>
             <span>STATUS: {status.toUpperCase()}</span>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-            <div><span className="text-slate-500">Provider:</span> {provider}</div>
-            <div><span className="text-slate-500">Confidence:</span> {confidence}%</div>
-            <div><span className="text-slate-500">Latency:</span> {latencyMs} ms</div>
+            <div><span className="text-slate-500">Provider:</span> {providerDisplay}</div>
+            <div>
+              <span className="text-slate-500">Confidence:</span>{' '}
+              {typeof confidence === 'number' ? `${confidence}%` : 'Grounded (N/A)'}
+            </div>
+            <div>
+              <span className="text-slate-500">Latency:</span>{' '}
+              {typeof latencyMs === 'number' ? `${latencyMs} ms` : 'Persistent Gateway'}
+            </div>
             <div><span className="text-slate-500">Retry Count:</span> {retryCount}</div>
           </div>
         </div>

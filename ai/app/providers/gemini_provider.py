@@ -22,13 +22,16 @@ class GeminiProvider(BaseAIProvider):
     Google GenAI / Gemini Provider Adapter for SkillBridge AI Intelligence Layer.
     """
 
-    def __init__(self, model_name: str = "gemini-2.5-flash"):
-        self._model_name = model_name
+    def __init__(self, model_name: Optional[str] = None):
+        self._model_name = model_name or os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
         self.api_key = os.getenv("GEMINI_API_KEY")
         if GENAI_AVAILABLE and self.api_key:
             self.client = genai.Client(api_key=self.api_key)
         else:
-            logger.warning("GEMINI_API_KEY is not set or google-genai package not available. Client initialization deferred.")
+            if not self.api_key:
+                logger.warning("GEMINI_API_KEY is not set. Client initialization deferred.")
+            if not GENAI_AVAILABLE:
+                logger.warning("google-genai package not available.")
             self.client = None
 
     @property
@@ -40,7 +43,7 @@ class GeminiProvider(BaseAIProvider):
         return self._model_name
 
     def is_available(self) -> bool:
-        return bool(self.api_key or os.getenv("GEMINI_API_KEY"))
+        return bool(GENAI_AVAILABLE and (self.api_key or os.getenv("GEMINI_API_KEY")))
 
     def _get_client(self) -> genai.Client:
         if not self.client:
@@ -52,73 +55,99 @@ class GeminiProvider(BaseAIProvider):
 
     def _execute_structured_prompt(self, prompt: str, schema_class: Any, metadata_tag: str) -> UnifiedAIResponse:
         start_time = time.time()
-        try:
-            client = self._get_client()
-            response = client.models.generate_content(
-                model=self._model_name,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    response_mime_type="application/json",
-                    response_schema=schema_class,
-                    temperature=0.1,
-                ),
-            )
-            latency = (time.time() - start_time) * 1000
-            parsed_data = schema_class.model_validate_json(response.text)
+        client = self._get_client()
+        candidate_models = [self._model_name]
+        for alt in ["gemini-flash-latest", "gemini-3.6-flash"]:
+            if alt not in candidate_models:
+                candidate_models.append(alt)
 
-            return ResponseNormalizer.normalize_success(
-                raw_data=parsed_data.model_dump(),
-                provider=self.provider_name,
-                model=self._model_name,
-                latency_ms=latency,
-                prompt_text=prompt,
-                completion_text=response.text,
-                metadata={"parsing_engine": metadata_tag}
-            )
-        except Exception as e:
-            latency = (time.time() - start_time) * 1000
-            logger.error(f"GeminiProvider {metadata_tag} failed: {e}")
-            return ResponseNormalizer.normalize_error(
-                error_msg=str(e),
-                provider=self.provider_name,
-                model=self._model_name,
-                latency_ms=latency,
-                prompt_text=prompt,
-                metadata={"error_type": type(e).__name__, "tag": metadata_tag}
-            )
+        last_error = None
+        for model in candidate_models:
+            try:
+                response = client.models.generate_content(
+                    model=model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=schema_class,
+                        temperature=0.1,
+                    ),
+                )
+                latency = (time.time() - start_time) * 1000
+                parsed_data = schema_class.model_validate_json(response.text)
+
+                return ResponseNormalizer.normalize_success(
+                    raw_data=parsed_data.model_dump(),
+                    provider=self.provider_name,
+                    model=model,
+                    latency_ms=latency,
+                    prompt_text=prompt,
+                    completion_text=response.text,
+                    metadata={"parsing_engine": metadata_tag}
+                )
+            except Exception as e:
+                last_error = e
+                logger.warning(f"GeminiProvider {metadata_tag} failed with model {model}: {e}")
+                if "503" in str(e) or "404" in str(e):
+                    continue
+                break
+
+        latency = (time.time() - start_time) * 1000
+        logger.error(f"GeminiProvider {metadata_tag} failed across models: {last_error}")
+        return ResponseNormalizer.normalize_error(
+            error_msg=str(last_error),
+            provider=self.provider_name,
+            model=self._model_name,
+            latency_ms=latency,
+            prompt_text=prompt,
+            metadata={"error_type": type(last_error).__name__, "tag": metadata_tag}
+        )
 
     def generate_content(self, prompt: str, **kwargs) -> UnifiedAIResponse:
         start_time = time.time()
-        try:
-            client = self._get_client()
-            full_prompt = PromptManager.get_career_architect_prompt(prompt)
-            response = client.models.generate_content(
-                model=self._model_name,
-                contents=full_prompt,
-            )
-            latency = (time.time() - start_time) * 1000
-            text_content = response.text if response and hasattr(response, 'text') else str(response)
+        client = self._get_client()
+        candidate_models = [self._model_name]
+        for alt in ["gemini-flash-latest", "gemini-3.6-flash"]:
+            if alt not in candidate_models:
+                candidate_models.append(alt)
 
-            return ResponseNormalizer.normalize_success(
-                raw_data=text_content,
-                provider=self.provider_name,
-                model=self._model_name,
-                latency_ms=latency,
-                prompt_text=full_prompt,
-                completion_text=text_content,
-                metadata={"status": "complete"}
-            )
-        except Exception as e:
-            latency = (time.time() - start_time) * 1000
-            logger.error(f"GeminiProvider generate_content failed: {e}")
-            return ResponseNormalizer.normalize_error(
-                error_msg=str(e),
-                provider=self.provider_name,
-                model=self._model_name,
-                latency_ms=latency,
-                prompt_text=prompt,
-                metadata={"error_type": type(e).__name__}
-            )
+        last_error = None
+        full_prompt = PromptManager.get_career_architect_prompt(prompt)
+        for model in candidate_models:
+            try:
+                response = client.models.generate_content(
+                    model=model,
+                    contents=full_prompt,
+                )
+                latency = (time.time() - start_time) * 1000
+                text_content = response.text if response and hasattr(response, 'text') else str(response)
+
+                return ResponseNormalizer.normalize_success(
+                    raw_data=text_content,
+                    provider=self.provider_name,
+                    model=model,
+                    latency_ms=latency,
+                    prompt_text=full_prompt,
+                    completion_text=text_content,
+                    metadata={"status": "complete"}
+                )
+            except Exception as e:
+                last_error = e
+                logger.warning(f"GeminiProvider generate_content failed with model {model}: {e}")
+                if "503" in str(e) or "404" in str(e):
+                    continue
+                break
+
+        latency = (time.time() - start_time) * 1000
+        logger.error(f"GeminiProvider generate_content failed across models: {last_error}")
+        return ResponseNormalizer.normalize_error(
+            error_msg=str(last_error),
+            provider=self.provider_name,
+            model=self._model_name,
+            latency_ms=latency,
+            prompt_text=prompt,
+            metadata={"error_type": type(last_error).__name__}
+        )
 
     def parse_resume_text(self, text: str, schema_class: Any) -> UnifiedAIResponse:
         prompt = PromptManager.get_resume_extraction_prompt(text)

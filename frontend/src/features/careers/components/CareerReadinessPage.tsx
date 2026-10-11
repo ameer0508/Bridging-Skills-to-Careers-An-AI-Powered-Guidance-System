@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Brain, FileText, Target, ChevronRight } from 'lucide-react';
+import { Brain, FileText, Target, ChevronRight, Sparkles, Filter, X } from 'lucide-react';
 import apiClient from '../../../lib/axios';
 import { useAuthStore } from '../../../store/authStore';
 
 import { ReadinessTelemetryHUD } from './ReadinessTelemetryHUD';
 import { ReadinessDimensionGrid } from './ReadinessDimensionGrid';
 import { CriticalGapActionDrawer } from './CriticalGapActionDrawer';
+import { ReadinessDiagnosticLabView } from './ReadinessDiagnosticLabView';
 
 // Design System 2.0 Components
 import {
@@ -15,7 +16,6 @@ import {
   AIStatusBar,
   WorkspaceDivider,
   PremiumSection,
-  PremiumEmptyState,
   PremiumErrorState,
 } from '../../../components/experience/workspace';
 import { AIThinkingAnimation } from '../../../components/experience';
@@ -53,8 +53,49 @@ interface ICareerReadiness {
 export const CareerReadinessPage: React.FC = () => {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
+  const queryClient = useQueryClient();
 
   const [selectedCareerId, setSelectedCareerId] = useState<string | null>(null);
+  const [selectedDimensionFilter, setSelectedDimensionFilter] = useState<string | null>(null);
+
+  // Resume status query to monitor real-time background parsing
+  const { data: resumeData } = useQuery({
+    queryKey: ['resumes', 'me'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get('/resumes/me');
+        return response.data?.data?.resume || null;
+      } catch {
+        return null;
+      }
+    },
+    refetchInterval: (query) => {
+      const status = query.state.data?.parsingStatus;
+      if (status === 'pending' || status === 'processing') {
+        return 2000;
+      }
+      return false;
+    },
+  });
+
+  // Resume upload mutation
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('resume', file);
+      const response = await apiClient.post('/resumes/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['resumes', 'me'] });
+      queryClient.invalidateQueries({ queryKey: ['readiness'] });
+      queryClient.invalidateQueries({ queryKey: ['skills'] });
+    },
+  });
 
   const { data, isLoading, error, refetch } = useQuery<{ readiness: ICareerReadiness[] }>({
     queryKey: ['readiness'],
@@ -63,6 +104,16 @@ export const CareerReadinessPage: React.FC = () => {
       return response.data.data;
     },
   });
+
+  const items = data?.readiness || [];
+  const activeItem = items.find((i) => i.careerId._id === selectedCareerId) || items[0];
+
+  // Auto refetch readiness when background parsing completes
+  useEffect(() => {
+    if (resumeData?.parsingStatus === 'completed' && items.length === 0) {
+      queryClient.invalidateQueries({ queryKey: ['readiness'] });
+    }
+  }, [resumeData?.parsingStatus, items.length, queryClient]);
 
   if (isLoading) {
     return (
@@ -86,23 +137,33 @@ export const CareerReadinessPage: React.FC = () => {
     );
   }
 
-  const items = data?.readiness || [];
-  const activeItem = items.find((i) => i.careerId._id === selectedCareerId) || items[0];
-
   if (items.length === 0) {
+    const uploadStatus: 'idle' | 'uploading' | 'processing' | 'completed' | 'error' =
+      uploadMutation.isPending
+        ? 'uploading'
+        : resumeData?.parsingStatus === 'processing' || resumeData?.parsingStatus === 'pending'
+          ? 'processing'
+          : resumeData?.parsingStatus === 'completed'
+            ? 'completed'
+            : uploadMutation.isError || resumeData?.parsingStatus === 'failed'
+              ? 'error'
+              : 'idle';
+
+    const errorMessage = uploadMutation.error
+      ? ((uploadMutation.error as any).response?.data?.message || (uploadMutation.error as Error).message)
+      : resumeData?.parsingStatus === 'failed'
+        ? 'Resume evidence parsing failed. Please ensure the file is an unlocked PDF or DOCX document.'
+        : undefined;
+
     return (
-      <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <PremiumEmptyState
-          title="No Readiness Profiles Generated"
-          description="Readiness scoring requires evidence parsing from your experience. Upload your resume to extract dimensional readiness metrics."
-          primaryAction={{
-            label: 'Upload Resume Now',
-            onClick: () => navigate('/resume'),
+      <div className="max-w-7xl mx-auto space-y-8 pb-16 px-4">
+        <ReadinessDiagnosticLabView
+          onUploadResume={async (file: File) => {
+            await uploadMutation.mutateAsync(file);
           }}
-          secondaryAction={{
-            label: 'Ask AI Architect',
-            onClick: () => navigate('/ai'),
-          }}
+          uploadStatus={uploadStatus}
+          errorMessage={errorMessage}
+          onConsultAI={() => navigate('/ai')}
         />
       </div>
     );
@@ -197,10 +258,28 @@ export const CareerReadinessPage: React.FC = () => {
         <div className="lg:col-span-8 space-y-6">
           <PremiumSection
             title="4-Dimension Capability Breakdown"
-            subtitle="Weighted readiness analysis across technical, experience, portfolio, and education"
+            subtitle="Weighted readiness analysis across technical, experience, portfolio, and education. Click a pillar to focus diagnostic evidence."
             badge="Dimensions"
           >
-            <ReadinessDimensionGrid dimensions={activeItem.dimensions} />
+            <div className="space-y-3">
+              {selectedDimensionFilter && (
+                <div className="flex items-center gap-2 p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-xs text-cyan-300">
+                  <Filter className="w-3.5 h-3.5" />
+                  <span>Focused Dimension: <strong>{selectedDimensionFilter}</strong></span>
+                  <button
+                    onClick={() => setSelectedDimensionFilter(null)}
+                    className="ml-auto inline-flex items-center gap-1 text-[10px] font-mono text-slate-400 hover:text-white cursor-pointer"
+                  >
+                    <X className="w-3 h-3" /> Clear Focus
+                  </button>
+                </div>
+              )}
+              <ReadinessDimensionGrid
+                dimensions={activeItem.dimensions}
+                selectedDimension={selectedDimensionFilter}
+                onSelectDimension={setSelectedDimensionFilter}
+              />
+            </div>
           </PremiumSection>
         </div>
       </div>

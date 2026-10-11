@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import UserService from '../services/UserService.js';
+import AuthService from '../services/AuthService.js';
 
 export class UserController {
   private userService: UserService;
@@ -31,6 +32,9 @@ export class UserController {
           onboardingCompleted: user.onboardingCompleted,
           onboardingCompletedAt: user.onboardingCompletedAt || null,
           profileCompleted: user.profileCompleted,
+          bio: user.bio || '',
+          location: user.location || '',
+          experienceLevel: user.experienceLevel || 'entry',
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
           lastLogin: user.lastLogin
@@ -52,6 +56,24 @@ export class UserController {
         updateData.onboardingCompletedAt = new Date();
       }
       const user = await this.userService.updateUserProfile(userId, updateData);
+
+      // Keep persistent backup mirror in sync
+      AuthService.backupUserToFile({
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+        primaryCareerDomain: user.primaryCareerDomain || '',
+        secondaryCareerDomains: user.secondaryCareerDomains || [],
+        targetRole: user.targetRole || '',
+        targetCareerId: user.targetCareerId || null,
+        onboardingCompleted: Boolean(user.onboardingCompleted),
+        onboardingCompletedAt: user.onboardingCompletedAt,
+        profileCompleted: Boolean(user.profileCompleted),
+        bio: user.bio || '',
+        location: user.location || '',
+        experienceLevel: user.experienceLevel || 'entry',
+      }).catch(err => console.warn('Failed to sync updated user backup to file:', err));
 
       // Trigger downstream intelligence recalculations if domain/target role changed or onboarding completed
       if (updateData.primaryCareerDomain || updateData.targetRole || updateData.onboardingCompleted) {
@@ -80,6 +102,9 @@ export class UserController {
           onboardingCompleted: user.onboardingCompleted,
           onboardingCompletedAt: user.onboardingCompletedAt || null,
           profileCompleted: user.profileCompleted,
+          bio: user.bio || '',
+          location: user.location || '',
+          experienceLevel: user.experienceLevel || 'entry',
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
           lastLogin: user.lastLogin

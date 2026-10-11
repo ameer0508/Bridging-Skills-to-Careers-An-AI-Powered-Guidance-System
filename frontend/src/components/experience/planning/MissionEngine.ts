@@ -38,7 +38,12 @@ export const MissionEngine = {
     }
 
     // Weekly Objective from Recommendations
-    const topRec = recommendations.find((r) => r.status !== 'completed');
+    const safeRecs: RecommendationItem[] = Array.isArray(recommendations)
+      ? recommendations
+      : (recommendations as any)?.recommendations && Array.isArray((recommendations as any).recommendations)
+        ? (recommendations as any).recommendations
+        : [];
+    const topRec = safeRecs.find((r) => r && r.status !== 'completed');
     if (topRec) {
       missions.push({
         id: 'mission-weekly',

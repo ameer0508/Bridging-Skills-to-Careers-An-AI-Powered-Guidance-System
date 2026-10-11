@@ -154,6 +154,57 @@ class AIClientService {
     });
     return response.data;
   }
+
+  /**
+   * Probes the AI service health and returns provider readiness telemetry.
+   */
+  async getProviderStatus(): Promise<{
+    isOnline: boolean;
+    isLive: boolean;
+    primaryProvider: string;
+    model: string;
+  }> {
+    try {
+      const response = await axios.get(`${this.aiServiceUrl}/api/v1/health`, { timeout: 2000 });
+      if (response.data && response.data.status === 'healthy') {
+        const providers = response.data.providers || {};
+        const geminiAvailable = Boolean(providers.gemini?.available);
+        const openaiAvailable = Boolean(providers.openai?.available);
+        if (geminiAvailable) {
+          const modelName = providers.gemini?.default_model || 'gemini-3.6-flash';
+          return {
+            isOnline: true,
+            isLive: true,
+            primaryProvider: `Google Gemini (${modelName})`,
+            model: modelName,
+          };
+        }
+        if (openaiAvailable) {
+          return {
+            isOnline: true,
+            isLive: true,
+            primaryProvider: 'OpenAI GPT-4o Mini',
+            model: providers.openai?.default_model || 'gpt-4o-mini',
+          };
+        }
+        return {
+          isOnline: true,
+          isLive: false,
+          primaryProvider: 'Local AI Fallback (Deterministic Mode)',
+          model: 'mock-v1',
+        };
+      }
+    } catch {
+      // AI service offline or unreachable
+    }
+    return {
+      isOnline: false,
+      isLive: false,
+      primaryProvider: 'Local Rule Engine (Offline Fallback)',
+      model: 'deterministic-v1',
+    };
+  }
 }
 
 export default new AIClientService();
+

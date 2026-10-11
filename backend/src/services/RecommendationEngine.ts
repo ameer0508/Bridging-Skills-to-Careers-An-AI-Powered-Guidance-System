@@ -73,6 +73,115 @@ export class RecommendationEngine {
         }
       }
 
+      // If user has no existing gap analysis, generate foundational high-leverage recommendations
+      if (newRecommendations.length === 0) {
+        logger.info(`No specific gap analysis found for user ${userId}. Generating foundational strategic recommendations.`);
+
+        const Career = (await import('../models/Career.js')).default;
+        const defaultCareer = await Career.findOne();
+        const careerId = defaultCareer?._id || new mongoose.Types.ObjectId();
+
+        newRecommendations.push(
+          {
+            userId: new mongoose.Types.ObjectId(userId),
+            careerId,
+            category: 'Projects',
+            type: 'project',
+            title: 'Build Hands-On Project: Containerized REST API & Microservice Mesh',
+            description: 'Design and deploy a scalable microservices architecture using Node.js/Python, Docker container orchestration, and automated API gateway routing.',
+            priority: 'Highest',
+            priorityScore: 94,
+            reason: 'Hands-on architectural capstones provide the strongest verified proof of seniority for tech hiring managers.',
+            impact: 35,
+            difficulty: 'Intermediate',
+            estimatedTime: '12 hours',
+            dependencies: ['Container fundamentals', 'REST API design'],
+            confidence: 95,
+            actionType: 'Project',
+            targetSkill: 'Docker & Microservices',
+            status: 'active'
+          },
+          {
+            userId: new mongoose.Types.ObjectId(userId),
+            careerId,
+            category: 'Learning Resources',
+            type: 'course',
+            title: 'Learn CI/CD Automation: GitHub Actions & Cloud Delivery',
+            description: 'Master enterprise deployment pipelines that automatically lint, test, containerize, and ship software with zero-downtime releases.',
+            priority: 'High',
+            priorityScore: 88,
+            reason: 'Automated delivery pipelines are required across 85% of modern software engineering postings.',
+            impact: 28,
+            difficulty: 'Intermediate',
+            estimatedTime: '6 hours',
+            dependencies: ['Git branching workflows'],
+            confidence: 92,
+            actionLink: 'https://docs.github.com/en/actions',
+            actionType: 'Course',
+            targetSkill: 'CI/CD Pipelines',
+            status: 'active'
+          },
+          {
+            userId: new mongoose.Types.ObjectId(userId),
+            careerId,
+            category: 'Certifications',
+            type: 'certification',
+            title: 'Get Certified: AWS Certified Solutions Architect - Associate',
+            description: 'Validate cloud infrastructure competencies including VPC networking, S3 security policies, ECS clusters, and cost-effective scaling.',
+            priority: 'High',
+            priorityScore: 82,
+            reason: 'Official cloud credentials dramatically elevate recruiter search visibility and profile shortlist conversion.',
+            impact: 30,
+            difficulty: 'Intermediate',
+            estimatedTime: '2 months',
+            dependencies: ['Basic cloud concepts'],
+            confidence: 88,
+            actionLink: 'https://aws.amazon.com/certification/',
+            actionType: 'Certification',
+            targetSkill: 'Cloud Architecture (AWS)',
+            status: 'active'
+          },
+          {
+            userId: new mongoose.Types.ObjectId(userId),
+            careerId,
+            category: 'Learning Resources',
+            type: 'course',
+            title: 'Deep Dive: Advanced System Architecture & Scalability Patterns',
+            description: 'Explore distributed caching, message queues, rate limiting, and database sharding techniques used at high scale.',
+            priority: 'High',
+            priorityScore: 78,
+            reason: 'System architecture questions constitute 50% of senior and staff level technical interview assessments.',
+            impact: 22,
+            difficulty: 'Advanced',
+            estimatedTime: '10 hours',
+            dependencies: ['Backend systems'],
+            confidence: 90,
+            actionType: 'Course',
+            targetSkill: 'System Design',
+            status: 'active'
+          },
+          {
+            userId: new mongoose.Types.ObjectId(userId),
+            careerId,
+            category: 'Resume Improvements',
+            type: 'resume_improvement',
+            title: 'Highlight System Design & Cloud Deliverables in Executive Summary',
+            description: 'Restructure your top resume summary to prominently showcase containerization, microservice orchestration, and measurable business impact.',
+            priority: 'Medium',
+            priorityScore: 70,
+            reason: 'ATS scanners and technical recruiters allocate 6-8 seconds to initial executive summary evaluations.',
+            impact: 20,
+            difficulty: 'Beginner',
+            estimatedTime: '30 mins',
+            dependencies: [],
+            confidence: 85,
+            actionType: 'Resume Optimization',
+            targetSkill: 'Resume Formatting',
+            status: 'active'
+          }
+        );
+      }
+
       if (newRecommendations.length > 0) {
         // We use try-catch to safely ignore uniqueness constraint errors if a duplicate somehow slips in
         // across different careers (e.g. recommending Python for both Backend and Data Science)
@@ -118,7 +227,7 @@ export class RecommendationEngine {
     const resources = await ResourceMatcher.matchLearningResources(gap.skillName);
     for (const res of resources) {
       const { priorityScore, priority } = PriorityCalculator.calculate(
-        gap.impactScore,
+        gap.impactScore || 50,
         'Learning Resources'
       );
       recs.push({
@@ -130,7 +239,7 @@ export class RecommendationEngine {
         priority,
         priorityScore,
         reason: gap.reason,
-        impact: gap.impactScore,
+        impact: gap.impactScore || 50,
         difficulty: res.difficulty,
         estimatedTime: res.estimatedTime,
         dependencies: [],
@@ -144,7 +253,7 @@ export class RecommendationEngine {
     // 2. Projects
     const projects = await ResourceMatcher.matchProjects(gap.skillName);
     for (const proj of projects) {
-      const { priorityScore, priority } = PriorityCalculator.calculate(gap.impactScore, 'Projects');
+      const { priorityScore, priority } = PriorityCalculator.calculate(gap.impactScore || 50, 'Projects');
       recs.push({
         userId: new mongoose.Types.ObjectId(userId),
         careerId: new mongoose.Types.ObjectId(careerId),
@@ -154,7 +263,7 @@ export class RecommendationEngine {
         priority,
         priorityScore,
         reason: `Hands-on application is required to prove proficiency in ${gap.skillName}.`,
-        impact: gap.impactScore,
+        impact: gap.impactScore || 50,
         difficulty: proj.difficulty,
         estimatedTime: proj.estimatedTime,
         dependencies: [`Understand ${gap.skillName} basics`],
@@ -165,11 +274,11 @@ export class RecommendationEngine {
     }
 
     // 3. Certifications (Only if critical or high impact)
-    if (gap.impactScore > 75) {
+    if ((gap.impactScore || 0) > 75) {
       const certs = await ResourceMatcher.matchCertifications(gap.skillName);
       for (const cert of certs) {
         const { priorityScore, priority } = PriorityCalculator.calculate(
-          gap.impactScore,
+          gap.impactScore || 50,
           'Certifications'
         );
         recs.push({

@@ -19,7 +19,10 @@ export const updateProfileSchema = z
     targetRole: z.string().trim().optional(),
     onboardingCompleted: z.boolean().optional(),
     onboardingCompletedAt: z.string().or(z.date()).optional(),
-    profileCompleted: z.boolean().optional()
+    profileCompleted: z.boolean().optional(),
+    bio: z.string().max(1000, 'Bio must not exceed 1000 characters').trim().optional(),
+    location: z.string().max(100, 'Location must not exceed 100 characters').trim().optional(),
+    experienceLevel: z.enum(['entry', 'mid', 'senior', 'lead', 'executive']).optional()
   })
   .strict('Unexpected properties detected in profile updates');
 

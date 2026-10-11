@@ -10,6 +10,7 @@ interface CareerOSOrbitalFieldProps {
   targetRole?: string;
   userSkills?: SkillItem[];
   onUploadResume?: () => void;
+  onNavigateSkills?: () => void;
 }
 
 interface SkillNode {
@@ -26,6 +27,7 @@ export const CareerOSOrbitalField: React.FC<CareerOSOrbitalFieldProps> = ({
   targetRole = 'Target Career Blueprint',
   userSkills = [],
   onUploadResume,
+  onNavigateSkills,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -188,6 +190,15 @@ export const CareerOSOrbitalField: React.FC<CareerOSOrbitalFieldProps> = ({
           {userSkills.length} Verified Vector Nodes Active
         </span>
       </div>
+
+      {onNavigateSkills && (
+        <button
+          onClick={onNavigateSkills}
+          className="absolute top-4 right-4 flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 border border-indigo-500/30 text-indigo-300 hover:text-white hover:border-indigo-400 backdrop-blur-md text-[10px] font-mono font-bold transition-all cursor-pointer"
+        >
+          <span>Skill Mesh →</span>
+        </button>
+      )}
     </div>
   );
 };

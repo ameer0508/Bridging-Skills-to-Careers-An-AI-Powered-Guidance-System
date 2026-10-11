@@ -1,5 +1,5 @@
 import re
-from typing import List
+from typing import List, Tuple
 from app.resume_intelligence.semantic_entities import SemanticExperience, SemanticExtractedEntity
 
 class ExperienceParser:

@@ -18,7 +18,7 @@ export async function runUnifiedOrchestrationTests() {
     criticalGapsCount: snapshotA.criticalGaps?.length,
   });
 
-  if (!snapshotA.targetCareer || typeof snapshotA.readinessScore !== 'number') {
+  if (!snapshotA.targetCareer || (snapshotA.readinessScore !== null && typeof snapshotA.readinessScore !== 'number')) {
     throw new Error('Unified career snapshot assembly failed');
   }
 

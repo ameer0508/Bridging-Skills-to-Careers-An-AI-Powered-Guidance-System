@@ -5,7 +5,7 @@
   "scripts": {
     "dev:frontend": "pnpm --filter frontend dev",
     "dev:backend": "pnpm --filter backend dev",
-    "dev:ai": "powershell -Command \"cd ai; .venv\\Scripts\\activate; uvicorn app.main:app --reload --host 127.0.0.1 --port 8000\"",
+    "dev:ai": "powershell -Command \"cd ai; .venv\\Scripts\\python.exe -m uvicorn app.main:app --reload --host 127.0.0.1 --port 8000\"",
     "dev": "npx concurrently \"pnpm dev:frontend\" \"pnpm dev:backend\" \"pnpm dev:ai\"",
     "build:frontend": "pnpm --filter frontend build",
     "build:backend": "pnpm --filter backend build",

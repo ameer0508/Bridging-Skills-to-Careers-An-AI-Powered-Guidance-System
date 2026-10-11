@@ -12,38 +12,44 @@ import {
   Award,
   Compass,
   CheckSquare,
+  GitBranch,
 } from 'lucide-react';
 import apiClient from '../../lib/axios';
 import { useAuthStore } from '../../store/authStore';
 
-// Feature Components
-import { LearningWorkspaceHeader } from '../../features/roadmaps/components/LearningWorkspaceHeader';
-import { NextBestActionCard } from '../../features/roadmaps/components/NextBestActionCard';
-import { RoadmapPhaseCard } from '../../features/roadmaps/components/RoadmapPhaseCard';
-import { RecommendationPanel } from '../../features/roadmaps/components/RecommendationPanel';
-import { CourseIntelligencePanel } from '../../features/roadmaps/components/CourseIntelligencePanel';
-import { CertificationIntelligencePanel } from '../../features/roadmaps/components/CertificationIntelligencePanel';
+// Feature Components — Adaptive Career Learning Journey
+import {
+  AdaptiveCareerJourneyHeader,
+  AdaptiveMilestoneSpine,
+  ActivePhaseSpotlight,
+  DependencyTreeEngine,
+  TaskJourneyInspector,
+  RoadmapActivationHub,
+  RoadmapPhaseCard,
+  CourseIntelligencePanel,
+  CertificationIntelligencePanel,
+} from '../../features/roadmaps/components';
+
+import type {
+  ActiveRoadmapItem,
+  ActivePhaseData,
+} from '../../features/roadmaps/components/ActivePhaseSpotlight';
+import type { TaskInspectorData } from '../../features/roadmaps/components/TaskJourneyInspector';
+import type { DependencyItem } from '../../features/roadmaps/components/DependencyTreeEngine';
 
 // Design System 2.0 Components
 import {
-  WorkspaceHero,
-  AIInsightBanner,
   QuickActionGrid,
-  PremiumMetricCard,
-  WorkspaceSpotlight,
   AIStatusBar,
   WorkspaceDivider,
   PremiumSection,
-  GlassPanel,
   WorkspaceToolbar,
   PremiumErrorState,
-  PremiumEmptyState,
 } from '../../components/experience/workspace';
 
 // Career Planning Engine & Experience Systems
 import {
   CareerPlanningEngine,
-  CareerJourneyMap,
   DecisionSimulator,
   OpportunityForecast,
   ProfessionalAchievements,
@@ -56,8 +62,13 @@ export const LearningJourneyWorkspace: React.FC = () => {
   const user = useAuthStore((state) => state.user);
 
   const [selectedCareerId, setSelectedCareerId] = useState<string | null>(null);
+  const [selectedPhaseOrder, setSelectedPhaseOrder] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
+
+  // Inspector State
+  const [inspectingTask, setInspectingTask] = useState<TaskInspectorData | null>(null);
+  const [isInspectorOpen, setIsInspectorOpen] = useState(false);
 
   // Query 1: Matched Careers for target selector
   const { data: careersData, isLoading: careersLoading } = useQuery({
@@ -124,16 +135,21 @@ export const LearningJourneyWorkspace: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['roadmap', activeCareerId] });
       queryClient.invalidateQueries({ queryKey: ['readiness'] });
       queryClient.invalidateQueries({ queryKey: ['careers', 'matches'] });
+      queryClient.invalidateQueries({ queryKey: ['careers-for-roadmap'] });
     },
   });
 
-  // Mutation 2: Update Recommendation Status
-  const updateRecMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      await apiClient.patch(`/recommendations/${id}/status`, { status });
+  // Mutation 2: Regenerate Roadmap (Adaptive sync with AI engine)
+  const regenerateRoadmapMutation = useMutation({
+    mutationFn: async () => {
+      if (!activeCareerId) return;
+      const response = await apiClient.post(`/roadmap/${activeCareerId}/regenerate`);
+      return response.data.data.roadmap;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['recommendations'] });
+      queryClient.invalidateQueries({ queryKey: ['roadmap', activeCareerId] });
+      queryClient.invalidateQueries({ queryKey: ['readiness'] });
+      queryClient.invalidateQueries({ queryKey: ['careers-for-roadmap'] });
     },
   });
 
@@ -142,8 +158,8 @@ export const LearningJourneyWorkspace: React.FC = () => {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
-          <AIThinkingAnimation statusText="Orchestrating Flagship AI Learning Journey & Roadmap..." />
+        <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[280px]">
+          <AIThinkingAnimation statusText="Orchestrating Adaptive Career Learning Journey & Sequenced Dependencies..." />
         </div>
       </div>
     );
@@ -177,74 +193,119 @@ export const LearningJourneyWorkspace: React.FC = () => {
     roadmap
   );
 
-  interface RoadmapItemRecord {
-    _id: string;
-    title: string;
-    description: string;
-    category: string;
-    priority: string;
-    estimatedDuration: string;
-    difficulty: string;
-    careerRelevance?: string;
-    expectedOutcome?: string;
-    prerequisites?: string[];
-    status: 'not_started' | 'in_progress' | 'completed' | 'skipped';
-  }
+  // Derive target role title from matches or plan
+  const matchedCareer = matches.find((m: any) => m.careerId?._id === activeCareerId);
+  const targetRoleTitle =
+    matchedCareer?.careerId?.title || plan.aiContext.topMatch?.careerId?.title || null;
 
-  interface RoadmapPhaseRecord {
-    _id: string;
-    title: string;
-    order: number;
-    objective: string;
-    skillsGained: string[];
-    estimatedCompletionTime: string;
-    items: RoadmapItemRecord[];
-  }
+  // Process phases
+  const phases: ActivePhaseData[] = (roadmap?.phases || []).map((phase: any) => ({
+    _id: phase._id || `phase-${phase.order}`,
+    order: phase.order,
+    title: phase.title,
+    objective: phase.objective,
+    skillsGained: phase.skillsGained || [],
+    estimatedCompletionTime: phase.estimatedCompletionTime || '',
+    items: (phase.items || []).map((i: any) => ({
+      _id: i._id,
+      itemId: i._id,
+      title: i.title,
+      description: i.description || '',
+      category: i.category || 'Skill Task',
+      priority: i.priority || 'Medium',
+      estimatedDuration: i.estimatedDuration || '30 mins',
+      difficulty: i.difficulty || 'Intermediate',
+      prerequisites: i.prerequisites || [],
+      careerRelevance: i.careerRelevance || '',
+      expectedOutcome: i.expectedOutcome || '',
+      status: i.status || 'not_started',
+      targetSkill: i.targetSkill || '',
+    })),
+  }));
 
-  // Derive Next Best Action item (first unfinished item)
-  let nextBestItem: RoadmapItemRecord | null = null;
-  if (roadmap && roadmap.phases) {
-    for (const phase of roadmap.phases as RoadmapPhaseRecord[]) {
-      const unfinished = phase.items.find(
-        (i) => i.status === 'in_progress' || i.status === 'not_started'
-      );
-      if (unfinished) {
-        nextBestItem = unfinished;
-        break;
-      }
-    }
-  }
-
-  // Derive counts
+  // Counts & Progress
   let completedTasksCount = 0;
   let totalTasksCount = 0;
-  if (roadmap && roadmap.phases) {
-    for (const phase of roadmap.phases as RoadmapPhaseRecord[]) {
-      totalTasksCount += phase.items.length;
-      completedTasksCount += phase.items.filter((i) => i.status === 'completed').length;
+  phases.forEach((p) => {
+    totalTasksCount += p.items.length;
+    completedTasksCount += p.items.filter((i) => i.status === 'completed' || i.status === 'skipped').length;
+  });
+
+  const progressPercentage =
+    roadmap?.progressPercentage !== undefined
+      ? roadmap.progressPercentage
+      : totalTasksCount > 0
+      ? Math.round((completedTasksCount / totalTasksCount) * 100)
+      : 0;
+
+  // Find active phase
+  const activePhase =
+    phases.find((p) => p.items.some((i) => i.status !== 'completed' && i.status !== 'skipped')) ||
+    phases[0];
+
+  // Currently focused phase for details (defaults to selectedPhaseOrder or activePhase)
+  const focusedPhase =
+    (selectedPhaseOrder !== null && phases.find((p) => p.order === selectedPhaseOrder)) ||
+    activePhase;
+
+  // Find Next Best Action (first unfinished item)
+  let nextBestItem: ActiveRoadmapItem | null = null;
+  for (const phase of phases) {
+    const unfinished = phase.items.find((i) => i.status === 'in_progress' || i.status === 'not_started');
+    if (unfinished) {
+      nextBestItem = unfinished;
+      break;
     }
   }
 
-  const targetRoleTitle = plan.aiContext.topMatch?.careerId?.title || 'Target Role';
+  // Dependency items for DependencyTreeEngine
+  const dependencyItems: DependencyItem[] = phases.flatMap((phase) =>
+    phase.items.map((i) => ({
+      id: i._id || i.itemId || '',
+      title: i.title,
+      targetSkill: i.targetSkill,
+      prerequisites: i.prerequisites,
+      status: i.status,
+      phaseOrder: phase.order,
+      category: i.category,
+      estimatedDuration: i.estimatedDuration,
+      careerRelevance: i.careerRelevance,
+    }))
+  );
+
+  const handleInspectTask = (item: ActiveRoadmapItem) => {
+    setInspectingTask(item);
+    setIsInspectorOpen(true);
+  };
+
+  const handleStatusChange = (itemId: string, status: string) => {
+    updateItemMutation.mutate({ itemId, status });
+    if (inspectingTask && (inspectingTask._id === itemId || inspectingTask.itemId === itemId)) {
+      setInspectingTask({
+        ...inspectingTask,
+        status: status as any,
+      });
+    }
+  };
 
   // Quick Action Grid Items
   const quickActions = [
     {
       id: 'roadmap',
-      title: 'Continue Roadmap',
-      subtitle: 'Execute active milestone tasks',
+      title: 'Continue Active Milestone',
+      subtitle: 'Advance next learning task',
       icon: Layers,
       shortcut: '⌘1',
       color: 'text-indigo-400',
       onClick: () => {
         if (nextBestItem?._id) {
-          updateItemMutation.mutate({ itemId: nextBestItem._id, status: 'in_progress' });
+          handleStatusChange(nextBestItem._id, 'in_progress');
         }
       },
     },
     {
       id: 'recommendations',
-      title: 'View Recommendations',
+      title: 'Action Intelligence',
       subtitle: 'AI prioritized decision items',
       icon: Sparkles,
       shortcut: '⌘2',
@@ -254,25 +315,25 @@ export const LearningJourneyWorkspace: React.FC = () => {
     {
       id: 'careers',
       title: 'Career Intelligence',
-      subtitle: 'Target role match fit',
+      subtitle: 'Role match alignment',
       icon: Compass,
       shortcut: '⌘3',
       color: 'text-emerald-400',
       onClick: () => navigate('/careers'),
     },
     {
-      id: 'skills',
-      title: 'Analyze Skills',
-      subtitle: 'Skill vector gap audit',
+      id: 'readiness',
+      title: 'Career Readiness Diagnostic',
+      subtitle: 'Dimensional gap scoring',
       icon: Target,
       shortcut: '⌘4',
       color: 'text-purple-400',
-      onClick: () => navigate('/skills'),
+      onClick: () => navigate('/readiness'),
     },
     {
       id: 'resume',
-      title: 'Resume Management',
-      subtitle: 'Update ATS skill index',
+      title: 'Resume Evidence Studio',
+      subtitle: 'Update verified skills',
       icon: FileText,
       shortcut: '⌘5',
       color: 'text-amber-400',
@@ -280,8 +341,8 @@ export const LearningJourneyWorkspace: React.FC = () => {
     },
     {
       id: 'architect',
-      title: 'Career Architect',
-      subtitle: 'Scenario simulation studio',
+      title: 'AI Career Architect',
+      subtitle: 'Strategic scenario planning',
       icon: Award,
       shortcut: '⌘6',
       color: 'text-rose-400',
@@ -291,279 +352,98 @@ export const LearningJourneyWorkspace: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-10 pb-16 px-4">
-      {/* SECTION 1 — WORKSPACE HERO */}
-      <WorkspaceHero
-        greeting="AI Learning Journey"
+      {/* SECTION 1 — ADAPTIVE CAREER JOURNEY HERO */}
+      <AdaptiveCareerJourneyHeader
         userName={user?.fullName || user?.email?.split('@')[0]}
-        title="Learning Roadmap"
-        description="Your AI-generated roadmap continuously adapts to your progress, strengths, and career goals."
-        aiSummary={`Adaptive Blueprint Synced • Progress: ${roadmap?.progressPercentage || 80}% • Target: ${targetRoleTitle} • Est. Graduation: 2 Weeks`}
-        stats={[
-          { label: 'Current Milestone', value: 'Phase 2: RAG', change: 'Active', isPositive: true },
-          { label: 'Overall Completion', value: `${roadmap?.progressPercentage || 80}%`, change: '+12% this week', isPositive: true },
-          { label: 'Est. Graduation', value: '2 Weeks', change: 'On Schedule', isPositive: true },
-          { label: 'Weekly Progress', value: `${completedTasksCount}/${totalTasksCount} Tasks`, change: 'Optimal Velocity', isPositive: true },
-        ]}
-        primaryAction={{
-          label: 'Continue Learning Today',
-          onClick: () => {
-            if (nextBestItem?._id) {
-              updateItemMutation.mutate({ itemId: nextBestItem._id, status: 'in_progress' });
-            }
-          },
-        }}
-      />
-
-      {/* Target Selector & Header Stats */}
-      <LearningWorkspaceHeader
+        targetRoleTitle={targetRoleTitle}
         careers={careersData || []}
         activeCareerId={activeCareerId}
         onSelectCareer={setSelectedCareerId}
-        progressPercentage={roadmap?.progressPercentage || 0}
+        activePhaseTitle={activePhase?.title}
+        activePhaseOrder={activePhase?.order}
+        totalPhasesCount={phases.length}
+        progressPercentage={progressPercentage}
         completedTasksCount={completedTasksCount}
         totalTasksCount={totalTasksCount}
-        totalPhasesCount={roadmap?.phases?.length || 0}
+        nextBestItem={nextBestItem}
+        onStartNextTask={(id) => handleStatusChange(id, 'in_progress')}
+        onRegenerateRoadmap={() => regenerateRoadmapMutation.mutate()}
+        isRegenerating={regenerateRoadmapMutation.isPending}
+        lastUpdated={roadmap?.updatedAt}
       />
 
-      {/* SECTION 11 — COMMAND TOOLBAR */}
-      <WorkspaceToolbar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        searchPlaceholder="Filter roadmap milestones, tasks, or prerequisites..."
-        filterOptions={[
-          { id: 'all', label: 'All Phases' },
-          { id: 'in_progress', label: 'In Progress' },
-          { id: 'completed', label: 'Completed' },
-          { id: 'upcoming', label: 'Upcoming' },
-        ]}
-        activeFilter={activeFilter}
-        onFilterChange={setActiveFilter}
-        onCommandPaletteOpen={() => alert('Command Palette triggered (⌘K).')}
-      />
-
-      {/* SECTION 2 — ROADMAP OVERVIEW (METRIC CARDS) */}
-      <PremiumSection
-        title="Roadmap Progress Telemetry"
-        subtitle="Real-time completion metrics across sequenced milestone phases"
-        badge="Analytics"
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <PremiumMetricCard
-            title="Overall Roadmap Progress"
-            value={roadmap?.progressPercentage || 80}
-            suffix="%"
-            trend="+12% this week"
-            isPositive={true}
-            confidence={98.4}
-            icon={Award}
-            sparklineData={[30, 45, 60, 72, 80]}
-          />
-          <PremiumMetricCard
-            title="Completed Milestones"
-            value={completedTasksCount || 8}
-            suffix=" Tasks"
-            trend="100% Verified"
-            isPositive={true}
-            confidence={99.1}
-            icon={CheckCircle2}
-            sparklineData={[2, 4, 6, 7, 8]}
-          />
-          <PremiumMetricCard
-            title="Current Active Phase"
-            value={2}
-            prefix="Phase "
-            suffix=": RAG Index"
-            trend="In Progress"
-            isPositive={true}
-            confidence={97.8}
-            icon={Layers}
-            sparklineData={[1, 1.5, 2]}
-          />
-          <PremiumMetricCard
-            title="Upcoming Milestones"
-            value={totalTasksCount - completedTasksCount || 5}
-            suffix=" Tasks"
-            trend="Sequenced"
-            isPositive={true}
-            confidence={96.5}
-            icon={Target}
-            sparklineData={[10, 8, 7, 6, 5]}
-          />
-          <PremiumMetricCard
-            title="Learning Velocity Index"
-            value={88}
-            suffix="%"
-            trend="+12% Consistency"
-            isPositive={true}
-            confidence={98.8}
-            icon={TrendingUp}
-            sparklineData={[50, 65, 75, 82, 88]}
-          />
-          <PremiumMetricCard
-            title="Estimated Graduation"
-            value={2}
-            suffix=" Weeks"
-            trend="On Schedule"
-            isPositive={true}
-            confidence={98.4}
-            icon={Clock}
-            sparklineData={[5, 4, 3, 2]}
-          />
-        </div>
-      </PremiumSection>
-
-      {/* SECTION 3 — TODAY'S LEARNING MISSION BANNER */}
-      <AIInsightBanner
-        title={
-          nextBestItem?.title
-            ? `Today's Learning Mission: ${nextBestItem.title}`
-            : "Complete Distributed Vector Indexing & RAG Pipelines Capstone"
-        }
-        description="Executing today's assigned milestone module closes your remaining technical skill gap and elevates your career match to 98%."
-        confidence={98.4}
-        priority="high"
-        evidence={['Prerequisites: Python, FastAPI, PyTorch', 'Est. Time: 30 Mins', 'Impact: +12% Match Boost']}
-        actionLabel="Continue Learning"
-        onAction={() => {
-          if (nextBestItem?._id) {
-            updateItemMutation.mutate({ itemId: nextBestItem._id, status: 'in_progress' });
-          }
-        }}
-      />
-
-      <WorkspaceDivider label="Interactive Roadmap & Milestones" />
-
-      {/* SECTION 4 — INTERACTIVE ROADMAP VISUALIZATION */}
-      <PremiumSection
-        title="Interactive Career Milestone Journey Map"
-        subtitle="Visual progression flow connecting foundational modules to advanced specialization capstones"
-        badge="Journey Map"
-      >
-        <CareerJourneyMap targetRoleTitle={targetRoleTitle} />
-      </PremiumSection>
-
-      {/* SECTION 5 — CURRENT MILESTONE FOCUS */}
-      {!roadmap ? (
-        <PremiumEmptyState
-          title="No Learning Roadmap Active"
-          description="You are fully prepared for this target career, or no critical skill gaps remain to sequence!"
-          primaryAction={{
-            label: 'Explore Career Matches',
-            onClick: () => navigate('/careers'),
-          }}
-          secondaryAction={{
-            label: 'Launch Career Architect',
-            onClick: () => navigate('/ai'),
-          }}
+      {/* If No Roadmap exists or 0 phases, render the RoadmapActivationHub */}
+      {!roadmap || phases.length === 0 ? (
+        <RoadmapActivationHub
+          hasTargetRole={!!activeCareerId}
+          targetRoleTitle={targetRoleTitle}
+          onSelectCareer={() => navigate('/careers')}
         />
       ) : (
         <>
-          {/* CURRENT MILESTONE HERO CARD */}
-          {nextBestItem && (
-            <NextBestActionCard
-              itemId={nextBestItem._id}
-              title={nextBestItem.title}
-              category={nextBestItem.category}
-              priority={nextBestItem.priority}
-              estimatedDuration={nextBestItem.estimatedDuration}
-              difficulty={nextBestItem.difficulty}
-              careerRelevance={nextBestItem.careerRelevance}
-              expectedOutcome={nextBestItem.expectedOutcome}
-              prerequisites={nextBestItem.prerequisites}
-              status={nextBestItem.status}
-              onMarkDone={(id) => updateItemMutation.mutate({ itemId: id, status: 'completed' })}
-              onStart={(id) => updateItemMutation.mutate({ itemId: id, status: 'in_progress' })}
+          {/* SECTION 2 — ADAPTIVE MILESTONE SPINE (JOURNEY MAP) */}
+          <PremiumSection
+            title="Adaptive Career Milestone Spine"
+            subtitle="Connected progression pathway from foundational competencies to target role mastery"
+            badge="Milestone Trajectory"
+          >
+            <AdaptiveMilestoneSpine
+              phases={phases}
+              targetRoleTitle={targetRoleTitle}
+              selectedPhaseOrder={focusedPhase?.order || 1}
+              onSelectPhase={(order) => setSelectedPhaseOrder(order)}
             />
+          </PremiumSection>
+
+          {/* SECTION 3 — ACTIVE CHAPTER SPOTLIGHT ("WHERE YOU ARE RIGHT NOW") */}
+          {focusedPhase && (
+            <PremiumSection
+              title={`Active Chapter Studio: Phase ${focusedPhase.order}`}
+              subtitle={focusedPhase.objective || 'Immediate curriculum focus and milestone execution'}
+              badge="Active Chapter"
+            >
+              <ActivePhaseSpotlight
+                phase={focusedPhase}
+                onStatusChange={handleStatusChange}
+                onInspectTask={handleInspectTask}
+              />
+            </PremiumSection>
           )}
 
-          {/* SECTION 6 — LEARNING MOMENTUM & SIMULATOR */}
+          {/* SECTION 4 — SEQUENCED DEPENDENCY TREE ENGINE ("WHY AM I LEARNING THIS NOW?") */}
           <PremiumSection
-            title="Learning Velocity & Predictive Decision Simulator"
-            subtitle="Plain language momentum analysis and projected readiness outcomes"
-            badge="Momentum"
+            title="Sequenced Skill Acquisition & Dependency Tree"
+            subtitle="Strict topological prerequisite graph eliminating your readiness gaps in optimal order"
+            badge="Topological Engine"
           >
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              <div className="lg:col-span-7">
-                <DecisionSimulator
-                  currentScore={plan.aiContext.topReadiness?.overallScore || 45}
-                  targetRoleTitle={targetRoleTitle}
-                  availableTasks={
-                    roadmap?.phases
-                      ?.flatMap((p) => p.items || [])
-                      .filter((i) => i.status !== 'completed')
-                      .slice(0, 4)
-                      .map((i) => i.title) || [nextBestItem?.title || 'Core Milestone']
-                  }
-                  onExecuteSimulatedTask={(taskTitle) => {
-                    const targetItem = roadmap?.phases
-                      ?.flatMap((p) => p.items || [])
-                      .find((i) => i.title === taskTitle);
-                    if (targetItem?._id) {
-                      updateItemMutation.mutate({ itemId: targetItem._id, status: 'in_progress' });
-                    }
-                  }}
-                />
-              </div>
-              <div className="lg:col-span-5">
-                <OpportunityForecast forecast={plan.forecast} />
-              </div>
-            </div>
-          </PremiumSection>
-
-          {/* SECTION 7 — NEXT MILESTONE SPOTLIGHT */}
-          <WorkspaceSpotlight
-            badge="Highest Priority Upcoming Milestone"
-            title="Deploy Microservice Endpoints with Kubernetes & FastAPI"
-            description="Our AI model calculated that completing this upcoming milestone will elevate your system design readiness score from 90% to 98%."
-            impactScore="+8% Readiness Gain"
-            actionLabel="Start Upcoming Milestone"
-            onAction={() => {
-              if (nextBestItem?._id) {
-                updateItemMutation.mutate({ itemId: nextBestItem._id, status: 'in_progress' });
-              }
-            }}
-          />
-
-          <WorkspaceDivider label="AI Multi-Provider Course Intelligence Hub" />
-
-          {/* SECTION 7.5 — COURSE INTELLIGENCE ENGINE */}
-          <PremiumSection
-            title="AI Multi-Provider Learning Course Recommendations"
-            subtitle="Multi-factor course discovery ranked across 12 global learning providers"
-            badge="Course Intelligence"
-          >
-            <CourseIntelligencePanel
-              skillTarget={targetRoleTitle}
-              onNavigateToRoadmap={() => navigate('/roadmap')}
+            <DependencyTreeEngine
+              items={dependencyItems}
+              targetRoleTitle={targetRoleTitle}
+              onSelectTask={(id) => {
+                const found = phases.flatMap((p) => p.items).find((i) => i._id === id || i.itemId === id);
+                if (found) handleInspectTask(found);
+              }}
             />
           </PremiumSection>
 
-          {/* SECTION 7.8 — CERTIFICATION INTELLIGENCE ENGINE */}
-          <PremiumSection
-            title="AI Multi-Provider Certification Intelligence"
-            subtitle="Multi-criteria certification discovery, employer recognition rankings, and salary ROI analytics"
-            badge="Certification Intelligence"
-          >
-            <CertificationIntelligencePanel
-              technologyTarget={targetRoleTitle}
-              onExploreRoadmap={() => navigate('/roadmap')}
-            />
-          </PremiumSection>
+          <WorkspaceDivider label="Curriculum Breakdown & Course Discovery" />
 
-          {/* SECTION 8 — ROADMAP TIMELINE & PHASES */}
+          {/* SECTION 5 — ALL PHASES BLUEPRINT (CURRICULUM BREAKDOWN) */}
           <PremiumSection
-            title="Sequenced Milestone Phases & Dependencies"
-            subtitle="Step-by-step curriculum blueprint ordered by career gap priority"
-            badge="Milestones"
+            title="Complete Roadmap Curriculum Blueprint"
+            subtitle="Step-by-step phases ordered by career gap priority"
+            badge="Curriculum Blueprint"
           >
             <div className="space-y-4">
-              {(roadmap.phases as RoadmapPhaseRecord[]).map((phase: RoadmapPhaseRecord) => (
+              {phases.map((phase) => (
                 <RoadmapPhaseCard
                   key={phase._id}
                   phase={{
                     ...phase,
-                    items: phase.items.map((i: RoadmapItemRecord) => ({
-                      itemId: i._id,
+                    skillsGained: phase.skillsGained || [],
+                    estimatedCompletionTime: phase.estimatedCompletionTime || '',
+                    items: phase.items.map((i) => ({
+                      itemId: i._id || i.itemId || '',
                       title: i.title,
                       description: i.description,
                       category: i.category,
@@ -574,64 +454,83 @@ export const LearningJourneyWorkspace: React.FC = () => {
                       status: i.status,
                     })),
                   }}
-                  onStatusChange={(itemId, newStatus) =>
-                    updateItemMutation.mutate({ itemId, status: newStatus })
-                  }
+                  onStatusChange={(itemId, newStatus) => handleStatusChange(itemId, newStatus)}
                 />
               ))}
             </div>
           </PremiumSection>
 
-          {/* SECTION 9 — ADAPTIVE AI CHANGES & ACHIEVEMENTS */}
+          {/* SECTION 6 — LEARNING MOMENTUM & SIMULATOR */}
           <PremiumSection
-            title="Adaptive AI Roadmap Audit Log & Verified Achievements"
-            subtitle="Real-time log of automated roadmap adjustments and verified achievements"
-            badge="Audit Log"
+            title="Learning Velocity & Predictive Decision Simulator"
+            subtitle="Plain language momentum analysis and projected readiness outcomes"
+            badge="Momentum Telemetry"
           >
-            <div className="space-y-6">
-              <div className="space-y-3">
-                {[
-                  { event: 'Milestone Phase 2 Sequenced', desc: 'Vector Indexing & RAG module automatically assigned highest priority.', time: '1 hour ago' },
-                  { event: 'New Vector Module Integrated', desc: 'Added Milvus ANN similarity search capstone project.', time: '4 hours ago' },
-                  { event: 'Prerequisites Verified', desc: 'Python, FastAPI, and PyTorch deep learning evidence verified.', time: '1 day ago' },
-                ].map((log, idx) => (
-                  <GlassPanel key={idx} className="p-4 flex items-center justify-between text-xs">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <CheckSquare className="w-4 h-4 text-cyan-400 shrink-0" />
-                        <span className="font-bold text-white">{log.event}</span>
-                      </div>
-                      <p className="text-slate-400 pl-6 text-xs">{log.desc}</p>
-                    </div>
-                    <span className="text-[10px] text-slate-500 font-mono shrink-0 ml-4">{log.time}</span>
-                  </GlassPanel>
-                ))}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-7">
+                <DecisionSimulator
+                  currentScore={plan.aiContext.topReadiness?.overallScore || 45}
+                  targetRoleTitle={targetRoleTitle || 'Target Role'}
+                  availableTasks={
+                    roadmap?.phases
+                      ?.flatMap((p: any) => p.items || [])
+                      .filter((i: any) => i.status !== 'completed')
+                      .slice(0, 4)
+                      .map((i: any) => i.title) || [nextBestItem?.title || 'Core Milestone']
+                  }
+                  onExecuteSimulatedTask={(taskTitle) => {
+                    const targetItem = roadmap?.phases
+                      ?.flatMap((p: any) => p.items || [])
+                      .find((i: any) => i.title === taskTitle);
+                    if (targetItem?._id) {
+                      handleStatusChange(targetItem._id, 'in_progress');
+                    }
+                  }}
+                />
               </div>
-
-              <ProfessionalAchievements achievements={plan.achievements} />
-              <RecommendationPanel
-                recommendations={recommendations}
-                onUpdateStatus={(id, status) => updateRecMutation.mutate({ id, status })}
-              />
+              <div className="lg:col-span-5">
+                <OpportunityForecast forecast={plan.forecast} />
+              </div>
             </div>
           </PremiumSection>
+
+          {/* SECTION 7 — MULTI-PROVIDER COURSE & CERTIFICATION HUBS */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <CourseIntelligencePanel
+              skillTarget={targetRoleTitle || 'Target Role'}
+              onNavigateToRoadmap={() => navigate('/roadmap')}
+            />
+            <CertificationIntelligencePanel
+              technologyTarget={targetRoleTitle || 'Target Role'}
+              onExploreRoadmap={() => navigate('/roadmap')}
+            />
+          </div>
         </>
       )}
 
-      {/* SECTION 10 — QUICK ACTIONS GRID */}
+      {/* SECTION 8 — QUICK SHORTCUTS GRID */}
       <PremiumSection
         title="Roadmap Operations Shortcuts"
         subtitle="Quick access to learning tools and career engines"
-        badge="Shortcuts"
+        badge="Operations"
       >
         <QuickActionGrid actions={quickActions} columns={3} />
       </PremiumSection>
 
-      {/* SECTION 12 — AI STATUS BAR */}
+      {/* TASK JOURNEY INSPECTOR (Slide-Over Drawer) */}
+      <TaskJourneyInspector
+        task={inspectingTask}
+        isOpen={isInspectorOpen}
+        onClose={() => setIsInspectorOpen(false)}
+        onStatusChange={handleStatusChange}
+        targetRoleTitle={targetRoleTitle}
+      />
+
+      {/* SECTION 9 — AI STATUS BAR */}
       <AIStatusBar
         status={isLoading ? 'thinking' : 'active'}
         confidence={98.4}
-        lastUpdated="Just now"
+        lastUpdated={roadmap?.updatedAt ? new Date(roadmap.updatedAt).toLocaleTimeString() : 'Live'}
       />
     </div>
   );

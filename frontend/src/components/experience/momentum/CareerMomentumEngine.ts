@@ -49,10 +49,16 @@ export const CareerMomentumEngine = {
       totalSkills
     );
 
+    const safeRecs = Array.isArray(recommendations)
+      ? recommendations
+      : (recommendations as any)?.recommendations && Array.isArray((recommendations as any).recommendations)
+        ? (recommendations as any).recommendations
+        : [];
+
     const plateau = PlateauDetectionEngine.detectPlateau(
       roadmap?.progressPercentage || 0,
       totalSkills,
-      recommendations.filter((r) => r.status === 'completed').length
+      safeRecs.filter((r: any) => r && r.status === 'completed').length
     );
 
     const growthStory = GrowthStoryEngine.generateGrowthStory(

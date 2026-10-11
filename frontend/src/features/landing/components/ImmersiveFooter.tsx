@@ -1,8 +1,20 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Sparkles, Code2, Globe, BookOpen, Cpu } from 'lucide-react';
+import { useAuthStore } from '../../../store/authStore';
 
 export const ImmersiveFooter: React.FC = () => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const navigate = useNavigate();
+
+  const handleDashboardLink = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (isAuthenticated) {
+      navigate('/home');
+    } else {
+      navigate('/login', { state: { from: { pathname: '/home' } } });
+    }
+  };
   return (
     <footer className="border-t border-white/10 bg-slate-950/95 text-slate-400 py-16 px-4 relative z-10">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 pb-12 border-b border-white/10">
@@ -80,9 +92,13 @@ export const ImmersiveFooter: React.FC = () => {
               </Link>
             </li>
             <li>
-              <Link to="/home" className="hover:text-white transition-colors">
+              <a
+                href="/home"
+                onClick={handleDashboardLink}
+                className="hover:text-white transition-colors cursor-pointer"
+              >
                 Dashboard Console
-              </Link>
+              </a>
             </li>
           </ul>
         </div>

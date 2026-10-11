@@ -4,26 +4,23 @@ import { useNavigate } from 'react-router-dom';
 import apiClient from '../../lib/axios';
 import { useAuthStore } from '../../store/authStore';
 
-// Feature Components
-import { AIWorkspaceHeader } from '../../features/ai/components/AIWorkspaceHeader';
-import { ConversationSidebar } from '../../features/ai/components/ConversationSidebar';
-import { ChatWindow } from '../../features/ai/components/ChatWindow';
-import { AICareerContextPanel } from '../../features/ai/components/AICareerContextPanel';
+// Neural Command Center Spatial Styles & Components
+import '../../features/ai/styles/neural_command_center.css';
+import {
+  NeuralCommandCenterCanvas,
+  NeuralCommandDeck,
+  NeuralConversationDrawer,
+  NeuralStrategyHorizon,
+  AICoreState,
+} from '../../features/ai/components/neural';
 
 // Experience Systems & Flagship Architect Components
 import {
   CareerArchitectEngine,
-  ExplainableStrategyPanel,
   AIThinkingAnimation,
   SkeletonShimmer,
 } from '../../components/experience';
-
-export interface ChatMessage {
-  _id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  contextSnapshotId?: string;
-}
+import { ChatMessage } from '../../features/ai/components/MessageBubble';
 
 export const AICareerArchitectWorkspace: React.FC = () => {
   const queryClient = useQueryClient();
@@ -32,8 +29,7 @@ export const AICareerArchitectWorkspace: React.FC = () => {
 
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [inputMessage, setInputMessage] = useState('');
-  const [showLeftDrawer, setShowLeftDrawer] = useState(false);
-  const [showRightDrawer, setShowRightDrawer] = useState(false);
+  const [isConversationDrawerOpen, setIsConversationDrawerOpen] = useState(false);
 
   // 1. Fetch matched careers for context switching
   const { data: careersData, isLoading: matchesLoading } = useQuery({
@@ -80,15 +76,45 @@ export const AICareerArchitectWorkspace: React.FC = () => {
     },
   });
 
+  // 6. Fetch Active Resume ATS telemetry
+  const { data: resumeData } = useQuery({
+    queryKey: ['activeResume'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get('/resumes/me');
+        return response.data.data.resume;
+      } catch {
+        return null;
+      }
+    },
+  });
+
+  // 7. Fetch Live Opportunity Pipeline Count
+  const { data: opportunitiesData } = useQuery({
+    queryKey: ['opportunities-count'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get('/opportunities?limit=10');
+        return response.data.data.opportunities || [];
+      } catch {
+        return [];
+      }
+    },
+  });
+
   const matches = careersData || [];
   const readiness = readinessData || [];
   const totalSkills = skillsData?.totalSkills || 0;
-  const recommendations = recommendationsData || [];
+  const recommendations = Array.isArray(recommendationsData)
+    ? recommendationsData
+    : (recommendationsData as any)?.recommendations && Array.isArray((recommendationsData as any).recommendations)
+      ? (recommendationsData as any).recommendations
+      : [];
   const conversations = conversationsData || [];
+  const opportunities = opportunitiesData || [];
 
   const topMatch = matches[0];
   const topReadiness = readiness[0];
-  const topRec = recommendations[0];
 
   // Active Roadmap Query
   const activeCareerId = topMatch?.careerId?._id;
@@ -125,7 +151,7 @@ export const AICareerArchitectWorkspace: React.FC = () => {
   // Mutation 1: Create New Conversation
   const createConversationMutation = useMutation({
     mutationFn: async (careerId?: string) => {
-      const response = await apiClient.post('/ai', { careerId, title: 'New Career Advisory Chat' });
+      const response = await apiClient.post('/ai', { careerId, title: 'Neural Advisory Stream' });
       return response.data.data;
     },
     onSuccess: (data) => {
@@ -144,6 +170,7 @@ export const AICareerArchitectWorkspace: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['conversation', activeConversationId] });
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      setIsConversationDrawerOpen(true);
     },
   });
 
@@ -167,7 +194,7 @@ export const AICareerArchitectWorkspace: React.FC = () => {
     },
   });
 
-  const isLoading = matchesLoading || readinessLoading || skillsLoading || recsLoading || roadmapLoading;
+  const isLoading = matchesLoading || readinessLoading || skillsLoading || recsLoading;
 
   // Master Comprehensive Architect Strategy
   const architectStrategy = useMemo(() => {
@@ -181,109 +208,129 @@ export const AICareerArchitectWorkspace: React.FC = () => {
     );
   }, [user, matches, readiness, totalSkills, recommendations, roadmapData]);
 
-  if (isLoading) {
-    return (
-      <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
-          <AIThinkingAnimation statusText="Orchestrating Flagship AI Command Center Hub..." />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <SkeletonShimmer height={180} />
-          <SkeletonShimmer height={180} />
-        </div>
-      </div>
-    );
-  }
+  // Derive Dynamic Neural AI Core State
+  const aiState: AICoreState = useMemo(() => {
+    if (sendMessageMutation.isPending) return 'GENERATING';
+    if (sendMessageMutation.isError) return 'ERROR';
+    if (loadingHistory || roadmapLoading) return 'RETRIEVING';
+    if (isLoading) return 'ANALYZING';
+    if (sendMessageMutation.isSuccess) return 'COMPLETED';
+    return 'IDLE';
+  }, [sendMessageMutation.isPending, sendMessageMutation.isError, sendMessageMutation.isSuccess, loadingHistory, roadmapLoading, isLoading]);
 
   const handleSend = () => {
     if (!inputMessage.trim()) return;
+    const msg = inputMessage.trim();
     if (!activeConversationId) {
       createConversationMutation.mutate(undefined, {
-        onSuccess: () => {
-          sendMessageMutation.mutate(inputMessage.trim());
+        onSuccess: (newConv) => {
+          sendMessageMutation.mutate(msg);
           setInputMessage('');
         },
       });
     } else {
-      sendMessageMutation.mutate(inputMessage.trim());
+      sendMessageMutation.mutate(msg);
       setInputMessage('');
     }
   };
 
   const handleStartNewChat = () => {
-    createConversationMutation.mutate();
+    createConversationMutation.mutate(undefined, {
+      onSuccess: () => {
+        setIsConversationDrawerOpen(true);
+      },
+    });
   };
 
   const suggestedPrompts = [
     'What are my biggest skill gaps for my target career role?',
     'How can I improve my readiness score over the next 30 days?',
     'Explain why specific roadmap tasks are recommended for me.',
-    'Suggest a project that demonstrates my core technical strengths.',
+    'Suggest a high-impact portfolio project that validates my core proficiencies.',
   ];
 
   const currentMessages: ChatMessage[] = activeHistory?.messages || [];
   const activePhase = roadmapData?.phases?.[0];
+  const targetRoleTitle = topMatch?.careerId?.title || user?.targetRole || user?.primaryCareerDomain || 'Target Career Summit';
+  const readinessRating = topReadiness?.overallScore ?? 0;
+  const matchFitScore = topMatch?.matchScore ?? 0;
+  const atsIndex = resumeData?.atsScore ?? 0;
+  const liveOpportunityCount = opportunities.length;
+
+  if (isLoading) {
+    return (
+      <div className="neural-command-center min-h-screen p-6 sm:p-12 flex flex-col items-center justify-center space-y-6">
+        <div className="neural-glass-blade p-12 flex flex-col items-center justify-center space-y-4 max-w-md w-full text-center">
+          <AIThinkingAnimation statusText="Connecting to Neural AI Orchestrator..." />
+          <span className="text-xs font-mono text-cyan-300">Synchronizing Grounded Telemetry Stream...</span>
+        </div>
+        <div className="w-full max-w-4xl space-y-4">
+          <SkeletonShimmer height={340} />
+          <SkeletonShimmer height={120} />
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-80px)] max-w-7xl mx-auto px-2 sm:px-4 pb-4">
-      {/* TOP AI WORKSPACE HEADER */}
-      <AIWorkspaceHeader
+    <div className="neural-command-center min-h-screen py-6 px-3 sm:px-8 max-w-7xl mx-auto space-y-8">
+      {/* 1. MASTER SPATIAL NEURAL STAGE */}
+      <NeuralCommandCenterCanvas
+        aiState={aiState}
+        targetRole={targetRoleTitle}
+        activeDomain={user?.primaryCareerDomain}
         careers={matches}
         selectedCareerId={activeHistory?.conversation?.careerId}
         onSelectCareerContext={(careerId) => switchCareerMutation.mutate(careerId)}
         onNewChat={handleStartNewChat}
+        telemetry={{
+          totalSkills,
+          readinessScore: readinessRating,
+          atsScore: atsIndex,
+          roadmapProgress: roadmapData?.progressPercentage ?? null,
+          activePhaseTitle: activePhase?.title,
+          opportunityCount: liveOpportunityCount,
+          userDomain: user?.primaryCareerDomain || 'Technology',
+        }}
+        matchScore={matchFitScore}
+        readinessScore={readinessRating}
+        atsScore={atsIndex}
+        opportunityCount={liveOpportunityCount}
+        onOpenConversationDrawer={() => setIsConversationDrawerOpen(true)}
       />
 
-      {/* 3-ZONE AI INTELLIGENCE COCKPIT */}
-      <div className="flex-1 flex overflow-hidden border border-white/10 rounded-b-2xl bg-slate-950/70 backdrop-blur-xl shadow-2xl">
-        {/* LEFT ZONE: YOUR CAREER CONTEXT (DESKTOP) */}
-        <div className="hidden lg:block shrink-0">
-          <AICareerContextPanel
-            userName={user?.fullName || user?.email?.split('@')[0]}
-            targetRole={topMatch?.careerId?.title || user?.targetRole || user?.primaryCareerDomain || 'Target Career Path'}
-            readinessScore={topReadiness?.overallScore}
-            totalSkills={totalSkills}
-            criticalGaps={topMatch?.missingSkills || []}
-            activePhaseTitle={activePhase?.title}
-            topRecommendationTitle={topRec?.title}
-          />
-        </div>
+      {/* 2. FLOATING NEURAL COMMAND DECK */}
+      <NeuralCommandDeck
+        inputMessage={inputMessage}
+        onInputChange={setInputMessage}
+        onSend={handleSend}
+        isSending={sendMessageMutation.isPending}
+        suggestedPrompts={suggestedPrompts}
+        onSelectPrompt={(p) => {
+          setInputMessage(p);
+        }}
+      />
 
-        {/* THREAD CONVERSATION SIDEBAR */}
-        <div className="hidden md:block shrink-0">
-          <ConversationSidebar
-            conversations={conversations}
-            activeId={activeConversationId}
-            onSelect={(id) => setActiveConversationId(id)}
-            onNewChat={handleStartNewChat}
-            isLoading={loadingConvs}
-          />
-        </div>
+      {/* 3. EXPLAINABLE AI STRATEGY HORIZON & SCENARIO SIMULATOR */}
+      <NeuralStrategyHorizon
+        strategy={architectStrategy}
+        targetRole={targetRoleTitle}
+        readinessScore={readinessRating}
+      />
 
-        {/* CENTRAL CONVERSATION COCKPIT */}
-        <ChatWindow
-          messages={currentMessages}
-          inputMessage={inputMessage}
-          onInputChange={setInputMessage}
-          onSend={handleSend}
-          isLoading={loadingHistory}
-          isSending={sendMessageMutation.isPending}
-          userName={user?.fullName || 'User'}
-          suggestedPrompts={suggestedPrompts}
-          onSelectPrompt={(p) => setInputMessage(p)}
-          onFeedback={(msgId, isHelpful) => feedbackMutation.mutate({ messageId: msgId, isHelpful })}
-          onToggleLeftDrawer={() => setShowLeftDrawer(!showLeftDrawer)}
-          onToggleRightDrawer={() => setShowRightDrawer(!showRightDrawer)}
-        />
-
-        {/* RIGHT ZONE: EXPLAINABLE STRATEGY PANEL (DESKTOP) */}
-        <div className="hidden xl:block w-96 border-l border-white/10 bg-slate-950/80 p-4 overflow-y-auto custom-scrollbar shrink-0">
-          <ExplainableStrategyPanel
-            strategy={architectStrategy}
-            onExecuteMilestone={() => navigate('/roadmap')}
-          />
-        </div>
-      </div>
+      {/* 4. SLIDE-OVER CONVERSATION ADVISORY DRAWER */}
+      <NeuralConversationDrawer
+        isOpen={isConversationDrawerOpen}
+        onClose={() => setIsConversationDrawerOpen(false)}
+        messages={currentMessages}
+        conversations={conversations}
+        activeConversationId={activeConversationId}
+        onSelectConversation={(id) => setActiveConversationId(id)}
+        onNewChat={handleStartNewChat}
+        isLoadingHistory={loadingHistory}
+        userName={user?.fullName || user?.email?.split('@')[0] || 'User'}
+        onFeedback={(msgId, isHelpful) => feedbackMutation.mutate({ messageId: msgId, isHelpful })}
+      />
     </div>
   );
 };

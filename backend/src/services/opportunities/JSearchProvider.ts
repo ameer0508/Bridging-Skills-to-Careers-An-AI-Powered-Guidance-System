@@ -127,6 +127,11 @@ export class JSearchProvider implements OpportunityProvider {
           ? item.job_required_skills.map((s) => String(s))
           : [];
 
+        // Safe public destination URL - never direct the user's browser to the raw RapidAPI backend endpoint
+        const fallbackSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${title} ${company} jobs`)}`;
+        const safeApplicationUrl = applicationUrl || sourceUrl || fallbackSearchUrl;
+        const safeSourceUrl = sourceUrl || safeApplicationUrl;
+
         return {
           externalId,
           provider: 'JSearch API',
@@ -138,8 +143,8 @@ export class JSearchProvider implements OpportunityProvider {
           employmentType,
           salary: salaryObj,
           postedAt,
-          applicationUrl: applicationUrl || 'https://jsearch.p.rapidapi.com',
-          sourceUrl,
+          applicationUrl: safeApplicationUrl,
+          sourceUrl: safeSourceUrl,
           skills: requiredSkills,
           fetchedAt: new Date().toISOString(),
         };
@@ -177,8 +182,8 @@ export class JSearchProvider implements OpportunityProvider {
         employmentType: 'FULL_TIME',
         salary: { min: 140000, max: 195000, currency: 'USD', period: 'YEARLY' },
         postedAt: now,
-        applicationUrl: 'https://jsearch.p.rapidapi.com',
-        sourceUrl: 'https://jsearch.p.rapidapi.com',
+        applicationUrl: `https://www.google.com/search?q=${encodeURIComponent(`Senior ${searchQuery} Lead CloudScale Infrastructure Systems`)}`,
+        sourceUrl: `https://www.google.com/search?q=${encodeURIComponent(`Senior ${searchQuery} Lead CloudScale Infrastructure Systems`)}`,
         skills: ['TypeScript', 'React', 'Node.js', 'FastAPI', 'System Design'],
         fetchedAt: now,
       },
@@ -193,8 +198,8 @@ export class JSearchProvider implements OpportunityProvider {
         employmentType: 'FULL_TIME',
         salary: { min: 150000, max: 210000, currency: 'USD', period: 'YEARLY' },
         postedAt: now,
-        applicationUrl: 'https://jsearch.p.rapidapi.com',
-        sourceUrl: 'https://jsearch.p.rapidapi.com',
+        applicationUrl: `https://www.google.com/search?q=${encodeURIComponent(`${searchQuery} Systems Engineer OpenAI Ecosystem Partner`)}`,
+        sourceUrl: `https://www.google.com/search?q=${encodeURIComponent(`${searchQuery} Systems Engineer OpenAI Ecosystem Partner`)}`,
         skills: ['Python', 'FastAPI', 'Docker', 'Kubernetes', 'MongoDB'],
         fetchedAt: now,
       },

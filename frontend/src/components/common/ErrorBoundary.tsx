@@ -39,13 +39,21 @@ export class ErrorBoundary extends Component<Props, State> {
             <AlertTriangle className="w-8 h-8" />
           </div>
 
-          <div className="space-y-1 max-w-md">
+          <div className="space-y-2 max-w-lg">
             <h3 className="text-lg font-bold text-white">
               {this.props.fallbackTitle || 'Workspace Recovered From Exception'}
             </h3>
             <p className="text-xs text-neutral-400">
               An unexpected runtime error occurred. Telemetry cache state remains secure.
             </p>
+            {this.state.error && (
+              <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-500/20 text-rose-300 text-xs text-left font-mono overflow-auto max-h-40">
+                <p className="font-bold">{this.state.error.name}: {this.state.error.message}</p>
+                {this.state.error.stack && (
+                  <pre className="text-[10px] text-rose-400/80 mt-1 whitespace-pre-wrap">{this.state.error.stack.split('\n').slice(0, 4).join('\n')}</pre>
+                )}
+              </div>
+            )}
           </div>
 
           <button

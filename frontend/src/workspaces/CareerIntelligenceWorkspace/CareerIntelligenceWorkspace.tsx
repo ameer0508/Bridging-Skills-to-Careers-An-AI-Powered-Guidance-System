@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
   Brain,
@@ -26,6 +26,7 @@ import { JobIntelligenceFeed, JobItem } from '../../features/careers/components/
 import { JobMatchDetailModal } from '../../features/careers/components/JobMatchDetailModal';
 import { SalaryIntelligencePanel } from '../../features/careers/components/SalaryIntelligencePanel';
 import { MarketTrendsPanel } from '../../features/careers/components/MarketTrendsPanel';
+import { CareerAlignmentLabView } from '../../features/careers/components/CareerAlignmentLabView';
 
 // Design System 2.0 Components
 import {
@@ -60,6 +61,47 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
   const [selectedJobForDetail, setSelectedJobForDetail] = useState<JobItem | null>(null);
   const [isJobDetailModalOpen, setIsJobDetailModalOpen] = useState(false);
 
+  const queryClient = useQueryClient();
+
+  // Resume status query to monitor real-time background parsing
+  const { data: resumeData } = useQuery({
+    queryKey: ['resumes', 'me'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get('/resumes/me');
+        return response.data?.data?.resume || null;
+      } catch {
+        return null;
+      }
+    },
+    refetchInterval: (query) => {
+      const status = query.state.data?.parsingStatus;
+      if (status === 'pending' || status === 'processing') {
+        return 2000;
+      }
+      return false;
+    },
+  });
+
+  // Resume upload mutation
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('resume', file);
+      const response = await apiClient.post('/resumes/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['resumes', 'me'] });
+      queryClient.invalidateQueries({ queryKey: ['careers', 'matches'] });
+      queryClient.invalidateQueries({ queryKey: ['skills'] });
+    },
+  });
+
   // Fetch Career Matches Query
   const { data, isLoading, error, refetch } = useQuery<{ matches: CareerMatchData[] }>({
     queryKey: ['careers', 'matches'],
@@ -71,6 +113,13 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
 
   const rawMatches = data?.matches;
   const matches = useMemo(() => rawMatches || [], [rawMatches]);
+
+  // When parsing transitions to completed, refetch matches automatically
+  useEffect(() => {
+    if (resumeData?.parsingStatus === 'completed' && matches.length === 0) {
+      queryClient.invalidateQueries({ queryKey: ['careers', 'matches'] });
+    }
+  }, [resumeData?.parsingStatus, matches.length, queryClient]);
 
   // Extract Categories
   const categories = useMemo(() => {
@@ -163,19 +212,32 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
   }
 
   if (matches.length === 0) {
+    const uploadStatus: 'idle' | 'uploading' | 'processing' | 'completed' | 'error' =
+      uploadMutation.isPending
+        ? 'uploading'
+        : resumeData?.parsingStatus === 'processing' || resumeData?.parsingStatus === 'pending'
+          ? 'processing'
+          : resumeData?.parsingStatus === 'completed'
+            ? 'completed'
+            : uploadMutation.isError || resumeData?.parsingStatus === 'failed'
+              ? 'error'
+              : 'idle';
+
+    const errorMessage = uploadMutation.error
+      ? ((uploadMutation.error as any).response?.data?.message || (uploadMutation.error as Error).message)
+      : resumeData?.parsingStatus === 'failed'
+        ? 'Resume evidence extraction failed. Please ensure the document is not password-protected or corrupted.'
+        : undefined;
+
     return (
-      <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <PremiumEmptyState
-          title="No Career Matches Computed Yet"
-          description="Career alignments require parsed resume evidence and skill extraction. Upload your resume to calculate deterministic role fit scores."
-          primaryAction={{
-            label: 'Upload Resume Now',
-            onClick: () => navigate('/resume'),
+      <div className="max-w-7xl mx-auto space-y-8 pb-16 px-4">
+        <CareerAlignmentLabView
+          onUploadResume={async (file: File) => {
+            await uploadMutation.mutateAsync(file);
           }}
-          secondaryAction={{
-            label: 'Learn More',
-            onClick: () => navigate('/ai'),
-          }}
+          uploadStatus={uploadStatus}
+          errorMessage={errorMessage}
+          onExploreSystem={() => navigate('/ai')}
         />
       </div>
     );

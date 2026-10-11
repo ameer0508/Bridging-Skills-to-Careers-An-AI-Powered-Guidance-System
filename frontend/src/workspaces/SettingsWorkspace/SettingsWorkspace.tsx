@@ -15,9 +15,12 @@ import {
   LogOut,
   Bell,
   Cpu,
+  Edit3,
+  Check,
 } from 'lucide-react';
 import apiClient from '../../lib/axios';
 import { useAuthStore } from '../../store/authStore';
+import { CAREER_DOMAINS, SECONDARY_INTEREST_TAGS } from '../../features/onboarding/components/CareerDomainOnboardingModal';
 
 // Feature Components
 import { SettingsWorkspaceHeader } from '../../features/user/components/SettingsWorkspaceHeader';
@@ -138,6 +141,64 @@ export const SettingsWorkspace: React.FC = () => {
   });
 
   const profile = dbProfile || user;
+
+  // Career Preferences Editing State
+  const [isEditingDomain, setIsEditingDomain] = useState(false);
+  const [editDomainId, setEditDomainId] = useState('software-engineering');
+  const [editRole, setEditRole] = useState('');
+  const [editInterests, setEditInterests] = useState<string[]>([]);
+  const [domainSaveSuccess, setDomainSaveSuccess] = useState(false);
+
+  const startEditingDomain = () => {
+    const currentDomainName = profile?.primaryCareerDomain || '';
+    const matchDomain = CAREER_DOMAINS.find(
+      (d) => d.name.toLowerCase() === currentDomainName.toLowerCase() || d.id === currentDomainName
+    );
+    const domainId = matchDomain ? matchDomain.id : 'software-engineering';
+    setEditDomainId(domainId);
+    setEditRole(profile?.targetRole || (matchDomain ? matchDomain.name : 'Software Engineering'));
+    setEditInterests(profile?.secondaryCareerDomains || []);
+    setIsEditingDomain(true);
+    setDomainSaveSuccess(false);
+  };
+
+  const domainMutation = useMutation({
+    mutationFn: async (payload: {
+      primaryCareerDomain: string;
+      secondaryCareerDomains: string[];
+      targetRole: string;
+    }) => {
+      const response = await apiClient.put('/users/me', {
+        ...payload,
+        onboardingCompleted: true,
+      });
+      return response.data.data;
+    },
+    onSuccess: (data) => {
+      updateUser({
+        primaryCareerDomain: data.primaryCareerDomain,
+        secondaryCareerDomains: data.secondaryCareerDomains,
+        targetRole: data.targetRole,
+        targetCareerId: data.targetCareerId,
+        onboardingCompleted: true,
+      });
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['career-snapshot'] });
+      queryClient.invalidateQueries({ queryKey: ['careers'] });
+      queryClient.invalidateQueries({ queryKey: ['skills'] });
+      queryClient.invalidateQueries({ queryKey: ['readiness'] });
+      queryClient.invalidateQueries({ queryKey: ['recommendations'] });
+      queryClient.invalidateQueries({ queryKey: ['roadmap'] });
+      queryClient.invalidateQueries({ queryKey: ['opportunities'] });
+      queryClient.invalidateQueries({ queryKey: ['analytics'] });
+      setDomainSaveSuccess(true);
+      setTimeout(() => {
+        setIsEditingDomain(false);
+        setDomainSaveSuccess(false);
+      }, 1000);
+    },
+  });
+
   const matches = matchesData || [];
   const topMatch = matches[0] || null;
   const totalSkills = skillsData?.totalSkills || 0;
@@ -414,32 +475,148 @@ export const SettingsWorkspace: React.FC = () => {
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <GlassPanel className="p-6 space-y-4 border-indigo-500/30">
-              <span className="text-sm font-bold text-white flex items-center gap-2">
-                <Compass className="w-4 h-4 text-cyan-400" />
-                Target Career Domain & Specific Role
-              </span>
-              <div className="space-y-3 font-mono text-xs">
-                <div className="flex justify-between items-center p-3 bg-slate-950/80 rounded-xl border border-white/10">
-                  <span className="text-slate-400">Primary Domain:</span>
-                  <strong className="text-cyan-300">{profile?.primaryCareerDomain || 'Not Selected'}</strong>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-slate-950/80 rounded-xl border border-white/10">
-                  <span className="text-slate-400">Target Role Title:</span>
-                  <strong className="text-emerald-300">{profile?.targetRole || 'Not Specified'}</strong>
-                </div>
-                {profile?.secondaryCareerDomains && profile.secondaryCareerDomains.length > 0 && (
-                  <div className="p-3 bg-slate-950/80 rounded-xl border border-white/10 space-y-1">
-                    <span className="text-slate-400 block text-[10px]">Specializations:</span>
-                    <div className="flex flex-wrap gap-1">
-                      {profile.secondaryCareerDomains.map((tag: string) => (
-                        <span key={tag} className="px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 text-[10px] font-bold border border-purple-500/30">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-bold text-white flex items-center gap-2">
+                  <Compass className="w-4 h-4 text-cyan-400" />
+                  Target Career Domain & Specific Role
+                </span>
+                {!isEditingDomain && (
+                  <button
+                    type="button"
+                    onClick={startEditingDomain}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 border border-cyan-500/30 transition-colors cursor-pointer"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>Edit Preferences</span>
+                  </button>
                 )}
               </div>
+
+              {!isEditingDomain ? (
+                <div className="space-y-3 font-mono text-xs">
+                  <div className="flex justify-between items-center p-3 bg-slate-950/80 rounded-xl border border-white/10">
+                    <span className="text-slate-400">Primary Domain:</span>
+                    <strong className="text-cyan-300">{profile?.primaryCareerDomain || 'Not Selected'}</strong>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-slate-950/80 rounded-xl border border-white/10">
+                    <span className="text-slate-400">Target Role Title:</span>
+                    <strong className="text-emerald-300">{profile?.targetRole || 'Not Specified'}</strong>
+                  </div>
+                  {profile?.secondaryCareerDomains && profile.secondaryCareerDomains.length > 0 && (
+                    <div className="p-3 bg-slate-950/80 rounded-xl border border-white/10 space-y-1">
+                      <span className="text-slate-400 block text-[10px]">Specializations:</span>
+                      <div className="flex flex-wrap gap-1">
+                        {profile.secondaryCareerDomains.map((tag: string) => (
+                          <span key={tag} className="px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 text-[10px] font-bold border border-purple-500/30">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4 pt-1 font-mono text-xs">
+                  <div className="space-y-1.5">
+                    <label className="text-slate-400 block text-[11px]">Primary Career Domain:</label>
+                    <select
+                      value={editDomainId}
+                      onChange={(e) => {
+                        const newId = e.target.value;
+                        setEditDomainId(newId);
+                        const found = CAREER_DOMAINS.find(d => d.id === newId);
+                        if (found) setEditRole(found.name);
+                        setEditInterests([]);
+                      }}
+                      className="w-full bg-slate-900/90 border border-white/20 rounded-xl p-2.5 text-white text-xs focus:outline-none focus:border-cyan-500"
+                    >
+                      {CAREER_DOMAINS.map(d => (
+                        <option key={d.id} value={d.id} className="bg-slate-950 text-white">
+                          {d.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-slate-400 block text-[11px]">Target Role Title:</label>
+                    <input
+                      type="text"
+                      value={editRole}
+                      onChange={(e) => setEditRole(e.target.value)}
+                      placeholder="e.g. Lead Security Architect"
+                      className="w-full bg-slate-900/90 border border-white/20 rounded-xl p-2.5 text-white text-xs focus:outline-none focus:border-cyan-500"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-slate-400 block text-[11px]">Specializations (Select up to 5):</label>
+                    <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 bg-slate-900/40 rounded-xl border border-white/5">
+                      {(SECONDARY_INTEREST_TAGS[editDomainId] || SECONDARY_INTEREST_TAGS['software-engineering'] || []).map(tag => {
+                        const isSelected = editInterests.includes(tag);
+                        return (
+                          <button
+                            key={tag}
+                            type="button"
+                            onClick={() => {
+                              if (isSelected) {
+                                setEditInterests(editInterests.filter(t => t !== tag));
+                              } else {
+                                if (editInterests.length < 5) setEditInterests([...editInterests, tag]);
+                              }
+                            }}
+                            className={`px-2 py-1 rounded text-[10px] font-semibold transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-cyan-500 text-black font-bold'
+                                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                            }`}
+                          >
+                            {tag}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-2">
+                    <button
+                      type="button"
+                      disabled={domainMutation.isPending || !editRole.trim()}
+                      onClick={() => {
+                        const domainObj = CAREER_DOMAINS.find(d => d.id === editDomainId) || CAREER_DOMAINS[0];
+                        domainMutation.mutate({
+                          primaryCareerDomain: domainObj.name,
+                          secondaryCareerDomains: editInterests,
+                          targetRole: editRole.trim(),
+                        });
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-linear-to-r from-indigo-500 to-cyan-500 text-white hover:opacity-90 disabled:opacity-50 transition-all cursor-pointer"
+                    >
+                      {domainSaveSuccess ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-300" />
+                          <span>Saved!</span>
+                        </>
+                      ) : domainMutation.isPending ? (
+                        <span>Saving...</span>
+                      ) : (
+                        <>
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Save Changes</span>
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditingDomain(false)}
+                      className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <p className="text-[11px] text-slate-400 leading-relaxed pt-2 border-t border-white/5">
                 Updating your target career domain recalculates taxonomy matches, readiness scores, recommendations, and live job search context across all 12 workspaces.
               </p>

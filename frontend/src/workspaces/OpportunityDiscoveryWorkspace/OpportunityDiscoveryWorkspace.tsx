@@ -70,6 +70,7 @@ export interface SavedOpportunityItem {
   matchedSkills: string[];
   missingSkills: string[];
   description?: string;
+  employmentType?: string;
 }
 
 export const OpportunityDiscoveryWorkspace: React.FC = () => {
@@ -278,7 +279,12 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
         });
         addToast({ type: 'success', message: `Saved [${opp.title}] to opportunity pipeline!` });
       }
-      await Promise.all([refetchSaved(), refetchTelemetry()]);
+      await Promise.all([
+        refetchSaved(),
+        refetchTelemetry(),
+        queryClient.invalidateQueries({ queryKey: ['career-snapshot'] }),
+        queryClient.invalidateQueries({ queryKey: ['careerSnapshot'] }),
+      ]);
     } catch {
       addToast({ type: 'error', message: 'Failed to update saved opportunity state.' });
     }
@@ -289,7 +295,12 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
     try {
       await apiClient.patch(`/opportunities/saved/${externalId}/status`, { status: newStatus, notes });
       addToast({ type: 'success', message: `Pipeline status updated to [${newStatus.toUpperCase()}].` });
-      await Promise.all([refetchSaved(), refetchTelemetry()]);
+      await Promise.all([
+        refetchSaved(),
+        refetchTelemetry(),
+        queryClient.invalidateQueries({ queryKey: ['career-snapshot'] }),
+        queryClient.invalidateQueries({ queryKey: ['careerSnapshot'] }),
+      ]);
     } catch {
       addToast({ type: 'error', message: 'Failed to update pipeline status.' });
     }
@@ -734,6 +745,22 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                             Inspect Details
                           </button>
 
+                          <button
+                            onClick={() =>
+                              navigate('/job-agent', {
+                                state: {
+                                  opportunity: opp,
+                                  selectedOpportunityId: opp.externalId,
+                                },
+                              })
+                            }
+                            className="py-1 px-2.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
+                            title="Analyze this opportunity in Autonomous Job Search Agent"
+                          >
+                            <Briefcase className="w-3.5 h-3.5 text-cyan-400" />
+                            <span>Job Search Agent</span>
+                          </button>
+
                           <a
                             href={opp.applicationUrl}
                             target="_blank"
@@ -1057,7 +1084,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
             </div>
 
             {/* FOOTER ACTIONS */}
-            <div className="flex items-center justify-between pt-4 border-t border-white/10">
+            <div className="flex items-center justify-between pt-4 border-t border-white/10 flex-wrap gap-3">
               <button
                 onClick={() => {
                   handleToggleSave(selectedOpportunity);
@@ -1069,15 +1096,32 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                 {savedExternalIds.has(selectedOpportunity.externalId) ? 'Remove Bookmark' : 'Save Opportunity'}
               </button>
 
-              <a
-                href={selectedOpportunity.applicationUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="py-2 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center gap-2 shadow-lg shadow-indigo-600/30"
-              >
-                <span>VIEW OPPORTUNITY</span>
-                <ExternalLink className="w-4 h-4" />
-              </a>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    navigate('/job-agent', {
+                      state: {
+                        opportunity: selectedOpportunity,
+                        selectedOpportunityId: selectedOpportunity.externalId,
+                      },
+                    });
+                  }}
+                  className="py-2 px-4 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-500/40 text-cyan-300 font-bold flex items-center gap-2 transition cursor-pointer"
+                >
+                  <Briefcase className="w-4 h-4 text-cyan-400" />
+                  <span>Job Search Agent</span>
+                </button>
+
+                <a
+                  href={selectedOpportunity.applicationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-2 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center gap-2 shadow-lg shadow-indigo-600/30"
+                >
+                  <span>VIEW OPPORTUNITY</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
             </div>
           </GlassPanel>
         </div>

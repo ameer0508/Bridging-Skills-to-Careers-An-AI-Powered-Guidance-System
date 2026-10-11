@@ -12,8 +12,16 @@ export interface ToastMessage {
   duration?: number;
 }
 
+export interface ToastOptions {
+  variant?: ToastVariant;
+  type?: ToastVariant;
+  message: React.ReactNode;
+  duration?: number;
+}
+
 interface ToastContextProps {
-  toast: (options: Omit<ToastMessage, 'id'>) => void;
+  toast: (options: ToastOptions) => void;
+  addToast: (options: ToastOptions) => void;
   success: (message: React.ReactNode) => void;
   error: (message: React.ReactNode) => void;
 }
@@ -28,11 +36,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   const addToast = useCallback(
-    ({ variant = 'info', message, duration = 4000 }: Omit<ToastMessage, 'id'>) => {
+    ({ variant, type, message, duration = 4000 }: ToastOptions) => {
+      const activeVariant = variant || type || 'info';
       const id = Math.random().toString(36).substring(2, 9);
-      setToasts(prev => [...prev.slice(-2), { id, variant, message, duration }]);
+      setToasts(prev => [...prev.slice(-2), { id, variant: activeVariant, message, duration }]);
 
-      if (duration > 0 && variant !== 'error') {
+      if (duration > 0 && activeVariant !== 'error') {
         setTimeout(() => {
           removeToast(id);
         }, duration);
@@ -45,7 +54,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const error = useCallback((msg: React.ReactNode) => addToast({ variant: 'error', message: msg, duration: 0 }), [addToast]);
 
   return (
-    <ToastContext.Provider value={{ toast: addToast, success, error }}>
+    <ToastContext.Provider value={{ toast: addToast, addToast, success, error }}>
       {children}
       <Portal>
         <div

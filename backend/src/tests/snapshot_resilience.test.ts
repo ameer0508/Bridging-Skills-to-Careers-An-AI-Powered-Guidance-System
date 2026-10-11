@@ -33,11 +33,16 @@ export async function runSnapshotResilienceTests() {
 
     assert.ok(snapshot, 'Snapshot must be generated successfully');
     assert.strictEqual(snapshot.targetCareer, 'Senior Security Engineer');
-    assert.strictEqual(snapshot.matchScore, 0);
-    assert.strictEqual(snapshot.readinessScore, 0);
+    assert.strictEqual(snapshot.matchScore, null, 'Uncalculated match rate must be null');
+    assert.strictEqual(snapshot.isMatchEvaluated, false);
+    assert.strictEqual(snapshot.readinessScore, null, 'Unevaluated readiness must be null');
+    assert.strictEqual(snapshot.isReadinessEvaluated, false);
+    assert.strictEqual(snapshot.careerHealth, null, 'Uncalculated career health must be null');
+    assert.strictEqual(snapshot.isCareerHealthEvaluated, false);
     assert.strictEqual(snapshot.totalSkills, 0);
     assert.deepStrictEqual(snapshot.criticalGaps, []);
     assert.strictEqual(snapshot.roadmapProgress, 0);
+    assert.strictEqual(snapshot.roadmap.isInitialized, false);
     assert.strictEqual(snapshot.activeRecommendationsCount, 0);
 
     // Verify opportunity telemetry schema
@@ -51,12 +56,23 @@ export async function runSnapshotResilienceTests() {
     assert.ok(snapshot.interviews, 'Interviews telemetry object must exist');
     assert.strictEqual(snapshot.interviews.total, 0);
     assert.strictEqual(snapshot.interviews.completed, 0);
-    assert.strictEqual(snapshot.interviews.averageScore, 0);
+    assert.strictEqual(snapshot.interviews.averageScore, null);
+    assert.strictEqual(snapshot.interviews.latestScore, null);
+    assert.strictEqual(snapshot.interviews.isEvaluated, false);
 
     // Verify resume telemetry schema
     assert.ok(snapshot.resumeInfo, 'ResumeInfo object must exist');
     assert.strictEqual(snapshot.resumeInfo.hasResume, false);
     assert.strictEqual(snapshot.resumeInfo.updatedAt, null);
+    assert.strictEqual(snapshot.resumeInfo.atsScore, null);
+
+    // Verify 10-stage pipeline schema
+    assert.ok(Array.isArray(snapshot.pipeline), 'Pipeline must be an array');
+    assert.strictEqual(snapshot.pipeline.length, 10, 'Pipeline must have 10 canonical stages');
+    assert.strictEqual(snapshot.pipeline[0].id, 'profile');
+    assert.strictEqual(snapshot.pipeline[0].status, 'COMPLETED');
+    assert.strictEqual(snapshot.pipeline[2].id, 'resume');
+    assert.strictEqual(snapshot.pipeline[2].status, 'NOT_STARTED');
 
     console.log('  ✓ Verified Snapshot resilience for candidate with 0 skills/resume/opportunities/interviews');
     console.log('✅ All Career Snapshot Resilience Tests Passed Successfully!\n');

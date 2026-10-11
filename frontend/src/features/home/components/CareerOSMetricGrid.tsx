@@ -11,50 +11,54 @@ interface MetricItem {
 }
 
 interface CareerOSMetricGridProps {
-  readinessScore?: number;
-  matchScore?: number;
+  careerHealth?: number | null;
+  readinessScore?: number | null;
+  matchScore?: number | null;
   totalSkills?: number;
   milestoneProgress?: number;
+  isRoadmapInitialized?: boolean;
   onNavigate?: (route: string) => void;
 }
 
 export const CareerOSMetricGrid: React.FC<CareerOSMetricGridProps> = ({
+  careerHealth,
   readinessScore,
   matchScore,
-  totalSkills = 0,
+  totalSkills: _totalSkills = 0,
   milestoneProgress,
+  isRoadmapInitialized = false,
   onNavigate,
 }) => {
   const metrics: MetricItem[] = [
     {
-      title: 'Career Readiness Score',
-      value: readinessScore !== undefined ? readinessScore : 'Pending',
-      suffix: readinessScore !== undefined ? '%' : undefined,
-      subtext: readinessScore !== undefined ? 'Verified Readiness Rating' : 'Upload Resume to Evaluate',
+      title: 'Career Health Index',
+      value: typeof careerHealth === 'number' ? careerHealth : '—',
+      suffix: typeof careerHealth === 'number' ? '%' : undefined,
+      subtext: typeof careerHealth === 'number' ? 'Weighted Capability Score' : 'Not Enough Verified Data',
       icon: Award,
       route: '/readiness',
     },
     {
       title: 'Target Path Match Rate',
-      value: matchScore !== undefined ? matchScore : 'Pending',
-      suffix: matchScore !== undefined ? '%' : undefined,
-      subtext: matchScore !== undefined ? 'AI Vector Alignment' : 'Select Target Path',
+      value: typeof matchScore === 'number' ? matchScore : '—',
+      suffix: typeof matchScore === 'number' ? '%' : undefined,
+      subtext: typeof matchScore === 'number' ? 'AI Vector Alignment' : 'Awaiting Skill Profile',
       icon: Compass,
       route: '/careers',
     },
     {
-      title: 'Extracted Skill Nodes',
-      value: totalSkills,
-      suffix: 'Skills',
-      subtext: totalSkills > 0 ? 'Verified In Profile' : 'No Skills Extracted Yet',
+      title: 'Career Readiness Score',
+      value: typeof readinessScore === 'number' ? readinessScore : '—',
+      suffix: typeof readinessScore === 'number' ? '%' : undefined,
+      subtext: typeof readinessScore === 'number' ? 'Multi-Dimensional Score' : 'Readiness Unevaluated',
       icon: Cpu,
-      route: '/skills',
+      route: '/readiness',
     },
     {
       title: 'Active Roadmap Completion',
-      value: milestoneProgress !== undefined ? milestoneProgress : 0,
-      suffix: '%',
-      subtext: milestoneProgress !== undefined ? 'Active Blueprint Progress' : 'No Active Roadmap',
+      value: isRoadmapInitialized && typeof milestoneProgress === 'number' ? milestoneProgress : '—',
+      suffix: isRoadmapInitialized && typeof milestoneProgress === 'number' ? '%' : undefined,
+      subtext: isRoadmapInitialized ? 'Active Blueprint Progress' : 'Roadmap Not Initialized',
       icon: Layers,
       route: '/roadmap',
     },

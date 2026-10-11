@@ -1,39 +1,64 @@
 import http from 'http';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
+import fs from 'fs';
+import path from 'path';
 import app from './app.js';
 import env from './config/env.js';
 import logger from './config/logger.js';
 import CareerService from './services/CareerService.js';
+import { AuthService } from './services/AuthService.js';
 
 const server = http.createServer(app);
 let mongoServer: MongoMemoryServer | null = null;
 
-// Initialize Database Connection
+// Initialize Database Connection with Persistent Storage Support
 const connectDatabase = async (): Promise<void> => {
   let mongoUri = env.MONGODB_URI;
 
-  if (
-    env.NODE_ENV === 'development' &&
-    (mongoUri.includes('localhost') || mongoUri.includes('127.0.0.1'))
-  ) {
+  const isCloudUri =
+    mongoUri.startsWith('mongodb+srv://') ||
+    (!mongoUri.includes('localhost') && !mongoUri.includes('127.0.0.1'));
+
+  if (isCloudUri) {
+    logger.info('☁️ Cloud MongoDB Atlas URI detected. Connecting directly to Cloud Database...');
+  } else if (env.NODE_ENV === 'development') {
     try {
-      logger.info('Local MongoDB URI detected. Spinning up in-memory MongoMemoryServer...');
-      mongoServer = await MongoMemoryServer.create();
+      const dbDir = path.resolve(process.cwd(), 'data', 'local_db');
+      if (!fs.existsSync(dbDir)) {
+        fs.mkdirSync(dbDir, { recursive: true });
+      }
+
+      logger.info(`Persisted Local MongoDB storage path: ${dbDir}`);
+      mongoServer = await MongoMemoryServer.create({
+        instance: {
+          dbPath: dbDir,
+          storageEngine: 'wiredTiger',
+          dbName: 'skillbridge',
+        },
+      });
       mongoUri = mongoServer.getUri();
-      logger.info(`🟢 In-memory database started successfully on URI: ${mongoUri}`);
+      logger.info(`🟢 Persistent local database active on URI: ${mongoUri}`);
     } catch (error) {
-      logger.error('❌ Failed to launch in-memory MongoMemoryServer:', error);
+      logger.warn('Failed to start persistent dbPath, falling back to dynamic instance:', error);
+      try {
+        mongoServer = await MongoMemoryServer.create();
+        mongoUri = mongoServer.getUri();
+      } catch (innerErr) {
+        logger.error('❌ Failed to launch MongoMemoryServer:', innerErr);
+      }
     }
   }
 
-  logger.info('Initializing MongoDB connection...');
+  logger.info('Initializing MongoDB connection pool...');
   try {
     await mongoose.connect(mongoUri);
     logger.info('Successfully established MongoDB connection pool.');
     await CareerService.seedInitialTaxonomy();
     const RecommendationService = (await import('./services/RecommendationService.js')).default;
     await RecommendationService.seedInitialResources();
+    // Automatically restore any registered users from persistent backup mirror
+    await AuthService.restoreUserBackups();
   } catch (error) {
     logger.error(
       'Failed to establish MongoDB connection on startup. API will remain active but degraded:',

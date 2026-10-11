@@ -26,8 +26,13 @@ export const MomentumScoreEngine = {
   ): MomentumScoreData {
     const roadmapProgress = roadmap?.progressPercentage || 0;
     const readinessScore = topReadiness?.overallScore || 0;
-    const recsCompleted = recommendations.filter((r) => r.status === 'completed').length;
-    const totalRecs = recommendations.length || 1;
+    const safeRecs = Array.isArray(recommendations)
+      ? recommendations
+      : (recommendations as any)?.recommendations && Array.isArray((recommendations as any).recommendations)
+        ? (recommendations as any).recommendations
+        : [];
+    const recsCompleted = safeRecs.filter((r: any) => r && r.status === 'completed').length;
+    const totalRecs = safeRecs.length || 1;
 
     // 1. Factor: Roadmap Execution (Weight: 35%)
     const roadmapScore = Math.min(100, roadmapProgress * 1.2);

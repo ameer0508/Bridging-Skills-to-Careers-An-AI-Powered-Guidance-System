@@ -1,5 +1,5 @@
 import re
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Any
 from app.resume_intelligence.semantic_entities import SemanticSkill
 
 class SkillMapper:

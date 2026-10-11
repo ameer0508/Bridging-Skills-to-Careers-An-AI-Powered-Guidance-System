@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
+import { useAuthStore } from '../store/authStore';
 import { GuestRoute, ProtectedRoute } from '../components/RouteGuards';
 import { AppShell } from '../layouts/AppShell';
 import { AuthLayout } from '../layouts/AuthLayout';
@@ -36,6 +37,7 @@ const OpportunityDiscoveryWorkspace = lazy(() => import('../workspaces/Opportuni
 const AIOrchestratorDashboard = lazy(() => import('../workspaces/AIOrchestratorDashboard/AIOrchestratorDashboard'));
 const PersonalMemoryWorkspace = lazy(() => import('../workspaces/PersonalMemoryWorkspace/PersonalMemoryWorkspace'));
 const CareerOSDashboard = lazy(() => import('../workspaces/CareerOSDashboard/CareerOSDashboard'));
+const CareerIdentityWorkspace = lazy(() => import('../workspaces/CareerIdentityWorkspace/CareerIdentityWorkspace'));
 
 // Feature Pages
 import LoginForm from '../features/auth/components/LoginForm';
@@ -65,6 +67,18 @@ import LandingPage from '../features/landing/LandingPage';
 
 // Root redirect handler based on authentication status
 const RootRedirect: React.FC = () => {
+  const accessToken = useAuthStore(state => state.accessToken);
+  const fetchCurrentUser = useAuthStore(state => state.fetchCurrentUser);
+  const clearSession = useAuthStore(state => state.clearSession);
+
+  useEffect(() => {
+    if (accessToken) {
+      fetchCurrentUser().catch(() => {
+        clearSession();
+      });
+    }
+  }, [accessToken, fetchCurrentUser, clearSession]);
+
   return <LandingPage />;
 };
 
@@ -145,7 +159,7 @@ export const router = createBrowserRouter([
             path: '/profile',
             element: (
               <WorkspaceSuspense>
-                <SettingsWorkspace />
+                <CareerIdentityWorkspace />
               </WorkspaceSuspense>
             ),
           },

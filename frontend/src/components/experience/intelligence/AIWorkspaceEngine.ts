@@ -46,11 +46,17 @@ export const AIWorkspaceEngine = {
       conversationalSummary = `Your skill graph contains ${totalSkills} verified competencies. Select a target career path to compute alignment.`;
     }
 
+    const safeRecs: RecommendationItem[] = Array.isArray(recommendations)
+      ? recommendations
+      : (recommendations as any)?.recommendations && Array.isArray((recommendations as any).recommendations)
+        ? (recommendations as any).recommendations
+        : [];
+
     return {
       topMatch,
       topReadiness,
       totalSkills,
-      activeRecommendations: recommendations.filter((r) => r.status !== 'completed'),
+      activeRecommendations: safeRecs.filter((r) => r && r.status !== 'completed'),
       roadmap,
       confidenceScore,
       confidenceTier,

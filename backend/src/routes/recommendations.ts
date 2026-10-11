@@ -7,6 +7,7 @@ const router = Router();
 router.use(requireAuth);
 
 router.get('/', RecommendationController.getRecommendations);
+router.post('/generate', RecommendationController.regenerateRecommendations);
 router.patch('/:id/status', RecommendationController.updateStatus);
 
 export default router;

@@ -140,7 +140,7 @@ class OpportunityService {
         company: sanitizeText(opp.company),
         location: sanitizeText(opp.location),
         description: sanitizeText(opp.description),
-        applicationUrl: sanitizeUrl(opp.applicationUrl) || 'https://jsearch.p.rapidapi.com',
+        applicationUrl: sanitizeUrl(opp.applicationUrl) || `https://www.google.com/search?q=${encodeURIComponent(`${opp.title} ${opp.company} jobs`)}`,
         skillbridgeMatchScore: calculatedScore,
         matchedSkills: matchedSkills.length > 0 ? matchedSkills : userSkillNames.slice(0, 2),
         missingSkills: missingSkills.slice(0, 3),
