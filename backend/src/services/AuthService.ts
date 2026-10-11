@@ -1,11 +1,8 @@
 import bcrypt from 'bcrypt';
-import fs from 'fs';
-import path from 'path';
 import UserRepository from '../repositories/UserRepository.js';
 import RefreshTokenRepository from '../repositories/RefreshTokenRepository.js';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
 import { AppError } from '../middlewares/errorHandler.js';
-import logger from '../config/logger.js';
 
 export class AuthService {
   private userRepository: UserRepository;
@@ -14,102 +11,6 @@ export class AuthService {
   constructor() {
     this.userRepository = new UserRepository();
     this.refreshTokenRepository = new RefreshTokenRepository();
-  }
-
-  private static getBackupFilePath(): string {
-    const dataDir = path.resolve(process.cwd(), 'data');
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-    return path.join(dataDir, 'users_backup.json');
-  }
-
-  public static async backupUserToFile(user: {
-    id: string;
-    fullName?: string;
-    email: string;
-    passwordHash?: string;
-    role?: string;
-    primaryCareerDomain?: string;
-    secondaryCareerDomains?: string[];
-    targetRole?: string;
-    targetCareerId?: unknown;
-    onboardingCompleted?: boolean;
-    onboardingCompletedAt?: Date | string;
-    profileCompleted?: boolean;
-  }) {
-    try {
-      const filePath = AuthService.getBackupFilePath();
-      let users: Array<{
-        id: string;
-        fullName?: string;
-        email: string;
-        passwordHash?: string;
-        role?: string;
-        primaryCareerDomain?: string;
-        secondaryCareerDomains?: string[];
-        targetRole?: string;
-        targetCareerId?: unknown;
-        onboardingCompleted?: boolean;
-        onboardingCompletedAt?: Date | string;
-        profileCompleted?: boolean;
-      }> = [];
-      if (fs.existsSync(filePath)) {
-        try {
-          users = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-        } catch {
-          users = [];
-        }
-      }
-      const existingIdx = users.findIndex(
-        (u) => (u.email || '').toLowerCase() === user.email.toLowerCase()
-      );
-      if (existingIdx >= 0) {
-        users[existingIdx] = { ...users[existingIdx], ...user };
-      } else {
-        users.push(user);
-      }
-      fs.writeFileSync(filePath, JSON.stringify(users, null, 2), 'utf-8');
-    } catch (err) {
-      logger.warn('Could not write user backup to file:', err);
-    }
-  }
-
-  public static async restoreUserBackups(): Promise<void> {
-    try {
-      const filePath = AuthService.getBackupFilePath();
-      if (!fs.existsSync(filePath)) return;
-      const content = fs.readFileSync(filePath, 'utf-8');
-      const users = JSON.parse(content);
-      if (!Array.isArray(users) || users.length === 0) return;
-
-      const { User } = await import('../models/User.js');
-      for (const u of users) {
-        const email = (u.email || '').toLowerCase().trim();
-        if (!email) continue;
-        const exists = await User.findOne({ email });
-        if (!exists) {
-          await User.create({
-            fullName: u.fullName || 'User',
-            email,
-            passwordHash: u.passwordHash,
-            role: u.role || 'user',
-            accountStatus: 'active',
-            status: 'active',
-            primaryCareerDomain: u.primaryCareerDomain || '',
-            secondaryCareerDomains: u.secondaryCareerDomains || [],
-            targetRole: u.targetRole || '',
-            targetCareerId: u.targetCareerId || null,
-            onboardingCompleted: Boolean(u.onboardingCompleted),
-            onboardingCompletedAt: u.onboardingCompletedAt ? new Date(u.onboardingCompletedAt) : undefined,
-            profileCompleted: Boolean(u.profileCompleted),
-          });
-          logger.info(`🟢 Restored user account from persistent storage: ${email}`);
-        }
-      }
-    } catch (err) {
-      logger.warn('Failed to restore user backups:', err);
-    }
   }
 
   /**
@@ -132,22 +33,6 @@ export class AuthService {
       fullName,
       email: normalizedEmail,
       passwordHash,
-    });
-
-    // Write to persistent redundancy mirror
-    await AuthService.backupUserToFile({
-      id: user.id,
-      fullName: user.fullName,
-      email: normalizedEmail,
-      passwordHash,
-      role: user.role,
-      primaryCareerDomain: user.primaryCareerDomain || '',
-      secondaryCareerDomains: user.secondaryCareerDomains || [],
-      targetRole: user.targetRole || '',
-      targetCareerId: user.targetCareerId || null,
-      onboardingCompleted: Boolean(user.onboardingCompleted),
-      onboardingCompletedAt: user.onboardingCompletedAt,
-      profileCompleted: Boolean(user.profileCompleted),
     });
 
     const accessToken = signAccessToken(user.id, user.role || 'user');
@@ -184,13 +69,7 @@ export class AuthService {
    */
   async login(email: string, password: string) {
     const normalizedEmail = (email || '').toLowerCase().trim();
-    let user = await this.userRepository.findByEmail(normalizedEmail);
-
-    // If user not found in active collection, attempt restore from persistent mirror
-    if (!user) {
-      await AuthService.restoreUserBackups();
-      user = await this.userRepository.findByEmail(normalizedEmail);
-    }
+    const user = await this.userRepository.findByEmail(normalizedEmail);
 
     if (!user) {
       const error = new Error('Invalid email or password.') as AppError;

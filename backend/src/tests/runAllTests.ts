@@ -1,3 +1,6 @@
+import { assertIsolatedDatabase } from './setupEnv.js';
+import fs from 'fs';
+import path from 'path';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { runAuthTests } from './auth.test.js';
@@ -16,7 +19,20 @@ async function runAll() {
   if (mongoose.connection.readyState === 0) {
     mongoServer = await MongoMemoryServer.create();
     await mongoose.connect(mongoServer.getUri());
+    assertIsolatedDatabase(mongoServer.getUri());
   }
+
+  // Tripwire: the suite must never touch real developer data on disk.
+  const protectedPaths = ['data/users_backup.json', 'data/local_db', 'uploads'].map(p =>
+    path.resolve(process.cwd(), p)
+  );
+  const fingerprint = () =>
+    protectedPaths.map(p => {
+      if (!fs.existsSync(p)) return `${p}:absent`;
+      const stat = fs.statSync(p);
+      return `${p}:${stat.size}:${stat.mtimeMs}`;
+    });
+  const before = fingerprint();
 
   try {
     await runAuthTests();
@@ -28,7 +44,15 @@ async function runAll() {
     await runOrchestratorServiceTests();
     await runResumeDifferentialTest();
     await runCorePipelineTests();
-    console.log('\n🎉 ALL BACKEND INTEGRATION & UNIT TESTS EXECUTED SUCCESSFULLY WITH ZERO FAILURES!');
+    const after = fingerprint();
+    const touched = before.filter((entry, i) => entry !== after[i]);
+    if (touched.length > 0) {
+      throw new Error(
+        `Test isolation breach: real data paths changed during the run: ${touched.join(', ')}`
+      );
+    }
+    console.log('  ✓ Isolation verified: real backup file, local database and uploads untouched');
+    console.log('\n🎉 All backend test suites passed.');
   } catch (error) {
     console.error('\n❌ Test Suite Execution Failed:', error);
     process.exitCode = 1;

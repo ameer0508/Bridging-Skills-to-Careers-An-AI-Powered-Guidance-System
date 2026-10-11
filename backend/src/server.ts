@@ -1,13 +1,12 @@
 import http from 'http';
 import mongoose from 'mongoose';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import type { MongoMemoryServer } from 'mongodb-memory-server';
 import fs from 'fs';
 import path from 'path';
 import app from './app.js';
 import env from './config/env.js';
 import logger from './config/logger.js';
 import CareerService from './services/CareerService.js';
-import { AuthService } from './services/AuthService.js';
 
 const server = http.createServer(app);
 let mongoServer: MongoMemoryServer | null = null;
@@ -23,14 +22,17 @@ const connectDatabase = async (): Promise<void> => {
   if (isCloudUri) {
     logger.info('☁️ Cloud MongoDB Atlas URI detected. Connecting directly to Cloud Database...');
   } else if (env.NODE_ENV === 'development') {
+    // Development convenience: run an embedded MongoDB whose files persist under data/local_db.
+    // The package is a devDependency, so it is loaded lazily and never required in production.
+    const dbDir = path.resolve(process.cwd(), 'data', 'local_db');
     try {
-      const dbDir = path.resolve(process.cwd(), 'data', 'local_db');
       if (!fs.existsSync(dbDir)) {
         fs.mkdirSync(dbDir, { recursive: true });
       }
+      const { MongoMemoryServer: EmbeddedMongo } = await import('mongodb-memory-server');
 
       logger.info(`Persisted Local MongoDB storage path: ${dbDir}`);
-      mongoServer = await MongoMemoryServer.create({
+      mongoServer = await EmbeddedMongo.create({
         instance: {
           dbPath: dbDir,
           storageEngine: 'wiredTiger',
@@ -40,13 +42,22 @@ const connectDatabase = async (): Promise<void> => {
       mongoUri = mongoServer.getUri();
       logger.info(`🟢 Persistent local database active on URI: ${mongoUri}`);
     } catch (error) {
-      logger.warn('Failed to start persistent dbPath, falling back to dynamic instance:', error);
-      try {
-        mongoServer = await MongoMemoryServer.create();
-        mongoUri = mongoServer.getUri();
-      } catch (innerErr) {
-        logger.error('❌ Failed to launch MongoMemoryServer:', innerErr);
+      // Never fall back to an empty throwaway database silently: existing accounts would
+      // appear to have vanished. Opt in explicitly with ALLOW_EPHEMERAL_DB=true.
+      if (process.env.ALLOW_EPHEMERAL_DB !== 'true') {
+        logger.error(
+          `❌ Could not open the persistent local database at ${dbDir}. ` +
+            'Another backend instance may still be running, or a stale lock file may remain. ' +
+            'Stop other instances and retry, point MONGODB_URI at a real MongoDB server, ' +
+            'or set ALLOW_EPHEMERAL_DB=true to start with a temporary empty database.',
+          error
+        );
+        process.exit(1);
       }
+      logger.warn('ALLOW_EPHEMERAL_DB=true: starting with a TEMPORARY EMPTY database. Data will not persist.');
+      const { MongoMemoryServer: EmbeddedMongo } = await import('mongodb-memory-server');
+      mongoServer = await EmbeddedMongo.create();
+      mongoUri = mongoServer.getUri();
     }
   }
 
@@ -57,8 +68,6 @@ const connectDatabase = async (): Promise<void> => {
     await CareerService.seedInitialTaxonomy();
     const RecommendationService = (await import('./services/RecommendationService.js')).default;
     await RecommendationService.seedInitialResources();
-    // Automatically restore any registered users from persistent backup mirror
-    await AuthService.restoreUserBackups();
   } catch (error) {
     logger.error(
       'Failed to establish MongoDB connection on startup. API will remain active but degraded:',

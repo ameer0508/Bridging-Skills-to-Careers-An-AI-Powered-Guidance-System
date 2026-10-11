@@ -1,3 +1,4 @@
+import './setupEnv.js';
 import orchestratorService from '../services/OrchestratorService.js';
 
 export async function runOrchestratorServiceTests() {

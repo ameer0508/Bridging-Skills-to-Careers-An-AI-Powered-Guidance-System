@@ -1,3 +1,4 @@
+import './setupEnv.js';
 import assert from 'node:assert/strict';
 import { pathToFileURL } from 'node:url';
 import mongoose from 'mongoose';

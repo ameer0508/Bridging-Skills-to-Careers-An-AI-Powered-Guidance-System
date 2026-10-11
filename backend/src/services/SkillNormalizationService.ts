@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { aiHttp } from './aiHttp.js';
 import { Skill, ISkill } from '../models/Skill.js';
 import { SkillRelationship } from '../models/SkillRelationship.js';
 import logger from '../config/logger.js';
@@ -16,12 +16,6 @@ interface NormalizedSkillData {
 }
 
 class SkillNormalizationService {
-  private aiServiceUrl: string;
-
-  constructor() {
-    this.aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-  }
-
   /**
    * Takes a list of raw skill strings, checks cache (DB), and normalizes unknown skills via AI.
    * Returns a map of rawName -> canonical ISkill document.
@@ -54,9 +48,9 @@ class SkillNormalizationService {
     // 2. Call AI Service for unknown skills
     logger.info(`Sending ${unknownRawSkills.length} unknown skills to AI for normalization.`);
     try {
-      const response = await axios.post(`${this.aiServiceUrl}/api/v1/skills/normalize`, {
+      const response = await aiHttp.post(`/api/v1/skills/normalize`, {
         skills: unknownRawSkills
-      });
+      }, { timeout: 30000 });
 
       if (response.data && response.data.normalized_skills) {
         const normalizedDataList: NormalizedSkillData[] = response.data.normalized_skills;

@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
-import axios from 'axios';
-import env from '../config/env.js';
+import { aiHttp, actingUser } from './aiHttp.js';
 import logger from '../config/logger.js';
 import snapshotService from './SnapshotService.js';
 import ProgressEventService from './ProgressEventService.js';
@@ -437,8 +436,8 @@ export class OrchestratorService {
     // Attempt to invoke Python AI Service if online for ML reasoning
     let reasoning = `Constructed 4-phase parallel/sequential workflow coordinating 7 specialized agents to achieve [${targetCareer}] with optimal confidence.`;
     try {
-      const aiUrl = `${env.AI_SERVICE_URL || 'http://127.0.0.1:8000'}/api/v1/orchestrator/execute/${userId}?goal=${encodeURIComponent(targetCareer)}&target_company=${encodeURIComponent(targetCompany)}`;
-      const aiResponse = await axios.post(aiUrl, {}, { timeout: 2500 });
+      const aiUrl = `/api/v1/orchestrator/execute/${userId}?goal=${encodeURIComponent(targetCareer)}&target_company=${encodeURIComponent(targetCompany)}`;
+      const aiResponse = await aiHttp.post(aiUrl, {}, { timeout: 2500, headers: actingUser(userId) });
       if (aiResponse.data?.data?.orchestration_reasoning?.orchestration_rationale) {
         reasoning = aiResponse.data.data.orchestration_reasoning.orchestration_rationale;
       }

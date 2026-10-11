@@ -30,13 +30,15 @@ const format = winston.format.combine(
     : winston.format.json()
 );
 
+const logDir = process.env.LOG_DIR || 'logs';
+
 const transports = [
   new winston.transports.Console(),
   new winston.transports.File({
-    filename: 'logs/error.log',
+    filename: `${logDir}/error.log`,
     level: 'error'
   }),
-  new winston.transports.File({ filename: 'logs/combined.log' })
+  new winston.transports.File({ filename: `${logDir}/combined.log` })
 ];
 
 export const logger = winston.createLogger({

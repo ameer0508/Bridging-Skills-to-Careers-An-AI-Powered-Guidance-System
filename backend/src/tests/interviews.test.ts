@@ -1,3 +1,4 @@
+import './setupEnv.js';
 import interviewService from '../services/InterviewService.js';
 
 export async function runInterviewTests() {
@@ -63,7 +64,10 @@ export async function runInterviewTests() {
   console.log('✅ All Interview Intelligence Tests Passed Successfully!\n');
 }
 
-runInterviewTests().catch((err) => {
-  console.error('❌ Interview Test Failed:', err);
-  process.exit(1);
-});
+// Run only when this file is executed directly, not when imported by runAllTests
+if (process.argv[1]?.includes('interviews.test')) {
+  runInterviewTests().catch((err) => {
+    console.error('❌ Interview Test Failed:', err);
+    process.exit(1);
+  });
+}

@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { aiHttp } from './aiHttp.js';
 import FormData from 'form-data';
 import logger from '../config/logger.js';
 
@@ -21,12 +21,6 @@ export interface IUnifiedAIResponse<T = unknown> {
 }
 
 class AIClientService {
-  private aiServiceUrl: string;
-
-  constructor() {
-    this.aiServiceUrl = process.env.AI_SERVICE_URL || 'http://localhost:8000';
-  }
-
   /**
    * Sends a file to the AI service for extraction and returns the structured JSON.
    */
@@ -35,10 +29,12 @@ class AIClientService {
       const form = new FormData();
       form.append('file', fileBuffer, { filename: fileName });
 
-      const response = await axios.post(`${this.aiServiceUrl}/api/v1/extract`, form, {
+      const response = await aiHttp.post(`/api/v1/extract`, form, {
         headers: {
           ...form.getHeaders()
-        }
+        },
+        timeout: 60000,
+        maxBodyLength: Infinity
       });
 
       if (response.data && response.data.success) {
@@ -63,7 +59,7 @@ class AIClientService {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const response = await axios.post(`${this.aiServiceUrl}/api/v1/chat`, { prompt }, {
+        const response = await aiHttp.post(`/api/v1/chat`, { prompt }, {
           timeout: timeoutMs
         });
 
@@ -89,7 +85,7 @@ class AIClientService {
    * Invokes Career Matching AI Service.
    */
   async matchCareer(userSkills: string[], targetRole: string, experienceYears: number = 0): Promise<IUnifiedAIResponse> {
-    const response = await axios.post(`${this.aiServiceUrl}/api/v1/career/match`, {
+    const response = await aiHttp.post(`/api/v1/career/match`, {
       user_skills: userSkills,
       target_role: targetRole,
       experience_years: experienceYears
@@ -101,7 +97,7 @@ class AIClientService {
    * Invokes Readiness Score AI Service.
    */
   async calculateReadiness(userSkills: string[], requiredSkills: string[], roleTitle: string): Promise<IUnifiedAIResponse> {
-    const response = await axios.post(`${this.aiServiceUrl}/api/v1/readiness/score`, {
+    const response = await aiHttp.post(`/api/v1/readiness/score`, {
       user_skills: userSkills,
       required_skills: requiredSkills,
       role_title: roleTitle
@@ -113,7 +109,7 @@ class AIClientService {
    * Invokes Recommendation Engine AI Service.
    */
   async generateRecommendations(userSkills: string[], careerGoal: string, preferredLearningStyle: string = 'hands-on'): Promise<IUnifiedAIResponse> {
-    const response = await axios.post(`${this.aiServiceUrl}/api/v1/recommendations/generate`, {
+    const response = await aiHttp.post(`/api/v1/recommendations/generate`, {
       user_skills: userSkills,
       career_goal: careerGoal,
       preferred_learning_style: preferredLearningStyle
@@ -125,7 +121,7 @@ class AIClientService {
    * Invokes Roadmap Generator AI Service.
    */
   async generateRoadmap(currentLevel: string, targetRole: string, targetMonths: number = 6): Promise<IUnifiedAIResponse> {
-    const response = await axios.post(`${this.aiServiceUrl}/api/v1/roadmap/generate`, {
+    const response = await aiHttp.post(`/api/v1/roadmap/generate`, {
       current_level: currentLevel,
       target_role: targetRole,
       target_months: targetMonths
@@ -137,7 +133,7 @@ class AIClientService {
    * Invokes Analytics Engine AI Service.
    */
   async generateAnalytics(userId: string, skillsTrend: Array<Record<string, unknown>> = []): Promise<IUnifiedAIResponse> {
-    const response = await axios.post(`${this.aiServiceUrl}/api/v1/analytics/insights`, {
+    const response = await aiHttp.post(`/api/v1/analytics/insights`, {
       user_id: userId,
       skills_trend: skillsTrend
     });
@@ -148,7 +144,7 @@ class AIClientService {
    * Invokes Resume Intelligence AI Service.
    */
   async analyzeResumeIntelligence(resumeText: string, targetRole?: string): Promise<IUnifiedAIResponse> {
-    const response = await axios.post(`${this.aiServiceUrl}/api/v1/resume/intelligence`, {
+    const response = await aiHttp.post(`/api/v1/resume/intelligence`, {
       resume_text: resumeText,
       target_role: targetRole
     });
@@ -165,7 +161,7 @@ class AIClientService {
     model: string;
   }> {
     try {
-      const response = await axios.get(`${this.aiServiceUrl}/api/v1/health`, { timeout: 2000 });
+      const response = await aiHttp.get(`/api/v1/health`, { timeout: 2000 });
       if (response.data && response.data.status === 'healthy') {
         const providers = response.data.providers || {};
         const geminiAvailable = Boolean(providers.gemini?.available);

@@ -1,3 +1,4 @@
+import './setupEnv.js';
 import JSearchProvider from '../services/opportunities/JSearchProvider.js';
 import OpportunityService from '../services/OpportunityService.js';
 
@@ -115,7 +116,10 @@ export async function runOpportunityTests() {
   console.log('✅ All Opportunity Infrastructure Tests Passed Successfully!\n');
 }
 
-runOpportunityTests().catch((err) => {
-  console.error('❌ Opportunity Test Failed:', err);
-  process.exit(1);
-});
+// Run only when this file is executed directly, not when imported by runAllTests
+if (process.argv[1]?.includes('opportunities.test')) {
+  runOpportunityTests().catch((err) => {
+    console.error('❌ Opportunity Test Failed:', err);
+    process.exit(1);
+  });
+}
