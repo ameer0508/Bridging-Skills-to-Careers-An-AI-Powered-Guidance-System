@@ -62,6 +62,7 @@ export class CareerReadinessService {
             careerId: career._id,
             overallScore: readinessData.overallScore,
             readinessTier: readinessData.tier,
+            interpretation: readinessData.interpretation,
             dimensions: readinessData.dimensions
           });
 

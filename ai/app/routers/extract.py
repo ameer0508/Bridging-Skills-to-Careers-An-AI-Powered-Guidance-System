@@ -101,12 +101,12 @@ async def extract_resume(file: UploadFile = File(...)):
 
         unified_resp = ResponseNormalizer.normalize_success(
             raw_data=parsed_data.model_dump(),
-            provider="transformer_engine",
-            model="transformer-resume-intelligence-v1",
+            provider="rule_based_parser",
+            model="resume-rules-v1",
             latency_ms=latency,
             prompt_text=text[:200],
             completion_text=str(parsed_data.model_dump()),
-            metadata={"file_type": ext, "parsing_engine": "transformer_pipeline"}
+            metadata={"file_type": ext, "parsing_engine": "rule_based"}
         )
 
         return JSONResponse(status_code=200, content=unified_resp.model_dump())

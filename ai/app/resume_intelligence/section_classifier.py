@@ -57,16 +57,28 @@ class SectionClassifier:
         }
 
         current_section = "header"
-        lines = [line.strip() for line in raw_text.splitlines() if line.strip()]
+        for raw_line in raw_text.splitlines():
+            line = raw_line.strip()
+            if not line:
+                # Blank lines are kept: they separate jobs and projects inside a section
+                sections[current_section].append("")
+                continue
 
-        for line in lines:
             detected = cls._match_heading(line)
             if detected:
                 current_section = detected
+                continue
+
+            # Inline heading: "Skills: Python, SQL" or "Languages - English, Hindi"
+            inline = re.match(r"^([A-Za-z &/]{3,40}?)\s*[:\-–]\s+(.+)$", line)
+            inline_section = cls._match_heading(inline.group(1)) if inline else None
+            if inline_section:
+                current_section = inline_section
+                sections[current_section].append(inline.group(2).strip())
             else:
                 sections[current_section].append(line)
 
-        return {k: "\n".join(v).strip() for k, v in sections.items() if v}
+        return {k: "\n".join(v).strip() for k, v in sections.items() if "\n".join(v).strip()}
 
     @classmethod
     def _match_heading(cls, line: str) -> str | None:

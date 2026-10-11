@@ -8,6 +8,8 @@ import {
 import JSearchProvider from './opportunities/JSearchProvider.js';
 import mongoose from 'mongoose';
 import UserSkill from '../models/UserSkill.js';
+import { buildUserSkillIndex, SkillEvidenceMatch } from '../utils/skillMatching.js';
+import { extractJobRequirements, matchOpportunity } from './opportunities/OpportunityMatcher.js';
 import CareerMatch from '../models/CareerMatch.js';
 import SavedOpportunity, { ApplicationStatus, ISavedOpportunity } from '../models/SavedOpportunity.js';
 import { AppError } from '../middlewares/errorHandler.js';
@@ -70,21 +72,19 @@ class OpportunityService {
       };
     }
 
-    // Fetch user skills from MongoDB if connected
-    let userSkillNames: string[] = [];
+    // Candidate evidence: the user's skills with their resume evidence
+    let userSkillIndex = new Map<string, SkillEvidenceMatch>();
     let targetTitle = '';
     if (mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(userId)) {
       try {
         const userObjId = new mongoose.Types.ObjectId(userId);
-        const userSkillsDocs = await UserSkill.find({ userId: userObjId }).populate<{ skillId: { name: string } }>('skillId');
-        userSkillNames = userSkillsDocs
-          .map((us) => (us.skillId && typeof us.skillId === 'object' ? us.skillId.name : null))
-          .filter((n): n is string => Boolean(n));
+        const userSkillsDocs = await UserSkill.find({ userId: userObjId }).populate('skillId');
+        userSkillIndex = buildUserSkillIndex(userSkillsDocs);
 
         const topCareerMatch = await CareerMatch.findOne({ userId: userObjId }).sort({ matchScore: -1 }).populate<{ careerId: { title: string } }>('careerId');
         targetTitle = topCareerMatch?.careerId?.title || '';
       } catch {
-        // Fallback to empty skill matrix if database query fails
+        // Without candidate evidence, postings are returned unscored (never with an invented score)
       }
     }
 
@@ -115,36 +115,29 @@ class OpportunityService {
     });
     const deduplicatedList = Array.from(uniqueMap.values());
 
-    // Enrich opportunities with candidate SkillBridge match telemetry
+    // Score each posting against the requirements the employer actually wrote
     const enrichedList: EnrichedOpportunity[] = deduplicatedList.map((opp) => {
-      const oppSkills = opp.skills.length > 0 ? opp.skills : ['TypeScript', 'React', 'Node.js', 'Python', 'FastAPI'];
-      
-      const matchedSkills = userSkillNames.filter((sk) =>
-        oppSkills.some((req) => req.toLowerCase().includes(sk.toLowerCase()) || sk.toLowerCase().includes(req.toLowerCase()))
-      );
-
-      const missingSkills = oppSkills.filter(
-        (req) => !userSkillNames.some((sk) => sk.toLowerCase().includes(req.toLowerCase()) || req.toLowerCase().includes(sk.toLowerCase()))
-      );
-
-      const totalReqs = Math.max(1, matchedSkills.length + missingSkills.length);
-      const calculatedScore = Math.min(99, Math.max(65, Math.round((matchedSkills.length / totalReqs) * 100)));
-
-      const matchExplanation = matchedSkills.length > 0
-        ? `Matched based on verified skills (${matchedSkills.slice(0, 3).join(', ')}) matching target role requirements.`
-        : `Matched target role pathway for ${opp.title} with grounded readiness alignment.`;
+      const description = sanitizeText(opp.description);
+      const requirements = extractJobRequirements({
+        skills: opp.skills,
+        qualifications: opp.qualifications,
+        description,
+      });
+      const match = matchOpportunity(requirements, userSkillIndex);
 
       return {
         ...opp,
         title: sanitizeText(opp.title),
         company: sanitizeText(opp.company),
         location: sanitizeText(opp.location),
-        description: sanitizeText(opp.description),
+        description,
         applicationUrl: sanitizeUrl(opp.applicationUrl) || `https://www.google.com/search?q=${encodeURIComponent(`${opp.title} ${opp.company} jobs`)}`,
-        skillbridgeMatchScore: calculatedScore,
-        matchedSkills: matchedSkills.length > 0 ? matchedSkills : userSkillNames.slice(0, 2),
-        missingSkills: missingSkills.slice(0, 3),
-        matchExplanation,
+        skillbridgeMatchScore: match.score,
+        matchStatus: match.status,
+        matchedSkills: match.matchedSkills,
+        missingSkills: match.missingSkills,
+        requirements: match.requirements,
+        matchExplanation: match.explanation,
       };
     });
 
@@ -177,16 +170,25 @@ class OpportunityService {
     if (sortBy === 'relevance') {
       return sorted;
     }
-    // Default to match score
-    return sorted.sort((a, b) => b.skillbridgeMatchScore - a.skillbridgeMatchScore);
+    // Default to match score; postings that could not be scored go last, in provider order
+    return sorted.sort(
+      (a, b) => (b.skillbridgeMatchScore ?? -1) - (a.skillbridgeMatchScore ?? -1)
+    );
   }
 
   /**
    * Retrieves detailed opportunity by external ID.
    */
   async getOpportunityById(userId: string, externalId: string): Promise<EnrichedOpportunity | null> {
-    const { opportunities } = await this.searchOpportunities(userId, { keywords: 'Software' });
-    return opportunities.find((opp) => opp.externalId === externalId) || null;
+    // Postings are only available from the provider's search results, so look in this
+    // user's recent (cached) searches rather than running an unrelated new search.
+    const prefix = `${userId}_`;
+    for (const [key, entry] of this.cache.entries()) {
+      if (!key.startsWith(prefix)) continue;
+      const found = entry.data.find((opp) => opp.externalId === externalId);
+      if (found) return found;
+    }
+    return null;
   }
 
   /**
@@ -217,7 +219,8 @@ class OpportunityService {
           salary: salaryStr,
           applicationUrl: safeUrl,
           postedAt: oppData.postedAt || new Date().toISOString(),
-          skillbridgeMatchScore: oppData.skillbridgeMatchScore || 85,
+          skillbridgeMatchScore:
+            typeof oppData.skillbridgeMatchScore === 'number' ? oppData.skillbridgeMatchScore : null,
           matchedSkills: oppData.matchedSkills || [],
           missingSkills: oppData.missingSkills || [],
           description: sanitizeText(oppData.description || ''),
@@ -226,6 +229,7 @@ class OpportunityService {
         $setOnInsert: {
           status: 'saved',
           notes: '',
+          statusHistory: [{ status: 'saved', changedAt: new Date(), note: '' }],
         },
       },
       { upsert: true, new: true, runValidators: true }
@@ -263,16 +267,19 @@ class OpportunityService {
       throw new AppError(`Invalid application status: ${status}`, 400);
     }
 
-    const updateObj: Record<string, unknown> = { status };
-    if (typeof notes === 'string') updateObj.notes = sanitizeText(notes);
-
-    const doc = await SavedOpportunity.findOneAndUpdate(
-      { userId, externalId },
-      { $set: updateObj },
-      { new: true }
-    );
-
+    const doc = await SavedOpportunity.findOne({ userId, externalId });
     if (!doc) throw new AppError('Saved opportunity not found.', 404);
+
+    const cleanNotes = typeof notes === 'string' ? sanitizeText(notes) : undefined;
+    if (doc.status !== status) {
+      // Every transition is recorded so the application's history can be shown
+      doc.statusHistory.push({ status, changedAt: new Date(), note: cleanNotes || '' });
+      if (status === 'applied' && !doc.appliedAt) doc.appliedAt = new Date();
+      doc.status = status;
+    }
+    if (cleanNotes !== undefined) doc.notes = cleanNotes;
+
+    await doc.save();
     return doc;
   }
 

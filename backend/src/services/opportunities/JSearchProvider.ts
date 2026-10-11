@@ -126,6 +126,10 @@ export class JSearchProvider implements OpportunityProvider {
         const requiredSkills = Array.isArray(item.job_required_skills)
           ? item.job_required_skills.map((s) => String(s))
           : [];
+        const highlights = (item.job_highlights || {}) as Record<string, unknown>;
+        const qualifications = Array.isArray(highlights.Qualifications)
+          ? highlights.Qualifications.map((q) => sanitizeText(String(q)))
+          : [];
 
         // Safe public destination URL - never direct the user's browser to the raw RapidAPI backend endpoint
         const fallbackSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${title} ${company} jobs`)}`;
@@ -146,6 +150,7 @@ export class JSearchProvider implements OpportunityProvider {
           applicationUrl: safeApplicationUrl,
           sourceUrl: safeSourceUrl,
           skills: requiredSkills,
+          qualifications,
           fetchedAt: new Date().toISOString(),
         };
       });
@@ -161,8 +166,9 @@ export class JSearchProvider implements OpportunityProvider {
    * Retrieves single opportunity by external ID.
    */
   async getById(externalId: string): Promise<CanonicalOpportunity | null> {
-    const list = await this.search({ keywords: 'Software' });
-    return list.find((item) => item.externalId === externalId) || null;
+    // JSearch offers no stable lookup by id on this plan; callers use recent search results
+    void externalId;
+    return null;
   }
 
   /**
@@ -175,7 +181,7 @@ export class JSearchProvider implements OpportunityProvider {
         externalId: 'live_opp_sandbox_01',
         provider: 'JSearch Provider (Sandbox Mode)',
         title: `Senior ${searchQuery} Lead`,
-        company: 'CloudScale Infrastructure Systems',
+        company: 'Sample Company A (demo listing)',
         description: `Lead architecture and high-throughput microservices development for ${searchQuery} platforms. Requires TypeScript, React, Node.js, and API design.`,
         location: 'San Francisco, CA',
         remote: true,
@@ -184,14 +190,15 @@ export class JSearchProvider implements OpportunityProvider {
         postedAt: now,
         applicationUrl: `https://www.google.com/search?q=${encodeURIComponent(`Senior ${searchQuery} Lead CloudScale Infrastructure Systems`)}`,
         sourceUrl: `https://www.google.com/search?q=${encodeURIComponent(`Senior ${searchQuery} Lead CloudScale Infrastructure Systems`)}`,
-        skills: ['TypeScript', 'React', 'Node.js', 'FastAPI', 'System Design'],
+        skills: ['TypeScript', 'React', 'Node.js', 'REST APIs'],
+        isSample: true,
         fetchedAt: now,
       },
       {
         externalId: 'live_opp_sandbox_02',
         provider: 'JSearch Provider (Sandbox Mode)',
         title: `${searchQuery} Systems Engineer`,
-        company: 'OpenAI Ecosystem Partner',
+        company: 'Sample Company B (demo listing)',
         description: `Build scalable AI infrastructure and high-frequency data pipelines for ${searchQuery} workloads.`,
         location: 'New York, NY',
         remote: true,
@@ -201,6 +208,7 @@ export class JSearchProvider implements OpportunityProvider {
         applicationUrl: `https://www.google.com/search?q=${encodeURIComponent(`${searchQuery} Systems Engineer OpenAI Ecosystem Partner`)}`,
         sourceUrl: `https://www.google.com/search?q=${encodeURIComponent(`${searchQuery} Systems Engineer OpenAI Ecosystem Partner`)}`,
         skills: ['Python', 'FastAPI', 'Docker', 'Kubernetes', 'MongoDB'],
+        isSample: true,
         fetchedAt: now,
       },
     ];

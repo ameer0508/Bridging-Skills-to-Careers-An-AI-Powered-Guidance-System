@@ -32,7 +32,10 @@ class OpportunityController {
       if (minScore) {
         const threshold = parseInt(String(minScore), 10);
         if (!isNaN(threshold)) {
-          opportunities = opportunities.filter((o) => o.skillbridgeMatchScore >= threshold);
+          // Unscored postings cannot satisfy a minimum-score filter
+          opportunities = opportunities.filter(
+            (o) => o.skillbridgeMatchScore !== null && o.skillbridgeMatchScore >= threshold
+          );
         }
       }
 

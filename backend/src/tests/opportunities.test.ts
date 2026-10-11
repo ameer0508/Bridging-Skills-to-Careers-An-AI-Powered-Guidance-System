@@ -67,10 +67,18 @@ export async function runOpportunityTests() {
     console.log('  ✓ OpportunityService Honest Provider Down Handling Verified (0 fabricated jobs):', serviceRes.providerHealth.message);
   } else if (serviceRes.opportunities.length > 0) {
     const topServiceOpp = serviceRes.opportunities[0];
-    if (typeof topServiceOpp.skillbridgeMatchScore !== 'number' || !Array.isArray(topServiceOpp.matchedSkills)) {
-      throw new Error('Enriched opportunity missing SkillBridge match telemetry');
+    // This user has no resume and therefore no evidenced skills: the posting must come back
+    // unscored with an explanation, never with an invented percentage.
+    if (
+      topServiceOpp.skillbridgeMatchScore !== null ||
+      topServiceOpp.matchStatus !== 'NO_CANDIDATE_EVIDENCE' ||
+      !Array.isArray(topServiceOpp.matchedSkills) ||
+      topServiceOpp.matchedSkills.length !== 0 ||
+      !topServiceOpp.matchExplanation
+    ) {
+      throw new Error('A candidate without evidenced skills must receive no match score');
     }
-    console.log('  ✓ OpportunityService Personalization & Match Score Verified:', topServiceOpp.skillbridgeMatchScore, '%');
+    console.log('  ✓ OpportunityService returns unscored postings (with a reason) for a user without skills');
   }
 
   // Test 9: Insecure URL Protocol Rejection Security Protocol

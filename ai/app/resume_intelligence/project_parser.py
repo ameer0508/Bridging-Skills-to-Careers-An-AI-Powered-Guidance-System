@@ -1,6 +1,7 @@
 import re
 from typing import List
 from app.resume_intelligence.semantic_entities import SemanticProject, SemanticExtractedEntity
+from app.resume_intelligence.skill_lexicon import get_lexicon
 
 class ProjectParser:
     """
@@ -69,4 +70,5 @@ class ProjectParser:
         match = re.search(r'(?:Technologies|Tech Stack|Built with|Tools used)[:\s]*(.+)', text, re.IGNORECASE)
         if match:
             return [t.strip() for t in match.group(1).split(',') if t.strip()]
-        return []
+        # No explicit "Technologies:" line: use the known skills named in the project text
+        return [skill.name for skill in get_lexicon().find_skills(text)]

@@ -1,4 +1,5 @@
 import re
+from app.resume_intelligence.skill_lexicon import get_lexicon
 from typing import Dict, Optional, Tuple
 
 class SemanticSimilarity:
@@ -53,6 +54,11 @@ class SemanticSimilarity:
             return "", 0.0
 
         clean = raw_skill.strip().lower()
+
+        # 0. Shared lexicon (single source of truth for canonical names)
+        known = get_lexicon().lookup(raw_skill)
+        if known:
+            return known.name, 0.99
 
         # 1. Exact Alias Lookup
         if clean in cls.ALIAS_MAP:

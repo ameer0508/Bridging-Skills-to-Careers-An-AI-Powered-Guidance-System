@@ -11,6 +11,7 @@ export interface ICareerReadiness extends Document<Types.ObjectId> {
   careerId: Types.ObjectId;
   overallScore: number;
   readinessTier: string;
+  interpretation: string;
   dimensions: IDimensionScore[];
   createdAt: Date;
   updatedAt: Date;
@@ -30,7 +31,8 @@ const CareerReadinessSchema = new Schema<ICareerReadiness>(
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     careerId: { type: Schema.Types.ObjectId, ref: 'Career', required: true },
     overallScore: { type: Number, required: true, min: 0, max: 100 },
-    readinessTier: { type: String, default: 'Not Ready' },
+    readinessTier: { type: String, default: 'Early' },
+    interpretation: { type: String, default: '' },
     dimensions: { type: [DimensionScoreSchema], default: [] }
   },
   { timestamps: true }

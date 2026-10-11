@@ -45,10 +45,8 @@ export class CareerMatchingEngine {
         }
 
         const scoreResult = CareerScoringEngine.calculateScore(requirements, userSkills);
-        const { strengths, weaknesses } = ExplanationGenerator.generate(
-          requirements,
-          userSkills,
-          scoreResult.missingSkills
+        const { strengths, weaknesses, summary } = ExplanationGenerator.generate(
+          scoreResult.breakdown
         );
 
         // Only save matches above a baseline threshold (e.g., > 10%) so we don't spam the DB
@@ -61,7 +59,9 @@ export class CareerMatchingEngine {
             missingSkills: scoreResult.missingSkills,
             strengths,
             weaknesses,
-            confidence: scoreResult.confidence
+            confidence: scoreResult.confidence,
+            breakdown: scoreResult.breakdown,
+            summary
           });
         }
       }

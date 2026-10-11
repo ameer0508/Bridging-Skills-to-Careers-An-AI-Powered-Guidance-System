@@ -14,6 +14,7 @@ import { runOrchestratorServiceTests } from './orchestrator_service.test.js';
 import { runCorePipelineTests } from './core_pipeline.test.js';
 import { runApiIntegrationTests } from './api_integration.test.js';
 import { runLegacyMigrationTests } from './legacy_migration.test.js';
+import { runScoringAccuracyTests } from './scoring_accuracy.test.js';
 
 async function runAll() {
   console.log('🚀 Starting Comprehensive SkillBridge Backend Test Suite...');
@@ -48,6 +49,7 @@ async function runAll() {
     await runCorePipelineTests();
     await runApiIntegrationTests();
     await runLegacyMigrationTests();
+    await runScoringAccuracyTests();
     const after = fingerprint();
     const touched = before.filter((entry, i) => entry !== after[i]);
     if (touched.length > 0) {

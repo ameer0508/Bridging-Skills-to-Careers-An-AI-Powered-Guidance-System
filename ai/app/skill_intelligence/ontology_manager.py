@@ -75,6 +75,10 @@ class OntologyManager:
     @classmethod
     def get_category_for_skill(cls, canonical_name: str) -> str:
         clean = canonical_name.lower()
+        from app.resume_intelligence.skill_lexicon import get_lexicon
+        known = get_lexicon().lookup(canonical_name)
+        if known:
+            return known.category
         for category, data in cls.TAXONOMY.items():
             for s in data["skills"]:
                 if s.lower() == clean:
