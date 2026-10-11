@@ -70,9 +70,6 @@ export class UserController {
         onboardingCompleted: Boolean(user.onboardingCompleted),
         onboardingCompletedAt: user.onboardingCompletedAt,
         profileCompleted: Boolean(user.profileCompleted),
-        bio: user.bio || '',
-        location: user.location || '',
-        experienceLevel: user.experienceLevel || 'entry',
       }).catch(err => console.warn('Failed to sync updated user backup to file:', err));
 
       // Trigger downstream intelligence recalculations if domain/target role changed or onboarding completed

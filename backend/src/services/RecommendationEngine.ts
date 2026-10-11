@@ -4,12 +4,17 @@ import { Recommendation } from '../models/Recommendation.js';
 import PriorityCalculator from './PriorityCalculator.js';
 import ResourceMatcher from './ResourceMatcher.js';
 import logger from '../config/logger.js';
+import { withUserLock } from '../utils/userLock.js';
 
 export class RecommendationEngine {
   /**
    * Generates recommendations based on the user's latest gap analysis for all matched careers.
    */
-  public async generateForUser(userId: string): Promise<void> {
+  public generateForUser(userId: string): Promise<void> {
+    return withUserLock(`recommendations:${userId}`, () => this.runGeneration(userId));
+  }
+
+  private async runGeneration(userId: string): Promise<void> {
     try {
       logger.info(`Starting Recommendation Generation for user ${userId}`);
 
@@ -246,6 +251,33 @@ export class RecommendationEngine {
         confidence: isCritical ? 95 : 75,
         actionLink: res.url,
         actionType: res.type,
+        targetSkill: gap.skillName
+      });
+    }
+
+    // No curated resource for this skill yet: still surface the gap as an actionable step
+    // rather than silently dropping it. No provider or duration is invented.
+    if (resources.length === 0) {
+      const { priorityScore, priority } = PriorityCalculator.calculate(
+        gap.impactScore || 50,
+        'Learning Resources'
+      );
+      recs.push({
+        userId: new mongoose.Types.ObjectId(userId),
+        careerId: new mongoose.Types.ObjectId(careerId),
+        category: 'Learning Resources',
+        title: `Learn ${gap.skillName}`,
+        description: `Build working knowledge of ${gap.skillName} through a structured course or official documentation, then apply it in a small project so it shows up as evidence on your resume.`,
+        priority,
+        priorityScore,
+        reason: gap.reason,
+        impact: gap.impactScore || 50,
+        difficulty: isCritical ? 'Beginner' : 'Intermediate',
+        estimatedTime: 'Self-paced',
+        dependencies: [],
+        confidence: isCritical ? 90 : 70,
+        actionLink: `https://www.google.com/search?q=${encodeURIComponent(`learn ${gap.skillName}`)}`,
+        actionType: 'Self-Study',
         targetSkill: gap.skillName
       });
     }

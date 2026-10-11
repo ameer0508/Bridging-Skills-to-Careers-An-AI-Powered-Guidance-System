@@ -1,27 +1,35 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-export interface ICareerMatch extends Document {
-  userId: string;
-  targetRole: string;
+export interface ICareerMatch extends Document<Types.ObjectId> {
+  userId: Types.ObjectId;
+  careerId: Types.ObjectId;
   matchScore: number;
-  breakdown?: Record<string, any>;
-  matchedSkills?: string[];
-  missingSkills?: string[];
-  calculatedAt?: Date;
+  matchingSkills: string[];
+  missingSkills: string[];
+  strengths: string[];
+  weaknesses: string[];
+  confidence: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const CareerMatchSchema = new Schema<ICareerMatch>(
   {
-    userId: { type: String, required: true, index: true },
-    targetRole: { type: String, required: true },
-    matchScore: { type: Number, required: true },
-    breakdown: { type: Schema.Types.Mixed, default: {} },
-    matchedSkills: { type: [String], default: [] },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    careerId: { type: Schema.Types.ObjectId, ref: 'Career', required: true },
+    matchScore: { type: Number, required: true, min: 0, max: 100 },
+    matchingSkills: { type: [String], default: [] },
     missingSkills: { type: [String], default: [] },
-    calculatedAt: { type: Date, default: Date.now }
+    strengths: { type: [String], default: [] },
+    weaknesses: { type: [String], default: [] },
+    confidence: { type: Number, default: 0 }
   },
   { timestamps: true }
 );
 
-export const CareerMatch = mongoose.models.CareerMatch || mongoose.model<ICareerMatch>('CareerMatch', CareerMatchSchema);
+CareerMatchSchema.index({ userId: 1, matchScore: -1 });
+
+export const CareerMatch: Model<ICareerMatch> =
+  (mongoose.models.CareerMatch as Model<ICareerMatch>) ||
+  mongoose.model<ICareerMatch>('CareerMatch', CareerMatchSchema);
 export default CareerMatch;

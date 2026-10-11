@@ -2,6 +2,7 @@ import axios from 'axios';
 import { Skill, ISkill } from '../models/Skill.js';
 import { SkillRelationship } from '../models/SkillRelationship.js';
 import logger from '../config/logger.js';
+import { escapeRegExp } from '../utils/skillMatching.js';
 
 interface NormalizedSkillData {
   raw_name: string;
@@ -34,7 +35,7 @@ class SkillNormalizationService {
       const trimmed = raw.trim();
       if (!trimmed) continue;
 
-      const regex = new RegExp(`^${trimmed}$`, 'i');
+      const regex = new RegExp(`^${escapeRegExp(trimmed)}$`, 'i');
       const existing = await Skill.findOne({
         $or: [{ canonicalName: regex }, { aliases: regex }]
       });

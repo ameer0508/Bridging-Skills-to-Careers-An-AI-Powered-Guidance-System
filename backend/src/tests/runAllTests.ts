@@ -8,6 +8,7 @@ import { runUnifiedOrchestrationTests } from './unified_orchestration.test.js';
 import { runResumeDifferentialTest } from './resume_differential.test.js';
 import { runSnapshotResilienceTests } from './snapshot_resilience.test.js';
 import { runOrchestratorServiceTests } from './orchestrator_service.test.js';
+import { runCorePipelineTests } from './core_pipeline.test.js';
 
 async function runAll() {
   console.log('🚀 Starting Comprehensive SkillBridge Backend Test Suite...');
@@ -26,6 +27,7 @@ async function runAll() {
     await runUnifiedOrchestrationTests();
     await runOrchestratorServiceTests();
     await runResumeDifferentialTest();
+    await runCorePipelineTests();
     console.log('\n🎉 ALL BACKEND INTEGRATION & UNIT TESTS EXECUTED SUCCESSFULLY WITH ZERO FAILURES!');
   } catch (error) {
     console.error('\n❌ Test Suite Execution Failed:', error);

@@ -1,7 +1,20 @@
 import { IParsedResume } from '../models/ParsedResume.js';
-import { IEvidence } from '../models/UserSkill.js';
+import { IEvidence, ProficiencyLevel } from '../models/UserSkill.js';
+import { escapeRegExp } from '../utils/skillMatching.js';
 
 export class EvidenceCalculator {
+  /**
+   * Maps an evidence score to a proficiency estimate.
+   * This is an estimate from resume evidence only: a skill that is merely listed stays
+   * "beginner" until experience, project or certification evidence backs it up.
+   */
+  public static estimateProficiency(evidenceScore: number): ProficiencyLevel {
+    if (evidenceScore >= 85) return 'expert';
+    if (evidenceScore >= 60) return 'advanced';
+    if (evidenceScore >= 35) return 'intermediate';
+    return 'beginner';
+  }
+
   /**
    * Calculates the evidence score and generates evidence records for a specific canonical skill
    * by searching through the user's parsed resume data.
@@ -13,13 +26,18 @@ export class EvidenceCalculator {
   ): { score: number; evidences: IEvidence[] } {
     let score = 0;
     const evidences: IEvidence[] = [];
-    const searchTerms = [canonicalName.toLowerCase(), ...aliases.map(a => a.toLowerCase())];
+    const searchTerms = [...new Set([canonicalName, ...aliases].map(t => t.toLowerCase().trim()))]
+      .filter(Boolean);
+
+    // Whole-term match: "Java" must not match "JavaScript", "R" must not match every word.
+    // Lookarounds are used instead of \b so terms such as "C++" and ".NET" still match.
+    const termPatterns = searchTerms.map(
+      term => new RegExp(`(?<![a-z0-9])${escapeRegExp(term)}(?![a-z0-9])`, 'i')
+    );
 
     const containsSkill = (text: string | undefined): boolean => {
       if (!text) return false;
-      const lower = text.toLowerCase();
-      // Simple substring match for now. Could be improved with word boundaries if needed.
-      return searchTerms.some(term => lower.includes(term));
+      return termPatterns.some(pattern => pattern.test(text));
     };
 
     // 1. Check Experience (Highest Weight)

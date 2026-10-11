@@ -1,6 +1,7 @@
 import { ICareerRequirement } from '../models/CareerRequirement.js';
 import { IUserSkill } from '../models/UserSkill.js';
 import { ISkill } from '../models/Skill.js';
+import { buildUserSkillIndex, findUserSkill } from '../utils/skillMatching.js';
 
 export class ExplanationGenerator {
   /**
@@ -20,12 +21,11 @@ export class ExplanationGenerator {
     }
 
     // Process strengths (matching skills with evidence)
-    for (const us of userSkills) {
-      const skill = us.skillId as unknown as ISkill;
-      if (!skill) continue;
-
-      const req = reqMap.get(skill.canonicalName.toLowerCase());
-      if (req) {
+    const userSkillIndex = buildUserSkillIndex(userSkills);
+    for (const req of requirements) {
+      const us = findUserSkill(userSkillIndex, req.skillName);
+      const skill = us?.skillId as unknown as ISkill | undefined;
+      if (us && skill) {
         if (us.evidenceScore >= 75) {
           strengths.push(
             `✓ Strong ${skill.canonicalName} evidence (${us.evidenceScore}% proficiency context)`

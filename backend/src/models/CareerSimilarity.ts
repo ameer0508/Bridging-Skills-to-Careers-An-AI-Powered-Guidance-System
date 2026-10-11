@@ -1,21 +1,21 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-export interface ICareerSimilarity extends Document {
-  careerA: string;
-  careerB: string;
+export interface ICareerSimilarity extends Document<Types.ObjectId> {
+  sourceCareerId: Types.ObjectId;
+  targetCareerId: Types.ObjectId;
   similarityScore: number;
-  sharedSkills?: string[];
 }
 
 const CareerSimilaritySchema = new Schema<ICareerSimilarity>(
   {
-    careerA: { type: String, required: true },
-    careerB: { type: String, required: true },
-    similarityScore: { type: Number, required: true },
-    sharedSkills: { type: [String], default: [] }
+    sourceCareerId: { type: Schema.Types.ObjectId, ref: 'Career', required: true, index: true },
+    targetCareerId: { type: Schema.Types.ObjectId, ref: 'Career', required: true },
+    similarityScore: { type: Number, required: true, min: 0, max: 100 }
   },
   { timestamps: true }
 );
 
-export const CareerSimilarity = mongoose.models.CareerSimilarity || mongoose.model<ICareerSimilarity>('CareerSimilarity', CareerSimilaritySchema);
+export const CareerSimilarity: Model<ICareerSimilarity> =
+  (mongoose.models.CareerSimilarity as Model<ICareerSimilarity>) ||
+  mongoose.model<ICareerSimilarity>('CareerSimilarity', CareerSimilaritySchema);
 export default CareerSimilarity;

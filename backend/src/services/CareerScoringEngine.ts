@@ -1,6 +1,6 @@
 import { ICareerRequirement } from '../models/CareerRequirement.js';
 import { IUserSkill } from '../models/UserSkill.js';
-import { ISkill } from '../models/Skill.js';
+import { buildUserSkillIndex, findUserSkill } from '../utils/skillMatching.js';
 
 export interface ScoreResult {
   totalScore: number; // 0-100
@@ -25,19 +25,8 @@ export class CareerScoringEngine {
     const matchingSkills: string[] = [];
     const missingSkills: string[] = [];
 
-    // Pre-map user skills for fast lookup (using canonical names)
-    const userSkillMap = new Map<string, number>(); // Name -> evidenceScore
-    for (const us of userSkills) {
-      const skill = us.skillId as unknown as ISkill;
-      if (skill && skill.canonicalName) {
-        userSkillMap.set(skill.canonicalName.toLowerCase(), us.evidenceScore);
-
-        // Also map aliases just in case
-        skill.aliases.forEach(a => {
-          userSkillMap.set(a.toLowerCase(), us.evidenceScore);
-        });
-      }
-    }
+    // Pre-map user skills for fast lookup (canonical names, aliases and common variants)
+    const userSkillIndex = buildUserSkillIndex(userSkills);
 
     // Evaluate each requirement
     for (const req of requirements) {
@@ -57,7 +46,7 @@ export class CareerScoringEngine {
       maxPossibleScore += maxReqScore;
 
       // Check if user has this skill
-      const userEvidenceScore = userSkillMap.get(req.skillName.toLowerCase());
+      const userEvidenceScore = findUserSkill(userSkillIndex, req.skillName)?.evidenceScore;
 
       if (userEvidenceScore !== undefined) {
         // User has the skill

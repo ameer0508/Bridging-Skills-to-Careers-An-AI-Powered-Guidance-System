@@ -1,29 +1,30 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-export interface ICareer extends Document {
+export interface ICareer extends Document<Types.ObjectId> {
   title: string;
   slug?: string;
-  domain?: string;
-  description?: string;
-  averageSalary?: number;
-  demandLevel?: string;
-  requiredSkills?: string[] | any[];
-  preferredSkills?: string[] | any[];
+  category: string;
+  domain: string;
+  description: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const CareerSchema = new Schema<ICareer>(
   {
-    title: { type: String, required: true, unique: true },
+    title: { type: String, required: true, unique: true, trim: true },
     slug: { type: String },
+    // Fine-grained family shown in the UI (e.g. "Engineering", "Data")
+    category: { type: String, default: 'General' },
+    // Broad onboarding domain the career belongs to (e.g. "Software Engineering")
     domain: { type: String, default: 'Technology' },
     description: { type: String, default: '' },
-    averageSalary: { type: Number, default: 0 },
-    demandLevel: { type: String, default: 'High' },
-    requiredSkills: { type: Schema.Types.Mixed, default: [] },
-    preferredSkills: { type: Schema.Types.Mixed, default: [] }
+    isActive: { type: Boolean, default: true }
   },
   { timestamps: true }
 );
 
-export const Career = mongoose.models.Career || mongoose.model<ICareer>('Career', CareerSchema);
+export const Career: Model<ICareer> =
+  (mongoose.models.Career as Model<ICareer>) || mongoose.model<ICareer>('Career', CareerSchema);
 export default Career;

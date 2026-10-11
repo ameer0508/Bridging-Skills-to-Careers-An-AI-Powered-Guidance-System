@@ -1,23 +1,27 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-export interface ICertification extends Document {
+export interface ICertification extends Document<Types.ObjectId> {
   title: string;
-  issuer?: string;
-  url?: string;
-  targetSkills?: string[];
-  level?: string;
+  provider: string;
+  url: string;
+  targetSkills: string[];
+  difficulty: string;
+  estimatedTime: string;
 }
 
 const CertificationSchema = new Schema<ICertification>(
   {
     title: { type: String, required: true },
-    issuer: { type: String, default: '' },
+    provider: { type: String, default: '' },
     url: { type: String, default: '' },
-    targetSkills: { type: [String], default: [] },
-    level: { type: String, default: 'professional' }
+    targetSkills: { type: [String], default: [], index: true },
+    difficulty: { type: String, default: 'Intermediate' },
+    estimatedTime: { type: String, default: '' }
   },
   { timestamps: true }
 );
 
-export const Certification = mongoose.models.Certification || mongoose.model<ICertification>('Certification', CertificationSchema);
+export const Certification: Model<ICertification> =
+  (mongoose.models.Certification as Model<ICertification>) ||
+  mongoose.model<ICertification>('Certification', CertificationSchema);
 export default Certification;

@@ -1,18 +1,18 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-export interface ISkill extends Document {
+export interface ISkill extends Document<Types.ObjectId> {
   name?: string;
   canonicalName: string;
-  category?: string;
-  aliases?: string[];
+  category: string;
+  aliases: string[];
   description?: string;
-  isActive?: boolean;
+  isActive: boolean;
 }
 
 const SkillSchema = new Schema<ISkill>(
   {
     name: { type: String },
-    canonicalName: { type: String, required: true },
+    canonicalName: { type: String, required: true, trim: true, index: true },
     category: { type: String, default: 'General' },
     aliases: { type: [String], default: [] },
     description: { type: String, default: '' },
@@ -28,5 +28,6 @@ SkillSchema.pre('save', function (next) {
   next();
 });
 
-export const Skill = mongoose.models.Skill || mongoose.model<ISkill>('Skill', SkillSchema);
+export const Skill: Model<ISkill> =
+  (mongoose.models.Skill as Model<ISkill>) || mongoose.model<ISkill>('Skill', SkillSchema);
 export default Skill;

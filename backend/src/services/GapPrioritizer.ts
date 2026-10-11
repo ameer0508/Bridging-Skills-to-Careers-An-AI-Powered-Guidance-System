@@ -1,7 +1,7 @@
 import { ICareerRequirement } from '../models/CareerRequirement.js';
 import { IUserSkill } from '../models/UserSkill.js';
 import { IGapItem } from '../models/GapAnalysis.js';
-import { ISkill } from '../models/Skill.js';
+import { buildUserSkillIndex, findUserSkill } from '../utils/skillMatching.js';
 
 export class GapPrioritizer {
   /**
@@ -15,17 +15,10 @@ export class GapPrioritizer {
     const weakAreas: IGapItem[] = [];
     const strengthAreas: IGapItem[] = [];
 
-    const userSkillMap = new Map<string, IUserSkill>();
-    for (const us of userSkills) {
-      const skill = us.skillId as unknown as ISkill;
-      if (skill && skill.canonicalName) {
-        userSkillMap.set(skill.canonicalName.toLowerCase(), us);
-        skill.aliases.forEach(a => userSkillMap.set(a.toLowerCase(), us));
-      }
-    }
+    const userSkillIndex = buildUserSkillIndex(userSkills);
 
     for (const req of requirements) {
-      const us = userSkillMap.get(req.skillName.toLowerCase());
+      const us = findUserSkill(userSkillIndex, req.skillName);
 
       const weightMultiplier =
         req.importance === 'required' ? 3 : req.importance === 'preferred' ? 2 : 1;

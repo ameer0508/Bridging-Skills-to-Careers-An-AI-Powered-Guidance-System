@@ -395,9 +395,9 @@ export class ResumeService {
 
       // 6. Build the User Skill Intelligence layer from extracted data
       const UserSkillService = (await import('./UserSkillService.js')).default;
-      UserSkillService.buildUserSkillsFromResume(userId, resumeId).catch((e: Error) => {
-        logger.error(`Async skill processing failed for ${userId}: ${e.message}`);
-      });
+      // Awaited so `parsingStatus: completed` means skills, matches, readiness and
+      // recommendations are all ready to read (this already runs in the background).
+      await UserSkillService.buildUserSkillsFromResume(userId, resumeId);
 
       const ProgressEventService = (await import('./ProgressEventService.js')).default;
       ProgressEventService.logEvent(userId, 'resume_parsed', { resumeId: resumeId }).catch((e: Error) => {

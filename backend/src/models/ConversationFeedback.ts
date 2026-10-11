@@ -1,21 +1,29 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-export interface IConversationFeedback extends Document {
-  conversationId: string;
-  rating: number;
-  comment?: string;
-  timestamp?: Date;
+export interface IConversationFeedback extends Document<Types.ObjectId> {
+  messageId: Types.ObjectId;
+  userId: Types.ObjectId;
+  isHelpful: boolean;
+  feedbackText: string;
+  createdAt: Date;
 }
 
 const ConversationFeedbackSchema = new Schema<IConversationFeedback>(
   {
-    conversationId: { type: String, required: true, index: true },
-    rating: { type: Number, required: true },
-    comment: { type: String, default: '' },
-    timestamp: { type: Date, default: Date.now }
+    messageId: {
+      type: Schema.Types.ObjectId,
+      ref: 'ConversationMessage',
+      required: true,
+      index: true
+    },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    isHelpful: { type: Boolean, required: true },
+    feedbackText: { type: String, default: '' }
   },
   { timestamps: true }
 );
 
-export const ConversationFeedback = mongoose.models.ConversationFeedback || mongoose.model<IConversationFeedback>('ConversationFeedback', ConversationFeedbackSchema);
+export const ConversationFeedback: Model<IConversationFeedback> =
+  (mongoose.models.ConversationFeedback as Model<IConversationFeedback>) ||
+  mongoose.model<IConversationFeedback>('ConversationFeedback', ConversationFeedbackSchema);
 export default ConversationFeedback;

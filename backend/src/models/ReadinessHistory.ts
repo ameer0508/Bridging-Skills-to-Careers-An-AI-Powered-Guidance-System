@@ -1,21 +1,22 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-export interface IReadinessHistory extends Document {
-  userId: string;
-  targetRole: string;
-  score: number;
-  timestamp: Date;
+export interface IReadinessHistory extends Document<Types.ObjectId> {
+  userId: Types.ObjectId;
+  careerId: Types.ObjectId;
+  overallScore: number;
+  createdAt: Date;
 }
 
 const ReadinessHistorySchema = new Schema<IReadinessHistory>(
   {
-    userId: { type: String, required: true, index: true },
-    targetRole: { type: String, required: true },
-    score: { type: Number, required: true },
-    timestamp: { type: Date, default: Date.now }
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    careerId: { type: Schema.Types.ObjectId, ref: 'Career', required: true },
+    overallScore: { type: Number, required: true }
   },
   { timestamps: true }
 );
 
-export const ReadinessHistory = mongoose.models.ReadinessHistory || mongoose.model<IReadinessHistory>('ReadinessHistory', ReadinessHistorySchema);
+export const ReadinessHistory: Model<IReadinessHistory> =
+  (mongoose.models.ReadinessHistory as Model<IReadinessHistory>) ||
+  mongoose.model<IReadinessHistory>('ReadinessHistory', ReadinessHistorySchema);
 export default ReadinessHistory;

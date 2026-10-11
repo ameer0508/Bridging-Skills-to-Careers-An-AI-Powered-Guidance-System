@@ -1,6 +1,6 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-export interface IUser extends Document {
+export interface IUser extends Document<Types.ObjectId> {
   fullName?: string;
   name?: string;
   email: string;
@@ -10,7 +10,7 @@ export interface IUser extends Document {
   role?: string;
   primaryCareerDomain?: string;
   secondaryCareerDomains?: string[];
-  targetCareerId?: any;
+  targetCareerId?: Types.ObjectId | null;
   targetRole?: string;
   onboardingCompleted?: boolean;
   onboardingCompletedAt?: Date;
@@ -61,5 +61,6 @@ UserSchema.set('toJSON', {
   }
 });
 
-export const User = mongoose.models.User || mongoose.model<IUser>('User', UserSchema);
+export const User: Model<IUser> =
+  (mongoose.models.User as Model<IUser>) || mongoose.model<IUser>('User', UserSchema);
 export default User;

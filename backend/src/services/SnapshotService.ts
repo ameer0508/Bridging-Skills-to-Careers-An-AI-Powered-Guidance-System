@@ -413,13 +413,13 @@ export class SnapshotService {
       roadmap: {
         isInitialized: isRoadmapInitialized,
         progress: roadmapProgress,
-        title: activeRoadmap?.title || null,
+        title: activeRoadmap ? 'Learning Roadmap' : null,
         currentPhaseTitle: activePhase?.title || null,
         totalMilestones: totalItems,
         completedMilestones: completedItems,
         phases: activeRoadmap?.phases?.slice(0, 3).map((p: IRoadmapPhase) => ({
           title: p.title,
-          description: p.description || p.objective,
+          description: p.objective,
           items: p.items.map((item: IRoadmapItem) => ({ title: item.title, status: item.status })),
         })) || [],
       },

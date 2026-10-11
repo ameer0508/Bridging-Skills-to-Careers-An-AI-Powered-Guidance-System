@@ -4,6 +4,7 @@ import { CareerMatch } from '../models/CareerMatch.js';
 import { CareerSimilarity } from '../models/CareerSimilarity.js';
 import mongoose from 'mongoose';
 import logger from '../config/logger.js';
+import { CAREER_TAXONOMY } from '../seed/careerTaxonomy.js';
 
 class CareerService {
   /**
@@ -38,85 +39,63 @@ class CareerService {
   }
 
   /**
-   * Seed a basic taxonomy if the database is empty.
+   * Ensures the curated career taxonomy (careers, requirements, similarities) exists.
    */
   public async seedInitialTaxonomy(): Promise<void> {
     try {
-      const count = await Career.countDocuments();
-      if (count > 0) return; // Already seeded
+      let createdCareers = 0;
+      let createdRequirements = 0;
+      const careerIdByTitle = new Map<string, mongoose.Types.ObjectId>();
 
-      logger.info('Seeding initial Career Taxonomy...');
+      // Idempotent: only fills in what is missing, so it also repairs partially seeded databases
+      for (const entry of CAREER_TAXONOMY) {
+        let career = await Career.findOne({ title: entry.title });
+        if (!career) {
+          career = await Career.create({
+            title: entry.title,
+            category: entry.category,
+            domain: entry.domain,
+            description: entry.description
+          });
+          createdCareers++;
+        }
+        careerIdByTitle.set(entry.title, career._id);
 
-      // 1. Create Careers
-      const se = await Career.create({
-        title: 'Software Engineer',
-        category: 'Engineering',
-        description: 'Builds and maintains software systems.'
-      });
-      const fe = await Career.create({
-        title: 'Frontend Engineer',
-        category: 'Engineering',
-        description: 'Specializes in user interfaces and client-side logic.'
-      });
-      const be = await Career.create({
-        title: 'Backend Engineer',
-        category: 'Engineering',
-        description: 'Focuses on server-side logic, databases, and APIs.'
-      });
-      const ds = await Career.create({
-        title: 'Data Scientist',
-        category: 'Data',
-        description: 'Analyzes data and builds ML models.'
-      });
+        const existingCount = await CareerRequirement.countDocuments({ careerId: career._id });
+        if (existingCount === 0) {
+          await CareerRequirement.insertMany(
+            entry.requirements.map(r => ({
+              careerId: career._id,
+              skillName: r.skill,
+              importance: r.importance,
+              weight: r.weight
+            }))
+          );
+          createdRequirements += entry.requirements.length;
+        }
+      }
 
-      // 2. Create Requirements
-      const reqs = [
-        // Software Engineer
-        { careerId: se._id, skillName: 'JavaScript', importance: 'required', weight: 4 },
-        { careerId: se._id, skillName: 'Python', importance: 'preferred', weight: 4 },
-        { careerId: se._id, skillName: 'Git', importance: 'required', weight: 3 },
-        // Frontend Engineer
-        { careerId: fe._id, skillName: 'JavaScript', importance: 'required', weight: 5 },
-        { careerId: fe._id, skillName: 'React', importance: 'preferred', weight: 5 },
-        { careerId: fe._id, skillName: 'CSS', importance: 'required', weight: 4 },
-        // Backend Engineer
-        { careerId: be._id, skillName: 'Node.js', importance: 'required', weight: 5 },
-        { careerId: be._id, skillName: 'SQL', importance: 'required', weight: 4 },
-        { careerId: be._id, skillName: 'Docker', importance: 'preferred', weight: 3 },
-        // Data Scientist
-        { careerId: ds._id, skillName: 'Python', importance: 'required', weight: 5 },
-        { careerId: ds._id, skillName: 'SQL', importance: 'required', weight: 4 },
-        { careerId: ds._id, skillName: 'Machine Learning', importance: 'preferred', weight: 5 }
-      ];
+      for (const entry of CAREER_TAXONOMY) {
+        const sourceCareerId = careerIdByTitle.get(entry.title);
+        for (const link of entry.similar) {
+          const targetCareerId = careerIdByTitle.get(link.title);
+          if (!sourceCareerId || !targetCareerId) continue;
+          await CareerSimilarity.updateOne(
+            { sourceCareerId, targetCareerId },
+            { $setOnInsert: { similarityScore: link.score } },
+            { upsert: true }
+          );
+        }
+      }
 
-      await CareerRequirement.insertMany(reqs);
-
-      // 3. Create Similarities
-      await CareerSimilarity.create({
-        sourceCareerId: se._id,
-        targetCareerId: be._id,
-        similarityScore: 80
-      });
-      await CareerSimilarity.create({
-        sourceCareerId: be._id,
-        targetCareerId: se._id,
-        similarityScore: 80
-      });
-      await CareerSimilarity.create({
-        sourceCareerId: se._id,
-        targetCareerId: fe._id,
-        similarityScore: 70
-      });
-      await CareerSimilarity.create({
-        sourceCareerId: fe._id,
-        targetCareerId: se._id,
-        similarityScore: 70
-      });
-
-      logger.info('Successfully seeded Career Taxonomy.');
+      if (createdCareers > 0 || createdRequirements > 0) {
+        logger.info(
+          `Career taxonomy ensured: ${createdCareers} careers and ${createdRequirements} requirements added.`
+        );
+      }
     } catch (err: unknown) {
       const error = err as Error;
-      logger.error('Failed to seed Career Taxonomy:', error.message);
+      logger.error(`Failed to seed Career Taxonomy: ${error.message}`);
     }
   }
 }

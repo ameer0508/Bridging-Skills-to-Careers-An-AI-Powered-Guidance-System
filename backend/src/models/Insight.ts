@@ -1,24 +1,25 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-export interface IInsight extends Document {
-  userId: string;
-  type?: string;
+export interface IInsight extends Document<Types.ObjectId> {
+  userId: Types.ObjectId;
+  type: string;
   title: string;
-  description?: string;
-  impact?: string;
-  createdAt?: Date;
+  description: string;
+  metricsReference: Record<string, unknown>;
+  createdAt: Date;
 }
 
 const InsightSchema = new Schema<IInsight>(
   {
-    userId: { type: String, required: true, index: true },
-    type: { type: String, default: 'career_growth' },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    type: { type: String, default: 'trend' },
     title: { type: String, required: true },
     description: { type: String, default: '' },
-    impact: { type: String, default: 'medium' }
+    metricsReference: { type: Schema.Types.Mixed, default: {} }
   },
   { timestamps: true }
 );
 
-export const Insight = mongoose.models.Insight || mongoose.model<IInsight>('Insight', InsightSchema);
+export const Insight: Model<IInsight> =
+  (mongoose.models.Insight as Model<IInsight>) || mongoose.model<IInsight>('Insight', InsightSchema);
 export default Insight;

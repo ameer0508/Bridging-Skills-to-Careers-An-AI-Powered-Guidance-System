@@ -1,25 +1,25 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-export interface IExtractedSkill extends Document {
-  resumeId?: string;
-  userId?: string;
+export interface IExtractedSkill extends Document<Types.ObjectId> {
+  resumeId: Types.ObjectId;
+  userId: Types.ObjectId;
   name: string;
-  category?: string;
-  confidence?: number;
-  context?: string;
+  category: string;
+  confidence: number;
 }
 
 const ExtractedSkillSchema = new Schema<IExtractedSkill>(
   {
-    resumeId: { type: String },
-    userId: { type: String },
-    name: { type: String, required: true },
+    resumeId: { type: Schema.Types.ObjectId, ref: 'Resume', required: true, index: true },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    name: { type: String, required: true, trim: true },
     category: { type: String, default: 'General' },
-    confidence: { type: Number, default: 0.9 },
-    context: { type: String }
+    confidence: { type: Number, default: 0.9 }
   },
   { timestamps: true }
 );
 
-export const ExtractedSkill = mongoose.models.ExtractedSkill || mongoose.model<IExtractedSkill>('ExtractedSkill', ExtractedSkillSchema);
+export const ExtractedSkill: Model<IExtractedSkill> =
+  (mongoose.models.ExtractedSkill as Model<IExtractedSkill>) ||
+  mongoose.model<IExtractedSkill>('ExtractedSkill', ExtractedSkillSchema);
 export default ExtractedSkill;

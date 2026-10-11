@@ -1,7 +1,7 @@
 import { ICareerRequirement } from '../models/CareerRequirement.js';
 import { IUserSkill } from '../models/UserSkill.js';
 import { IDimensionScore } from '../models/CareerReadiness.js';
-import { ISkill } from '../models/Skill.js';
+import { buildUserSkillIndex, findUserSkill } from '../utils/skillMatching.js';
 
 export class ReadinessCalculator {
   /**
@@ -21,14 +21,7 @@ export class ReadinessCalculator {
     let totalRequirementsCount = requirements.length;
 
     // Pre-map skills
-    const userSkillMap = new Map<string, IUserSkill>();
-    for (const us of userSkills) {
-      const skill = us.skillId as unknown as ISkill;
-      if (skill && skill.canonicalName) {
-        userSkillMap.set(skill.canonicalName.toLowerCase(), us);
-        skill.aliases.forEach(a => userSkillMap.set(a.toLowerCase(), us));
-      }
-    }
+    const userSkillIndex = buildUserSkillIndex(userSkills);
 
     for (const req of requirements) {
       const weightMultiplier =
@@ -37,7 +30,7 @@ export class ReadinessCalculator {
 
       techMax += maxPoints;
 
-      const us = userSkillMap.get(req.skillName.toLowerCase());
+      const us = findUserSkill(userSkillIndex, req.skillName);
       if (us) {
         // Technical dimension (base skill presence)
         techEarned += (us.evidenceScore / 100) * maxPoints;

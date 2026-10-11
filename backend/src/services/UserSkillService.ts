@@ -55,7 +55,9 @@ class UserSkillService {
         userSkillsToInsert.push({
           userId: new mongoose.Types.ObjectId(userId),
           skillId: canonicalSkill._id,
+          category: canonicalSkill.category || 'General',
           evidenceScore: score,
+          proficiency: EvidenceCalculator.estimateProficiency(score),
           evidences: evidences
         });
       }
@@ -66,17 +68,14 @@ class UserSkillService {
           `Successfully built ${userSkillsToInsert.length} UserSkills for user ${userId}`
         );
 
-        // 5. Trigger Career Matching & Readiness asynchronously
+        // 5. Recompute Career Matching & Readiness
         const CareerMatchingEngine = (await import('./CareerMatchingEngine.js')).default;
         const CareerReadinessService = (await import('./CareerReadinessService.js')).default;
 
-        CareerMatchingEngine.evaluateUser(userId)
-          .then(() => {
-            return CareerReadinessService.evaluateUser(userId);
-          })
-          .catch(e => {
-            logger.error(`Async Career Match/Readiness failed for ${userId}: ${e.message}`);
-          });
+        // Awaited in order so the resume is only reported as processed once every
+        // downstream record (matches -> readiness/gaps -> recommendations) is consistent.
+        await CareerMatchingEngine.evaluateUser(userId);
+        await CareerReadinessService.evaluateUser(userId);
       }
     } catch (error: unknown) {
       const err = error as Error;

@@ -33,7 +33,7 @@ export class AuthService {
     primaryCareerDomain?: string;
     secondaryCareerDomains?: string[];
     targetRole?: string;
-    targetCareerId?: string;
+    targetCareerId?: unknown;
     onboardingCompleted?: boolean;
     onboardingCompletedAt?: Date | string;
     profileCompleted?: boolean;
@@ -49,7 +49,7 @@ export class AuthService {
         primaryCareerDomain?: string;
         secondaryCareerDomains?: string[];
         targetRole?: string;
-        targetCareerId?: string;
+        targetCareerId?: unknown;
         onboardingCompleted?: boolean;
         onboardingCompletedAt?: Date | string;
         profileCompleted?: boolean;

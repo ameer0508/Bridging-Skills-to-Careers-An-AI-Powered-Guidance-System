@@ -1,72 +1,72 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
-export enum RecommendationStatus {
-  RECOMMENDED = 'recommended',
-  IN_PROGRESS = 'in_progress',
-  COMPLETED = 'completed',
-  DISMISSED = 'dismissed'
-}
+export type RecommendationStatus =
+  | 'active'
+  | 'accepted'
+  | 'dismissed'
+  | 'completed'
+  | 'saved_for_later';
 
-export enum PriorityLevel {
-  HIGHEST = 'Highest',
-  HIGH = 'High',
-  MEDIUM = 'Medium',
-  LOW = 'Low'
-}
+export const RECOMMENDATION_STATUSES: RecommendationStatus[] = [
+  'active',
+  'accepted',
+  'dismissed',
+  'completed',
+  'saved_for_later'
+];
 
-export interface IRecommendation extends Document {
-  userId: any;
-  careerId?: any;
-  category?: string;
+export type PriorityLevel = 'Highest' | 'High' | 'Medium' | 'Low';
+
+export interface IRecommendation extends Document<Types.ObjectId> {
+  userId: Types.ObjectId;
+  careerId: Types.ObjectId;
+  category: string;
   type?: string;
   title: string;
-  description?: string;
-  provider?: string;
-  url?: string;
-  skillName?: string;
-  targetSkill?: string;
-  status: string;
-  score?: number;
-  priority?: string;
-  priorityScore?: number;
-  reason?: string;
-  impact?: number;
-  difficulty?: string;
-  estimatedTime?: string;
-  dependencies?: string[];
-  confidence?: number;
+  description: string;
+  status: RecommendationStatus;
+  priority: PriorityLevel;
+  priorityScore: number;
+  reason: string;
+  impact: number;
+  difficulty: string;
+  estimatedTime: string;
+  dependencies: string[];
+  confidence: number;
   actionLink?: string;
   actionType?: string;
+  targetSkill: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const RecommendationSchema = new Schema<IRecommendation>(
   {
-    userId: { type: Schema.Types.Mixed, required: true, index: true },
-    careerId: { type: Schema.Types.Mixed, ref: 'Career', index: true },
-    category: { type: String, default: 'General' },
-    type: { type: String, default: 'action' },
+    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
+    careerId: { type: Schema.Types.ObjectId, ref: 'Career', required: true, index: true },
+    category: { type: String, default: 'Learning Resources' },
+    type: { type: String },
     title: { type: String, required: true },
     description: { type: String, default: '' },
-    provider: { type: String, default: '' },
-    url: { type: String, default: '' },
-    skillName: { type: String, default: '' },
-    targetSkill: { type: String, default: '' },
-    status: { type: String, default: 'active' },
-    score: { type: Number, default: 0.8 },
-    priority: { type: String, default: 'Medium' },
+    status: { type: String, enum: RECOMMENDATION_STATUSES, default: 'active' },
+    priority: { type: String, enum: ['Highest', 'High', 'Medium', 'Low'], default: 'Medium' },
     priorityScore: { type: Number, default: 50 },
     reason: { type: String, default: '' },
-    impact: { type: Number, default: 20 },
+    impact: { type: Number, default: 0 },
     difficulty: { type: String, default: 'Intermediate' },
-    estimatedTime: { type: String, default: '1-2 weeks' },
+    estimatedTime: { type: String, default: '' },
     dependencies: { type: [String], default: [] },
-    confidence: { type: Number, default: 85 },
+    confidence: { type: Number, default: 0 },
     actionLink: { type: String, default: '' },
-    actionType: { type: String, default: '' }
+    actionType: { type: String, default: '' },
+    targetSkill: { type: String, default: '' }
   },
-  { timestamps: true, strict: false }
+  { timestamps: true }
 );
 
-export const Recommendation = mongoose.models.Recommendation || mongoose.model<IRecommendation>('Recommendation', RecommendationSchema);
-export default Recommendation;
+RecommendationSchema.index({ userId: 1, status: 1, priorityScore: -1 });
 
+export const Recommendation: Model<IRecommendation> =
+  (mongoose.models.Recommendation as Model<IRecommendation>) ||
+  mongoose.model<IRecommendation>('Recommendation', RecommendationSchema);
+export default Recommendation;
