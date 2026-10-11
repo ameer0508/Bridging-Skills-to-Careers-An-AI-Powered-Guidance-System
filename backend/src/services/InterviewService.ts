@@ -4,6 +4,7 @@ import UserSkill from '../models/UserSkill.js';
 import CareerMatch from '../models/CareerMatch.js';
 import GapAnalysis from '../models/GapAnalysis.js';
 import ParsedResume from '../models/ParsedResume.js';
+import { evaluateAnswer } from './InterviewEvaluator.js';
 import { AppError } from '../middlewares/errorHandler.js';
 
 export interface StartInterviewDTO {
@@ -73,8 +74,10 @@ export class InterviewService {
         // Parsed resume experience
         const resumeDoc = await ParsedResume.findOne({ userId: userObjectId }).sort({ updatedAt: -1 });
         if (resumeDoc?.experience) {
+          // Only real entries: no placeholder role or employer is ever inserted
           resumeExperience = resumeDoc.experience
-            .map((w) => `${w.role?.value || 'Developer'} at ${w.company?.value || 'Tech Corp'}`);
+            .filter((w) => w.role?.value && w.company?.value)
+            .map((w) => `${w.role?.value} at ${w.company?.value}`);
         }
       } catch {
         // Fallback to defaults if MongoDB query encounters issues
@@ -175,8 +178,8 @@ export class InterviewService {
     const q = session.questions[dto.questionIndex];
     q.candidateResponse = dto.candidateResponse;
 
-    // Evaluate response deterministically based on STAR keywords, action verbs, metrics, and expected concepts
-    const evaluation = this.evaluateResponse(dto.candidateResponse, q);
+    // AI rubric when available, otherwise the labelled rule-based rubric
+    const evaluation = await evaluateAnswer(dto.candidateResponse, q, session.targetCareerTitle);
     q.evaluation = evaluation;
 
     // Advance question index if applicable
@@ -197,43 +200,69 @@ export class InterviewService {
     const session = await this.getSession(userId, sessionId);
 
     const evaluatedQuestions = session.questions.filter((q) => q.evaluation && typeof q.evaluation.score === 'number');
+    const totalQuestions = session.questions.length;
 
-    let overallScore = 0;
-    if (evaluatedQuestions.length > 0) {
-      const sum = evaluatedQuestions.reduce((acc, q) => acc + (q.evaluation?.score || 0), 0);
-      overallScore = Math.round(sum / evaluatedQuestions.length);
-    }
+    // Unanswered questions count as zero: skipping most of an interview must not look like a pass
+    const overallScore =
+      totalQuestions > 0
+        ? Math.round(evaluatedQuestions.reduce((acc, q) => acc + (q.evaluation?.score || 0), 0) / totalQuestions)
+        : 0;
 
     session.overallScore = overallScore;
+    session.answeredCount = evaluatedQuestions.length;
     session.status = 'completed';
     session.completedAt = new Date();
 
-    // Compute dimension scores
-    const techQs = session.questions.filter((q) => q.category === 'technical' && q.evaluation);
-    const behQs = session.questions.filter((q) => q.category === 'behavioral' && q.evaluation);
-    const projQs = session.questions.filter((q) => q.category === 'project' && q.evaluation);
-
+    // Dimension scores are averages of what was actually measured for each answer.
+    // A dimension nobody could judge (e.g. technical accuracy without AI) stays null.
+    const average = (values: Array<number | null | undefined>): number | null => {
+      const numbers = values.filter((n): n is number => typeof n === 'number');
+      return numbers.length ? Math.round(numbers.reduce((a, b) => a + b, 0) / numbers.length) : null;
+    };
+    const dims = evaluatedQuestions.map((q) => q.evaluation?.dimensions);
     session.dimensionScores = {
-      technical: techQs.length ? Math.round(techQs.reduce((acc, q) => acc + (q.evaluation?.score || 0), 0) / techQs.length) : overallScore,
-      behavioral: behQs.length ? Math.round(behQs.reduce((acc, q) => acc + (q.evaluation?.score || 0), 0) / behQs.length) : Math.max(0, overallScore - 5),
-      communication: Math.min(100, overallScore + 5),
-      project: projQs.length ? Math.round(projQs.reduce((acc, q) => acc + (q.evaluation?.score || 0), 0) / projQs.length) : overallScore,
+      relevance: average(dims.map((d) => d?.relevance)),
+      completeness: average(dims.map((d) => d?.completeness)),
+      specificity: average(dims.map((d) => d?.specificity)),
+      structure: average(dims.map((d) => d?.structure)),
+      technicalAccuracy: average(dims.map((d) => d?.technicalAccuracy)),
     };
 
-    // Extract consolidated strengths & weaknesses
+    const sources = new Set(evaluatedQuestions.map((q) => q.evaluation?.source || 'heuristic'));
+    session.evaluationSource = sources.size === 0 ? undefined : sources.size > 1 ? 'mixed' : [...sources][0];
+
     const allStrengths = evaluatedQuestions.flatMap((q) => q.evaluation?.strengths || []);
     const allImprovements = evaluatedQuestions.flatMap((q) => q.evaluation?.improvements || []);
-
     session.strengths = Array.from(new Set(allStrengths)).slice(0, 5);
     session.weaknesses = Array.from(new Set(allImprovements)).slice(0, 5);
 
-    // Connected preparation recommendations
-    session.preparationRecommendations = [
-      `Review core architecture & system design patterns for ${session.targetCareerTitle}`,
-      'Practice quantifying impact in STAR behavioral responses (e.g. 35% latency reduction)',
-      'Update active resume and project evidence in SkillBridge Profile',
-      'Follow your personalized SkillBridge Roadmap milestones to close identified gaps',
-    ];
+    // Preparation advice derived from this session's own results
+    const advice: string[] = [];
+    const unanswered = totalQuestions - evaluatedQuestions.length;
+    if (unanswered > 0) {
+      advice.push(`Answer every question next time: ${unanswered} of ${totalQuestions} were left unanswered and scored zero.`);
+    }
+    const missedConcepts = Array.from(new Set(evaluatedQuestions.flatMap((q) => q.evaluation?.missingConcepts || []))).slice(0, 4);
+    if (missedConcepts.length > 0) {
+      advice.push(`Review these topics, which your answers did not cover: ${missedConcepts.join(', ')}.`);
+    }
+    const dimensionLabels: Record<string, string> = {
+      relevance: 'staying on the question asked',
+      completeness: 'developing answers in more depth',
+      specificity: 'giving concrete details, tools and measured results',
+      structure: 'structuring answers (Situation, Task, Action, Result for behavioural questions)',
+      technicalAccuracy: 'technical accuracy',
+    };
+    const weakest = Object.entries(session.dimensionScores)
+      .filter((entry): entry is [string, number] => typeof entry[1] === 'number')
+      .sort((x, y) => x[1] - y[1])[0];
+    if (weakest && weakest[1] < 70) {
+      advice.push(`Your weakest area was ${dimensionLabels[weakest[0]]} (${weakest[1]}/100). Focus your next practice session on it.`);
+    }
+    if (sources.has('heuristic')) {
+      advice.push('Some answers were scored by the built-in rubric because AI evaluation was unavailable; technical correctness was not checked for those.');
+    }
+    session.preparationRecommendations = advice;
 
     if (mongoose.connection.readyState === 1 && typeof session.save === 'function') {
       await session.save();
@@ -275,20 +304,25 @@ export class InterviewService {
     opportunityContext?: { company?: string; description?: string }
   ): IQuestionItem[] {
     const company = opportunityContext?.company ? `at ${opportunityContext.company}` : '';
-    const skillsList = verifiedSkills.slice(0, 3).join(', ') || 'software development, APIs, data modeling';
-    const gapList = criticalGaps.slice(0, 2).join(', ') || 'distributed caching, CI/CD automation';
+    // Questions only refer to skills, gaps and experience the candidate actually has on record
+    const skillsList = verifiedSkills.slice(0, 3).join(', ');
+    const gapList = criticalGaps.slice(0, 2).join(', ');
 
     const pool: IQuestionItem[] = [
       {
         questionId: 'q_tech_01',
-        question: `How would you design a high-throughput, fault-tolerant service for ${roleTitle} ${company} leveraging your verified skills in ${skillsList}?`,
+        question: skillsList
+          ? `How would you design a reliable, scalable service for a ${roleTitle} role ${company} using your experience with ${skillsList}?`
+          : `How would you design a reliable, scalable service for a ${roleTitle} role ${company}? Explain your main design decisions.`,
         category: 'technical',
         difficulty: 'hard',
         expectedConcepts: ['Scalability', 'Fault Tolerance', 'API Rate Limiting', 'Caching'],
       },
       {
         questionId: 'q_tech_02',
-        question: `Describe how you approach addressing skill gaps in ${gapList} when building enterprise applications for ${roleTitle}.`,
+        question: gapList
+          ? `Your profile shows little evidence of ${gapList}, which ${roleTitle} roles commonly expect. How would you get productive in ${gapList} on a real project?`
+          : `Describe how you get productive in a technology you have not used before when a ${roleTitle} project requires it.`,
         category: 'technical',
         difficulty: 'medium',
         expectedConcepts: ['Skill Gap Mitigation', 'Continuous Learning', 'System Reliability'],
@@ -309,75 +343,27 @@ export class InterviewService {
       },
       {
         questionId: 'q_res_01',
-        question: `Based on your resume experience (${resumeExperience[0] || 'software development projects'}), explain how you measure technical debt and ensure maintainability.`,
+        question: resumeExperience[0]
+          ? `From your time as ${resumeExperience[0]}, describe a piece of work you are proud of and how you kept it maintainable.`
+          : 'Describe a project you have worked on and how you kept the code maintainable as it grew.',
         category: 'resume',
         difficulty: 'medium',
         expectedConcepts: ['Code Quality', 'Refactoring', 'Test Coverage'],
       },
     ];
 
+    // Questions of the requested kind first, then the rest; never the same question twice
+    const prioritised = (categories: string[]) =>
+      [...pool.filter((q) => categories.includes(q.category)), ...pool.filter((q) => !categories.includes(q.category))].slice(0, count);
+
     if (mode === 'behavioral') {
-      return pool.filter((q) => q.category === 'behavioral' || q.category === 'resume').concat(pool).slice(0, count);
+      return prioritised(['behavioral', 'resume']);
     }
     if (mode === 'project') {
-      return pool.filter((q) => q.category === 'project' || q.category === 'technical').concat(pool).slice(0, count);
+      return prioritised(['project', 'technical']);
     }
 
     return pool.slice(0, count);
-  }
-
-  /**
-   * Helper: Evaluate candidate response against STAR standards & expected concepts
-   */
-  private evaluateResponse(candidateResponse: string, question: IQuestionItem) {
-    const text = candidateResponse.trim();
-    const hasActionVerbs = /built|architected|implemented|developed|designed|led|spearheaded|engineered/i.test(text);
-    const hasQuantifiedMetrics = /\d+%|\$\d+|\d+ms|\d+x|\d+k|\d+ RPS/i.test(text);
-
-    let matchedConcepts = 0;
-    const missingConcepts: string[] = [];
-
-    for (const concept of question.expectedConcepts) {
-      const regex = new RegExp(concept.split(' ')[0], 'i');
-      if (regex.test(text)) {
-        matchedConcepts++;
-      } else {
-        missingConcepts.push(concept);
-      }
-    }
-
-    const conceptScore = question.expectedConcepts.length > 0
-      ? Math.round((matchedConcepts / question.expectedConcepts.length) * 40)
-      : 30;
-
-    const actionScore = hasActionVerbs ? 30 : 15;
-    const metricScore = hasQuantifiedMetrics ? 30 : 15;
-
-    const totalScore = Math.min(100, conceptScore + actionScore + metricScore);
-
-    const strengths: string[] = [];
-    const improvements: string[] = [];
-
-    if (hasActionVerbs) strengths.push('Strong action-oriented engineering vocabulary used');
-    else improvements.push('Use clear action verbs (e.g. Architected, Implemented, Engineered)');
-
-    if (hasQuantifiedMetrics) strengths.push('Explicit quantified metrics provided (e.g. 35% latency reduction)');
-    else improvements.push('Include explicit quantified business/technical metrics');
-
-    if (matchedConcepts > 0) strengths.push(`Addressed core concepts (${question.expectedConcepts.slice(0, matchedConcepts).join(', ')})`);
-    if (missingConcepts.length > 0) improvements.push(`Detail coverage for: ${missingConcepts.join(', ')}`);
-
-    return {
-      score: totalScore,
-      starFormatted: hasActionVerbs && hasQuantifiedMetrics,
-      strengths,
-      improvements,
-      missingConcepts,
-      feedback: totalScore >= 80
-        ? 'Exemplary STAR structured response demonstrating high technical depth and quantified impact.'
-        : 'Good technical response. Incorporate explicit performance metrics and action verbs to strengthen STAR formatting.',
-      evaluatedAt: new Date(),
-    };
   }
 }
 

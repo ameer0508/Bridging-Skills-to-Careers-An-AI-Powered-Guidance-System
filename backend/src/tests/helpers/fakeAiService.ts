@@ -101,8 +101,12 @@ function extractUploadedText(rawBody: Buffer): string {
   return start === -1 ? '' : body.slice(start + 4, end === -1 ? undefined : end);
 }
 
+export type FakeInterviewMode = 'unavailable' | 'ok' | 'invalid' | 'slow';
+
 export interface FakeAiService {
   url: string;
+  /** How /api/v1/interview/evaluate behaves. Defaults to 'unavailable' (no provider). */
+  interview: { mode: FakeInterviewMode; rubric: Record<string, unknown> };
   /** Paths requested since start, e.g. "POST /api/v1/extract". */
   requests: string[];
   stop: () => Promise<void>;
@@ -124,6 +128,7 @@ export async function ensureFakeAiService(): Promise<FakeAiService> {
 
 export async function startFakeAiService(serviceKey: string): Promise<FakeAiService> {
   const requests: string[] = [];
+  const interview: FakeAiService['interview'] = { mode: 'unavailable', rubric: {} };
 
   const server = http.createServer((req, res) => {
     const chunks: Buffer[] = [];
@@ -163,6 +168,15 @@ export async function startFakeAiService(serviceKey: string): Promise<FakeAiServ
           }))
         });
       }
+      if (path === '/api/v1/interview/evaluate') {
+        if (interview.mode === 'unavailable') return send(503, { success: false, error: 'AI evaluation is unavailable.' });
+        if (interview.mode === 'invalid') return send(200, { success: true, provider: 'fake', data: { relevance: 'high', score: 99 } });
+        if (interview.mode === 'slow') {
+          setTimeout(() => send(200, { success: true, provider: 'fake', data: interview.rubric }), 1500).unref();
+          return;
+        }
+        return send(200, { success: true, provider: 'fake', model: 'fake-rubric', data: interview.rubric });
+      }
       if (path === '/api/v1/chat') {
         return send(200, { success: true, data: 'Deterministic test reply.', provider: 'fake_ai_service' });
       }
@@ -177,6 +191,7 @@ export async function startFakeAiService(serviceKey: string): Promise<FakeAiServ
   return {
     url: `http://127.0.0.1:${port}`,
     requests,
+    interview,
     stop: () => new Promise<void>(resolve => server.close(() => resolve()))
   };
 }

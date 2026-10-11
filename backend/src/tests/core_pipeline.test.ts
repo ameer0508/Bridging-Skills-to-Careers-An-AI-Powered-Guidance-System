@@ -108,7 +108,8 @@ export async function runCorePipelineTests() {
     interests: []
   });
 
-  const resumeSkills = ['JavaScript', 'React', 'HTML', 'CSS', 'Node.js', 'Git', 'C++', 'Java'];
+  // SQL is listed but never used in a role or project, so it should prompt a "show your evidence" step
+  const resumeSkills = ['JavaScript', 'React', 'HTML', 'CSS', 'Node.js', 'Git', 'C++', 'Java', 'SQL'];
   await Skill.insertMany(
     resumeSkills.map(name => ({ canonicalName: name, category: 'Programming', aliases: [] }))
   );
@@ -197,6 +198,22 @@ export async function runCorePipelineTests() {
     recs.length,
     'no duplicate recommendations for a career'
   );
+  // Every recommendation says what, why, on what evidence, and what to do next
+  const allRecs = await Recommendation.find({ userId: user._id });
+  for (const rec of allRecs) {
+    assert.ok(rec.title && rec.reason && rec.nextAction && rec.priority, `"${rec.title}" is complete`);
+    assert.ok(rec.evidence.length >= 1, `"${rec.title}" cites the evidence it is based on`);
+    const text = [rec.title, rec.description, rec.reason, rec.nextAction, ...rec.evidence].join(' ');
+    assert.ok(
+      !/\d+\s?% of (?:\w+ ){0,3}(?:postings|roles|recruiters|companies|interviews|assessments|jobs)|hiring managers|recruiters allocate|shortlist conversion/i.test(text),
+      `"${rec.title}" contains no invented market statistics`
+    );
+  }
+  assert.ok(allRecs.some(r => r.source === 'evidence'), 'listed-but-unproven skills produce a resume recommendation');
+  assert.ok(
+    allRecs.filter(r => r.source === 'gap').every(r => r.evidence.some(e => /skill baseline/.test(e))),
+    'gap recommendations name the career requirement they come from'
+  );
   console.log(`  ✓ ${recs.length} recommendations covering gaps: ${gapSkills.join(', ')}`);
 
   // --- 6. Roadmap: creation, persistent progress, safe regeneration -------
@@ -242,6 +259,19 @@ export async function runCorePipelineTests() {
   assert.equal(storedSession!.status, 'completed');
   assert.ok((storedSession!.overallScore ?? 0) > 0, 'completed session has a real score');
   console.log(`  ✓ Interview persisted with score ${storedSession!.overallScore}`);
+
+  // The interview's own feedback becomes a recommendation, citing that interview
+  await RecommendationEngine.generateForUser(userId);
+  const interviewRec = await Recommendation.findOne({ userId: user._id, source: 'interview' });
+  assert.ok(interviewRec, 'interview weaknesses feed recommendations');
+  assert.ok(interviewRec!.evidence.some(e => /Practice interview on \d{4}-\d{2}-\d{2}/.test(e)));
+  assert.ok(storedSession!.weaknesses.some(w => interviewRec!.title.includes(w)));
+  const roadmapAfter = await LearningRoadmap.findById(roadmap!._id);
+  assert.ok(
+    !roadmapAfter!.phases.flatMap(p => p.items).some(i => i.category === 'Interview Preparation'),
+    'interview tips do not become learning-roadmap items'
+  );
+  console.log('  ✓ Interview feedback is reflected in recommendations');
 
   // --- 8. Saved opportunities keep their data and reach the snapshot ------
   await OpportunityService.saveOpportunity(userId, {

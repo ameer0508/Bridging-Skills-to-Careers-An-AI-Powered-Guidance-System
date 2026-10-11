@@ -17,7 +17,7 @@ from app.routers import (
     roadmap, analytics, resume_intelligence,
     salary, market, courses, certifications,
     external_gateway, knowledge_graph, events,
-    feature_store, ai_operations, github, linkedin, portfolio, coding, opensource, brand, professional_graph, agent, job_agent_router, learning_agent_router, resume_agent_router, interview_agent_router, networking_agent_router, opportunity_agent_router, orchestrator_router, memory_router
+    feature_store, ai_operations, interview_evaluation, github, linkedin, portfolio, coding, opensource, brand, professional_graph, agent, job_agent_router, learning_agent_router, resume_agent_router, interview_agent_router, networking_agent_router, opportunity_agent_router, orchestrator_router, memory_router
 )
 from app.career_os import dashboard_router
 
@@ -63,6 +63,7 @@ app.include_router(health.router)
 app.include_router(extract.router, dependencies=internal_only)
 app.include_router(skills.router, dependencies=internal_only)
 app.include_router(chat.router, dependencies=internal_only)
+app.include_router(interview_evaluation.router, dependencies=internal_only)
 app.include_router(career.router, dependencies=internal_only)
 app.include_router(readiness.router, dependencies=internal_only)
 app.include_router(recommendations.router, dependencies=internal_only)

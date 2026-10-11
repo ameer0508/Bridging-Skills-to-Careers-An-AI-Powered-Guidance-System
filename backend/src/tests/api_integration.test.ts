@@ -276,6 +276,20 @@ export async function runApiIntegrationTests() {
     assert.equal((await api('GET', '/skills/me', { token: bobToken })).body.data.totalSkills, 0);
     assert.equal((await api('GET', '/resumes/me', { token: bobToken })).body.data.resume, null);
     assert.equal((await api('GET', '/resumes/download', { token: bobToken })).status, 404);
+    // A user with no resume gets no recommendations at all: nothing generic is invented
+    const bobRecs = await api('GET', '/recommendations', { token: bobToken });
+    assert.equal(bobRecs.status, 200);
+    assert.deepEqual(bobRecs.body.data.recommendations, []);
+    // ...and job postings come back unscored for them, with the reason
+    const bobJobs = await api('GET', '/opportunities?search=Frontend', { token: bobToken });
+    assert.equal(bobJobs.body.data.opportunities[0].skillbridgeMatchScore, null);
+    assert.equal(bobJobs.body.data.opportunities[0].matchStatus, 'NO_CANDIDATE_EVIDENCE');
+    // Alice, who has a resume, gets real scores for the same postings
+    const aliceJobs = await api('GET', '/opportunities?search=Frontend', { token: aliceToken });
+    const scored = aliceJobs.body.data.opportunities.find((o: any) => o.matchStatus === 'SCORED');
+    assert.ok(scored, 'postings are scored for a user with evidenced skills');
+    assert.ok(scored.skillbridgeMatchScore >= 0 && scored.skillbridgeMatchScore <= 100);
+    assert.ok(scored.matchExplanation.length > 0);
     const aliceRoadmapAfter = await api('GET', `/roadmap/${careerId}`, { token: aliceToken });
     assert.equal(
       aliceRoadmapAfter.body.data.roadmap.phases[0].items[0].status,

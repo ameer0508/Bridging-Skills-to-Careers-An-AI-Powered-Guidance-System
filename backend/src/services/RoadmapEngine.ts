@@ -44,7 +44,8 @@ export class RoadmapEngine {
       const recommendations = await Recommendation.find({
         userId: new mongoose.Types.ObjectId(userId),
         careerId: new mongoose.Types.ObjectId(careerId),
-        status: { $in: ['active', 'accepted', 'saved_for_later'] }
+        status: { $in: ['active', 'accepted', 'saved_for_later', 'completed'] },
+        category: { $in: ['Learning Resources', 'Projects', 'Certifications'] }
       })
         .sort({ priorityScore: -1 })
         .lean();

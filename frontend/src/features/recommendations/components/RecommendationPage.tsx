@@ -23,91 +23,6 @@ import {
 } from '../../../components/experience/workspace';
 import { AIThinkingAnimation } from '../../../components/experience';
 
-const DEFAULT_STRATEGIC_RECOMMENDATIONS: IRecommendation[] = [
-  {
-    _id: 'rec-default-1',
-    category: 'Projects',
-    title: 'Build Hands-On Project: Containerized REST API & Microservice Mesh',
-    description: 'Design and deploy a scalable microservices architecture using Node.js/Python, Docker container orchestration, and automated API gateway routing.',
-    priority: 'Highest',
-    priorityScore: 94,
-    reason: 'Hands-on architectural capstones provide the strongest verified proof of seniority for tech hiring managers.',
-    impact: 35,
-    difficulty: 'Intermediate',
-    estimatedTime: '12 hours',
-    dependencies: ['Container fundamentals', 'REST API design'],
-    actionType: 'Project',
-    targetSkill: 'Docker & Microservices',
-    status: 'active'
-  },
-  {
-    _id: 'rec-default-2',
-    category: 'Learning Resources',
-    title: 'Learn CI/CD Automation: GitHub Actions & Cloud Delivery',
-    description: 'Master enterprise deployment pipelines that automatically lint, test, containerize, and ship software with zero-downtime releases.',
-    priority: 'High',
-    priorityScore: 88,
-    reason: 'Automated delivery pipelines are required across 85% of modern software engineering postings.',
-    impact: 28,
-    difficulty: 'Intermediate',
-    estimatedTime: '6 hours',
-    dependencies: ['Git branching workflows'],
-    actionLink: 'https://docs.github.com/en/actions',
-    actionType: 'Course',
-    targetSkill: 'CI/CD Pipelines',
-    status: 'active'
-  },
-  {
-    _id: 'rec-default-3',
-    category: 'Certifications',
-    title: 'Get Certified: AWS Certified Solutions Architect - Associate',
-    description: 'Validate cloud infrastructure competencies including VPC networking, S3 security policies, ECS clusters, and cost-effective scaling.',
-    priority: 'High',
-    priorityScore: 82,
-    reason: 'Official cloud credentials dramatically elevate recruiter search visibility and profile shortlist conversion.',
-    impact: 30,
-    difficulty: 'Intermediate',
-    estimatedTime: '2 months',
-    dependencies: ['Basic cloud concepts'],
-    actionLink: 'https://aws.amazon.com/certification/',
-    actionType: 'Certification',
-    targetSkill: 'Cloud Architecture (AWS)',
-    status: 'active'
-  },
-  {
-    _id: 'rec-default-4',
-    category: 'Learning Resources',
-    title: 'Deep Dive: Advanced System Architecture & Scalability Patterns',
-    description: 'Explore distributed caching, message queues, rate limiting, and database sharding techniques used at high scale.',
-    priority: 'High',
-    priorityScore: 78,
-    reason: 'System architecture questions constitute 50% of senior and staff level technical interview assessments.',
-    impact: 22,
-    difficulty: 'Advanced',
-    estimatedTime: '10 hours',
-    dependencies: ['Backend systems'],
-    actionType: 'Course',
-    targetSkill: 'System Design',
-    status: 'active'
-  },
-  {
-    _id: 'rec-default-5',
-    category: 'Resume Improvements',
-    title: 'Highlight System Design & Cloud Deliverables in Executive Summary',
-    description: 'Restructure your top resume summary to prominently showcase containerization, microservice orchestration, and measurable business impact.',
-    priority: 'Medium',
-    priorityScore: 70,
-    reason: 'ATS scanners and technical recruiters allocate 6-8 seconds to initial executive summary evaluations.',
-    impact: 20,
-    difficulty: 'Beginner',
-    estimatedTime: '30 mins',
-    dependencies: [],
-    actionType: 'Resume Optimization',
-    targetSkill: 'Resume Formatting',
-    status: 'active'
-  }
-];
-
 export const RecommendationPage: React.FC = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -179,12 +94,8 @@ export const RecommendationPage: React.FC = () => {
     }
   }, [data, rawList.length]);
 
-  const recommendations = useMemo(() => {
-    if (rawList.length > 0) {
-      return rawList;
-    }
-    return DEFAULT_STRATEGIC_RECOMMENDATIONS;
-  }, [rawList]);
+  // Only recommendations computed for this user are shown; there is no built-in sample list
+  const recommendations = rawList;
 
   // Counts for status tabs
   const statusCounts = useMemo(() => {
@@ -273,6 +184,19 @@ export const RecommendationPage: React.FC = () => {
           title="Action Intelligence Connection Error"
           message={`Failed to connect to recommendation engine: ${(error as Error).message}`}
           onRetry={() => refetch()}
+        />
+      </div>
+    );
+  }
+
+  if (rawList.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto pb-12 px-4">
+        <PremiumEmptyState
+          title="No recommendations yet"
+          description="Recommendations are built from the skill gaps between your resume and your target careers. Upload a resume and they will appear here, each with the evidence behind it."
+          primaryAction={{ label: 'Upload resume', onClick: () => navigate('/resume') }}
+          secondaryAction={{ label: 'Check again', onClick: () => refetch() }}
         />
       </div>
     );

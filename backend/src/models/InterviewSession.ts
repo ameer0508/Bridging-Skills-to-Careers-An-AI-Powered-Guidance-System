@@ -1,5 +1,14 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
+/** Rubric dimensions, each 0-100. technicalAccuracy is null when it could not be judged. */
+export interface IEvaluationDimensions {
+  relevance: number;
+  completeness: number;
+  specificity: number;
+  structure: number;
+  technicalAccuracy: number | null;
+}
+
 export interface IQuestionEvaluation {
   score: number;
   starFormatted: boolean;
@@ -9,6 +18,7 @@ export interface IQuestionEvaluation {
   feedback: string;
   // Which evaluator produced this result, so the UI can label it honestly
   source?: 'ai' | 'heuristic';
+  dimensions?: IEvaluationDimensions;
   evaluatedAt: Date;
 }
 
@@ -36,7 +46,11 @@ export interface IInterviewSession extends Document<Types.ObjectId> {
   strengths: string[];
   weaknesses: string[];
   overallScore?: number;
-  dimensionScores?: Record<string, number>;
+  /** Averages of the rubric dimensions over answered questions; null where never judged. */
+  dimensionScores?: Record<string, number | null>;
+  answeredCount?: number;
+  /** 'ai', 'heuristic' or 'mixed': which evaluator produced the scores in this session. */
+  evaluationSource?: string;
   preparationRecommendations: string[];
   startedAt: Date;
   completedAt?: Date;
@@ -53,6 +67,7 @@ const QuestionEvaluationSchema = new Schema<IQuestionEvaluation>(
     missingConcepts: { type: [String], default: [] },
     feedback: { type: String, default: '' },
     source: { type: String, enum: ['ai', 'heuristic'], default: 'heuristic' },
+    dimensions: { type: Schema.Types.Mixed },
     evaluatedAt: { type: Date, default: Date.now }
   },
   { _id: false }
@@ -87,6 +102,8 @@ const InterviewSessionSchema = new Schema<IInterviewSession>(
     weaknesses: { type: [String], default: [] },
     overallScore: { type: Number },
     dimensionScores: { type: Schema.Types.Mixed },
+    answeredCount: { type: Number, default: 0 },
+    evaluationSource: { type: String },
     preparationRecommendations: { type: [String], default: [] },
     startedAt: { type: Date, default: Date.now },
     completedAt: { type: Date }

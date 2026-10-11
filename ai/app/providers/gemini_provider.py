@@ -149,6 +149,13 @@ class GeminiProvider(BaseAIProvider):
             metadata={"error_type": type(last_error).__name__}
         )
 
+    def evaluate_interview_answer(
+        self, question: str, category: str, expected_concepts: List[str], role_title: str, answer: str, schema_class: Any
+    ) -> UnifiedAIResponse:
+        from app.prompts.interview_prompts import build_interview_evaluation_prompt
+        prompt = build_interview_evaluation_prompt(question, category, expected_concepts, role_title, answer)
+        return self._execute_structured_prompt(prompt, schema_class, "interview_evaluation")
+
     def parse_resume_text(self, text: str, schema_class: Any) -> UnifiedAIResponse:
         prompt = PromptManager.get_resume_extraction_prompt(text)
         return self._execute_structured_prompt(prompt, schema_class, "resume_extraction")

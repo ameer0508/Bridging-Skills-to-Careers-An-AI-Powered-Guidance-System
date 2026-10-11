@@ -5,6 +5,7 @@ import { LearningResource } from '../models/LearningResource.js';
 import { ProjectTemplate } from '../models/ProjectTemplate.js';
 import { Certification } from '../models/Certification.js';
 import logger from '../config/logger.js';
+import { LEARNING_RESOURCES } from '../seed/learningResources.js';
 import { AppError } from '../middlewares/errorHandler.js';
 
 class RecommendationService {
@@ -54,40 +55,19 @@ class RecommendationService {
    */
   public async seedInitialResources(): Promise<void> {
     try {
-      const count = await LearningResource.countDocuments();
-      if (count > 0) return; // Already seeded
+      // Idempotent: add any curated resource that is not present yet (matched by URL)
+      let added = 0;
+      for (const resource of LEARNING_RESOURCES) {
+        const result = await LearningResource.updateOne(
+          { url: resource.url },
+          { $setOnInsert: { ...resource, estimatedTime: 'Self-paced' } },
+          { upsert: true }
+        );
+        if (result.upsertedCount > 0) added++;
+      }
+      if (added > 0) logger.info(`Added ${added} curated learning resources.`);
 
-      logger.info('Seeding initial Resource Catalogs...');
-
-      await LearningResource.insertMany([
-        {
-          title: 'Docker for Beginners',
-          provider: 'Official Docs',
-          url: 'https://docs.docker.com/get-started/',
-          targetSkills: ['Docker'],
-          difficulty: 'Beginner',
-          estimatedTime: '4 hours',
-          type: 'Documentation'
-        },
-        {
-          title: 'CI/CD Pipelines with GitHub Actions',
-          provider: 'FreeCodeCamp',
-          url: 'https://www.freecodecamp.org',
-          targetSkills: ['CI/CD'],
-          difficulty: 'Intermediate',
-          estimatedTime: '6 hours',
-          type: 'Course'
-        },
-        {
-          title: 'Advanced React Patterns',
-          provider: 'Frontend Masters',
-          url: 'https://frontendmasters.com',
-          targetSkills: ['React'],
-          difficulty: 'Advanced',
-          estimatedTime: '10 hours',
-          type: 'Course'
-        }
-      ]);
+      if ((await ProjectTemplate.countDocuments()) > 0) return; // Templates already seeded
 
       await ProjectTemplate.insertMany([
         {
