@@ -13,6 +13,7 @@ import { runSnapshotResilienceTests } from './snapshot_resilience.test.js';
 import { runOrchestratorServiceTests } from './orchestrator_service.test.js';
 import { runCorePipelineTests } from './core_pipeline.test.js';
 import { runApiIntegrationTests } from './api_integration.test.js';
+import { runLegacyMigrationTests } from './legacy_migration.test.js';
 
 async function runAll() {
   console.log('🚀 Starting Comprehensive SkillBridge Backend Test Suite...');
@@ -46,6 +47,7 @@ async function runAll() {
     await runResumeDifferentialTest();
     await runCorePipelineTests();
     await runApiIntegrationTests();
+    await runLegacyMigrationTests();
     const after = fingerprint();
     const touched = before.filter((entry, i) => entry !== after[i]);
     if (touched.length > 0) {

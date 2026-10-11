@@ -9,6 +9,10 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "test": "tsx src/tests/runAllTests.ts",
+    "test:api": "tsx src/tests/api_integration.test.ts",
+    "typecheck": "tsc --noEmit",
+    "migrate:legacy": "tsx src/scripts/migrateLegacyData.ts",
+    "restore:users": "tsx src/scripts/restoreUsersFromBackup.ts",
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
