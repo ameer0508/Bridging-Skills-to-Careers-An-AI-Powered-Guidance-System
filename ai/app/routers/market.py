@@ -1,3 +1,6 @@
+# NOTE: this module has no live data source. It returns built-in illustrative sample data,
+# labelled as such in every response. It is not used by the product's user workflows.
+ILLUSTRATIVE = "illustrative_sample"
 from fastapi import APIRouter, Query, HTTPException
 from typing import Optional
 from app.market_intelligence.market_engine import market_engine_instance
@@ -25,6 +28,6 @@ async def get_market_trends(
             remote_only=remote_only,
         )
         result = market_engine_instance.get_market_intelligence(filter_params)
-        return {"success": True, "data": result}
+        return {"success": True, "data_origin": ILLUSTRATIVE, "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

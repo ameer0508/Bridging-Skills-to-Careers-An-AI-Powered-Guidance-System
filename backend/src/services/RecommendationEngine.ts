@@ -128,7 +128,7 @@ export class RecommendationEngine {
   /** The user's best-matching careers, with the target role first when it is one of them. */
   private async loadFocusCareers(userObjectId: mongoose.Types.ObjectId): Promise<CareerContext[]> {
     const matches = await CareerMatch.find({ userId: userObjectId })
-      .sort({ matchScore: -1 })
+      .sort({ matchScore: -1, confidence: -1, _id: 1 })
       .populate<{ careerId: { _id: mongoose.Types.ObjectId; title: string } | null }>('careerId', 'title');
 
     const user = await User.findById(userObjectId).select('targetRole');

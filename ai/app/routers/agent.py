@@ -1,3 +1,6 @@
+# NOTE: this module has no live data source. It returns built-in illustrative sample data,
+# labelled as such in every response. It is not used by the product's user workflows.
+ILLUSTRATIVE = "illustrative_sample"
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from fastapi import APIRouter, Query, HTTPException
@@ -22,7 +25,7 @@ async def get_agent_career_plan(
     """
     try:
         data = career_agent_instance.run_agent_session(user_id, trigger_adaptation=adapt)
-        return {"success": True, "data": data}
+        return {"success": True, "data_origin": ILLUSTRATIVE, "data": data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

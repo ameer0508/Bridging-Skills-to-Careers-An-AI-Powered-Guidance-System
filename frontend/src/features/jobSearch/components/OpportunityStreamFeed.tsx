@@ -27,7 +27,7 @@ export interface OpportunityItem {
   postedAt: string | Date;
   applicationUrl: string;
   skills: string[];
-  skillbridgeMatchScore: number;
+  skillbridgeMatchScore: number | null;
   matchedSkills: string[];
   missingSkills: string[];
   matchExplanation?: string;
@@ -189,7 +189,7 @@ export const OpportunityStreamFeed: React.FC<OpportunityStreamFeedProps> = ({
                     {/* Match Score Badge */}
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">
                       <CheckCircle2 className="w-3 h-3 text-indigo-400" />
-                      {opp.skillbridgeMatchScore}%
+                      {opp.skillbridgeMatchScore === null ? 'Not scored' : `${opp.skillbridgeMatchScore}%`}
                     </span>
 
                     {/* Bookmark Save Action */}

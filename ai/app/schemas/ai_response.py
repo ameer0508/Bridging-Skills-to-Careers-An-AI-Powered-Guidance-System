@@ -6,6 +6,9 @@ class TokenUsage(BaseModel):
     completion_tokens: int = 0
     total_tokens: int = 0
     estimated_cost_usd: float = 0.0
+    # "provider": counts reported by the AI provider. "estimated": derived from text length.
+    # The cost is always an estimate from a static price table.
+    source: str = "estimated"
 
 class UnifiedAIResponse(BaseModel):
     success: bool = True

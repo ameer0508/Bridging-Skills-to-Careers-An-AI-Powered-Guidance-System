@@ -164,7 +164,7 @@ export class SnapshotService {
     }
 
     // 1. Target career match & target role resolution
-    const topMatch = await CareerMatch.findOne({ userId: userObjId }).sort({ matchScore: -1 }).populate<{ careerId: { title: string } }>('careerId');
+    const topMatch = await CareerMatch.findOne({ userId: userObjId }).sort({ matchScore: -1, confidence: -1, _id: 1 }).populate<{ careerId: { title: string } }>('careerId');
     const targetCareer = topMatch?.careerId && typeof topMatch.careerId === 'object'
       ? topMatch.careerId.title
       : userDoc?.targetRole || userDoc?.primaryCareerDomain || 'Target Career Role';

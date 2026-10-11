@@ -143,6 +143,11 @@ export async function runApiIntegrationTests() {
     assert.equal(onboarded.body.data.targetRole, 'Frontend Engineer');
     console.log('  ✓ Profile: read, strict update validation, onboarding completion');
 
+    // Searched before any resume exists: unscored. The same search must be scored once skills
+    // are on record (scores are computed per request, never served from a stale cache).
+    const preResumeJobs = await api('GET', '/opportunities?search=Frontend', { token: aliceToken });
+    assert.equal(preResumeJobs.body.data.opportunities[0].matchStatus, 'NO_CANDIDATE_EVIDENCE');
+
     // --- Resume upload and the downstream pipeline --------------------------
     const fakeForm = new FormData();
     fakeForm.append('resume', new Blob(['MZ this is not a pdf'], { type: 'application/pdf' }), 'resume.pdf');

@@ -52,7 +52,7 @@ export class InterviewService {
       try {
         // Top career match
         if (!targetCareerTitle) {
-          const topMatch = await CareerMatch.findOne({ userId: userObjectId }).sort({ matchScore: -1 }).populate<{ careerId: { title: string } }>('careerId');
+          const topMatch = await CareerMatch.findOne({ userId: userObjectId }).sort({ matchScore: -1, confidence: -1, _id: 1 }).populate<{ careerId: { title: string } }>('careerId');
           if (topMatch?.careerId && typeof topMatch.careerId === 'object') {
             targetCareerTitle = topMatch.careerId.title;
             targetCareerIdObj = topMatch.careerId as unknown as mongoose.Types.ObjectId;

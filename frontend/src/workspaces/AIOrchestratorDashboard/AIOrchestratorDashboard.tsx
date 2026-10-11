@@ -118,7 +118,7 @@ export const AIOrchestratorDashboard: React.FC = () => {
 
   const activeAgentsCount = agentsList.filter((a) => a.status === 'ACTIVE').length;
   const readinessScore = readinessData?.overallScore || 80;
-  const latestLatency = currentExecution?.latencyMs || 120;
+  const latestLatency = currentExecution?.latencyMs ?? 0;
 
   // Handler: Execute Multi-Agent Workflow DAG
   const handleExecuteWorkflow = async () => {

@@ -1,3 +1,6 @@
+# NOTE: this module has no live data source. It returns built-in illustrative sample data,
+# labelled as such in every response. It is not used by the product's user workflows.
+ILLUSTRATIVE = "illustrative_sample"
 from fastapi import APIRouter, Query, HTTPException
 from app.interview_agent.interview_agent import interview_agent_instance
 
@@ -14,6 +17,6 @@ async def run_interview_prep_cycle(
     """
     try:
         data = interview_agent_instance.run_interview_prep_cycle(user_id, company=company, target_role=target_role)
-        return {"success": True, "data": data}
+        return {"success": True, "data_origin": ILLUSTRATIVE, "data": data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

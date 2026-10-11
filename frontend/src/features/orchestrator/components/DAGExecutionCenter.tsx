@@ -159,7 +159,7 @@ export const DAGExecutionCenter: React.FC<DAGExecutionCenterProps> = ({
                       {phase.parallel ? 'PARALLEL BRANCH' : 'SEQUENTIAL STEP'}
                     </span>
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                      ✓ {phase.status} ({phase.durationMs}ms)
+                      ✓ {phase.status}
                     </span>
                   </div>
                 </div>

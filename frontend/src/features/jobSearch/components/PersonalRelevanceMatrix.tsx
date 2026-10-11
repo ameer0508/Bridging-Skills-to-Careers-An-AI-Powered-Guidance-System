@@ -41,7 +41,9 @@ export const PersonalRelevanceMatrix: React.FC<PersonalRelevanceMatrixProps> = (
     );
   }
 
-  const matchScore = opportunity.skillbridgeMatchScore || 70;
+  // null means the posting could not be scored (no recognisable requirements, or no resume yet)
+  const isScored = typeof opportunity.skillbridgeMatchScore === 'number';
+  const matchScore = isScored ? (opportunity.skillbridgeMatchScore as number) : 0;
   const matched = opportunity.matchedSkills || [];
   const missing = opportunity.missingSkills || [];
 
@@ -84,8 +86,8 @@ export const PersonalRelevanceMatrix: React.FC<PersonalRelevanceMatrixProps> = (
 
           <div className="flex items-baseline justify-between">
             <div className="text-3xl font-extrabold font-mono text-white">
-              {matchScore}
-              <span className="text-sm text-slate-400 font-normal"> / 100</span>
+              {isScored ? matchScore : '—'}
+              <span className="text-sm text-slate-400 font-normal">{isScored ? ' / 100' : ' not scored'}</span>
             </div>
             <span className="text-xs font-mono text-indigo-400">
               {matched.length} of {Math.max(1, matched.length + missing.length)} Skills Verified

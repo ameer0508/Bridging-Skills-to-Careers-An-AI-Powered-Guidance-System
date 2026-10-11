@@ -39,6 +39,10 @@ export class GapPrioritizer {
         else weakAreas.push(item);
       } else {
         // Present, but check if it's a weak area
+        if (us.inferredFrom) {
+          // Demonstrated through a related skill (e.g. SQL via PostgreSQL): not a learning gap
+          continue;
+        }
         if (us.evidenceScore < 40 && req.importance === 'required') {
           weakAreas.push({
             skillName: req.skillName,

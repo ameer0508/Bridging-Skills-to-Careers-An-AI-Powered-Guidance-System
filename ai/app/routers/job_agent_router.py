@@ -1,3 +1,6 @@
+# NOTE: this module has no live data source. It returns built-in illustrative sample data,
+# labelled as such in every response. It is not used by the product's user workflows.
+ILLUSTRATIVE = "illustrative_sample"
 from fastapi import APIRouter, Query, HTTPException
 from app.job_search_agent.job_agent import job_agent_instance
 
@@ -13,6 +16,6 @@ async def run_job_search_agent_cycle(
     """
     try:
         data = job_agent_instance.run_agent_cycle(user_id, target_role=target_role)
-        return {"success": True, "data": data}
+        return {"success": True, "data_origin": ILLUSTRATIVE, "data": data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

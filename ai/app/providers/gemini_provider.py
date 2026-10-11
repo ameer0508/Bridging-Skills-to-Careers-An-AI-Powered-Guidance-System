@@ -17,6 +17,18 @@ from app.utils.response_normalizer import ResponseNormalizer
 
 logger = logging.getLogger("skillbridge-ai")
 
+def _reported_usage(response: Any) -> Optional[Dict[str, int]]:
+    """Token counts reported by Gemini for a response, when present."""
+    meta = getattr(response, "usage_metadata", None)
+    prompt_tokens = getattr(meta, "prompt_token_count", None) if meta is not None else None
+    if prompt_tokens is None:
+        return None
+    return {
+        "prompt_tokens": prompt_tokens,
+        "completion_tokens": getattr(meta, "candidates_token_count", None) or 0,
+    }
+
+
 class GeminiProvider(BaseAIProvider):
     """
     Google GenAI / Gemini Provider Adapter for SkillBridge AI Intelligence Layer.
@@ -42,6 +54,27 @@ class GeminiProvider(BaseAIProvider):
     def default_model(self) -> str:
         return self._model_name
 
+    def _candidate_models(self) -> List[str]:
+        """
+        The configured model, followed only by fallbacks the operator listed explicitly in
+        GEMINI_FALLBACK_MODELS (comma separated). No other model is ever substituted silently.
+        """
+        models = [self._model_name]
+        for alt in os.getenv("GEMINI_FALLBACK_MODELS", "").split(","):
+            alt = alt.strip()
+            if alt and alt not in models:
+                models.append(alt)
+        return models
+
+    def _note_fallback(self, model: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
+        """Records, visibly, when a model other than the configured one produced the answer."""
+        if model != self._model_name:
+            metadata["model_fallback_from"] = self._model_name
+            logger.warning(
+                f"GeminiProvider: configured model '{self._model_name}' failed; answered by fallback '{model}'."
+            )
+        return metadata
+
     def is_available(self) -> bool:
         return bool(GENAI_AVAILABLE and (self.api_key or os.getenv("GEMINI_API_KEY")))
 
@@ -56,10 +89,7 @@ class GeminiProvider(BaseAIProvider):
     def _execute_structured_prompt(self, prompt: str, schema_class: Any, metadata_tag: str) -> UnifiedAIResponse:
         start_time = time.time()
         client = self._get_client()
-        candidate_models = [self._model_name]
-        for alt in ["gemini-flash-latest", "gemini-3.6-flash"]:
-            if alt not in candidate_models:
-                candidate_models.append(alt)
+        candidate_models = self._candidate_models()
 
         last_error = None
         for model in candidate_models:
@@ -83,7 +113,8 @@ class GeminiProvider(BaseAIProvider):
                     latency_ms=latency,
                     prompt_text=prompt,
                     completion_text=response.text,
-                    metadata={"parsing_engine": metadata_tag}
+                    metadata=self._note_fallback(model, {"parsing_engine": metadata_tag}),
+                    actual_usage=_reported_usage(response)
                 )
             except Exception as e:
                 last_error = e
@@ -106,10 +137,7 @@ class GeminiProvider(BaseAIProvider):
     def generate_content(self, prompt: str, **kwargs) -> UnifiedAIResponse:
         start_time = time.time()
         client = self._get_client()
-        candidate_models = [self._model_name]
-        for alt in ["gemini-flash-latest", "gemini-3.6-flash"]:
-            if alt not in candidate_models:
-                candidate_models.append(alt)
+        candidate_models = self._candidate_models()
 
         last_error = None
         full_prompt = PromptManager.get_career_architect_prompt(prompt)
@@ -129,7 +157,8 @@ class GeminiProvider(BaseAIProvider):
                     latency_ms=latency,
                     prompt_text=full_prompt,
                     completion_text=text_content,
-                    metadata={"status": "complete"}
+                    metadata=self._note_fallback(model, {"status": "complete"}),
+                    actual_usage=_reported_usage(response)
                 )
             except Exception as e:
                 last_error = e

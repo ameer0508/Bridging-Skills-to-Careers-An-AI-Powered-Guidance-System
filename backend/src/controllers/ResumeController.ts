@@ -141,6 +141,8 @@ export class ResumeController {
             parsingError: resume.parsingError,
             uploadedAt: resume.uploadedAt,
             atsScore: parsedResume?.atsScore || 0,
+            atsScoreNote:
+              'Resume completeness heuristic based on which sections and details were found. It is not the result of any real applicant tracking system.',
             sectionHealth: parsedResume?.sectionHealth || [],
             personalInfo: parsedResume?.personalInfo || {},
             education: parsedResume?.education || [],

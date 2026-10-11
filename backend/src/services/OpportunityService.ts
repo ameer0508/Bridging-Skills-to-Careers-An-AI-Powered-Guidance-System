@@ -41,7 +41,9 @@ function sanitizeUrl(urlStr?: string): string {
 
 class OpportunityService {
   private provider: OpportunityProvider;
-  private cache: Map<string, { data: EnrichedOpportunity[]; timestamp: number }> = new Map();
+  // Provider results only, keyed by search. Match scores are never cached: they are computed
+  // per request from the user's current skills.
+  private cache: Map<string, { data: CanonicalOpportunity[]; timestamp: number }> = new Map();
   private readonly CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
   constructor() {
@@ -57,31 +59,15 @@ class OpportunityService {
   ): Promise<{ opportunities: EnrichedOpportunity[]; providerHealth: OpportunityProviderHealth }> {
     const health = await this.provider.healthCheck();
 
-    // Check cache
-    const cacheKey = `${userId}_${query.keywords || 'default'}_${query.location || 'all'}_${query.page || 1}_${query.datePosted || 'all'}`;
-    const cached = this.cache.get(cacheKey);
-    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL_MS) {
-      let filtered = cached.data;
-      if (query.remoteOnly) filtered = filtered.filter((o) => o.remote);
-      if (query.employmentType) {
-        filtered = filtered.filter((o) => o.employmentType.toLowerCase().includes(query.employmentType!.toLowerCase()));
-      }
-      return {
-        opportunities: this.sortOpportunities(filtered, query.sortBy),
-        providerHealth: health,
-      };
-    }
-
     // Candidate evidence: the user's skills with their resume evidence
     let userSkillIndex = new Map<string, SkillEvidenceMatch>();
     let targetTitle = '';
     if (mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(userId)) {
       try {
         const userObjId = new mongoose.Types.ObjectId(userId);
-        const userSkillsDocs = await UserSkill.find({ userId: userObjId }).populate('skillId');
-        userSkillIndex = buildUserSkillIndex(userSkillsDocs);
+        userSkillIndex = await this.loadUserSkillIndex(userId);
 
-        const topCareerMatch = await CareerMatch.findOne({ userId: userObjId }).sort({ matchScore: -1 }).populate<{ careerId: { title: string } }>('careerId');
+        const topCareerMatch = await CareerMatch.findOne({ userId: userObjId }).sort({ matchScore: -1, confidence: -1, _id: 1 }).populate<{ careerId: { title: string } }>('careerId');
         targetTitle = topCareerMatch?.careerId?.title || '';
       } catch {
         // Without candidate evidence, postings are returned unscored (never with an invented score)
@@ -90,9 +76,14 @@ class OpportunityService {
 
     // Deriving search keyword query if not provided
     const searchKeyword = query.keywords || targetTitle || 'Software Engineer';
+    const cacheKey = `${searchKeyword}_${query.location || 'all'}_${query.page || 1}_${query.datePosted || 'all'}`.toLowerCase();
+    const cached = this.cache.get(cacheKey);
     let canonicalOpportunities: CanonicalOpportunity[];
     try {
-      canonicalOpportunities = await this.provider.search({ ...query, keywords: searchKeyword });
+      canonicalOpportunities =
+        cached && Date.now() - cached.timestamp < this.CACHE_TTL_MS
+          ? cached.data
+          : await this.provider.search({ ...query, keywords: searchKeyword });
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : 'External opportunity provider request failed';
       return {
@@ -116,33 +107,10 @@ class OpportunityService {
     const deduplicatedList = Array.from(uniqueMap.values());
 
     // Score each posting against the requirements the employer actually wrote
-    const enrichedList: EnrichedOpportunity[] = deduplicatedList.map((opp) => {
-      const description = sanitizeText(opp.description);
-      const requirements = extractJobRequirements({
-        skills: opp.skills,
-        qualifications: opp.qualifications,
-        description,
-      });
-      const match = matchOpportunity(requirements, userSkillIndex);
-
-      return {
-        ...opp,
-        title: sanitizeText(opp.title),
-        company: sanitizeText(opp.company),
-        location: sanitizeText(opp.location),
-        description,
-        applicationUrl: sanitizeUrl(opp.applicationUrl) || `https://www.google.com/search?q=${encodeURIComponent(`${opp.title} ${opp.company} jobs`)}`,
-        skillbridgeMatchScore: match.score,
-        matchStatus: match.status,
-        matchedSkills: match.matchedSkills,
-        missingSkills: match.missingSkills,
-        requirements: match.requirements,
-        matchExplanation: match.explanation,
-      };
-    });
+    const enrichedList: EnrichedOpportunity[] = deduplicatedList.map((opp) => this.enrich(opp, userSkillIndex));
 
     // Save to cache
-    this.cache.set(cacheKey, { data: enrichedList, timestamp: Date.now() });
+    this.cache.set(cacheKey, { data: deduplicatedList, timestamp: cached?.timestamp ?? Date.now() });
 
     let finalResults = enrichedList;
     if (query.remoteOnly) finalResults = finalResults.filter((o) => o.remote);
@@ -154,6 +122,41 @@ class OpportunityService {
       opportunities: this.sortOpportunities(finalResults, query.sortBy),
       providerHealth: health,
     };
+  }
+
+  /** Scores one posting for a candidate and sanitises its text fields. */
+  private enrich(opp: CanonicalOpportunity, userSkillIndex: Map<string, SkillEvidenceMatch>): EnrichedOpportunity {
+    const description = sanitizeText(opp.description);
+    const requirements = extractJobRequirements({
+      skills: opp.skills,
+      qualifications: opp.qualifications,
+      description,
+    });
+    const match = matchOpportunity(requirements, userSkillIndex);
+
+    return {
+      ...opp,
+      title: sanitizeText(opp.title),
+      company: sanitizeText(opp.company),
+      location: sanitizeText(opp.location),
+      description,
+      applicationUrl: sanitizeUrl(opp.applicationUrl) || `https://www.google.com/search?q=${encodeURIComponent(`${opp.title} ${opp.company} jobs`)}`,
+      skillbridgeMatchScore: match.score,
+      matchStatus: match.status,
+      matchedSkills: match.matchedSkills,
+      missingSkills: match.missingSkills,
+      requirements: match.requirements,
+      matchExplanation: match.explanation,
+    };
+  }
+
+  /** The candidate's evidenced skills, indexed for matching. Empty when none are on record. */
+  private async loadUserSkillIndex(userId: string): Promise<Map<string, SkillEvidenceMatch>> {
+    if (mongoose.connection.readyState !== 1 || !mongoose.Types.ObjectId.isValid(userId)) {
+      return new Map();
+    }
+    const docs = await UserSkill.find({ userId: new mongoose.Types.ObjectId(userId) }).populate('skillId');
+    return buildUserSkillIndex(docs);
   }
 
   /**
@@ -180,13 +183,11 @@ class OpportunityService {
    * Retrieves detailed opportunity by external ID.
    */
   async getOpportunityById(userId: string, externalId: string): Promise<EnrichedOpportunity | null> {
-    // Postings are only available from the provider's search results, so look in this
-    // user's recent (cached) searches rather than running an unrelated new search.
-    const prefix = `${userId}_`;
-    for (const [key, entry] of this.cache.entries()) {
-      if (!key.startsWith(prefix)) continue;
+    // Postings are only available from the provider's search results, so look in recent
+    // (cached) searches rather than running an unrelated new search, and score for this user.
+    for (const entry of this.cache.values()) {
       const found = entry.data.find((opp) => opp.externalId === externalId);
-      if (found) return found;
+      if (found) return this.enrich(found, await this.loadUserSkillIndex(userId));
     }
     return null;
   }

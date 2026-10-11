@@ -12,7 +12,7 @@ class CareerService {
    */
   public async getUserMatches(userId: string) {
     const matches = await CareerMatch.find({ userId: new mongoose.Types.ObjectId(userId) })
-      .sort({ matchScore: -1 })
+      .sort({ matchScore: -1, confidence: -1, _id: 1 })
       .populate('careerId', 'title category description')
       .limit(10); // Top 10
 

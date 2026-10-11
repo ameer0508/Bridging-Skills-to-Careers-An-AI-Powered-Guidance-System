@@ -130,13 +130,13 @@ def get_realtime_ai_telemetry() -> dict:
             "total_edges": edges_count
         },
         "agents": [
-            {"id": "job_agent", "name": "Job Intelligence Agent", "status": "ONLINE", "mode": "REAL_TIME"},
-            {"id": "learning_agent", "name": "Adaptive Learning Agent", "status": "ONLINE", "mode": "REAL_TIME"},
-            {"id": "resume_agent", "name": "Resume Intelligence Agent", "status": "ONLINE", "mode": "REAL_TIME"},
-            {"id": "interview_agent", "name": "Mock Interview Agent", "status": "ONLINE", "mode": "REAL_TIME"},
-            {"id": "networking_agent", "name": "Professional Networking Agent", "status": "ONLINE", "mode": "REAL_TIME"},
-            {"id": "opportunity_agent", "name": "Market Opportunity Agent", "status": "ONLINE", "mode": "REAL_TIME"},
-            {"id": "orchestrator", "name": "CareerOS Orchestrator", "status": "ONLINE", "mode": "REAL_TIME"}
+            {"id": "job_agent", "name": "Job Intelligence Agent", "status": "DEMO", "mode": "ILLUSTRATIVE_DATA"},
+            {"id": "learning_agent", "name": "Adaptive Learning Agent", "status": "DEMO", "mode": "ILLUSTRATIVE_DATA"},
+            {"id": "resume_agent", "name": "Resume Intelligence Agent", "status": "DEMO", "mode": "ILLUSTRATIVE_DATA"},
+            {"id": "interview_agent", "name": "Mock Interview Agent", "status": "DEMO", "mode": "ILLUSTRATIVE_DATA"},
+            {"id": "networking_agent", "name": "Professional Networking Agent", "status": "DEMO", "mode": "ILLUSTRATIVE_DATA"},
+            {"id": "opportunity_agent", "name": "Market Opportunity Agent", "status": "DEMO", "mode": "ILLUSTRATIVE_DATA"},
+            {"id": "orchestrator", "name": "CareerOS Orchestrator", "status": "DEMO", "mode": "ILLUSTRATIVE_DATA"}
         ],
         "providers": providers_status,
         "runtime": {
@@ -160,7 +160,7 @@ def render_ai_dashboard_html(data: dict) -> str:
             <span class="chip-dot"></span>
             <div>
                 <div style="font-weight:600; color:#fff; font-size:0.88rem;">{a["name"]}</div>
-                <div style="font-size:0.75rem; color:#94a3b8;">Status: <span style="color:#34d399;">{a["status"]}</span> • {a["mode"]}</div>
+                <div style="font-size:0.75rem; color:#94a3b8;">Status: {a["status"]} • {a["mode"]}</div>
             </div>
         </div>'''
         for a in data.get("agents", [])
@@ -353,7 +353,7 @@ def render_ai_dashboard_html(data: dict) -> str:
   <div class="container">
     <div class="header">
       <div>
-        <div class="badge-live"><span class="pulse-dot"></span> Real-Time AI Fleet Active</div>
+        <div class="badge-live"><span class="pulse-dot"></span> AI Service Running</div>
         <h1 class="title" style="margin-top: 0.75rem;">SkillBridge AI Intelligence Core</h1>
         <p class="subtitle">Multi-Agent Cognitive Framework, Semantic Knowledge Graph & ML Engine</p>
       </div>
@@ -381,20 +381,20 @@ def render_ai_dashboard_html(data: dict) -> str:
         <div class="card-hint">Weighted Graph Edges</div>
       </div>
       <div class="card">
-        <div class="card-label">Autonomous AI Fleet</div>
+        <div class="card-label">Demo Agent Modules</div>
         <div class="card-val" id="agents-count" style="color: #34d399;">7</div>
-        <div class="card-hint">All Agents Active & Online</div>
+        <div class="card-hint">Demo modules with illustrative sample data</div>
       </div>
       <div class="card">
         <div class="card-label">Primary AI Provider</div>
         <div class="card-val" style="font-size: 1.5rem; text-transform: uppercase;">{data["primary_provider"]}</div>
-        <div class="card-hint">Auto Fallback Matrix Active</div>
+        <div class="card-hint">Configured primary provider</div>
       </div>
     </div>
 
     <!-- Agents & Ecosystem Panel -->
     <div class="card" style="margin-bottom: 2rem;">
-      <div class="section-title">🤖 Active Multi-Agent Fleet Telemetry</div>
+      <div class="section-title">🤖 Demo Agent Modules (illustrative data, not used by the app)</div>
       <div class="agents-grid">
         {agents_html}
       </div>
@@ -413,7 +413,7 @@ def render_ai_dashboard_html(data: dict) -> str:
         </div>
         <div class="list-item">
           <span style="color: var(--text-muted);">Backend Server Sync</span>
-          <span class="pill" style="color: #34d399;">CONNECTED (localhost:5000)</span>
+          <span class="pill">not probed from this page</span>
         </div>
         <div class="list-item">
           <span style="color: var(--text-muted);">Last Live Sync Timestamp</span>

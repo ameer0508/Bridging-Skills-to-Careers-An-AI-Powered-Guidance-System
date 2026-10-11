@@ -47,7 +47,7 @@ export interface OpportunityItem {
   applicationUrl: string;
   sourceUrl?: string;
   skills: string[];
-  skillbridgeMatchScore: number;
+  skillbridgeMatchScore: number | null;
   matchedSkills: string[];
   missingSkills: string[];
   matchExplanation?: string;
@@ -66,7 +66,7 @@ export interface SavedOpportunityItem {
   savedAt: string;
   status: 'saved' | 'applied' | 'interviewing' | 'offer' | 'rejected' | 'withdrawn';
   notes?: string;
-  skillbridgeMatchScore: number;
+  skillbridgeMatchScore: number | null;
   matchedSkills: string[];
   missingSkills: string[];
   description?: string;
@@ -227,7 +227,10 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
   }, [savedOpportunities]);
 
   // Telemetry Metrics
-  const topMatchScore = liveOpportunities[0]?.skillbridgeMatchScore || topMatch?.matchScore || 90;
+  // Best real score among the listed postings; null when none could be scored
+  const scoredOpportunity = liveOpportunities.find((o) => typeof o.skillbridgeMatchScore === 'number');
+  const topMatchScore: number | null = scoredOpportunity?.skillbridgeMatchScore ?? null;
+  const topMatchLabel = topMatchScore === null ? 'Not scored' : `${topMatchScore}%`;
   const readinessScore = readinessData?.overallScore || 0;
 
   const userSkillNames = useMemo(() => {
@@ -352,9 +355,9 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
         userName={targetRoleTitle}
         title="Opportunity Discovery Agent"
         description="Multi-modal opportunity discovery across verified career roles, research grants, skill fellowships, and high-impact industry programs."
-        aiSummary={`Top Match: ${topMatchScore}% • Eligibility: ${eligibilityPercent}% • Discovered: ${liveOpportunities.length} Live Opportunities`}
+        aiSummary={`Top Match: ${topMatchLabel} • Eligibility: ${eligibilityPercent}% • Discovered: ${liveOpportunities.length} Live Opportunities`}
         stats={[
-          { label: 'Top Match Score', value: `${topMatchScore} / 100`, change: targetRoleTitle, isPositive: topMatchScore >= 80 },
+          { label: 'Top Match Score', value: topMatchScore === null ? 'Not scored' : `${topMatchScore} / 100`, change: targetRoleTitle, isPositive: topMatchScore !== null && topMatchScore >= 80 },
           { label: 'Skill Eligibility Rate', value: `${eligibilityPercent}%`, change: `${userSkillNames.length} Verified Skills`, isPositive: eligibilityPercent >= 60 },
           { label: 'Live Discovered', value: `${liveOpportunities.length} Jobs`, change: 'RapidAPI JSearch Feed', isPositive: true },
           { label: 'Pipeline Saved', value: `${savedOpportunities.length} Bookmarks`, change: 'Persisted Records', isPositive: true },
@@ -689,7 +692,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                         {/* MATCH SCORE BADGE & SAVE BUTTON */}
                         <div className="flex items-center gap-2 shrink-0">
                           <span className="text-emerald-400 font-bold text-xs flex items-center gap-1 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/30">
-                            <Sparkles className="w-3.5 h-3.5" /> SkillBridge Match: {opp.skillbridgeMatchScore}%
+                            <Sparkles className="w-3.5 h-3.5" /> SkillBridge Match: {opp.skillbridgeMatchScore === null ? 'Not scored' : `${opp.skillbridgeMatchScore}%`}
                           </span>
 
                           <button
@@ -1013,7 +1016,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                   LIVE EXTERNAL DATA • JSEARCH
                 </span>
                 <span className="text-emerald-400 font-bold text-xs bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/30">
-                  Match Score: {selectedOpportunity.skillbridgeMatchScore}%
+                  Match Score: {selectedOpportunity.skillbridgeMatchScore === null ? 'Not scored' : `${selectedOpportunity.skillbridgeMatchScore}%`}
                 </span>
               </div>
               <h2 id="opportunity-drawer-title" className="text-xl font-bold text-white">
@@ -1130,7 +1133,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
       {/* BOTTOM STATUS BAR */}
       <AIStatusBar
         status={isAnalyzing ? 'thinking' : 'active'}
-        confidence={topMatchScore || 90}
+        confidence={topMatchScore ?? 0}
         lastUpdated="Opportunity Agent Active"
       />
     </div>

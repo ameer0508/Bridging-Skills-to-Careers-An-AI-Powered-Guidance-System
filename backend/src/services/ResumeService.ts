@@ -225,9 +225,9 @@ export class ResumeService {
       sectionName: 'Contact Information',
       iconName: 'user',
       score: hasInfo ? 95 : 0,
-      status: hasInfo ? 'Verified' : 'Missing',
-      qualitativeConfidence: hasInfo ? 'Very High' : 'Low',
-      extractionMethod: 'Regex & Header NER',
+      status: hasInfo ? 'Found' : 'Missing',
+      qualitativeConfidence: hasInfo ? 'Detected' : 'Not found',
+      extractionMethod: 'Rule-based parser',
       description: hasInfo
         ? `Email: ${emailVal || 'N/A'}, Phone: ${phoneVal || 'N/A'}`
         : 'No contact details detected in resume.'
@@ -239,8 +239,8 @@ export class ResumeService {
       iconName: 'briefcase',
       score: exp.length > 0 ? Math.min(95, 60 + exp.length * 15) : 0,
       status: exp.length > 0 ? `${exp.length} Roles Found` : 'Empty',
-      qualitativeConfidence: exp.length > 0 ? 'High' : 'Low',
-      extractionMethod: 'Transformer Sequence Classifier',
+      qualitativeConfidence: exp.length > 0 ? 'Detected' : 'Not found',
+      extractionMethod: 'Rule-based parser',
       description: exp.length > 0
         ? `${exp.length} work experience entry/entries detected.`
         : 'No work experience section found.'
@@ -252,8 +252,8 @@ export class ResumeService {
       iconName: 'folder',
       score: proj.length > 0 ? Math.min(95, 60 + proj.length * 10) : 0,
       status: proj.length > 0 ? `${proj.length} Projects` : 'Empty',
-      qualitativeConfidence: proj.length > 0 ? 'Very High' : 'Low',
-      extractionMethod: 'Layout & Heading Detector',
+      qualitativeConfidence: proj.length > 0 ? 'Detected' : 'Not found',
+      extractionMethod: 'Rule-based parser',
       description: proj.length > 0
         ? `${proj.length} project entries detected.`
         : 'No project section found.'
@@ -268,8 +268,8 @@ export class ResumeService {
       iconName: 'graduation',
       score: edu.length > 0 ? 95 : 0,
       status: edu.length > 0 ? 'Extracted' : 'Missing',
-      qualitativeConfidence: edu.length > 0 ? 'Very High' : 'Low',
-      extractionMethod: 'Fuzzy Section Heading Match',
+      qualitativeConfidence: edu.length > 0 ? 'Detected' : 'Not found',
+      extractionMethod: 'Rule-based parser',
       description: edu.length > 0
         ? `${degVal || 'Education'} at ${instVal || 'Institution'}`
         : 'No education section found.'
@@ -281,10 +281,10 @@ export class ResumeService {
       iconName: 'target',
       score: skills.length > 0 ? Math.min(98, 50 + skills.length * 3) : 0,
       status: skills.length > 0 ? `${skills.length} Skills Mapped` : 'Empty',
-      qualitativeConfidence: skills.length > 0 ? 'Very High' : 'Low',
-      extractionMethod: 'Taxonomy Embedding Equivalence',
+      qualitativeConfidence: skills.length > 0 ? 'Detected' : 'Not found',
+      extractionMethod: 'Rule-based parser',
       description: skills.length > 0
-        ? `${skills.length} skill entities mapped to domain taxonomy.`
+        ? `${skills.length} skills recognised from the skill lexicon.`
         : 'No skills section found.'
     });
 
@@ -294,8 +294,8 @@ export class ResumeService {
       iconName: 'award',
       score: certs.length > 0 ? 90 : 0,
       status: certs.length > 0 ? `${certs.length} Certs` : 'None Listed',
-      qualitativeConfidence: certs.length > 0 ? 'High' : 'Low',
-      extractionMethod: 'Issuer NER Pattern Match',
+      qualitativeConfidence: certs.length > 0 ? 'Detected' : 'Not found',
+      extractionMethod: 'Rule-based parser',
       description: certs.length > 0
         ? `${certs.length} certification entry/entries detected.`
         : 'No certifications listed in resume.'
@@ -307,8 +307,8 @@ export class ResumeService {
       iconName: 'trophy',
       score: ach.length > 0 ? 85 : 0,
       status: ach.length > 0 ? `${ach.length} Achievements` : 'None Listed',
-      qualitativeConfidence: ach.length > 0 ? 'Medium' : 'Low',
-      extractionMethod: 'Semantic Bullet Classifier',
+      qualitativeConfidence: ach.length > 0 ? 'Detected' : 'Not found',
+      extractionMethod: 'Rule-based parser',
       description: ach.length > 0
         ? `${ach.length} achievement entry/entries detected.`
         : 'No explicit achievements section listed.'
@@ -320,8 +320,8 @@ export class ResumeService {
       iconName: 'languages',
       score: lang.length > 0 ? 94 : 0,
       status: lang.length > 0 ? `${lang.length} Languages` : 'None Listed',
-      qualitativeConfidence: lang.length > 0 ? 'Very High' : 'Low',
-      extractionMethod: 'Natural Language Detector',
+      qualitativeConfidence: lang.length > 0 ? 'Detected' : 'Not found',
+      extractionMethod: 'Rule-based parser',
       description: lang.length > 0
         ? `${lang.map(l => l.value).join(', ')} detected.`
         : 'No explicit language skills listed.'

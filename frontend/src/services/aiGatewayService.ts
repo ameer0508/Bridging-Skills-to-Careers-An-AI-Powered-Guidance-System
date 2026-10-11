@@ -42,22 +42,23 @@ export class AIGatewayService {
     const isEnvelope = response && typeof response === 'object' && ('confidence' in response || 'provider' in response);
     const res = response as Record<string, unknown> | null;
 
-    const rawConfidence = res && typeof res.confidence === 'number' ? res.confidence : 0.984;
+    // No values are assumed: when a response carries no telemetry, zero / "Unknown" is reported
+    const rawConfidence = res && typeof res.confidence === 'number' ? res.confidence : 0;
     const confidence = isEnvelope
       ? Math.round(rawConfidence * (rawConfidence <= 1.0 ? 100 : 1) * 10) / 10
-      : 98.4;
+      : 0;
 
     const provider = isEnvelope && res?.provider
       ? String(res.provider).toUpperCase()
-      : 'GEMINI AI';
+      : 'UNKNOWN';
 
     const latencyMs = isEnvelope && typeof res?.latency === 'number'
       ? Math.round(res.latency)
-      : 120;
+      : 0;
 
     const model = isEnvelope && res?.model
       ? String(res.model)
-      : 'gemini-1.5-pro';
+      : 'unknown';
 
     const rawData = isEnvelope && res
       ? (res.data || res.response || res)
@@ -80,12 +81,12 @@ export class AIGatewayService {
    */
   static formatProviderBadge(provider: string): string {
     const p = provider.toUpperCase();
-    if (p.includes('GEMINI')) return 'Gemini 1.5 Pro';
-    if (p.includes('OPENAI')) return 'OpenAI GPT-4o';
-    if (p.includes('HUGGINGFACE')) return 'HuggingFace Llama3';
-    if (p.includes('LOCAL')) return 'Local LLM Engine';
-    if (p.includes('MOCK')) return 'Development Mock AI';
-    if (p.includes('SEMANTIC') || p.includes('INTELLIGENCE')) return 'SkillBridge AI Engine';
+    if (p.includes('GEMINI')) return 'Google Gemini';
+    if (p.includes('OPENAI')) return 'OpenAI';
+    if (p.includes('HUGGINGFACE')) return 'Hugging Face';
+    if (p.includes('LOCAL')) return 'Local model';
+    if (p.includes('MOCK')) return 'Development mock (not real AI)';
+    if (p.includes('SEMANTIC') || p.includes('INTELLIGENCE') || p.includes('RULE')) return 'SkillBridge rule engine';
     return provider || 'AI Gateway';
   }
 }

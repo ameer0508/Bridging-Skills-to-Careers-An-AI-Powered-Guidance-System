@@ -1,6 +1,4 @@
 import mongoose from 'mongoose';
-import { aiHttp, actingUser } from './aiHttp.js';
-import logger from '../config/logger.js';
 import snapshotService from './SnapshotService.js';
 import ProgressEventService from './ProgressEventService.js';
 import { EventType } from '../models/ProgressEvent.js';
@@ -30,7 +28,8 @@ export interface IDAGStep {
   action: string;
   parallel: boolean;
   status: 'COMPLETED' | 'RUNNING' | 'PENDING' | 'FAILED';
-  durationMs: number;
+  /** Per-step timing is not measured (all steps read one snapshot), so this is null. */
+  durationMs: number | null;
   payloadSummary: Record<string, unknown>;
   outputResult: string;
 }
@@ -44,6 +43,8 @@ export interface IWorkflowExecution {
   startedAt: string;
   completedAt: string;
   latencyMs: number;
+  /** Plain statement of what this run did and did not do. */
+  notice: string;
   dagPhases: IDAGStep[];
   sanitizedPayload: Record<string, unknown>;
   orchestrationReasoning: string;
@@ -325,15 +326,15 @@ export class OrchestratorService {
    */
   public async executeWorkflow(
     userId: string,
-    goal: string = 'Become Principal AI Infrastructure Architect',
-    targetCompany: string = 'OpenScale AI Systems'
+    goal: string = '',
+    targetCompany: string = ''
   ): Promise<IWorkflowExecution> {
     const startTime = Date.now();
     const snapshot = await snapshotService.getUnifiedCareerSnapshot(userId);
 
-    const targetCareer = goal || snapshot.targetCareer || 'Full Stack Software Engineer';
-    const verifiedSkills = snapshot.totalSkills > 0 ? `${snapshot.totalSkills} verified skills` : 'General engineering taxonomy';
-    const gapsList = snapshot.criticalGaps && snapshot.criticalGaps.length > 0 ? snapshot.criticalGaps.slice(0, 3).join(', ') : 'High-concurrency systems, Distributed cache';
+    const targetCareer = goal || snapshot.targetCareer || 'your target career';
+    const verifiedSkills = snapshot.totalSkills > 0 ? `${snapshot.totalSkills} skills evidenced on your resume` : 'no skills on record yet';
+    const gapsList = snapshot.criticalGaps && snapshot.criticalGaps.length > 0 ? snapshot.criticalGaps.slice(0, 3).join(', ') : 'none identified yet';
 
     // 4-Phase DAG Step Definitions
     const dagPhases: IDAGStep[] = [
@@ -345,13 +346,15 @@ export class OrchestratorService {
         action: `Evaluate strategic requirements and baseline fit for ${targetCareer}`,
         parallel: false,
         status: 'COMPLETED',
-        durationMs: 42,
+        durationMs: null,
         payloadSummary: {
           targetRole: targetCareer,
-          simulatedEmployer: targetCompany,
-          baselineFit: snapshot.matchScore ? `${snapshot.matchScore}%` : '82% (Market Baseline)',
+          targetEmployer: targetCompany || 'Not specified',
+          baselineFit: typeof snapshot.matchScore === 'number' ? `${snapshot.matchScore}%` : 'Not evaluated yet',
         },
-        outputResult: `Strategic parameters established. Target role [${targetCareer}] benchmarked against current capability profile.`
+        outputResult: typeof snapshot.matchScore === 'number'
+          ? `Your current match for ${snapshot.targetCareer} is ${snapshot.matchScore}%.`
+          : 'No career match has been calculated yet. Upload a resume to get one.'
       },
       {
         step: 2,
@@ -361,7 +364,7 @@ export class OrchestratorService {
         action: `Audit verified competencies against ${targetCareer} core skills`,
         parallel: true,
         status: 'COMPLETED',
-        durationMs: 65,
+        durationMs: null,
         payloadSummary: {
           verifiedSkillsBaseline: verifiedSkills,
           criticalGapsIdentified: gapsList,
@@ -376,12 +379,14 @@ export class OrchestratorService {
         action: `Evaluate resume alignment and quantify impact metrics for ${targetCompany}`,
         parallel: true,
         status: 'COMPLETED',
-        durationMs: 58,
+        durationMs: null,
         payloadSummary: {
-          atsIndex: snapshot.resumeInfo?.atsScore ? `${snapshot.resumeInfo.atsScore}/100` : '78/100',
-          resumeParsed: snapshot.resumeInfo?.hasResume ? 'Active Resume Synced' : 'Default Profile Evidence',
+          resumeCompleteness: snapshot.resumeInfo?.atsScore ? `${snapshot.resumeInfo.atsScore}/100` : 'No resume analysed',
+          resumeParsed: snapshot.resumeInfo?.hasResume ? 'Resume on file' : 'No resume uploaded',
         },
-        outputResult: `Quantified impact signals extracted. Target resume keyword coverage verified.`
+        outputResult: snapshot.resumeInfo?.hasResume
+          ? `Resume on file with ${snapshot.resumeInfo.detectedSkillsCount} skills detected.`
+          : 'No resume uploaded yet.'
       },
       {
         step: 3,
@@ -391,13 +396,15 @@ export class OrchestratorService {
         action: `Synthesize grounded system design & behavioral questions for ${targetCareer}`,
         parallel: false,
         status: 'COMPLETED',
-        durationMs: 84,
+        durationMs: null,
         payloadSummary: {
           testTrack: 'Technical & Architecture Round',
           groundedGapsTested: gapsList,
-          simulatedRoundQuestions: 5,
+          completedPracticeSessions: snapshot.interviews?.completed || 0,
         },
-        outputResult: `5-scenario interview studio chamber pre-configured with expected engineering concepts.`
+        outputResult: snapshot.interviews?.completed
+          ? `${snapshot.interviews.completed} practice interview(s) completed; latest score ${snapshot.interviews.latestScore ?? 'n/a'}/100.`
+          : 'No practice interview completed yet.'
       },
       {
         step: 4,
@@ -407,13 +414,13 @@ export class OrchestratorService {
         action: `Discover and fit-score live market opportunities matching ${targetCareer} at ${targetCompany}`,
         parallel: true,
         status: 'COMPLETED',
-        durationMs: 71,
+        durationMs: null,
         payloadSummary: {
           opportunityCriteria: targetCareer,
           employerFilter: targetCompany,
-          marketMatchesCount: Math.max(3, snapshot.opportunities?.total || 3),
+          savedOpportunities: snapshot.opportunities?.total || 0,
         },
-        outputResult: `Evaluated live opportunities. Match confidence calculated at 88%.`
+        outputResult: `${snapshot.opportunities?.total || 0} saved opportunities, ${snapshot.opportunities?.applied || 0} marked as applied.`
       },
       {
         step: 4,
@@ -423,35 +430,30 @@ export class OrchestratorService {
         action: `Sequence adaptive milestone progression to close critical capability gaps`,
         parallel: true,
         status: 'COMPLETED',
-        durationMs: 60,
+        durationMs: null,
         payloadSummary: {
           curriculumTarget: gapsList,
-          phaseSequence: snapshot.roadmap?.currentPhaseTitle || 'Phase 1: Architecture & Vector Scaling',
-          estimatedDuration: '4 Weeks',
+          phaseSequence: snapshot.roadmap?.currentPhaseTitle || 'No roadmap yet',
+          roadmapProgress: `${snapshot.roadmapProgress || 0}%`,
         },
-        outputResult: `Learning roadmap milestones synchronized to address ${gapsList}.`
+        outputResult: snapshot.roadmap?.isInitialized
+          ? `Roadmap is ${snapshot.roadmapProgress}% complete. Open gaps: ${gapsList}.`
+          : `No roadmap created yet. Open gaps: ${gapsList}.`
       }
     ];
 
-    // Attempt to invoke Python AI Service if online for ML reasoning
-    let reasoning = `Constructed 4-phase parallel/sequential workflow coordinating 7 specialized agents to achieve [${targetCareer}] with optimal confidence.`;
-    try {
-      const aiUrl = `/api/v1/orchestrator/execute/${userId}?goal=${encodeURIComponent(targetCareer)}&target_company=${encodeURIComponent(targetCompany)}`;
-      const aiResponse = await aiHttp.post(aiUrl, {}, { timeout: 2500, headers: actingUser(userId) });
-      if (aiResponse.data?.data?.orchestration_reasoning?.orchestration_rationale) {
-        reasoning = aiResponse.data.data.orchestration_reasoning.orchestration_rationale;
-      }
-    } catch {
-      // Graceful fallback to server-side deterministic explanation
-      logger.info('Orchestrator: Executed server-side DAG coordination.');
-    }
+    // No AI model is consulted here: every figure above is read from the user's stored data.
+    const notice =
+      'This overview summarises your current SkillBridge data module by module. ' +
+      'It reads stored results; it does not run autonomous AI agents.';
+    const reasoning = `Summary for ${targetCareer}, compiled from your resume, skills, readiness, roadmap, interviews and saved opportunities.`;
 
     // Log progress event asynchronously
     if (mongoose.connection.readyState === 1 && mongoose.Types.ObjectId.isValid(userId)) {
       ProgressEventService.logEvent(
         userId,
-        EventType.ROADMAP_PROGRESS,
-        { goal: targetCareer, targetCompany, phasesCount: 4, totalAgents: 7 }
+        EventType.WORKFLOW_EXECUTED,
+        { goal: targetCareer, targetCompany }
       ).catch(() => {});
     }
 
@@ -464,15 +466,16 @@ export class OrchestratorService {
       status: 'COMPLETED',
       startedAt: new Date(startTime).toISOString(),
       completedAt: new Date().toISOString(),
-      latencyMs: Math.max(120, latencyMs),
+      latencyMs,
+      notice,
       dagPhases,
       sanitizedPayload: {
         candidateTargetRole: targetCareer,
         targetCompany,
         verifiedSkillsBaseline: verifiedSkills,
         criticalGapsIdentified: gapsList,
-        readinessScore: snapshot.readinessScore || 75,
-        estimatedOfferProbability: snapshot.matchScore || 80,
+        readinessScore: snapshot.readinessScore ?? null,
+        matchScore: snapshot.matchScore ?? null,
       },
       orchestrationReasoning: reasoning,
       followUpActions: [
@@ -484,7 +487,7 @@ export class OrchestratorService {
         },
         {
           title: 'Inspect Opportunity Openings',
-          description: `Explore live roles tailored to ${targetCareer} at ${targetCompany}.`,
+          description: `Explore live roles related to ${targetCareer}.`,
           route: '/job-agent',
           agentId: 'job_agent'
         },

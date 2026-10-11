@@ -105,7 +105,7 @@ const getBackendRealtimeData = async () => {
     uptime_seconds: Math.round(process.uptime()),
     database: {
       status: dbConnected ? 'CONNECTED' : 'DISCONNECTED',
-      cluster: 'MongoDB (In-Memory Engine)',
+      host: dbConnected ? mongoose.connection.host : null,
       careers_count: careerCount,
       requirements_count: requirementCount,
       recommendations_count: recommendationCount,
@@ -308,7 +308,7 @@ const renderBackendDashboardHtml = (data: Awaited<ReturnType<typeof getBackendRe
   <div class="container">
     <div class="header">
       <div>
-        <div class="badge-live"><span class="pulse-dot"></span> Real-Time Core Active</div>
+        <div class="badge-live"><span class="pulse-dot"></span> Backend Running</div>
         <h1 class="title" style="margin-top: 0.75rem;">SkillBridge Backend Core</h1>
         <p class="subtitle">REST API Foundation & Live Career Intelligence Engine</p>
       </div>
@@ -325,7 +325,7 @@ const renderBackendDashboardHtml = (data: Awaited<ReturnType<typeof getBackendRe
       <div class="card">
         <div class="card-label">Database Status</div>
         <div class="card-val" id="db-status" style="color: #34d399;">${data.database.status}</div>
-        <div class="card-hint">● MongoDB Connected</div>
+        <div class="card-hint">MongoDB connection state</div>
       </div>
       <div class="card">
         <div class="card-label">Career Taxonomy</div>
@@ -358,7 +358,7 @@ const renderBackendDashboardHtml = (data: Awaited<ReturnType<typeof getBackendRe
         </div>
         <div class="list-item">
           <span style="color: var(--text-muted);">AI Intelligence Service</span>
-          <span class="pill pill-success" id="ai-status">CONNECTED (127.0.0.1:8000)</span>
+          <span class="pill" id="ai-status">configured: ${data.ai_service.url} (not probed here)</span>
         </div>
         <div class="list-item">
           <span style="color: var(--text-muted);">Last Live Telemetry Sync</span>

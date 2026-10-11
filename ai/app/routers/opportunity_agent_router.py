@@ -1,3 +1,6 @@
+# NOTE: this module has no live data source. It returns built-in illustrative sample data,
+# labelled as such in every response. It is not used by the product's user workflows.
+ILLUSTRATIVE = "illustrative_sample"
 from fastapi import APIRouter, Query, HTTPException
 from app.opportunity_agent.opportunity_agent import opportunity_agent_instance
 
@@ -10,6 +13,6 @@ async def run_opportunity_discovery_cycle(user_id: str):
     """
     try:
         data = opportunity_agent_instance.run_discovery_cycle(user_id)
-        return {"success": True, "data": data}
+        return {"success": True, "data_origin": ILLUSTRATIVE, "data": data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

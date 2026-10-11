@@ -16,10 +16,13 @@ class ResponseNormalizer:
         latency_ms: float,
         prompt_text: str = "",
         completion_text: str = "",
-        metadata: Dict[str, Any] = None
+        metadata: Dict[str, Any] = None,
+        actual_usage: Dict[str, int] = None
     ) -> UnifiedAIResponse:
         if metadata is None:
             metadata = {}
+        # The envelope's confidence is a fixed heuristic per provider, not a model-reported value
+        metadata.setdefault("confidence_basis", "heuristic_not_model_reported")
 
         if not completion_text and isinstance(raw_data, str):
             completion_text = raw_data
@@ -33,10 +36,23 @@ class ResponseNormalizer:
             fallback_used=metadata.get("fallback_used", False)
         )
 
-        p_tokens = TokenTracker.count_tokens(prompt_text)
-        c_tokens = TokenTracker.count_tokens(completion_text)
-        cost = CostTracker.calculate_cost(provider, model, p_tokens, c_tokens)
-        usage = TokenTracker.calculate_usage(prompt_text, completion_text, cost)
+        if actual_usage and actual_usage.get("prompt_tokens") is not None:
+            # Counts reported by the provider for this request
+            p_tokens = int(actual_usage.get("prompt_tokens") or 0)
+            c_tokens = int(actual_usage.get("completion_tokens") or 0)
+            cost = CostTracker.calculate_cost(provider, model, p_tokens, c_tokens)
+            usage = TokenUsage(
+                prompt_tokens=p_tokens,
+                completion_tokens=c_tokens,
+                total_tokens=p_tokens + c_tokens,
+                estimated_cost_usd=round(cost, 6),
+                source="provider",
+            )
+        else:
+            p_tokens = TokenTracker.count_tokens(prompt_text)
+            c_tokens = TokenTracker.count_tokens(completion_text)
+            cost = CostTracker.calculate_cost(provider, model, p_tokens, c_tokens)
+            usage = TokenTracker.calculate_usage(prompt_text, completion_text, cost)
 
         return UnifiedAIResponse(
             success=True,
