@@ -18,6 +18,7 @@ router.post('/assessments/:id/answers', TechnicalAssessmentController.answer);
 router.post('/assessments/:id/finish', TechnicalAssessmentController.finish);
 
 router.get('/history', InterviewController.getHistory);
+router.get('/progress', InterviewController.getProgress);
 router.post('/', InterviewController.startSession);
 router.get('/:id', InterviewController.getSession);
 router.post('/:id/respond', InterviewController.respondToQuestion);

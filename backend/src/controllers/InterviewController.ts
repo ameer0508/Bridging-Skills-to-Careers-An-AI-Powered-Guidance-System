@@ -3,6 +3,7 @@ import interviewService from '../services/InterviewService.js';
 import { AppError } from '../middlewares/errorHandler.js';
 import { z } from 'zod';
 import { resolveRubric, RUBRIC_IDS, RUBRICS, rubricById, type RubricId } from '../services/interview/InterviewRubrics.js';
+import InterviewProgressService from '../services/interview/InterviewProgressService.js';
 
 /** Longest interview answer accepted, in characters. */
 const MAX_ANSWER_LENGTH = 10000;
@@ -71,6 +72,25 @@ export class InterviewController {
         // `resolved` is the rubric a session for `role` would use when none is chosen
         data: { rubrics: RUBRIC_IDS.map(id => RUBRICS[id]), resolved: resolveRubric(parsed.data.role).id },
       });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /**
+   * GET /api/v1/interviews/progress
+   * D6: per-dimension comparison across the caller's completed sessions
+   */
+  getProgress = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication required', 401);
+      const parsed = z
+        .object({ mode: z.enum(['technical', 'behavioral', 'project', 'resume', 'career', 'mixed']).optional() })
+        .strict()
+        .safeParse(req.query ?? {});
+      if (!parsed.success) throw new AppError('Invalid request: only an optional interview mode is accepted', 400, 'VALIDATION_ERROR');
+      res.status(200).json({ success: true, data: await InterviewProgressService.forUser(userId, parsed.data) });
     } catch (err) {
       next(err);
     }

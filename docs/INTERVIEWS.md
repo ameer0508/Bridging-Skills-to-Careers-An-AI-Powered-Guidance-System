@@ -7,7 +7,8 @@
 | **D5** role-specific rubrics | **Implemented and tested** (U H B) |
 | **D4** technical assessments without code execution | **Implemented and tested** (U H B D) |
 | **D3** answer-adaptive follow-ups | **Implemented and tested** (U H B) |
-| D6, D2, D1 | Not started |
+| **D6** historical performance comparison | **Implemented and tested** (U H B) |
+| D2, D1 | Not started |
 
 ## D5. Role-specific scoring rubrics
 
@@ -174,3 +175,35 @@ The candidate answers with an option index, a line number or a short value, whic
   - the summary;
   - HTTP validation, isolation (404) and the report.
 - `e2e/tests/interviews.mjs` adds 2 browser steps: a follow-up asked at once with its provenance, then answered and reported apart from the overall score.
+
+## D6. Historical performance comparison
+
+**API:** `GET /interviews/progress?mode=` (sign-in required; only the caller's completed sessions; at most the latest 50). **Screen:** "Progress across sessions", under *Inspect Past Sessions* in the interview studio. Each scoring source gets a line chart and a table alternative.
+
+**Like with like.** Implemented in `backend/src/services/interview/InterviewProgressService.ts`:
+- **Rubrics.** The dimensions (relevance, completeness, specificity, structure, technical accuracy) are measured the same way under every rubric, so they are compared across rubrics.
+- **Scoring source.** AI-scored and rule-scored sessions are **separate series**. The rule-based rubric is capped at 80 and cannot judge accuracy, so the two are not on one scale.
+- **Exclusions.** Sessions scored partly by each (`mixed`) are listed as excluded, as are completed sessions with no answer.
+- **Accuracy.** Technical accuracy only appears for AI-scored sessions.
+- **Overall scores.** These depend on the rubric's weights, so they are compared only within one scoring source and one rubric (`overallByRubric`).
+
+**Direction.**
+- It needs at least **3 sessions**.
+- The mean of the earlier half is compared with the recent half; for an odd count, the middle session is dropped.
+- It is stated as improved or declined only when the difference is at least **10 points**; otherwise it is "no clear change".
+- With fewer sessions, the screen says "Not stated: n of 3 sessions needed". The first and latest values and the latest-vs-previous difference are still shown.
+
+**Limits.**
+- This compares a person's own practice, not other candidates, and it predicts nothing.
+- Different questions are asked each time, so part of any change comes from the questions. The screen says so.
+
+**Tests:**
+- `backend/src/tests/interview_progress.test.ts` covers:
+  - the trend rule and its threshold;
+  - series kept apart by source;
+  - mixed and unanswered sessions excluded;
+  - accuracy only for AI sessions;
+  - overall scores grouped by rubric;
+  - date ordering;
+  - HTTP: own completed sessions only, the mode filter and 2 invalid queries.
+- `e2e/tests/interviews.mjs` adds 1 browser step: the panel's values equal the API, three sessions state a direction, and rule-based sessions have no accuracy row.

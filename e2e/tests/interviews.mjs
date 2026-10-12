@@ -108,6 +108,23 @@ export async function run({ webUrl, apiUrl }) {
       expect(session.overallScore === expected, `overall ${session.overallScore} vs planned-question average ${expected}`);
     });
 
+    // ---- D6 historical comparison ----------------------------------------------------------------------------
+    await t.step('history compares the dimensions of completed sessions, like with like', async () => {
+      await gotoAndSettle(page, `${webUrl}/interview-agent`, 2000);
+      await page.getByRole('button', { name: /Inspect Past Sessions/ }).click();
+      const panel = page.getByTestId('interview-progress');
+      await panel.getByTestId('progress-series').first().waitFor({ timeout: 15_000 });
+      const progress = (await api('GET', '/interviews/progress')).data;
+      const series = progress.series.find((s) => s.evaluationSource === 'heuristic');
+      expect(series && series.sessions.length === 3, `heuristic sessions: ${series?.sessions.length}`);
+      const row = (await panel.locator('tr[data-dimension="structure"]').innerText()).replace(/\s+/g, ' ');
+      const t = series.dimensions.structure.trend;
+      expect(row.includes(String(t.first)) && row.includes(String(t.latest)), `row "${row}" vs first ${t.first}, latest ${t.latest}`);
+      expect(/Improved|Declined|No clear change/.test(row), `three sessions should state a direction: ${row}`);
+      expect((await panel.locator('tr[data-dimension="technicalAccuracy"]').count()) === 0, 'rule-based sessions show no accuracy row');
+      return row;
+    });
+
     // ---- D4 technical assessments --------------------------------------------------------------------------
     const SQL_KEYS = { 'sql-group-count': '2', 'sql-offset': 'Dina', 'sql-avg': '70', 'sql-left-join-zero': '3', 'sql-count-distinct': '3' };
     await t.step('the lobby links to a technical assessment that runs nothing', async () => {

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { RubricPicker } from '../../features/interview/components/RubricControls';
+import { InterviewProgressPanel } from '../../features/interview/components/InterviewProgressPanel';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import apiClient from '../../lib/axios';
@@ -481,11 +482,14 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
 
       {/* HISTORICAL JOURNEY DRAWER */}
       {studioMode === 'HISTORY' && (
-        <InterviewJourneyHistory
-          history={historyData || []}
-          onSelectSession={handleSelectHistorySession}
-          onClose={() => setStudioMode('LOBBY')}
-        />
+        <>
+          <InterviewJourneyHistory
+            history={historyData || []}
+            onSelectSession={handleSelectHistorySession}
+            onClose={() => setStudioMode('LOBBY')}
+          />
+          <InterviewProgressPanel />
+        </>
       )}
     </div>
   );
