@@ -23,6 +23,14 @@ interface NeuralConversationDrawerProps {
   isLoadingHistory: boolean;
   userName: string;
   onFeedback: (messageId: string, isHelpful: boolean) => void;
+  /** True while a question is waiting for its reply. */
+  isSending?: boolean;
+  /** Why the last question could not be sent at all (network or server error). */
+  sendError?: string | null;
+  onRetrySend?: () => void;
+  /** Asks again for the last question when its reply was a fallback. */
+  onRetryReply?: () => void;
+  isRetryingReply?: boolean;
 }
 
 export const NeuralConversationDrawer: React.FC<NeuralConversationDrawerProps> = ({
@@ -36,6 +44,11 @@ export const NeuralConversationDrawer: React.FC<NeuralConversationDrawerProps> =
   isLoadingHistory,
   userName,
   onFeedback,
+  isSending = false,
+  sendError = null,
+  onRetrySend,
+  onRetryReply,
+  isRetryingReply = false,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -43,7 +56,7 @@ export const NeuralConversationDrawer: React.FC<NeuralConversationDrawerProps> =
     if (isOpen) {
       scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, isOpen]);
+  }, [messages, isOpen, isSending, sendError]);
 
   if (!isOpen) return null;
 
@@ -120,28 +133,47 @@ export const NeuralConversationDrawer: React.FC<NeuralConversationDrawerProps> =
           {isLoadingHistory ? (
             <div className="h-full flex flex-col items-center justify-center gap-3 text-slate-400">
               <RefreshCw className="w-6 h-6 animate-spin text-cyan-400" />
-              <span className="text-xs font-mono">Retrieving Intelligence Telemetry...</span>
+              <span className="text-xs font-mono">Loading conversation...</span>
             </div>
-          ) : messages.length === 0 ? (
+          ) : messages.length === 0 && !isSending && !sendError ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-3">
               <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 text-cyan-300">
                 <MessageSquare className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-bold text-white">No Messages in Active Stream</h3>
+              <h3 className="text-sm font-bold text-white">No messages yet</h3>
               <p className="text-xs text-slate-400 max-w-xs">
-                Issue a query from the Neural Command Deck to initiate your career intelligence advisory.
+                Ask a question about your skills, readiness or roadmap to start this conversation.
               </p>
             </div>
           ) : (
             <>
-              {messages.map((msg) => (
+              {messages.map((msg, index) => (
                 <MessageBubble
                   key={msg._id}
                   message={msg}
                   userName={userName}
                   onFeedback={onFeedback}
+                  // Only the latest reply can be asked again
+                  onRetry={index === messages.length - 1 && !isSending ? onRetryReply : undefined}
+                  isRetrying={isRetryingReply}
                 />
               ))}
+              {(isSending || isRetryingReply) && (
+                <div className="flex items-center gap-2 text-xs text-slate-300" role="status" aria-live="polite" data-testid="chat-pending">
+                  <RefreshCw className="w-4 h-4 animate-spin text-cyan-400" />
+                  <span>Waiting for the assistant. This can take up to 40 seconds.</span>
+                </div>
+              )}
+              {sendError && !isSending && (
+                <div role="alert" className="p-3 rounded-xl border border-rose-500/30 bg-rose-500/10 flex flex-wrap items-center justify-between gap-2" data-testid="chat-send-error">
+                  <span className="text-xs text-rose-100">Your message was not sent: {sendError}</span>
+                  {onRetrySend && (
+                    <button type="button" onClick={onRetrySend} className="py-1.5 px-3 rounded-lg bg-slate-900 border border-white/10 text-slate-100 text-xs font-bold cursor-pointer">
+                      Send again
+                    </button>
+                  )}
+                </div>
+              )}
               <div ref={scrollRef} />
             </>
           )}

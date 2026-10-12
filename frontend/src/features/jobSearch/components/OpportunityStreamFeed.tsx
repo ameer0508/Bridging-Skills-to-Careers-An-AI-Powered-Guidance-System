@@ -1,3 +1,4 @@
+import { formatPostedDate } from './jobFormat';
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -20,14 +21,25 @@ export interface OpportunityItem {
   remote: boolean;
   employmentType: string;
   salary?: { min?: number; max?: number; currency?: string; period?: string } | string | null;
-  postedAt: string | Date;
+  /** Null when the provider did not state a posting date. */
+  postedAt: string | Date | null;
   applicationUrl: string;
   skills: string[];
   skillbridgeMatchScore: number | null;
   matchedSkills: string[];
   missingSkills: string[];
   matchExplanation?: string;
+  matchStatus?: 'SCORED' | 'NO_REQUIREMENTS' | 'NO_CANDIDATE_EVIDENCE';
+  /** True for built-in demo listings (no live provider configured). */
+  isSample?: boolean;
   status?: string;
+  // Tracking fields, present on saved jobs
+  notes?: string;
+  reminderAt?: string | null;
+  reminderNote?: string;
+  reminderDue?: boolean;
+  appliedAt?: string;
+  statusHistory?: Array<{ status: string; changedAt: string; note?: string }>;
   _id?: string;
 }
 
@@ -55,17 +67,6 @@ export const OpportunityStreamFeed: React.FC<OpportunityStreamFeedProps> = ({
   isLoading,
 }) => {
   const currentList = activeTab === 'LIVE' ? liveOpportunities : savedOpportunities;
-
-  const formatPostedDate = (raw?: string | Date) => {
-    if (!raw) return 'Recently';
-    const d = new Date(raw);
-    if (isNaN(d.getTime())) return 'Recently';
-    const diffHours = Math.round((Date.now() - d.getTime()) / (1000 * 60 * 60));
-    if (diffHours < 24) return `${Math.max(1, diffHours)}h ago`;
-    const diffDays = Math.round(diffHours / 24);
-    if (diffDays < 30) return `${diffDays}d ago`;
-    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-  };
 
   const getStatusBadge = (status?: string) => {
     switch (status?.toLowerCase()) {

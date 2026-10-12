@@ -204,6 +204,9 @@ export const FeatureShowcase: React.FC = () => {
 
   return (
     <section id="features" className="py-24 px-4 max-w-7xl mx-auto relative">
+      <p className="mb-6 text-center text-xs text-slate-400" data-testid="landing-sample-note">
+        The screens in this section are illustrations with sample data. They are not results for any real person.
+      </p>
       {/* Section Header */}
       <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 backdrop-blur-md">

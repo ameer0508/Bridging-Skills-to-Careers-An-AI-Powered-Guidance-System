@@ -4,3 +4,6 @@ export * from './OpportunityInspector';
 export * from './PersonalRelevanceMatrix';
 export * from './JobSearchAgentStatusBar';
 export * from './OpportunityActivationHub';
+export * from './SearchResultsNotice';
+export * from './ApplicationTrackerPanel';
+export * from './jobFormat';

@@ -11,7 +11,7 @@ export interface RelevanceMetric {
   recommendedAction: string;
 }
 
-export const defaultRelevanceMetrics: RelevanceMetric[] = [
+const defaultRelevanceMetrics: RelevanceMetric[] = [
   {
     skillName: 'Python & Async FastAPI',
     relevanceScore: 96.5,

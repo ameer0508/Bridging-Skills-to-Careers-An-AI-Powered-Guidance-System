@@ -2,6 +2,8 @@ import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../lib/axios';
+import { listFrom } from '../../lib/collections';
+import type { RecommendationItem } from '../../types/telemetry';
 import { useAuthStore } from '../../store/authStore';
 
 // Feature Components
@@ -101,13 +103,9 @@ export const AnalyticsWorkspace: React.FC = () => {
     },
   });
 
-  const matches = matchesData || [];
-  const readiness = readinessData || [];
-  const recommendations = Array.isArray(recommendationsData)
-    ? recommendationsData
-    : (recommendationsData as any)?.recommendations && Array.isArray((recommendationsData as any).recommendations)
-      ? (recommendationsData as any).recommendations
-      : [];
+  const matches = useMemo(() => matchesData || [], [matchesData]);
+  const readiness = useMemo(() => readinessData || [], [readinessData]);
+  const recommendations = useMemo(() => listFrom<RecommendationItem>(recommendationsData, 'recommendations'), [recommendationsData]);
 
   // Active Roadmap Query
   const activeCareerId = matches[0]?.careerId?._id;

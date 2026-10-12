@@ -176,6 +176,15 @@ export async function runInterviewQuestionTests() {
     assert.equal((await h.api('PUT', '/users/me', { token: alice.token, json: { targetRole: 'Frontend Engineer' } })).status, 200);
     await uploadAndWait(h, alice.token);
 
+    // Recommendations lead with the career the user chose, not whichever career scores highest
+    const recs = (await h.api('GET', '/recommendations', { token: alice.token })).body.data.recommendations as any[];
+    assert.ok(recs.length > 0);
+    assert.equal(recs[0].isPrimaryCareer, true);
+    assert.equal(recs[0].careerId.title, 'Frontend Engineer', 'the first recommendation is for the target career');
+    const firstOther = recs.findIndex(r => !r.isPrimaryCareer);
+    assert.ok(firstOther === -1 || recs.slice(firstOther).every(r => !r.isPrimaryCareer), 'target-career items are not interleaved with others');
+    console.log('  ✓ Recommendations: items for the chosen target career are listed first');
+
     for (const body of [{ mode: 'trivia' }, { questionCount: 50 }, { questionCount: 0 }, { isAdmin: true }, { opportunityContext: { company: 'x'.repeat(300) } }]) {
       const res = await h.api('POST', '/interviews', { token: alice.token, json: body });
       assert.equal(res.status, 400, `rejected: ${JSON.stringify(body).slice(0, 60)}`);

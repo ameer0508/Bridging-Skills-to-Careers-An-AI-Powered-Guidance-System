@@ -1,11 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createBrowserRouter } from 'react-router-dom';
 import React, { lazy, Suspense, useEffect } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { GuestRoute, ProtectedRoute } from '../components/RouteGuards';
 import { AppShell } from '../layouts/AppShell';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { ErrorBoundary } from '../components/common/ErrorBoundary';
+import { NotFoundPage } from '../components/common/NotFoundPage';
 import { AIThinkingAnimation } from '../components/experience';
 
 // Lazy-loaded Workspaces for Route Code Splitting
@@ -414,7 +415,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: <Navigate to="/" replace />,
+    element: <NotFoundPage />,
   },
 ], {
   future: {

@@ -1,4 +1,5 @@
 import { MomentumScoreEngine, MomentumScoreData } from './MomentumScoreEngine';
+import { listFrom } from '../../../lib/collections';
 import { VelocityEngine, VelocityMetrics } from './VelocityEngine';
 import { TrendAnalysisEngine, TrendAnalysisResult } from './TrendAnalysisEngine';
 import { PlateauDetectionEngine, PlateauAnalysis } from './PlateauDetectionEngine';
@@ -49,16 +50,12 @@ export const CareerMomentumEngine = {
       totalSkills
     );
 
-    const safeRecs = Array.isArray(recommendations)
-      ? recommendations
-      : (recommendations as any)?.recommendations && Array.isArray((recommendations as any).recommendations)
-        ? (recommendations as any).recommendations
-        : [];
+    const safeRecs = listFrom<RecommendationItem>(recommendations, 'recommendations');
 
     const plateau = PlateauDetectionEngine.detectPlateau(
       roadmap?.progressPercentage || 0,
       totalSkills,
-      safeRecs.filter((r: any) => r && r.status === 'completed').length
+      safeRecs.filter((r) => r && r.status === 'completed').length
     );
 
     const growthStory = GrowthStoryEngine.generateGrowthStory(

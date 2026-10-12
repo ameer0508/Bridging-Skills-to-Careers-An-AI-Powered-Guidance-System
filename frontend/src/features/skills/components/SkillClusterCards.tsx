@@ -10,7 +10,7 @@ export interface SkillCluster {
   proficiencyLevel: 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';
 }
 
-export const defaultClusters: SkillCluster[] = [
+const defaultClusters: SkillCluster[] = [
   {
     clusterName: 'Software Engineering & Full Stack',
     categoryCount: 5,

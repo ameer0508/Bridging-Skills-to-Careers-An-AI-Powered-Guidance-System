@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import apiClient from '../../lib/axios';
 import { useAuthStore } from '../../store/authStore';
-import { CAREER_DOMAINS, SECONDARY_INTEREST_TAGS } from '../../features/onboarding/components/CareerDomainOnboardingModal';
+import { CAREER_DOMAINS, SECONDARY_INTEREST_TAGS } from '../../features/onboarding/careerDomains';
 
 // Feature Components
 import { SettingsWorkspaceHeader } from '../../features/user/components/SettingsWorkspaceHeader';
@@ -199,7 +199,7 @@ export const SettingsWorkspace: React.FC = () => {
     },
   });
 
-  const matches = matchesData || [];
+  const matches = useMemo(() => matchesData || [], [matchesData]);
   const topMatch = matches[0] || null;
   const totalSkills = skillsData?.totalSkills || 0;
   const recentEvents = analyticsData?.recentEvents || [];

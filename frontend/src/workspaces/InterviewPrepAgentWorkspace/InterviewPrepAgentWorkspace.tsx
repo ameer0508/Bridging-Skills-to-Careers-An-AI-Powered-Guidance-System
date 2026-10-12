@@ -11,12 +11,17 @@ import {
   PerformanceReview,
   InterviewJourneyHistory,
 } from '../../features/interview/components';
+import type { EvaluationDimensions } from '../../features/interview/components/EvaluationProvenance';
 import { primaryReadiness, dimensionScore, readinessStrengths, readinessGaps } from '../../lib/readiness';
 
 export interface QuestionItem {
   questionId: string;
   question: string;
-  category: 'technical' | 'behavioral' | 'project' | 'resume' | 'general';
+  category: 'technical' | 'behavioral' | 'project' | 'resume' | 'career' | 'general';
+  /** Who wrote the question: an AI provider or the built-in question bank. */
+  source?: 'ai' | 'question_bank';
+  /** The fact on record the question is based on. */
+  groundedIn?: string;
   difficulty: 'easy' | 'medium' | 'hard';
   expectedConcepts: string[];
   candidateResponse?: string;
@@ -27,6 +32,9 @@ export interface QuestionItem {
     improvements: string[];
     missingConcepts: string[];
     feedback: string;
+    /** Which evaluator scored this answer. */
+    source?: 'ai' | 'heuristic';
+    dimensions?: EvaluationDimensions;
     evaluatedAt?: string;
   };
 }
@@ -41,17 +49,25 @@ export interface InterviewSession {
   questionCount: number;
   currentQuestionIndex: number;
   overallScore?: number;
-  dimensionScores?: {
-    technical?: number;
-    behavioral?: number;
-    communication?: number;
-    project?: number;
-  };
+  /** Averages of the rubric dimensions over answered questions; null where never judged. */
+  dimensionScores?: EvaluationDimensions;
+  answeredCount?: number;
+  questionSource?: 'ai' | 'question_bank';
+  /** 'ai', 'heuristic' or 'mixed'. */
+  evaluationSource?: string;
+  /** The job posting this session prepared for, when it was started from one. */
+  opportunityContext?: { title?: string; company?: string };
   questions: QuestionItem[];
   strengths: string[];
   weaknesses: string[];
   preparationRecommendations: string[];
 }
+
+/**
+ * Starting a session and scoring an answer may wait on the AI service (up to 15s and 12s on the
+ * server before it falls back), so these requests get more time than the client default.
+ */
+const AI_BACKED_REQUEST_TIMEOUT_MS = 30000;
 
 export const InterviewPrepAgentWorkspace: React.FC = () => {
   const { addToast } = useToast();
@@ -60,16 +76,20 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
   const queryClient = useQueryClient();
 
   // Opportunity Context handoff from Job Search Agent if present in route state
-  const locationOpportunity = (location.state as any)?.opportunity;
+  const locationOpportunity = (
+    location.state as { opportunity?: { id?: string; externalId?: string; title?: string; company?: string; location?: string; description?: string } } | null
+  )?.opportunity;
   const [opportunityContext, setOpportunityContext] = useState<{
     id?: string;
     title?: string;
     company?: string;
     location?: string;
+    description?: string;
   } | null>(
     locationOpportunity
       ? {
-          id: locationOpportunity.id,
+          id: locationOpportunity.id || locationOpportunity.externalId,
+          description: locationOpportunity.description,
           title: locationOpportunity.title,
           company: locationOpportunity.company,
           location: locationOpportunity.location,
@@ -80,7 +100,7 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
   // Studio Mode State: LOBBY | LIVE | REVIEW | HISTORY
   const [studioMode, setStudioMode] = useState<'LOBBY' | 'LIVE' | 'REVIEW' | 'HISTORY'>('LOBBY');
   const [targetCompany, setTargetCompany] = useState<string>(
-    locationOpportunity?.company || 'OpenScale AI Systems'
+    locationOpportunity?.company || ''
   );
   const [selectedMode, setSelectedMode] = useState<
     'technical' | 'behavioral' | 'project' | 'resume' | 'career' | 'mixed'
@@ -140,7 +160,9 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
   const matches = matchesData || [];
   const topMatch = matches[0] || null;
   const targetRoleTitle =
-    opportunityContext?.title || topMatch?.careerId?.title || 'Full Stack Software Engineer';
+    opportunityContext?.title || topMatch?.careerId?.title || 'your target role';
+  // What is sent to the server: undefined lets it use the role saved on the user's profile
+  const requestedRoleTitle: string | undefined = opportunityContext?.title || topMatch?.careerId?.title || undefined;
 
   // Dynamic Telemetry Calculations
   const readinessScore = primaryReadiness(readinessData)?.overallScore ?? 0;
@@ -201,14 +223,19 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
     setIsStarting(true);
     try {
       const response = await apiClient.post('/interviews', {
-        targetCareerTitle: targetRoleTitle,
+        targetCareerTitle: requestedRoleTitle,
         mode: selectedMode,
         questionCount: 5,
-        opportunityContext: {
-          title: targetRoleTitle,
-          company: targetCompany,
-        },
-      });
+        // Only a real posting or an employer the user typed makes this a job-specific session
+        opportunityContext:
+          targetCompany.trim() || opportunityContext?.description
+            ? {
+                title: requestedRoleTitle,
+                company: targetCompany.trim() || undefined,
+                description: opportunityContext?.description?.slice(0, 20000),
+              }
+            : undefined,
+      }, { timeout: AI_BACKED_REQUEST_TIMEOUT_MS });
 
       const session = response.data.data;
       setActiveSession(session);
@@ -218,7 +245,10 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
 
       addToast({
         type: 'success',
-        message: `Adaptive ${selectedMode.toUpperCase()} Interview Studio Initialized!`,
+        message:
+          session.questionSource === 'ai'
+            ? 'Interview started with AI-written questions.'
+            : 'Interview started. AI question writing is unavailable, so questions come from the built-in question bank.',
       });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to start interview session';
@@ -247,7 +277,7 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
       const response = await apiClient.post(`/interviews/${activeSession._id}/respond`, {
         questionIndex: activeSession.currentQuestionIndex,
         candidateResponse: candidateAnswer,
-      });
+      }, { timeout: AI_BACKED_REQUEST_TIMEOUT_MS });
 
       const updated = response.data.data;
       setActiveSession(updated);

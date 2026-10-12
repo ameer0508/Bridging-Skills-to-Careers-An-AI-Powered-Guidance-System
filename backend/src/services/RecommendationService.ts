@@ -13,9 +13,30 @@ class RecommendationService {
    * Fetch user recommendations
    */
   public async getUserRecommendations(userId: string) {
-    return await Recommendation.find({ userId: new mongoose.Types.ObjectId(userId) })
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const docs = await Recommendation.find({ userId: userObjectId })
       .sort({ priorityScore: -1 })
-      .populate('careerId', 'title category');
+      .populate<{ careerId: { _id: mongoose.Types.ObjectId; title: string; category?: string } | null }>('careerId', 'title category');
+
+    // The user's primary career: the role chosen in their profile when it is one of their
+    // matches, otherwise their best match. Its recommendations are listed first so the top
+    // action never argues from a different career than the one the user is aiming for.
+    const { CareerMatch } = await import('../models/CareerMatch.js');
+    const { User } = await import('../models/User.js');
+    const matches = await CareerMatch.find({ userId: userObjectId })
+      .sort({ matchScore: -1, confidence: -1, _id: 1 })
+      .populate<{ careerId: { _id: mongoose.Types.ObjectId; title: string } | null }>('careerId', 'title');
+    const targetRole = ((await User.findById(userObjectId).select('targetRole'))?.targetRole || '').trim().toLowerCase();
+    const valid = matches.filter(m => m.careerId);
+    const primary = (targetRole && valid.find(m => m.careerId!.title.toLowerCase() === targetRole)) || valid[0];
+    const primaryCareerId = primary?.careerId?._id.toString() ?? null;
+
+    const withFlag = docs.map(doc => ({
+      ...doc.toObject(),
+      isPrimaryCareer: primaryCareerId !== null && doc.careerId?._id.toString() === primaryCareerId,
+    }));
+    // Stable: primary-career items first, each group still ordered by priority
+    return [...withFlag.filter(r => r.isPrimaryCareer), ...withFlag.filter(r => !r.isPrimaryCareer)];
   }
 
   /**

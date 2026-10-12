@@ -1,4 +1,5 @@
 import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../types/telemetry';
+import { listFrom } from '../../../lib/collections';
 
 export interface AINormalizedContext {
   topMatch: CareerMatchItem | null;
@@ -46,11 +47,7 @@ export const AIWorkspaceEngine = {
       conversationalSummary = `Your skill graph contains ${totalSkills} verified competencies. Select a target career path to compute alignment.`;
     }
 
-    const safeRecs: RecommendationItem[] = Array.isArray(recommendations)
-      ? recommendations
-      : (recommendations as any)?.recommendations && Array.isArray((recommendations as any).recommendations)
-        ? (recommendations as any).recommendations
-        : [];
+    const safeRecs: RecommendationItem[] = listFrom<RecommendationItem>(recommendations, 'recommendations');
 
     return {
       topMatch,

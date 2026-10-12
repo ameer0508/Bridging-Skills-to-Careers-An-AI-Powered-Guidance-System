@@ -80,6 +80,7 @@ export const MilestoneProgressHorizon: React.FC<MilestoneProgressHorizonProps> =
     hasResume,
     totalSkills,
     hasTargetRole,
+    targetRole,
     readinessScore,
     roadmapProgress,
     savedOpportunitiesCount,

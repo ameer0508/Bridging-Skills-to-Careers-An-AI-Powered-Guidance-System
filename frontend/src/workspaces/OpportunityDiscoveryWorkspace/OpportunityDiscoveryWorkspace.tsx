@@ -216,9 +216,9 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
     },
   });
 
-  const liveOpportunities: OpportunityItem[] = opportunitiesData?.opportunities || [];
+  const liveOpportunities: OpportunityItem[] = useMemo(() => opportunitiesData?.opportunities || [], [opportunitiesData]);
   const providerHealth = opportunitiesData?.providerHealth || { status: 'UP', provider: 'JSearch API' };
-  const savedOpportunities: SavedOpportunityItem[] = savedData || [];
+  const savedOpportunities: SavedOpportunityItem[] = useMemo(() => savedData || [], [savedData]);
   const matches = matchesData || [];
   const topMatch = matches[0] || null;
   const targetRoleTitle = topMatch?.careerId?.title || 'Target Career Role';

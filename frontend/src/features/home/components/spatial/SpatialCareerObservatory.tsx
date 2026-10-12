@@ -62,8 +62,8 @@ export const SpatialCareerObservatory: React.FC<SpatialCareerObservatoryProps> =
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const [selectedNode, setSelectedNode] = useState<ConstellationNode | null>(null);
 
-  const safeSkills = Array.isArray(skills) ? skills : [];
-  const safeGaps = Array.isArray(criticalGaps) ? criticalGaps : [];
+  const safeSkills = useMemo(() => (Array.isArray(skills) ? skills : []), [skills]);
+  const safeGaps = useMemo(() => (Array.isArray(criticalGaps) ? criticalGaps : []), [criticalGaps]);
   const safeAction: NextBestActionInfo = nextBestAction || {
     action: 'upload_resume',
     subtitle: 'Upload your PDF or DOCX resume to extract verified skills, benchmark ATS fit, and ground your readiness path.',

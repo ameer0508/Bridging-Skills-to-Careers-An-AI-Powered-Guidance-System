@@ -10,7 +10,7 @@ export interface MatrixItem {
   impactBoost: number;
 }
 
-export const defaultMatrixItems: MatrixItem[] = [
+const defaultMatrixItems: MatrixItem[] = [
   { id: '1', title: 'Add Milvus Vector DB Terminology to Resume', type: 'resume_improvement', quadrant: 'Quick Win', impactBoost: 15.0 },
   { id: '2', title: 'Build Enterprise AI Microservices Capstone', type: 'project', quadrant: 'Major Capstone', impactBoost: 22.0 },
   { id: '3', title: 'AWS Certified Solutions Architect', type: 'certification', quadrant: 'Major Capstone', impactBoost: 18.0 },

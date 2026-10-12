@@ -8,7 +8,7 @@ export interface CalendarWeek {
   isCompleted: boolean;
 }
 
-export const defaultWeeks: CalendarWeek[] = [
+const defaultWeeks: CalendarWeek[] = [
   { weekNumber: 1, focusTopic: 'Async FastAPI Architecture', isCompleted: true },
   { weekNumber: 2, focusTopic: 'PostgreSQL Relational Schemas', isCompleted: true },
   { weekNumber: 3, focusTopic: 'Redis Caching & Session Store', isCompleted: true },

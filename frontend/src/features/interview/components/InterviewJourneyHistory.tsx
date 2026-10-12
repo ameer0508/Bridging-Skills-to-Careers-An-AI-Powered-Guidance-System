@@ -8,6 +8,7 @@ import {
   ArrowLeft
 } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
+import { SourceBadge } from './EvaluationProvenance';
 import { InterviewSession } from '../../../workspaces/InterviewPrepAgentWorkspace/InterviewPrepAgentWorkspace';
 
 export interface InterviewJourneyHistoryProps {
@@ -40,7 +41,7 @@ export const InterviewJourneyHistory: React.FC<InterviewJourneyHistoryProps> = (
               <h2 className="text-base font-bold text-white">Your Interview Journey</h2>
             </div>
             <p className="text-[11px] text-slate-400">
-              Persistent archive of all grounded AI mock interviews, STAR responses, and dimensional scores.
+              Every practice session you started, with your answers and scores. Select one to open its report.
             </p>
           </div>
         </div>
@@ -85,6 +86,7 @@ export const InterviewJourneyHistory: React.FC<InterviewJourneyHistoryProps> = (
             return (
               <GlassPanel
                 key={sess._id}
+                data-testid="interview-history-item"
                 className="p-5 border-white/10 hover:border-indigo-500/40 transition-all cursor-pointer group"
                 onClick={() => onSelectSession(sess)}
               >
@@ -115,13 +117,15 @@ export const InterviewJourneyHistory: React.FC<InterviewJourneyHistoryProps> = (
                       </span>
                       <span className="flex items-center gap-1">
                         <Layers className="w-3.5 h-3.5 text-slate-500" />
-                        {sess.questionCount || sess.questions?.length || 5} Scenarios
+                        {sess.answeredCount ?? (sess.questions || []).filter((q) => q.candidateResponse).length} of {sess.questions?.length ?? sess.questionCount} answered
                       </span>
-                      {sess.dimensionScores?.technical && (
-                        <span className="text-indigo-400">
-                          Tech: {sess.dimensionScores.technical}%
+                      {sess.opportunityContext?.company && (
+                        <span className="text-slate-300">
+                          For {[sess.opportunityContext.title, sess.opportunityContext.company].filter(Boolean).join(' at ')}
                         </span>
                       )}
+                      <SourceBadge kind="questions" source={sess.questionSource} />
+                      <SourceBadge kind="scoring" source={sess.evaluationSource} />
                     </div>
                   </div>
 
@@ -138,7 +142,7 @@ export const InterviewJourneyHistory: React.FC<InterviewJourneyHistoryProps> = (
                             : 'text-rose-400'
                         }`}
                       >
-                        {score > 0 ? `${score}%` : 'In Progress'}
+                        {sess.status === 'completed' ? `${score}%` : 'Not finished'}
                       </span>
                     </div>
 

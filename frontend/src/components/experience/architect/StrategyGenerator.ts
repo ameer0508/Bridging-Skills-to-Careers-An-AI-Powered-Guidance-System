@@ -1,4 +1,5 @@
 import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../types/telemetry';
+import { listFrom } from '../../../lib/collections';
 
 export interface StrategySummary {
   recommendedRoleTitle: string;
@@ -56,11 +57,7 @@ export const StrategyGenerator = {
       ];
 
       const estimatedTotalEffort = '2-4 Weeks (30 mins/day)';
-      const safeRecs = Array.isArray(recommendations)
-        ? recommendations
-        : (recommendations as any)?.recommendations && Array.isArray((recommendations as any).recommendations)
-        ? (recommendations as any).recommendations
-        : [];
+      const safeRecs = listFrom<RecommendationItem>(recommendations, 'recommendations');
 
       // Derive Confidence Tier reliably
       const confidenceTier =

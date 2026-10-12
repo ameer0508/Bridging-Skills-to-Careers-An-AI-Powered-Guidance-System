@@ -226,7 +226,7 @@ export const CareerIdentityWorkspace: React.FC = () => {
             <button
               key={sec.id}
               type="button"
-              onClick={() => setActiveSection(sec.id as any)}
+              onClick={() => setActiveSection(sec.id as typeof activeSection)}
               className={`px-3.5 py-1.5 rounded-xl font-bold transition cursor-pointer whitespace-nowrap ${
                 activeSection === sec.id
                   ? 'bg-indigo-600 text-white shadow-md'

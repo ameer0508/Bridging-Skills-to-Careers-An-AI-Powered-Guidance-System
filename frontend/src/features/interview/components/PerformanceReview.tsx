@@ -14,6 +14,8 @@ import {
   ChevronRight,
   ShieldAlert} from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
+import { DimensionBars, SourceBadge } from './EvaluationProvenance';
+import { HEURISTIC_NOTICE } from './evaluationLabels';
 import { InterviewSession, QuestionItem } from '../../../workspaces/InterviewPrepAgentWorkspace/InterviewPrepAgentWorkspace';
 
 export interface PerformanceReviewProps {
@@ -43,32 +45,10 @@ export const PerformanceReview: React.FC<PerformanceReviewProps> = ({
   const questions = session.questions || [];
   const selectedQuestion: QuestionItem | undefined = questions[selectedQuestionIndex];
 
-  const dimensions = [
-    {
-      label: 'Technical Depth',
-      score: session.dimensionScores?.technical ?? overallScore,
-      color: 'bg-indigo-500',
-      textColor: 'text-indigo-400',
-    },
-    {
-      label: 'Behavioral Reasoning',
-      score: session.dimensionScores?.behavioral ?? Math.max(0, overallScore - 5),
-      color: 'bg-purple-500',
-      textColor: 'text-purple-400',
-    },
-    {
-      label: 'Communication Structure',
-      score: session.dimensionScores?.communication ?? Math.min(100, overallScore + 5),
-      color: 'bg-cyan-500',
-      textColor: 'text-cyan-400',
-    },
-    {
-      label: 'Project Architecture',
-      score: session.dimensionScores?.project ?? overallScore,
-      color: 'bg-emerald-500',
-      textColor: 'text-emerald-400',
-    },
-  ];
+  const answeredCount = session.answeredCount ?? questions.filter((q) => q.candidateResponse).length;
+  const jobContext = session.opportunityContext?.company
+    ? [session.opportunityContext.title, session.opportunityContext.company].filter(Boolean).join(' at ')
+    : null;
 
   return (
     <div className="space-y-6 font-mono">
@@ -81,11 +61,13 @@ export const PerformanceReview: React.FC<PerformanceReviewProps> = ({
             <div className="flex items-center gap-2 flex-wrap">
               <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 flex items-center gap-1.5">
                 <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                INTERVIEW COMPLETED • PRIVATE COACHING DEBRIEF
+                {session.status === 'completed' ? 'INTERVIEW COMPLETED' : 'INTERVIEW IN PROGRESS'}
               </span>
               <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 uppercase">
                 {session.mode} Track
               </span>
+              <SourceBadge kind="questions" source={session.questionSource} />
+              <SourceBadge kind="scoring" source={session.evaluationSource} />
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
@@ -93,8 +75,8 @@ export const PerformanceReview: React.FC<PerformanceReviewProps> = ({
             </h1>
 
             <p className="text-xs text-slate-300 leading-relaxed">
-              Detailed performance evaluation generated from your responses. Review dimensional scores,
-              STAR alignment, and specific recommendations to refine before your real technical interview.
+              {jobContext ? `Practice for ${jobContext}. ` : ''}Scores come from the answers you gave in this session.
+              Unanswered questions count as zero in the overall score.
             </p>
           </div>
 
@@ -106,10 +88,10 @@ export const PerformanceReview: React.FC<PerformanceReviewProps> = ({
             <div>
               <span className="text-[10px] text-slate-400 uppercase tracking-wider block">Overall Performance</span>
               <span className="text-sm font-bold text-emerald-400">
-                {overallScore >= 80 ? 'Target Level Ready' : overallScore >= 60 ? 'Competency Aligned' : 'Target Gap Closure'}
+                Practice score
               </span>
               <span className="text-[10px] text-slate-500 block">
-                {questions.length} Scenarios Evaluated
+                {answeredCount} of {questions.length} questions answered
               </span>
             </div>
           </div>
@@ -127,25 +109,15 @@ export const PerformanceReview: React.FC<PerformanceReviewProps> = ({
                 <Award className="w-4 h-4 text-indigo-400" />
                 Dimensional Evaluation Profile
               </span>
-              <span className="text-[10px] text-slate-400">STAR Evaluated</span>
+              <span className="text-[10px] text-slate-400">Average over answered questions</span>
             </div>
 
-            <div className="space-y-3">
-              {dimensions.map((dim) => (
-                <div key={dim.label} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="text-slate-300 font-medium">{dim.label}</span>
-                    <span className={`font-bold ${dim.textColor}`}>{dim.score}%</span>
-                  </div>
-                  <div className="w-full h-2 rounded-full bg-slate-900 border border-white/5 overflow-hidden">
-                    <div
-                      className={`h-full rounded-full ${dim.color} transition-all duration-500`}
-                      style={{ width: `${Math.min(100, Math.max(5, dim.score))}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <DimensionBars dimensions={session.dimensionScores} />
+            {(session.evaluationSource === 'heuristic' || session.evaluationSource === 'mixed') && (
+              <p className="text-[11px] text-amber-200/90 leading-relaxed border-t border-white/5 pt-3" data-testid="heuristic-notice">
+                {HEURISTIC_NOTICE}
+              </p>
+            )}
           </GlassPanel>
 
           {/* Consolidated Strengths & Weaknesses */}
@@ -364,6 +336,9 @@ export const PerformanceReview: React.FC<PerformanceReviewProps> = ({
               </div>
               <h3 className="text-sm sm:text-base font-bold text-white leading-relaxed">
                 {selectedQuestion.question}
+                {selectedQuestion.groundedIn && (
+                  <span className="block mt-2 text-[11px] font-normal text-slate-400">Based on: {selectedQuestion.groundedIn}</span>
+                )}
               </h3>
             </div>
 
@@ -385,8 +360,9 @@ export const PerformanceReview: React.FC<PerformanceReviewProps> = ({
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <span className="font-bold text-white flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-indigo-400" />
-                    AI Evaluation & Rubric Breakdown
+                    Evaluation
                   </span>
+                  <SourceBadge kind="scoring" source={selectedQuestion.evaluation.source} />
                   <div className="flex items-center gap-2">
                     <span
                       className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
@@ -395,7 +371,7 @@ export const PerformanceReview: React.FC<PerformanceReviewProps> = ({
                           : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
                       }`}
                     >
-                      {selectedQuestion.evaluation.starFormatted ? 'STAR Compliant' : 'Needs Metrics'}
+                      {selectedQuestion.evaluation.starFormatted ? 'STAR structure detected' : 'STAR structure not detected'}
                     </span>
                     <span className="px-2.5 py-0.5 rounded-xl bg-slate-900 text-emerald-400 font-bold border border-emerald-500/40">
                       Score: {selectedQuestion.evaluation.score}/100
@@ -403,9 +379,11 @@ export const PerformanceReview: React.FC<PerformanceReviewProps> = ({
                   </div>
                 </div>
 
-                <p className="text-slate-300 italic bg-slate-950/60 p-3 rounded-xl border border-white/5">
-                  "{selectedQuestion.evaluation.feedback}"
+                <p className="text-slate-300 bg-slate-950/60 p-3 rounded-xl border border-white/5">
+                  {selectedQuestion.evaluation.feedback}
                 </p>
+
+                <DimensionBars dimensions={selectedQuestion.evaluation.dimensions} />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* What Worked */}

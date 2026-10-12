@@ -1,4 +1,5 @@
 import { RecommendationItem, RoadmapData } from '../../../types/telemetry';
+import { listFrom } from '../../../lib/collections';
 
 export interface Mission {
   id: string;
@@ -38,11 +39,7 @@ export const MissionEngine = {
     }
 
     // Weekly Objective from Recommendations
-    const safeRecs: RecommendationItem[] = Array.isArray(recommendations)
-      ? recommendations
-      : (recommendations as any)?.recommendations && Array.isArray((recommendations as any).recommendations)
-        ? (recommendations as any).recommendations
-        : [];
+    const safeRecs: RecommendationItem[] = listFrom<RecommendationItem>(recommendations, 'recommendations');
     const topRec = safeRecs.find((r) => r && r.status !== 'completed');
     if (topRec) {
       missions.push({

@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { motion, useMotionValue, useSpring, useReducedMotion } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useReducedMotion, type HTMLMotionProps } from 'framer-motion';
 
-export interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+// The rest props are spread onto a motion.button, so they are that element's props
+export interface MagneticButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
   children: React.ReactNode;
   strength?: number;
   className?: string;
@@ -57,7 +58,7 @@ export const MagneticButton: React.FC<MagneticButtonProps> = ({
       whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
       onClick={onClick}
       className={`relative inline-flex items-center justify-center font-medium transition-all cursor-pointer select-none overflow-hidden ${className}`}
-      {...(props as any)}
+      {...props}
     >
       {glowOnHover && isHovered && (
         <span className="absolute inset-0 pointer-events-none bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />

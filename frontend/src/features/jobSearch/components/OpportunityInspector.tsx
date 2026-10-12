@@ -1,3 +1,4 @@
+import { APPLICATION_STATUS_LABEL, formatJobSalary } from './jobFormat';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -40,23 +41,7 @@ export const OpportunityInspector: React.FC<OpportunityInspectorProps> = ({
     );
   }
 
-  const formatSalary = (salary: any) => {
-    if (!salary) return 'Market Benchmark Benchmark';
-    if (typeof salary === 'string') return salary;
-    if (salary.min && salary.max) {
-      return `$${salary.min.toLocaleString()} - $${salary.max.toLocaleString()} ${salary.currency || 'USD'}`;
-    }
-    if (salary.min) return `From $${salary.min.toLocaleString()}`;
-    return 'Competitive';
-  };
-
-  const statusOptions = [
-    { id: 'saved', label: 'Saved' },
-    { id: 'applied', label: 'Applied' },
-    { id: 'interviewing', label: 'Interviewing' },
-    { id: 'offer', label: 'Offer' },
-    { id: 'rejected', label: 'Archived' },
-  ];
+  const statusOptions = Object.entries(APPLICATION_STATUS_LABEL).map(([id, label]) => ({ id, label }));
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/70 p-6 md:p-8 shadow-2xl backdrop-blur-xl flex flex-col h-[740px] space-y-6">
@@ -110,7 +95,7 @@ export const OpportunityInspector: React.FC<OpportunityInspectorProps> = ({
 
           <span className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-950/60 border border-white/5 font-mono text-emerald-400">
             <DollarSign className="w-3.5 h-3.5" />
-            {formatSalary(opportunity.salary)}
+            {formatJobSalary(opportunity.salary)}
           </span>
 
           <span className="px-3 py-1 rounded-xl bg-slate-950/60 border border-white/5 font-mono text-slate-400">
@@ -208,7 +193,7 @@ export const OpportunityInspector: React.FC<OpportunityInspectorProps> = ({
 
         {/* Source Provider Attribution */}
         <div className="p-3 rounded-xl bg-slate-950/30 border border-white/5 flex items-center justify-between text-[11px] text-slate-500 font-mono">
-          <span>Provider: {opportunity.provider || 'JSearch Index'}</span>
+          <span>Provider: {opportunity.provider || 'not stated'}</span>
           <span>External Ref: {opportunity.externalId}</span>
         </div>
       </div>

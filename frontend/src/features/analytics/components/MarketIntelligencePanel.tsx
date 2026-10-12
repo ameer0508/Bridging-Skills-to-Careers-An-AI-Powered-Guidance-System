@@ -8,7 +8,7 @@ export interface TechTrendItem {
   demandLevel: string;
 }
 
-export const defaultTechTrends: TechTrendItem[] = [
+const defaultTechTrends: TechTrendItem[] = [
   { tech: 'Generative AI & RAG Pipelines', growthYoY: '+45%', demandLevel: 'Critical' },
   { tech: 'Vector Databases (Milvus/Pinecone)', growthYoY: '+52%', demandLevel: 'High' },
   { tech: 'Model Context Protocol (MCP)', growthYoY: '+68%', demandLevel: 'Emerging' },

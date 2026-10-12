@@ -1,7 +1,8 @@
 import React, { useRef } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform, type HTMLMotionProps } from 'framer-motion';
 
-export interface TiltSurfaceProps extends React.HTMLAttributes<HTMLDivElement> {
+// The rest props are spread onto a motion.div, so they are that element's props
+export interface TiltSurfaceProps extends Omit<HTMLMotionProps<'div'>, 'children'> {
   maxRotation?: number;
   perspective?: number;
   className?: string;
@@ -53,7 +54,7 @@ export const TiltSurface: React.FC<TiltSurfaceProps> = ({
           transformStyle: 'preserve-3d',
         }}
         className={`relative transition-shadow duration-300 ${className}`}
-        {...(props as any)}
+        {...props}
       >
         {children}
       </motion.div>

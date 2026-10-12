@@ -374,7 +374,7 @@ export const CertificationIntelligencePanel: React.FC<CertificationIntelligenceP
               <select
                 aria-label="Sort certifications"
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
                 className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 cursor-pointer"
               >
                 <option value="rank-desc" className="bg-slate-900 text-white">AI Rank Fit Score</option>

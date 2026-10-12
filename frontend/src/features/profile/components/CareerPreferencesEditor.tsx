@@ -5,7 +5,7 @@ import {
 import {
   CAREER_DOMAINS,
   SECONDARY_INTEREST_TAGS
-} from '../../onboarding/components/CareerDomainOnboardingModal';
+} from '../../onboarding/careerDomains';
 
 export interface CareerPreferencesEditorProps {
   isOpen: boolean;

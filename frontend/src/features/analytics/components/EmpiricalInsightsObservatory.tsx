@@ -13,7 +13,7 @@ export interface BackendInsight {
   type: string;
   title: string;
   description: string;
-  metricsReference?: Record<string, any>;
+  metricsReference?: Record<string, unknown>;
   createdAt?: string | number | Date;
 }
 

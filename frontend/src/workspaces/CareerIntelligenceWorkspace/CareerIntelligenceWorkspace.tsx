@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { messageOf } from '../../lib/collections';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -225,7 +226,7 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
               : 'idle';
 
     const errorMessage = uploadMutation.error
-      ? ((uploadMutation.error as any).response?.data?.message || (uploadMutation.error as Error).message)
+      ? messageOf(uploadMutation.error, 'The upload failed.')
       : resumeData?.parsingStatus === 'failed'
         ? 'Resume evidence extraction failed. Please ensure the document is not password-protected or corrupted.'
         : undefined;

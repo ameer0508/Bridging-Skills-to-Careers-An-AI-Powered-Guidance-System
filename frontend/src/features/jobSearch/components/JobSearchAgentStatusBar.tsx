@@ -70,7 +70,7 @@ export const JobSearchAgentStatusBar: React.FC<JobSearchAgentStatusBarProps> = (
       {/* Right: Telemetry Attribution */}
       <div className="flex items-center gap-2 text-xs font-mono text-slate-400 shrink-0">
         <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-        <span>JSearch Provider: {providerStatus}</span>
+        <span>Source: {providerStatus}</span>
       </div>
     </div>
   );

@@ -117,7 +117,7 @@ export const SkillIntelligencePage: React.FC = () => {
 
   const activeCareer = useMemo(() => {
     if (!careersData || careersData.length === 0) return null;
-    return careersData.find((c: any) => c.careerId._id === activeCareerId) || careersData[0];
+    return careersData.find((c: { careerId: { _id: string } }) => c.careerId._id === activeCareerId) || careersData[0];
   }, [careersData, activeCareerId]);
 
   const targetRoleTitle = activeCareer?.careerId?.title || null;

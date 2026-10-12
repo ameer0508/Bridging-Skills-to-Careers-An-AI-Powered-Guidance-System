@@ -14,9 +14,26 @@ import {
   PersonalRelevanceMatrix,
   JobSearchAgentStatusBar,
   OpportunityActivationHub,
+  SearchResultsNotice,
+  ApplicationTrackerPanel,
   OpportunityItem,
+  type OpportunitySearchMeta,
 } from '../../features/jobSearch/components';
 import { primaryReadiness } from '../../lib/readiness';
+
+type SortKey = 'match' | 'date' | 'salary' | 'relevance';
+
+interface OpportunitySearchResult {
+  opportunities: OpportunityItem[];
+  providerHealth: { status: string; provider: string; message?: string };
+  meta?: OpportunitySearchMeta;
+}
+
+const PAGE_SIZE = 10;
+const MAX_PAGE_SIZE = 50;
+
+const errorMessage = (error: unknown, fallback: string): string =>
+  typeof (error as { message?: unknown })?.message === 'string' ? (error as { message: string }).message : fallback;
 
 export const JobSearchAgentWorkspace: React.FC = () => {
   const { addToast } = useToast();
@@ -35,15 +52,25 @@ export const JobSearchAgentWorkspace: React.FC = () => {
   const handoffId = statePayload?.selectedOpportunityId || handoffOpp?.externalId || null;
   const handoffRole = statePayload?.roleTitle || handoffOpp?.title || null;
 
-  // Search & Filter State
+  // Search & Filter State. Text fields are applied when the user runs the search, so typing
+  // does not send a request (and spend provider quota) on every keystroke.
   const [activeTab, setActiveTab] = useState<'LIVE' | 'SAVED'>('LIVE');
   const [searchKeyword, setSearchKeyword] = useState<string>(() => handoffRole || '');
   const [searchLocation, setSearchLocation] = useState<string>('');
+  const [applied, setApplied] = useState<{ keyword: string; location: string; salaryMin: string }>(() => ({
+    keyword: handoffRole || '',
+    location: '',
+    salaryMin: '',
+  }));
   const [remoteOnly, setRemoteOnly] = useState<boolean>(false);
   const [employmentType, setEmploymentType] = useState<string>('ALL');
-  const [sortBy, setSortBy] = useState<'match' | 'date' | 'salary' | 'relevance'>('match');
-  const [selectedOpportunity, setSelectedOpportunity] = useState<OpportunityItem | null>(() => handoffOpp || null);
+  const [datePosted, setDatePosted] = useState<string>('all');
+  const [salaryMin, setSalaryMin] = useState<string>('');
+  const [sortBy, setSortBy] = useState<SortKey>('match');
+  const [pageSize, setPageSize] = useState<number>(PAGE_SIZE);
+  const [selectedId, setSelectedId] = useState<string | null>(() => handoffId);
   const [isCycleRunning, setIsCycleRunning] = useState<boolean>(false);
+  const [isTrackerSaving, setIsTrackerSaving] = useState<boolean>(false);
 
   // Query 1: Candidate Career Target Roles
   const { data: matchesData } = useQuery({
@@ -54,18 +81,10 @@ export const JobSearchAgentWorkspace: React.FC = () => {
     },
   });
 
-  const matches = matchesData || [];
-  const topMatch = matches[0] || null;
-  const targetRoleTitle = topMatch?.careerId?.title || 'Target Career Role';
+  const topMatch = (matchesData || [])[0] || null;
+  const targetRoleTitle: string = topMatch?.careerId?.title || '';
 
-  // Auto-seed search keyword with target role if blank and no handoff role
-  useEffect(() => {
-    if (!searchKeyword && targetRoleTitle && targetRoleTitle !== 'Target Career Role') {
-      setSearchKeyword(targetRoleTitle);
-    }
-  }, [targetRoleTitle]);
-
-  // Query 2: Verified User Skills
+  // Query 2: User Skills
   const { data: skillsData } = useQuery({
     queryKey: ['skills', 'me'],
     queryFn: async () => {
@@ -74,9 +93,7 @@ export const JobSearchAgentWorkspace: React.FC = () => {
     },
   });
 
-  const totalSkills =
-    skillsData?.totalSkills ??
-    (Array.isArray(skillsData?.skills) ? skillsData.skills.length : 0);
+  const totalSkills: number = skillsData?.totalSkills ?? 0;
 
   // Query 3: Candidate Career Readiness
   const { data: readinessData } = useQuery({
@@ -93,209 +110,210 @@ export const JobSearchAgentWorkspace: React.FC = () => {
   const { data: resumeData } = useQuery({
     queryKey: ['activeResume'],
     queryFn: async () => {
-      try {
-        const response = await apiClient.get('/resumes/me');
-        return response.data.data.resume;
-      } catch {
-        return null;
-      }
+      const response = await apiClient.get('/resumes/me');
+      return response.data.data.resume;
     },
   });
 
-  // Query 5: Live External Opportunities via OpportunityService & JSearch Provider
+  // Query 5: Job postings. With no keyword the server searches for the user's best-matching career.
   const {
     data: opportunitiesData,
     isLoading: isOpportunitiesLoading,
+    isFetching: isOpportunitiesFetching,
     error: opportunitiesError,
     refetch: refetchOpportunities,
-  } = useQuery({
-    queryKey: [
-      'opportunities',
-      searchKeyword,
-      searchLocation,
-      remoteOnly,
-      employmentType,
-      sortBy,
-    ],
+  } = useQuery<OpportunitySearchResult>({
+    queryKey: ['opportunities', applied.keyword, applied.location, applied.salaryMin, remoteOnly, employmentType, datePosted, sortBy, pageSize],
     queryFn: async () => {
       const response = await apiClient.get('/opportunities', {
         params: {
-          search: searchKeyword || undefined,
-          location: searchLocation || undefined,
+          search: applied.keyword || undefined,
+          location: applied.location || undefined,
           remote: remoteOnly ? 'true' : undefined,
           employmentType: employmentType !== 'ALL' ? employmentType : undefined,
+          datePosted: datePosted !== 'all' ? datePosted : undefined,
+          salaryMin: applied.salaryMin || undefined,
           sortBy,
-          limit: 15,
+          limit: pageSize,
         },
       });
       return response.data.data;
     },
+    placeholderData: (previous) => previous,
   });
 
-  // Query 6: Persisted Saved Opportunities
-  const { data: savedData, refetch: refetchSaved } = useQuery({
+  // Query 6: Saved jobs. A failure is shown, not turned into an empty list.
+  const {
+    data: savedData,
+    error: savedError,
+    refetch: refetchSaved,
+  } = useQuery<OpportunityItem[]>({
     queryKey: ['opportunities', 'saved'],
     queryFn: async () => {
-      try {
-        const response = await apiClient.get('/opportunities/saved');
-        return response.data.data.savedOpportunities || [];
-      } catch {
-        return [];
-      }
+      const response = await apiClient.get('/opportunities/saved');
+      return response.data.data.savedOpportunities || [];
     },
   });
 
-  const liveOpportunities: OpportunityItem[] = opportunitiesData?.opportunities || [];
-  const providerHealth = opportunitiesData?.providerHealth || { status: 'ONLINE', provider: 'JSearch API' };
-  const savedOpportunities: OpportunityItem[] = savedData || [];
+  const liveOpportunities = useMemo(() => opportunitiesData?.opportunities || [], [opportunitiesData]);
+  const savedOpportunities = useMemo(() => savedData || [], [savedData]);
+  const meta = opportunitiesData?.meta;
+  const providerHealth = opportunitiesData?.providerHealth;
+  const sourceLabel =
+    meta?.source === 'live' ? 'Live listings' : meta?.source === 'sample' ? 'Demo listings' : meta?.source === 'unavailable' ? 'Provider unavailable' : 'Loading';
 
-  const savedExternalIds = useMemo(() => {
-    return new Set(savedOpportunities.map((s) => s.externalId));
-  }, [savedOpportunities]);
+  const savedByExternalId = useMemo(() => new Map(savedOpportunities.map((s) => [s.externalId, s])), [savedOpportunities]);
+  const savedExternalIds = useMemo(() => new Set(savedByExternalId.keys()), [savedByExternalId]);
 
-  // Set initial selected opportunity if none selected or if handoffId is provided
-  useEffect(() => {
-    const currentList = activeTab === 'LIVE' ? liveOpportunities : savedOpportunities;
-    if (handoffId) {
-      const match = currentList.find((opp) => opp.externalId === handoffId);
-      if (match) {
-        setSelectedOpportunity(match);
-        return;
-      }
-    }
-    if (currentList.length > 0 && !selectedOpportunity) {
-      setSelectedOpportunity(currentList[0]);
-    }
-  }, [liveOpportunities, savedOpportunities, activeTab, selectedOpportunity, handoffId]);
+  const currentList = activeTab === 'LIVE' ? liveOpportunities : savedOpportunities;
 
-  // Handle Save / Unsave Mutation
+  // The selected posting is derived from the lists, so it always reflects the latest saved state
+  const selectedOpportunity: OpportunityItem | null = useMemo(() => {
+    const fromList = currentList.find((o) => o.externalId === selectedId) || (selectedId === handoffId ? handoffOpp : null) || currentList[0] || null;
+    if (!fromList) return null;
+    const saved = savedByExternalId.get(fromList.externalId);
+    // Live fields (description, requirements) from the posting; tracking fields from the saved record
+    return saved ? { ...fromList, ...saved, description: fromList.description || saved.description, skills: fromList.skills ?? saved.skills } : fromList;
+  }, [currentList, selectedId, handoffId, handoffOpp, savedByExternalId]);
+
+  const invalidateTracking = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['opportunities', 'saved'] }),
+      queryClient.invalidateQueries({ queryKey: ['opportunities', 'telemetry'] }),
+      // Home and the Command Center count tracked jobs and due reminders
+      queryClient.invalidateQueries({ queryKey: ['careerSnapshot'] }),
+      queryClient.invalidateQueries({ queryKey: ['career-snapshot'] }),
+    ]);
+  };
+
+  // Save / remove
   const handleToggleSave = async (opp: OpportunityItem, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     const isCurrentlySaved = savedExternalIds.has(opp.externalId);
 
     try {
       if (isCurrentlySaved) {
-        await apiClient.delete(`/opportunities/${opp.externalId}/save`);
-        addToast({
-          type: 'info',
-          message: `Removed "${opp.title}" from saved opportunities.`,
-        });
+        await apiClient.delete(`/opportunities/saved/${encodeURIComponent(opp.externalId)}`);
+        addToast({ type: 'info', message: `Removed "${opp.title}" from tracked jobs.` });
       } else {
         await apiClient.post('/opportunities/save', {
           externalId: opp.externalId,
-          provider: opp.provider || 'JSearch',
+          provider: opp.provider,
           title: opp.title,
           company: opp.company,
           location: opp.location,
-          salary: typeof opp.salary === 'string' ? opp.salary : 'Competitive',
+          // The posting's own salary object; the server stores "not disclosed" when there is none
+          salary: typeof opp.salary === 'object' ? opp.salary : null,
           applicationUrl: opp.applicationUrl,
           postedAt: opp.postedAt,
           skillbridgeMatchScore: opp.skillbridgeMatchScore,
           matchedSkills: opp.matchedSkills || [],
           missingSkills: opp.missingSkills || [],
+          matchExplanation: opp.matchExplanation,
           description: opp.description,
           employmentType: opp.employmentType,
+          remote: opp.remote,
+          isSample: Boolean(opp.isSample),
         });
-        addToast({
-          type: 'success',
-          message: `Saved "${opp.title}" at ${opp.company} to application tracker.`,
-        });
+        addToast({ type: 'success', message: `Saved "${opp.title}" at ${opp.company}.` });
       }
-
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['opportunities', 'saved'] }),
-        queryClient.invalidateQueries({ queryKey: ['opportunities', 'telemetry'] }),
-      ]);
-      await refetchSaved();
-    } catch {
-      addToast({
-        type: 'error',
-        message: 'Failed to update saved status. Please try again.',
-      });
+      await invalidateTracking();
+    } catch (error) {
+      addToast({ type: 'error', message: errorMessage(error, 'The saved job could not be updated. Please try again.') });
     }
   };
 
-  // Handle Application Pipeline Status Update
+  // Application status
   const handleUpdateStatus = async (status: string) => {
     if (!selectedOpportunity) return;
     try {
-      await apiClient.patch(`/opportunities/saved/${selectedOpportunity.externalId}/status`, {
-        status,
-      });
-      addToast({
-        type: 'success',
-        message: `Application funnel updated to "${status.toUpperCase()}".`,
-      });
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['opportunities', 'saved'] }),
-        queryClient.invalidateQueries({ queryKey: ['opportunities', 'telemetry'] }),
-      ]);
-      await refetchSaved();
-      // Update local state
-      setSelectedOpportunity((prev) => (prev ? { ...prev, status } : null));
-    } catch {
-      addToast({
-        type: 'error',
-        message: 'Failed to update application status.',
-      });
+      await apiClient.patch(`/opportunities/saved/${encodeURIComponent(selectedOpportunity.externalId)}/status`, { status });
+      addToast({ type: 'success', message: `Status changed to ${status}.` });
+      await invalidateTracking();
+    } catch (error) {
+      addToast({ type: 'error', message: errorMessage(error, 'The status could not be changed.') });
     }
   };
 
-  // Execute Agent Search Cycle
-  const handleExecuteSearch = async () => {
-    setIsCycleRunning(true);
+  // Notes and reminder
+  const handleUpdateDetails = async (body: { notes?: string; reminderAt?: string | null; reminderNote?: string }, done: string) => {
+    if (!selectedOpportunity) return;
+    setIsTrackerSaving(true);
     try {
-      await refetchOpportunities();
-      addToast({
-        type: 'success',
-        message: 'Job Search Agent cycle completed. Fresh opportunities indexed.',
-      });
-    } catch {
-      addToast({
-        type: 'error',
-        message: 'Failed to refresh opportunities.',
-      });
+      await apiClient.patch(`/opportunities/saved/${encodeURIComponent(selectedOpportunity.externalId)}`, body);
+      addToast({ type: 'success', message: done });
+      await invalidateTracking();
+    } catch (error) {
+      addToast({ type: 'error', message: errorMessage(error, 'Your changes could not be saved.') });
     } finally {
-      setIsCycleRunning(false);
+      setIsTrackerSaving(false);
     }
   };
 
-  // Reset Filters to Target Role
+  // Run the search with the text currently in the form
+  const handleExecuteSearch = async () => {
+    const next = { keyword: searchKeyword.trim(), location: searchLocation.trim(), salaryMin: salaryMin.trim() };
+    setPageSize(PAGE_SIZE);
+    setActiveTab('LIVE');
+    if (next.keyword === applied.keyword && next.location === applied.location && next.salaryMin === applied.salaryMin) {
+      setIsCycleRunning(true);
+      try {
+        await refetchOpportunities();
+      } finally {
+        setIsCycleRunning(false);
+      }
+      return;
+    }
+    setApplied(next);
+  };
+
   const handleResetFilters = () => {
-    setSearchKeyword(targetRoleTitle);
+    setSearchKeyword('');
     setSearchLocation('');
+    setSalaryMin('');
+    setApplied({ keyword: '', location: '', salaryMin: '' });
     setRemoteOnly(false);
     setEmploymentType('ALL');
+    setDatePosted('all');
     setSortBy('match');
+    setPageSize(PAGE_SIZE);
   };
+
+  // Keep the selection valid when the visible list changes
+  useEffect(() => {
+    if (selectedId && currentList.some((o) => o.externalId === selectedId)) return;
+    if (selectedId === handoffId && handoffOpp) return;
+    setSelectedId(currentList[0]?.externalId ?? null);
+  }, [currentList, selectedId, handoffId, handoffOpp]);
 
   if (isOpportunitiesLoading && liveOpportunities.length === 0) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
         <div className="p-16 rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[320px]">
-          <AIThinkingAnimation statusText="Autonomous Job Search Agent Querying Live Employer Feeds..." />
+          <AIThinkingAnimation statusText="Loading job listings..." />
         </div>
       </div>
     );
   }
 
-  if (opportunitiesError) {
+  if (opportunitiesError && !opportunitiesData) {
     return (
       <div className="max-w-7xl mx-auto pb-12 px-4">
         <PremiumErrorState
-          title="Job Search Provider Connection Failed"
-          message={`Unable to retrieve opportunities: ${(opportunitiesError as Error).message}`}
+          title="Job listings could not be loaded"
+          message={errorMessage(opportunitiesError, 'The request failed.')}
           onRetry={() => refetchOpportunities()}
         />
       </div>
     );
   }
 
-  const currentList = activeTab === 'LIVE' ? liveOpportunities : savedOpportunities;
+  const isSearching = isCycleRunning || isOpportunitiesFetching;
+  const fieldClass = 'rounded-xl bg-slate-950/80 border border-white/10 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/60';
 
   return (
     <div className="max-w-7xl mx-auto space-y-7 pb-16 px-4">
-      {/* 1. HERO / SEARCH COMMAND CENTER */}
+      {/* 1. SEARCH */}
       <JobSearchCommandCenter
         searchKeyword={searchKeyword}
         onSearchKeywordChange={setSearchKeyword}
@@ -307,48 +325,121 @@ export const JobSearchAgentWorkspace: React.FC = () => {
         onEmploymentTypeChange={setEmploymentType}
         sortBy={sortBy}
         onSortByChange={setSortBy}
-        targetRoleTitle={targetRoleTitle}
+        targetRoleTitle={targetRoleTitle || 'Not set yet'}
         totalSkills={totalSkills}
         readinessScore={readinessScore}
-        providerStatus={providerHealth.status}
-        isSearching={isCycleRunning || isOpportunitiesLoading}
+        providerStatus={sourceLabel}
+        isSearching={isSearching}
         onExecuteSearch={handleExecuteSearch}
       />
 
-      {/* 2. AGENT EXECUTION STATUS BAR */}
-      <JobSearchAgentStatusBar
-        isSearching={isCycleRunning || isOpportunitiesLoading}
-        providerStatus={providerHealth.status}
-        totalFound={currentList.length}
+      {/* 1b. MORE FILTERS */}
+      <form
+        className="rounded-2xl border border-white/10 bg-slate-950/60 p-4 flex flex-wrap items-end gap-4"
+        aria-label="More filters"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void handleExecuteSearch();
+        }}
+      >
+        <div className="flex flex-col gap-1">
+          <label htmlFor="job-date-posted" className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Date posted</label>
+          <select id="job-date-posted" value={datePosted} onChange={(e) => { setDatePosted(e.target.value); setPageSize(PAGE_SIZE); }} className={fieldClass}>
+            <option value="all">Any time</option>
+            <option value="today">Last 24 hours</option>
+            <option value="3days">Last 3 days</option>
+            <option value="week">Last 7 days</option>
+            <option value="month">Last 30 days</option>
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="job-salary-min" className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Minimum yearly salary</label>
+          <input
+            id="job-salary-min"
+            type="number"
+            min={0}
+            step={10000}
+            inputMode="numeric"
+            value={salaryMin}
+            onChange={(e) => setSalaryMin(e.target.value)}
+            placeholder="e.g. 800000"
+            aria-describedby="job-salary-hint"
+            className={`${fieldClass} w-44`}
+          />
+        </div>
+        <button type="submit" className="py-2 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-100 text-xs font-bold cursor-pointer">
+          Apply
+        </button>
+        <button type="button" onClick={handleResetFilters} className="py-2 px-3 text-xs font-bold text-slate-300 hover:text-white cursor-pointer">
+          Reset all filters
+        </button>
+        <p id="job-salary-hint" className="text-[11px] text-slate-400 basis-full">
+          The salary filter only keeps postings that state a yearly salary, in the posting&apos;s own currency. Many postings do not state one.
+        </p>
+      </form>
+
+      {/* 2. WHERE THE RESULTS CAME FROM */}
+      <SearchResultsNotice
+        meta={meta}
+        providerMessage={providerHealth?.message}
+        shown={liveOpportunities.length}
+        sortBy={sortBy}
+        onRetry={() => refetchOpportunities()}
       />
 
-      {/* 3. PRIMARY OPPORTUNITY CANVAS (3-COLUMN LAYOUT) */}
-      {currentList.length === 0 ? (
+      {savedError && (
+        <div role="alert" className="p-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 flex items-center justify-between gap-3">
+          <p className="text-xs text-rose-100">Your tracked jobs could not be loaded: {errorMessage(savedError, 'the request failed')}.</p>
+          <button type="button" onClick={() => refetchSaved()} className="py-1.5 px-3 rounded-lg bg-slate-900 border border-white/10 text-slate-100 text-xs font-bold cursor-pointer">
+            Try again
+          </button>
+        </div>
+      )}
+
+      <JobSearchAgentStatusBar isSearching={isSearching} providerStatus={sourceLabel} totalFound={currentList.length} />
+
+      {/* 3. LISTINGS, DETAILS, MATCH */}
+      {liveOpportunities.length === 0 && savedOpportunities.length === 0 ? (
         <OpportunityActivationHub
           onResetFilters={handleResetFilters}
-          targetRoleTitle={targetRoleTitle}
+          targetRoleTitle={targetRoleTitle || 'your target role'}
           hasResume={!!resumeData}
           totalSkills={totalSkills}
         />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Column 1: Opportunity Stream (4 Cols) */}
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-4 space-y-3">
             <OpportunityStreamFeed
               activeTab={activeTab}
               onTabChange={setActiveTab}
               liveOpportunities={liveOpportunities}
               savedOpportunities={savedOpportunities}
               selectedId={selectedOpportunity?.externalId}
-              onSelectOpportunity={(opp) => setSelectedOpportunity(opp)}
+              onSelectOpportunity={(opp) => setSelectedId(opp.externalId)}
               savedExternalIds={savedExternalIds}
               onToggleSave={handleToggleSave}
-              isLoading={isOpportunitiesLoading}
+              isLoading={isOpportunitiesFetching}
             />
+            {currentList.length === 0 && (
+              <p className="text-xs text-slate-400 px-1" data-testid="job-list-empty">
+                {activeTab === 'SAVED'
+                  ? 'You are not tracking any jobs yet. Save a listing to track your application here.'
+                  : 'No listings match these filters. Change or reset the filters to see more.'}
+              </p>
+            )}
+            {activeTab === 'LIVE' && meta?.hasMore && pageSize < MAX_PAGE_SIZE && (
+              <button
+                type="button"
+                onClick={() => setPageSize((size) => Math.min(MAX_PAGE_SIZE, size + PAGE_SIZE))}
+                disabled={isOpportunitiesFetching}
+                className="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-100 text-xs font-bold cursor-pointer disabled:opacity-50"
+              >
+                {isOpportunitiesFetching ? 'Loading...' : 'Show more listings'}
+              </button>
+            )}
           </div>
 
-          {/* Column 2: Selected Opportunity Inspector (5 Cols) */}
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-5 space-y-6">
             <OpportunityInspector
               opportunity={selectedOpportunity}
               isSaved={selectedOpportunity ? savedExternalIds.has(selectedOpportunity.externalId) : false}
@@ -356,13 +447,27 @@ export const JobSearchAgentWorkspace: React.FC = () => {
               onUpdateStatus={handleUpdateStatus}
               status={selectedOpportunity?.status || 'saved'}
             />
+            {selectedOpportunity && savedExternalIds.has(selectedOpportunity.externalId) && (
+              <ApplicationTrackerPanel
+                key={[selectedOpportunity.externalId, selectedOpportunity.notes, selectedOpportunity.reminderAt, selectedOpportunity.reminderNote].join('|')}
+                opportunity={selectedOpportunity}
+                isSaving={isTrackerSaving}
+                onSaveNotes={(notes) => handleUpdateDetails({ notes }, 'Notes saved.')}
+                onSetReminder={(reminderAt, reminderNote) =>
+                  handleUpdateDetails(
+                    reminderAt === null ? { reminderAt: null } : { reminderAt, reminderNote },
+                    reminderAt === null ? 'Reminder cleared.' : 'Reminder set.'
+                  )
+                }
+                onRemove={() => handleToggleSave(selectedOpportunity)}
+              />
+            )}
           </div>
 
-          {/* Column 3: Personal Relevance Matrix (3 Cols) */}
           <div className="lg:col-span-3">
             <PersonalRelevanceMatrix
               opportunity={selectedOpportunity}
-              targetRoleTitle={targetRoleTitle}
+              targetRoleTitle={targetRoleTitle || 'your target role'}
               userSkillsCount={totalSkills}
             />
           </div>

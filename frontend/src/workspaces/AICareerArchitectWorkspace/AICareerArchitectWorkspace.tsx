@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../../lib/axios';
+import { listFrom } from '../../lib/collections';
+import type { RecommendationItem } from '../../types/telemetry';
 import { useAuthStore } from '../../store/authStore';
 
 // Neural Command Center Spatial Styles & Components
@@ -20,6 +22,9 @@ import {
   SkeletonShimmer,
 } from '../../components/experience';
 import { ChatMessage } from '../../features/ai/components/MessageBubble';
+
+/** Longer than the server's own 25s wait for the AI provider, so the server's answer always arrives first. */
+const CHAT_REQUEST_TIMEOUT_MS = 40000;
 
 export const AICareerArchitectWorkspace: React.FC = () => {
   const queryClient = useQueryClient();
@@ -100,14 +105,10 @@ export const AICareerArchitectWorkspace: React.FC = () => {
     },
   });
 
-  const matches = careersData || [];
-  const readiness = readinessData || [];
+  const matches = useMemo(() => careersData || [], [careersData]);
+  const readiness = useMemo(() => readinessData || [], [readinessData]);
   const totalSkills = skillsData?.totalSkills || 0;
-  const recommendations = Array.isArray(recommendationsData)
-    ? recommendationsData
-    : (recommendationsData as any)?.recommendations && Array.isArray((recommendationsData as any).recommendations)
-      ? (recommendationsData as any).recommendations
-      : [];
+  const recommendations = useMemo(() => listFrom<RecommendationItem>(recommendationsData, 'recommendations'), [recommendationsData]);
   const conversations = conversationsData || [];
   const opportunities = opportunitiesData || [];
 
@@ -158,17 +159,29 @@ export const AICareerArchitectWorkspace: React.FC = () => {
     },
   });
 
-  // Mutation 2: Send Message
+  // Mutation 2: Send Message. The conversation id is passed in explicitly, so the first message of
+  // a conversation created a moment ago is sent to it rather than dropped.
+  // The request may wait for the provider: provider 20s < server 25s < this 40s.
   const sendMessageMutation = useMutation({
-    mutationFn: async (content: string) => {
-      if (!activeConversationId) return;
-      const response = await apiClient.post(`/ai/${activeConversationId}/messages`, { content });
+    mutationFn: async ({ conversationId, content }: { conversationId: string; content: string }) => {
+      const response = await apiClient.post(`/ai/${conversationId}/messages`, { content }, { timeout: CHAT_REQUEST_TIMEOUT_MS });
       return response.data.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conversation', activeConversationId] });
+    onSuccess: (_reply, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['conversation', variables.conversationId] });
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
-      setIsConversationDrawerOpen(true);
+      setInputMessage('');
+    },
+  });
+
+  // Mutation 2b: ask again for the last question when its reply was a fallback
+  const retryReplyMutation = useMutation({
+    mutationFn: async (conversationId: string) => {
+      const response = await apiClient.post(`/ai/${conversationId}/retry`, undefined, { timeout: CHAT_REQUEST_TIMEOUT_MS });
+      return response.data.data;
+    },
+    onSettled: (_reply, _error, conversationId) => {
+      queryClient.invalidateQueries({ queryKey: ['conversation', conversationId] });
     },
   });
 
@@ -216,19 +229,21 @@ export const AICareerArchitectWorkspace: React.FC = () => {
     return 'IDLE';
   }, [sendMessageMutation.isPending, sendMessageMutation.isError, sendMessageMutation.isSuccess, loadingHistory, roadmapLoading, isLoading]);
 
+  const sendTo = (conversationId: string, content: string) => {
+    setIsConversationDrawerOpen(true);
+    sendMessageMutation.mutate({ conversationId, content });
+  };
+
+  // The typed text stays in the box until the server has accepted it
   const handleSend = () => {
-    if (!inputMessage.trim()) return;
     const msg = inputMessage.trim();
+    if (!msg || sendMessageMutation.isPending) return;
     if (!activeConversationId) {
       createConversationMutation.mutate(undefined, {
-        onSuccess: () => {
-          sendMessageMutation.mutate(msg);
-          setInputMessage('');
-        },
+        onSuccess: (conversation) => sendTo(conversation._id, msg),
       });
     } else {
-      sendMessageMutation.mutate(msg);
-      setInputMessage('');
+      sendTo(activeConversationId, msg);
     }
   };
 
@@ -328,6 +343,17 @@ export const AICareerArchitectWorkspace: React.FC = () => {
         isLoadingHistory={loadingHistory}
         userName={user?.fullName || user?.email?.split('@')[0] || 'User'}
         onFeedback={(msgId, isHelpful) => feedbackMutation.mutate({ messageId: msgId, isHelpful })}
+        isSending={sendMessageMutation.isPending}
+        sendError={
+          sendMessageMutation.isError
+            ? (sendMessageMutation.error as { message?: string } | null)?.message || 'the request failed'
+            : createConversationMutation.isError
+              ? 'a new conversation could not be started'
+              : null
+        }
+        onRetrySend={handleSend}
+        onRetryReply={activeConversationId ? () => retryReplyMutation.mutate(activeConversationId) : undefined}
+        isRetryingReply={retryReplyMutation.isPending}
       />
     </div>
   );

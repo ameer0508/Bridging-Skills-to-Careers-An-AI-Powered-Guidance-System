@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { messageOf } from '../../../lib/collections';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Brain, FileText, Target, ChevronRight, Filter, X } from 'lucide-react';
@@ -148,7 +149,7 @@ export const CareerReadinessPage: React.FC = () => {
               : 'idle';
 
     const errorMessage = uploadMutation.error
-      ? ((uploadMutation.error as any).response?.data?.message || (uploadMutation.error as Error).message)
+      ? messageOf(uploadMutation.error, 'The upload failed.')
       : resumeData?.parsingStatus === 'failed'
         ? 'Resume evidence parsing failed. Please ensure the file is an unlocked PDF or DOCX document.'
         : undefined;

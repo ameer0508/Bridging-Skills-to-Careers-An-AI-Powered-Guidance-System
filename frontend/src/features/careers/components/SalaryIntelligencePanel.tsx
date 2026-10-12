@@ -89,9 +89,7 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
   ];
 
   // Calculated Values
-  const currentRegion = useMemo(() => {
-    return regions.find((r) => r.name === selectedRegion) || regions[0];
-  }, [selectedRegion]);
+  const currentRegion = regions.find((r) => r.name === selectedRegion) || regions[0];
 
   const levelMultiplier = useMemo(() => {
     if (experienceLevel === 'Junior') return 0.7;
@@ -101,11 +99,9 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
     return 1.45;
   }, [experienceLevel]);
 
-  const totalCertBoost = useMemo(() => {
-    return certBoosts
-      .filter((c) => activeCertifications.includes(c.name))
-      .reduce((acc, c) => acc + c.boost, 0);
-  }, [activeCertifications]);
+  const totalCertBoost = certBoosts
+    .filter((c) => activeCertifications.includes(c.name))
+    .reduce((acc, c) => acc + c.boost, 0);
 
   const calculatedSalary = useMemo(() => {
     const base = currentRegion.baseMedian * levelMultiplier;
@@ -272,7 +268,7 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
               </span>
               <select
                 value={experienceLevel}
-                onChange={(e) => setExperienceLevel(e.target.value as any)}
+                onChange={(e) => setExperienceLevel(e.target.value as typeof experienceLevel)}
                 className="w-full py-1.5 px-2.5 rounded-lg bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
               >
                 <option value="Junior">Junior</option>
@@ -368,7 +364,7 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
                 <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={(v) => `$${v / 1000}k`} tickLine={false} />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
-                  formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Compensation']}
+                  formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Compensation']}
                 />
                 <Area type="monotone" dataKey="targetSalary" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorTarget)" name="SkillBridge Optimized Target" />
                 <Area type="monotone" dataKey="baseSalary" stroke="#06b6d4" strokeWidth={2} strokeDasharray="4 4" fillOpacity={1} fill="url(#colorBase)" name="Market Baseline" />
@@ -395,7 +391,7 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
                 <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={(v) => `$${v / 1000}k`} tickLine={false} />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
-                  formatter={(val: any) => [`$${Number(val).toLocaleString()}`, 'Average Salary']}
+                  formatter={(val) => [`$${Number(val).toLocaleString()}`, 'Average Salary']}
                 />
                 <Bar dataKey="avgSalary" radius={[6, 6, 0, 0]}>
                   {experienceTrajectory.map((entry, index) => (

@@ -20,6 +20,9 @@ export const HeroSection: React.FC = () => {
 
   return (
     <section className="relative pt-32 pb-20 md:pt-40 md:pb-32 px-4 max-w-7xl mx-auto overflow-hidden">
+      <p className="mb-6 text-center text-xs text-slate-400" data-testid="landing-sample-note">
+        The screens in this section are illustrations with sample data. They are not results for any real person.
+      </p>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         {/* Left Column - Headline & CTAs */}
         <motion.div

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { listFrom } from '../../../lib/collections';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Brain, Compass, Target } from 'lucide-react';
@@ -79,20 +80,19 @@ export const RecommendationPage: React.FC = () => {
     },
   });
 
-  const rawList: IRecommendation[] = useMemo(() => {
-    if (Array.isArray(data)) return data;
-    if ((data as any)?.recommendations && Array.isArray((data as any).recommendations)) {
-      return (data as any).recommendations;
-    }
-    return [];
-  }, [data]);
+  const rawList: IRecommendation[] = useMemo(() => listFrom<IRecommendation>(data, 'recommendations'), [data]);
 
   // Automatically trigger backend generation if recommendations are currently empty
+  // Attempted once per visit: a user with no resume legitimately has none, and asking again on
+  // every empty answer would loop.
+  const autoGenerateTried = React.useRef(false);
+  const { mutate: regenerate } = regenerateMutation;
   React.useEffect(() => {
-    if (data && rawList.length === 0) {
-      regenerateMutation.mutate();
+    if (data && rawList.length === 0 && !autoGenerateTried.current) {
+      autoGenerateTried.current = true;
+      regenerate();
     }
-  }, [data, rawList.length]);
+  }, [data, rawList.length, regenerate]);
 
   // Only recommendations computed for this user are shown; there is no built-in sample list
   const recommendations = rawList;
@@ -112,11 +112,13 @@ export const RecommendationPage: React.FC = () => {
     return recommendations.filter((r) => r.status === 'active' && r.priority === 'Highest').length;
   }, [recommendations]);
 
+  // The headline action comes from the user's primary career (flagged by the API), so it never
+  // argues from a different role than the one shown in the header.
   const topPriorityRec = useMemo(() => {
-    return (
-      recommendations.find((r) => r.status === 'active' && r.priority === 'Highest') ||
-      recommendations.find((r) => r.status === 'active')
-    );
+    const active = recommendations.filter((r) => r.status === 'active');
+    const primary = active.filter((r) => (r as { isPrimaryCareer?: boolean }).isPrimaryCareer);
+    const pool = primary.length > 0 ? primary : active;
+    return pool.find((r) => r.priority === 'Highest') || pool[0] || recommendations[0];
   }, [recommendations]);
 
   // Filtered and Sorted Recommendations

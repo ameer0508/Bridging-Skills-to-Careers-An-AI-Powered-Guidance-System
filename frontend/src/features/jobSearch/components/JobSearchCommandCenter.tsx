@@ -81,11 +81,11 @@ export const JobSearchCommandCenter: React.FC<JobSearchCommandCenterProps> = ({
 
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <ShieldCheck className="w-3.5 h-3.5" />
-                Live Employer Stream
+                Job Listings
               </span>
 
               <span className="text-xs text-slate-400 font-mono flex items-center gap-1">
-                Provider: <strong className="text-slate-200">JSearch Index</strong> ({providerStatus})
+                Source: <strong className="text-slate-200">{providerStatus}</strong>
               </span>
             </div>
           </div>
@@ -201,7 +201,7 @@ export const JobSearchCommandCenter: React.FC<JobSearchCommandCenterProps> = ({
             <select
               aria-label="Sort By"
               value={sortBy}
-              onChange={(e) => onSortByChange(e.target.value as any)}
+              onChange={(e) => onSortByChange(e.target.value as JobSearchCommandCenterProps['sortBy'])}
               className="px-3 py-1.5 rounded-xl bg-slate-950/80 border border-white/10 text-xs font-mono text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
               {sortOptions.map((opt) => (

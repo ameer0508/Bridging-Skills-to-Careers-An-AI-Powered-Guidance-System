@@ -11,7 +11,7 @@ export interface PhaseInsight {
   expectedOutcome: string;
 }
 
-export const defaultPhaseInsights: PhaseInsight[] = [
+const defaultPhaseInsights: PhaseInsight[] = [
   {
     phaseTitle: 'Foundational Core & API Architecture',
     whyIncluded: 'Establishes core programming, mathematical logic, and API backend foundations.',

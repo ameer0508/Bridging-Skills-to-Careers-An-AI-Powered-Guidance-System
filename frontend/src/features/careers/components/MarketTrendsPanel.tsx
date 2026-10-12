@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   TrendingUp,
   Sparkles,
@@ -126,10 +126,8 @@ export const MarketTrendsPanel: React.FC<MarketTrendsPanelProps> = ({
   };
 
   // Filtered Skills
-  const filteredSkills = useMemo(() => {
-    if (selectedCategory === 'all') return trendingSkills;
-    return trendingSkills.filter((s) => s.category === selectedCategory);
-  }, [selectedCategory, trendingSkills]);
+  const filteredSkills =
+    selectedCategory === 'all' ? trendingSkills : trendingSkills.filter((s) => s.category === selectedCategory);
 
   return (
     <div className="space-y-8">
@@ -410,7 +408,7 @@ export const MarketTrendsPanel: React.FC<MarketTrendsPanelProps> = ({
                 <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
-                  formatter={(val: any, _name: any, item: any) => [val, item.payload.label]}
+                  formatter={(val, _name, item) => [val, (item.payload as { label?: string } | undefined)?.label ?? '']}
                 />
                 <Bar dataKey="count" radius={[6, 6, 0, 0]}>
                   {lifecycleData.map((_entry, index) => (

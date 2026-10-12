@@ -25,7 +25,7 @@ export interface AdaptiveTimelineProps {
   onToggleStatus?: (milestoneId: string, newStatus: string) => void;
 }
 
-export const defaultPhases: PhaseTimelineItem[] = [
+const defaultPhases: PhaseTimelineItem[] = [
   {
     phase: 1,
     title: 'Foundational Core & API Architecture',

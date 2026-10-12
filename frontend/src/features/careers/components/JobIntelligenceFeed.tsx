@@ -421,7 +421,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
           <div className="lg:col-span-2">
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
               className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
               <option value="matchScore-desc" className="bg-slate-900 text-white">Match Score (High-Low)</option>

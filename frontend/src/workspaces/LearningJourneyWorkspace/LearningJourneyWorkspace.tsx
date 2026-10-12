@@ -50,6 +50,21 @@ import {
 } from '../../components/experience';
 import { IllustrativeNotice } from '../../components/common/IllustrativeNotice';
 
+/** A roadmap phase and its items as returned by GET /roadmap/:careerId. */
+interface ApiRoadmapItem extends Partial<Omit<ActiveRoadmapItem, 'title'>> {
+  _id: string;
+  title: string;
+}
+interface ApiRoadmapPhase {
+  _id?: string;
+  order: number;
+  title: string;
+  objective?: string;
+  skillsGained?: string[];
+  estimatedCompletionTime?: string;
+  items?: ApiRoadmapItem[];
+}
+
 export const LearningJourneyWorkspace: React.FC = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -186,19 +201,19 @@ export const LearningJourneyWorkspace: React.FC = () => {
   );
 
   // Derive target role title from matches or plan
-  const matchedCareer = matches.find((m: any) => m.careerId?._id === activeCareerId);
+  const matchedCareer = matches.find((m: { careerId?: { _id?: string } }) => m.careerId?._id === activeCareerId);
   const targetRoleTitle =
     matchedCareer?.careerId?.title || plan.aiContext.topMatch?.careerId?.title || null;
 
   // Process phases
-  const phases: ActivePhaseData[] = (roadmap?.phases || []).map((phase: any) => ({
+  const phases: ActivePhaseData[] = ((roadmap?.phases || []) as ApiRoadmapPhase[]).map((phase) => ({
     _id: phase._id || `phase-${phase.order}`,
     order: phase.order,
     title: phase.title,
     objective: phase.objective,
     skillsGained: phase.skillsGained || [],
     estimatedCompletionTime: phase.estimatedCompletionTime || '',
-    items: (phase.items || []).map((i: any) => ({
+    items: (phase.items || []).map((i) => ({
       _id: i._id,
       itemId: i._id,
       title: i.title,
@@ -275,7 +290,7 @@ export const LearningJourneyWorkspace: React.FC = () => {
     if (inspectingTask && (inspectingTask._id === itemId || inspectingTask.itemId === itemId)) {
       setInspectingTask({
         ...inspectingTask,
-        status: status as any,
+        status: status as ActiveRoadmapItem['status'],
       });
     }
   };
@@ -463,19 +478,19 @@ export const LearningJourneyWorkspace: React.FC = () => {
               <div className="lg:col-span-7">
                 <IllustrativeNotice kind="heuristic" className="mb-3" />
                 <DecisionSimulator
-                  currentScore={plan.aiContext.topReadiness?.overallScore || 45}
+                  currentScore={plan.aiContext.topReadiness?.overallScore ?? 0}
                   targetRoleTitle={targetRoleTitle || 'Target Role'}
                   availableTasks={
-                    roadmap?.phases
-                      ?.flatMap((p: any) => p.items || [])
-                      .filter((i: any) => i.status !== 'completed')
+                    ((roadmap?.phases || []) as ApiRoadmapPhase[])
+                      .flatMap((p) => p.items || [])
+                      .filter((i) => i.status !== 'completed')
                       .slice(0, 4)
-                      .map((i: any) => i.title) || [nextBestItem?.title || 'Core Milestone']
+                      .map((i) => i.title)
                   }
                   onExecuteSimulatedTask={(taskTitle) => {
-                    const targetItem = roadmap?.phases
-                      ?.flatMap((p: any) => p.items || [])
-                      .find((i: any) => i.title === taskTitle);
+                    const targetItem = ((roadmap?.phases || []) as ApiRoadmapPhase[])
+                      .flatMap((p) => p.items || [])
+                      .find((i) => i.title === taskTitle);
                     if (targetItem?._id) {
                       handleStatusChange(targetItem._id, 'in_progress');
                     }

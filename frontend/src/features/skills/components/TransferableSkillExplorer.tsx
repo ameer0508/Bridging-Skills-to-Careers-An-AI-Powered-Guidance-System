@@ -8,7 +8,7 @@ export interface TransferableItem {
   crossDomainFit: string;
 }
 
-export const defaultTransferableItems: TransferableItem[] = [
+const defaultTransferableItems: TransferableItem[] = [
   {
     sourceSkill: 'Python',
     inferredCapabilities: ['Automation Scripting', 'Data Analysis', 'Machine Learning', 'Backend API Architecture'],

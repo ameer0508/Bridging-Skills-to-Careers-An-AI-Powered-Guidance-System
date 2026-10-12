@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import type { RecommendationItem } from '../../types/telemetry';
+import { listFrom } from '../../lib/collections';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertCircle } from 'lucide-react';
@@ -201,16 +203,11 @@ export const HomeWorkspace: React.FC = () => {
     );
   }, [skillsData]);
 
-  const safeRecsList = useMemo(() => {
-    if (Array.isArray(recommendationsData)) return recommendationsData;
-    if ((recommendationsData as any)?.recommendations && Array.isArray((recommendationsData as any).recommendations)) {
-      return (recommendationsData as any).recommendations;
-    }
-    return [];
-  }, [recommendationsData]);
+  const safeRecsList = useMemo(() => listFrom<RecommendationItem>(recommendationsData, 'recommendations'), [recommendationsData]);
 
   const topRec = useMemo(() => {
-    const raw = (snapshot.topRecommendations && snapshot.topRecommendations.length > 0)
+    // Either source may supply the headline recommendation; only these fields are read from it
+    const raw: { title: string; reason?: string; category?: string; type?: string } | null = (snapshot.topRecommendations && snapshot.topRecommendations.length > 0)
       ? snapshot.topRecommendations[0]
       : safeRecsList.length > 0
       ? safeRecsList[0]

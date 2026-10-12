@@ -17,6 +17,23 @@ import {
 } from 'lucide-react';
 import { QuestionItem, InterviewSession } from '../../../workspaces/InterviewPrepAgentWorkspace/InterviewPrepAgentWorkspace';
 
+/** The parts of the browser Web Speech API this component uses. */
+interface SpeechRecognitionEventLike {
+  resultIndex: number;
+  results: ArrayLike<ArrayLike<{ transcript: string }>>;
+}
+interface SpeechRecognitionLike {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+}
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
+
 export interface LiveInterviewRoomProps {
   session: InterviewSession;
   currentQuestion: QuestionItem | null;
@@ -42,7 +59,7 @@ export const LiveInterviewRoom: React.FC<LiveInterviewRoomProps> = ({
   const [isListening, setIsListening] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
   const [showExpectedConcepts, setShowExpectedConcepts] = useState(false);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
 
   // Elapsed Session Timer
   const [secondsElapsed, setSecondsElapsed] = useState(0);
@@ -60,25 +77,36 @@ export const LiveInterviewRoom: React.FC<LiveInterviewRoomProps> = ({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
+  // The dictation handler is created once, so it reads the current answer through a ref
+  const answerRef = useRef(candidateAnswer);
+  useEffect(() => {
+    answerRef.current = candidateAnswer;
+  }, [candidateAnswer]);
+
   // Initialize Speech Recognition if available in browser
   useEffect(() => {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const speechWindow = window as Window & {
+      SpeechRecognition?: SpeechRecognitionConstructor;
+      webkitSpeechRecognition?: SpeechRecognitionConstructor;
+    };
+    const SpeechRecognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
 
     if (SpeechRecognition) {
       setSpeechSupported(true);
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
-      recognition.interimResults = true;
+      // Final phrases only: interim results would be appended again as they are revised
+      recognition.interimResults = false;
       recognition.lang = 'en-US';
 
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event) => {
         let transcript = '';
         for (let i = event.resultIndex; i < event.results.length; i++) {
           transcript += event.results[i][0].transcript;
         }
         if (transcript) {
-          onAnswerChange(candidateAnswer ? `${candidateAnswer} ${transcript}` : transcript);
+          const current = answerRef.current;
+          onAnswerChange(current ? `${current} ${transcript.trim()}` : transcript.trim());
         }
       };
 
@@ -213,6 +241,12 @@ export const LiveInterviewRoom: React.FC<LiveInterviewRoomProps> = ({
                 {/* Question Typography */}
                 <h2 className="text-base sm:text-lg font-bold text-white leading-relaxed tracking-wide">
                   {currentQuestion.question}
+                  {currentQuestion.groundedIn && (
+                    <span className="block mt-3 text-xs font-normal text-slate-400" data-testid="question-grounding">
+                      Based on: {currentQuestion.groundedIn}
+                      {currentQuestion.source === 'ai' ? ' · written by AI' : currentQuestion.source === 'question_bank' ? ' · from the question bank' : ''}
+                    </span>
+                  )}
                 </h2>
 
                 {/* Expected Concepts Peek (Collapsible) */}

@@ -10,11 +10,14 @@ import {
   Award,
 } from 'lucide-react';
 
+/** Values recorded with a progress event; they are shown as text. */
+type EventDetails = Record<string, string | number | undefined>;
+
 export interface ProgressEventItem {
   _id: string;
   eventType: string;
-  data?: Record<string, any>;
-  details?: Record<string, any>;
+  data?: EventDetails;
+  details?: EventDetails;
   timestamp?: string | number | Date;
   createdAt?: string | number | Date;
 }
