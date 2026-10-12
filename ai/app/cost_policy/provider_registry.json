@@ -1,0 +1,329 @@
+{
+  "policy_version": "2026-10-12",
+  "currency_ceiling": "INR 0",
+  "rules": [
+    "Every provider not listed here is BLOCKED.",
+    "BLOCKED and UNVERIFIED providers can never make live calls.",
+    "External providers are off until the operator sets their enable flag, even when APPROVED.",
+    "CONDITIONAL providers also need every attestation flag set to true and any credential present.",
+    "A provider that has used its self-imposed quota stops; nothing paid is ever tried instead.",
+    "Personal data is sent only to providers whose allows_personal_data is true."
+  ],
+  "providers": {
+    "mock": {
+      "display_name": "Development mock AI provider",
+      "kind": "local",
+      "status": "APPROVED",
+      "free_access_verified": true,
+      "verified_on": "2026-10-12",
+      "sources": ["ai/app/providers/mock_adapter.py"],
+      "credential_env": [],
+      "allows_personal_data": true,
+      "billing_risk": "none (in-process code)",
+      "conditions": ["Development and test only; never answers chat, interview questions or interview scoring."]
+    },
+    "ollama": {
+      "display_name": "Ollama (local models)",
+      "kind": "local",
+      "status": "APPROVED",
+      "free_access_verified": true,
+      "verified_on": "2026-10-12",
+      "sources": ["https://github.com/ollama/ollama", "https://docs.ollama.com/cloud"],
+      "credential_env": [],
+      "allows_personal_data": true,
+      "billing_risk": "Ollama cloud models (names ending ':cloud' or '-cloud', or the ollama.com API) need an account and are not free; they are rejected.",
+      "conditions": [
+        "LOCAL_MODEL_ENDPOINT must be a loopback address.",
+        "Model names ending in ':cloud' or '-cloud' are rejected.",
+        "OLLAMA_API_KEY must not be set."
+      ]
+    },
+    "sentence_transformers": {
+      "display_name": "Sentence Transformers (local embeddings)",
+      "kind": "local",
+      "status": "APPROVED",
+      "free_access_verified": true,
+      "verified_on": "2026-10-12",
+      "sources": ["https://github.com/UKPLab/sentence-transformers"],
+      "credential_env": [],
+      "allows_personal_data": true,
+      "billing_risk": "none at runtime; model weights are downloaded once from the public Hugging Face Hub",
+      "conditions": ["Download weights during setup, then run with HF_HUB_OFFLINE=1 so runtime never reaches the network."]
+    },
+    "spacy": {
+      "display_name": "spaCy (local NLP)",
+      "kind": "local",
+      "status": "APPROVED",
+      "free_access_verified": true,
+      "verified_on": "2026-10-12",
+      "sources": ["https://github.com/explosion/spaCy"],
+      "credential_env": [],
+      "allows_personal_data": true,
+      "billing_risk": "none",
+      "conditions": []
+    },
+    "tesseract": {
+      "display_name": "Tesseract OCR (local)",
+      "kind": "local",
+      "status": "APPROVED",
+      "free_access_verified": true,
+      "verified_on": "2026-10-12",
+      "sources": ["https://github.com/tesseract-ocr/tesseract"],
+      "credential_env": [],
+      "allows_personal_data": true,
+      "billing_risk": "none",
+      "conditions": []
+    },
+    "whisper_local": {
+      "display_name": "OpenAI Whisper, open-source model run locally",
+      "kind": "local",
+      "status": "APPROVED",
+      "free_access_verified": true,
+      "verified_on": "2026-10-12",
+      "sources": ["https://github.com/openai/whisper"],
+      "credential_env": [],
+      "allows_personal_data": true,
+      "billing_risk": "none locally. The hosted OpenAI transcription API is a different, paid service and is covered by 'openai'.",
+      "conditions": ["Use the open-source package only; never the hosted OpenAI audio API."]
+    },
+    "pymupdf": {
+      "display_name": "PyMuPDF (local PDF parsing)",
+      "kind": "local",
+      "status": "APPROVED",
+      "free_access_verified": true,
+      "verified_on": "2026-10-12",
+      "sources": ["https://pymupdf.readthedocs.io/en/latest/about.html"],
+      "credential_env": [],
+      "allows_personal_data": true,
+      "billing_risk": "none, but it is AGPL: a hosted deployment must publish its source or buy a commercial licence",
+      "conditions": ["AGPL obligations must be met, or pdfplumber used instead."]
+    },
+    "web_speech_api": {
+      "display_name": "Browser Web Speech API",
+      "kind": "browser",
+      "status": "CONDITIONAL",
+      "free_access_verified": true,
+      "verified_on": "2026-10-12",
+      "sources": ["https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API/Using_the_Web_Speech_API"],
+      "credential_env": [],
+      "allows_personal_data": false,
+      "billing_risk": "none to SkillBridge; by default the browser sends audio to its vendor's server",
+      "conditions": [
+        "Prefer processLocally = true; use server recognition only after explicit user consent.",
+        "Always offer the typed-answer fallback."
+      ]
+    },
+    "gemini": {
+      "display_name": "Google Gemini Developer API (free tier)",
+      "kind": "external",
+      "status": "CONDITIONAL",
+      "free_access_verified": true,
+      "verified_on": "2026-10-12",
+      "sources": [
+        "https://ai.google.dev/gemini-api/docs/pricing",
+        "https://ai.google.dev/gemini-api/docs/rate-limits",
+        "https://ai.google.dev/gemini-api/terms"
+      ],
+      "credential_env": ["GEMINI_API_KEY"],
+      "enable_env": "SKILLBRIDGE_ENABLE_GEMINI",
+      "attestation_env": ["SKILLBRIDGE_GEMINI_NO_BILLING_ATTESTED"],
+      "allows_personal_data": false,
+      "billing_risk": "A key from a project with billing linked is on a paid tier and is billed per token. The API cannot tell the app which tier a key is on.",
+      "rate_limits": {
+        "published": "Per model and per project; shown only in AI Studio. Exceeding them returns 429 RESOURCE_EXHAUSTED.",
+        "self_imposed": {"per_minute": 10, "per_day": 200}
+      },
+      "conditions": [
+        "The key must come from an AI Studio project with no billing account linked (operator attests).",
+        "Unpaid Services terms: no sensitive, confidential or personal information, so no resume text.",
+        "Users must be 18 or older; not available to users in the EEA, UK or Switzerland on the free tier.",
+        "Free-tier prompts may be read by human reviewers and used to improve Google products."
+      ]
+    },
+    "github_rest_public": {
+      "display_name": "GitHub REST API, unauthenticated public data",
+      "kind": "external",
+      "status": "APPROVED",
+      "free_access_verified": true,
+      "verified_on": "2026-10-12",
+      "sources": ["https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api"],
+      "credential_env": [],
+      "enable_env": "SKILLBRIDGE_ENABLE_GITHUB_REST_PUBLIC",
+      "allows_personal_data": false,
+      "billing_risk": "none: no account or credential, so there is no billing relationship. Over the limit returns 403/429.",
+      "rate_limits": {
+        "published": "60 requests per hour per IP, unauthenticated",
+        "self_imposed": {"per_minute": 5, "per_day": 1000}
+      },
+      "conditions": ["Cache responses; send no token."]
+    },
+    "arbeitnow": {
+      "display_name": "Arbeitnow job board API",
+      "kind": "external",
+      "status": "CONDITIONAL",
+      "free_access_verified": true,
+      "verified_on": "2026-10-12",
+      "sources": ["https://www.arbeitnow.com/blog/job-board-api"],
+      "credential_env": [],
+      "enable_env": "SKILLBRIDGE_ENABLE_ARBEITNOW",
+      "attestation_env": [],
+      "allows_personal_data": false,
+      "billing_risk": "none: no key. Rate limits and attribution are not published.",
+      "rate_limits": {"published": "not published", "self_imposed": {"per_minute": 2, "per_day": 100}},
+      "conditions": ["Cache results; label listings with source and fetch date."]
+    },
+    "remoteok": {
+      "display_name": "Remote OK job API",
+      "kind": "external",
+      "status": "CONDITIONAL",
+      "free_access_verified": true,
+      "verified_on": "2026-10-12",
+      "sources": ["https://remoteok.com/api"],
+      "credential_env": [],
+      "enable_env": "SKILLBRIDGE_ENABLE_REMOTEOK",
+      "attestation_env": [],
+      "allows_personal_data": false,
+      "billing_risk": "none: no key",
+      "rate_limits": {"published": "not stated in the part of the page read", "self_imposed": {"per_minute": 2, "per_day": 100}},
+      "conditions": [
+        "Link back to Remote OK (followed link) and name it as the source, or access is suspended.",
+        "Do not use the Remote OK logo."
+      ]
+    },
+    "jsearch": {
+      "display_name": "JSearch on RapidAPI / OpenWeb Ninja",
+      "kind": "external",
+      "status": "UNVERIFIED",
+      "free_access_verified": false,
+      "verified_on": "2026-10-12",
+      "sources": ["https://rapidapi.com/letscrape-6bef512/api/jsearch/pricing (page did not render; terms unread)"],
+      "credential_env": ["RAPIDAPI_KEY", "JSEARCH_API_KEY"],
+      "enable_env": "SKILLBRIDGE_ENABLE_JSEARCH",
+      "allows_personal_data": false,
+      "billing_risk": "Marketplace plans; paid plans charge per request over quota. The free plan's hard limit could not be confirmed from the official page.",
+      "conditions": ["Blocked until the official pricing page confirms a hard-limited free plan with no card on file."]
+    },
+    "adzuna": {
+      "display_name": "Adzuna API",
+      "kind": "external",
+      "status": "BLOCKED",
+      "free_access_verified": false,
+      "verified_on": "2026-10-12",
+      "sources": ["https://developer.adzuna.com/docs/terms_of_service"],
+      "credential_env": ["ADZUNA_APP_ID", "ADZUNA_APP_KEY", "ADZUNA_API_KEY"],
+      "allows_personal_data": false,
+      "billing_risk": "Commercial use is only a 14-day trial, after which 'a licence agreement may be required'; aggregated statistics need written consent.",
+      "rate_limits": {"published": "25/minute, 250/day, 1,000/week, 2,500/month"},
+      "conditions": ["Could become CONDITIONAL for personal or academic research use with attribution, if the owner classifies the project that way."]
+    },
+    "usajobs": {
+      "display_name": "USAJOBS API",
+      "kind": "external",
+      "status": "UNVERIFIED",
+      "free_access_verified": false,
+      "verified_on": "2026-10-12",
+      "sources": ["https://developer.usajobs.gov/ (rate-limiting page returned an error)"],
+      "credential_env": ["USAJOBS_API_KEY"],
+      "allows_personal_data": false,
+      "billing_risk": "unknown",
+      "conditions": ["US federal jobs only; of limited use to an India-focused product."]
+    },
+    "youtube_data_api": {
+      "display_name": "YouTube Data API v3",
+      "kind": "external",
+      "status": "UNVERIFIED",
+      "free_access_verified": false,
+      "verified_on": "2026-10-12",
+      "sources": ["https://developers.google.com/youtube/v3/getting-started", "https://developers.google.com/youtube/v3/determine_quota_cost"],
+      "credential_env": ["YOUTUBE_API_KEY"],
+      "allows_personal_data": false,
+      "billing_risk": "Quota is fixed (10,000 units/day; search.list 100 calls/day); the official pages read do not state that usage is free of charge.",
+      "rate_limits": {"published": "10,000 units/day, search.list 100/day"},
+      "conditions": []
+    },
+    "coursera_api": {
+      "display_name": "Coursera API",
+      "kind": "external",
+      "status": "UNVERIFIED",
+      "free_access_verified": false,
+      "verified_on": "2026-10-12",
+      "sources": [],
+      "credential_env": ["COURSERA_API_KEY"],
+      "allows_personal_data": false,
+      "billing_risk": "unknown; no public developer terms were found",
+      "conditions": []
+    },
+    "learning_provider_apis": {
+      "display_name": "Other learning-provider APIs (Udemy, edX, ...)",
+      "kind": "external",
+      "status": "UNVERIFIED",
+      "free_access_verified": false,
+      "verified_on": "2026-10-12",
+      "sources": [],
+      "credential_env": [],
+      "allows_personal_data": false,
+      "billing_risk": "unknown; each provider must be registered here on its own",
+      "conditions": ["Use the curated, linked learning resources in backend/src/seed instead."]
+    },
+    "public_datasets": {
+      "display_name": "Public job-market, salary and exam-syllabus datasets",
+      "kind": "dataset",
+      "status": "UNVERIFIED",
+      "free_access_verified": false,
+      "verified_on": "2026-10-12",
+      "sources": [],
+      "credential_env": [],
+      "allows_personal_data": false,
+      "billing_risk": "Licence and provenance vary by dataset.",
+      "conditions": ["Each dataset needs its own entry with licence, source URL, publication date and retrieval date before use."]
+    },
+    "openai": {
+      "display_name": "OpenAI API",
+      "kind": "external",
+      "status": "BLOCKED",
+      "free_access_verified": false,
+      "verified_on": "2026-10-12",
+      "sources": ["https://openai.com/api/pricing/ (403 to automated fetch)"],
+      "credential_env": ["OPENAI_API_KEY"],
+      "allows_personal_data": false,
+      "billing_risk": "Billed per token from prepaid credits; no free tier is relied on.",
+      "conditions": []
+    },
+    "huggingface_inference": {
+      "display_name": "Hugging Face Inference Providers / hf-inference",
+      "kind": "external",
+      "status": "BLOCKED",
+      "free_access_verified": false,
+      "verified_on": "2026-10-12",
+      "sources": ["https://huggingface.co/docs/inference-providers/pricing"],
+      "credential_env": ["HUGGINGFACE_API_KEY", "HF_TOKEN"],
+      "allows_personal_data": false,
+      "billing_risk": "Free users get no monthly credits ('credits purchase required'); every request past included credits is charged.",
+      "conditions": []
+    },
+    "ollama_cloud": {
+      "display_name": "Ollama cloud models",
+      "kind": "external",
+      "status": "BLOCKED",
+      "free_access_verified": false,
+      "verified_on": "2026-10-12",
+      "sources": ["https://docs.ollama.com/cloud"],
+      "credential_env": ["OLLAMA_API_KEY"],
+      "allows_personal_data": false,
+      "billing_risk": "Needs an ollama.com account and API key; plan limits and prices were not published on the page read.",
+      "conditions": []
+    },
+    "google_vertex_ai": {
+      "display_name": "Google Vertex AI (Gemini through Google Cloud)",
+      "kind": "external",
+      "status": "BLOCKED",
+      "free_access_verified": false,
+      "verified_on": "2026-10-12",
+      "sources": [],
+      "credential_env": ["GOOGLE_GENAI_USE_VERTEXAI", "GOOGLE_CLOUD_PROJECT", "GOOGLE_APPLICATION_CREDENTIALS"],
+      "allows_personal_data": false,
+      "billing_risk": "Billed to a Google Cloud billing account. google-genai's Client() can select it from these variables when no API key is passed.",
+      "conditions": []
+    }
+  }
+}

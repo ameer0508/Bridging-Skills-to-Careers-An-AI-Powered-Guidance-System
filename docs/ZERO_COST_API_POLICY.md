@@ -1,0 +1,173 @@
+# Zero-cost API policy (₹0)
+
+**Status:** in force from 2026-10-12. **Owner:** project owner. **Machine-readable source of truth:**
+[`ai/app/cost_policy/provider_registry.json`](../ai/app/cost_policy/provider_registry.json).
+
+SkillBridge must cost **₹0 in application API and infrastructure charges** while it is being developed and operated. A Claude Code
+or Claude Pro subscription is separate. It does **not** pay for any API the application calls.
+
+## 1. Rules
+
+1. **No paid endpoints.** Nothing paid per request or per token, and no subscription-only integrations.
+2. **No billing exposure.** Nothing that needs a credit card or a linked billing account. No trial credits that convert to billing, and no automatic overage charges.
+3. **No paid infrastructure.** Everything runs locally or in Docker Compose on the developer's own machine.
+4. **Unverified means blocked.** A provider is usable only after its current official terms have been read and the date recorded here. If verification cannot be completed, the provider is `UNVERIFIED`, and `UNVERIFIED` is treated exactly like `BLOCKED`.
+5. **External providers are off by default.** Even an `APPROVED` external provider stays off until the operator sets its `SKILLBRIDGE_ENABLE_<PROVIDER>=true` flag.
+6. **Fail closed, never substitute.** If a provider is refused, unavailable or out of quota, the feature reports that it is unavailable. Nothing ever falls back to a paid provider, and no output is fabricated in its place. Falling back to a *free local* provider (for example Ollama) is allowed.
+7. **No personal data to free tiers that forbid it.** Resume text, contact details and interview answers go only to providers whose `allows_personal_data` is `true`, which in practice means local ones.
+8. **Secrets never appear in logs or responses.** Use `CostPolicy.redact` / `redactSecrets`.
+9. **Tests never reach the network.** Tests run with provider keys blank. The network tripwire turns any non-loopback connection into an error.
+
+We cannot see any billing account, so this project does **not** claim that charges were "verified ₹0". The claim is narrower: **no paid service was activated and no live external API call was initiated** while this policy was written and tested.
+
+## 2. Status meanings
+
+| Status | Live calls | Needs |
+|---|---|---|
+| `APPROVED` | Yes, when enabled | Local: nothing. External: its enable flag. |
+| `CONDITIONAL` | Only when every condition holds | Enable flag, every attestation flag, and a credential if one is listed |
+| `UNVERIFIED` | **Never** | Official terms showing free access with no billing exposure, then a registry update |
+| `BLOCKED` | **Never** | A deliberate policy change by the project owner |
+| *(not listed)* | **Never** | A registry entry |
+
+## 3. Provider inventory
+
+All entries were verified on **2026-10-12** from the sources listed. "Code" shows where the project uses each provider today.
+
+### 3.1 Local and offline: approved, ₹0, no network at runtime
+
+| Provider | Code today | Licence | Notes and conditions |
+|---|---|---|---|
+| Development mock provider | `ai/app/providers/mock_adapter.py` | — | Dev/test only. Never answers chat, interview questions or interview scoring. |
+| **Ollama** (local models) | `ai/app/providers/local_adapter.py` (`ENABLE_LOCAL_MODEL`) | MIT ([github.com/ollama/ollama](https://github.com/ollama/ollama)) | The endpoint must be loopback. **Ollama cloud models** (`gemma4:cloud`, `*-cloud`, or the ollama.com API) need an account and are not free ([docs.ollama.com/cloud](https://docs.ollama.com/cloud)), so they are rejected. |
+| **Sentence Transformers** | `ai/app/resume_intelligence/transformer_parser.py` (optional; package not installed) | Apache-2.0 | Weights download once from the public Hugging Face Hub. After that, run with `HF_HUB_OFFLINE=1`. |
+| **spaCy** | same, `TRANSFORMER_PROVIDER=spacy` (not installed) | MIT | — |
+| **Tesseract OCR** | not used yet | Apache-2.0 | Candidate for scanned resumes. |
+| **Whisper** (open-source, local) | not used yet | MIT ([github.com/openai/whisper](https://github.com/openai/whisper)) | Code and weights are MIT. The hosted OpenAI transcription API is a different service and is **blocked**. |
+| **PyMuPDF** | `ai/requirements.txt` | **AGPL** or commercial ([about](https://pymupdf.readthedocs.io/en/latest/about.html)) | Costs ₹0. A *hosted* deployment must meet AGPL source obligations, or switch to `pdfplumber` (MIT), which is already installed. |
+| pdfplumber, python-docx | resume extraction | MIT | — |
+
+### 3.2 Browser
+
+| Provider | Status | Notes |
+|---|---|---|
+| **Web Speech API** | CONDITIONAL | Free to SkillBridge. MDN: *"By default … your audio is sent to a web service for recognition processing."* Use `processLocally = true` where the browser supports it. Use server recognition only after explicit voice consent, and always offer a typed answer as the fallback. ([MDN](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API/Using_the_Web_Speech_API)) |
+
+### 3.3 External: conditional or approved (off until enabled)
+
+| Provider | Status | Verified terms | Billing risk | Conditions before live use |
+|---|---|---|---|---|
+| **Google Gemini Developer API** | CONDITIONAL | The free plan exists and offers "Free input & output tokens" on Flash / Flash-Lite models, including the configured `gemini-3.6-flash` and `gemini-2.5-flash` ([pricing](https://ai.google.dev/gemini-api/docs/pricing), updated 2026-10-09). Limits are per model and shown only in AI Studio. Exceeding them returns `429 RESOURCE_EXHAUSTED` ([rate limits](https://ai.google.dev/gemini-api/docs/rate-limits)). | **A key from a project with billing linked is on the paid tier and is billed per token.** The app cannot tell which tier a key belongs to. Tier 1 starts as soon as billing is linked. | `SKILLBRIDGE_ENABLE_GEMINI=true` and `SKILLBRIDGE_GEMINI_NO_BILLING_ATTESTED=true` (key from an AI Studio project with no billing account). **Unpaid Services terms: "Do not submit sensitive, confidential, or personal information"**, so no resume text. Users must be 18+. Not for users in the EEA, UK or Switzerland. Prompts may be human-reviewed and used to improve Google products ([terms](https://ai.google.dev/gemini-api/terms)). Self-imposed cap: 10/min, 200/day. |
+| **GitHub REST API**, unauthenticated | APPROVED | 60 requests per hour per IP. Over the limit returns 403/429 ([rate limits](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api)). | None: no account or token means no billing relationship. | `SKILLBRIDGE_ENABLE_GITHUB_REST_PUBLIC=true`. Cache responses and send no token. Self-imposed cap: 5/min, 1,000/day. **Note:** `github_intelligence/github_client.py` currently returns *invented* profile data and must not be shown as real (see §7). |
+| **Arbeitnow** job API | CONDITIONAL | "Free Job Search API … requires no API key" ([blog](https://www.arbeitnow.com/blog/job-board-api)). Rate limits are not published. | None (no key) | Enable flag. Cache results. Label each listing with its source and fetch date. Self-imposed cap: 2/min, 100/day. |
+| **Remote OK** API | CONDITIONAL | Terms: link back with a followed link and name Remote OK as the source, *"If you do not we'll have to suspend API access"*. Logo use is not allowed ([remoteok.com/api](https://remoteok.com/api)). | None (no key) | Enable flag, attribution link, no logo. Self-imposed cap: 2/min, 100/day. |
+
+### 3.4 Unverified: blocked until verified
+
+| Provider | Code today | Why it is unverified |
+|---|---|---|
+| **JSearch** (RapidAPI / OpenWeb Ninja) | `backend/src/services/opportunities/JSearchProvider.ts` (`RAPIDAPI_KEY`, `JSEARCH_API_KEY`), `ai/app/job_intelligence/providers.py` | The official pricing page did not render, so I could not confirm whether the free plan is hard-limited without a card on file. Paid marketplace plans charge per request over quota. |
+| **USAJOBS** | `ai/app/job_intelligence/providers.py` (`USAJOBS_API_KEY`) | The rate-limit and terms pages returned errors. It is also US federal jobs only. |
+| **YouTube Data API v3** | not used | Quota is verified (10,000 units/day; `search.list` 100/day), but the official pages read do not say whether usage is free. |
+| **Coursera API** | `ai/app/external_gateway/auth_manager.py` (`COURSERA_API_KEY`) | No public developer terms found. |
+| Other learning-provider APIs (Udemy, edX, …) | not used | Each needs its own entry. Use the curated links in `backend/src/seed/learningResources.ts` instead. |
+| Public job-market, salary and exam-syllabus datasets | not used | Each dataset needs its own entry with licence, source URL, publication date and retrieval date. |
+
+### 3.5 Blocked
+
+| Provider | Code today | Reason |
+|---|---|---|
+| **OpenAI API** | `ai/app/providers/openai_adapter.py`, gateway fallback chain | Billed per token from prepaid credits. |
+| **Hugging Face Inference Providers / hf-inference** | `ai/app/providers/huggingface_adapter.py` | Free users get **no** monthly credits. Use needs a "credits purchase", and past included credits *"you get charged for every inference request"* ([pricing](https://huggingface.co/docs/inference-providers/pricing)). The adapter targets the legacy `api-inference.huggingface.co` "Inference API (serverless)", which Hugging Face says is now the billed `hf-inference` provider. |
+| **Adzuna** | `ai/app/job_intelligence/providers.py`, `auth_manager.py` | Terms limit commercial use to a "14 day trial period", after which "a licence agreement may be required". Aggregate statistics (counts, average salaries) need written consent. Limits: 25/min, 250/day, 1,000/week, 2,500/month ([terms](https://developer.adzuna.com/docs/terms_of_service)). The owner could reclassify it as CONDITIONAL for personal or academic research with attribution. |
+| **Ollama cloud models** | — | Need an ollama.com account and key. Plan prices are not published on the docs page. |
+| **Google Vertex AI** | reachable through `ai/app/services/gemini.py` | Billed to a Google Cloud account. `genai.Client()` with no key can select Vertex from `GOOGLE_GENAI_USE_VERTEXAI` / `GOOGLE_CLOUD_PROJECT`. |
+
+Other outbound references: Google Fonts (`fonts.googleapis.com`) appears only in a CSP allow-list. It is free and keyless and is loaded by the browser, not by the app.
+
+## 4. Quota and rate-limit strategy
+
+- **Self-imposed caps** (`rate_limits.self_imposed` in the registry) sit well below the published free limits. `QuotaLedger` counts calls per minute, hour, day and month, and refuses the next call with `quota_exhausted` once a cap is reached.
+- **Provider-reported exhaustion** (HTTP 429 / `RESOURCE_EXHAUSTED`) is recorded with `ledger.mark_exhausted(provider, retry_after)`. No retry is attempted until it resets.
+- **No paid fallback.** `CostPolicy.filter_chain` removes every refused provider from a fallback chain. It keeps the original order and never adds anything.
+- **Caching.** Permitted public responses (GitHub public data, open job feeds) must be cached with their source and fetch time. The AI gateway already caches AI responses for one hour (`ai/app/utils/caching_layer.py`).
+- **Limit:** the ledger is in-process memory, so a restart resets it. The caps leave headroom for this. Persist the ledger before any provider is enabled in a long-running deployment.
+
+## 5. Guardrails implemented
+
+| Guardrail | Where | Behaviour |
+|---|---|---|
+| Provider registry | `ai/app/cost_policy/provider_registry.json` | Status, verification source and date, credentials, enable flags, attestations, caps and privacy for every provider. |
+| `CostPolicy.check` / `require` | `ai/app/cost_policy/policy.py` | Fails closed with one of: `unknown_provider`, `blocked`, `unverified`, `not_enabled`, `not_attested`, `missing_credentials`, `personal_data_not_allowed`, `quota_exhausted`. `require` raises `ProviderBlockedError` / `QuotaExhaustedError` and counts the call. |
+| Unavailable-feature response | `Decision.as_unavailable(feature)` | `{available: false, reason, message, data: null}`: a clear indicator, never invented data. |
+| Local-model checks | `validate_local_model_endpoint`, `validate_ollama_model` | Loopback endpoints only. Cloud model names are rejected. |
+| Secret redaction | `CostPolicy.redact` (Python), `redactSecrets` (TypeScript) | Removes every configured credential value from text. |
+| Network tripwire | `ai/app/cost_policy/network_guard.py` | Within `block_external_network()`, any non-loopback connect or DNS lookup raises and is recorded. |
+| Environment audit | `python -m app.cost_policy.audit [.env]` (run from `ai/`) | Prints variable names only. Exits 1 when a key is set for a blocked or unverified provider, or a local model points at a remote or cloud endpoint. |
+| Backend guard | `backend/src/config/costPolicy.ts` | `checkLiveCall`, `guardedFetch` (refuses before `fetch` is called) and `redactSecrets`. A test keeps it in step with the registry. |
+
+### Tests
+
+- `ai/tests/test_zero_cost_policy.py`, 31 tests:
+  - registry completeness;
+  - blocked and unverified providers refused even with keys;
+  - off-by-default;
+  - Gemini flags, attestation and credential;
+  - personal-data refusal;
+  - quota exhaustion with no paid fallback;
+  - the gateway fallback chain stripped of OpenAI and Hugging Face;
+  - a keyed OpenAI adapter stopped by the tripwire;
+  - existing chat and extract endpoints making no live call;
+  - redaction;
+  - the audit.
+
+  Run them with `cd ai && pytest tests/test_zero_cost_policy.py`.
+- `backend/src/tests/cost_policy.test.ts`: registry consistency, unverified JSearch refused with a key, unknown providers refused, `guardedFetch` never calling `fetch`, missing flag or credential, redaction. Run it with `cd backend && npx tsx src/tests/cost_policy.test.ts`.
+
+## 6. Hardware and storage for local alternatives
+
+| Component | Disk | Memory | Source |
+|---|---|---|---|
+| Whisper tiny / base | ~75–145 MB | ~1 GB VRAM (runs on CPU, slower) | Whisper README (verified) |
+| Whisper small | ~460 MB | ~2 GB VRAM | Whisper README (verified) |
+| Whisper medium / turbo | ~1.5 GB | ~5–6 GB VRAM | Whisper README (verified) |
+| Sentence Transformers `all-MiniLM-L6-v2` | ~90 MB | < 1 GB RAM, CPU is fine | model card (approximate) |
+| spaCy `en_core_web_sm` | ~15 MB | < 1 GB RAM | approximate |
+| Tesseract + one language pack | ~30–50 MB | small | approximate |
+| Ollama 7–8B model, 4-bit | ~4–5 GB | ~8 GB RAM | approximate; not stated on the current README |
+
+The development machine has about 222 GB free on E:, where the repository lives. No model was downloaded while writing this policy. Check free RAM before pulling any model larger than 1 GB.
+
+## 7. Known functionality limits and integration changes for coordination
+
+These shared files belong to active work, so this branch does **not** edit them. Apply the following changes during integration:
+
+1. **`ai/app/gateway/ai_gateway.py` `get_provider_chain`.** Today it appends OpenAI and Hugging Face whenever their keys are set: this is a **silent paid fallback**. Filter the chain:
+   ```python
+   from app.cost_policy import CostPolicy
+   allowed = set(CostPolicy().filter_chain([p.provider_name for p in chain]))
+   chain = [p for p in chain if p.provider_name in allowed]
+   ```
+   Do the same for the primary provider. Then call `policy.ledger.mark_exhausted(name)` when a response error contains `429` / `RESOURCE_EXHAUSTED`.
+   Gemini will then also need `SKILLBRIDGE_ENABLE_GEMINI` and `SKILLBRIDGE_GEMINI_NO_BILLING_ATTESTED`. Add both to `ai/.env.example`.
+2. **Resume parsing through Gemini.** Pass `contains_personal_data=True` so resume text never reaches the free tier. The deterministic extractor stays the default.
+3. **`ai/app/services/gemini.py`.** This file is unused. It builds `genai.Client()` with no key, which can select billed Vertex AI. Delete it.
+4. **`ai/app/providers/local_adapter.py`.** Call `validate_local_model_endpoint(self.endpoint)` and `validate_ollama_model(model)` before each request.
+5. **`ai/app/external_gateway/auth_manager.py`.** It defaults missing keys to placeholder strings (`"env-jsearch-key"`), which makes a provider look configured. Default to `None` instead.
+6. **`backend/src/services/opportunities/JSearchProvider.ts`.** Replace `fetch(url, …)` with `guardedFetch('jsearch', url, …)`. Have `healthCheck` report `checkLiveCall('jsearch')`, so a configured key shows "unverified, blocked" instead of `UP`. Until then, **do not set `RAPIDAPI_KEY`**.
+7. **`ai/tests/conftest.py`.** Wrap the whole session in `block_external_network()` with an autouse session fixture, so every test, not just the policy tests, proves it makes no live call.
+8. **`backend/src/tests/runAllTests.ts`.** Register `runCostPolicyTests`.
+9. **CI.** Add a step that runs `python -m app.cost_policy.audit` in `ai/`.
+10. **Invented data still shown as real:**
+    - `github_intelligence/github_client.py` returns fixed profile numbers for any username.
+    - `job_intelligence/providers.py MockJobProvider` returns fictional companies with US salaries.
+
+    Both must be labelled as samples or removed before market and portfolio features rely on them.
+
+## 8. Before any provider goes live
+
+1. The official terms are re-read, and the registry entry's `sources` and `verified_on` are updated.
+2. The status is `APPROVED` or `CONDITIONAL`, and every listed condition is met and attested by the operator.
+3. No billing account is linked to the credential's project. The provider's own usage page is checked after the first day.
+4. Caching, self-imposed caps and attribution are in place, and the feature shows an unavailable state when refused.
+5. `python -m app.cost_policy.audit` passes.
