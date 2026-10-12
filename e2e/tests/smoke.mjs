@@ -535,6 +535,33 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       return `${start.recent.length} recorded activities, 1-day streak; one milestone after opting in, read and dismissed`;
     });
 
+    await t.step('free resources: listed for real gaps, labelled third-party, and a mark changes no score', async () => {
+      const careerId = (await api('GET', '/careers/matches')).data.matches[0].careerId._id;
+      const stored = (await api('GET', `/learning-resources?careerId=${careerId}`)).data;
+      const scores = async () => JSON.stringify((await api('GET', '/careers/matches')).data.matches.map((m) => [m.careerId.title, m.matchScore]));
+      const before = await scores();
+      await gotoAndSettle(page, `${webUrl}/roadmap`, 3500);
+      const panel = page.getByTestId('free-resources');
+      await panel.waitFor({ timeout: 15_000 });
+      const groups = page.getByTestId('resource-group');
+      expect((await groups.count()) === stored.groups.length && stored.groups.length > 0, `page shows ${await groups.count()} skills with resources, the API has ${stored.groups.length}`);
+      const first = panel.getByTestId('resource').first();
+      const link = first.getByRole('link');
+      expect((await link.getAttribute('href')) === stored.groups[0].resources[0].url, 'the link is not the catalogue link');
+      expect((await link.getAttribute('target')) === '_blank' && /noopener/.test(await link.getAttribute('rel')), 'an outside link does not open safely in a new tab');
+      expect(/Third-party site/.test(await first.innerText()) && /not re-checked/.test(await first.innerText()), 'the resource is not labelled as third-party and unchecked');
+      const note = await page.getByTestId('free-resources-note').innerText();
+      expect(/cannot promise they stay free/.test(note) && /not a course completion/.test(note), 'the limits of the catalogue are not stated');
+
+      await first.getByRole('button', { name: /^Mark as worked through:/ }).click();
+      await panel.locator('[data-testid="resource"][data-status="done"]').first().waitFor({ timeout: 15_000 });
+      expect((await api('GET', '/learning-resources/mine')).data.resources.length === 1, 'the mark was not stored');
+      expect((await scores()) === before, 'marking a resource changed a score');
+      await first.getByRole('button', { name: /^Unmark as worked through:/ }).click();
+      await panel.locator('[data-testid="resource"][data-status="none"]').first().waitFor({ timeout: 15_000 });
+      return `${stored.coverage.withResources} of ${stored.coverage.gapSkills} gaps have resources; marks stored without changing scores`;
+    });
+
     // ---- Resume: replace, reprocess, recover ----------------------------------------------------------
     await t.step('replacing the resume rebuilds skills and reports what changed', async () => {
       await gotoAndSettle(page, `${webUrl}/resume`, 2000);

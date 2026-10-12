@@ -407,3 +407,21 @@ until the user switches it on**:
   cannot reach a user who does not open SkillBridge.
 - Switching a kind off stops new notifications of that kind. Existing ones stay until dismissed.
 - The 7- and 14-day limits and the streak steps are chosen values.
+
+## 17. Free learning resources
+
+The catalogue (`backend/src/seed/learningResources.ts`) holds 39 links to official documentation
+and first-party tutorials. For one career, the resources shown are those whose skill is one of
+the user's gaps (as in section 10), in the order of the gaps. A gap for which the catalogue has
+nothing is named as such; it is not hidden.
+
+- Coverage is partial: 39 of the 52 distinct skills that careers require have a resource. The 13
+  without one are mostly non-technical (communication, user research, product strategy and
+  similar).
+- Every resource is third-party content on another site. SkillBridge does not host it. The links
+  were free to read when they were listed; they have **not been re-checked**, and nothing here
+  promises a site stays free or keeps its content. No request is made to those sites by
+  SkillBridge.
+- No rating, duration, price or completion rate is shown, because none is known.
+- "Saved" and "worked through" are the user's private notes. They are not course completions,
+  are not learning activity for the streak, and change no score.

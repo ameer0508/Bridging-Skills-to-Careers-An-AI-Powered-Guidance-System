@@ -133,6 +133,9 @@ Nothing in this group changes the user's skills or scores, except recording a co
 | `POST` | `/api/v1/activity/notifications/read-all` | Yes | Mark all read. |
 | `DELETE` | `/api/v1/activity/notifications/:id` | Yes | Dismiss one; it is not created again for the same occasion. |
 | `DELETE` | `/api/v1/activity/notifications` | Yes | Dismiss all. |
+| `GET` | `/api/v1/learning-resources` | Yes | Free third-party resources grouped by the caller's gaps for a career (`careerId` query; default the best match), the gaps the catalogue has nothing for, and coverage figures. Each resource is marked third-party and "not re-checked". |
+| `GET` | `/api/v1/learning-resources/mine` | Yes | Resources the caller saved or marked as worked through. |
+| `PUT` | `/api/v1/learning-resources/:id/status` | Yes | Body `status`: `saved`, `done` or `null` to clear. The caller's own note; changes no score. |
 
 ### Jobs and application tracking
 
