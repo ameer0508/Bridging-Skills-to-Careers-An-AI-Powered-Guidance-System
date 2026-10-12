@@ -10,7 +10,7 @@ An item is **Done** only when it has a working screen, an authenticated API, sto
 needed, validation and error states, documented limits, and passing service, HTTP and browser
 tests. Code that exists but is not verified earns nothing.
 
-Expansion total: 100 points. **Current: 28 / 100.**
+Expansion total: 100 points. **Current: 30 / 100.**
 
 ## Phase 1. Advanced career intelligence (15)
 
@@ -30,7 +30,7 @@ Expansion total: 100 points. **Current: 28 / 100.**
 | B2 | Personalised project suggestions | 2 | **Done** | Suite `learning_projects` (catalogue and HTTP); browser suite `pnpm test:e2e` (43/43): 15 curated briefs covering all 14 careers; a brief is suggested only for requirements the user has not shown in use; ranked by the same what-if score change the Career Lab returns (asserted equal); reason, tasks, deliverables, assumed effort and weeks at the user's hours. Taking on, working on and completing a project changes no skill, score or recalculation (asserted). Irrelevant briefs cannot be taken on; private per user. Rules in `docs/SCORING.md` section 14 |
 | B3 | Practical quizzes and skill verification | 4 | **Done** | HTTP suite `skill_assessment`; browser suite `pnpm test:e2e` (41/41): versioned bank for **8 skills only** (JavaScript, TypeScript, React, Node.js, Python, SQL, Git, Docker; 56 questions), server-side scoring with answers never sent before submission, shuffled options, per-skill pass criteria (4 of 5), 15-minute limit, 3 attempts per skill per day, single submission, owner-only. A fail changes no score; a pass adds `assessed` evidence worth 15 points once per skill and triggers one recalculation; a repeat pass adds nothing. Survives reprocessing and deleting the resume. Limits in `docs/SCORING.md` section 12: unsupervised, memorisable, not a certification |
 | B4 | Availability- and progress-aware roadmaps | 3 | **Done** | Suite `learning_plan` (unit and HTTP); browser suite `pnpm test:e2e` (42/42): weekly hours set by the user (1-60, none assumed), effort per item as a range labelled `catalogue` or `assumption`, weeks and finish dates as ranges, prerequisites block dependants, completing an item shortens the plan. Regeneration keeps item ids, completion dates and anything started; an untouched item whose gap is now evidenced is removed and the history says why. Same figures on the dashboard. Assumptions in `docs/SCORING.md` section 13: effort ranges are not measured |
-| B5 | Evidence-backed portfolios | 2 | Pending |  |
+| B5 | Evidence-backed portfolios | 2 | **Done** | Suite `portfolio`; browser suite `pnpm test:e2e` (44/44): entries with owner, completion date, skills, optional https link and visibility; with a link an entry counts as a further project on the resume's own scale (equal to the what-if prediction), without one it earns nothing; always `self_reported`, stored separately from skill-check evidence; an unfinished practice project cannot be added; evidence rebuilt idempotently and kept through reprocessing and deleting the resume; public link off by default, shared entries only, no ids or contact details, new token each time. No file uploads (links only). Rules in `docs/SCORING.md` section 15 |
 | B6 | Streaks, opt-in reminders and milestone notifications | 2 | Pending |  |
 
 ## Phase 3. Historical market and opportunity intelligence (15)
@@ -97,7 +97,7 @@ One point each. An enhancement is counted here once, even when a feature above d
 
 | ID | Item | Points | Status | Evidence |
 |---|---|---|---|---|
-| V1 | Original regression baseline still passes (19 backend suites, 104 AI tests, 35 browser checks) | 2 | Pending | Passing at this checkpoint: 23 backend suites (19 original + 4), 104 AI tests, 43 browser checks (35 original + 8). Awarded at the end of the expansion |
+| V1 | Original regression baseline still passes (19 backend suites, 104 AI tests, 35 browser checks) | 2 | Pending | Passing at this checkpoint: 24 backend suites (19 original + 5), 104 AI tests, 44 browser checks (35 original + 9). Awarded at the end of the expansion |
 | V2 | Cross-user isolation and input validation for every new endpoint | 2 | Pending |  |
 | V3 | Accessibility and failure states for every new screen | 2 | Pending |  |
 | V4 | Docker Compose workflow passes with the expansion | 2 | Pending |  |

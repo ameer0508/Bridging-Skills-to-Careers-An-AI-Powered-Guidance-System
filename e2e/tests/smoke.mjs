@@ -266,7 +266,7 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       await react.getByRole('button', { name: 'I have used this recently' }).click();
       await react.getByRole('button', { name: 'Confirm' }).click();
       await page.locator('[data-testid="freshness-skill"][data-skill="React"][data-status="current"]').waitFor({ timeout: 15_000 });
-      expect(/Confirmed by you \(not verified\)/.test(await react.innerText()), 'the confirmation is not labelled unverified');
+      expect(/Your own record \(not verified\)/.test(await react.innerText()), 'the confirmation is not labelled unverified');
       const scoreAfter = await scoreOfReact();
       expect(scoreAfter === scoreBefore, `the confirmation changed the evidence score (${scoreBefore} to ${scoreAfter})`);
       return 'React ageing to current after confirmation, evidence score unchanged; Node.js undated';
@@ -433,6 +433,65 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       await page.reload();
       await page.locator('[data-testid="my-project"][data-status="completed"]').waitFor({ timeout: 20_000 });
       return `${expected.length} suggestions; "${top.title}" taken on and completed; scores unchanged`;
+    });
+
+    await t.step('portfolio: a finished project with a link counts, stays self-reported, and is public only when shared', async () => {
+      const evidence = async () => JSON.stringify((await api('GET', '/skills/freshness')).data.skills.map((x) => [x.name, x.evidenceScore]).sort());
+      const before = await evidence();
+      await gotoAndSettle(page, `${webUrl}/portfolio`, 2500);
+      expect(/Nothing recorded yet/.test(await bodyText(page)), 'the empty portfolio is not explained');
+      await page.getByRole('button', { name: 'Add work' }).click();
+      const form = page.getByTestId('portfolio-form');
+      // The practice project completed earlier fills in the title and skills
+      await form.locator('#pf-project').selectOption({ index: 1 });
+      const title = await form.locator('#pf-title').inputValue();
+      expect(title.length > 3 && (await form.locator('#pf-skills').inputValue()).length > 0, 'the completed practice project did not prefill the entry');
+
+      await form.locator('#pf-url').fill('http://example.com/work');
+      await form.getByRole('button', { name: 'Save entry' }).click();
+      expect(/must start with https/.test(await form.innerText()), 'a link that is not https was accepted');
+      await form.locator('#pf-url').fill('https://example.com/priya/bookings-api');
+      await form.getByRole('button', { name: 'Save entry' }).click();
+      const entry = page.getByTestId('portfolio-entry');
+      await entry.waitFor({ timeout: 15_000 });
+      expect((await entry.getAttribute('data-counts')) === 'true' && (await entry.getAttribute('data-visibility')) === 'private', 'a new entry with a link should count and be private');
+      expect(/Your own record, not checked/.test(await entry.innerText()), 'the entry is not labelled as unchecked');
+      const stored = (await api('GET', '/portfolio')).data.entries[0];
+      expect(stored.verification === 'self_reported' && stored.skills.some((x) => x.points > 0), `stored entry ${JSON.stringify(stored.skills)}`);
+      expect((await evidence()) !== before, 'the entry with a link did not change any evidence score');
+
+      // Sharing: nothing is public until the link is on and the entry is marked as shared
+      const share = page.getByTestId('portfolio-share');
+      await share.getByRole('button', { name: 'Switch sharing on' }).click();
+      const link = page.getByTestId('portfolio-share-link');
+      await link.waitFor({ timeout: 15_000 });
+      const url = await link.innerText();
+      const visitor = await browser.newContext();
+      const publicPage = await visitor.newPage();
+      await gotoAndSettle(publicPage, url, 2500);
+      expect(/Nothing has been shared yet/.test(await bodyText(publicPage)), 'a private entry is visible through the public link');
+
+      await entry.getByRole('button', { name: `Edit ${title}` }).click();
+      await form.getByRole('checkbox').check();
+      await form.getByRole('button', { name: 'Save entry' }).click();
+      await page.locator('[data-testid="portfolio-entry"][data-visibility="shared"]').waitFor({ timeout: 15_000 });
+      await gotoAndSettle(publicPage, url, 2500);
+      const shown = await bodyText(publicPage);
+      expect(shown.includes(title) && /not a professional certification/.test(shown), 'the shared entry or the note on what it means is missing from the public page');
+      expect(!shown.includes(emailA) && !/Smoke Tester/.test(shown), 'the public page shows who the owner is although they did not allow it');
+
+      await share.getByRole('button', { name: 'Switch sharing off' }).click();
+      await page.locator('[data-testid="portfolio-share"][data-enabled="false"]').waitFor({ timeout: 15_000 });
+      await gotoAndSettle(publicPage, url, 2500);
+      expect(await publicPage.getByTestId('public-portfolio-unavailable').isVisible(), 'the link still works after sharing was switched off');
+      // That 404 belongs to the signed-out visitor, not to the journey being watched
+      await visitor.close();
+
+      // Removing the entry removes exactly the evidence it added
+      await entry.getByRole('button', { name: `Remove ${title}` }).click();
+      await page.getByText('Nothing recorded yet').waitFor({ timeout: 15_000 });
+      expect((await evidence()) === before, 'removing the entry did not restore the evidence scores');
+      return `"${title}" counted with a link, shown publicly only while shared, evidence restored after removal`;
     });
 
     // ---- Resume: replace, reprocess, recover ----------------------------------------------------------
@@ -673,7 +732,7 @@ export async function run({ webUrl, apiUrl, aiControl }) {
     // ---- Layout and accessibility basics ------------------------------------------------------------------------------
     await t.step('main pages render, fit a phone screen, and name their controls', async () => {
       const problems = [];
-      const routes = ['/home', '/ai', '/resume', '/skills', '/careers', '/career-lab', '/readiness', '/roadmap', '/recommendations', '/job-agent', '/interview-agent', '/analytics', '/profile', '/settings'];
+      const routes = ['/home', '/ai', '/resume', '/skills', '/careers', '/career-lab', '/portfolio', '/readiness', '/roadmap', '/recommendations', '/job-agent', '/interview-agent', '/analytics', '/profile', '/settings'];
       for (const route of routes) {
         await gotoAndSettle(page, webUrl + route, 2200);
         const text = await bodyText(page);
@@ -693,7 +752,7 @@ export async function run({ webUrl, apiUrl, aiControl }) {
         if (audit.unnamed || audit.unlabelled || audit.noAlt) problems.push(`${route}: ${JSON.stringify(audit)}`);
       }
       await page.setViewportSize({ width: 390, height: 844 });
-      for (const route of ['/home', '/resume', '/careers', '/career-lab', '/job-agent', '/roadmap', '/interview-agent', '/readiness']) {
+      for (const route of ['/home', '/resume', '/careers', '/career-lab', '/portfolio', '/job-agent', '/roadmap', '/interview-agent', '/readiness']) {
         await gotoAndSettle(page, webUrl + route, 2200);
         const width = await page.evaluate(() => document.documentElement.scrollWidth);
         if (width > 395) problems.push(`${route}: ${width}px wide at 390px`);
@@ -722,7 +781,7 @@ export async function run({ webUrl, apiUrl, aiControl }) {
           : route.continue();
       await page.route(`${apiUrl}/**`, failReads);
       const silent = [];
-      const routes = ['/home', '/ai', '/resume', '/skills', '/careers', '/career-lab', '/readiness', '/roadmap', '/recommendations', '/job-agent', '/interview-agent', '/analytics', '/profile'];
+      const routes = ['/home', '/ai', '/resume', '/skills', '/careers', '/career-lab', '/portfolio', '/readiness', '/roadmap', '/recommendations', '/job-agent', '/interview-agent', '/analytics', '/profile'];
       for (const route of routes) {
         await page.goto(webUrl + route);
         const shown = await page.getByTestId('load-error-banner').waitFor({ timeout: 15_000 }).then(() => true, () => false);

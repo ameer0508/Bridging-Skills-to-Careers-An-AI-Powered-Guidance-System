@@ -112,5 +112,7 @@ export const findUserSkill = (
 /** True when the evidence shows the skill being used, not merely listed. */
 export const hasAppliedEvidence = (evidences: IEvidence[]): boolean =>
   evidences.some(e =>
-    ['resume_experience', 'resume_projects', 'resume_certifications'].includes(e.sourceType)
+    ['resume_experience', 'resume_projects', 'resume_certifications'].includes(e.sourceType) ||
+    // A portfolio project counts as use only when it earned points, that is, when it has a link
+    (e.sourceType === 'portfolio_project' && (e.points || 0) > 0)
   );

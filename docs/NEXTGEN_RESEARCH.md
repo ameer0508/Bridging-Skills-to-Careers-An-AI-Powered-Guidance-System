@@ -149,6 +149,10 @@ hiring outcomes.
 - The greedy search is not guaranteed to find the smallest set of changes. With the current
   additive scoring it finds a good one; a counter-example would need requirements that interact,
   which the formula's missing-required penalty makes possible in principle.
+- A hypothetical project for a skill that is new to the profile includes the 10 points for being
+  listed in a resume. A real portfolio project for such a skill earns the project points only, so
+  the two differ by those 10 points; for a skill already on the profile they agree exactly
+  (suite `portfolio`).
 - Counterfactual candidates assume project-level evidence for each skill. Other routes
   (certification, a job) are available in the what-if form but are not searched automatically.
 - No effort or time is attached to a change, because the system holds no data about how long

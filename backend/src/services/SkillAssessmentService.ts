@@ -1,7 +1,6 @@
 import crypto from 'node:crypto';
 import mongoose from 'mongoose';
 import AssessmentAttempt, { type IAssessmentAttempt } from '../models/AssessmentAttempt.js';
-import { Skill, type ISkill } from '../models/Skill.js';
 import { UserSkill, type IEvidence } from '../models/UserSkill.js';
 import {
   SKILL_ASSESSMENTS,
@@ -13,7 +12,8 @@ import {
 } from '../seed/skillAssessments.js';
 import EvidenceCalculator, { EVIDENCE_POINTS } from './EvidenceCalculator.js';
 import RecalculationService from './RecalculationService.js';
-import { escapeRegExp, lookupSkill } from '../utils/skillLexicon.js';
+import { lookupSkill } from '../utils/skillLexicon.js';
+import { findOrCreateCanonicalSkill } from '../utils/canonicalSkill.js';
 import { withUserLock } from '../utils/userLock.js';
 import { AppError } from '../middlewares/errorHandler.js';
 
@@ -273,17 +273,8 @@ class SkillAssessmentService {
     };
   }
 
-  /** The canonical skill record, created from the lexicon when the user's resume never named it. */
-  private async canonicalSkill(skillName: string): Promise<ISkill> {
-    const exact = new RegExp(`^${escapeRegExp(skillName)}$`, 'i');
-    const existing = await Skill.findOne({ $or: [{ canonicalName: exact }, { aliases: exact }] });
-    if (existing) return existing;
-    const known = lookupSkill(skillName);
-    return Skill.create({ canonicalName: skillName, category: known?.category || 'General', aliases: known?.aliases || [], isActive: true });
-  }
-
   private async recordPass(uid: mongoose.Types.ObjectId, skillName: string, attemptId: string, correct: number, of: number, now: Date) {
-    const skill = await this.canonicalSkill(skillName);
+    const skill = await findOrCreateCanonicalSkill(skillName);
     const evidence: IEvidence = {
       sourceType: 'assessment',
       sourceId: attemptId,

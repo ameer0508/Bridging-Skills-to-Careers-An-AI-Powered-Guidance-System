@@ -35,7 +35,7 @@ class UserSkillService {
     // is not removed with it. A skill is kept only while such evidence still earns points.
     let skillsKept = 0;
     for (const doc of await UserSkill.find({ userId: uid })) {
-      const kept = doc.evidences.filter(e => !e.sourceType.startsWith('resume_'));
+      const kept = doc.evidences.filter(e => !e.sourceType.startsWith('resume_') && e.sourceType !== 'portfolio_project');
       const points = Math.min(100, kept.reduce((sum, e) => sum + (e.points || 0), 0));
       if (points === 0) {
         await doc.deleteOne();
@@ -52,6 +52,11 @@ class UserSkillService {
     await CareerReadiness.deleteMany({ userId: uid });
     await GapAnalysis.deleteMany({ userId: uid });
     await Recommendation.deleteMany({ userId: uid, status: 'active' });
+
+    // Portfolio evidence is rebuilt from the entries themselves
+    const { default: PortfolioService } = await import('./PortfolioService.js');
+    await PortfolioService.syncEvidence(userId);
+    skillsKept = await UserSkill.countDocuments({ userId: uid });
 
     if (skillsKept > 0) {
       const { default: RecalculationService } = await import('./RecalculationService.js');
@@ -108,7 +113,7 @@ class UserSkillService {
       const carriedOver = new Map<string, IEvidence[]>();
       const categoryOf = new Map<string, string>();
       for (const existing of await UserSkill.find({ userId: new mongoose.Types.ObjectId(userId) })) {
-        const kept = existing.evidences.filter(e => !e.sourceType.startsWith('resume_'));
+        const kept = existing.evidences.filter(e => !e.sourceType.startsWith('resume_') && e.sourceType !== 'portfolio_project');
         if (kept.length > 0) carriedOver.set(existing.skillId.toString(), kept.map(e => ({ ...(e as unknown as { toObject?: () => IEvidence }).toObject?.() ?? e })));
         categoryOf.set(existing.skillId.toString(), existing.category);
       }
@@ -165,6 +170,9 @@ class UserSkillService {
 
       if (userSkillsToInsert.length > 0) {
         await UserSkill.insertMany(userSkillsToInsert);
+        // Portfolio projects continue the count after the resume's own projects
+        const { default: PortfolioService } = await import('./PortfolioService.js');
+        await PortfolioService.syncEvidence(userId);
         logger.info(
           `Successfully built ${userSkillsToInsert.length} UserSkills for user ${userId}`
         );

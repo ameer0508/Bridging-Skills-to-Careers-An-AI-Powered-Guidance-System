@@ -8,7 +8,9 @@ export type EvidenceSourceType =
   | 'resume_skills'
   // Not from the resume: recorded by the user or by an assessment inside SkillBridge
   | 'self_attested'
-  | 'assessment';
+  | 'assessment'
+  // Finished work the user recorded in their portfolio; their own statement
+  | 'portfolio_project';
 
 /** How far a piece of evidence has been checked. */
 export type EvidenceVerification =

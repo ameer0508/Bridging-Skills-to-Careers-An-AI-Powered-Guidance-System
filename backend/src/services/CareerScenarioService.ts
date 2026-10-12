@@ -64,6 +64,9 @@ export interface CareerScenarioResult {
 const round2 = (n: number): number => Math.round(n * 100) / 100;
 const stepped = (steps: readonly number[], occurrence: number): number => steps[Math.min(occurrence, steps.length - 1)];
 const countOf = (skill: ScenarioSkill, sourceType: string): number => skill.evidences.filter(e => e.sourceType === sourceType).length;
+/** Projects already counted for a skill: those on the resume and portfolio entries that earned points. */
+const projectCount = (skill: ScenarioSkill): number =>
+  skill.evidences.filter(e => e.sourceType === 'resume_projects' || (e.sourceType === 'portfolio_project' && (e.points || 0) > 0)).length;
 
 /** The scoring engine reads `skillId.canonicalName`, `skillId.aliases`, `evidenceScore` and `evidences`. */
 const asEngineInput = (skills: ScenarioSkill[]): IUserSkill[] =>
@@ -88,7 +91,7 @@ class CareerScenarioService {
         canonicalName: skill.canonicalName,
         aliases: skill.aliases || [],
         evidenceScore: doc.evidenceScore,
-        evidences: doc.evidences.map(e => ({ sourceType: e.sourceType, description: e.description, weight: e.weight })),
+        evidences: doc.evidences.map(e => ({ sourceType: e.sourceType, description: e.description, weight: e.weight, points: e.points })),
         hypothetical: false
       });
     }
@@ -173,7 +176,7 @@ class CareerScenarioService {
         case 'add_project':
           for (const name of change.skills) {
             const skill = ensure(name);
-            add(skill, stepped(EVIDENCE_POINTS.projects, countOf(skill, 'resume_projects')), 'resume_projects', `Hypothetical project${change.name ? `: ${change.name}` : ''}`);
+            add(skill, stepped(EVIDENCE_POINTS.projects, projectCount(skill)), 'resume_projects', `Hypothetical project${change.name ? `: ${change.name}` : ''}`);
           }
           break;
         case 'add_experience':

@@ -37,7 +37,9 @@ export class ReadinessCalculator {
 
         // Drill down into evidence types for other dimensions
         const hasExp = us.evidences.some(e => e.sourceType === 'resume_experience');
-        const hasProj = us.evidences.some(e => e.sourceType === 'resume_projects');
+        const hasProj = us.evidences.some(
+          e => e.sourceType === 'resume_projects' || (e.sourceType === 'portfolio_project' && (e.points || 0) > 0)
+        );
         const hasCert = us.evidences.some(
           e => e.sourceType === 'resume_certifications' || e.sourceType === 'resume_education'
         );

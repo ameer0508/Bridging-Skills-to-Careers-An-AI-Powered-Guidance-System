@@ -12,6 +12,8 @@ import { AIThinkingAnimation } from '../components/experience';
 // Lazy-loaded Workspaces for Route Code Splitting
 const HomeWorkspace = lazy(() => import('../workspaces/HomeWorkspace/HomeWorkspace'));
 const CareerLabWorkspace = lazy(() => import('../workspaces/CareerLabWorkspace/CareerLabWorkspace'));
+const PortfolioWorkspace = lazy(() => import('../workspaces/PortfolioWorkspace/PortfolioWorkspace'));
+const PublicPortfolioPage = lazy(() => import('../workspaces/PortfolioWorkspace/PublicPortfolioPage'));
 const CareerIntelligenceWorkspace = lazy(() => import('../workspaces/CareerIntelligenceWorkspace/CareerIntelligenceWorkspace'));
 const LearningJourneyWorkspace = lazy(() => import('../workspaces/LearningJourneyWorkspace/LearningJourneyWorkspace'));
 const AnalyticsWorkspace = lazy(() => import('../workspaces/AnalyticsWorkspace/AnalyticsWorkspace'));
@@ -91,6 +93,15 @@ export const router = createBrowserRouter([
     element: <RootRedirect />,
   },
   {
+    // A shared portfolio is public: reachable signed in or not
+    path: '/p/:token',
+    element: (
+      <WorkspaceSuspense>
+        <PublicPortfolioPage />
+      </WorkspaceSuspense>
+    ),
+  },
+  {
     element: <GuestRoute />,
     children: [
       {
@@ -135,6 +146,14 @@ export const router = createBrowserRouter([
             element: (
               <WorkspaceSuspense>
                 <CareerLabWorkspace />
+              </WorkspaceSuspense>
+            ),
+          },
+          {
+            path: '/portfolio',
+            element: (
+              <WorkspaceSuspense>
+                <PortfolioWorkspace />
               </WorkspaceSuspense>
             ),
           },

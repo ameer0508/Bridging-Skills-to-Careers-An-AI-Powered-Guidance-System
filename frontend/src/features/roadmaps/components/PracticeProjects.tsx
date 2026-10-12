@@ -158,6 +158,7 @@ export const PracticeProjectsPanel: React.FC<{ careerId: string }> = ({ careerId
                 <p className="text-[11px] text-slate-400">
                   {project.completedAt ? `Marked complete ${formatDate(project.completedAt)}. ` : project.startedAt ? `Started ${formatDate(project.startedAt)}. ` : ''}
                   {project.evidence}
+                  {project.status === 'completed' && <> <a href="/portfolio" className="text-cyan-300 underline">Add it to your portfolio</a> with a link to make it count.</>}
                 </p>
               </li>
             ))}
@@ -220,7 +221,7 @@ export const PracticeProjectsPanel: React.FC<{ careerId: string }> = ({ careerId
       </div>
 
       <Note testId="practice-projects-note">
-        {data.note} Effort ranges are planning assumptions, not measurements. To have a finished project count, add it to your resume and upload it again.
+        {data.note} Effort ranges are planning assumptions, not measurements. To have a finished project count, add it to your portfolio with a link, or to your resume.
       </Note>
     </section>
   );

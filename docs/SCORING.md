@@ -33,6 +33,7 @@ not supported and not tested.
 | Named in a certification | 30 (once) |
 | Mentioned anywhere in the resume | 10 |
 | Passed a SkillBridge skill check (not from the resume; see section 12) | 15 (once) |
+| Portfolio project with a link (not from the resume; see section 15) | Counted as a further project: 25, 10, 5 after the resume's own projects |
 
 Capped at 100. Repeating a skill inside one role or project adds nothing.
 Proficiency estimate: 85+ expert, 60+ advanced, 35+ intermediate, otherwise beginner. A skill that
@@ -254,7 +255,7 @@ offers or employment.
 
 ## 11. Versions and recalculation
 
-Every recalculation records `scoringVersion` (currently `2026.10-2`, changed whenever a formula,
+Every recalculation records `scoringVersion` (currently `2026.10-3`, changed whenever a formula,
 weight or threshold in this document changes) and `taxonomyVersion` (a hash of the career and
 requirement data). A transition plan made under other versions is shown as outdated. Which events
 recompute which figures is tabulated in `NEXTGEN_RESEARCH.md` (R1).
@@ -279,8 +280,9 @@ degree, less than using it in a project (25). They are not derived from data.
 A pass on a skill the resume never mentioned puts the skill on the profile with those 15 points
 only; it does not also receive the 10 points for being listed in a resume.
 
-Evidence is kept by kind and never merged: stated in a resume (`stated`), confirmed by the user
-(`self_attested`, always 0 points), and shown in a skill check (`assessed`). Evidence that did
+Evidence is kept by kind and never merged: stated in a resume (`stated`), the user's own record
+(`self_attested`: a confirmation of recent use, always 0 points, or a portfolio project, section
+15), and shown in a skill check (`assessed`). Evidence that did
 not come from the resume survives replacing, reprocessing or deleting the resume; scores are then
 recomputed from what remains.
 
@@ -341,3 +343,36 @@ run time. For one career:
 **A project taken on here is a record, not evidence.** Its tasks and its "complete" status are
 the user's own report and change no skill, score or recommendation. The score change shown is
 hypothetical. Effort ranges are assumptions set per brief, not measurements.
+
+## 15. Portfolio evidence
+
+A portfolio entry is finished work the user records: title, skills used, the day it was finished
+and, optionally, a link. It is the user's own statement. SkillBridge does not open the link,
+check who made the work or judge its quality.
+
+| Entry | Effect on each skill it names |
+|---|---|
+| With an https link | Counts as one more project: 25, 10 or 5 points on the project scale of section 2, continuing after the projects on the resume. Dated on the completion day. Verification `self_attested` |
+| Without a link | Recorded and dated (it updates freshness). 0 points. It does not put a new skill on the profile |
+
+- A project on a resume and a portfolio entry with a link are treated alike because both are
+  unchecked statements by the user. The same piece of work entered in both places is counted
+  twice; nothing detects that.
+- A skill known only from the portfolio has its project points and no "listed in a resume" points.
+- An entry never makes a skill "verified". A skill is shown as verified by skill check only when
+  the user passed that skill check (section 12), and the two kinds of evidence are stored as
+  separate records.
+- An entry made from a practice project (section 14) is accepted only after the user has marked
+  that project complete, and once per project.
+- Portfolio evidence is rebuilt from the entries whenever an entry or the resume changes, so it
+  is never added twice. Removing an entry removes exactly its evidence. Entries survive replacing
+  or deleting the resume; after a deletion the first portfolio project for a skill counts as the
+  first project.
+- Limits: 30 entries, 8 skills per entry, skills must be ones SkillBridge recognises, completion
+  date not in the future. Files cannot be uploaded; only a link is stored.
+
+**Sharing.** Entries are private. A user can switch on a public link (a random 48-character
+token); it shows only entries marked as shared, with title, description, date, link and skills.
+The owner's name appears only if they allow it. No scores, resume data, ids or contact details
+are included. Switching sharing off disables the link permanently; switching it on again issues a
+new one.

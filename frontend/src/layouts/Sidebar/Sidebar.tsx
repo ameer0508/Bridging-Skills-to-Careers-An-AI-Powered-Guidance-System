@@ -19,6 +19,7 @@ import {
   Bot,
   MessageSquare,
   FlaskConical,
+  FolderGit2,
 } from 'lucide-react';
 import { SidebarItem } from './SidebarItem';
 import { useAuthStore } from '../../store/authStore';
@@ -106,6 +107,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           to: '/career-lab',
           label: 'Career Lab',
           icon: <FlaskConical className="w-4 h-4" />,
+        },
+        {
+          to: '/portfolio',
+          label: 'Portfolio',
+          icon: <FolderGit2 className="w-4 h-4" />,
         },
         {
           to: '/readiness',

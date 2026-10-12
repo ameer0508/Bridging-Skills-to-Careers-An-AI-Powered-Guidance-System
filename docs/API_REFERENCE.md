@@ -121,6 +121,12 @@ Nothing in this group changes the user's skills or scores, except recording a co
 | `POST` | `/api/v1/projects` | Yes | Body `briefId`, optional `careerId`. Takes a project on (`201`), or returns the existing one (`200`). `409 PROJECT_NOT_RELEVANT` when it addresses none of the caller's gaps. |
 | `PATCH` | `/api/v1/projects/:id` | Yes | Body `status` (`planned`, `in_progress`, `completed`) and/or `task` (`index`, `done`). The caller's own record; changes no score. |
 | `DELETE` | `/api/v1/projects/:id` | Yes | Remove a project the caller took on. |
+| `GET` | `/api/v1/portfolio` | Yes | The caller's entries (each with the points it earned per skill and whether that skill was separately verified by a skill check), limits, and the sharing settings. |
+| `POST` | `/api/v1/portfolio` | Yes | Body `title`, `skills` (1 to 8 recognised skills), `completedOn` (`YYYY-MM-DD`, not in the future), optional `description`, `evidenceUrl` (https, no credentials), `sourceProjectId`, `visibility` (`private` default, or `shared`). `400 UNKNOWN_SKILL`, `409 PROJECT_NOT_COMPLETED`, `409 PROJECT_ALREADY_IN_PORTFOLIO`, `409 PORTFOLIO_FULL`. Rebuilds evidence and recalculates. |
+| `PUT` | `/api/v1/portfolio/:id` | Yes | Replace an entry (same body). |
+| `DELETE` | `/api/v1/portfolio/:id` | Yes | Remove an entry and the evidence it added. |
+| `PUT` | `/api/v1/portfolio/share` | Yes | Body `enabled` and/or `showName`. Switching on issues a new link token; switching off disables it. |
+| `GET` | `/api/v1/portfolio/shared/:token` | No | Public. Entries marked as shared, the owner's name only if allowed, and a note on what the entries mean. `404` for an unknown or switched-off link. |
 
 ### Jobs and application tracking
 

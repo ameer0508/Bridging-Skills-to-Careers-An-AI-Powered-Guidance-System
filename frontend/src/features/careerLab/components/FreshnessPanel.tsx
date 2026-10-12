@@ -18,7 +18,7 @@ const STATUS_TONE: Record<FreshnessStatus, string> = {
 };
 const VERIFICATION_TEXT: Record<string, string> = {
   stated: 'Stated in your resume',
-  self_attested: 'Confirmed by you (not verified)',
+  self_attested: 'Your own record (not verified)',
   assessed: 'Verified by a SkillBridge skill check (not a certification)',
 };
 
