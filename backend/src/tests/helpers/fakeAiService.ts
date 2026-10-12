@@ -198,6 +198,48 @@ export async function startFakeAiService(serviceKey: string, listenPort = 0): Pr
         }
         return reply();
       }
+      // Multilingual analysis (E5): a fixed-shape reply keyed on markers in the text. The real
+      // extraction is tested in ai/tests/test_multilingual.py.
+      if (path === '/api/v1/multilingual/analyze' || path === '/api/v1/multilingual/analyze-text') {
+        const text = path.endsWith('analyze-text')
+          ? (JSON.parse(raw.toString('utf8') || '{}') as { text?: string }).text || ''
+          : extractUploadedText(raw);
+        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        if (text.includes('SCANNED')) {
+          return send(200, { success: true, data: { method: 'multilingual-rules-2', status: 'scanned_unreadable', language: { language: null, supported: false, status: 'too_little_text', message: 'Only 0 words.' }, layout: { type: 'single_column', pages: 1, scannedPages: 1 }, textQuality: 'ok', warnings: ['1 of 1 page(s) look scanned (images without a text layer). SkillBridge has no OCR, so their text cannot be read.'], sections: [], fields: { email: null, phone: null, experience: [], education: [], skills: [] }, lineCount: 0, originalLines: [], fileType: 'pdf' } });
+        }
+        if (text.includes('Compétences')) {
+          return send(200, { success: true, data: { method: 'multilingual-rules-2', status: 'unsupported', language: { language: 'fr', supported: false, status: 'unsupported_language', message: 'This resume looks like French. Supported: English, Hindi, Spanish.' }, layout: { type: 'plain_text', pages: 1, scannedPages: 0 }, textQuality: 'ok', warnings: ['This resume looks like French. Supported: English, Hindi, Spanish.'], sections: [], fields: { email: null, phone: null, experience: [], education: [], skills: [] }, lineCount: lines.length, originalLines: lines, fileType: 'text' } });
+        }
+        const hindi = /[ऀ-ॿ]/.test(text);
+        const emailLine = lines.findIndex(l => /@/.test(l));
+        const skills = KNOWN_SKILLS.map(([n]) => n).filter(n => containsTerm(text, n));
+        return send(200, {
+          success: true,
+          data: {
+            method: 'multilingual-rules-2',
+            status: 'extracted',
+            language: { language: hindi ? 'hi' : 'en', name: hindi ? 'Hindi' : 'English', supported: true, status: 'detected', mixed: hindi && /[A-Za-z]/.test(text), scripts: {}, words: lines.join(' ').split(/\s+/).length },
+            layout: { type: 'plain_text', pages: 1, scannedPages: 0 },
+            textQuality: 'ok',
+            warnings: [],
+            sections: lines.map((l, i) => (/^(कौशल|skills)$/i.test(l) ? { key: 'skills', heading: l, headingLanguage: hindi ? 'hi' : 'en', startLine: i, endLine: i + 1 } : null)).filter(Boolean),
+            fields: {
+              email: emailLine >= 0 ? { value: lines[emailLine].match(/[\w.+-]+@[\w-]+(?:\.[\w-]+)+/)?.[0] ?? null, source: { line: emailLine, text: lines[emailLine] } } : null,
+              phone: null,
+              experience: [],
+              education: [],
+              skills: skills.map(n => {
+                const line = lines.findIndex(l => containsTerm(l, n));
+                return { name: n, matched: n, source: { line, text: lines[line] } };
+              }),
+            },
+            lineCount: lines.length,
+            originalLines: lines,
+            fileType: path.endsWith('analyze-text') ? 'text' : 'txt',
+          },
+        });
+      }
       if (path === '/api/v1/skills/normalize') {
         const { skills = [] } = JSON.parse(raw.toString('utf8') || '{}') as { skills?: string[] };
         const categoryOf = new Map(KNOWN_SKILLS.map(([n, c]) => [n.toLowerCase(), c]));
