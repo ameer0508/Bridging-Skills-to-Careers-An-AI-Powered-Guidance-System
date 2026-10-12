@@ -44,7 +44,8 @@ export class ContextAssembler {
           const skillObj = s.skillId as Record<string, unknown> | undefined;
           const evidencesList = (s.evidences as Record<string, unknown>[]) || [];
           return {
-            name: skillObj?.name || s.skillId,
+            // canonicalName is always present; `name` is an optional legacy copy of it
+            name: skillObj?.canonicalName || skillObj?.name || 'Unnamed skill',
             evidenceScore: s.evidenceScore,
             verifiedVia: evidencesList.map(e => e.sourceType),
           };
@@ -53,7 +54,7 @@ export class ContextAssembler {
         context.skills = [];
       }
     } else {
-      context.skills = [{ name: 'TypeScript', evidenceScore: 90, verifiedVia: ['github'] }];
+      context.skills = [];
     }
 
     if (!careerId) {

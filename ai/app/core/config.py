@@ -30,6 +30,9 @@ class Settings(BaseSettings):
     HUGGINGFACE_API_KEY: Optional[str] = None
     LOCAL_MODEL_ENDPOINT: Optional[str] = "http://localhost:11434/api/generate"
     PRIMARY_PROVIDER: str = "gemini"
+    # Longest a single Gemini request may take. Kept below the backend's own timeout for the
+    # AI service so a slow provider is reported as unavailable instead of leaving callers hanging.
+    GEMINI_TIMEOUT_SECONDS: float = 20.0
     USE_MOCK_PROVIDER: bool = False
 
     # Configuration binding to read from environment and local .env

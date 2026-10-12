@@ -1,6 +1,43 @@
 import { Request, Response, NextFunction } from 'express';
 import OpportunityService from '../services/OpportunityService.js';
 import { AppError } from '../middlewares/errorHandler.js';
+import { z } from 'zod';
+import { APPLICATION_STATUSES, type ISavedOpportunity } from '../models/SavedOpportunity.js';
+
+const searchQuerySchema = z.object({
+  search: z.string().trim().max(120).optional(),
+  location: z.string().trim().max(120).optional(),
+  remote: z.enum(['true', 'false']).optional(),
+  employmentType: z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERN', 'INTERNSHIP', 'all']).optional(),
+  datePosted: z.enum(['all', 'today', '3days', 'week', 'month']).optional(),
+  sortBy: z.enum(['match', 'date', 'salary', 'relevance']).optional(),
+  minScore: z.coerce.number().int().min(0).max(100).optional(),
+  salaryMin: z.coerce.number().min(0).max(1_000_000_000).optional(),
+  page: z.coerce.number().int().min(1).max(50).optional(),
+  limit: z.coerce.number().int().min(1).max(50).optional(),
+});
+
+const statusBodySchema = z.object({
+  status: z.enum(APPLICATION_STATUSES as [string, ...string[]]),
+  notes: z.string().max(2000).optional(),
+}).strict();
+
+const detailsBodySchema = z.object({
+  notes: z.string().max(2000).optional(),
+  reminderAt: z.string().max(40).nullable().optional(),
+  reminderNote: z.string().max(300).optional(),
+}).strict().refine(body => Object.keys(body).length > 0, { message: 'Nothing to update.' });
+
+function validationError(error: z.ZodError): AppError {
+  const detail = error.issues.map(i => `${i.path.join('.') || 'request'}: ${i.message}`).join('; ');
+  return new AppError(`Invalid request: ${detail}`, 400, 'VALIDATION_ERROR');
+}
+
+/** Adds the computed "reminder is due" flag the client shows next to a saved opportunity. */
+function presentSaved(doc: ISavedOpportunity) {
+  const plain = doc.toObject();
+  return { ...plain, reminderDue: Boolean(doc.reminderAt && doc.reminderAt.getTime() <= Date.now()) };
+}
 
 class OpportunityController {
   /**
@@ -11,32 +48,32 @@ class OpportunityController {
       const userId = req.user?.userId;
       if (!userId) throw new AppError('Authentication is required.', 401);
 
-      const { search, location, remote, employmentType, datePosted, sortBy, minScore, page, limit } = req.query;
+      const parsed = searchQuerySchema.safeParse(req.query);
+      if (!parsed.success) throw validationError(parsed.error);
+      const q = parsed.data;
 
       const query = {
-        keywords: typeof search === 'string' ? search : undefined,
-        location: typeof location === 'string' ? location : undefined,
-        remoteOnly: remote === 'true',
-        employmentType: typeof employmentType === 'string' ? employmentType : undefined,
-        datePosted: typeof datePosted === 'string' ? datePosted : undefined,
-        sortBy: typeof sortBy === 'string' && ['match', 'date', 'salary', 'relevance'].includes(sortBy)
-          ? (sortBy as 'match' | 'date' | 'salary' | 'relevance')
+        keywords: q.search || undefined,
+        location: q.location || undefined,
+        remoteOnly: q.remote === 'true',
+        employmentType: q.employmentType && q.employmentType !== 'all'
+          ? (q.employmentType === 'INTERNSHIP' ? 'INTERN' : q.employmentType)
           : undefined,
-        page: typeof page === 'string' ? parseInt(page, 10) : 1,
-        limit: typeof limit === 'string' ? parseInt(limit, 10) : 10,
+        datePosted: q.datePosted && q.datePosted !== 'all' ? q.datePosted : undefined,
+        salaryMin: q.salaryMin,
+        sortBy: q.sortBy,
+        page: q.page ?? 1,
+        limit: q.limit ?? 10,
       };
 
       const result = await OpportunityService.searchOpportunities(userId, query);
 
       let opportunities = result.opportunities;
-      if (minScore) {
-        const threshold = parseInt(String(minScore), 10);
-        if (!isNaN(threshold)) {
-          // Unscored postings cannot satisfy a minimum-score filter
-          opportunities = opportunities.filter(
-            (o) => o.skillbridgeMatchScore !== null && o.skillbridgeMatchScore >= threshold
-          );
-        }
+      if (typeof q.minScore === 'number') {
+        // Unscored postings cannot satisfy a minimum-score filter
+        opportunities = opportunities.filter(
+          (o) => o.skillbridgeMatchScore !== null && o.skillbridgeMatchScore >= (q.minScore as number)
+        );
       }
 
       res.status(200).json({
@@ -46,6 +83,7 @@ class OpportunityController {
           total: opportunities.length,
           page: query.page,
           providerHealth: result.providerHealth,
+          meta: result.meta,
         },
       });
     } catch (error) {
@@ -85,11 +123,14 @@ class OpportunityController {
       if (!userId) throw new AppError('Authentication is required.', 401);
 
       const oppData = req.body;
+      if (!oppData || typeof oppData !== 'object' || Array.isArray(oppData)) {
+        throw new AppError('A job posting is required.', 400, 'VALIDATION_ERROR');
+      }
       const saved = await OpportunityService.saveOpportunity(userId, oppData);
 
       res.status(201).json({
         success: true,
-        data: { savedOpportunity: saved },
+        data: { savedOpportunity: presentSaved(saved) },
       });
     } catch (error) {
       next(error);
@@ -107,11 +148,11 @@ class OpportunityController {
       if (!userId) throw new AppError('Authentication is required.', 401);
       if (!id) throw new AppError('Opportunity ID is required.', 400);
 
-      const deleted = await OpportunityService.unsaveOpportunity(userId, id);
+      await OpportunityService.unsaveOpportunity(userId, id);
 
       res.status(200).json({
         success: true,
-        data: { deleted },
+        data: { deleted: true },
       });
     } catch (error) {
       next(error);
@@ -130,7 +171,7 @@ class OpportunityController {
 
       res.status(200).json({
         success: true,
-        data: { savedOpportunities: saved, total: saved.length },
+        data: { savedOpportunities: saved.map(presentSaved), total: saved.length },
       });
     } catch (error) {
       next(error);
@@ -144,17 +185,44 @@ class OpportunityController {
     try {
       const userId = req.user?.userId;
       const { id } = req.params;
-      const { status, notes } = req.body;
-
       if (!userId) throw new AppError('Authentication is required.', 401);
       if (!id) throw new AppError('Opportunity ID is required.', 400);
-      if (!status) throw new AppError('Status is required.', 400);
+      const parsed = statusBodySchema.safeParse(req.body ?? {});
+      if (!parsed.success) throw validationError(parsed.error);
 
-      const updated = await OpportunityService.updateSavedStatus(userId, id, status, notes);
+      const updated = await OpportunityService.updateSavedStatus(
+        userId,
+        id,
+        parsed.data.status as ISavedOpportunity['status'],
+        parsed.data.notes
+      );
 
       res.status(200).json({
         success: true,
-        data: { savedOpportunity: updated },
+        data: { savedOpportunity: presentSaved(updated) },
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Updates the notes and follow-up reminder of a saved opportunity.
+   */
+  updateSavedDetails = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      const { id } = req.params;
+      if (!userId) throw new AppError('Authentication is required.', 401);
+      if (!id) throw new AppError('Opportunity ID is required.', 400);
+      const parsed = detailsBodySchema.safeParse(req.body ?? {});
+      if (!parsed.success) throw validationError(parsed.error);
+
+      const updated = await OpportunityService.updateSavedDetails(userId, id, parsed.data);
+
+      res.status(200).json({
+        success: true,
+        data: { savedOpportunity: presentSaved(updated) },
       });
     } catch (error) {
       next(error);

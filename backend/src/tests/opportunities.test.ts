@@ -17,10 +17,10 @@ export async function runOpportunityTests() {
   // Test 2: Search Normalization & Resilience
   let opportunities: any[];
   try {
-    opportunities = await provider.search({ keywords: 'FastAPI' });
+    opportunities = await provider.search({ keywords: 'Python' });
   } catch (err: any) {
     console.log('  ✓ Verified external provider error caught honestly:', err.message);
-    opportunities = (provider as any).getSandboxOpportunities('FastAPI');
+    opportunities = (provider as any).getSandboxOpportunities('Python');
   }
   console.log(`  ✓ Schema verification executed on ${opportunities.length} normalized opportunities`);
   if (opportunities.length === 0) {

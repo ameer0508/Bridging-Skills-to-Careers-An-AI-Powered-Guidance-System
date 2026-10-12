@@ -38,7 +38,7 @@ class GeminiProvider(BaseAIProvider):
         self._model_name = model_name or os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
         self.api_key = os.getenv("GEMINI_API_KEY")
         if GENAI_AVAILABLE and self.api_key:
-            self.client = genai.Client(api_key=self.api_key)
+            self.client = genai.Client(api_key=self.api_key, http_options=self._http_options())
         else:
             if not self.api_key:
                 logger.warning("GEMINI_API_KEY is not set. Client initialization deferred.")
@@ -78,12 +78,21 @@ class GeminiProvider(BaseAIProvider):
     def is_available(self) -> bool:
         return bool(GENAI_AVAILABLE and (self.api_key or os.getenv("GEMINI_API_KEY")))
 
+    @staticmethod
+    def _http_options() -> Dict[str, Any]:
+        """Request timeout for every Gemini call, in the milliseconds the SDK expects."""
+        try:
+            seconds = float(os.getenv("GEMINI_TIMEOUT_SECONDS", "20"))
+        except ValueError:
+            seconds = 20.0
+        return {"timeout": int(max(1.0, seconds) * 1000)}
+
     def _get_client(self) -> genai.Client:
         if not self.client:
             key = os.getenv("GEMINI_API_KEY")
             if not key:
                 raise ValueError("GEMINI_API_KEY is not set in the environment.")
-            self.client = genai.Client(api_key=key)
+            self.client = genai.Client(api_key=key, http_options=self._http_options())
         return self.client
 
     def _execute_structured_prompt(self, prompt: str, schema_class: Any, metadata_tag: str) -> UnifiedAIResponse:

@@ -13,6 +13,10 @@ router.post('/save', OpportunityController.saveOpportunity);
 router.post('/:id/save', OpportunityController.saveOpportunity);
 router.delete('/:id/save', OpportunityController.deleteSavedOpportunity);
 router.patch('/saved/:id/status', OpportunityController.updateSavedStatus);
+// Notes and follow-up reminder of a saved opportunity
+router.patch('/saved/:id', OpportunityController.updateSavedDetails);
+// Same operation as DELETE /:id/save, under the saved-opportunity path
+router.delete('/saved/:id', OpportunityController.deleteSavedOpportunity);
 router.get('/:id', OpportunityController.getOpportunityById);
 
 export default router;

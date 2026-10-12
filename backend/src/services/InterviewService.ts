@@ -77,9 +77,9 @@ export class InterviewService {
         // Skills on the profile, strongest evidence first
         const skillsDocs = await UserSkill.find({ userId: userObjectId })
           .sort({ evidenceScore: -1 })
-          .populate<{ skillId: { name: string } }>('skillId');
+          .populate<{ skillId: { canonicalName?: string; name?: string } }>('skillId');
         userSkillNames = skillsDocs
-          .map((s) => (s.skillId && typeof s.skillId === 'object' ? s.skillId.name : null))
+          .map((s) => (s.skillId && typeof s.skillId === 'object' ? s.skillId.canonicalName || s.skillId.name : null))
           .filter((n): n is string => Boolean(n));
 
         // Gaps for the career being prepared for; otherwise for the best match

@@ -113,6 +113,8 @@ export interface FakeAiService {
    * 'ok' returns `set`; 'short' returns one question fewer than requested.
    */
   questions: { mode: 'unavailable' | 'ok' | 'short'; set: Array<Record<string, unknown>>; payloads: Array<Record<string, any>> };
+  /** How /api/v1/chat behaves. Defaults to 'ok' (a deterministic reply from a named fake provider). */
+  chat: { mode: 'ok' | 'unavailable' | 'slow' | 'error'; reply: string; delayMs: number; prompts: string[] };
   /** How /api/v1/extract behaves: 'ok', 'fail' (500) or 'slow' (answers after `delayMs`). */
   extract: { mode: 'ok' | 'fail' | 'slow'; delayMs: number };
   /** Paths requested since start, e.g. "POST /api/v1/extract". */
@@ -138,6 +140,7 @@ export async function startFakeAiService(serviceKey: string): Promise<FakeAiServ
   const requests: string[] = [];
   const interview: FakeAiService['interview'] = { mode: 'unavailable', rubric: {} };
   const extract: FakeAiService['extract'] = { mode: 'ok', delayMs: 400 };
+  const chat: FakeAiService['chat'] = { mode: 'ok', reply: 'Deterministic test reply.', delayMs: 1500, prompts: [] };
   const questions: FakeAiService['questions'] = { mode: 'unavailable', set: [], payloads: [] };
 
   const server = http.createServer((req, res) => {
@@ -202,7 +205,15 @@ export async function startFakeAiService(serviceKey: string): Promise<FakeAiServ
         return send(200, { success: true, provider: 'fake', model: 'fake-questions', data: { questions: set } });
       }
       if (path === '/api/v1/chat') {
-        return send(200, { success: true, data: 'Deterministic test reply.', provider: 'fake_ai_service' });
+        chat.prompts.push(String((JSON.parse(raw.toString('utf8') || '{}') as { prompt?: string }).prompt || ''));
+        if (chat.mode === 'unavailable') return send(503, { success: false, code: 'AI_UNAVAILABLE', error: 'AI chat is unavailable.' });
+        if (chat.mode === 'error') return send(500, { detail: 'Internal Server Error' });
+        const reply = () => send(200, { success: true, data: chat.reply, provider: 'fake_ai_service', model: 'fake-chat-model' });
+        if (chat.mode === 'slow') {
+          setTimeout(reply, chat.delayMs).unref();
+          return;
+        }
+        return reply();
       }
       return send(404, { detail: 'Not implemented in fake AI service.' });
     });
@@ -218,6 +229,7 @@ export async function startFakeAiService(serviceKey: string): Promise<FakeAiServ
     interview,
     extract,
     questions,
+    chat,
     stop: () => new Promise<void>(resolve => server.close(() => resolve()))
   };
 }

@@ -4,6 +4,7 @@ import {
   CanonicalOpportunity,
   EnrichedOpportunity,
   OpportunityProviderHealth,
+  OpportunitySearchMeta,
 } from './opportunities/OpportunityProvider.js';
 import JSearchProvider from './opportunities/JSearchProvider.js';
 import mongoose from 'mongoose';
@@ -26,6 +27,36 @@ function sanitizeText(raw?: string): string {
     .trim();
 }
 
+/** Yearly amounts are compared directly; other periods are not converted, so they never pass a salary filter. */
+const yearlyTop = (salary: CanonicalOpportunity['salary']): number | null => {
+  if (!salary) return null;
+  if (salary.period && salary.period !== 'YEARLY' && salary.period !== 'YEAR') return null;
+  return salary.max ?? salary.min ?? null;
+};
+
+const DATE_WINDOW_DAYS: Record<string, number> = { today: 1, '3days': 3, week: 7, month: 30 };
+
+/** Same role re-posted by the same employer in the same place counts as one posting. */
+const repostKey = (opp: CanonicalOpportunity): string =>
+  [opp.title, opp.company, opp.location].map(v => (v || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()).join('|');
+
+export function formatSalary(salary?: CanonicalOpportunity['salary'] | null): string {
+  if (!salary || (!salary.min && !salary.max)) return 'Salary not disclosed';
+  const amount = (n: number) => n.toLocaleString('en-US');
+  const range = salary.min && salary.max && salary.min !== salary.max
+    ? `${amount(salary.min)} - ${amount(salary.max)}`
+    : amount((salary.max || salary.min) as number);
+  const period = salary.period ? ` per ${salary.period.toLowerCase().replace(/ly$/, '')}` : '';
+  return `${salary.currency ? `${salary.currency} ` : ''}${range}${period}`;
+}
+
+export interface SavedOpportunityDetailsUpdate {
+  notes?: string;
+  /** ISO date, or null to clear the reminder. */
+  reminderAt?: string | null;
+  reminderNote?: string;
+}
+
 function sanitizeUrl(urlStr?: string): string {
   if (!urlStr) return '';
   try {
@@ -43,7 +74,7 @@ class OpportunityService {
   private provider: OpportunityProvider;
   // Provider results only, keyed by search. Match scores are never cached: they are computed
   // per request from the user's current skills.
-  private cache: Map<string, { data: CanonicalOpportunity[]; timestamp: number }> = new Map();
+  private cache: Map<string, { data: CanonicalOpportunity[]; timestamp: number; duplicatesRemoved: number }> = new Map();
   private readonly CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 
   constructor() {
@@ -51,13 +82,16 @@ class OpportunityService {
   }
 
   /**
-   * Searches live external opportunities and enriches them with candidate SkillBridge match telemetry.
+   * Searches job postings, scores each against the user's evidenced skills, and reports
+   * honestly where the results came from and what the filters removed.
    */
   async searchOpportunities(
     userId: string,
     query: OpportunitySearchQuery
-  ): Promise<{ opportunities: EnrichedOpportunity[]; providerHealth: OpportunityProviderHealth }> {
+  ): Promise<{ opportunities: EnrichedOpportunity[]; providerHealth: OpportunityProviderHealth; meta: OpportunitySearchMeta }> {
     const health = await this.provider.healthCheck();
+    const page = query.page && query.page > 0 ? query.page : 1;
+    const limit = Math.min(50, Math.max(1, query.limit || 10));
 
     // Candidate evidence: the user's skills with their resume evidence
     let userSkillIndex = new Map<string, SkillEvidenceMatch>();
@@ -74,53 +108,100 @@ class OpportunityService {
       }
     }
 
-    // Deriving search keyword query if not provided
-    const searchKeyword = query.keywords || targetTitle || 'Software Engineer';
-    const cacheKey = `${searchKeyword}_${query.location || 'all'}_${query.page || 1}_${query.datePosted || 'all'}`.toLowerCase();
+    // With no keywords the search is for the user's own best-matching career, if they have one
+    const searchKeyword = (query.keywords || targetTitle || '').trim();
+    const cacheKey = `${searchKeyword}_${query.location || 'all'}_${page}_${query.datePosted || 'all'}`.toLowerCase();
     const cached = this.cache.get(cacheKey);
-    let canonicalOpportunities: CanonicalOpportunity[];
-    try {
-      canonicalOpportunities =
-        cached && Date.now() - cached.timestamp < this.CACHE_TTL_MS
-          ? cached.data
-          : await this.provider.search({ ...query, keywords: searchKeyword });
-    } catch (err: unknown) {
-      const errorMsg = err instanceof Error ? err.message : 'External opportunity provider request failed';
-      return {
-        opportunities: [],
-        providerHealth: {
-          status: 'DOWN',
-          provider: this.provider.name,
-          message: errorMsg,
-        },
-      };
-    }
+    const fromCache = Boolean(cached && Date.now() - cached.timestamp < this.CACHE_TTL_MS);
 
-    // DEDUPLICATION: Prevent duplicate live opportunities using provider + externalId
-    const uniqueMap = new Map<string, CanonicalOpportunity>();
-    canonicalOpportunities.forEach((opp) => {
-      const dedupKey = `${opp.provider}_${opp.externalId}`;
-      if (!uniqueMap.has(dedupKey)) {
-        uniqueMap.set(dedupKey, opp);
+    let deduplicatedList: CanonicalOpportunity[];
+    let duplicatesRemoved: number;
+    let fetchedAt: number;
+    let rawCount: number;
+    if (fromCache && cached) {
+      deduplicatedList = cached.data;
+      duplicatesRemoved = cached.duplicatesRemoved;
+      fetchedAt = cached.timestamp;
+      rawCount = cached.data.length + cached.duplicatesRemoved;
+    } else {
+      let fetched: CanonicalOpportunity[];
+      try {
+        fetched = await this.provider.search({ ...query, keywords: searchKeyword, page });
+      } catch (err: unknown) {
+        const errorMsg = err instanceof Error ? err.message : 'External opportunity provider request failed';
+        return {
+          opportunities: [],
+          providerHealth: { status: 'DOWN', provider: this.provider.name, message: errorMsg },
+          meta: {
+            total: 0, page, limit, hasMore: false, source: 'unavailable', fetchedAt: null, fromCache: false,
+            duplicatesRemoved: 0, salaryDataAvailable: false, salaryFilter: null, excludedWithoutDate: 0,
+          },
+        };
       }
-    });
-    const deduplicatedList = Array.from(uniqueMap.values());
+      rawCount = fetched.length;
+
+      // Deduplicate by provider id, then by the same role re-posted by the same employer in the same place
+      const byId = new Map<string, CanonicalOpportunity>();
+      const seenReposts = new Set<string>();
+      for (const opp of fetched) {
+        const idKey = `${opp.provider}_${opp.externalId}`;
+        const repost = repostKey(opp);
+        if (byId.has(idKey) || seenReposts.has(repost)) continue;
+        byId.set(idKey, opp);
+        seenReposts.add(repost);
+      }
+      deduplicatedList = Array.from(byId.values());
+      duplicatesRemoved = fetched.length - deduplicatedList.length;
+      fetchedAt = Date.now();
+      this.cache.set(cacheKey, { data: deduplicatedList, timestamp: fetchedAt, duplicatesRemoved });
+    }
 
     // Score each posting against the requirements the employer actually wrote
-    const enrichedList: EnrichedOpportunity[] = deduplicatedList.map((opp) => this.enrich(opp, userSkillIndex));
+    let results: EnrichedOpportunity[] = deduplicatedList.map((opp) => this.enrich(opp, userSkillIndex));
+    const salaryDataAvailable = results.some((o) => yearlyTop(o.salary) !== null);
 
-    // Save to cache
-    this.cache.set(cacheKey, { data: deduplicatedList, timestamp: cached?.timestamp ?? Date.now() });
-
-    let finalResults = enrichedList;
-    if (query.remoteOnly) finalResults = finalResults.filter((o) => o.remote);
+    if (query.remoteOnly) results = results.filter((o) => o.remote);
     if (query.employmentType) {
-      finalResults = finalResults.filter((o) => o.employmentType.toLowerCase().includes(query.employmentType!.toLowerCase()));
+      const wanted = query.employmentType.toLowerCase().replace(/[^a-z]/g, '');
+      results = results.filter((o) => o.employmentType.toLowerCase().replace(/[^a-z]/g, '').includes(wanted));
     }
 
+    let excludedWithoutDate = 0;
+    const windowDays = query.datePosted ? DATE_WINDOW_DAYS[query.datePosted] : undefined;
+    if (windowDays) {
+      const cutoff = Date.now() - windowDays * 24 * 60 * 60 * 1000;
+      excludedWithoutDate = results.filter((o) => !o.postedAt).length;
+      results = results.filter((o) => o.postedAt && new Date(o.postedAt).getTime() >= cutoff);
+    }
+
+    let salaryFilter: OpportunitySearchMeta['salaryFilter'] = null;
+    if (typeof query.salaryMin === 'number' && query.salaryMin > 0) {
+      const min = query.salaryMin;
+      // A posting that states no salary cannot be shown to meet a salary requirement
+      salaryFilter = { requestedMin: min, excludedWithoutSalary: results.filter((o) => yearlyTop(o.salary) === null).length };
+      results = results.filter((o) => (yearlyTop(o.salary) ?? -1) >= min);
+    }
+
+    const sorted = this.sortOpportunities(results, query.sortBy);
+    const isSample = deduplicatedList.some((o) => o.isSample) || health.status === 'PENDING_CREDS';
+
     return {
-      opportunities: this.sortOpportunities(finalResults, query.sortBy),
+      opportunities: sorted.slice(0, limit),
       providerHealth: health,
+      meta: {
+        total: sorted.length,
+        page,
+        limit,
+        // Demo listings are a fixed set; a live provider may have more when it filled its page
+        hasMore: sorted.length > limit || (!isSample && rawCount >= 10),
+        source: isSample ? 'sample' : 'live',
+        fetchedAt: new Date(fetchedAt).toISOString(),
+        fromCache,
+        duplicatesRemoved,
+        salaryDataAvailable,
+        salaryFilter,
+        excludedWithoutDate,
+      },
     };
   }
 
@@ -141,6 +222,7 @@ class OpportunityService {
       location: sanitizeText(opp.location),
       description,
       applicationUrl: sanitizeUrl(opp.applicationUrl) || `https://www.google.com/search?q=${encodeURIComponent(`${opp.title} ${opp.company} jobs`)}`,
+      isSample: Boolean(opp.isSample),
       skillbridgeMatchScore: match.score,
       matchStatus: match.status,
       matchedSkills: match.matchedSkills,
@@ -165,10 +247,13 @@ class OpportunityService {
   private sortOpportunities(list: EnrichedOpportunity[], sortBy?: string): EnrichedOpportunity[] {
     const sorted = [...list];
     if (sortBy === 'date') {
-      return sorted.sort((a, b) => new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime());
+      // Newest first; postings with no publication date go last
+      const time = (o: EnrichedOpportunity) => (o.postedAt ? new Date(o.postedAt).getTime() : -Infinity);
+      return sorted.sort((a, b) => time(b) - time(a));
     }
     if (sortBy === 'salary') {
-      return sorted.sort((a, b) => (b.salary?.max || b.salary?.min || 0) - (a.salary?.max || a.salary?.min || 0));
+      // Highest stated salary first; postings with no salary go last
+      return sorted.sort((a, b) => (yearlyTop(b.salary) ?? -1) - (yearlyTop(a.salary) ?? -1));
     }
     if (sortBy === 'relevance') {
       return sorted;
@@ -206,9 +291,7 @@ class OpportunityService {
     }
 
     const provider = oppData.provider || 'JSearch API';
-    const salaryStr = oppData.salary?.min && oppData.salary?.max
-      ? `$${(oppData.salary.min / 1000).toFixed(0)}k - $${(oppData.salary.max / 1000).toFixed(0)}k`
-      : 'Salary Not Disclosed';
+    const salaryStr = formatSalary(oppData.salary);
 
     const saved = await SavedOpportunity.findOneAndUpdate(
       { userId, provider, externalId: oppData.externalId },
@@ -216,15 +299,19 @@ class OpportunityService {
         $set: {
           title: sanitizeText(oppData.title),
           company: sanitizeText(oppData.company),
-          location: sanitizeText(oppData.location || 'Remote / Global'),
+          location: sanitizeText(oppData.location || 'Location not stated'),
           salary: salaryStr,
           applicationUrl: safeUrl,
-          postedAt: oppData.postedAt || new Date().toISOString(),
+          postedAt: oppData.postedAt || undefined,
           skillbridgeMatchScore:
             typeof oppData.skillbridgeMatchScore === 'number' ? oppData.skillbridgeMatchScore : null,
           matchedSkills: oppData.matchedSkills || [],
           missingSkills: oppData.missingSkills || [],
           description: sanitizeText(oppData.description || ''),
+          isSample: Boolean(oppData.isSample),
+          remote: typeof oppData.remote === 'boolean' ? oppData.remote : undefined,
+          employmentType: sanitizeText(oppData.employmentType || ''),
+          matchExplanation: sanitizeText(oppData.matchExplanation || ''),
           savedAt: new Date(),
         },
         $setOnInsert: {
@@ -240,11 +327,46 @@ class OpportunityService {
   }
 
   /**
-   * Removes a saved opportunity.
+   * Removes one of the caller's saved opportunities. Like every saved-opportunity operation it is
+   * scoped to the caller and reports 404 when the caller has no such record, whether the id is
+   * unknown or belongs to someone else.
    */
-  async unsaveOpportunity(userId: string, externalId: string): Promise<boolean> {
+  async unsaveOpportunity(userId: string, externalId: string): Promise<void> {
     const res = await SavedOpportunity.deleteOne({ userId, externalId });
-    return res.deletedCount > 0;
+    if (res.deletedCount === 0) {
+      throw new AppError('Saved opportunity not found.', 404, 'SAVED_OPPORTUNITY_NOT_FOUND');
+    }
+  }
+
+  /**
+   * Updates the notes and follow-up reminder of a saved opportunity without changing its status.
+   */
+  async updateSavedDetails(
+    userId: string,
+    externalId: string,
+    update: SavedOpportunityDetailsUpdate
+  ): Promise<ISavedOpportunity> {
+    const doc = await SavedOpportunity.findOne({ userId, externalId });
+    if (!doc) throw new AppError('Saved opportunity not found.', 404, 'SAVED_OPPORTUNITY_NOT_FOUND');
+
+    if (typeof update.notes === 'string') doc.notes = sanitizeText(update.notes).slice(0, 2000);
+    if (update.reminderAt === null) {
+      doc.reminderAt = null;
+      doc.reminderNote = '';
+    } else if (typeof update.reminderAt === 'string') {
+      const when = new Date(update.reminderAt);
+      if (Number.isNaN(when.getTime())) throw new AppError('Reminder date is not a valid date.', 400, 'VALIDATION_ERROR');
+      if (when.getTime() < Date.now() - 60 * 1000) {
+        throw new AppError('Reminder date must be in the future.', 400, 'VALIDATION_ERROR');
+      }
+      doc.reminderAt = when;
+    }
+    if (typeof update.reminderNote === 'string' && doc.reminderAt) {
+      doc.reminderNote = sanitizeText(update.reminderNote).slice(0, 300);
+    }
+
+    await doc.save();
+    return doc;
   }
 
   /**
@@ -269,7 +391,7 @@ class OpportunityService {
     }
 
     const doc = await SavedOpportunity.findOne({ userId, externalId });
-    if (!doc) throw new AppError('Saved opportunity not found.', 404);
+    if (!doc) throw new AppError('Saved opportunity not found.', 404, 'SAVED_OPPORTUNITY_NOT_FOUND');
 
     const cleanNotes = typeof notes === 'string' ? sanitizeText(notes) : undefined;
     if (doc.status !== status) {
@@ -294,6 +416,8 @@ class OpportunityService {
     offerCount: number;
     rejectedCount: number;
     withdrawnCount: number;
+    /** Follow-up reminders whose time has arrived. */
+    remindersDue: number;
   }> {
     const docs = await SavedOpportunity.find({ userId });
     return {
@@ -303,6 +427,7 @@ class OpportunityService {
       offerCount: docs.filter((d) => d.status === 'offer').length,
       rejectedCount: docs.filter((d) => d.status === 'rejected').length,
       withdrawnCount: docs.filter((d) => d.status === 'withdrawn').length,
+      remindersDue: docs.filter((d) => d.reminderAt && d.reminderAt.getTime() <= Date.now()).length,
     };
   }
 }

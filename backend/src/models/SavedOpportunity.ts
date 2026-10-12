@@ -42,7 +42,14 @@ export interface ISavedOpportunity extends Document<Types.ObjectId> {
   notes: string;
   statusHistory: IStatusHistoryEntry[];
   appliedAt?: Date;
+  /** When the user wants to be reminded to follow up; null when no reminder is set. */
   reminderAt?: Date | null;
+  reminderNote?: string;
+  /** True when this was saved from a built-in demo listing rather than a live posting. */
+  isSample?: boolean;
+  remote?: boolean;
+  employmentType?: string;
+  matchExplanation?: string;
   savedAt: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -77,6 +84,11 @@ const SavedOpportunitySchema = new Schema<ISavedOpportunity>(
     statusHistory: { type: [StatusHistorySchema], default: [] },
     appliedAt: { type: Date },
     reminderAt: { type: Date, default: null },
+    reminderNote: { type: String, default: '' },
+    isSample: { type: Boolean, default: false },
+    remote: { type: Boolean },
+    employmentType: { type: String, default: '' },
+    matchExplanation: { type: String, default: '' },
     savedAt: { type: Date, default: Date.now }
   },
   { timestamps: true }

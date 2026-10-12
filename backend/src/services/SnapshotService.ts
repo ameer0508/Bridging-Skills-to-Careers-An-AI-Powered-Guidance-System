@@ -128,7 +128,7 @@ export class SnapshotService {
         },
         activeRecommendationsCount: 0,
         topRecommendations: [],
-        opportunities: { saved: 0, applied: 0, interviewing: 0, offer: 0, rejected: 0, withdrawn: 0, total: 0 },
+        opportunities: { saved: 0, applied: 0, interviewing: 0, offer: 0, rejected: 0, withdrawn: 0, total: 0, remindersDue: 0 },
         interviews: { total: 0, completed: 0, averageScore: null, latestScore: null, isEvaluated: false, latestWeaknesses: [] },
         resumeInfo: {
           hasResume: false,
@@ -230,6 +230,8 @@ export class SnapshotService {
       rejected: savedDocs.filter((d) => d.status === 'rejected').length,
       withdrawn: savedDocs.filter((d) => d.status === 'withdrawn').length,
       total: savedDocs.length,
+      // Follow-up reminders the user set whose time has arrived
+      remindersDue: savedDocs.filter((d) => d.reminderAt && new Date(d.reminderAt).getTime() <= Date.now()).length,
     };
 
     // 8. Interview Telemetry

@@ -42,11 +42,24 @@ class ConversationController {
     try {
       const userId = req.user?.userId;
       const { id } = req.params;
-      const { content } = req.body;
+      const content = typeof req.body?.content === 'string' ? req.body.content.trim() : '';
       if (!userId) throw new AppError('Authentication required', 401);
-      if (!content) throw new AppError('Message content required', 400);
+      if (!content) throw new AppError('Message content required', 400, 'VALIDATION_ERROR');
+      if (content.length > 4000) throw new AppError('Message is too long (4000 characters at most).', 400, 'VALIDATION_ERROR');
 
       const aiMessage = await ConversationService.sendMessage(id, userId, content);
+      res.status(200).json({ success: true, data: aiMessage });
+    } catch (error) { next(error); }
+  };
+
+  /** Asks again for the last question when its answer was a fallback. */
+  retryMessage = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      const { id } = req.params;
+      if (!userId) throw new AppError('Authentication required', 401);
+
+      const aiMessage = await ConversationService.retryLastReply(id, userId);
       res.status(200).json({ success: true, data: aiMessage });
     } catch (error) { next(error); }
   };

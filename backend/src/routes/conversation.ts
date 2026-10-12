@@ -10,6 +10,7 @@ router.get('/', ConversationController.getConversations);
 router.post('/', ConversationController.createConversation);
 router.get('/:id', ConversationController.getHistory);
 router.post('/:id/messages', ConversationController.sendMessage);
+router.post('/:id/retry', ConversationController.retryMessage);
 router.patch('/:id/career', ConversationController.switchCareer);
 router.post('/messages/:id/feedback', ConversationController.submitFeedback);
 

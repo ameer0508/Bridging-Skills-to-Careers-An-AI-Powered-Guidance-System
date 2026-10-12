@@ -5,6 +5,7 @@ import {
   OpportunityProviderHealth,
 } from './OpportunityProvider.js';
 import env from '../../config/env.js';
+import { searchSampleOpportunities } from './sampleOpportunities.js';
 
 /**
  * Sanitizes external HTML text to prevent script execution / XSS / prompt injection.
@@ -50,7 +51,7 @@ export class JSearchProvider implements OpportunityProvider {
       return {
         status: 'PENDING_CREDS',
         provider: this.name,
-        message: 'JSearch RapidAPI Key not configured in environment (RAPIDAPI_KEY / JSEARCH_API_KEY). Provider in sandbox mode.',
+        message: 'No live job provider key is configured (RAPIDAPI_KEY / JSEARCH_API_KEY). Showing built-in demo listings only.',
       };
     }
     return {
@@ -70,9 +71,9 @@ export class JSearchProvider implements OpportunityProvider {
     const location = query.location || '';
     const fullQuery = location ? `${searchQuery} in ${location}` : searchQuery;
 
-    // If API credentials are not set, return sandbox live opportunities
+    // Without credentials only the clearly labelled demo listings are available
     if (!apiKey) {
-      return this.getSandboxOpportunities(fullQuery);
+      return searchSampleOpportunities(query);
     }
 
     try {
@@ -109,18 +110,29 @@ export class JSearchProvider implements OpportunityProvider {
 
       return results.map((item, idx) => {
         const externalId = String(item.job_id || `jsearch_${idx}`);
-        const title = String(item.job_title || 'Software Opportunity');
-        const company = String(item.employer_name || 'Verified Employer');
+        const title = String(item.job_title || 'Untitled role');
+        const company = String(item.employer_name || 'Employer not stated');
         const description = sanitizeText(String(item.job_description || 'No description provided by employer.'));
         const jobCity = item.job_city ? String(item.job_city) : '';
         const jobCountry = item.job_country ? String(item.job_country) : '';
-        const locationStr = jobCity ? `${jobCity}, ${jobCountry}` : 'Remote / Global';
+        const locationStr = [jobCity, jobCountry].filter(Boolean).join(', ') || 'Location not stated';
         const isRemote = Boolean(item.job_is_remote);
-        const employmentType = String(item.job_employment_type || 'FULL_TIME').toUpperCase();
+        const employmentType = String(item.job_employment_type || 'NOT_STATED').toUpperCase();
         const minSalary = typeof item.job_min_salary === 'number' ? item.job_min_salary : undefined;
         const maxSalary = typeof item.job_max_salary === 'number' ? item.job_max_salary : undefined;
-        const salaryObj = minSalary || maxSalary ? { min: minSalary, max: maxSalary, currency: 'USD', period: 'YEARLY' } : null;
-        const postedAt = item.job_posted_at_timestamp ? new Date((item.job_posted_at_timestamp as number) * 1000).toISOString() : new Date().toISOString();
+        // Currency and period are only reported when the provider states them
+        const salaryObj = minSalary || maxSalary
+          ? {
+              min: minSalary,
+              max: maxSalary,
+              currency: item.job_salary_currency ? String(item.job_salary_currency) : undefined,
+              period: item.job_salary_period ? String(item.job_salary_period).toUpperCase() : undefined,
+            }
+          : null;
+        // Null rather than "now" when the provider gives no date, so freshness is never invented
+        const postedAt = typeof item.job_posted_at_timestamp === 'number'
+          ? new Date(item.job_posted_at_timestamp * 1000).toISOString()
+          : null;
         const applicationUrl = sanitizeUrl(String(item.job_apply_link || item.job_google_link || ''));
         const sourceUrl = sanitizeUrl(String(item.job_google_link || ''));
         const requiredSkills = Array.isArray(item.job_required_skills)
@@ -171,47 +183,9 @@ export class JSearchProvider implements OpportunityProvider {
     return null;
   }
 
-  /**
-   * Sandbox provider results when live API keys are pending.
-   */
-  private getSandboxOpportunities(searchQuery: string): CanonicalOpportunity[] {
-    const now = new Date().toISOString();
-    return [
-      {
-        externalId: 'live_opp_sandbox_01',
-        provider: 'JSearch Provider (Sandbox Mode)',
-        title: `Senior ${searchQuery} Lead`,
-        company: 'Sample Company A (demo listing)',
-        description: `Lead architecture and high-throughput microservices development for ${searchQuery} platforms. Requires TypeScript, React, Node.js, and API design.`,
-        location: 'San Francisco, CA',
-        remote: true,
-        employmentType: 'FULL_TIME',
-        salary: { min: 140000, max: 195000, currency: 'USD', period: 'YEARLY' },
-        postedAt: now,
-        applicationUrl: `https://www.google.com/search?q=${encodeURIComponent(`Senior ${searchQuery} Lead CloudScale Infrastructure Systems`)}`,
-        sourceUrl: `https://www.google.com/search?q=${encodeURIComponent(`Senior ${searchQuery} Lead CloudScale Infrastructure Systems`)}`,
-        skills: ['TypeScript', 'React', 'Node.js', 'REST APIs'],
-        isSample: true,
-        fetchedAt: now,
-      },
-      {
-        externalId: 'live_opp_sandbox_02',
-        provider: 'JSearch Provider (Sandbox Mode)',
-        title: `${searchQuery} Systems Engineer`,
-        company: 'Sample Company B (demo listing)',
-        description: `Build scalable AI infrastructure and high-frequency data pipelines for ${searchQuery} workloads.`,
-        location: 'New York, NY',
-        remote: true,
-        employmentType: 'FULL_TIME',
-        salary: { min: 150000, max: 210000, currency: 'USD', period: 'YEARLY' },
-        postedAt: now,
-        applicationUrl: `https://www.google.com/search?q=${encodeURIComponent(`${searchQuery} Systems Engineer OpenAI Ecosystem Partner`)}`,
-        sourceUrl: `https://www.google.com/search?q=${encodeURIComponent(`${searchQuery} Systems Engineer OpenAI Ecosystem Partner`)}`,
-        skills: ['Python', 'FastAPI', 'Docker', 'Kubernetes', 'MongoDB'],
-        isSample: true,
-        fetchedAt: now,
-      },
-    ];
+  /** Demo listings, as returned when no live key is configured. */
+  getSandboxOpportunities(searchQuery: string): CanonicalOpportunity[] {
+    return searchSampleOpportunities({ keywords: searchQuery });
   }
 }
 

@@ -21,6 +21,26 @@ export interface IUnifiedAIResponse<T = unknown> {
   metadata: Record<string, unknown>;
 }
 
+/** Raised when no AI reply could be obtained. Callers show their own labelled fallback. */
+export class AiUnavailableError extends Error {
+  constructor(message: string, public readonly reason: 'unavailable' | 'timeout' | 'error') {
+    super(message);
+    this.name = 'AiUnavailableError';
+  }
+}
+
+export interface ChatReply {
+  text: string;
+  provider: string;
+  model: string;
+}
+
+/**
+ * Longest the backend waits for one chat reply. The chain is ordered so the innermost timeout
+ * fires first: Gemini request (20s, GEMINI_TIMEOUT_SECONDS) < this (25s) < browser request (40s).
+ */
+export const chatAiTimeoutMs = (): number => Number(process.env.CHAT_AI_TIMEOUT_MS) || 25000;
+
 class AIClientService {
   /**
    * Sends a file to the AI service for extraction and returns the structured JSON.
@@ -53,35 +73,49 @@ class AIClientService {
   }
 
   /**
-   * Generates conversational AI content based on a structured prompt.
-   * Includes circuit-breaker-like retries and timeouts for hardening.
+   * Asks the AI service for a chat reply.
+   *
+   * Returns the provider's text together with the provider and model that produced it, or
+   * throws AiUnavailableError. It never returns a made-up reply. A dropped connection is retried
+   * once; "no provider" answers and timeouts are not, since repeating them only adds delay.
    */
-  async generateContent(prompt: string): Promise<string> {
-    const maxRetries = 2;
-    const timeoutMs = 15000; // 15 second timeout for AI responses
+  async generateChat(prompt: string): Promise<ChatReply> {
+    const timeoutMs = chatAiTimeoutMs();
+    const startedAt = Date.now();
 
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
       try {
         const response = await aiHttp.post(`/api/v1/chat`, { prompt }, {
-          timeout: timeoutMs
+          timeout: Math.max(1000, timeoutMs - (Date.now() - startedAt)),
         });
-
-        if (response.data && response.data.success) {
-          return typeof response.data.data === 'string' ? response.data.data : response.data.response;
-        } else {
-           throw new Error(response.data?.error || response.data?.errors?.[0] || 'AI generation failed');
+        const text = typeof response.data?.data === 'string' ? response.data.data : response.data?.response;
+        if (response.data?.success && typeof text === 'string' && text.trim()) {
+          return {
+            text: text.trim(),
+            provider: String(response.data.provider || 'unknown'),
+            model: String(response.data.model || 'unknown'),
+          };
         }
+        throw new AiUnavailableError('The AI service returned no reply.', 'error');
       } catch (error: unknown) {
-        const err = error as Error;
-        logger.warn(`AI generation attempt ${attempt} failed: ${err.message}`);
-        if (attempt === maxRetries) {
-          logger.error('All AI generation attempts failed', err.message);
-          return "I'm currently experiencing high latency or downtime. Please try your request again in a few moments.";
+        if (error instanceof AiUnavailableError) throw error;
+        const err = error as { code?: string; message?: string; response?: { status?: number } };
+        const status = err.response?.status;
+        const timedOut = err.code === 'ECONNABORTED' || /timeout/i.test(err.message || '');
+        logger.warn(`AI chat attempt ${attempt} failed: ${status ? `HTTP ${status}` : err.code || err.message}`);
+
+        if (timedOut) throw new AiUnavailableError('The AI service did not answer in time.', 'timeout');
+        if (status) {
+          throw new AiUnavailableError('The AI service has no provider available.', status === 503 ? 'unavailable' : 'error');
         }
-        await new Promise(res => setTimeout(res, 1000 * attempt));
+        // No HTTP response at all: the connection failed. Worth one more try if time remains.
+        if (attempt === 2 || Date.now() - startedAt > timeoutMs / 2) {
+          throw new AiUnavailableError('The AI service could not be reached.', 'unavailable');
+        }
+        await new Promise(res => setTimeout(res, 300));
       }
     }
-    return "I'm currently experiencing high latency or downtime. Please try your request again in a few moments.";
+    throw new AiUnavailableError('The AI service could not be reached.', 'unavailable');
   }
 
   /**
