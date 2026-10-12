@@ -42,7 +42,7 @@ The system is usable with no external keys. It says so on screen rather than inv
 
 | Feature | With a provider | Without one |
 |---|---|---|
-| Resume parsing | Rule-based parser; an AI provider can assist | Rule-based parser |
+| Resume parsing | Rule-based parser. If it fails on a document, the AI provider is asked instead | Rule-based parser. If it fails, the resume is marked failed and can be reprocessed; no content is invented |
 | Interview questions | Written by AI, labelled "written by AI" | Built-in bank of 108 questions selected for the user, labelled "from the question bank" |
 | Interview scoring | AI rubric, including technical accuracy | Rule-based rubric, capped at 80, technical accuracy shown as "Not assessed" |
 | Chat | AI reply, labelled with provider and model | A labelled summary of the user's stored data with a Retry button; never a made-up answer |
@@ -130,8 +130,8 @@ browser chat request 40 s.
 | `pnpm typecheck` | TypeScript type-check of frontend and backend. |
 | `pnpm lint` | ESLint on frontend and backend; any warning fails. |
 | `pnpm build` | Frontend type-check and production build, then backend build. |
-| `pnpm test` | 18 backend suites on an in-memory database with a stub AI service. |
-| `cd ai && python -m pytest` | 98 AI service tests; provider calls are mocked. |
+| `pnpm test` | 19 backend suites on an in-memory database with a stub AI service. |
+| `cd ai && python -m pytest` | 104 AI service tests; provider calls are mocked. |
 | `pnpm test:e2e` | 35 browser checks against an isolated copy of the whole stack. See [`e2e/README.md`](e2e/README.md). |
 
 None of these contacts Gemini or JSearch, and none reads or writes the development database or

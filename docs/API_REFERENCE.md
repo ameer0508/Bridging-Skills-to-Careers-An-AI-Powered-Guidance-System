@@ -41,8 +41,8 @@ Rules that apply to every authenticated endpoint:
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
-| `GET` | `/health` | No | Backend status and database connection. |
-| `GET` | `/` | No | Service banner. |
+| `GET` | `/health` | No | Whether the backend and its database are up. Nothing else is reported. |
+| `GET` | `/` | No | A one-line banner. In local development it serves the developer status page instead. |
 | `GET` | `/api/v1` | No | API banner. |
 
 ### Authentication
@@ -139,7 +139,7 @@ Rules that apply to every authenticated endpoint:
 | `GET` | `/api/v1/orchestrator/agents` | Yes | Module overview built from the caller's stored data. |
 | `GET` | `/api/v1/orchestrator/history` | Yes | Past workflow runs. |
 | `POST` | `/api/v1/orchestrator/execute` | Yes | Run the overview workflow. Optional `goal` and `targetCompany`. |
-| `GET` | `/api/v1/realtime` | No | Service status: uptime, memory use and total record counts. Contains no user data. |
+| `GET` | `/api/v1/realtime` | Admin | Infrastructure diagnostics: uptime, memory use, database host and total record counts. Open without sign-in only when `NODE_ENV=development`; otherwise `401` without a token and `403` unless the caller's role is `admin` (set directly in the database). |
 
 ---
 
@@ -160,7 +160,6 @@ Used by monitoring tools or reverse proxies to check service availability.
 {
   "status": "UP",
   "timestamp": "2026-07-19T14:50:00.000Z",
-  "uptime": 124.5,
   "services": {
     "database": "UP"
   }
@@ -173,7 +172,6 @@ Used by monitoring tools or reverse proxies to check service availability.
 {
   "status": "DOWN",
   "timestamp": "2026-07-19T14:50:00.000Z",
-  "uptime": 124.5,
   "services": {
     "database": "DOWN"
   }

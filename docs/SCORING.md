@@ -159,8 +159,21 @@ under it (measured in the milestone-1 test run).
 - **Token usage**: counts reported by the AI provider when available (`source: provider`);
   otherwise estimated from text length (`source: estimated`). Cost is always an estimate from a
   static price table.
-- **Envelope confidence** on AI service responses is a fixed heuristic per provider, flagged as
-  `confidence_basis: heuristic_not_model_reported`.
+- **Confidence** is never invented. Where nothing measures it, the value is `null`:
+  - AI service response envelopes carry `confidence: null` and `confidence_basis: not_measured`.
+    They used to carry a fixed number chosen by provider name (0.98 for Gemini).
+  - The rule-based resume parser attaches no confidence to names, dates, roles or skills. It used
+    to attach a per-rule constant between 0.85 and 0.99. Each field reports its extraction method
+    instead.
+  - Skill normalisation reports how a name was resolved (shared lexicon, alias table, or "not
+    recognised; kept as written"), not a similarity percentage: it is a table lookup.
+  - When an AI model produces a structured result, any confidence in it is the model's own
+    estimate and is passed through as such. No AI path has been run against a live provider.
+  - The career match's "confidence" (section 3) is different: it is a defined, calculated share
+    of matched requirements backed by applied evidence, not a probability.
+  - The development mock provider and the simulated modules below still contain fixed sample
+    numbers. The mock never answers chat, interview questions or interview scoring, and resume
+    extraction does not use it.
 - AI service modules with no live data source (market, salary, GitHub, LinkedIn and the agent
   demos) label every response `data_origin: illustrative_sample`. No user workflow uses them.
 

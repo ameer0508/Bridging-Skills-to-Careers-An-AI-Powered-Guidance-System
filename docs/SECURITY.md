@@ -9,6 +9,7 @@ SkillBridge applies Defense in Depth across its stack.
 ## API Protection
 - **Rate Limiting**: `express-rate-limit` is applied to the API (1000 requests / 15 min / IP) and, more tightly, to sign-in and registration (15 attempts / 15 min / IP).
 - **Request validation**: Every write endpoint checks the type and size of its input; a test sends 40 malformed requests and requires a 4xx for each.
+- **Diagnostics are not public**: uptime, memory use, database host and record counts (`GET /api/v1/realtime`) require an administrator outside local development. `/health` reports only up or down. No API can grant the administrator role.
 - **Internal service key**: The AI service accepts requests only with the shared `X-Internal-Service-Key`; it is not published outside the container network.
 - **CORS**: Strictly checks origins in production against `FRONTEND_URL`.
 - **Helmet**: Adds security headers (HSTS, CSP, XSS Filters).

@@ -179,6 +179,15 @@ class ResumeIntelligencePipeline:
     @classmethod
     def _execute_fallback(cls, file_path: str, raw_text: Optional[str]) -> ParsedResumeResponse:
         logger.info("[ResumeIntelligencePipeline] Executing Fallback Strategy via AI Gateway")
+        # Only a real provider may read a resume. The development mock returns a fixed, fictional
+        # resume, which must never be stored as if it were the user's own.
+        try:
+            real_providers = [p for p in ai_gateway.get_provider_chain() if p.provider_name != "mock"]
+        except Exception:
+            real_providers = []
+        if not real_providers:
+            raise RuntimeError("The resume could not be parsed, and no AI provider is available to try instead.")
+
         text = raw_text or extract_text_from_file(file_path)
         ai_resp = ai_gateway.route_request(
             service_name="resume_parsing",
@@ -186,6 +195,6 @@ class ResumeIntelligencePipeline:
             payload=text,
             schema_class=ParsedResumeResponse
         )
-        if ai_resp.success and ai_resp.response:
+        if ai_resp.success and ai_resp.response and ai_resp.provider != "mock":
             return ParsedResumeResponse.model_validate(ai_resp.response)
         raise RuntimeError(f"Resume processing fallback failed: {'; '.join(ai_resp.errors)}")

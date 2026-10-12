@@ -90,6 +90,11 @@ If a step fails, `docker compose logs <service>` shows why. Do not mark the Dock
 
 ## Operations notes
 
+- To view diagnostics (`GET /api/v1/realtime`) in a deployment, give one account the role `admin`
+  directly in the database, for example
+  `db.users.updateOne({ email: "you@example.com" }, { $set: { role: "admin" } })`, then call the
+  endpoint with that account's access token. `/health` needs no sign-in.
+
 - Resume processing runs inside the backend process. If the backend restarts during a job, the
   job is marked failed at the next start and the user can reprocess it from the resume page.
 - Rate limits are per IP address: 1000 API requests and 15 sign-in or registration attempts per

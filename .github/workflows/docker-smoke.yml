@@ -112,7 +112,7 @@ jobs:
           docker compose logs --no-color > compose.log 2>&1 || true
           echo "log lines: $(wc -l < compose.log)"
           docker compose logs --no-color --tail 25 backend ai-service || true
-          if grep -nE "Traceback \(most recent call last\)|UnhandledPromiseRejection|Unhandled Rejection|Failed to establish MongoDB|EADDRINUSE|ECONNREFUSED|MODULE_NOT_FOUND|ERR_MODULE_NOT_FOUND|nginx: \[emerg\]|Segmentation fault|Killed" compose.log; then
+          if grep -nE "Traceback \(most recent call last\)|UnhandledPromiseRejection|Unhandled Rejection|Failed to establish MongoDB|EADDRINUSE|ECONNREFUSED|MODULE_NOT_FOUND|ERR_MODULE_NOT_FOUND|nginx: \[emerg\]|Segmentation fault|OOMKilled|Out of memory" compose.log; then
             echo "::error::startup or runtime failures found in the container logs"
             exit 1
           fi

@@ -79,3 +79,45 @@ def test_skill_normalisation_reports_method_not_confidence(client):
     assert any("Canonical name found by: shared skill lexicon" in e for e in skills[0]["evidence"])
     assert any("not recognised; kept as written" in e for e in skills[2]["evidence"])
     assert not any("% confidence" in e for s in skills for e in s["evidence"])
+
+
+# --- The fictional resume in the development mock must never be returned as a parse result ---
+
+def _break_rule_parser(monkeypatch):
+    """Makes the rule-based pipeline fail so that its AI fallback path is taken."""
+    from app.resume_intelligence import parser_pipeline
+
+    def boom(*args, **kwargs):
+        raise RuntimeError("simulated parser failure")
+
+    monkeypatch.setattr(parser_pipeline.ResumeIntelligencePipeline, "_convert_to_parsed_response", classmethod(boom))
+
+
+def test_parser_failure_without_a_provider_is_an_error_not_a_made_up_resume(client, monkeypatch):
+    _break_rule_parser(monkeypatch)
+    res = client.post("/api/v1/extract", files={"file": ("resume.txt", RESUME, "text/plain")})
+    assert res.status_code >= 400, "a failed parse was reported as a success"
+    assert "Jane Doe" not in res.text and "Stanford" not in res.text, "the mock provider's fictional resume was returned"
+
+
+def test_parser_failure_uses_a_real_provider_when_one_is_available(client, monkeypatch):
+    from app.gateway.ai_gateway import ai_gateway
+
+    class _RealProvider:
+        provider_name = "fake_llm"
+        default_model = "fake-model"
+
+        def is_available(self):
+            return True
+
+        def parse_resume_text(self, text, schema_class):
+            parsed = schema_class.model_validate({"personalInfo": {"fullName": {"value": "Priya Sharma"}}, "skills": [{"name": "React", "category": "Frameworks"}]})
+            return ResponseNormalizer.normalize_success(raw_data=parsed.model_dump(), provider=self.provider_name, model=self.default_model, latency_ms=1.0)
+
+    _break_rule_parser(monkeypatch)
+    monkeypatch.setattr(ai_gateway, "get_provider_chain", lambda requested_provider=None: [_RealProvider()])
+    res = client.post("/api/v1/extract", files={"file": ("resume-provider-path.txt", RESUME + b"\nunique", "text/plain")})
+    assert res.status_code == 200, res.text
+    data = res.json()["data"]
+    assert data["personalInfo"]["fullName"]["value"] == "Priya Sharma"
+    assert data["personalInfo"]["fullName"]["confidence"] is None, "no confidence is added to what the provider returned"
