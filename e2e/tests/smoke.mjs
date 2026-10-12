@@ -152,6 +152,18 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       return `candidate ${name}`;
     });
 
+    await t.step('download returns the stored resume file', async () => {
+      const [download] = await Promise.all([
+        page.waitForEvent('download', { timeout: 15_000 }),
+        page.getByRole('button', { name: 'Download', exact: true }).click(),
+      ]);
+      expect(download.suggestedFilename() === 'priya-frontend.pdf', `downloaded as "${download.suggestedFilename()}"`);
+      const chunks = [];
+      for await (const chunk of await download.createReadStream()) chunks.push(chunk);
+      expect(Buffer.concat(chunks).equals(RESUME_FIRST), 'the downloaded file is not the uploaded one');
+      return `${download.suggestedFilename()}, ${RESUME_FIRST.length} bytes, identical to the upload`;
+    });
+
     let skillCount = 0;
     await t.step('skills page lists the extracted skills with evidence', async () => {
       skillCount = (await api('GET', '/skills/me')).data.totalSkills;

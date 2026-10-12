@@ -20,6 +20,7 @@ import { runResumeLifecycleTests } from './resume_lifecycle.test.js';
 import { runInterviewQuestionTests } from './interview_questions.test.js';
 import { runOpportunityTrackingTests } from './opportunity_tracking.test.js';
 import { runChatReliabilityTests } from './chat_reliability.test.js';
+import { runInputValidationTests } from './input_validation.test.js';
 
 async function runAll() {
   console.log('🚀 Starting Comprehensive SkillBridge Backend Test Suite...');
@@ -60,6 +61,7 @@ async function runAll() {
     await runInterviewQuestionTests();
     await runOpportunityTrackingTests();
     await runChatReliabilityTests();
+    await runInputValidationTests();
     const after = fingerprint();
     const touched = before.filter((entry, i) => entry !== after[i]);
     if (touched.length > 0) {

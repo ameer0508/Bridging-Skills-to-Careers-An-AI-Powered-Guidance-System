@@ -28,6 +28,35 @@ const detailsBodySchema = z.object({
   reminderNote: z.string().max(300).optional(),
 }).strict().refine(body => Object.keys(body).length > 0, { message: 'Nothing to update.' });
 
+/** A posting to save. Field types are checked so a value can never be a query operator object. */
+const saveBodySchema = z.object({
+  externalId: z.string().min(1).max(300),
+  provider: z.string().max(120).optional(),
+  title: z.string().min(1).max(300),
+  company: z.string().min(1).max(300),
+  location: z.string().max(300).optional(),
+  description: z.string().max(60000).optional(),
+  applicationUrl: z.string().max(2000),
+  postedAt: z.string().max(60).nullable().optional(),
+  employmentType: z.string().max(60).optional(),
+  remote: z.boolean().optional(),
+  isSample: z.boolean().optional(),
+  salary: z.union([
+    z.object({
+      min: z.number().optional(),
+      max: z.number().optional(),
+      currency: z.string().max(10).optional(),
+      period: z.string().max(20).optional(),
+    }),
+    z.string().max(120),
+    z.null(),
+  ]).optional(),
+  skillbridgeMatchScore: z.number().min(0).max(100).nullable().optional(),
+  matchedSkills: z.array(z.string().max(120)).max(200).optional(),
+  missingSkills: z.array(z.string().max(120)).max(200).optional(),
+  matchExplanation: z.string().max(2000).optional(),
+}).passthrough();
+
 function validationError(error: z.ZodError): AppError {
   const detail = error.issues.map(i => `${i.path.join('.') || 'request'}: ${i.message}`).join('; ');
   return new AppError(`Invalid request: ${detail}`, 400, 'VALIDATION_ERROR');
@@ -122,10 +151,10 @@ class OpportunityController {
       const userId = req.user?.userId;
       if (!userId) throw new AppError('Authentication is required.', 401);
 
-      const oppData = req.body;
-      if (!oppData || typeof oppData !== 'object' || Array.isArray(oppData)) {
-        throw new AppError('A job posting is required.', 400, 'VALIDATION_ERROR');
-      }
+      const parsed = saveBodySchema.safeParse(req.body);
+      if (!parsed.success) throw validationError(parsed.error);
+      // A salary given as text carries no amounts to store
+      const oppData = { ...parsed.data, salary: typeof parsed.data.salary === 'object' ? parsed.data.salary : null };
       const saved = await OpportunityService.saveOpportunity(userId, oppData);
 
       res.status(201).json({

@@ -3,6 +3,9 @@ import interviewService from '../services/InterviewService.js';
 import { AppError } from '../middlewares/errorHandler.js';
 import { z } from 'zod';
 
+/** Longest interview answer accepted, in characters. */
+const MAX_ANSWER_LENGTH = 10000;
+
 const startSessionSchema = z
   .object({
     targetCareerId: z.string().max(40).optional(),
@@ -104,8 +107,14 @@ export class InterviewController {
       const { id } = req.params;
       const { questionIndex, candidateResponse } = req.body;
 
-      if (typeof questionIndex !== 'number' || typeof candidateResponse !== 'string') {
-        throw new AppError('questionIndex (number) and candidateResponse (string) are required', 400);
+      if (!Number.isInteger(questionIndex) || questionIndex < 0 || typeof candidateResponse !== 'string') {
+        throw new AppError('questionIndex (a whole number) and candidateResponse (text) are required', 400, 'VALIDATION_ERROR');
+      }
+      if (!candidateResponse.trim()) {
+        throw new AppError('An answer is required.', 400, 'VALIDATION_ERROR');
+      }
+      if (candidateResponse.length > MAX_ANSWER_LENGTH) {
+        throw new AppError(`An answer can be at most ${MAX_ANSWER_LENGTH} characters.`, 400, 'VALIDATION_ERROR');
       }
 
       const session = await interviewService.respondToQuestion(userId, id, { questionIndex, candidateResponse });

@@ -1,6 +1,7 @@
 import http from 'http';
 import type { AddressInfo } from 'net';
 import app from '../../app.js';
+import AuthService from '../../services/AuthService.js';
 
 export interface ApiResult<T = any> {
   status: number;
@@ -16,7 +17,14 @@ export interface ApiOptions {
 
 export interface HttpHarness {
   api: <T = any>(method: string, path: string, options?: ApiOptions) => Promise<ApiResult<T>>;
-  /** Registers a synthetic user and returns its access token. */
+  /** Sends a body exactly as given (e.g. malformed JSON) with a JSON content type. */
+  rawRequest: (method: string, path: string, body: string, token?: string) => Promise<{ status: number; text: string }>;
+  /**
+   * Creates a synthetic user and returns its access token. The account is created through the
+   * auth service rather than POST /auth/register, so suites that are not about sign-up do not
+   * spend the real login rate limit (15 attempts per 15 minutes). The HTTP sign-up path is
+   * covered by api_integration.test.ts.
+   */
   registerUser: (label: string) => Promise<{ token: string; email: string; userId: string }>;
   close: () => Promise<void>;
 }
@@ -49,19 +57,24 @@ export async function startHttpHarness(): Promise<HttpHarness> {
     return { status: res.status, body, headers: res.headers };
   };
 
+  const rawRequest: HttpHarness['rawRequest'] = async (method, path, body, token) => {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) headers.Authorization = `Bearer ${token}`;
+    const res = await fetch(`${baseUrl}${path}`, { method, headers, body });
+    return { status: res.status, text: await res.text() };
+  };
+
   let counter = 0;
   const registerUser: HttpHarness['registerUser'] = async label => {
     counter += 1;
     const email = `${label}.${Date.now()}.${counter}@example.com`;
-    const res = await api('POST', '/auth/register', {
-      json: { fullName: `${label} Tester`, email, password: 'Password123!' }
-    });
-    if (res.status !== 201) throw new Error(`register ${label} failed: ${res.status} ${JSON.stringify(res.body)}`);
-    return { token: res.body.data.accessToken, email, userId: String(res.body.data.user.id ?? res.body.data.user._id) };
+    const created = await new AuthService().register(`${label} Tester`, email, 'Password123!');
+    return { token: created.accessToken, email, userId: String(created.user.id) };
   };
 
   return {
     api,
+    rawRequest,
     registerUser,
     close: () => new Promise<void>(resolve => server.close(() => resolve()))
   };

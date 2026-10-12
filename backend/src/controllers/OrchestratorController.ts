@@ -35,6 +35,11 @@ class OrchestratorController {
       if (!userId) throw new AppError('Authentication is required.', 401);
 
       const { goal, targetCompany } = req.body || {};
+      for (const [name, value, max] of [['goal', goal, 500], ['targetCompany', targetCompany, 200]] as const) {
+        if (value !== undefined && (typeof value !== 'string' || value.length > max)) {
+          throw new AppError(`${name} must be text of at most ${max} characters.`, 400, 'VALIDATION_ERROR');
+        }
+      }
 
       const execution = await orchestratorService.executeWorkflow(
         userId,
