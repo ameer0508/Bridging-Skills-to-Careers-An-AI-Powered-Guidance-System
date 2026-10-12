@@ -9,7 +9,7 @@
 | **D3** answer-adaptive follow-ups | **Implemented and tested** (U H B) |
 | **D6** historical performance comparison | **Implemented and tested** (U H B) |
 | **D2** speech-to-text with typed fallback | **Implemented and tested** (U H B D); real recognition needs a manual check, see limits |
-| D1 | Not started |
+| **D1** voice interviews with consent, retention and deletion | **Implemented and tested** (U H B D); real microphone capture needs a manual check |
 
 ## D5. Role-specific scoring rubrics
 
@@ -260,3 +260,66 @@ No audio is stored for dictation. The lobby no longer says dictation is "support
   - dictated text appears, is edited and is stored as `mixed`;
   - an error message is shown and consent is withdrawn;
   - a browser without speech recognition gets the typed fallback and the typed answer is scored.
+
+## D1. Voice interviews with consent, retention and deletion
+
+A spoken round uses three pieces, all optional:
+1. **Hear the question.** The question can be read aloud with an **on-device** browser voice. Network voices are never used, since they would send the text to a voice provider. Without an on-device voice, the button is hidden.
+2. **Speak the answer.** The answer can be dictated (D2) or typed. The text is what is scored.
+3. **Record the answer for self-review.** The user can listen back to their delivery.
+
+**Recording rules.**
+- **Consent and retention.** Recording is off until the user allows it in the room and picks how long recordings are kept:
+  - until the round ends;
+  - 7 days;
+  - 30 days.
+
+  This is stored in `VoiceSettings` (`recordingConsent`, `retentionDays`) with an audit history. The upload endpoint refuses without consent (403 `RECORDING_CONSENT_REQUIRED`).
+- **Where recordings go.** Recordings are stored only on SkillBridge's server, under file names made from ids. They are:
+  - playable only by their owner, with `Cache-Control: private, no-store`;
+  - never sent to an AI or any third party;
+  - never transcribed by SkillBridge;
+  - never used for scoring.
+- **Accepted audio.** WebM, Ogg, MP4 or WAV, checked by declared type **and** file signature, up to 5 MB. Durations are capped at 180 s. A new recording for the same question replaces the old one, and recording stops when the round ends (409).
+- **Deletion.** Any of these deletes recordings:
+  - deleting one recording, or all of them (`DELETE /interviews/recordings`);
+  - **turning recording off**, which deletes every recording;
+  - retention "until the round ends", which deletes the round's recordings when it completes (24 hours at most);
+  - expiry: expired recordings are purged whenever recordings are touched and by `npx tsx src/scripts/purgeVoiceRecordings.ts`, which should run daily;
+  - a shorter retention, which also shortens recordings already kept.
+
+**API**, sign-in required; another user's session answers 404:
+
+| Method and path | Purpose |
+|---|---|
+| `POST /interviews/:id/recordings` | Upload, multipart `audio` plus `questionIndex` |
+| `GET /interviews/:id/recordings` | List |
+| `GET /interviews/:id/recordings/:questionId/audio` | Play |
+| `DELETE /interviews/:id/recordings/:questionId` | Delete one |
+| `DELETE /interviews/recordings` | Delete all |
+
+**Storage.** The default location is `<UPLOAD_DIR>/../voice-recordings`, which is git-ignored; `VOICE_RECORDING_DIR` overrides it. Docker deployments need it on a volume. Files are written with mode 600.
+
+**Limits.**
+- Browser tests use a stand-in microphone and `MediaRecorder`, so the consent, upload, playback, deletion and withdrawal flows are deterministic. Real microphone capture and codecs per browser need a manual check.
+- The purge script is not scheduled automatically.
+
+**Tests:**
+- `backend/src/tests/voice_interviews.test.ts` covers:
+  - consent required;
+  - 7-day expiry;
+  - owner-only byte-exact playback with no-store;
+  - storage location never returned;
+  - 6 bad uploads refused, including text disguised as audio, an image, oversize, no file and a bad index;
+  - replacement;
+  - 4 isolation probes;
+  - deletion removing the file;
+  - retention shortening;
+  - deletion at round end;
+  - no uploads after the round;
+  - expiry purge;
+  - withdrawal deleting everything.
+- `e2e/tests/interviews.mjs` adds 3 browser steps:
+  - no microphone access before consent, with consent text and retention;
+  - record, listen and delete;
+  - turning recording off deletes everything.

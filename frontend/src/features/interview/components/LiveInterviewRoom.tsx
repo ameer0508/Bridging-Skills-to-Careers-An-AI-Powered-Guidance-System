@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { QuestionItem, InterviewSession } from '../../../workspaces/InterviewPrepAgentWorkspace/InterviewPrepAgentWorkspace';
 import { DictationControl } from './DictationControl';
+import { RecordingControl } from './RecordingControl';
+import { ReadAloudButton } from './ReadAloudButton';
 
 export interface LiveInterviewRoomProps {
   session: InterviewSession;
@@ -280,6 +282,10 @@ export const LiveInterviewRoom: React.FC<LiveInterviewRoomProps> = ({
                 </div>
 
                 <DictationControl onTranscript={appendDictation} disabled={isEvaluating} />
+                <div className="flex flex-wrap items-start gap-3">
+                  <ReadAloudButton text={currentQuestion.question} />
+                  <RecordingControl sessionId={session._id} questionIndex={qIndex} questionId={currentQuestion.questionId} disabled={isEvaluating} />
+                </div>
 
                 {/* Actions & Next Flow */}
                 <div className="flex items-center justify-between pt-2 flex-wrap gap-3">

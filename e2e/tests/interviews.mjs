@@ -45,6 +45,31 @@ export async function run({ webUrl, apiUrl }) {
     window.__speech = state;
     window.__hear = (text) => state.current?.onresult?.({ resultIndex: 0, results: [[{ transcript: text }]] });
     window.__speechError = (error) => state.current?.onerror?.({ error });
+
+    // A stand-in microphone and recorder: "recording" yields a tiny WebM-signed blob
+    const media = { requests: 0 };
+    window.__media = media;
+    navigator.mediaDevices.getUserMedia = async () => {
+      media.requests += 1;
+      return { getTracks: () => [{ stop() {} }] };
+    };
+    class FakeRecorder {
+      constructor() {
+        this.mimeType = 'audio/webm';
+        this.state = 'inactive';
+      }
+      start() {
+        this.state = 'recording';
+      }
+      stop() {
+        if (this.state !== 'recording') return;
+        this.state = 'inactive';
+        const bytes = new Uint8Array([0x1a, 0x45, 0xdf, 0xa3, 0x42, 0x86, 0x81, 0x01]);
+        this.ondataavailable?.({ data: new Blob([bytes], { type: 'audio/webm' }) });
+        this.onstop?.();
+      }
+    }
+    window.MediaRecorder = FakeRecorder;
   });
   const page = await context.newPage();
   const log = watch(page, apiUrl);
@@ -222,6 +247,54 @@ export async function run({ webUrl, apiUrl }) {
       const stored = (await otherApi('GET', '/interviews/history')).data.history[0];
       await plain.close();
       expect(stored.questions[0].answerInputMethod === 'typed' && stored.questions[0].evaluation, 'the typed answer was not stored and scored');
+    });
+
+    // ---- D1 recorded answers --------------------------------------------------------------------------------
+    let recordingRound;
+    await t.step('recording is off until the user consents and picks a retention', async () => {
+      await gotoAndSettle(page, `${webUrl}/interview-agent`, 2000);
+      await page.getByRole('button', { name: /ENTER INTERVIEW STUDIO/ }).click();
+      await page.locator('textarea').first().waitFor({ timeout: 20_000 });
+      recordingRound = (await latestSession())._id;
+      await page.getByRole('button', { name: 'Record spoken answers' }).click();
+      expect((await page.evaluate(() => window.__media.requests)) === 0, 'the microphone was opened before consent');
+      const dialog = page.getByTestId('recording-consent');
+      const text = await dialog.innerText();
+      expect(/not sent to\s+any AI/.test(text) && /do not change your score/.test(text) && /deletes all of them/.test(text), `consent text: ${text}`);
+      await dialog.getByLabel('Keep recordings').selectOption('7');
+      await dialog.getByRole('button', { name: 'Allow recording' }).click();
+      await page.getByTestId('recording-status').waitFor({ timeout: 10_000 });
+      const settings = (await api('GET', '/interviews/voice-settings')).data;
+      expect(settings.recordingConsent === true && settings.retentionDays === 7, `settings ${JSON.stringify(settings)}`);
+    });
+
+    await t.step('an answer is recorded, played back to its owner and deleted', async () => {
+      await page.getByRole('button', { name: 'Record answer' }).click();
+      await page.getByRole('button', { name: /Stop recording/ }).click();
+      await page.getByRole('button', { name: 'Listen' }).waitFor({ timeout: 10_000 });
+      expect(/Recording saved/.test(await page.getByTestId('recording-status').innerText()), 'the saved state is not shown');
+      expect((await api('GET', `/interviews/${recordingRound}/recordings`)).data.recordings.length === 1, 'the recording was not stored');
+      await page.getByRole('button', { name: 'Listen' }).click();
+      const player = page.getByTestId('recording-player');
+      await player.waitFor({ timeout: 10_000 });
+      expect(/^blob:/.test(await player.getAttribute('src')), 'playback does not use the fetched audio');
+      await page.getByRole('button', { name: 'Delete recording' }).click();
+      await page.getByRole('button', { name: 'Record answer' }).waitFor({ timeout: 10_000 });
+      expect((await api('GET', `/interviews/${recordingRound}/recordings`)).data.recordings.length === 0, 'the recording was not deleted');
+    });
+
+    await t.step('turning recording off deletes every recording', async () => {
+      await page.getByRole('button', { name: 'Record answer' }).click();
+      await page.getByRole('button', { name: /Stop recording/ }).click();
+      await page.getByRole('button', { name: 'Listen' }).waitFor({ timeout: 10_000 });
+      page.once('dialog', (d) => d.accept());
+      await page.getByRole('button', { name: 'Turn off recording' }).click();
+      await page.getByRole('button', { name: 'Record spoken answers' }).waitFor({ timeout: 10_000 });
+      const settings = (await api('GET', '/interviews/voice-settings')).data;
+      expect(settings.recordingConsent === false, 'consent was not withdrawn');
+      expect((await api('GET', `/interviews/${recordingRound}/recordings`)).data.recordings.length === 0, 'recordings survived withdrawal');
+      await page.getByRole('button', { name: /Conclude Round/ }).click();
+      await page.waitForTimeout(2500);
     });
 
     // ---- D4 technical assessments --------------------------------------------------------------------------
