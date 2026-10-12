@@ -6,6 +6,7 @@ import SkillNormalizationService from './SkillNormalizationService.js';
 import EvidenceCalculator from './EvidenceCalculator.js';
 import logger from '../config/logger.js';
 import type { IResumeSkillChanges } from '../models/Resume.js';
+import type { IEvidence } from '../models/UserSkill.js';
 
 class UserSkillService {
   /** Canonical names of the skills currently on the user's profile. */
@@ -79,6 +80,14 @@ class UserSkillService {
       // Since UserSkill is a union of all user evidences, we'll just recalculate for the given skills.
       // For now, if they replace a resume, we can just replace their entire skill profile based on that resume.
       // (Assuming 1 active resume = 1 skill profile for this milestone).
+      // Evidence that did not come from a resume (the user's own confirmations, assessments taken
+      // here) belongs to the user, not to the file, and is carried over to the rebuilt profile.
+      const carriedOver = new Map<string, IEvidence[]>();
+      for (const existing of await UserSkill.find({ userId: new mongoose.Types.ObjectId(userId) })) {
+        const kept = existing.evidences.filter(e => !e.sourceType.startsWith('resume_'));
+        if (kept.length > 0) carriedOver.set(existing.skillId.toString(), kept.map(e => ({ ...(e as unknown as { toObject?: () => IEvidence }).toObject?.() ?? e })));
+      }
+
       await UserSkill.deleteMany({ userId: new mongoose.Types.ObjectId(userId) });
 
       const userSkillsToInsert = [];
@@ -100,13 +109,17 @@ class UserSkillService {
           parsedResume
         );
 
+        const extra = carriedOver.get(canonicalIdStr) || [];
+        carriedOver.delete(canonicalIdStr);
+        const total = Math.min(100, score + extra.reduce((sum, e) => sum + (e.points || 0), 0));
+
         userSkillsToInsert.push({
           userId: new mongoose.Types.ObjectId(userId),
           skillId: canonicalSkill._id,
           category: canonicalSkill.category || 'General',
-          evidenceScore: score,
-          proficiency: EvidenceCalculator.estimateProficiency(score),
-          evidences: evidences
+          evidenceScore: total,
+          proficiency: EvidenceCalculator.estimateProficiency(total),
+          evidences: [...evidences, ...extra]
         });
       }
 
@@ -116,14 +129,11 @@ class UserSkillService {
           `Successfully built ${userSkillsToInsert.length} UserSkills for user ${userId}`
         );
 
-        // 5. Recompute Career Matching & Readiness
-        const CareerMatchingEngine = (await import('./CareerMatchingEngine.js')).default;
-        const CareerReadinessService = (await import('./CareerReadinessService.js')).default;
-
-        // Awaited in order so the resume is only reported as processed once every
-        // downstream record (matches -> readiness/gaps -> recommendations) is consistent.
-        await CareerMatchingEngine.evaluateUser(userId);
-        await CareerReadinessService.evaluateUser(userId);
+        // 5. Recompute what depends on the skill profile, in order and once. Awaited so the
+        // resume is only reported as processed when matches, readiness, gaps and
+        // recommendations are all consistent with it.
+        const { default: RecalculationService } = await import('./RecalculationService.js');
+        await RecalculationService.run(userId, 'resume_processed', resumeId);
       } else {
         await this.clearDerivedIntelligence(userId);
       }

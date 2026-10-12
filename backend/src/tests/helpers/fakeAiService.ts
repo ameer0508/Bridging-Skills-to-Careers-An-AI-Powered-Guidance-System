@@ -69,6 +69,8 @@ function parseResumeText(text: string) {
           {
             role: entity(experienceLines[0].split(' at ')[0]),
             company: entity((experienceLines[0].split(' at ')[1] || '').replace(/\s*\(.*\)$/, '')),
+            // The period in brackets after the employer, as the real parser reports it
+            duration: /\(([^)]+)\)\s*$/.test(experienceLines[0]) ? entity(experienceLines[0].match(/\(([^)]+)\)\s*$/)![1]) : null,
             responsibilities: experienceLines.slice(1).map(entity)
           }
         ]

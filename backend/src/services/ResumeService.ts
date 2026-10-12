@@ -185,6 +185,9 @@ export class ResumeService {
     await ExtractedSkill.deleteMany({ resumeId: activeResume._id });
     const UserSkillService = (await import('./UserSkillService.js')).default;
     await UserSkillService.clearDerivedIntelligence(userId);
+    // Recorded so the history shows why the figures dropped; there is nothing left to recompute
+    const { default: RecalculationService } = await import('./RecalculationService.js');
+    await RecalculationService.run(userId, 'resume_deleted', activeResume.id);
 
     const ProgressEventService = (await import('./ProgressEventService.js')).default;
     ProgressEventService.logEvent(userId, 'resume_deleted', { fileName: activeResume.originalFileName }).catch(e => logger.error(e));

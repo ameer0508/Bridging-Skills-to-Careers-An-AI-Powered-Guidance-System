@@ -325,6 +325,9 @@ export class InterviewService {
 
     if (mongoose.connection.readyState === 1 && typeof session.save === 'function') {
       await session.save();
+      // Interview weaknesses feed recommendations; scores are unaffected, so only those are refreshed
+      const { default: RecalculationService } = await import('./RecalculationService.js');
+      await RecalculationService.run(userId, 'interview_completed', sessionId);
     }
     return session;
   }

@@ -1,6 +1,7 @@
 import { IParsedResume } from '../models/ParsedResume.js';
 import { IEvidence, ProficiencyLevel } from '../models/UserSkill.js';
 import { escapeRegExp } from '../utils/skillMatching.js';
+import { parsePeriodEnd } from '../utils/periods.js';
 
 /**
  * Points awarded per kind of resume evidence. Repeats give diminishing returns so that
@@ -42,6 +43,7 @@ export class EvidenceCalculator {
   ): { score: number; evidences: IEvidence[] } {
     let score = 0;
     const evidences: IEvidence[] = [];
+    const recordedAt = new Date();
     const searchTerms = [
       ...new Set([canonicalName, ...aliases].map(t => t.toLowerCase().trim()))
     ].filter(Boolean);
@@ -64,13 +66,21 @@ export class EvidenceCalculator {
     let rolesWithSkill = 0;
     for (const exp of parsedResume.experience || []) {
       if (containsSkill(exp.role?.value) || anyContains(exp.responsibilities)) {
-        score += stepped(EVIDENCE_POINTS.experience, rolesWithSkill);
+        const points = stepped(EVIDENCE_POINTS.experience, rolesWithSkill);
+        // A role's dates say when the skill was last used there; other evidence carries no date
+        const period = parsePeriodEnd(exp.duration?.value, recordedAt);
+        score += points;
         rolesWithSkill++;
         evidences.push({
           sourceType: 'resume_experience',
           sourceId: parsedResume.id,
           description: `Used at ${exp.company?.value || 'a previous employer'} as ${exp.role?.value || 'an employee'}`,
-          weight: 0.8
+          weight: 0.8,
+          points,
+          observedAt: period.end,
+          ongoing: period.ongoing,
+          verification: 'stated',
+          recordedAt
         });
       }
     }
@@ -84,13 +94,18 @@ export class EvidenceCalculator {
         anyContains(proj.technologies) ||
         anyContains(proj.contributions)
       ) {
-        score += stepped(EVIDENCE_POINTS.projects, projectsWithSkill);
+        const points = stepped(EVIDENCE_POINTS.projects, projectsWithSkill);
+        score += points;
         projectsWithSkill++;
         evidences.push({
           sourceType: 'resume_projects',
           sourceId: parsedResume.id,
           description: `Applied in project: ${proj.name?.value || 'Unnamed project'}`,
-          weight: 0.6
+          weight: 0.6,
+          points,
+          observedAt: null,
+          verification: 'stated',
+          recordedAt
         });
       }
     }
@@ -105,7 +120,11 @@ export class EvidenceCalculator {
         sourceType: 'resume_education',
         sourceId: parsedResume.id,
         description: `Studied during ${education.degree?.value || 'degree'} at ${education.institution?.value || 'institution'}`,
-        weight: 0.4
+        weight: 0.4,
+        points: EVIDENCE_POINTS.education,
+        observedAt: null,
+        verification: 'stated',
+        recordedAt
       });
     }
 
@@ -117,7 +136,11 @@ export class EvidenceCalculator {
         sourceType: 'resume_certifications',
         sourceId: parsedResume.id,
         description: `Certified: ${certification.value}`,
-        weight: 0.9
+        weight: 0.9,
+        points: EVIDENCE_POINTS.certification,
+        observedAt: null,
+        verification: 'stated',
+        recordedAt
       });
     }
 
@@ -127,7 +150,11 @@ export class EvidenceCalculator {
       sourceType: 'resume_skills',
       sourceId: parsedResume.id,
       description: 'Mentioned in the resume',
-      weight: 0.2
+      weight: 0.2,
+      points: EVIDENCE_POINTS.listed,
+      observedAt: null,
+      verification: 'stated',
+      recordedAt
     });
 
     return { score: Math.min(score, 100), evidences };

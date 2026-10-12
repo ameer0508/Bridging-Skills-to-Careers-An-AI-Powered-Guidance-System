@@ -59,9 +59,9 @@ export class UserController {
 
       // Trigger downstream intelligence recalculations if domain/target role changed or onboarding completed
       if (updateData.primaryCareerDomain || updateData.targetRole || updateData.onboardingCompleted) {
+        // One ordered run; a repeat with unchanged inputs is skipped by the service
         Promise.all([
-          import('../services/CareerMatchingEngine.js').then(m => m.default.evaluateUser(userId)),
-          import('../services/CareerReadinessService.js').then(m => m.default.evaluateUser(userId)),
+          import('../services/RecalculationService.js').then(m => m.default.run(userId, 'target_role_changed')),
           import('../services/SnapshotService.js').then(m => m.default.createSnapshot(userId)),
         ]).catch(err => {
           logger.error('Downstream evaluation failure after domain update:', err);
