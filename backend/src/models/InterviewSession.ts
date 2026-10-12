@@ -25,8 +25,17 @@ export interface IQuestionEvaluation {
   evaluatedAt: Date;
 }
 
-/** Who wrote a question: an AI provider, or the built-in question bank used when AI is unavailable. */
-export type InterviewQuestionSource = 'ai' | 'question_bank';
+/**
+ * Who wrote a question: an AI provider, the built-in question bank used when AI is unavailable,
+ * or the follow-up rules (D3) reacting to the previous answer.
+ */
+export type InterviewQuestionSource = 'ai' | 'question_bank' | 'follow_up';
+
+/** Why a follow-up was asked (D3). */
+export interface IFollowUpReason {
+  type: 'missing_concept' | 'low_specificity' | 'weak_structure';
+  concept?: string;
+}
 
 export interface IQuestionItem {
   questionId: string;
@@ -39,6 +48,9 @@ export interface IQuestionItem {
   groundedIn?: string;
   candidateResponse?: string;
   evaluation?: IQuestionEvaluation;
+  /** Set on follow-up questions (D3): the questionId they follow up. */
+  followUpOf?: string;
+  followUpReason?: IFollowUpReason;
 }
 
 export type InterviewStatus = 'active' | 'completed' | 'abandoned';
@@ -55,6 +67,10 @@ export interface IInterviewSession extends Document<Types.ObjectId> {
   /** Role rubric (D5) chosen at the start; absent on older sessions, which are scored with 'general'. */
   rubricId?: string;
   rubricVersion?: number;
+  /** D3: ask a follow-up when an answer misses something. Off unless the user turns it on. */
+  adaptiveFollowUps?: boolean;
+  /** D3: follow-ups asked and answered; kept out of the overall score. */
+  followUpSummary?: { asked: number; answered: number; recovered: number; averageScore: number | null };
   /** Where this session's questions came from. Absent on sessions created before this field existed. */
   questionSource?: InterviewQuestionSource;
   /** The job posting this session prepares for, when it was started from one. */
@@ -100,8 +116,10 @@ const QuestionItemSchema = new Schema<IQuestionItem>(
     category: { type: String, default: 'technical' },
     difficulty: { type: String, default: 'medium' },
     expectedConcepts: { type: [String], default: [] },
-    source: { type: String, enum: ['ai', 'question_bank'] },
+    source: { type: String, enum: ['ai', 'question_bank', 'follow_up'] },
     groundedIn: { type: String },
+    followUpOf: { type: String },
+    followUpReason: { type: new Schema({ type: { type: String }, concept: { type: String } }, { _id: false }) },
     candidateResponse: { type: String },
     evaluation: { type: QuestionEvaluationSchema }
   },
@@ -121,6 +139,8 @@ const InterviewSessionSchema = new Schema<IInterviewSession>(
     questionSource: { type: String, enum: ['ai', 'question_bank'] },
     rubricId: { type: String },
     rubricVersion: { type: Number },
+    adaptiveFollowUps: { type: Boolean, default: false },
+    followUpSummary: { type: Schema.Types.Mixed },
     opportunityContext: {
       type: new Schema({ title: { type: String }, company: { type: String } }, { _id: false }),
     },

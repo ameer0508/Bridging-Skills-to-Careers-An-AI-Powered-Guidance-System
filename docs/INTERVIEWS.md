@@ -6,7 +6,8 @@
 |---|---|
 | **D5** role-specific rubrics | **Implemented and tested** (U H B) |
 | **D4** technical assessments without code execution | **Implemented and tested** (U H B D) |
-| D3, D6, D2, D1 | Not started |
+| **D3** answer-adaptive follow-ups | **Implemented and tested** (U H B) |
+| D6, D2, D1 | Not started |
 
 ## D5. Role-specific scoring rubrics
 
@@ -123,3 +124,53 @@ The candidate answers with an option index, a line number or a short value, whic
   - finish and history;
   - a line answer;
   - 390 px.
+
+## D3. Answer-adaptive follow-up questions
+
+**Opt-in per round.** In the lobby, check *Ask follow-up questions*, or send `adaptiveFollowUps: true` to `POST /interviews`. It is off by default, so existing rounds behave exactly as before.
+
+**When a follow-up is asked.** Right after an answer is scored, `backend/src/services/interview/FollowUpService.ts` decides from what the answer lacked, in this order:
+
+1. **A missing expected concept** (the first in `missingConcepts`):
+   - technical: "Your answer did not cover *concept*. How does it apply here, and what would you do about it?"
+   - behavioural: "In the situation you described, what part did *concept* play?"
+2. **Specificity below 40.** It asks for the concrete tools, methods and measured results.
+3. **Structure below 50.** It asks for the STAR steps for behavioural questions, or the reasoning and trade-offs otherwise.
+
+**No follow-up** is asked:
+- after an empty answer, which still needs an answer itself;
+- after a strong answer (75 or more with nothing missing);
+- for a follow-up;
+- beyond **one per question** or **three per round**.
+
+**What it is.**
+- It is deterministic and needs no AI.
+- It is inserted immediately after the answered question, so it is asked next.
+- It carries `source: 'follow_up'`, `followUpOf`, `followUpReason` and a `groundedIn` such as "your answer to question 2 did not cover …". The room labels it **FOLLOW-UP · not part of the overall score**.
+
+**Scoring.**
+- A follow-up answer is scored with the session's rubric (D5).
+- The overall score, the dimension averages and "answered" cover the **planned questions only**, so asking follow-ups can never lower or raise the headline score.
+- The report adds `followUpSummary`:
+  - `asked`, `answered`;
+  - `recovered`: the concept is now covered, or the weak dimension reached its threshold;
+  - `averageScore`.
+
+  It also adds one line of advice.
+
+**Limits.** The lexical coverage check behind "missing concept" is coarse, the same as in the rule-based rubric. A follow-up may ask about a point the candidate did make, in other words.
+
+**Tests:**
+- `backend/src/tests/interview_followups.test.ts` covers:
+  - reasons in priority order;
+  - no follow-up for empty, strong or follow-up answers;
+  - wording;
+  - recovery;
+  - opt-in only;
+  - placement;
+  - one per question;
+  - the cap of 3;
+  - an overall score from planned questions only;
+  - the summary;
+  - HTTP validation, isolation (404) and the report.
+- `e2e/tests/interviews.mjs` adds 2 browser steps: a follow-up asked at once with its provenance, then answered and reported apart from the overall score.

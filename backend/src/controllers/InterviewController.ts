@@ -14,6 +14,7 @@ const startSessionSchema = z
     mode: z.enum(['technical', 'behavioral', 'project', 'resume', 'career', 'mixed']).optional(),
     questionCount: z.number().int().min(1).max(10).optional(),
     rubricId: z.enum(RUBRIC_IDS as [RubricId, ...RubricId[]]).optional(),
+    adaptiveFollowUps: z.boolean().optional(),
     opportunityContext: z
       .object({
         title: z.string().trim().max(200).optional(),
@@ -193,6 +194,8 @@ export class InterviewController {
           status: session.status,
           // Who wrote the questions and who scored the answers, so the client can label both honestly
           questionSource: session.questionSource ?? null,
+          adaptiveFollowUps: Boolean(session.adaptiveFollowUps),
+          followUpSummary: session.followUpSummary ?? null,
           evaluationSource: session.evaluationSource ?? null,
           // The role rubric the answers were weighted with (older sessions: general)
           rubric: rubricById(session.rubricId),

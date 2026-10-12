@@ -72,6 +72,42 @@ export async function run({ webUrl, apiUrl }) {
       return `${session.targetCareerTitle} → ${resolved}`;
     });
 
+    // ---- D3 adaptive follow-ups --------------------------------------------------------------------------
+    const VAGUE =
+      'I would approach this carefully, think about what the team needs, talk to the people involved, and make sure that whatever we build is reliable. ' +
+      'I would test it properly, review it with colleagues and keep improving it over time until everyone is happy with how it works in practice.';
+    await t.step('with follow-ups on, an answer that misses a point is followed up at once', async () => {
+      await gotoAndSettle(page, `${webUrl}/interview-agent`, 2500);
+      await page.getByLabel(/Ask follow-up questions/).check();
+      await page.getByRole('button', { name: /ENTER INTERVIEW STUDIO/ }).click();
+      const box = page.locator('textarea').first();
+      await box.waitFor({ timeout: 20_000 });
+      await box.fill(VAGUE);
+      await page.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+      const badge = page.getByTestId('follow-up-badge');
+      await badge.waitFor({ timeout: 20_000 });
+      const grounding = await page.getByTestId('question-grounding').first().innerText();
+      expect(/your answer to question 1/.test(grounding) && /follow-up to your previous answer/.test(grounding), `grounding: ${grounding}`);
+      const session = await latestSession();
+      expect(session.adaptiveFollowUps === true && session.questions[1].source === 'follow_up', 'the follow-up was not stored after question 1');
+      return session.questions[1].question;
+    });
+
+    await t.step('the follow-up is answered and reported apart from the overall score', async () => {
+      const box = page.locator('textarea').first();
+      await box.fill(`${ANSWER} The key point I missed is handled explicitly, with a measured result.`);
+      await page.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+      await page.waitForTimeout(1500);
+      await page.getByRole('button', { name: /Conclude Round/ }).click();
+      const summary = page.getByTestId('follow-up-summary');
+      await summary.waitFor({ timeout: 15_000 });
+      expect(/1 asked, 1 answered/.test(await summary.innerText()), `summary: ${await summary.innerText()}`);
+      const session = await latestSession();
+      const primary = session.questions.filter((q) => !q.followUpOf);
+      const expected = Math.round(primary.reduce((acc, q) => acc + (q.evaluation?.score || 0), 0) / primary.length);
+      expect(session.overallScore === expected, `overall ${session.overallScore} vs planned-question average ${expected}`);
+    });
+
     // ---- D4 technical assessments --------------------------------------------------------------------------
     const SQL_KEYS = { 'sql-group-count': '2', 'sql-offset': 'Dina', 'sql-avg': '70', 'sql-left-join-zero': '3', 'sql-count-distinct': '3' };
     await t.step('the lobby links to a technical assessment that runs nothing', async () => {

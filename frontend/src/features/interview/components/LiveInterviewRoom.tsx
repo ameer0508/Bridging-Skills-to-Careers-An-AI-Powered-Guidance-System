@@ -238,13 +238,27 @@ export const LiveInterviewRoom: React.FC<LiveInterviewRoomProps> = ({
                   )}
                 </div>
 
+                {currentQuestion.source === 'follow_up' && (
+                  <span
+                    className="inline-block rounded-full border border-amber-400/40 bg-amber-500/10 px-2.5 py-0.5 text-[10px] font-bold text-amber-200"
+                    data-testid="follow-up-badge"
+                  >
+                    FOLLOW-UP · not part of the overall score
+                  </span>
+                )}
                 {/* Question Typography */}
                 <h2 className="text-base sm:text-lg font-bold text-white leading-relaxed tracking-wide">
                   {currentQuestion.question}
                   {currentQuestion.groundedIn && (
                     <span className="block mt-3 text-xs font-normal text-slate-400" data-testid="question-grounding">
                       Based on: {currentQuestion.groundedIn}
-                      {currentQuestion.source === 'ai' ? ' · written by AI' : currentQuestion.source === 'question_bank' ? ' · from the question bank' : ''}
+                      {currentQuestion.source === 'ai'
+                        ? ' · written by AI'
+                        : currentQuestion.source === 'question_bank'
+                          ? ' · from the question bank'
+                          : currentQuestion.source === 'follow_up'
+                            ? ' · follow-up to your previous answer'
+                            : ''}
                     </span>
                   )}
                 </h2>

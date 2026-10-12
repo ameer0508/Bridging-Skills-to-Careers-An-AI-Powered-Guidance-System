@@ -80,6 +80,12 @@ export const PerformanceReview: React.FC<PerformanceReviewProps> = ({
               Unanswered questions count as zero in the overall score.
             </p>
             <RubricNote rubricId={session.rubricId} />
+            {session.followUpSummary && (
+              <p className="mt-2 text-xs text-slate-400" data-testid="follow-up-summary">
+                Follow-ups: {session.followUpSummary.asked} asked, {session.followUpSummary.answered} answered; the missing point was
+                recovered in {session.followUpSummary.recovered}. Follow-up answers are not part of the overall score.
+              </p>
+            )}
           </div>
 
           {/* Overall Score Dial */}
