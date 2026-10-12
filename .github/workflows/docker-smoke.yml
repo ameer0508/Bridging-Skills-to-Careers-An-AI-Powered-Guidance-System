@@ -27,8 +27,6 @@ jobs:
   compose:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      SMOKE_STATE: ${{ runner.temp }}/skillbridge-docker-smoke.json
     steps:
       - uses: actions/checkout@v4
 
@@ -42,6 +40,8 @@ jobs:
             echo "GEMINI_API_KEY="
             echo "RAPIDAPI_KEY="
           } > .env
+          # Where the smoke test keeps its synthetic account between the two runs
+          echo "SMOKE_STATE=$RUNNER_TEMP/skillbridge-docker-smoke.json" >> "$GITHUB_ENV"
 
       - name: 1. Validate the Compose file
         run: docker compose config --quiet
