@@ -23,6 +23,8 @@ import { runChatReliabilityTests } from './chat_reliability.test.js';
 import { runInputValidationTests } from './input_validation.test.js';
 import { runDiagnosticsAccessTests } from './diagnostics_access.test.js';
 import { runCareerLabTests } from './career_lab.test.js';
+import { runCostPolicyTests } from './cost_policy.test.js';
+import { runMarketIntelligenceTests } from './market_intelligence.test.js';
 
 async function runAll() {
   console.log('🚀 Starting Comprehensive SkillBridge Backend Test Suite...');
@@ -66,6 +68,8 @@ async function runAll() {
     await runInputValidationTests();
     await runDiagnosticsAccessTests();
     await runCareerLabTests();
+    await runCostPolicyTests();
+    await runMarketIntelligenceTests();
     const after = fingerprint();
     const touched = before.filter((entry, i) => entry !== after[i]);
     if (touched.length > 0) {

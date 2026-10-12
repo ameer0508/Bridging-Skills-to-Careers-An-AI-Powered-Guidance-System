@@ -17,6 +17,7 @@ import conversationRouter from './routes/conversation.js';
 import opportunitiesRouter from './routes/opportunities.js';
 import interviewRouter from './routes/interview.js';
 import orchestratorRouter from './routes/orchestrator.js';
+import marketRouter from './routes/market.js';
 import env from './config/env.js';
 import { diagnosticsAreOpen, requireDiagnosticsAccess } from './middlewares/diagnostics.js';
 
@@ -495,6 +496,7 @@ app.use('/api/v1/ai', conversationRouter);
 app.use('/api/v1/opportunities', opportunitiesRouter);
 app.use('/api/v1/interviews', interviewRouter);
 app.use('/api/v1/orchestrator', orchestratorRouter);
+app.use('/api/v1/market', marketRouter);
 
 // Error handling middleware
 app.use(errorHandler);
