@@ -65,7 +65,7 @@ export async function runVoiceInterviewTests() {
     const webm = (marker: string) => Buffer.concat([Buffer.from([0x1a, 0x45, 0xdf, 0xa3]), Buffer.from(`fake-webm-${marker}`)]);
     const upload = (token: string, sessionId: string, body: { buffer?: Buffer; type?: string; questionIndex?: string; name?: string }) => {
       const form = new FormData();
-      if (body.buffer) form.append('audio', new Blob([body.buffer], { type: body.type ?? 'audio/webm' }), body.name ?? 'answer.webm');
+      if (body.buffer) form.append('audio', new Blob([new Uint8Array(body.buffer)], { type: body.type ?? 'audio/webm' }), body.name ?? 'answer.webm');
       form.append('questionIndex', body.questionIndex ?? '0');
       form.append('durationSec', '12.4');
       return h.api('POST', `/interviews/${sessionId}/recordings`, { token, form });
