@@ -1,9 +1,12 @@
 # SkillBridge finalization checklist
 
+A full score means every item on this list has passed its stated verification. It does not by
+itself mean the system is ready for production use; see the limitations at the end.
+
 Progress is the sum of points for items marked **Done**. An item is only marked Done when
 the stated verification has actually been run and passed. "Code exists" does not count.
 
-Total: 100 points. **Current: 97 / 100.**
+Total: 100 points. **Current: 100 / 100.**
 
 Verification levels used below:
 
@@ -107,20 +110,20 @@ Verification levels used below:
 |---|---|---|---|---|
 | J1 | Models tracked, typed, matching services; backend `tsc --noEmit` clean | 3 | **Done** | `tsc --noEmit`: 0 errors |
 | J2 | Recalculations serialized per user | 1 | **Done** | service test (duplicate checks) |
-| J3 | Docker Compose starts a working stack | 3 | Pending | NOT run: Docker is still not installed on the development machine. Configuration was corrected by inspection only |
+| J3 | Docker Compose starts a working stack | 3 | **Done** | GitHub Actions workflow `docker-smoke.yml` on an Ubuntu runner, commit `f5ca3a8` ([run](https://github.com/ameer0508/Bridging-Skills-to-Careers-An-AI-Powered-Guidance-System/actions/runs/38237809763)): Compose file valid, four images built, all services running and healthy, frontend reaches backend through nginx, backend reaches the AI service with the internal key, registration and sign-in, a generated PDF parsed and turned into skills, matches, readiness, recommendations and a roadmap, data intact after restarting every container, no startup failures in the logs, teardown. Not run on a local machine or a production host |
 | J4 | Correct error codes and input validation | 2 | **Done** | HTTP test input_validation: 40 malformed requests across every write endpoint return the expected 4xx with an error code, none 500, none changes data |
-| J5 | All test suites isolated, run once, pass | 3 | **Done** | `pnpm --filter backend test`: 13 suites pass; pytest: 78 pass |
+| J5 | All test suites isolated, run once, pass | 3 | **Done** | `pnpm test`: 19 suites pass; pytest: 104 pass |
 | J6 | Frontend type-check is real and build passes | 3 | **Done** | `pnpm --filter frontend build` now runs `tsc --noEmit -p tsconfig.app.json` first: 0 errors (was 514), then `vite build` passes. No strictness relaxed, no `@ts-ignore`/`@ts-nocheck` added |
 | J7 | Lint clean | 1 | **Done** | `pnpm lint`: backend 0 warnings; frontend 0 warnings (was 108), no rule disabled or suppression added. Seven suppressions that predate this work remain in context/provider files |
 | J8 | UX polish, accessibility, loading and error states | 2 | **Done** | `pnpm test:e2e` (35/35): accessible names on every control of 13 pages, 7 pages fit 390px, keyboard focus order, and a load-failure notice with retry on 12 pages when the API fails; loading, empty, error and retry states for resume, jobs, interviews and chat. Not covered: screen readers, colour contrast, non-Chromium browsers |
 | J9 | README and docs match the implementation | 1 | **Done** | README, DEPLOYMENT, SECURITY, ARCHITECTURE, CHANGELOG, SCORING and the `.env.example` files rewritten or corrected against the code; the endpoint table in API_REFERENCE is checked against all 54 routes. The older per-endpoint examples in API_REFERENCE were not re-verified one by one and say so |
 | J10 | Full demo journey run-through | 1 | **Done** | browser journey: 27 of 27 checks pass on a clean temporary database (register, onboarding, upload, extraction, skills, matches, readiness, roadmap, jobs, interview, Home, reload, logout, re-login, cross-user isolation, invalid input, navigation, 390px layout, basic accessibility) |
 
-## Environment limitations (as of milestone 5)
+## Environment limitations (as of the release candidate)
 
-- **Docker is not installed** on the development machine, so `docker compose up` and the
-  image builds have not been executed. The Compose file, Dockerfiles, nginx config and
-  ignore files were corrected by inspection only.
+- **Docker is not installed on the development machine.** The Compose stack was verified on a
+  GitHub Actions Ubuntu runner instead (see J3). It has not been run on a developer machine or
+  on a production host, and it was exercised by one synthetic user, not under load.
 - **The project's Python 3.11 virtualenv (`ai/.venv`) could not be launched** from the
   automation shell. The AI tests and the live check ran in a separate throwaway Python 3.13
   environment installed from `ai/requirements.txt`, so they exercised current package

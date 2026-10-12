@@ -25,8 +25,14 @@ Verified status and evidence for every item are in `FINALIZATION_CHECKLIST.md`.
 - Every write endpoint validates its input; saved-job operations answer 404 for unknown or foreign records.
 - The AI service requires an internal key and never answers chat, interview questions or interview scoring with its development mock.
 
+### Security and integrity (release candidate)
+- Infrastructure diagnostics (`GET /api/v1/realtime`) are no longer public; `/health` reports only up or down.
+- No confidence figure is attached where none is measured: AI response envelopes, the rule-based resume parser and skill normalisation now report `null` and the method used.
+- The resume parser's AI fallback can no longer return the development mock's fictional resume.
+- Docker Compose stack verified on a GitHub Actions runner (`docker-smoke.yml`).
+
 ### Not verified
-- Docker deployment, live Gemini generation and live JSearch search.
+- A deployment on a server, live Gemini generation and live JSearch search.
 
 ---
 

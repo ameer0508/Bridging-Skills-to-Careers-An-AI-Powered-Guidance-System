@@ -1,9 +1,11 @@
 # Deployment
 
-> **Status: not verified.** The Compose file and Dockerfiles in this repository have been reviewed
-> and corrected by reading them, but they have never been built or started, because Docker was not
-> available on the development machine. Treat this page as instructions to follow and check, not
-> as a record of a working deployment. The verification steps are at the end.
+> **Status: verified in CI, not on a host.** The Compose stack is built, started and exercised by
+> the GitHub Actions workflow `.github/workflows/docker-smoke.yml` on an Ubuntu runner, with
+> synthetic secrets and a synthetic user. It passed on commit `f5ca3a8`
+> ([run](https://github.com/ameer0508/Bridging-Skills-to-Careers-An-AI-Powered-Guidance-System/actions/runs/38237809763)).
+> It has not been run on a developer machine or deployed to a server, and was not load-tested.
+> Repeat the checks below on the machine you deploy to.
 
 ## Services
 
@@ -51,6 +53,11 @@ Then open http://localhost:3000.
 
 ## Verify the deployment
 
+The workflow automates these checks: `gh workflow run docker-smoke.yml --ref <branch>`, or
+Actions > "Docker Compose smoke test" > Run workflow. With the stack running locally you can also
+run its test script directly: `node e2e/docker-smoke.mjs`, then after a restart
+`node e2e/docker-smoke.mjs --verify`.
+
 Run these after the first start and record the results. Each has one expected outcome.
 
 ```bash
@@ -76,8 +83,7 @@ Then, in the browser: register, complete onboarding, upload a resume, and confir
 career matches appear. Restart the stack (`docker compose restart`) and confirm the account and
 the uploaded resume are still there; that checks the two volumes.
 
-If a step fails, `docker compose logs <service>` shows why. Do not mark the Docker item in
-`docs/FINALIZATION_CHECKLIST.md` as done until all of the above pass.
+If a step fails, `docker compose logs <service>` shows why.
 
 ## Data
 

@@ -5,8 +5,8 @@ skills, matches them against career requirements, explains the match, shows wher
 builds a learning roadmap, helps them track job applications and lets them practise interviews.
 
 This is a college major project. It runs locally and is covered by automated tests. It has **not**
-been deployed or load-tested, and the two external integrations (Google Gemini and JSearch) have
-not been exercised live; see [Verification status](#verification-status).
+been deployed to a server or load-tested, and the two external integrations (Google Gemini and
+JSearch) have not been exercised live; see [Verification status](#verification-status).
 
 ## Contents
 
@@ -133,6 +133,7 @@ browser chat request 40 s.
 | `pnpm test` | 19 backend suites on an in-memory database with a stub AI service. |
 | `cd ai && python -m pytest` | 104 AI service tests; provider calls are mocked. |
 | `pnpm test:e2e` | 35 browser checks against an isolated copy of the whole stack. See [`e2e/README.md`](e2e/README.md). |
+| `gh workflow run docker-smoke.yml --ref <branch>` | Builds and starts the Docker Compose stack on GitHub Actions and runs 11 checks against it. |
 
 None of these contacts Gemini or JSearch, and none reads or writes the development database or
 uploads. The backend runner fails if it detects a change to those paths.
@@ -147,11 +148,15 @@ resume lifecycle, scoring rules, job filters and tracking, interview question ge
 scoring fallbacks, chat fallback and retry, request validation, and that one account cannot read
 or change another's data.
 
+The Docker Compose stack is verified by a GitHub Actions workflow (`docker-smoke.yml`, run by
+hand): it builds the images, starts the four services and runs a resume-to-career check with
+synthetic data. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
 Not verified:
 
-- **Docker.** `docker-compose.yml` and the Dockerfiles have been reviewed but never run; Docker was
-  not available on the development machine. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for the
-  commands to verify it.
+- **A real deployment.** The containers have run only on a CI runner, with one synthetic user.
+  The project has never been deployed to a server.
+
 - **Live Gemini.** The configured model was confirmed to exist for the key, but no generation
   request has been made. AI paths are tested with mocked provider output.
 - **Live JSearch.** Never called. Live job search is tested against a stubbed provider response.
