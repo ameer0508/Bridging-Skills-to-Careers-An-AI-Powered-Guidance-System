@@ -6,6 +6,7 @@ import MarketHistoryService, { MAX_HISTORY_MONTHS, monthRange } from '../service
 import MarketSkillTrendService from '../services/market/MarketSkillTrendService.js';
 import MarketOpportunityService from '../services/market/MarketOpportunityService.js';
 import MarketSalaryService from '../services/market/MarketSalaryService.js';
+import MarketForecastService, { lastCompleteMonth, MAX_HORIZON } from '../services/market/MarketForecastService.js';
 import { SALARY_PERIODS, SalaryPeriod } from '../models/MarketPosting.js';
 import mongoose from 'mongoose';
 import { Career } from '../models/Career.js';
@@ -34,6 +35,16 @@ const skillTrendQuerySchema = z
     // Comma-separated skill names; aliases are accepted and canonicalised
     skills: z.string().trim().max(400).optional(),
     limit: z.coerce.number().int().min(1).max(50).default(15),
+  })
+  .strict();
+
+const forecastQuerySchema = z
+  .object({
+    dataset: z.enum(['sourced', 'synthetic_fixture']).default('sourced'),
+    skill: z.string().trim().min(1).max(80).optional(),
+    country: z.string().trim().regex(/^[A-Za-z]{2}$/, 'must be an ISO 3166-1 alpha-2 code').optional(),
+    to: month.optional(),
+    horizon: z.coerce.number().int().min(1).max(MAX_HORIZON).default(MAX_HORIZON),
   })
   .strict();
 
@@ -185,6 +196,30 @@ class MarketController {
       skill,
       from,
       to,
+    });
+    res.status(200).json({ success: true, data });
+  });
+
+  /** C2: a guarded forecast of monthly postings; unavailable unless every minimum is met. */
+  forecast = handle(async (req, res) => {
+    userIdOf(req);
+    const q = parse(forecastQuerySchema, req.query);
+    const latestComplete = lastCompleteMonth();
+    // A month still in progress would look like a fall in demand
+    if (q.to && q.to > latestComplete) {
+      throw new AppError(`Invalid request: to must be a completed month (${latestComplete} or earlier)`, 400, 'VALIDATION_ERROR');
+    }
+    let skill: string | undefined;
+    if (q.skill) {
+      skill = lookupSkill(q.skill)?.name;
+      if (!skill) throw new AppError(`Invalid request: '${q.skill}' is not a recognised skill`, 400, 'UNKNOWN_SKILL');
+    }
+    const data = await MarketForecastService.forecast({
+      dataset: q.dataset,
+      skill,
+      country: q.country?.toUpperCase(),
+      to: q.to ?? latestComplete,
+      horizon: q.horizon,
     });
     res.status(200).json({ success: true, data });
   });

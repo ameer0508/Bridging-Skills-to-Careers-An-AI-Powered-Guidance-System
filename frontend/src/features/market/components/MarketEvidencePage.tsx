@@ -6,6 +6,7 @@ import { Card, CardBody, CardHeader } from '../../../components/base/Card';
 import { messageOf } from '../../../lib/collections';
 import { fetchMarketHistory, MarketDataset, MarketHistory, MarketHistoryFilters, REASON_TEXT } from '../marketApi';
 import { SkillTrendsSection } from './SkillTrendsSection';
+import { ForecastSection } from './ForecastSection';
 
 const COUNTRIES = [
   { value: '', label: 'All countries' },
@@ -123,6 +124,8 @@ export const MarketEvidencePage: React.FC = () => {
       </div>
 
       <SkillTrendsSection filters={filters} />
+
+      <ForecastSection filters={filters} />
     </div>
   );
 };

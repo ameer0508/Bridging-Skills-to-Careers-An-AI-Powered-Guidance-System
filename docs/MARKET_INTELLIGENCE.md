@@ -11,7 +11,8 @@
 | C6 application outcomes | Implemented and tested; see [`APPLICATION_OUTCOMES.md`](APPLICATION_OUTCOMES.md) |
 | **C3** salary insights | **Implemented and tested** on synthetic data (see §5b). Real salary insights answer *DATA UNAVAILABLE* until a licensed source is registered. |
 | **X8** application history | **Implemented and tested** on real user-recorded data; see [`APPLICATION_OUTCOMES.md`](APPLICATION_OUTCOMES.md#application-history-x8) |
-| C2, R4, X7 | Not started |
+| **C2** cautious forecasting | **Implemented and tested** with a held-out synthetic evaluation (see §5c). Real forecasts are *FORECAST UNAVAILABLE*: no licensed source. |
+| R4, X7 | Not started |
 
 ## 1. Principles
 
@@ -175,6 +176,62 @@ const s = await fetchMarketOpportunitySummary(careerId, { country: 'IN' });
     - one-bound figures, all four exclusions, every filter and re-import stability;
     - sign-in and 9 invalid queries.
   - `e2e/tests/salaries.mjs` covers 14 browser steps, including DATA UNAVAILABLE before and after a fixture import, the labelled demo, filters, exclusions, the error state, 390 px and the console.
+
+## 5c. C2 cautious demand forecasting
+
+`GET /api/v1/market/forecast?dataset&skill&country&to&horizon=1..3` (sign-in required). Service: `backend/src/services/market/MarketForecastService.ts`. Shown as "Postings forecast" on `/market`.
+
+**What is forecast.** It forecasts the number of distinct postings SkillBridge would hold per month from its sources. It does not forecast employment, hiring or anyone's chances. `to` must be a completed month (default: the last one), because a month in progress looks like a fall.
+
+**When a forecast is withheld.** Every reason that applies is returned, and no figure is produced:
+
+| Reason | Minimum |
+|---|---|
+| `no_registered_source` | A licensed source must exist. Without one, the production answer is `forecast_unavailable`, and the screen shows **FORECAST UNAVAILABLE**. |
+| `history_too_short` | 24 months from the first month with postings to `to` |
+| `too_few_postings_per_month` | A median of 10 postings a month |
+| `too_many_empty_months` | At most 2 months with no postings |
+| `latest_month_empty` | The last month has postings. An empty month more likely means collection stopped. |
+| `stale_data` | Latest retrieval within 60 days |
+| `mixed_countries` | One country. Without a country filter, postings from several countries are refused. |
+| `duplicate_heavy` | At most 50% of postings merged as cross-posts |
+| `too_few_backtest_origins` | At least 8 past origins to measure error |
+
+**Method.** Deterministic and explainable:
+- **Baseline:** naive, so next month equals last month.
+- **Model:** an ordinary least-squares line through the last 12 months, never below zero.
+- **Selection:** both are evaluated by rolling-origin backtesting on the history itself. At each origin, a method sees only earlier months. The one with the lower total mean absolute error over the horizon is used, and a tie keeps the baseline.
+- **Range:** the 80% range at each horizon is the point ± the 80th percentile of that method's backtest absolute errors at that horizon. It is empirical, with no distribution assumed.
+- **Output:** points and ranges are whole postings. Both methods' backtest errors are reported.
+
+**Held-out evaluation.** Synthetic series of 36 months with 40 seeds per shape. The last 3 months are held out, and the forecast is made from the 33 before them (`backend/src/tests/market_forecast.test.ts`). MAE is in postings per month.
+
+| Shape | Selected method MAE | Naive baseline MAE | Linear trend MAE | 80% range coverage | Trend selected |
+|---|---|---|---|---|---|
+| Rising trend | **2.1** | 4.0 | 2.1 | 0.93 | 40/40 |
+| Flat, noisy | **4.5** | 4.8 | 4.5 | 0.82 | 38/40 |
+| Seasonal (12-month cycle) | 2.6 | 2.6 | 11.1 | 1.00 | 0/40 |
+| Random walk | 3.6 | **3.4** | 4.3 | 0.81 | 4/40 |
+| Step change 3 months before the end | 2.8 | **2.1** | 3.1 | 0.74 | 32/40 |
+
+**Reading the evaluation honestly:**
+- The selection clearly beats the baseline on trending data and roughly matches it on noise.
+- It is slightly worse than the baseline on a random walk.
+- After a sudden level change, both the forecast and its range lag. Coverage falls to 0.74, which is the documented failure condition.
+- Seasonality is not modelled. The backtest correctly avoids the trend line there, but the ranges are wider than needed (coverage 1.00).
+- These are synthetic results. No evaluation on real postings exists, because there are none.
+
+**No leakage.** A spy method verifies that each backtest origin received exactly the months before it, and that changing later months never changes an earlier prediction or backtest error.
+
+**Tests:**
+- `market_forecast.test.ts` covers:
+  - methods, no leakage and the held-out table;
+  - `forecast_unavailable` without a source;
+  - the 12-month fixture (too short) and two countries (refused);
+  - 30 dense synthetic months (forecast given and labelled synthetic);
+  - sparse, stale, duplicate-heavy and gapped sourced data (each reason named);
+  - HTTP sign-in and 7 invalid queries, including an in-progress month.
+- `e2e/tests/market.mjs` adds 2 browser steps: FORECAST UNAVAILABLE with no source, and with 12 synthetic months.
 
 ## 6. Known limits
 

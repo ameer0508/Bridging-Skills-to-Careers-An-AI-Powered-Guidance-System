@@ -11,6 +11,7 @@ router.get('/sources', MarketController.listSources);
 router.get('/history', MarketController.history);
 router.get('/skill-trends', MarketController.skillTrends);
 router.get('/salaries', MarketController.salaries);
+router.get('/forecast', MarketController.forecast);
 router.get('/careers/:careerId/summary', MarketController.careerSummary);
 
 // Write side: importing postings from a registered source is an operator task
