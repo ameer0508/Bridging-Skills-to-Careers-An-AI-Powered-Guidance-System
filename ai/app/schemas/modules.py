@@ -49,7 +49,7 @@ class RecommendationItem(BaseModel):
     difficulty: Optional[str] = "Intermediate"
     industry_demand: Optional[str] = "High"
     learning_roi: Optional[str] = "High"
-    confidence: float = Field(default=0.95, ge=0.0, le=1.0)
+    confidence: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Estimate reported by an AI model when one produced this value. None when no confidence was measured, which is always the case for the rule-based parser.")
 
 class RecommendationResponse(BaseModel):
     recommendations: List[RecommendationItem]
@@ -74,7 +74,7 @@ class RoadmapPhase(BaseModel):
     career_benefit: Optional[str] = None
     estimated_effort: Optional[str] = None
     expected_outcome: Optional[str] = None
-    confidence: float = Field(default=0.95, ge=0.0, le=1.0)
+    confidence: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Estimate reported by an AI model when one produced this value. None when no confidence was measured, which is always the case for the rule-based parser.")
 
 class RoadmapResponse(BaseModel):
     title: str

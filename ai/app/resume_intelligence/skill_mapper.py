@@ -25,7 +25,8 @@ class SkillMapper:
                 name=mention.skill.name,
                 category=mention.skill.category,
                 # Canonical-name hits are slightly more certain than alias hits
-                confidence=0.95 if mention.matched_text.lower() == mention.skill.name.lower() else 0.9,
+                # A lexicon match is exact or it is not; no confidence is measured
+                confidence=None,
                 source="skill_lexicon",
                 transformer_model="skill-lexicon-v1",
                 extraction_method="lexicon-term-match",

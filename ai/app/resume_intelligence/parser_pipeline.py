@@ -98,35 +98,30 @@ class ResumeIntelligencePipeline:
         return SemanticPersonalInfo(
             fullName=SemanticExtractedEntity(
                 value=full_name,
-                confidence=0.8,
                 source="resume_header",
                 transformer_model=model_name,
                 extraction_method="header-heuristic"
             ) if full_name else None,
             email=SemanticExtractedEntity(
                 value=email_match.group(0),
-                confidence=0.99,
                 source="resume_header",
                 transformer_model=model_name,
                 extraction_method="regex-email"
             ) if email_match else None,
             phone=SemanticExtractedEntity(
                 value=phone_match.group(0),
-                confidence=0.96,
                 source="resume_header",
                 transformer_model=model_name,
                 extraction_method="regex-phone"
             ) if phone_match else None,
             linkedin=SemanticExtractedEntity(
                 value=linkedin_match.group(0),
-                confidence=0.98,
                 source="resume_header",
                 transformer_model=model_name,
                 extraction_method="regex-social"
             ) if linkedin_match else None,
             github=SemanticExtractedEntity(
                 value=github_match.group(0),
-                confidence=0.98,
                 source="resume_header",
                 transformer_model=model_name,
                 extraction_method="regex-social"

@@ -5,7 +5,8 @@ import logger from '../config/logger.js';
 
 export interface IUnifiedAIResponse<T = unknown> {
   success: boolean;
-  confidence: number;
+  /** Null: the AI service does not measure a confidence for its responses. */
+  confidence: number | null;
   provider: string;
   latency: number;
   model: string;

@@ -12,7 +12,7 @@ class TokenUsage(BaseModel):
 
 class UnifiedAIResponse(BaseModel):
     success: bool = True
-    confidence: float = Field(default=0.95, ge=0.0, le=1.0)
+    confidence: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Estimate reported by an AI model when one produced this value. None when no confidence was measured, which is always the case for the rule-based parser.")
     provider: str = Field(default="gemini")
     latency: float = Field(default=0.0, description="Latency in milliseconds")
     model: str = Field(default="gemini-2.5-flash")

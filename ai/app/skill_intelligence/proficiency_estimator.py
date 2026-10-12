@@ -50,19 +50,16 @@ class ProficiencyEstimator:
         # Level Resolution
         if score >= 7.0:
             level = "Expert"
-            confidence = 0.95
         elif score >= 5.0:
             level = "Advanced"
-            confidence = 0.92
         elif score >= 3.0:
             level = "Intermediate"
-            confidence = 0.88
         else:
             level = "Beginner"
-            confidence = 0.85
 
         return {
             "level": level,
-            "confidence": confidence,
+            # The level comes from fixed point rules; no confidence is measured for it
+            "confidence": None,
             "evidence_score": round(min(score / 10.0, 1.0), 2)
         }

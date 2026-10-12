@@ -1,6 +1,5 @@
 from typing import Any, List, Dict
 from app.schemas.ai_response import UnifiedAIResponse, TokenUsage
-from app.utils.confidence_calculator import ConfidenceCalculator
 from app.utils.token_tracker import TokenTracker
 from app.utils.cost_tracker import CostTracker
 
@@ -21,20 +20,13 @@ class ResponseNormalizer:
     ) -> UnifiedAIResponse:
         if metadata is None:
             metadata = {}
-        # The envelope's confidence is a fixed heuristic per provider, not a model-reported value
-        metadata.setdefault("confidence_basis", "heuristic_not_model_reported")
+        # Providers do not report a confidence for a reply, and none is estimated here
+        metadata.setdefault("confidence_basis", "not_measured")
 
         if not completion_text and isinstance(raw_data, str):
             completion_text = raw_data
         elif not completion_text and raw_data is not None:
             completion_text = str(raw_data)
-
-        confidence = ConfidenceCalculator.calculate(
-            raw_response=raw_data,
-            provider=provider,
-            has_error=False,
-            fallback_used=metadata.get("fallback_used", False)
-        )
 
         if actual_usage and actual_usage.get("prompt_tokens") is not None:
             # Counts reported by the provider for this request
@@ -56,7 +48,7 @@ class ResponseNormalizer:
 
         return UnifiedAIResponse(
             success=True,
-            confidence=confidence,
+            confidence=None,
             provider=provider,
             latency=round(latency_ms, 2),
             model=model,
@@ -84,7 +76,7 @@ class ResponseNormalizer:
 
         return UnifiedAIResponse(
             success=False,
-            confidence=0.0,
+            confidence=None,
             provider=provider,
             latency=round(latency_ms, 2),
             model=model,

@@ -5,7 +5,8 @@ export interface IExtractedSkill extends Document<Types.ObjectId> {
   userId: Types.ObjectId;
   name: string;
   category: string;
-  confidence: number;
+  /** Reported by an AI model when one extracted the skill; null for the rule-based parser, which measures none. */
+  confidence: number | null;
 }
 
 const ExtractedSkillSchema = new Schema<IExtractedSkill>(
@@ -14,7 +15,7 @@ const ExtractedSkillSchema = new Schema<IExtractedSkill>(
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     name: { type: String, required: true, trim: true },
     category: { type: String, default: 'General' },
-    confidence: { type: Number, default: 0.9 }
+    confidence: { type: Number, default: null }
   },
   { timestamps: true }
 );

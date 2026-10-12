@@ -16,6 +16,8 @@ export interface ApiOptions {
 }
 
 export interface HttpHarness {
+  /** Scheme, host and port of the test server, for paths outside /api/v1. */
+  origin: string;
   api: <T = any>(method: string, path: string, options?: ApiOptions) => Promise<ApiResult<T>>;
   /** Sends a body exactly as given (e.g. malformed JSON) with a JSON content type. */
   rawRequest: (method: string, path: string, body: string, token?: string) => Promise<{ status: number; text: string }>;
@@ -36,7 +38,8 @@ export interface HttpHarness {
 export async function startHttpHarness(): Promise<HttpHarness> {
   const server = http.createServer(app);
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
-  const baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}/api/v1`;
+  const origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  const baseUrl = `${origin}/api/v1`;
 
   const api: HttpHarness['api'] = async (method, path, options = {}) => {
     const headers: Record<string, string> = {};
@@ -73,6 +76,7 @@ export async function startHttpHarness(): Promise<HttpHarness> {
   };
 
   return {
+    origin,
     api,
     rawRequest,
     registerUser,

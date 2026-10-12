@@ -12,10 +12,9 @@ _BULLET_PREFIX = re.compile(r"^\s*[•\-*‣▪●◦·]\s+")
 _ROLE_COMPANY_DELIMITERS = [r"\s+at\s+", r"\s+@\s+", r"\s+\|\s+", r"\s+[-–—]\s+", r",\s+"]
 
 
-def _entity(value: str, confidence: float, source: str, method: str) -> SemanticExtractedEntity:
+def _entity(value: str, source: str, method: str) -> SemanticExtractedEntity:
     return SemanticExtractedEntity(
         value=value,
-        confidence=confidence,
         source=source,
         transformer_model="rule-based",
         extraction_method=method,
@@ -45,15 +44,15 @@ class ExperienceParser:
                 continue
 
             responsibilities = [
-                _entity(_BULLET_PREFIX.sub("", line).strip(), 0.9, "experience_bullets", "bullet-extraction")
+                _entity(_BULLET_PREFIX.sub("", line).strip(), "experience_bullets", "bullet-extraction")
                 for line in body_lines
                 if len(line.strip()) > 10
             ]
 
             experiences.append(SemanticExperience(
-                company=_entity(company, 0.85, "experience_header", "header-rules") if company else None,
-                role=_entity(role, 0.85, "experience_header", "header-rules") if role else None,
-                duration=_entity(duration, 0.9, "experience_dates", "date-regex") if duration else None,
+                company=_entity(company, "experience_header", "header-rules") if company else None,
+                role=_entity(role, "experience_header", "header-rules") if role else None,
+                duration=_entity(duration, "experience_dates", "date-regex") if duration else None,
                 responsibilities=responsibilities,
             ))
         return experiences

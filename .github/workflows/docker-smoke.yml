@@ -1,0 +1,132 @@
+name: Docker Compose smoke test
+
+# Builds the four images, starts the stack and checks that the services work together.
+#
+# Run it by hand: Actions > "Docker Compose smoke test" > Run workflow (pick the branch),
+# or `gh workflow run docker-smoke.yml --ref <branch>`.
+# It also runs when this file itself changes, so that the workflow is registered and any edit to
+# it is tried once. It does not run on ordinary pushes.
+#
+# Everything it uses is synthetic: random secrets generated for the run, a test user, a generated
+# resume. No provider keys are set, so Gemini and JSearch are never contacted.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/docker-smoke.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SMOKE_STATE: ${{ runner.temp }}/skillbridge-docker-smoke.json
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create synthetic settings
+        run: |
+          {
+            echo "JWT_ACCESS_SECRET=$(openssl rand -hex 32)"
+            echo "JWT_REFRESH_SECRET=$(openssl rand -hex 32)"
+            echo "INTERNAL_SERVICE_KEY=$(openssl rand -hex 32)"
+            echo "FRONTEND_URL=http://localhost:3000"
+            echo "GEMINI_API_KEY="
+            echo "RAPIDAPI_KEY="
+          } > .env
+
+      - name: 1. Validate the Compose file
+        run: docker compose config --quiet
+
+      - name: Compose refuses to start without the required secrets
+        run: |
+          if docker compose --env-file /dev/null config --quiet 2>/dev/null; then
+            echo "::error::Compose accepted a configuration with no secrets"
+            exit 1
+          fi
+          echo "refused, as intended"
+
+      - name: 2. Build the images
+        run: docker compose build
+
+      - name: 3. Start MongoDB, AI service, backend and frontend
+        run: docker compose up -d --wait --wait-timeout 300
+
+      - name: 4. Container state
+        run: |
+          docker compose ps
+          for service in mongodb ai-service backend frontend; do
+            state=$(docker compose ps --format '{{.State}}' "$service")
+            echo "$service: $state"
+            [ "$state" = "running" ] || { echo "::error::$service is $state"; exit 1; }
+          done
+          for service in mongodb ai-service; do
+            health=$(docker compose ps --format '{{.Health}}' "$service")
+            [ "$health" = "healthy" ] || { echo "::error::$service health is $health"; exit 1; }
+          done
+
+      - name: Services run as unprivileged users
+        run: |
+          [ "$(docker compose exec -T backend id -u)" != "0" ] || { echo "::error::backend runs as root"; exit 1; }
+          [ "$(docker compose exec -T ai-service id -u)" != "0" ] || { echo "::error::ai-service runs as root"; exit 1; }
+
+      - name: 6. Backend reaches the AI service; the AI service is not published
+        run: |
+          docker compose exec -T backend node -e "fetch('http://ai-service:8000/api/v1/health').then(r=>{if(r.status!==200)process.exit(1);return r.text()}).then(t=>console.log(t.slice(0,200))).catch(e=>{console.error(e.message);process.exit(1)})"
+          # A request without the internal key is refused by the AI service
+          docker compose exec -T backend node -e "fetch('http://ai-service:8000/api/v1/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:'hi'})}).then(r=>{console.log('without key:',r.status);process.exit(r.status===401?0:1)})"
+          if curl -s -m 5 -o /dev/null http://localhost:8000/api/v1/health; then
+            echo "::error::the AI service is reachable from the host"
+            exit 1
+          fi
+          if curl -s -m 5 -o /dev/null http://localhost:27017; then
+            echo "::error::MongoDB is reachable from the host"
+            exit 1
+          fi
+          echo "AI service and MongoDB are reachable only inside the Compose network"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 5, 7, 8. Connectivity, authentication and the resume-to-career workflow
+        run: node e2e/docker-smoke.mjs
+
+      - name: Data survives a restart of every container
+        run: |
+          docker compose restart
+          docker compose up -d --wait --wait-timeout 300
+          node e2e/docker-smoke.mjs --verify
+
+      - name: 9. Check the logs for startup failures
+        if: always()
+        run: |
+          docker compose logs --no-color > compose.log 2>&1 || true
+          echo "log lines: $(wc -l < compose.log)"
+          docker compose logs --no-color --tail 25 backend ai-service || true
+          if grep -nE "Traceback \(most recent call last\)|UnhandledPromiseRejection|Unhandled Rejection|Failed to establish MongoDB|EADDRINUSE|ECONNREFUSED|MODULE_NOT_FOUND|ERR_MODULE_NOT_FOUND|nginx: \[emerg\]|Segmentation fault|Killed" compose.log; then
+            echo "::error::startup or runtime failures found in the container logs"
+            exit 1
+          fi
+          echo "no startup failures in the logs"
+
+      - name: Keep the logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compose-logs
+          path: compose.log
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: 10. Tear down containers and volumes
+        if: always()
+        run: docker compose down -v --remove-orphans

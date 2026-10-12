@@ -3,9 +3,9 @@ from typing import List, Optional
 
 class ExtractedEntity(BaseModel):
     value: str
-    confidence: float = Field(default=0.95, ge=0.0, le=1.0)
+    confidence: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Estimate reported by an AI model when one produced this value. None when no confidence was measured, which is always the case for the rule-based parser.")
     source: Optional[str] = "resume_body"
-    transformer_model: Optional[str] = "transformer-ner-v1"
+    transformer_model: Optional[str] = None
     extraction_method: Optional[str] = "semantic-ner"
 
 class PersonalInfo(BaseModel):
@@ -39,7 +39,7 @@ class Project(BaseModel):
 class Skill(BaseModel):
     name: str
     category: str = Field(description="e.g., Programming Languages, Frameworks, Databases, Cloud, DevOps, AI/ML, Cybersecurity, Tools")
-    confidence: float = Field(default=0.95, ge=0.0, le=1.0)
+    confidence: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Estimate reported by an AI model when one produced this value. None when no confidence was measured, which is always the case for the rule-based parser.")
 
 class ParsedResumeResponse(BaseModel):
     personalInfo: PersonalInfo

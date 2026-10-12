@@ -31,7 +31,7 @@ class SemanticSkillEngine:
                 continue
 
             # 1. Alias & Similarity Resolution
-            canonical_name, sim_confidence = SemanticSimilarity.resolve_canonical_name(raw)
+            canonical_name, resolution_method = SemanticSimilarity.resolve_canonical_name(raw)
 
             # 2. Ontology Category Mapping
             category = OntologyManager.get_category_for_skill(canonical_name)
@@ -76,7 +76,7 @@ class SemanticSkillEngine:
             evidence = [
                 f"Extracted from input string: '{raw}'",
                 f"Mapped to taxonomy category: '{category}'",
-                f"Resolved via semantic similarity index with {sim_confidence*100:.0f}% confidence"
+                f"Canonical name found by: {resolution_method}"
             ]
 
             norm_skill = NormalizedSkill(
@@ -90,7 +90,7 @@ class SemanticSkillEngine:
                 is_emerging=is_emerging,
                 transferable_skills=transferable,
                 evidence=evidence,
-                confidence=round(sim_confidence * prof_data["confidence"], 2),
+                confidence=None,
                 source="semantic_skill_engine"
             )
             normalized_list.append(norm_skill)

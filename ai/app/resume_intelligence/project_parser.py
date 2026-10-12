@@ -27,7 +27,6 @@ class ProjectParser:
             contributions = [
                 SemanticExtractedEntity(
                     value=l.strip('•-*\t '),
-                    confidence=0.90,
                     source="project_bullets",
                     transformer_model="project-parser-v1",
                     extraction_method="bullet-extraction"
@@ -38,14 +37,12 @@ class ProjectParser:
             projects.append(SemanticProject(
                 name=SemanticExtractedEntity(
                     value=name,
-                    confidence=0.93,
                     source="project_title",
                     transformer_model="project-parser-v1",
                     extraction_method="title-ner"
                 ),
                 description=SemanticExtractedEntity(
                     value=description,
-                    confidence=0.90,
                     source="project_summary",
                     transformer_model="project-parser-v1",
                     extraction_method="text-summary"
@@ -53,7 +50,6 @@ class ProjectParser:
                 technologies=[
                     SemanticExtractedEntity(
                         value=t,
-                        confidence=0.95,
                         source="project_tech",
                         transformer_model="project-parser-v1",
                         extraction_method="tech-regex"

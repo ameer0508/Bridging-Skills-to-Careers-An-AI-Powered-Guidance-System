@@ -18,6 +18,7 @@ import opportunitiesRouter from './routes/opportunities.js';
 import interviewRouter from './routes/interview.js';
 import orchestratorRouter from './routes/orchestrator.js';
 import env from './config/env.js';
+import { diagnosticsAreOpen, requireDiagnosticsAccess } from './middlewares/diagnostics.js';
 
 import rateLimit from 'express-rate-limit';
 
@@ -418,8 +419,12 @@ const renderBackendDashboardHtml = (data: Awaited<ReturnType<typeof getBackendRe
 </html>
 `;
 
-// Root Endpoint - Real-time Dashboard (Browser) or Real-time JSON (API)
+// Root endpoint. On a developer's machine it serves the status page (which polls the
+// diagnostics endpoint below). Anywhere else it is a plain banner with no system details.
 app.get('/', async (req, res) => {
+  if (!diagnosticsAreOpen()) {
+    return res.status(200).json({ success: true, service: 'SkillBridge API', health: '/health' });
+  }
   const realtimeData = await getBackendRealtimeData();
   if (req.accepts('html')) {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -428,13 +433,18 @@ app.get('/', async (req, res) => {
   return res.status(200).json(realtimeData);
 });
 
-// Real-Time Telemetry API Endpoint
-app.get('/api/v1/realtime', async (_req, res) => {
-  const realtimeData = await getBackendRealtimeData();
-  res.status(200).json(realtimeData);
+// Infrastructure diagnostics: uptime, memory, database host and global record counts.
+// Open in local development only; otherwise administrators only (see middlewares/diagnostics.ts).
+app.get('/api/v1/realtime', requireDiagnosticsAccess, async (_req, res, next) => {
+  try {
+    res.status(200).json(await getBackendRealtimeData());
+  } catch (error) {
+    next(error);
+  }
 });
 
-// Health check endpoint
+// Health check endpoint. Public on purpose (load balancers and Compose use it), so it reports
+// only whether the service and its database are up.
 app.get('/health', (_req, res) => {
   const dbStatus = mongoose.connection.readyState === 1 ? 'UP' : 'DOWN';
   const statusCode = dbStatus === 'UP' ? 200 : 503;
@@ -442,7 +452,6 @@ app.get('/health', (_req, res) => {
   res.status(statusCode).json({
     status: dbStatus,
     timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
     services: {
       database: dbStatus,
     },
@@ -468,7 +477,6 @@ app.get('/api/v1', (_req, res) => {
       ai: '/api/v1/ai',
       opportunities: '/api/v1/opportunities',
       interviews: '/api/v1/interviews',
-      realtime: '/api/v1/realtime',
     },
   });
 });

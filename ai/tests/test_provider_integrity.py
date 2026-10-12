@@ -80,7 +80,8 @@ def test_token_usage_is_labelled_as_estimated_otherwise():
         raw_data="some text", provider="mock", model="mock-v1", latency_ms=1.0, prompt_text="a prompt of several words"
     )
     assert response.usage.source == "estimated"
-    assert response.metadata["confidence_basis"] == "heuristic_not_model_reported"
+    assert response.confidence is None, "no confidence figure is invented for a response"
+    assert response.metadata["confidence_basis"] == "not_measured"
     assert _reported_usage(SimpleNamespace()) is None
     assert _reported_usage(SimpleNamespace(usage_metadata=None)) is None
 

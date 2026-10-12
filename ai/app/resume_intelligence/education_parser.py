@@ -32,28 +32,24 @@ class EducationParser:
                 educations.append(SemanticEducation(
                     institution=SemanticExtractedEntity(
                         value=institution,
-                        confidence=0.94,
                         source="education_header",
                         transformer_model="education-parser-v1",
                         extraction_method="institution-ner"
                     ) if institution else None,
                     degree=SemanticExtractedEntity(
                         value=degree,
-                        confidence=0.96,
                         source="education_header",
                         transformer_model="education-parser-v1",
                         extraction_method="degree-regex"
                     ) if degree else None,
                     endYear=SemanticExtractedEntity(
                         value=year,
-                        confidence=0.90,
                         source="education_year",
                         transformer_model="education-parser-v1",
                         extraction_method="year-regex"
                     ) if year else None,
                     gpa=SemanticExtractedEntity(
                         value=gpa,
-                        confidence=0.92,
                         source="education_gpa",
                         transformer_model="education-parser-v1",
                         extraction_method="gpa-regex"

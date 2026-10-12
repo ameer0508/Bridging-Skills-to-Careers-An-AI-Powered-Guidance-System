@@ -18,7 +18,7 @@ export interface IParsedResumeData {
   skills?: Array<{
     name: string;
     category: string;
-    confidence: number;
+    confidence: number | null;
   }>;
 }
 
@@ -495,7 +495,7 @@ export class ResumeService {
               resumeId: new mongoose.Types.ObjectId(resumeId),
               name: skill.name.trim(),
               category: skill.category.trim(),
-              confidence: skill.confidence,
+              confidence: typeof skill.confidence === 'number' ? skill.confidence : null,
             });
           }
         }
