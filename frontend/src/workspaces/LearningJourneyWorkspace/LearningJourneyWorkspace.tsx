@@ -50,6 +50,7 @@ import {
 } from '../../components/experience';
 import { IllustrativeNotice } from '../../components/common/IllustrativeNotice';
 import { StudyPlanPanel } from '../../features/roadmaps/components/StudyPlan';
+import { PracticeProjectsPanel } from '../../features/roadmaps/components/PracticeProjects';
 
 /** A roadmap phase and its items as returned by GET /roadmap/:careerId. */
 interface ApiRoadmapItem extends Partial<Omit<ActiveRoadmapItem, 'title'>> {
@@ -391,6 +392,7 @@ export const LearningJourneyWorkspace: React.FC = () => {
         <>
           {/* Weekly hours and the schedule that follows from them */}
           {activeCareerId && <StudyPlanPanel careerId={activeCareerId} />}
+          {activeCareerId && <PracticeProjectsPanel careerId={activeCareerId} />}
 
           {/* SECTION 2 — ADAPTIVE MILESTONE SPINE (JOURNEY MAP) */}
           <PremiumSection

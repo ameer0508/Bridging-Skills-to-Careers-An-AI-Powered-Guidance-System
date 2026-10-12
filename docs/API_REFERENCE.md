@@ -116,6 +116,11 @@ Nothing in this group changes the user's skills or scores, except recording a co
 | `GET` | `/api/v1/roadmap/:id/schedule` | Yes | Hours of work remaining as a range, weeks and finish dates when weekly hours are set (`needsAvailability` otherwise), per-item effort with its basis (`catalogue` or `assumption`), blocked items, the next item, the assumptions used, and the last change to the roadmap with what was added or removed. `404 ROADMAP_NOT_FOUND`; does not create a roadmap. |
 | `GET` | `/api/v1/users/me/learning-preferences` | Yes | `hoursPerWeek` (null until the user sets it) and its limits. |
 | `PUT` | `/api/v1/users/me/learning-preferences` | Yes | Body `hoursPerWeek`: a whole number from 1 to 60, or `null` to clear it. |
+| `GET` | `/api/v1/projects/suggestions` | Yes | Up to five practice projects for a career (`careerId` query; default the target role or best match), each tied to the caller's gaps, with reason, tasks, deliverables, assumed effort and the hypothetical score change. Empty with `hasProfile: false` when there is no skill profile. |
+| `GET` | `/api/v1/projects` | Yes | Projects the caller has taken on. |
+| `POST` | `/api/v1/projects` | Yes | Body `briefId`, optional `careerId`. Takes a project on (`201`), or returns the existing one (`200`). `409 PROJECT_NOT_RELEVANT` when it addresses none of the caller's gaps. |
+| `PATCH` | `/api/v1/projects/:id` | Yes | Body `status` (`planned`, `in_progress`, `completed`) and/or `task` (`index`, `done`). The caller's own record; changes no score. |
+| `DELETE` | `/api/v1/projects/:id` | Yes | Remove a project the caller took on. |
 
 ### Jobs and application tracking
 

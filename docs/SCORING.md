@@ -319,3 +319,25 @@ passed skill check, changed target role). Items are recognised by title and keep
 Anything the user has started, completed or skipped stays, with its dates, even when the
 recommendation behind it is gone. An untouched item whose recommendation is gone is removed; the
 roadmap history records each removal and whether the skill is now on the profile.
+
+## 14. Practice project suggestions
+
+Fifteen project briefs are curated in `backend/src/seed/projectBriefs.ts`. Nothing is generated at
+run time. For one career:
+
+1. The gaps are the requirements the user has not yet shown in a role or project (status missing,
+   listed or inferred), exactly as in the counterfactual explanation of section 10.
+2. A brief is suggested only if it exercises at least one of those gaps. Where a brief offers
+   alternatives (one mobile framework, one dashboard tool), only the alternative worth most to
+   that career is counted.
+3. Suggestions are ranked by the change in the career's match score if the practised skills had
+   project evidence. This is the what-if calculation of section 10, so the figure shown equals
+   what the Career Lab returns for the same change. Ties: more required gaps closed, then less
+   assumed effort.
+4. The five highest are shown, each with the gap skills it practises, their importance and
+   current status, its tasks and deliverables, and an assumed effort range. With weekly hours
+   set, the range is also given in weeks.
+
+**A project taken on here is a record, not evidence.** Its tasks and its "complete" status are
+the user's own report and change no skill, score or recommendation. The score change shown is
+hypothetical. Effort ranges are assumptions set per brief, not measurements.

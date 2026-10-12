@@ -399,6 +399,42 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       return `${schedule.remainingItems} items, ${weeks}; same on the dashboard`;
     });
 
+    await t.step('practice projects: suggested for real gaps, taken on and completed without changing any score', async () => {
+      const careerId = (await api('GET', '/careers/matches')).data.matches[0].careerId._id;
+      const scores = async () => JSON.stringify([(await api('GET', '/careers/matches')).data.matches.map((m) => [m.careerId.title, m.matchScore]), (await api('GET', '/skills/me')).data.totalSkills]);
+      const before = await scores();
+      const expected = (await api('GET', `/projects/suggestions?careerId=${careerId}`)).data.suggestions;
+      const panel = page.getByTestId('practice-projects');
+      await panel.waitFor({ timeout: 15_000 });
+      const cards = page.getByTestId('project-suggestion');
+      expect((await cards.count()) === expected.length && expected.length > 0, `page shows ${await cards.count()} suggestions, the API has ${expected.length}`);
+      const first = cards.first();
+      const top = expected[0];
+      expect((await first.getAttribute('data-brief')) === top.briefId, 'the most useful project is not listed first');
+      const why = await first.getByTestId('project-why').innerText();
+      expect(top.practises.every((p) => why.includes(p.skill)), `the reason does not name the gap skills: ${why}`);
+      const effect = await first.getByTestId('project-effect').innerText();
+      expect(effect.includes(`${top.hypotheticalScore.after}% instead of ${top.hypotheticalScore.before}% (hypothetical)`), `effect shown as "${effect}"`);
+      expect(/at 6 hours a week/.test(effect), 'the effort is not expressed in weeks at the saved weekly hours');
+
+      await first.getByRole('button', { name: 'Tasks and deliverables' }).click();
+      expect((await first.innerText()).includes(top.tasks[0]), 'the tasks are not shown');
+      await first.getByRole('button', { name: `Take on ${top.title}` }).click();
+      const mine = page.getByTestId('my-project');
+      await mine.waitFor({ timeout: 15_000 });
+      expect((await mine.getAttribute('data-status')) === 'planned', 'a project just taken on is not shown as planned');
+      // The box is ticked once the server has stored it
+      await mine.getByRole('checkbox').first().click();
+      await page.locator('[data-testid="my-project"][data-status="in_progress"]').waitFor({ timeout: 15_000 });
+      await mine.getByRole('button', { name: 'Mark complete' }).click();
+      await page.locator('[data-testid="my-project"][data-status="completed"]').waitFor({ timeout: 15_000 });
+      expect(/Marked complete by you/.test(await mine.innerText()) && /not skill evidence/.test(await mine.innerText()), 'a completed project is not labelled as the user\'s own record');
+      expect((await scores()) === before, 'taking on and completing a project changed a score');
+      await page.reload();
+      await page.locator('[data-testid="my-project"][data-status="completed"]').waitFor({ timeout: 20_000 });
+      return `${expected.length} suggestions; "${top.title}" taken on and completed; scores unchanged`;
+    });
+
     // ---- Resume: replace, reprocess, recover ----------------------------------------------------------
     await t.step('replacing the resume rebuilds skills and reports what changed', async () => {
       await gotoAndSettle(page, `${webUrl}/resume`, 2000);
