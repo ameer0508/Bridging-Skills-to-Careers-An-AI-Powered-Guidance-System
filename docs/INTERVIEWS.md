@@ -5,7 +5,8 @@
 | ID | Status on this branch |
 |---|---|
 | **D5** role-specific rubrics | **Implemented and tested** (U H B) |
-| D4, D3, D6, D2, D1 | Not started |
+| **D4** technical assessments without code execution | **Implemented and tested** (U H B D) |
+| D3, D6, D2, D1 | Not started |
 
 ## D5. Role-specific scoring rubrics
 
@@ -58,3 +59,67 @@ A **rubric** sets how those dimensions are weighted for a role family. It change
   - a chosen rubric stored and named in the debrief;
   - "match my role" equal to the server's resolution;
   - a clean console.
+
+## D4. Technical assessments without code execution
+
+**Screen:** `/interview-agent/assessments`, linked from the interview lobby. **API**, sign-in required and scoped to the caller:
+
+| Method and path | Purpose |
+|---|---|
+| `GET /interviews/assessments/catalog` | Skills and task types available |
+| `POST /interviews/assessments` | Start, with `{skills?, kinds?, count 1–10}` |
+| `GET /interviews/assessments` | Past attempts |
+| `GET /interviews/assessments/:id` | One attempt |
+| `POST /interviews/assessments/:id/answers` | Answer one task, with `{taskId, response}` |
+| `POST /interviews/assessments/:id/finish` | Finish the attempt |
+
+**No code is executed, ever.** The tasks are curated, read-only items in `backend/src/seed/technicalAssessmentBank.ts`. There are 23 tasks over JavaScript, Python, SQL, and data structures and algorithms:
+
+| Type | What the candidate does |
+|---|---|
+| Trace | Say what the code prints |
+| Review | Find the defect, as a line number or an option |
+| Complexity | Give the big-O |
+| SQL | Read a query against tables shown with it |
+
+The candidate answers with an option index, a line number or a short value, which is compared with a stored key.
+- Anything typed, including code, is stored as text and compared as text.
+- The runtime modules import nothing that can execute code; a test audits them for `eval`, `Function`, `vm` and process spawning.
+- No user content leaves the server.
+
+**Rules:**
+- **Matching.**
+  - Text answers ignore case, surrounding quotes and spacing.
+  - Numbers are compared numerically, so `70.0` equals `70`.
+  - Choices and lines must be the exact index or number. Nothing looser is accepted.
+- **Keys stay hidden until answered.** Keys and explanations are returned only for tasks already answered. Before that, the response contains no key, explanation or "correct" field.
+- **One answer per task.** An answer cannot be changed (409).
+- **Scoring.** Finishing scores unanswered tasks as incorrect. Answering every task finishes the attempt automatically. The score is correct over total, also broken down by skill.
+- **Selection.** Tasks not seen in the user's last two attempts come first. The order is a seeded shuffle, so an attempt always lists the same way.
+- **Validation.**
+  - Unknown skills, task types and fields → 400.
+  - More than 10 tasks → 400.
+  - Text answers over 200 characters → 400.
+  - A line outside the code, or a choice outside the options → 400.
+  - Another user's attempt → 404.
+- **Results are practice only.** They do not add skill evidence and do not change career scores. Agent A's skill verification (B3) owns evidence; feeding D4 results into it is an integration decision.
+
+**Key verification.**
+- The five SQL keys are re-derived in the test from the tables shown to the candidate.
+- The five JavaScript trace keys are checked by running the bank's own snippets in a sandbox inside the test only. No user input is involved.
+- Python keys were worked out by hand and carry explanations.
+
+**Tests:**
+- `backend/src/tests/technical_assessments.test.ts` covers:
+  - bank integrity;
+  - re-derived keys;
+  - matching rules;
+  - the no-execution audit;
+  - HTTP: keys withheld, code-as-answer stored as text, one answer per task, finish scoring, 4 isolation probes, line and choice validation, auto-completion, unseen tasks preferred, 4 invalid starts.
+- `e2e/tests/interviews.mjs` adds 6 browser steps:
+  - the lobby link and the no-execution statement;
+  - SQL tasks with tables and no visible answers;
+  - a right answer and a code answer;
+  - finish and history;
+  - a line answer;
+  - 390 px.

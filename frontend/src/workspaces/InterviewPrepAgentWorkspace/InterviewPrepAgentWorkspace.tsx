@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { RubricPicker } from '../../features/interview/components/RubricControls';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import apiClient from '../../lib/axios';
 import { WorkspaceHero, AIStatusBar } from '../../components/experience/workspace';
 import { useToast } from '../../components/composite/Toast';
@@ -414,7 +414,18 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
           onStartSession={handleStartSession}
           isStarting={isStarting}
           onChangeRole={() => navigate('/careers')}
-          settingsSlot={<RubricPicker roleTitle={targetRoleTitle} value={rubricChoice} onChange={setRubricChoice} />}
+          settingsSlot={
+            <>
+              <RubricPicker roleTitle={targetRoleTitle} value={rubricChoice} onChange={setRubricChoice} />
+              <Link
+                to="/interview-agent/assessments"
+                className="block rounded-2xl border border-white/10 bg-slate-900/40 p-4 text-xs text-slate-300 hover:border-indigo-400/40"
+              >
+                <span className="font-semibold text-slate-100">Technical assessment</span>: read code and answer trace, bug, complexity and SQL
+                tasks. Nothing you type is run as code.
+              </Link>
+            </>
+          }
         />
       )}
 
