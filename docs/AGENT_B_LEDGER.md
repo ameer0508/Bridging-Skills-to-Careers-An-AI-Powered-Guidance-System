@@ -185,3 +185,72 @@ All ran after the last code change:
 2. Coordinated integration with Agent A, resolving the keep-both conflicts in the four shared files.
 3. Removing the hard-coded market panels (`MARKET_INTELLIGENCE.md` §7a).
 4. Phase-5 wider-career work (E1–E5) if assigned.
+
+## Milestone M3: wider careers, exams, multilingual and AI quality (2026-10-13)
+
+**Head before this ledger entry:** `91b73e5`. Base of this milestone: `7ac386f`. The D1–D6 integration, voice-retention hardening, X7, removal of the market mock data and the final integration security checks were reassigned to Agent A and are not part of this milestone.
+
+### Features
+
+| ID | State | Data | Eligible for credit at integration? |
+|---|---|---|---|
+| E2 GATE CS 2026 pilot | Implemented, tested (U H B) | Official IIT Guwahati syllabus and pattern; 47 original questions, not official papers | **Yes**, candidate |
+| E3 SSC CGL 2026 Tier-I pilot | Implemented, tested (U H B) | Official SSC notice §13.8 and §13.10; 33 original questions | **Yes**, candidate |
+| E4 exam progress and study plans | Implemented, tested (U H B) | User attempts; kept separate from career skills | **Yes**, candidate |
+| E1 six roles in four new domains | Preview only, tested (U H B) | O*NET 31.0, CC BY 4.0 | **Not yet.** It must first work across recommendations, readiness and roadmaps, which needs Agent A's lexicon and taxonomy patch (`docs/E1_CAREER_DOMAINS.md`) |
+| E5/X1 multilingual resumes (en, hi, es) | Implemented, tested (U H B), accuracy measured | Labelled synthetic set, 6 resumes × 3 layouts | Candidate, **with the stated limitation**: Hindi PDFs are degraded and always flagged; no OCR |
+| X9 interview scoring quality | Implemented, tested (U H B) | User answers | **Yes**, candidate |
+| X11 AI observability | Implemented, tested (U H B) | Codes and timings only; 14-day retention | **Yes**, candidate |
+
+### Screens
+
+`/exams`, `/exams/:examId`, `/career-domains`, `/resume-language`, `/ai-observability` (administrators only). The interview room and review now show evaluation details.
+
+### APIs
+
+- `/api/v1/exams`
+- `/api/v1/career-domains`
+- `/api/v1/languages`
+- `/api/v1/ai-observability`, administrators only, with the role read from the database
+- AI service: `/api/v1/multilingual/*` and `/api/v1/observability/*`, both internal
+
+### Database changes (additive)
+
+New collections: `ExamAttempt`, `ExamStudyPlan`, `ResumeLanguageAnalysis` and `LanguageSettings`. Interview evaluations gain method version, factors, uncertainty and limitations. Sessions gain `notScoredCount`.
+
+### Tests executed at this milestone
+
+All ran after the last code change (`91b73e5`):
+
+| Suite | Result |
+|---|---|
+| Backend `runAllTests.ts` | **40/40 suites passed** (adds `exam_prep`, `career_domains`, `multilingual`, `interview_quality` and `ai_observability`) |
+| AI `pytest` (full) | **169 passed** (adds `test_multilingual.py` with 8 tests and `test_observability.py` with 7) |
+| Typecheck, frontend and backend | Pass |
+| Lint, frontend and backend | Pass, after fixing two errors from this milestone's earlier commits (`23acdae`) |
+| Production build | Pass |
+| Browser: smoke | 35/35 |
+| Browser: market | 15/15 |
+| Browser: salaries | 14/14 |
+| Browser: applications | 15/15 |
+| Browser: outcomes | 10/10 |
+| Browser: interviews | 23/23 |
+| Browser: exams | 12/12 |
+| Browser: careerDomains | 7/7 |
+| Browser: languages | 10/10 |
+| Browser: aiObservability | 6/6 |
+
+### Blockers and limitations
+
+- **OCR:** none. Tesseract (Apache-2.0) would need the user's approval to install. Scanned pages are detected and reported, not read.
+- **Hindi PDFs:** PyMuPDF and pdfplumber garble shaped Devanagari. Section accuracy is 0.47 and experience and education recall are 0.00. Such files are always flagged; DOCX and text input are accurate.
+- **Exams:** no official papers, cutoffs, ranks or pass rates are used. Practice scores are not qualifications.
+- **X11:** the log is per process; set `AI_AUDIT_DIR` for a durable record.
+- **Voice (D1/D2):** the manual microphone check is still outstanding.
+
+### Shared files and integration
+
+- **Shared files:** `chore(integration)` commits `6c8c2f7`, `2b2b307`, `1e59658`, `87c99e5` and `91b73e5` touch `app.ts`, `runAllTests.ts`, `routes/index.tsx`, `Sidebar.tsx` and `ai/app/main.py`. All are additions, so the expected conflicts are keep-both.
+- **`ai_gateway.py`:** X11 adds audit calls and `metadata.observability`. Routing and policy are unchanged. If Agent A has edited the gateway, merge by hand.
+- **Lexicon and taxonomy:** E1 does not change Agent A's lexicon, taxonomy or scoring. The patch is documented for Agent A to apply.
+- **Reported to Agent A:** `middlewares/upload.ts` probably decodes UTF-8 file names as Latin-1. The language upload has its own fix; the shared file was not changed.
