@@ -24,6 +24,7 @@ import {
   ClipboardList,
   GraduationCap,
   Languages,
+  Activity,
 } from 'lucide-react';
 import { SidebarItem } from './SidebarItem';
 import { useAuthStore } from '../../store/authStore';
@@ -171,6 +172,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label: 'Application Outcomes',
           icon: <Target className="w-4 h-4" />,
         },
+        ...(user?.role === 'admin'
+          ? [{ to: '/ai-observability', label: 'AI Observability', icon: <Activity className="w-4 h-4" /> }]
+          : []),
       ],
     },
     {
