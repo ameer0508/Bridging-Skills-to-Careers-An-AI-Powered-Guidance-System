@@ -50,6 +50,75 @@ Built entirely from the signed-in user's own tracked jobs (`SavedOpportunity` an
 
 ## Limits
 
-- Dates are when the user changed a status in SkillBridge, not when the employer acted.
+- Dates are what the user recorded: the moment a status was changed in SkillBridge, or a date the user entered or corrected (see X8 below). They are not dates received from employers.
 - Rates describe one person's own search. They are not benchmarks and say nothing about other candidates.
 - With the default minimum of 5, most individual users will see "too few to compare" for interview → offer.
+
+# Application history (X8)
+
+**Screen:** `/applications` ("Applications" in the sidebar). **Service:** `backend/src/services/applications/ApplicationHistoryService.ts`. Built on the same `SavedOpportunity.statusHistory` that C6 reads, so there is one source of truth.
+
+## API (sign-in required; every operation is scoped to the caller)
+
+| Method and path | Purpose |
+|---|---|
+| `GET /api/v1/applications` | The caller's tracked jobs, with current stage, `applied`, application date and reminder |
+| `GET /api/v1/applications/:id/history` | Chronological timeline and notes |
+| `POST /api/v1/applications/:id/events` | Record `applied`, `interviewing`, `offer`, `rejected` or `withdrawn`, with an optional date and note |
+| `PATCH /api/v1/applications/:id/events/:eventId` | Correct an event's date or note |
+| `DELETE /api/v1/applications/:id/events/:eventId` | Remove a mistaken event (the `saved` event cannot be removed) |
+| `PUT /api/v1/applications/:id/reminder` | Set (`{at, note}`) or clear (`{at: null}`) the follow-up reminder |
+| `POST /api/v1/applications/manual` | Add an application made outside SkillBridge's job search |
+
+Another user's id, an unknown id and a malformed id all answer **404**. Unknown fields are rejected with 400.
+
+## Rules
+
+- **Only what the user recorded.** SkillBridge receives nothing from employers. No status, event or date is created for the user.
+  - An application that C6 infers (an interview, offer or rejection with no recorded application, or an older record with only a stored application date) appears in the timeline as `origin: 'inferred'`, dashed and with an explanation.
+  - An inferred event is **not stored** and cannot be edited.
+- **Dates and their basis.**
+  - `changedAt` is the date of the event, and it is what C6 reads.
+  - `dateSource` records where that date came from:
+    - `recorded_at_change`: when the status was changed in SkillBridge. Older entries without the field count as this.
+    - `user_stated`: a date the user entered or corrected.
+  - `recordedAt` is when the event was entered.
+  - `editedAt` stamps a correction. For an older entry, the original date is kept as `recordedAt` when it is first corrected.
+- **Saving is not applying.** `saved` marks when tracking began and is not a stage. The current stage is the latest dated real stage, and `appliedAt` is the earliest application event. Both are recomputed after every addition, correction or removal, so C6 changes immediately.
+- **Duplicates.** The same stage on the same UTC day is refused with **409 `DUPLICATE_EVENT`**, whether it is added or moved there by a correction. A second interview round on another day is kept, and C6 counts each stage once per application.
+- **Validation.**
+  - Event dates must lie between 2000-01-01 and now; future events cannot be recorded.
+  - Notes are limited to 500 characters.
+  - Manual links must be `http(s)`.
+  - Reminders must fall between now and one year ahead.
+- **Inconsistencies are pointed out, not hidden.** An interview, offer or rejection dated before the application produces a note asking the user to correct one of the dates. C6 counts the same case in `milestonesDatedBeforeApplication`.
+- **Reminders are opt-in and in-app.** There is no reminder unless the user sets one. Due reminders are listed at the top of the Applications page and flagged in the list. No e-mail or push message is sent.
+- **Older records.** Entries saved before events had ids receive stable ids once, on first read. The write applies only if the stored history is still the one read.
+- **Demo listings.** A saved demo listing is labelled "Demo listing". C6 still leaves it out by default.
+
+## Tests
+
+- `backend/src/tests/application_history.test.ts`, 8 groups:
+  - chronological status, inferred and unstored events, date sources and date validation;
+  - the existing save and status endpoints feeding the history;
+  - dated events, same-day duplicates (409) and 6 invalid events;
+  - corrections and removals recomputing status, `appliedAt` and C6 (cohort month and offer count);
+  - older records getting stable ids;
+  - manual applications counted by C6, and 4 invalid entries;
+  - reminders;
+  - 6 cross-user operations answering 404 with no change.
+- `e2e/tests/applications.mjs`, 15 browser steps:
+  - sign-in required;
+  - empty state;
+  - save from job search → "Saved — not applied";
+  - record applied and interview with dates;
+  - duplicate refused;
+  - correct a date;
+  - remove an offer;
+  - add a manual application;
+  - inferred event shown and not editable;
+  - outcomes follow;
+  - reminder set and cleared;
+  - another account sees nothing;
+  - 390 px;
+  - console clean.

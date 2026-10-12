@@ -10,7 +10,8 @@
 | C5 market signals contract | `MarketOpportunitySummary` contract and its unavailable form are defined and tested. The producer is not built yet. |
 | C6 application outcomes | Implemented and tested; see [`APPLICATION_OUTCOMES.md`](APPLICATION_OUTCOMES.md) |
 | **C3** salary insights | **Implemented and tested** on synthetic data (see §5b). Real salary insights answer *DATA UNAVAILABLE* until a licensed source is registered. |
-| C2, R4, X7, X8 | Not started |
+| **X8** application history | **Implemented and tested** on real user-recorded data; see [`APPLICATION_OUTCOMES.md`](APPLICATION_OUTCOMES.md#application-history-x8) |
+| C2, R4, X7 | Not started |
 
 ## 1. Principles
 

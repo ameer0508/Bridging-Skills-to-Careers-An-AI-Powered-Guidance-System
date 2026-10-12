@@ -318,7 +318,7 @@ class OpportunityService {
         $setOnInsert: {
           status: 'saved',
           notes: '',
-          statusHistory: [{ status: 'saved', changedAt: new Date(), note: '' }],
+          statusHistory: [{ status: 'saved', changedAt: new Date(), recordedAt: new Date(), dateSource: 'recorded_at_change', note: '' }],
         },
       },
       { upsert: true, new: true, runValidators: true }
@@ -397,7 +397,8 @@ class OpportunityService {
     const cleanNotes = typeof notes === 'string' ? sanitizeText(notes) : undefined;
     if (doc.status !== status) {
       // Every transition is recorded so the application's history can be shown
-      doc.statusHistory.push({ status, changedAt: new Date(), note: cleanNotes || '' });
+      const now = new Date();
+      doc.statusHistory.push({ status, changedAt: now, recordedAt: now, dateSource: 'recorded_at_change', note: cleanNotes || '' });
       if (status === 'applied' && !doc.appliedAt) doc.appliedAt = new Date();
       doc.status = status;
     }

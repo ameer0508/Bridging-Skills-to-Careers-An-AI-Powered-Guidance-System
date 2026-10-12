@@ -17,10 +17,25 @@ export const APPLICATION_STATUSES: ApplicationStatus[] = [
   'withdrawn'
 ];
 
+/**
+ * Where an event's date came from. 'recorded_at_change' (and older entries without the field) is
+ * the moment the user changed the status in SkillBridge; 'user_stated' is a date the user entered
+ * or corrected, such as the day an interview actually took place.
+ */
+export type EventDateSource = 'recorded_at_change' | 'user_stated';
+
 export interface IStatusHistoryEntry {
+  /** Stable id for corrections; entries saved before ids existed receive one on first read. */
+  _id?: Types.ObjectId;
   status: ApplicationStatus;
+  /** When the event happened. Analytics (C6) read this date. */
   changedAt: Date;
   note?: string;
+  /** When the user entered it in SkillBridge; absent on entries older than this field. */
+  recordedAt?: Date;
+  dateSource?: EventDateSource;
+  /** Last time the user corrected this event; null when never corrected. */
+  editedAt?: Date | null;
 }
 
 export interface ISavedOpportunity extends Document<Types.ObjectId> {
@@ -59,9 +74,13 @@ const StatusHistorySchema = new Schema<IStatusHistoryEntry>(
   {
     status: { type: String, enum: APPLICATION_STATUSES, required: true },
     changedAt: { type: Date, default: Date.now },
-    note: { type: String, default: '' }
+    note: { type: String, default: '' },
+    recordedAt: { type: Date },
+    dateSource: { type: String, enum: ['recorded_at_change', 'user_stated'] },
+    editedAt: { type: Date, default: null }
   },
-  { _id: false }
+  // Each event has an id so a single entry can be corrected or removed
+  { _id: true }
 );
 
 const SavedOpportunitySchema = new Schema<ISavedOpportunity>(
