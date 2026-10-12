@@ -41,6 +41,7 @@ import { runVoiceInterviewTests } from './voice_interviews.test.js';
 import { runExamPrepTests } from './exam_prep.test.js';
 import { runCareerDomainTests } from './career_domains.test.js';
 import { runMultilingualTests } from './multilingual.test.js';
+import { runInterviewQualityTests } from './interview_quality.test.js';
 
 async function runAll() {
   console.log('🚀 Starting Comprehensive SkillBridge Backend Test Suite...');
@@ -102,6 +103,7 @@ async function runAll() {
     await runExamPrepTests();
     await runCareerDomainTests();
     await runMultilingualTests();
+    await runInterviewQualityTests();
     const after = fingerprint();
     const touched = before.filter((entry, i) => entry !== after[i]);
     if (touched.length > 0) {
