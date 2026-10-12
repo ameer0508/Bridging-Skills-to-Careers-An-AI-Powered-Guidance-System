@@ -10,7 +10,7 @@ An item is **Done** only when it has a working screen, an authenticated API, sto
 needed, validation and error states, documented limits, and passing service, HTTP and browser
 tests. Code that exists but is not verified earns nothing.
 
-Expansion total: 100 points. **Current: 17 / 100.**
+Expansion total: 100 points. **Current: 22 / 100.**
 
 ## Phase 1. Advanced career intelligence (15)
 
@@ -18,7 +18,7 @@ Expansion total: 100 points. **Current: 17 / 100.**
 |---|---|---|---|---|
 | A1 | Compare careers by requirements, evidence, effort and opportunities | 3 | Pending | Partly done: comparison by requirements, evidence and effort works and is tested (HTTP and browser). The opportunities dimension is not shown because there are no dated market records yet (C1); no points until it is |
 | A2 | What-if changes from skills, projects and certifications | 3 | **Done** | HTTP suite `career_lab`; browser suite `pnpm test:e2e` (40/40): scores before and after hypothetical skills, projects, certifications or roles with requirement-level changes; nothing is saved; unknown skills rejected. After the evidence was really added, 6 career scores equalled the hypothetical ones exactly |
-| A3 | Skill freshness and revalidation | 3 | **Done** | HTTP suite `career_lab`; browser suite `pnpm test:e2e` (40/40): freshness from dated evidence only (role periods), "undated" when the resume gives no date; a user's confirmation is labelled unverified, adds no points and survives reprocessing. Assessment-based revalidation arrives with B3 |
+| A3 | Skill freshness and revalidation | 3 | **Done** | HTTP suite `career_lab`; browser suite `pnpm test:e2e` (41/41): freshness from dated evidence only (role periods), "undated" when the resume gives no date; a user's confirmation is labelled unverified, adds no points and survives reprocessing. A passed skill check (B3) also dates the skill and is labelled as assessed |
 | A4 | Multi-stage career transition plans | 3 | **Done** | HTTP suite `career_lab`; browser suite `pnpm test:e2e` (40/40): staged plan through nearer careers, saved per user, re-evaluated on read, projected scores agree with what-if, survives a reload, private to its owner |
 | A5 | Counterfactual explanations of a match | 3 | **Done** | HTTP suite `career_lab`; browser suite `pnpm test:e2e` (40/40): ranked single changes and a monotonic path to a target score, consistent with what-if; unreachable targets reported as not reached |
 
@@ -28,7 +28,7 @@ Expansion total: 100 points. **Current: 17 / 100.**
 |---|---|---|---|---|
 | B1 | Learning-platform and course integration | 2 | Pending |  |
 | B2 | Personalised project suggestions | 2 | Pending |  |
-| B3 | Practical quizzes and skill verification | 4 | Pending |  |
+| B3 | Practical quizzes and skill verification | 4 | **Done** | HTTP suite `skill_assessment`; browser suite `pnpm test:e2e` (41/41): versioned bank for **8 skills only** (JavaScript, TypeScript, React, Node.js, Python, SQL, Git, Docker; 56 questions), server-side scoring with answers never sent before submission, shuffled options, per-skill pass criteria (4 of 5), 15-minute limit, 3 attempts per skill per day, single submission, owner-only. A fail changes no score; a pass adds `assessed` evidence worth 15 points once per skill and triggers one recalculation; a repeat pass adds nothing. Survives reprocessing and deleting the resume. Limits in `docs/SCORING.md` section 12: unsupervised, memorisable, not a certification |
 | B4 | Availability- and progress-aware roadmaps | 3 | Pending |  |
 | B5 | Evidence-backed portfolios | 2 | Pending |  |
 | B6 | Streaks, opt-in reminders and milestone notifications | 2 | Pending |  |
@@ -72,7 +72,7 @@ One point each. An enhancement is counted here once, even when a feature above d
 | ID | Item | Points | Status | Evidence |
 |---|---|---|---|---|
 | X1 | Multi-layout and multilingual resume extraction | 1 | Pending |  |
-| X2 | Validated proficiency and dated skill evidence | 1 | Pending | Partly done: evidence carries points, date and verification state. Validated proficiency needs assessments (B3) |
+| X2 | Validated proficiency and dated skill evidence | 1 | **Done** | Delivered by F1 and B3: every evidence record carries its points, date and one of three verification states (`stated`, `self_attested` at 0 points, `assessed`); proficiency is derived from the evidence score. Suites `career_lab` and `skill_assessment` |
 | X3 | Career explanation | 1 | **Done** | Delivered by A5 and the existing breakdown: baseline evidence per requirement, what would change it, and by how much |
 | X4 | Evidence-grounded readiness calibration | 1 | Pending |  |
 | X5 | Measurable, personalised recommendations | 1 | Pending |  |
@@ -97,7 +97,7 @@ One point each. An enhancement is counted here once, even when a feature above d
 
 | ID | Item | Points | Status | Evidence |
 |---|---|---|---|---|
-| V1 | Original regression baseline still passes (19 backend suites, 104 AI tests, 35 browser checks) | 2 | Pending | Passing at this checkpoint: 20 backend suites (19 original + 1), 104 AI tests, 40 browser checks (35 original + 5). Awarded at the end of the expansion |
+| V1 | Original regression baseline still passes (19 backend suites, 104 AI tests, 35 browser checks) | 2 | Pending | Passing at this checkpoint: 21 backend suites (19 original + 2), 104 AI tests, 41 browser checks (35 original + 6). Awarded at the end of the expansion |
 | V2 | Cross-user isolation and input validation for every new endpoint | 2 | Pending |  |
 | V3 | Accessibility and failure states for every new screen | 2 | Pending |  |
 | V4 | Docker Compose workflow passes with the expansion | 2 | Pending |  |

@@ -13,7 +13,9 @@ export const EVIDENCE_POINTS = {
   projects: [25, 10, 5], // 1st project, 2nd project, each further project
   education: 15,
   certification: 30,
-  listed: 10
+  listed: 10,
+  // Passing a SkillBridge skill check; not resume evidence, counted once per skill
+  assessment: 15
 } as const;
 
 const stepped = (steps: readonly number[], occurrence: number): number =>

@@ -24,17 +24,40 @@ class UserSkillService {
    * Roadmaps (with their completed items), completed or saved recommendations, readiness
    * history, interviews and saved jobs are the user's own history and are left untouched.
    */
-  async clearDerivedIntelligence(userId: string): Promise<void> {
+  async clearDerivedIntelligence(userId: string): Promise<{ skillsKept: number }> {
     const uid = new mongoose.Types.ObjectId(userId);
     const { CareerMatch } = await import('../models/CareerMatch.js');
     const { CareerReadiness } = await import('../models/CareerReadiness.js');
     const { GapAnalysis } = await import('../models/GapAnalysis.js');
     const { Recommendation } = await import('../models/Recommendation.js');
-    await UserSkill.deleteMany({ userId: uid });
+
+    // Evidence the user earned here (a passed skill check) does not come from the resume and
+    // is not removed with it. A skill is kept only while such evidence still earns points.
+    let skillsKept = 0;
+    for (const doc of await UserSkill.find({ userId: uid })) {
+      const kept = doc.evidences.filter(e => !e.sourceType.startsWith('resume_'));
+      const points = Math.min(100, kept.reduce((sum, e) => sum + (e.points || 0), 0));
+      if (points === 0) {
+        await doc.deleteOne();
+        continue;
+      }
+      doc.evidences = kept;
+      doc.evidenceScore = points;
+      doc.proficiency = EvidenceCalculator.estimateProficiency(points);
+      await doc.save();
+      skillsKept++;
+    }
+
     await CareerMatch.deleteMany({ userId: uid });
     await CareerReadiness.deleteMany({ userId: uid });
     await GapAnalysis.deleteMany({ userId: uid });
     await Recommendation.deleteMany({ userId: uid, status: 'active' });
+
+    if (skillsKept > 0) {
+      const { default: RecalculationService } = await import('./RecalculationService.js');
+      await RecalculationService.run(userId, 'skill_evidence_changed');
+    }
+    return { skillsKept };
   }
 
   /**
@@ -83,9 +106,11 @@ class UserSkillService {
       // Evidence that did not come from a resume (the user's own confirmations, assessments taken
       // here) belongs to the user, not to the file, and is carried over to the rebuilt profile.
       const carriedOver = new Map<string, IEvidence[]>();
+      const categoryOf = new Map<string, string>();
       for (const existing of await UserSkill.find({ userId: new mongoose.Types.ObjectId(userId) })) {
         const kept = existing.evidences.filter(e => !e.sourceType.startsWith('resume_'));
         if (kept.length > 0) carriedOver.set(existing.skillId.toString(), kept.map(e => ({ ...(e as unknown as { toObject?: () => IEvidence }).toObject?.() ?? e })));
+        categoryOf.set(existing.skillId.toString(), existing.category);
       }
 
       await UserSkill.deleteMany({ userId: new mongoose.Types.ObjectId(userId) });
@@ -120,6 +145,21 @@ class UserSkillService {
           evidenceScore: total,
           proficiency: EvidenceCalculator.estimateProficiency(total),
           evidences: [...evidences, ...extra]
+        });
+      }
+
+      // Skills the new resume does not mention but the user earned points for here (a passed
+      // skill check) stay on the profile with that evidence alone
+      for (const [skillId, extra] of carriedOver.entries()) {
+        const points = Math.min(100, extra.reduce((sum, e) => sum + (e.points || 0), 0));
+        if (points === 0) continue;
+        userSkillsToInsert.push({
+          userId: new mongoose.Types.ObjectId(userId),
+          skillId: new mongoose.Types.ObjectId(skillId),
+          category: categoryOf.get(skillId) || 'General',
+          evidenceScore: points,
+          proficiency: EvidenceCalculator.estimateProficiency(points),
+          evidences: extra
         });
       }
 

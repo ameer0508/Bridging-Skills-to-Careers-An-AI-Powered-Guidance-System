@@ -33,7 +33,7 @@ derived modules they can change:
 | Career data (taxonomy) changed | recompute | recompute | recompute |
 | Target role changed | | | recompute |
 | Interview completed | | | recompute |
-| Resume deleted | (caller clears derived data) | | |
+| Resume deleted | (caller clears what came from the resume; if assessed skills remain, it raises "skill evidence changed") | | |
 | Roadmap progress | | | |
 
 Three rules apply to every run:
@@ -62,6 +62,9 @@ Test suite `career_lab` (section R1), on a synthetic user:
 | Ten identical triggers fired at once | Exactly one recompute, nine recognised as duplicates; no duplicate match records | Pass |
 | The user confirms recent use of a skill (adds no points) | Recorded as a duplicate, because no score input changed | Pass |
 | A what-if scenario is run | No run is recorded at all | Pass |
+| A skill check is passed (suite `skill_assessment`) | One run naming the attempt; all three modules recomputed | Pass |
+| The same skill check is passed again (no new points) | Recorded as a duplicate | Pass |
+| A skill check is failed | No run is recorded | Pass |
 
 The pre-existing regression suites (resume lifecycle, HTTP integration, interview questions and
 others, 19 suites) all pass through the new service, which is the evidence that routing the

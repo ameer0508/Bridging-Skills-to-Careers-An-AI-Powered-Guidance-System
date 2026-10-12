@@ -85,7 +85,7 @@ Rules that apply to every authenticated endpoint:
 
 ### Career Lab
 
-Nothing in this group changes the user's skills or scores, except recording a confirmation.
+Nothing in this group changes the user's skills or scores, except recording a confirmation (0 points) and passing a skill check (15 points, once per skill).
 
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
@@ -98,6 +98,9 @@ Nothing in this group changes the user's skills or scores, except recording a co
 | `DELETE` | `/api/v1/careers/transition-plans/:id` | Yes | Remove a plan. |
 | `GET` | `/api/v1/skills/freshness` | Yes | When each skill was last shown to be in use, from dated evidence only. |
 | `POST` | `/api/v1/skills/:id/revalidate` | Yes | Record the caller's confirmation of recent use (unverified, 0 points). Optional `note`. |
+| `GET` | `/api/v1/skills/assessments` | Yes | Skills that have a skill check (8), the caller's standing on each (verified, attempts left today, attempt in progress), the last 20 attempts, and the rules. |
+| `POST` | `/api/v1/skills/assessments` | Yes | Body `skill`. Starts an attempt (`201`) or returns the one in progress (`200`): questions and shuffled options, never answers. `404 ASSESSMENT_NOT_AVAILABLE` for a skill without a skill check, `429 ASSESSMENT_ATTEMPT_LIMIT` after 3 attempts in 24 hours. |
+| `POST` | `/api/v1/skills/assessments/:attemptId/submit` | Yes | Body `answers`: one option position (0-3) or `null` per question. Returns the score, a review with explanations and, on a pass, the evidence change and recalculation. `409 ATTEMPT_ALREADY_SUBMITTED`, `409 ATTEMPT_EXPIRED`, `404` for another user's attempt. |
 | `GET` | `/api/v1/users/me/intelligence-history` | Yes | The last 20 recalculations: trigger, modules recomputed, figures before and after, versions. |
 
 ### Recommendations and roadmap

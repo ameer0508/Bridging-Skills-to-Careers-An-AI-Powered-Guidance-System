@@ -146,7 +146,7 @@ export const ResumeStudioHeader: React.FC<ResumeStudioHeaderProps> = ({
                   career matches, readiness scores and active recommendations calculated from it.
                 </p>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Your roadmap progress, saved jobs and interview history are kept. This cannot be undone.
+                  Your roadmap progress, saved jobs and interview history are kept, and so are skills you verified with a skill check. This cannot be undone.
                 </p>
               </div>
             </div>

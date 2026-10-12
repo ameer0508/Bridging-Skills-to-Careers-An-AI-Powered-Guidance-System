@@ -3,6 +3,7 @@ import { z } from 'zod';
 import mongoose from 'mongoose';
 import CareerScenarioService from '../services/CareerScenarioService.js';
 import SkillFreshnessService from '../services/SkillFreshnessService.js';
+import SkillAssessmentService from '../services/SkillAssessmentService.js';
 import RecalculationService from '../services/RecalculationService.js';
 import { Career } from '../models/Career.js';
 import { AppError } from '../middlewares/errorHandler.js';
@@ -24,6 +25,8 @@ const compareSchema = z.object({ careerIds: z.array(objectId).min(2).max(4) }).s
 const whatIfSchema = z.object({ changes: z.array(changeSchema).min(1).max(10), careerIds: z.array(objectId).min(1).max(20).optional() }).strict();
 const planSchema = z.object({ targetCareerId: objectId }).strict();
 const revalidateSchema = z.object({ note: z.string().max(200).optional() }).strict();
+const startAssessmentSchema = z.object({ skill: skillName }).strict();
+const submitAssessmentSchema = z.object({ answers: z.array(z.number().int().min(0).max(3).nullable()).min(1).max(20) }).strict();
 
 function parse<T>(schema: z.ZodType<T>, body: unknown): T {
   const parsed = schema.safeParse(body ?? {});
@@ -103,6 +106,23 @@ class CareerLabController {
     // A confirmation adds no points, so the service records that nothing needed recomputing
     const run = await RecalculationService.run(userId, 'skill_evidence_changed', req.params.userSkillId);
     res.status(200).json({ success: true, data: { skill, recalculation: { status: run.status, modulesRecomputed: run.modulesRecomputed } } });
+  });
+
+  assessments = handle(async (req, res) => {
+    res.status(200).json({ success: true, data: await SkillAssessmentService.overview(userIdOf(req)) });
+  });
+
+  startAssessment = handle(async (req, res) => {
+    const userId = userIdOf(req);
+    const { skill } = parse(startAssessmentSchema, req.body);
+    const attempt = await SkillAssessmentService.start(userId, skill);
+    res.status(attempt.resumed ? 200 : 201).json({ success: true, data: { attempt } });
+  });
+
+  submitAssessment = handle(async (req, res) => {
+    const userId = userIdOf(req);
+    const { answers } = parse(submitAssessmentSchema, req.body);
+    res.status(200).json({ success: true, data: await SkillAssessmentService.submit(userId, req.params.attemptId, answers) });
   });
 
   /** What each event changed: the audit trail of recalculations. */

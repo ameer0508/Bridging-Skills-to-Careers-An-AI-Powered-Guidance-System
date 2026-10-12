@@ -5,6 +5,7 @@ import { careerLabApi, type CareerOption } from '../../features/careerLab/career
 import { ComparePanel } from '../../features/careerLab/components/ComparePanel';
 import { WhatIfPanel } from '../../features/careerLab/components/WhatIfPanel';
 import { FreshnessPanel } from '../../features/careerLab/components/FreshnessPanel';
+import { VerifyPanel } from '../../features/careerLab/components/VerifyPanel';
 import { TransitionPanel } from '../../features/careerLab/components/TransitionPanel';
 import { ActivityPanel } from '../../features/careerLab/components/ActivityPanel';
 import { Loading } from '../../features/careerLab/components/labUi';
@@ -13,6 +14,7 @@ const TABS = [
   { id: 'compare', label: 'Compare' },
   { id: 'what-if', label: 'What-if' },
   { id: 'freshness', label: 'Skill freshness' },
+  { id: 'verify', label: 'Verify skills' },
   { id: 'transition', label: 'Transition plan' },
   { id: 'activity', label: 'Activity' },
 ] as const;
@@ -87,6 +89,7 @@ export const CareerLabWorkspace: React.FC = () => {
             {active === 'compare' && <ComparePanel careers={careers} />}
             {active === 'what-if' && <WhatIfPanel careers={careers} />}
             {active === 'freshness' && <FreshnessPanel />}
+            {active === 'verify' && <VerifyPanel />}
             {active === 'transition' && <TransitionPanel careers={careers} />}
             {active === 'activity' && <ActivityPanel />}
           </>

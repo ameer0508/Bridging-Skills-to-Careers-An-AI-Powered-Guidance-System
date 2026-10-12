@@ -295,6 +295,63 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       expect(skipped >= 1, 'the confirmation that changed no score is not recorded as needing no recalculation');
       return `one resume run; ${skipped} event(s) correctly recalculated nothing`;
     });
+    await t.step('Career Lab: a skill check fails without changing scores, then a pass adds assessed evidence once', async () => {
+      const javascript = async () => (await api('GET', '/skills/freshness')).data.skills.find((s) => s.name === 'JavaScript');
+      const before = await javascript();
+      await openLabTab('Verify skills');
+      const tile = page.locator('[data-testid="assessable-skill"][data-skill="JavaScript"]');
+      await tile.waitFor({ timeout: 15_000 });
+      expect(/Stated, not verified/.test(await tile.innerText()), 'a skill from the resume is not labelled as stated only');
+      expect(await page.getByTestId('assessment-history-empty').isVisible(), 'the empty history is not shown');
+      expect(/not a certification/.test(await page.getByTestId('assessment-note').innerText()), 'the limits of a skill check are not stated');
+
+      // Correct answers are learned only from the reviews the server returns after each submission
+      const known = new Map();
+      const attemptOnce = async () => {
+        await tile.getByRole('button').click();
+        await page.getByTestId('assessment-attempt').waitFor({ timeout: 15_000 });
+        const questions = page.getByTestId('assessment-question');
+        const count = await questions.count();
+        for (let i = 0; i < count; i++) {
+          const question = questions.nth(i);
+          const prompt = (await question.locator('legend').innerText()).replace(/^\d+\.\s*/, '');
+          if (known.has(prompt)) await question.getByLabel(known.get(prompt), { exact: true }).check();
+        }
+        const [response] = await Promise.all([
+          page.waitForResponse((r) => /\/skills\/assessments\/[^/]+\/submit$/.test(r.url())),
+          page.getByRole('button', { name: 'Submit answers' }).click(),
+        ]);
+        const scored = (await response.json()).data;
+        for (const item of scored.review) known.set(item.prompt, item.options[item.correctOption]);
+        await page.getByTestId('assessment-result').waitFor({ timeout: 15_000 });
+        return scored;
+      };
+
+      const blank = await attemptOnce();
+      expect(blank.correct === 0 && !blank.passed, `an unanswered attempt scored ${blank.correct}`);
+      expect(/Not passed/.test(await page.getByTestId('assessment-result').innerText()), 'the failed result is not shown');
+      expect((await page.getByTestId('assessment-review').count()) === 5, 'the review does not list every question');
+      expect((await javascript()).evidenceScore === before.evidenceScore, 'a failed attempt changed the evidence score');
+
+      const partial = await attemptOnce();
+      expect(!partial.passed, `answering only the ${partial.correct} questions seen before should not pass`);
+
+      const full = await attemptOnce();
+      expect(full.passed && full.correct === 5, `the third attempt scored ${full.correct} of 5`);
+      await page.locator('[data-testid="assessable-skill"][data-skill="JavaScript"][data-verified="true"]').waitFor({ timeout: 15_000 });
+      expect(/Verified by skill check/.test(await tile.innerText()), 'the skill is not shown as verified');
+      expect(/No attempts left today/.test(await tile.innerText()), 'the daily attempt limit is not shown');
+      expect(await tile.getByRole('button').isDisabled(), 'a fourth attempt can still be started');
+      expect((await page.getByTestId('assessment-history').locator('li').count()) === 3, 'the three attempts are not in the history');
+
+      const after = await javascript();
+      expect(after.evidenceScore === Math.min(100, before.evidenceScore + 15), `evidence score went from ${before.evidenceScore} to ${after.evidenceScore}`);
+      expect(after.verification === 'assessed', `verification is ${after.verification}`);
+      await openLabTab('Skill freshness');
+      const shown = await page.locator('[data-testid="freshness-skill"][data-skill="JavaScript"]').innerText();
+      expect(/Verified by a SkillBridge skill check/.test(shown) && /Not a professional certification/.test(shown), 'the freshness list does not say how the skill was verified');
+      return `0, ${partial.correct} and 5 of 5; evidence ${before.evidenceScore} to ${after.evidenceScore}; fourth attempt blocked`;
+    });
 
     // ---- Roadmap ------------------------------------------------------------------------------------
     let completedBeforeReplace = 0;
@@ -654,11 +711,12 @@ export async function run({ webUrl, apiUrl, aiControl }) {
     });
 
     // ---- Resume deletion ---------------------------------------------------------------------------------------------------
-    await t.step('deleting the resume asks first, clears derived data and keeps history', async () => {
+    await t.step('deleting the resume asks first, clears what came from it and keeps history', async () => {
       await gotoAndSettle(page, `${webUrl}/resume`, 2500);
       await page.getByRole('button', { name: 'Delete resume' }).first().click();
       const dialog = page.getByRole('dialog');
       expect(/roadmap progress, saved jobs and interview history are kept/i.test(await dialog.innerText()), 'the confirmation does not say what is kept');
+      expect(/skills you verified with a skill check/i.test(await dialog.innerText()), 'the confirmation does not say verified skills are kept');
       await dialog.getByRole('button', { name: 'Keep resume' }).click();
       expect((await api('GET', '/resumes/me')).data.resume !== null, 'cancelling deleted the resume');
 
@@ -666,13 +724,16 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       await page.getByRole('dialog').getByRole('button', { name: 'Delete resume' }).click();
       await page.waitForTimeout(3000);
       expect((await api('GET', '/resumes/me')).data.resume === null, 'the resume still exists');
-      expect((await api('GET', '/skills/me')).data.totalSkills === 0, 'skills from the deleted resume remain');
+      // The skill check passed earlier is the user's own evidence: it stays, worth its own points only
+      const left = (await api('GET', '/skills/freshness')).data.skills;
+      expect(left.length === 1 && left[0].name === 'JavaScript' && left[0].evidenceScore === 15 && left[0].verification === 'assessed',
+        `after deletion the profile holds ${JSON.stringify(left.map((s) => [s.name, s.evidenceScore, s.verification]))}`);
       const snap = await snapshot();
       expect(snap.resumeInfo.hasResume === false, 'Home still reports a resume');
       expect(snap.roadmap.completedMilestones >= 1, 'completed roadmap work was erased');
       expect(snap.opportunities.total === 1, 'tracked jobs were erased');
       expect((await api('GET', '/interviews/history')).data.history.length === 2, 'interview history was erased');
-      return 'skills cleared; roadmap progress, tracked job and interviews kept';
+      return 'resume skills cleared; the verified skill, roadmap progress, tracked job and interviews kept';
     });
 
     // ---- Sign out and back in -----------------------------------------------------------------------------------------------

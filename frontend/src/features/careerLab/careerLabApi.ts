@@ -162,6 +162,63 @@ export interface RecalculationRun {
   durationMs: number;
 }
 
+export interface AssessableSkill {
+  skill: string;
+  questionsInBank: number;
+  questionCount: number;
+  passMark: number;
+  onProfile: boolean;
+  evidenceScore: number | null;
+  verified: boolean;
+  verifiedAt: string | null;
+  inProgressAttemptId: string | null;
+  attemptsRemaining: number;
+  nextAttemptAt: string | null;
+  lastResult: { correct: number; of: number; passed: boolean; at: string | null } | null;
+}
+
+export interface AssessmentHistoryItem {
+  attemptId: string;
+  skill: string;
+  status: 'in_progress' | 'submitted' | 'expired';
+  startedAt: string;
+  submittedAt: string | null;
+  correct: number | null;
+  of: number;
+  passed: boolean | null;
+}
+
+export interface AssessmentOverview {
+  skills: AssessableSkill[];
+  history: AssessmentHistoryItem[];
+  policy: { questionCount: number; passMark: number; minutesToComplete: number; attemptsPerDay: number; points: number };
+  bankVersion: string;
+  note: string;
+}
+
+export interface AssessmentAttempt {
+  attemptId: string;
+  skill: string;
+  startedAt: string;
+  expiresAt: string;
+  passMark: number;
+  questions: Array<{ prompt: string; options: string[] }>;
+  resumed: boolean;
+}
+
+export interface AssessmentResult {
+  attemptId: string;
+  skill: string;
+  correct: number;
+  of: number;
+  passMark: number;
+  passed: boolean;
+  review: Array<{ prompt: string; options: string[]; chosen: number | null; correctOption: number; correct: boolean; explanation: string }>;
+  evidence: { added: boolean; evidenceScoreBefore: number | null; evidenceScoreAfter: number; userSkillId: string } | null;
+  recalculation: { status: string; modulesRecomputed: string[] } | null;
+  note: string;
+}
+
 export const careerLabApi = {
   catalog: async (): Promise<CareerOption[]> => (await apiClient.get('/careers/catalog')).data.data.careers,
   compare: async (careerIds: string[]): Promise<CompareResult> => (await apiClient.post('/careers/compare', { careerIds })).data.data,
@@ -172,6 +229,10 @@ export const careerLabApi = {
   freshness: async (): Promise<FreshnessResult> => (await apiClient.get('/skills/freshness')).data.data,
   revalidate: async (userSkillId: string, note?: string): Promise<SkillFreshness> =>
     (await apiClient.post(`/skills/${userSkillId}/revalidate`, { note: note || undefined })).data.data.skill,
+  assessments: async (): Promise<AssessmentOverview> => (await apiClient.get('/skills/assessments')).data.data,
+  startAssessment: async (skill: string): Promise<AssessmentAttempt> => (await apiClient.post('/skills/assessments', { skill })).data.data.attempt,
+  submitAssessment: async (attemptId: string, answers: Array<number | null>): Promise<AssessmentResult> =>
+    (await apiClient.post(`/skills/assessments/${attemptId}/submit`, { answers })).data.data,
   plans: async (): Promise<TransitionPlan[]> => (await apiClient.get('/careers/transition-plans')).data.data.plans,
   createPlan: async (targetCareerId: string): Promise<TransitionPlan> =>
     (await apiClient.post('/careers/transition-plans', { targetCareerId })).data.data.plan,

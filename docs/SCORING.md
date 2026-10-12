@@ -32,6 +32,7 @@ not supported and not tested.
 | Named in a degree or branch of study | 15 (once) |
 | Named in a certification | 30 (once) |
 | Mentioned anywhere in the resume | 10 |
+| Passed a SkillBridge skill check (not from the resume; see section 12) | 15 (once) |
 
 Capped at 100. Repeating a skill inside one role or project adds nothing.
 Proficiency estimate: 85+ expert, 60+ advanced, 35+ intermediate, otherwise beginner. A skill that
@@ -253,7 +254,39 @@ offers or employment.
 
 ## 11. Versions and recalculation
 
-Every recalculation records `scoringVersion` (currently `2026.10-1`, changed whenever a formula,
+Every recalculation records `scoringVersion` (currently `2026.10-2`, changed whenever a formula,
 weight or threshold in this document changes) and `taxonomyVersion` (a hash of the career and
 requirement data). A transition plan made under other versions is shown as outdated. Which events
 recompute which figures is tabulated in `NEXTGEN_RESEARCH.md` (R1).
+
+## 12. Skill checks
+
+A skill check is a multiple-choice quiz written for SkillBridge and scored on the server.
+
+| Rule | Value |
+|---|---|
+| Skills covered | 8: JavaScript, TypeScript, React, Node.js, Python, SQL, Git, Docker (7 questions each). No other skill can be verified this way |
+| Questions per attempt | 5, preferring questions not asked in the previous attempt; option order is shuffled per attempt |
+| Pass mark | 4 of 5. Criteria are defined per skill; every skill currently uses this default |
+| Time allowed | 15 minutes from starting; a later submission earns nothing |
+| Attempts | 3 per skill in any 24 hours; an attempt can be submitted once |
+| Effect of a pass | Evidence of kind `assessment`, verification `assessed`, dated that day, **15 points, once per skill**. Passing again updates the date only |
+| Effect of a fail | None on any score. The attempt is kept in the user's history |
+
+The 15 points are a chosen value: more than being listed (10), the same as naming the skill in a
+degree, less than using it in a project (25). They are not derived from data.
+
+A pass on a skill the resume never mentioned puts the skill on the profile with those 15 points
+only; it does not also receive the 10 points for being listed in a resume.
+
+Evidence is kept by kind and never merged: stated in a resume (`stated`), confirmed by the user
+(`self_attested`, always 0 points), and shown in a skill check (`assessed`). Evidence that did
+not come from the resume survives replacing, reprocessing or deleting the resume; scores are then
+recomputed from what remains.
+
+**Limits.** A pass means five conceptual questions were answered correctly on one day. It is
+labelled "verified by a SkillBridge skill check" and is not a professional certification. It does
+not test building anything, nothing is executed, and the quiz is not supervised. With seven
+questions per skill and the answers explained after each attempt, a person who retries can pass
+by remembering the answers. The questions have not been validated against any external measure
+of ability.
