@@ -15,6 +15,7 @@ import {
   ShieldAlert} from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 import { DimensionBars, SourceBadge } from './EvaluationProvenance';
+import { RubricNote } from './RubricControls';
 import { HEURISTIC_NOTICE } from './evaluationLabels';
 import { InterviewSession, QuestionItem } from '../../../workspaces/InterviewPrepAgentWorkspace/InterviewPrepAgentWorkspace';
 
@@ -78,6 +79,7 @@ export const PerformanceReview: React.FC<PerformanceReviewProps> = ({
               {jobContext ? `Practice for ${jobContext}. ` : ''}Scores come from the answers you gave in this session.
               Unanswered questions count as zero in the overall score.
             </p>
+            <RubricNote rubricId={session.rubricId} />
           </div>
 
           {/* Overall Score Dial */}

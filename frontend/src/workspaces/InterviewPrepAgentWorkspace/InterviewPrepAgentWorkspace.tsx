@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { RubricPicker } from '../../features/interview/components/RubricControls';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation } from 'react-router-dom';
 import apiClient from '../../lib/axios';
@@ -53,6 +54,8 @@ export interface InterviewSession {
   dimensionScores?: EvaluationDimensions;
   answeredCount?: number;
   questionSource?: 'ai' | 'question_bank';
+  /** Role rubric the answers are weighted with (D5); absent on older sessions, which used General. */
+  rubricId?: string;
   /** 'ai', 'heuristic' or 'mixed'. */
   evaluationSource?: string;
   /** The job posting this session prepared for, when it was started from one. */
@@ -109,6 +112,8 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
   const [candidateAnswer, setCandidateAnswer] = useState<string>('');
   const [isEvaluating, setIsEvaluating] = useState<boolean>(false);
   const [isStarting, setIsStarting] = useState<boolean>(false);
+  // '' keeps the rubric matched to the role
+  const [rubricChoice, setRubricChoice] = useState<string>('');
 
   // Query 1: Career Readiness Dimensions
   const {
@@ -226,6 +231,7 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
         targetCareerTitle: requestedRoleTitle,
         mode: selectedMode,
         questionCount: 5,
+        rubricId: rubricChoice || undefined,
         // Only a real posting or an employer the user typed makes this a job-specific session
         opportunityContext:
           targetCompany.trim() || opportunityContext?.description
@@ -408,6 +414,7 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
           onStartSession={handleStartSession}
           isStarting={isStarting}
           onChangeRole={() => navigate('/careers')}
+          settingsSlot={<RubricPicker roleTitle={targetRoleTitle} value={rubricChoice} onChange={setRubricChoice} />}
         />
       )}
 

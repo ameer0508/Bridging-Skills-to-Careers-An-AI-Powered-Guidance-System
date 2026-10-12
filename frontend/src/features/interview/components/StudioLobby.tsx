@@ -36,6 +36,8 @@ export interface StudioLobbyProps {
   onStartSession: () => void;
   isStarting: boolean;
   onChangeRole: () => void;
+  /** Extra session settings shown above the start button (e.g. the scoring rubric). */
+  settingsSlot?: React.ReactNode;
 }
 
 export const StudioLobby: React.FC<StudioLobbyProps> = ({
@@ -56,6 +58,7 @@ export const StudioLobby: React.FC<StudioLobbyProps> = ({
   onStartSession,
   isStarting,
   onChangeRole,
+  settingsSlot,
 }) => {
   const interviewModes = [
     {
@@ -273,6 +276,8 @@ export const StudioLobby: React.FC<StudioLobbyProps> = ({
               })}
             </div>
           </GlassPanel>
+
+          {settingsSlot}
 
           {/* Primary Action CTA */}
           <div className="pt-2">

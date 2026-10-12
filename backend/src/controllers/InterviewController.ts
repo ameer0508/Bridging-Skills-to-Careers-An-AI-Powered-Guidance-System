@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import interviewService from '../services/InterviewService.js';
 import { AppError } from '../middlewares/errorHandler.js';
 import { z } from 'zod';
+import { resolveRubric, RUBRIC_IDS, RUBRICS, rubricById, type RubricId } from '../services/interview/InterviewRubrics.js';
 
 /** Longest interview answer accepted, in characters. */
 const MAX_ANSWER_LENGTH = 10000;
@@ -12,6 +13,7 @@ const startSessionSchema = z
     targetCareerTitle: z.string().trim().max(160).optional(),
     mode: z.enum(['technical', 'behavioral', 'project', 'resume', 'career', 'mixed']).optional(),
     questionCount: z.number().int().min(1).max(10).optional(),
+    rubricId: z.enum(RUBRIC_IDS as [RubricId, ...RubricId[]]).optional(),
     opportunityContext: z
       .object({
         title: z.string().trim().max(200).optional(),
@@ -48,6 +50,25 @@ export class InterviewController {
         success: true,
         data: session,
         message: 'Interview session started',
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /**
+   * GET /api/v1/interviews/rubrics
+   * The role rubrics and their weights, so the client can show how answers are scored
+   */
+  listRubrics = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user?.userId) throw new AppError('Authentication required', 401);
+      const parsed = z.object({ role: z.string().trim().max(160).optional() }).strict().safeParse(req.query ?? {});
+      if (!parsed.success) throw new AppError('Invalid request: only an optional role (up to 160 characters) is accepted', 400, 'VALIDATION_ERROR');
+      res.status(200).json({
+        success: true,
+        // `resolved` is the rubric a session for `role` would use when none is chosen
+        data: { rubrics: RUBRIC_IDS.map(id => RUBRICS[id]), resolved: resolveRubric(parsed.data.role).id },
       });
     } catch (err) {
       next(err);
@@ -173,6 +194,8 @@ export class InterviewController {
           // Who wrote the questions and who scored the answers, so the client can label both honestly
           questionSource: session.questionSource ?? null,
           evaluationSource: session.evaluationSource ?? null,
+          // The role rubric the answers were weighted with (older sessions: general)
+          rubric: rubricById(session.rubricId),
           opportunityContext: session.opportunityContext ?? null,
           answeredCount: session.answeredCount ?? 0,
           questionCount: session.questions.length,

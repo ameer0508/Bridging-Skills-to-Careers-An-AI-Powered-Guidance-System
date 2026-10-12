@@ -19,6 +19,9 @@ export interface IQuestionEvaluation {
   // Which evaluator produced this result, so the UI can label it honestly
   source?: 'ai' | 'heuristic';
   dimensions?: IEvaluationDimensions;
+  /** Role rubric (D5) whose weights produced the score; absent on evaluations from before rubrics, which used 'general'. */
+  rubricId?: string;
+  rubricVersion?: number;
   evaluatedAt: Date;
 }
 
@@ -49,6 +52,9 @@ export interface IInterviewSession extends Document<Types.ObjectId> {
   questionCount: number;
   currentQuestionIndex: number;
   questions: IQuestionItem[];
+  /** Role rubric (D5) chosen at the start; absent on older sessions, which are scored with 'general'. */
+  rubricId?: string;
+  rubricVersion?: number;
   /** Where this session's questions came from. Absent on sessions created before this field existed. */
   questionSource?: InterviewQuestionSource;
   /** The job posting this session prepares for, when it was started from one. */
@@ -78,6 +84,8 @@ const QuestionEvaluationSchema = new Schema<IQuestionEvaluation>(
     feedback: { type: String, default: '' },
     source: { type: String, enum: ['ai', 'heuristic'], default: 'heuristic' },
     dimensions: { type: Schema.Types.Mixed },
+    rubricId: { type: String },
+    rubricVersion: { type: Number },
     evaluatedAt: { type: Date, default: Date.now }
   },
   { _id: false }
@@ -111,6 +119,8 @@ const InterviewSessionSchema = new Schema<IInterviewSession>(
     currentQuestionIndex: { type: Number, default: 0 },
     questions: { type: [QuestionItemSchema], default: [] },
     questionSource: { type: String, enum: ['ai', 'question_bank'] },
+    rubricId: { type: String },
+    rubricVersion: { type: Number },
     opportunityContext: {
       type: new Schema({ title: { type: String }, company: { type: String } }, { _id: false }),
     },

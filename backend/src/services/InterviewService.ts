@@ -7,6 +7,7 @@ import ParsedResume from '../models/ParsedResume.js';
 import Resume from '../models/Resume.js';
 import { User } from '../models/User.js';
 import { evaluateAnswer } from './InterviewEvaluator.js';
+import { resolveRubric, rubricById, RUBRICS, type RubricId } from './interview/InterviewRubrics.js';
 import { generateInterviewQuestions, INTERVIEW_MODES, type InterviewMode } from './InterviewQuestionGenerator.js';
 import { extractSkills } from '../utils/skillLexicon.js';
 import logger from '../config/logger.js';
@@ -17,6 +18,8 @@ export interface StartInterviewDTO {
   targetCareerTitle?: string;
   mode?: InterviewMode;
   questionCount?: number;
+  /** Role rubric to score with; resolved from the role title when omitted. */
+  rubricId?: RubricId;
   opportunityContext?: {
     title?: string;
     company?: string;
@@ -155,6 +158,7 @@ export class InterviewService {
       sessionOrdinal,
     });
     const questions = generated.questions;
+    const rubric = dto.rubricId ? RUBRICS[dto.rubricId] : resolveRubric(targetCareerTitle);
     if (questions.length === 0) {
       throw new AppError('No interview questions could be prepared. Please try again.', 503, 'QUESTIONS_UNAVAILABLE');
     }
@@ -171,6 +175,8 @@ export class InterviewService {
       currentQuestionIndex: 0,
       questions,
       questionSource: generated.source,
+      rubricId: rubric.id,
+      rubricVersion: rubric.version,
       opportunityContext: hasJob ? { title: job?.title, company: job?.company } : undefined,
       strengths: [],
       weaknesses: [],
@@ -238,7 +244,8 @@ export class InterviewService {
     q.candidateResponse = dto.candidateResponse;
 
     // AI rubric when available, otherwise the labelled rule-based rubric
-    const evaluation = await evaluateAnswer(dto.candidateResponse, q, session.targetCareerTitle);
+    // The rubric stored with the session; sessions from before rubrics were scored with 'general'
+    const evaluation = await evaluateAnswer(dto.candidateResponse, q, session.targetCareerTitle, rubricById(session.rubricId));
     q.evaluation = evaluation;
 
     // Advance question index if applicable

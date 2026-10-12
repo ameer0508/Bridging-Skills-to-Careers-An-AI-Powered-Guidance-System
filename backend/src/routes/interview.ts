@@ -6,6 +6,7 @@ const router = Router();
 
 router.use(requireAuth);
 
+router.get('/rubrics', InterviewController.listRubrics);
 router.get('/history', InterviewController.getHistory);
 router.post('/', InterviewController.startSession);
 router.get('/:id', InterviewController.getSession);
