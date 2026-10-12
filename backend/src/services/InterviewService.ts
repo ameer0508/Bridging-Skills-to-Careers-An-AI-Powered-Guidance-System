@@ -369,6 +369,9 @@ export class InterviewService {
 
     if (mongoose.connection.readyState === 1 && typeof session.save === 'function') {
       await session.save();
+      // D1: with retention 0, this round's recordings are deleted now
+      const { default: VoiceRecordingService } = await import('./interview/VoiceRecordingService.js');
+      await VoiceRecordingService.onSessionCompleted(userId, sessionId);
       // Interview weaknesses feed recommendations; scores are unaffected, so only those are refreshed
       const { default: RecalculationService } = await import('./RecalculationService.js');
       await RecalculationService.run(userId, 'interview_completed', sessionId);

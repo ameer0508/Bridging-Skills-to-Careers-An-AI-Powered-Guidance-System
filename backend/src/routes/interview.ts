@@ -2,6 +2,7 @@ import { Router } from 'express';
 import InterviewController from '../controllers/InterviewController.js';
 import TechnicalAssessmentController from '../controllers/TechnicalAssessmentController.js';
 import { requireAuth } from '../middlewares/auth.js';
+import { recordingUpload } from '../middlewares/recordingUpload.js';
 
 const router = Router();
 
@@ -21,6 +22,13 @@ router.get('/history', InterviewController.getHistory);
 router.get('/progress', InterviewController.getProgress);
 router.get('/voice-settings', InterviewController.getVoiceSettings);
 router.put('/voice-settings', InterviewController.updateVoiceSettings);
+
+// D1 recorded answers (consent and retention in voice-settings)
+router.delete('/recordings', InterviewController.deleteAllRecordings);
+router.post('/:id/recordings', recordingUpload, InterviewController.uploadRecording);
+router.get('/:id/recordings', InterviewController.listRecordings);
+router.get('/:id/recordings/:questionId/audio', InterviewController.streamRecording);
+router.delete('/:id/recordings/:questionId', InterviewController.deleteRecording);
 router.post('/', InterviewController.startSession);
 router.get('/:id', InterviewController.getSession);
 router.post('/:id/respond', InterviewController.respondToQuestion);

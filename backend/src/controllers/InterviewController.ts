@@ -5,6 +5,8 @@ import { z } from 'zod';
 import { resolveRubric, RUBRIC_IDS, RUBRICS, rubricById, type RubricId } from '../services/interview/InterviewRubrics.js';
 import InterviewProgressService from '../services/interview/InterviewProgressService.js';
 import VoiceSettingsService from '../services/interview/VoiceSettingsService.js';
+import VoiceRecordingService from '../services/interview/VoiceRecordingService.js';
+import fs from 'fs';
 
 /** Longest interview answer accepted, in characters. */
 const MAX_ANSWER_LENGTH = 10000;
@@ -78,6 +80,74 @@ export class InterviewController {
     }
   };
 
+  /** POST /api/v1/interviews/:id/recordings: one spoken answer (multipart field "audio"), with consent only */
+  uploadRecording = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication required', 401);
+      const file = req.file;
+      if (!file) throw new AppError('No recording was uploaded (field "audio").', 400, 'MISSING_FILE');
+      const questionIndex = Number(req.body?.questionIndex);
+      const durationSec = req.body?.durationSec === undefined ? undefined : Number(req.body.durationSec);
+      if (!Number.isInteger(questionIndex) || questionIndex < 0) throw new AppError('questionIndex must be a whole number', 400, 'VALIDATION_ERROR');
+      if (durationSec !== undefined && !Number.isFinite(durationSec)) throw new AppError('durationSec must be a number', 400, 'VALIDATION_ERROR');
+      const recording = await VoiceRecordingService.upload(userId, req.params.id, { questionIndex, durationSec, mimeType: file.mimetype, buffer: file.buffer });
+      res.status(201).json({ success: true, data: recording });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /** GET /api/v1/interviews/:id/recordings */
+  listRecordings = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication required', 401);
+      res.status(200).json({ success: true, data: { recordings: await VoiceRecordingService.list(userId, req.params.id) } });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /** GET /api/v1/interviews/:id/recordings/:questionId/audio: streamed to its owner only */
+  streamRecording = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication required', 401);
+      const file = await VoiceRecordingService.file(userId, req.params.id, req.params.questionId);
+      res.setHeader('Content-Type', file.mimeType);
+      res.setHeader('Content-Length', String(file.bytes));
+      res.setHeader('Cache-Control', 'private, no-store');
+      res.setHeader('Content-Disposition', 'inline');
+      fs.createReadStream(file.path).on('error', next).pipe(res);
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /** DELETE /api/v1/interviews/:id/recordings/:questionId */
+  deleteRecording = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication required', 401);
+      await VoiceRecordingService.remove(userId, req.params.id, req.params.questionId);
+      res.status(200).json({ success: true, data: { deleted: 1 } });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /** DELETE /api/v1/interviews/recordings: every recording of the caller */
+  deleteAllRecordings = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication required', 401);
+      res.status(200).json({ success: true, data: { deleted: await VoiceRecordingService.removeAllForUser(userId) } });
+    } catch (err) {
+      next(err);
+    }
+  };
+
   /** GET /api/v1/interviews/voice-settings: dictation and recording consent (D1, D2) */
   getVoiceSettings = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
@@ -106,7 +176,12 @@ export class InterviewController {
       if (!parsed.success) {
         throw new AppError(`Invalid request: ${parsed.error.issues.map((i) => `${i.path.join('.') || 'body'} ${i.message}`).join('; ')}`, 400, 'VALIDATION_ERROR');
       }
-      res.status(200).json({ success: true, data: await VoiceSettingsService.update(userId, parsed.data) });
+      const settings = await VoiceSettingsService.update(userId, parsed.data);
+      // D1: withdrawing consent deletes every recording; a shorter retention shortens kept ones
+      let recordingsDeleted = 0;
+      if (parsed.data.recordingConsent === false) recordingsDeleted = await VoiceRecordingService.removeAllForUser(userId);
+      if (parsed.data.retentionDays !== undefined) await VoiceRecordingService.applyRetention(userId, parsed.data.retentionDays);
+      res.status(200).json({ success: true, data: { ...settings, recordingsDeleted } });
     } catch (err) {
       next(err);
     }
