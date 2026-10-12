@@ -6,6 +6,7 @@ export type AIStatus = 'active' | 'thinking' | 'synced' | 'idle' | 'retry' | 'un
 
 export interface AIStatusBarProps {
   status?: AIStatus;
+  /** Accepted for compatibility but never displayed: no confidence value is measured. */
   confidence?: number;
   lastUpdated?: string;
   provider?: string;
@@ -17,9 +18,8 @@ export interface AIStatusBarProps {
 
 export const AIStatusBar: React.FC<AIStatusBarProps> = ({
   status = 'active',
-  confidence,
   lastUpdated = 'Just now',
-  provider = 'Gemini 1.5 Flash (Career Intelligence Layer)',
+  provider = 'SkillBridge',
   latencyMs,
   retryCount = 0,
   errorMessage,
@@ -83,11 +83,6 @@ export const AIStatusBar: React.FC<AIStatusBarProps> = ({
             {badge.icon}
             <span>{badge.label}</span>
           </span>
-          {typeof confidence === 'number' && (
-            <span className="hidden sm:inline text-slate-400 font-mono text-[11px]">
-              Confidence: <strong className="text-emerald-400 font-bold">{confidence}%</strong>
-            </span>
-          )}
           {typeof latencyMs === 'number' && latencyMs > 0 && (
             <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-slate-900 border border-white/5 text-slate-400">
               <Zap className="w-3 h-3 text-cyan-400" />
@@ -119,10 +114,6 @@ export const AIStatusBar: React.FC<AIStatusBarProps> = ({
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
             <div><span className="text-slate-500">Provider:</span> {providerDisplay}</div>
-            <div>
-              <span className="text-slate-500">Confidence:</span>{' '}
-              {typeof confidence === 'number' ? `${confidence}%` : 'Grounded (N/A)'}
-            </div>
             <div>
               <span className="text-slate-500">Latency:</span>{' '}
               {typeof latencyMs === 'number' ? `${latencyMs} ms` : 'Persistent Gateway'}

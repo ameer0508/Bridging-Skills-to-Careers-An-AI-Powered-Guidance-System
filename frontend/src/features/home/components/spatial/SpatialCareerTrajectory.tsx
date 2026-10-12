@@ -109,7 +109,7 @@ export const SpatialCareerTrajectory: React.FC<SpatialCareerTrajectoryProps> = (
       label: targetRole || 'Target Career Summit',
       shortName: 'Career Summit',
       status: isStage6Complete ? 'completed' : activeIndex === 5 ? 'current' : 'upcoming',
-      metric: `${Math.round(roadmapProgress)}% Trajectory`,
+      metric: `${Math.round(roadmapProgress)}% of roadmap done`,
       route: '/roadmap',
       description: 'Offer acquisition and transition into your destination role.',
     },

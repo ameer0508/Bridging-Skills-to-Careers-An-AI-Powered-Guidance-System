@@ -195,10 +195,10 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
           <Sparkles className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <span className="font-bold text-white block">
-              AI Grounding Explanation ({jobTitle})
+              About these figures ({jobTitle})
             </span>
             <p className="text-slate-300 leading-relaxed">
-              Compensation estimate calculated via multi-provider linear regression matching your 18 verified technical competencies against current <strong className="text-cyan-300">{currentRegion.name}</strong> market distributions (<strong className="text-emerald-400">98.4% Confidence</strong>).
+              These salary ranges for <strong className="text-cyan-300">{currentRegion.name}</strong> are built-in example values. They are not calculated from your profile and do not come from a live compensation source.
             </p>
           </div>
         </div>

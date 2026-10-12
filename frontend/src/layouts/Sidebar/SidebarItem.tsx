@@ -28,6 +28,7 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
     <NavLink
       to={to}
       onClick={onClick}
+      aria-label={label}
       className={({ isActive }) => `
         relative flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold select-none cursor-pointer transition-all duration-200 group
         ${

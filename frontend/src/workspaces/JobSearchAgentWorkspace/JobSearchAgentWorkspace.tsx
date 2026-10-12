@@ -16,6 +16,7 @@ import {
   OpportunityActivationHub,
   OpportunityItem,
 } from '../../features/jobSearch/components';
+import { primaryReadiness } from '../../lib/readiness';
 
 export const JobSearchAgentWorkspace: React.FC = () => {
   const { addToast } = useToast();
@@ -86,7 +87,7 @@ export const JobSearchAgentWorkspace: React.FC = () => {
     },
   });
 
-  const readinessScore = readinessData?.overallScore || 0;
+  const readinessScore = primaryReadiness(readinessData)?.overallScore ?? 0;
 
   // Query 4: Active Resume
   const { data: resumeData } = useQuery({

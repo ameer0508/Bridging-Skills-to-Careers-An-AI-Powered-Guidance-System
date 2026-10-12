@@ -338,7 +338,7 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
               AI Multi-Criteria Selection Synthesis ({skillTarget})
             </span>
             <p className="text-slate-300 leading-relaxed">
-              Courses ranked using <strong className="text-cyan-300">Skill Gap Fit (35%)</strong>, <strong className="text-cyan-300">Rating (25%)</strong>, and <strong className="text-emerald-400">Market Relevance (20%)</strong> with <strong className="text-emerald-400">98.4% Grounding Confidence</strong>.
+              Courses ranked using <strong className="text-cyan-300">Skill Gap Fit (35%)</strong>, <strong className="text-cyan-300">Rating (25%)</strong>, and <strong className="text-emerald-400">Market Relevance (20%)</strong>.
             </p>
           </div>
         </div>
@@ -363,6 +363,7 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
             {/* Provider Filter */}
             <div className="lg:col-span-2">
               <select
+                aria-label="Filter by provider"
                 value={selectedProvider}
                 onChange={(e) => setSelectedProvider(e.target.value)}
                 className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
@@ -380,6 +381,7 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
             {/* Difficulty Filter */}
             <div className="lg:col-span-2">
               <select
+                aria-label="Filter by level"
                 value={selectedDifficulty}
                 onChange={(e) => setSelectedDifficulty(e.target.value)}
                 className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
@@ -394,6 +396,7 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
             {/* Price Filter */}
             <div className="lg:col-span-2">
               <select
+                aria-label="Filter by price"
                 value={selectedPrice}
                 onChange={(e) => setSelectedPrice(e.target.value)}
                 className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
@@ -407,6 +410,7 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
             {/* Sort By */}
             <div className="lg:col-span-2">
               <select
+                aria-label="Sort courses"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
                 className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"

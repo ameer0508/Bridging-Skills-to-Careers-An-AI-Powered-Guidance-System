@@ -18,7 +18,6 @@ import {
   Briefcase,
   Bot,
   MessageSquare,
-  GitBranch,
 } from 'lucide-react';
 import { SidebarItem } from './SidebarItem';
 import { useAuthStore } from '../../store/authStore';
@@ -151,11 +150,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           to: '/orchestrator',
           label: 'Agent Orchestrator',
           icon: <Bot className="w-4 h-4 text-purple-400" />,
-        },
-        {
-          to: '/github',
-          label: 'GitHub Intelligence',
-          icon: <GitBranch className="w-4 h-4 text-slate-300" />,
         },
       ],
     },

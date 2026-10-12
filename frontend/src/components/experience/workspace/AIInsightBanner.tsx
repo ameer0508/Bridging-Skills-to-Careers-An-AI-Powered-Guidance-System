@@ -18,7 +18,7 @@ export interface AIInsightBannerProps {
 export const AIInsightBanner: React.FC<AIInsightBannerProps> = ({
   title,
   description,
-  confidence = 98.4,
+  confidence,
   priority = 'high',
   evidence = [],
   actionLabel,
@@ -83,7 +83,7 @@ export const AIInsightBanner: React.FC<AIInsightBannerProps> = ({
                 {priority} Priority
               </span>
               <span className="text-[11px] font-mono text-emerald-400 flex items-center gap-1 font-semibold">
-                <CheckCircle2 className="w-3 h-3" /> {confidence}% Confidence
+                <CheckCircle2 className="w-3 h-3" /> {typeof confidence === 'number' ? `${confidence}% of matched skills shown in a role or project` : 'From your resume evidence'}
               </span>
             </div>
             <h3 className="text-base font-bold text-white tracking-tight">{title}</h3>

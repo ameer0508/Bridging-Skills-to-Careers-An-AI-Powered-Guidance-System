@@ -148,6 +148,7 @@ export const AccountSecurityPrivacyCard: React.FC<AccountSecurityPrivacyCardProp
               <button
                 onClick={() => setIsConfirmModalOpen(false)}
                 type="button"
+                aria-label="Close"
                 className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer"
               >
                 <X className="w-4 h-4" />

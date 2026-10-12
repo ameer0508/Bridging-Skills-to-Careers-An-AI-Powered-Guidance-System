@@ -182,9 +182,9 @@ export const IntelligenceStreamFeed: React.FC<IntelligenceStreamFeedProps> = ({
                 {/* Telemetry Snapshot */}
                 <div className="grid grid-cols-2 gap-2 w-full text-[11px] font-mono">
                   <div className="p-2 rounded-xl bg-slate-900/90 border border-white/10 text-center space-y-0.5">
-                    <span className="text-[9px] text-slate-400 uppercase block">Readiness Boost</span>
+                    <span className="text-[9px] text-slate-400 uppercase block">Gap impact</span>
                     <span className="text-emerald-400 font-extrabold text-sm block">
-                      +{rec.impact}%
+                      {rec.impact}/100
                     </span>
                   </div>
 

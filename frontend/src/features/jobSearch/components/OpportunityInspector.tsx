@@ -127,6 +127,7 @@ export const OpportunityInspector: React.FC<OpportunityInspectorProps> = ({
             <div className="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-white/10">
               <span className="text-[10px] font-mono text-slate-500 px-1.5">Funnel:</span>
               <select
+                aria-label="Application status"
                 value={status}
                 onChange={(e) => onUpdateStatus(e.target.value)}
                 className="px-2 py-0.5 rounded-lg bg-slate-900 border-0 text-xs font-mono font-semibold text-indigo-300 focus:outline-none cursor-pointer"

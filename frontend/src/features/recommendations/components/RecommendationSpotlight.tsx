@@ -81,8 +81,8 @@ export const RecommendationSpotlight: React.FC<RecommendationSpotlightProps> = (
         <div className="md:col-span-4 p-4 bg-slate-950/80 border border-white/5 rounded-2xl flex flex-col justify-between space-y-4">
           <div className="space-y-3">
             <div className="flex justify-between items-center text-xs font-mono">
-              <span className="text-slate-400">Readiness Boost:</span>
-              <span className="font-bold text-emerald-400">+{estimatedReadinessBoost}%</span>
+              <span className="text-slate-400">Gap impact:</span>
+              <span className="font-bold text-emerald-400">{estimatedReadinessBoost}/100</span>
             </div>
             <div className="flex justify-between items-center text-xs font-mono">
               <span className="text-slate-400">Match Gain:</span>

@@ -27,6 +27,8 @@ class CareerService {
 
         return {
           ...matchObj,
+          // The client keys and compares matches by `id`; toObject() only carries `_id`.
+          id: String(matchObj._id),
           relatedCareers: similarities.map(s => ({
             career: s.targetCareerId,
             score: s.similarityScore

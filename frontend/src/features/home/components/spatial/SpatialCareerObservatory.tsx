@@ -227,7 +227,7 @@ export const SpatialCareerObservatory: React.FC<SpatialCareerObservatoryProps> =
 
             <div className="flex items-center gap-2 text-[11px] text-slate-400">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]" />
-              <span>Telemetry Synchronized ({syncTime})</span>
+              <span>Data loaded ({syncTime})</span>
             </div>
           </div>
 

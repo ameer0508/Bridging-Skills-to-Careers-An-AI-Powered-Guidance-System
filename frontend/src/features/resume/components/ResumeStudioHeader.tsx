@@ -31,7 +31,7 @@ export const ResumeStudioHeader: React.FC<ResumeStudioHeaderProps> = ({
               Resume Intelligence Studio
             </h1>
             <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono text-[9px] font-bold border border-indigo-500/30">
-              14-Stage NLP Engine
+              Rule-based parser
             </span>
           </div>
           <p className="text-xs text-slate-400">

@@ -85,7 +85,7 @@ export const CareerIdentityWorkspace: React.FC = () => {
     queryKey: ['interview', 'history'],
     queryFn: async () => {
       try {
-        const res = await apiClient.get('/interview/history');
+        const res = await apiClient.get('/interviews/history');
         return res.data.data;
       } catch {
         return { sessions: [], averageScore: null };

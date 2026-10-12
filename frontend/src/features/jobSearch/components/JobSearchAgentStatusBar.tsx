@@ -44,7 +44,7 @@ export const JobSearchAgentStatusBar: React.FC<JobSearchAgentStatusBarProps> = (
             {isSearching ? 'Job Search Agent Active' : 'Agent Ready'}
           </span>
           <span className="text-[10px] font-mono text-slate-400">
-            {isSearching ? 'Scraping, parsing & ranking live opportunities...' : `Indexing ${totalFound} verified opportunities`}
+            {isSearching ? 'Fetching and ranking opportunities...' : `Showing ${totalFound} ${totalFound === 1 ? 'opportunity' : 'opportunities'}`}
           </span>
         </div>
       </div>

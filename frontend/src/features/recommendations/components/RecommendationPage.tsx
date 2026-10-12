@@ -112,12 +112,6 @@ export const RecommendationPage: React.FC = () => {
     return recommendations.filter((r) => r.status === 'active' && r.priority === 'Highest').length;
   }, [recommendations]);
 
-  const totalPotentialGain = useMemo(() => {
-    return recommendations
-      .filter((r) => r.status === 'active')
-      .reduce((acc, curr) => acc + (curr.impact || 0), 0);
-  }, [recommendations]);
-
   const topPriorityRec = useMemo(() => {
     return (
       recommendations.find((r) => r.status === 'active' && r.priority === 'Highest') ||
@@ -237,10 +231,10 @@ export const RecommendationPage: React.FC = () => {
       {/* SECTION 1 — PERSONALIZED INTELLIGENCE HERO */}
       <ActionIntelligenceHero
         userName={user?.fullName || ''}
-        targetRole={snapshotData?.careerDomain?.targetRole || 'Senior AI Engineer'}
-        careerDomain={snapshotData?.careerDomain?.name || 'Artificial Intelligence & Systems'}
-        readinessScore={snapshotData?.readiness?.score || 74}
-        criticalGapsCount={snapshotData?.readiness?.criticalGaps?.length || 3}
+        targetRole={snapshotData?.targetCareer || 'No target career yet'}
+        careerDomain={snapshotData?.primaryCareerDomain || ''}
+        readinessScore={snapshotData?.readinessScore ?? 0}
+        criticalGapsCount={snapshotData?.criticalGaps?.length ?? 0}
         topRecommendation={topPriorityRec}
         isRegenerating={regenerateMutation.isPending}
         onRegenerate={() => regenerateMutation.mutate()}
@@ -256,8 +250,7 @@ export const RecommendationPage: React.FC = () => {
         highestPriorityCount={highestPriorityCount}
         savedCount={statusCounts.saved_for_later}
         completedCount={statusCounts.completed}
-        totalPotentialGain={totalPotentialGain}
-        resolvedGapsPercentage={snapshotData?.roadmap?.progress || 68}
+        roadmapProgress={snapshotData?.roadmap?.isInitialized ? snapshotData.roadmap.progress : null}
       />
 
       {/* SECTION 3 — SPECTRUM FILTER & CONTINUOUS ACTION STREAM FEED */}

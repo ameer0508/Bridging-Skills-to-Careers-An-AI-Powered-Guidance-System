@@ -58,7 +58,7 @@ export const SpatialInterviewChamber: React.FC<SpatialInterviewChamberProps> = (
           className="catalyst-magnetic-btn group text-xs py-2.5 px-5 self-start sm:self-center shadow-[0_0_25px_rgba(245,158,11,0.3)]"
         >
           <Play className="w-3.5 h-3.5 fill-current" />
-          <span>Launch Simulation</span>
+          <span>Open Interview Studio</span>
           <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
         </MagneticButton>
       </div>

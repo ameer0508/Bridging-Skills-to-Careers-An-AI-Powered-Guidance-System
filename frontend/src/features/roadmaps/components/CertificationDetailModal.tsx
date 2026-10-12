@@ -140,7 +140,7 @@ export const CertificationDetailModal: React.FC<CertificationDetailModalProps> =
                 </h4>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                {certification.whyRecommended} Possessing the <strong className="text-cyan-300">{certification.name}</strong> aligns with <strong className="text-emerald-400">98.4% of top tier hiring specifications</strong>.
+                {certification.whyRecommended}
               </p>
             </GlassPanel>
 

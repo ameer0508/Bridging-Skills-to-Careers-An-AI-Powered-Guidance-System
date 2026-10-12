@@ -161,7 +161,7 @@ export class OrchestratorService {
         capabilities: [
           'Dimensional Readiness Scoring',
           'Diagnostic Gap Severity Auditing',
-          'Offer Probability Indexing'
+          'Interview Practice Review'
         ],
         inputContracts: ['UserSkill Evidence Vectors', 'CareerMatch Requirements'],
         outputContracts: ['CareerReadiness Document', 'Dimension Scores', 'Overall Readiness %'],

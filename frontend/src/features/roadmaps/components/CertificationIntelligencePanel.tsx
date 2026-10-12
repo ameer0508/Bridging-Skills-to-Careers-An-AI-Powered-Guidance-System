@@ -314,7 +314,7 @@ export const CertificationIntelligencePanel: React.FC<CertificationIntelligenceP
               AI Multi-Criteria Certification Synthesis ({technologyTarget})
             </span>
             <p className="text-slate-300 leading-relaxed">
-              Certifications ranked using <strong className="text-cyan-300">Skill Gap Fit (35%)</strong>, <strong className="text-cyan-300">Employer Recognition (25%)</strong>, and <strong className="text-emerald-400">Salary Impact (20%)</strong> with <strong className="text-emerald-400">98.4% Confidence</strong>.
+              Certifications ranked using <strong className="text-cyan-300">Skill Gap Fit (35%)</strong>, <strong className="text-cyan-300">Employer Recognition (25%)</strong>, and <strong className="text-emerald-400">Salary Impact (20%)</strong>.
             </p>
           </div>
         </div>
@@ -339,6 +339,7 @@ export const CertificationIntelligencePanel: React.FC<CertificationIntelligenceP
             {/* Provider Filter */}
             <div className="lg:col-span-3">
               <select
+                aria-label="Filter by provider"
                 value={selectedProvider}
                 onChange={(e) => setSelectedProvider(e.target.value)}
                 className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 cursor-pointer"
@@ -356,6 +357,7 @@ export const CertificationIntelligencePanel: React.FC<CertificationIntelligenceP
             {/* Level Filter */}
             <div className="lg:col-span-2">
               <select
+                aria-label="Filter by level"
                 value={selectedLevel}
                 onChange={(e) => setSelectedLevel(e.target.value)}
                 className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 cursor-pointer"
@@ -370,6 +372,7 @@ export const CertificationIntelligencePanel: React.FC<CertificationIntelligenceP
             {/* Sort By */}
             <div className="lg:col-span-2">
               <select
+                aria-label="Sort certifications"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
                 className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 cursor-pointer"

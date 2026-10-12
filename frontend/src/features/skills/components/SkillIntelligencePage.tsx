@@ -121,7 +121,8 @@ export const SkillIntelligencePage: React.FC = () => {
   }, [careersData, activeCareerId]);
 
   const targetRoleTitle = activeCareer?.careerId?.title || null;
-  const matchedSkills: string[] = activeCareer?.matchedSkills || [];
+  // The career-match API names this field `matchingSkills`.
+  const matchedSkills: string[] = activeCareer?.matchingSkills || [];
   const missingSkills: string[] = activeCareer?.missingSkills || [];
 
   // Filter skills by search query, category, and strength tier

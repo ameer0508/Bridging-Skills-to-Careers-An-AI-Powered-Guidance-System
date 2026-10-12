@@ -199,6 +199,7 @@ export const JobSearchCommandCenter: React.FC<JobSearchCommandCenterProps> = ({
               Sort By:
             </span>
             <select
+              aria-label="Sort By"
               value={sortBy}
               onChange={(e) => onSortByChange(e.target.value as any)}
               className="px-3 py-1.5 rounded-xl bg-slate-950/80 border border-white/10 text-xs font-mono text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"

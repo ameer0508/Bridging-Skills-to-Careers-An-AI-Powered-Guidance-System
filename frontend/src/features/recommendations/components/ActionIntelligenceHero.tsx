@@ -106,16 +106,12 @@ export const ActionIntelligenceHero: React.FC<ActionIntelligenceHeroProps> = ({
             {/* Trajectory Highlights Bar */}
             <div className="flex flex-wrap items-center gap-3 pt-2 text-xs font-mono">
               <div className="px-3 py-1.5 rounded-xl bg-slate-900/80 border border-white/10 flex items-center gap-2">
-                <span className="text-slate-400">Readiness Baseline:</span>
+                <span className="text-slate-400">Current readiness:</span>
                 <span className="text-emerald-400 font-bold">{readinessScore}%</span>
               </div>
               <div className="px-3 py-1.5 rounded-xl bg-slate-900/80 border border-white/10 flex items-center gap-2">
                 <span className="text-slate-400">Critical Skill Gaps:</span>
                 <span className="text-rose-400 font-bold">{criticalGapsCount} Active</span>
-              </div>
-              <div className="px-3 py-1.5 rounded-xl bg-slate-900/80 border border-white/10 flex items-center gap-2">
-                <span className="text-slate-400">Optimization Goal:</span>
-                <span className="text-cyan-300 font-bold">Top 5% Candidate Match</span>
               </div>
             </div>
           </div>
@@ -134,7 +130,7 @@ export const ActionIntelligenceHero: React.FC<ActionIntelligenceHeroProps> = ({
                     #1 Highest Leverage Action
                   </div>
                   <span className="text-[10px] font-mono text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30">
-                    +{topRecommendation.impact}% Readiness Boost
+                    Gap impact {topRecommendation.impact}/100
                   </span>
                 </div>
 

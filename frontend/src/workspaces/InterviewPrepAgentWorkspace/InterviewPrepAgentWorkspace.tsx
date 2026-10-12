@@ -11,6 +11,7 @@ import {
   PerformanceReview,
   InterviewJourneyHistory,
 } from '../../features/interview/components';
+import { primaryReadiness, dimensionScore, readinessStrengths, readinessGaps } from '../../lib/readiness';
 
 export interface QuestionItem {
   questionId: string;
@@ -119,18 +120,6 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
     },
   });
 
-  // Query 4: Active Resume Metadata
-  const { data: resumeData } = useQuery({
-    queryKey: ['activeResume'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get('/resumes/me');
-        return response.data.data.resume;
-      } catch {
-        return null;
-      }
-    },
-  });
 
   // Query 5: Persistent Session History
   const {
@@ -154,16 +143,10 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
     opportunityContext?.title || topMatch?.careerId?.title || 'Full Stack Software Engineer';
 
   // Dynamic Telemetry Calculations
-  const readinessScore = readinessData?.overallScore || 0;
-  const technicalDepth = readinessData?.dimensions?.technical?.score || readinessScore;
+  const readinessScore = primaryReadiness(readinessData)?.overallScore ?? 0;
+  const technicalDepth = dimensionScore(readinessData, 'Technical Skills') ?? readinessScore;
   const behavioralScore =
-    readinessData?.dimensions?.experience?.score || Math.max(0, readinessScore - 5);
-  const atsScore = resumeData?.atsScore || 0;
-
-  const offerProbability = useMemo(() => {
-    if (!readinessScore) return 0;
-    return Math.min(98, Math.round(readinessScore * 0.6 + (atsScore > 0 ? atsScore : 70) * 0.4));
-  }, [readinessScore, atsScore]);
+    dimensionScore(readinessData, 'Professional Experience') ?? 0;
 
   const confidenceRating = useMemo(() => {
     if (readinessScore >= 80) return 'Target Level Ready';
@@ -173,8 +156,8 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
 
   // Verified Strengths
   const verifiedStrengths: string[] = useMemo(() => {
-    if (readinessData?.strengths?.length > 0) {
-      return readinessData.strengths.slice(0, 4).map((s: { skillName: string }) => s.skillName);
+    if (readinessStrengths(readinessData).length > 0) {
+      return readinessStrengths(readinessData).slice(0, 4).map((s: { skillName: string }) => s.skillName);
     }
     if (skillsData?.categories) {
       const allSkills = Object.values(skillsData.categories).flatMap(
@@ -182,20 +165,18 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
       );
       return allSkills.slice(0, 4).map((s: { name: string }) => s.name);
     }
-    return ['STAR Structured Response', 'Quantified Metrics Emphasis', 'Architecture Patterns'];
+    return [];
   }, [readinessData, skillsData]);
 
   // Real Gap Improvements
   const focusGaps: string[] = useMemo(() => {
-    if (readinessData?.gaps?.length > 0) {
-      return readinessData.gaps
+    if (readinessGaps(readinessData).length > 0) {
+      return readinessGaps(readinessData)
         .slice(0, 3)
-        .map(
-          (g: { skillName: string; gapSeverity: number }) =>
-            `${g.skillName} (Severity: -${g.gapSeverity}%)`
-        );
+        .map((g) => `${g.skillName} (gap impact ${g.impactScore}/100)`);
     }
-    return ['System Scalability & Load Balancing', 'Database Sharding Trade-offs'];
+    // No gaps on record: show none rather than example topics
+    return [];
   }, [readinessData]);
 
   // Current active question item
@@ -272,13 +253,11 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
       setActiveSession(updated);
 
       const evaluatedQ = updated.questions[activeSession.currentQuestionIndex];
-      const score = evaluatedQ?.evaluation?.score || 75;
+      const score = evaluatedQ?.evaluation?.score;
 
       addToast({
         type: 'success',
-        message: `Response Evaluated! Score: ${score}/100 (${
-          evaluatedQ?.evaluation?.starFormatted ? 'STAR Compliant' : 'Needs Metrics'
-        })`,
+        message: typeof score === 'number' ? `Answer scored ${score}/100.` : 'Answer saved.',
       });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Evaluation failed';
@@ -353,30 +332,24 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
         userName={targetRoleTitle}
         title="AI Interview Studio"
         description="Immersive mock interviews grounded in candidate verified skills, STAR response evaluation, and private debrief coaching."
-        aiSummary={`Readiness: ${readinessScore}% • Rating: ${confidenceRating} • Estimated Offer Prob: ${offerProbability}%`}
+        aiSummary={`Career readiness: ${readinessScore}% • ${confidenceRating}`}
         stats={[
           {
-            label: 'Interview Readiness',
+            label: 'Career Readiness',
             value: `${readinessScore} / 100`,
             change: confidenceRating,
             isPositive: readinessScore >= 70,
           },
           {
-            label: 'Estimated Offer Prob.',
-            value: `${offerProbability}%`,
-            change: 'ATS Grounded',
-            isPositive: offerProbability >= 70,
-          },
-          {
-            label: 'Technical Depth',
+            label: 'Technical Skills Evidence',
             value: `${technicalDepth}%`,
-            change: 'Competency Evaluated',
+            change: 'From your readiness breakdown',
             isPositive: technicalDepth >= 70,
           },
           {
-            label: 'Behavioral Score',
+            label: 'Experience Evidence',
             value: `${behavioralScore}%`,
-            change: 'STAR Structured',
+            change: 'From your readiness breakdown',
             isPositive: behavioralScore >= 70,
           },
         ]}
@@ -400,7 +373,6 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
           readinessScore={readinessScore}
           technicalDepth={technicalDepth}
           behavioralScore={behavioralScore}
-          offerProbability={offerProbability}
           historyCount={historyData?.length || 0}
           onOpenHistory={() => setStudioMode('HISTORY')}
           onStartSession={handleStartSession}

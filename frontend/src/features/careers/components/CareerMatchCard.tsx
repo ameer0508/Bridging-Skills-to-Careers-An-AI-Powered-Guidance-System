@@ -20,6 +20,18 @@ export interface CareerMatchData {
   missingSkills: string[];
   strengths: string[];
   weaknesses: string[];
+  /** One-sentence explanation of the score, from the API. */
+  summary?: string;
+  /** Per-requirement breakdown of the score, from the API (see docs/SCORING.md). */
+  breakdown?: Array<{
+    skillName: string;
+    importance: 'required' | 'preferred' | 'supporting';
+    status: 'applied' | 'listed' | 'inferred' | 'missing';
+    matchedVia?: string;
+    evidenceScore: number;
+    pointsEarned: number;
+    pointsPossible: number;
+  }>;
   confidence: number;
   relatedCareers?: Array<{
     career: {
@@ -47,7 +59,8 @@ export const CareerMatchCard: React.FC<CareerMatchCardProps> = ({
 
   const { careerId, matchScore, confidence, strengths, weaknesses, matchingSkills, missingSkills, relatedCareers } = match;
 
-  const confidenceColor = confidence >= 85 ? 'success' : confidence >= 70 ? 'info' : 'warning';
+  // `confidence` is the share of matched skills backed by a role or project (docs/SCORING.md), not a prediction.
+  const confidenceColor = confidence >= 70 ? 'success' : confidence >= 40 ? 'info' : 'warning';
 
   return (
     <Card variant="default" className="relative overflow-hidden transition-all duration-[var(--duration-fast)] hover:border-[var(--color-border-strong)]">
@@ -75,7 +88,7 @@ export const CareerMatchCard: React.FC<CareerMatchCardProps> = ({
                 {careerId.category}
               </Badge>
               <Badge variant="outlined" color={confidenceColor}>
-                {confidence}% Confidence
+                {confidence}% shown in practice
               </Badge>
             </div>
             <h2 className="text-xl font-bold font-display text-[var(--color-text-primary)]">
@@ -100,7 +113,7 @@ export const CareerMatchCard: React.FC<CareerMatchCardProps> = ({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-[var(--color-bg-surface-sunken)] border border-[var(--color-border-subtle)] rounded-[var(--radius-md)] text-xs">
           <div>
             <span className="text-[10px] text-[var(--color-text-tertiary)] uppercase font-semibold block">
-              Verified Strengths
+              Matched Skills
             </span>
             <span className="font-bold text-[var(--color-status-success-text)] text-sm">
               {matchingSkills.length} Skills
@@ -127,7 +140,7 @@ export const CareerMatchCard: React.FC<CareerMatchCardProps> = ({
               Evidence Level
             </span>
             <span className="font-bold text-[var(--color-ai-text)] text-sm">
-              {confidence >= 80 ? 'High Rigor' : 'Medium Rigor'}
+              {confidence >= 70 ? 'Mostly applied' : confidence >= 40 ? 'Mixed' : 'Mostly listed'}
             </span>
           </div>
         </div>
@@ -185,7 +198,7 @@ export const CareerMatchCard: React.FC<CareerMatchCardProps> = ({
             <div className="space-y-2">
               <div>
                 <span className="text-[10px] font-bold uppercase text-[var(--color-text-tertiary)] tracking-wider block mb-1">
-                  Matching Verified Skills ({matchingSkills.length})
+                  Matching Skills ({matchingSkills.length})
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {matchingSkills.map(skill => (

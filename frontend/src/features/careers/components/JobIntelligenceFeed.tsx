@@ -114,7 +114,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
           salaryMax,
           currency: 'USD',
           matchScore: Math.round(matchScore * 10) / 10,
-          confidence: match.confidence || 98.4,
+          confidence: match.confidence ?? 0,
           postingAge: `${(idx + 1) * 2 + cIdx}h ago`,
           requiredSkills: [...(match.matchingSkills || []), ...(match.missingSkills || [])],
           matchingSkills: match.matchingSkills || [],

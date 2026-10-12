@@ -182,12 +182,19 @@ export class SnapshotService {
     const matchScore = isMatchEvaluated ? topMatch!.matchScore : null;
 
     // 3. Readiness & Dimensions
-    const readiness = await CareerReadiness.findOne({ userId: userObjId }).sort({ updatedAt: -1 });
+    // Readiness and gaps are reported for the same career as the top match, so every page
+    // shows the same figure. (Previously an arbitrary career's readiness was returned.)
+    const topCareerId = (topMatch?.careerId as unknown as { _id?: mongoose.Types.ObjectId } | null)?._id;
+    const readiness =
+      (topCareerId && (await CareerReadiness.findOne({ userId: userObjId, careerId: topCareerId }))) ||
+      (await CareerReadiness.findOne({ userId: userObjId }).sort({ overallScore: -1 }));
     const isReadinessEvaluated = Boolean(readiness && typeof readiness.overallScore === 'number');
     const readinessScore = isReadinessEvaluated ? readiness!.overallScore : null;
 
     // 4. Critical Gaps
-    const gapDoc = await GapAnalysis.findOne({ userId: userObjId }).sort({ updatedAt: -1 });
+    const gapDoc =
+      (topCareerId && (await GapAnalysis.findOne({ userId: userObjId, careerId: topCareerId }))) ||
+      (await GapAnalysis.findOne({ userId: userObjId }).sort({ updatedAt: -1 }));
     const criticalGaps = gapDoc?.criticalGaps?.map((g: IGapItem) => g.skillName) || [];
 
     // 5. Active Recommendations
@@ -383,7 +390,7 @@ export class SnapshotService {
       nextBestAction = {
         action: 'prepare_interview',
         title: 'Simulate STAR Technical Interview for Saved Opportunities',
-        subtitle: `You have ${opportunityTelemetry.saved} saved opportunities. Conduct mock technical interviews to boost offer probability.`,
+        subtitle: `You have ${opportunityTelemetry.saved} saved opportunities. Practise a mock interview for the roles you saved.`,
         route: '/interview-agent',
         icon: 'Video',
         actionLabel: 'Launch Interview Studio',

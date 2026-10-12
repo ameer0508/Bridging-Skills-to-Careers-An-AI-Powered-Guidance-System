@@ -147,10 +147,10 @@ export const LivingCapabilityHUD: React.FC<LivingCapabilityHUDProps> = ({
           {/* Metric 4: Target Role Coverage */}
           <div className="p-4 rounded-2xl bg-slate-950/70 border border-white/10 text-center space-y-1 shadow-sm">
             <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider block">
-              Role Fit Match
+              Requirements Covered
             </span>
             <span className="font-display text-2xl font-black text-purple-400">
-              {roleCoveragePercentage !== null ? `${roleCoveragePercentage}%` : 'Verified'}
+              {roleCoveragePercentage !== null ? `${roleCoveragePercentage}%` : '—'}
             </span>
             <span className="text-[9px] font-mono text-slate-500 block truncate" title={targetRoleTitle || 'Target Role'}>
               {targetRoleTitle || 'Direction'}

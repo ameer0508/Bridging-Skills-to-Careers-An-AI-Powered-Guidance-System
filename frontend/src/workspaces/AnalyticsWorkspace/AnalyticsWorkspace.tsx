@@ -31,6 +31,7 @@ import {
   PlateauCoachingCard,
   AIThinkingAnimation,
 } from '../../components/experience';
+import { IllustrativeNotice } from '../../components/common/IllustrativeNotice';
 
 export const AnalyticsWorkspace: React.FC = () => {
   const navigate = useNavigate();
@@ -203,6 +204,11 @@ export const AnalyticsWorkspace: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-16 px-4">
+      <IllustrativeNotice kind="heuristic">
+        Readiness, skills and roadmap totals on this page come from your stored data. Momentum, velocity,
+        health and forecast figures are rough estimates calculated in your browser from those totals; they
+        are not measured trends or predictions.
+      </IllustrativeNotice>
       {/* 1. PROGRESS OBSERVATORY HERO */}
       <ProgressObservatoryHero
         userName={user?.fullName || user?.email?.split('@')[0]}
@@ -290,7 +296,7 @@ export const AnalyticsWorkspace: React.FC = () => {
       <AIStatusBar
         status={analyticsLoading ? 'thinking' : 'active'}
         confidence={98.8}
-        lastUpdated="Telemetry synchronized"
+        lastUpdated="Loaded from your data"
       />
     </div>
   );

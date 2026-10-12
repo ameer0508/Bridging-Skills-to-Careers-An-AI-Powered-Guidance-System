@@ -455,7 +455,7 @@ export const HomeWorkspace: React.FC = () => {
           totalSkills={snapshot.totalSkills || 0}
           readinessScore={snapshot.readinessScore ?? null}
           roadmapProgress={snapshot.roadmapProgress || 0}
-          savedOpportunitiesCount={snapshot.opportunities?.saved || 0}
+          savedOpportunitiesCount={snapshot.opportunities?.total || 0}
           interviewsCount={snapshot.interviews?.total || 0}
           onNavigate={(route) => navigate(route)}
           onHoverStage={setTrajectoryHoveredDomainId}

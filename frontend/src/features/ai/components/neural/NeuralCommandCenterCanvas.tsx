@@ -157,7 +157,7 @@ export const NeuralCommandCenterCanvas: React.FC<NeuralCommandCenterCanvasProps>
 
           <div className="flex items-center gap-2 text-[11px] text-slate-400">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]" />
-            <span className="font-mono">7-Agent DAG Synced</span>
+            <span className="font-mono">Your data loaded</span>
           </div>
         </div>
 

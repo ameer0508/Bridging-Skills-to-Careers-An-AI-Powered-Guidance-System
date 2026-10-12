@@ -23,7 +23,7 @@ export const AIOrchestratorDashboard: React.FC = () => {
   const queryClient = useQueryClient();
 
   // State Management
-  const [goalQuery, setGoalQuery] = useState<string>('Principal AI Infrastructure Architect');
+  const [goalQuery, setGoalQuery] = useState<string>('');
   const [targetCompany, setTargetCompany] = useState<string>('OpenScale AI Systems');
   const [selectedAgent, setSelectedAgent] = useState<IAgentMetadata | null>(null);
   const [currentExecution, setCurrentExecution] = useState<IWorkflowExecution | null>(null);
@@ -79,7 +79,7 @@ export const AIOrchestratorDashboard: React.FC = () => {
 
   const matches = matchesData || [];
   const topMatch = matches[0] || null;
-  const topCareerTitle = topMatch?.careerId?.title || 'Principal AI Infrastructure Architect';
+  const topCareerTitle = topMatch?.careerId?.title || '';
 
   // Derived Telemetry
   const agentsList: IAgentMetadata[] = useMemo(() => {
@@ -169,11 +169,10 @@ export const AIOrchestratorDashboard: React.FC = () => {
     <div className="w-full max-w-7xl mx-auto space-y-8 pb-12 px-4 font-mono">
       {/* WORKSPACE HERO */}
       <WorkspaceHero
-        greeting="AI Agent Control Plane & DAG Orchestrator"
-        userName={goalQuery}
-        title="Multi-Agent Orchestrator"
-        description="Observable, explainable AI control plane coordinating 10 specialized agents across Career, Skills, Readiness, Roadmap, Jobs, and Interviews."
-        aiSummary={`${activeAgentsCount} Subsystems Active • Hybrid DAG Architecture • Latency: ${latestLatency}ms`}
+        greeting="Overview"
+        title="Module Overview"
+        description="A module-by-module overview of your stored SkillBridge data: career match, skills, readiness, roadmap, jobs and interviews. It summarises saved results and does not run autonomous AI agents."
+        aiSummary={`${activeAgentsCount} modules summarised`}
         stats={[
           {
             label: 'Registered Agents',

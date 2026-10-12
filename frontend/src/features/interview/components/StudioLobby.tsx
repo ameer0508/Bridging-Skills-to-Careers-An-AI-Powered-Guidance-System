@@ -9,7 +9,6 @@ import {
   Briefcase,
   ChevronRight,
   RefreshCw,
-  Zap,
   Award
 } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
@@ -32,7 +31,6 @@ export interface StudioLobbyProps {
   readinessScore: number;
   technicalDepth: number;
   behavioralScore: number;
-  offerProbability: number;
   historyCount: number;
   onOpenHistory: () => void;
   onStartSession: () => void;
@@ -53,7 +51,6 @@ export const StudioLobby: React.FC<StudioLobbyProps> = ({
   readinessScore,
   technicalDepth,
   behavioralScore,
-  offerProbability,
   historyCount,
   onOpenHistory,
   onStartSession,
@@ -148,13 +145,6 @@ export const StudioLobby: React.FC<StudioLobbyProps> = ({
               <Award className="w-5 h-5 text-emerald-400/70" />
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-white/10 flex items-center justify-between">
-              <div>
-                <span className="text-[10px] text-slate-400 uppercase block">Estimated Offer Prob.</span>
-                <span className="text-lg font-bold text-cyan-400">{offerProbability}%</span>
-              </div>
-              <Zap className="w-5 h-5 text-cyan-400/70" />
-            </div>
           </div>
         </div>
 

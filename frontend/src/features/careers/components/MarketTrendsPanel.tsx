@@ -181,7 +181,7 @@ export const MarketTrendsPanel: React.FC<MarketTrendsPanelProps> = ({
               AI Market Velocity Synthesis (Q3 2024 Index)
             </span>
             <p className="text-slate-300 leading-relaxed">
-              <strong className="text-cyan-300">Vector Indexing (Milvus)</strong> and <strong className="text-cyan-300">LangChain</strong> lead market demand with <strong className="text-emerald-400">+42% YoY hiring growth</strong> across San Francisco, NYC, and Global Remote markets (<strong className="text-emerald-400">98.4% Confidence</strong>).
+              <strong className="text-cyan-300">Vector Indexing (Milvus)</strong> and <strong className="text-cyan-300">LangChain</strong> lead market demand with <strong className="text-emerald-400">+42% YoY hiring growth</strong> across San Francisco, NYC, and Global Remote markets (example figures, not live market data).
             </p>
           </div>
         </div>

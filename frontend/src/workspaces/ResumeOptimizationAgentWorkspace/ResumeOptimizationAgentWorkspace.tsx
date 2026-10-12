@@ -20,6 +20,7 @@ import { GlassPanel } from '../../components/experience/workspace';
 import { WorkspaceHero, AIStatusBar } from '../../components/experience/workspace';
 import { useToast } from '../../components/composite/Toast';
 import { AIThinkingAnimation } from '../../components/experience';
+import { primaryReadiness } from '../../lib/readiness';
 
 export const ResumeOptimizationAgentWorkspace: React.FC = () => {
   const { addToast } = useToast();
@@ -80,7 +81,7 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
 
   // Derived Telemetry
   const atsScore = resumeData?.atsScore || 0;
-  const readinessScore = readinessData?.overallScore || 0;
+  const readinessScore = primaryReadiness(readinessData)?.overallScore ?? 0;
 
   // Extracted User Verified Skills Names
   const userSkillNames = useMemo(() => {

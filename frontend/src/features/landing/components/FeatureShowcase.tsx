@@ -49,7 +49,7 @@ export const FeatureShowcase: React.FC = () => {
               <span className="text-xs font-bold text-white">Parsed_Resume_Analysis.json</span>
             </div>
             <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-mono">
-              98.4% Parsing Quality
+              Example output
             </span>
           </div>
           <div className="space-y-2">

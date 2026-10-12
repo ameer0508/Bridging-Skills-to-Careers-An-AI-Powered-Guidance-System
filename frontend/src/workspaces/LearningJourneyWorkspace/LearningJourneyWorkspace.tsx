@@ -48,6 +48,7 @@ import {
   OpportunityForecast,
   AIThinkingAnimation,
 } from '../../components/experience';
+import { IllustrativeNotice } from '../../components/common/IllustrativeNotice';
 
 export const LearningJourneyWorkspace: React.FC = () => {
   const queryClient = useQueryClient();
@@ -460,6 +461,7 @@ export const LearningJourneyWorkspace: React.FC = () => {
           >
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               <div className="lg:col-span-7">
+                <IllustrativeNotice kind="heuristic" className="mb-3" />
                 <DecisionSimulator
                   currentScore={plan.aiContext.topReadiness?.overallScore || 45}
                   targetRoleTitle={targetRoleTitle || 'Target Role'}
@@ -488,10 +490,12 @@ export const LearningJourneyWorkspace: React.FC = () => {
 
           {/* SECTION 7 — MULTI-PROVIDER COURSE & CERTIFICATION HUBS */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <IllustrativeNotice className="mb-3" />
             <CourseIntelligencePanel
               skillTarget={targetRoleTitle || 'Target Role'}
               onNavigateToRoadmap={() => navigate('/roadmap')}
             />
+            <IllustrativeNotice className="mb-3" />
             <CertificationIntelligencePanel
               technologyTarget={targetRoleTitle || 'Target Role'}
               onExploreRoadmap={() => navigate('/roadmap')}

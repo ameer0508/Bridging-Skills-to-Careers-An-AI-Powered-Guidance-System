@@ -103,7 +103,7 @@ export const SpatialOpportunityRadar: React.FC<SpatialOpportunityRadarProps> = (
                   : 'Sandbox Provider Mode (Add RAPIDAPI_KEY to backend/.env for live postings)'
               }
             >
-              {marketStatus === 'LIVE' ? 'LIVE JSEARCH' : 'SANDBOX MODE'}
+              {marketStatus === 'LIVE' ? 'LIVE JSEARCH' : 'DEMO LISTINGS'}
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
@@ -118,7 +118,7 @@ export const SpatialOpportunityRadar: React.FC<SpatialOpportunityRadarProps> = (
           onClick={() => onNavigate('/opportunities')}
           className="spatial-ghost-btn group text-xs py-2 px-4 self-start sm:self-center"
         >
-          <span>{marketStatus === 'LIVE' ? 'Explore Live Market' : 'Explore Market Sandbox'}</span>
+          <span>{marketStatus === 'LIVE' ? 'Explore Live Market' : 'Explore Demo Listings'}</span>
           <ArrowUpRight className="w-3.5 h-3.5 text-amber-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
         </MagneticButton>
       </div>
