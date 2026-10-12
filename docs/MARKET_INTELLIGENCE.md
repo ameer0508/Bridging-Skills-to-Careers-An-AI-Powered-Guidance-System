@@ -59,48 +59,41 @@
 
   Unique indexes back each rule, and concurrent imports resolve to "duplicate".
 
-## 4. `MarketOpportunitySummary` (contract for Agent A)
+## 4. `MarketOpportunitySummary` (contract v2 for Agent A)
 
-Defined in `backend/src/services/market/MarketOpportunitySummary.ts`:
+- **Producer:** `MarketOpportunityService.summaryForCareer`, served at `GET /api/v1/market/careers/:careerId/summary?dataset&country&from&to` (sign-in required).
+- **Types:** `backend/src/services/market/MarketOpportunitySummary.ts`, mirrored for the frontend in `frontend/src/features/market/marketApi.ts` (`fetchMarketOpportunitySummary`).
 
-```ts
-interface MarketOpportunitySummary {
-  contractVersion: 1;
-  careerId: string; careerTitle: string;
-  location: { country: string | null; label: string };
-  period: { from: string; to: string };            // YYYY-MM, inclusive
-  dataset: 'sourced';                               // never built from fixtures
-  matchingRule: string | null;                      // how postings were attributed to the career
-  sourcedObservations: number; distinctPostings: number;
-  sources: { id; name; licence; postings }[];
-  freshness: { latestPostedAt; latestRetrievedAt; ageDays };
-  demand: null | { monthly: { month; postings }[]; minimums };   // null unless sufficient
-  available: boolean;
-  insufficientDataReasons: ('no_registered_source' | 'no_records' | 'too_few_postings'
-    | 'too_few_months_with_postings' | 'career_not_mapped_to_postings' | 'stale_data')[];
-}
-```
+| `evidenceClass` | Meaning | `usableForRecommendations` | `demand` |
+|---|---|---|---|
+| `sourced_valid` | Sourced, at least 30 postings in at least 3 months, retrieved within 90 days | **true** | monthly counts |
+| `sourced_sparse` | Sourced, but too few, too narrow, stale or not mapped | false | null |
+| `no_legitimate_source` | No licensed source is registered | false | null |
+| `synthetic_test_data` | Generated fixture, for tests and demonstrations | false | null |
 
-The contract has **no opportunity score**. Readiness describes the person; these figures describe postings, so consumers keep the two apart.
+**Matching rule.** A posting belongs to a career when its title contains the career title as whole words, case-insensitively. The rule is stated in `matchingRule`. It is deliberately narrow: "Data Analysts" and "Data Analytics Engineer" do not count for "Data Analyst".
 
-**Backend consumer example** (Career Lab comparison, once the producer exists):
+**Counts.** `distinctPostings` counts deduplicated postings. `sourcedObservations` adds re-observations. Neither is ever scaled or estimated. There is **no opportunity score**. Readiness describes the person and these figures describe postings, so consumers keep them separate.
+
+**Backend consumer example** (Career Lab comparison; Career Lab is not edited here):
 
 ```ts
-const market = await MarketOpportunityService.summaryForCareer(careerId, { country: 'IN', from, to });
-row.market = market.available
+const market = await MarketOpportunityService.summaryForCareer({ id, title }, { dataset: 'sourced', country: 'IN', from, to });
+row.market = market.usableForRecommendations
   ? { distinctPostings: market.distinctPostings, demand: market.demand, sources: market.sources }
-  : { unavailable: market.insufficientDataReasons };   // show the reasons, never a zero as if measured
+  : { evidenceClass: market.evidenceClass, reasons: market.insufficientDataReasons };  // never a zero as if measured
 ```
 
 **Frontend consumer example:**
 
 ```tsx
-{summary.available
-  ? <span>{summary.distinctPostings} postings · {summary.sources.map(s => s.name).join(', ')}</span>
-  : <span>Market evidence unavailable: {summary.insufficientDataReasons.join(', ')}</span>}
+const s = await fetchMarketOpportunitySummary(careerId, { country: 'IN' });
+{s.usableForRecommendations
+  ? <span>{s.distinctPostings} postings · {s.sources.map(x => x.name).join(', ')}</span>
+  : <span>Market evidence unavailable ({s.evidenceClass}): {s.insufficientDataReasons.join(', ')}</span>}
 ```
 
-Until the producer is built, `unavailableSummary(career, period, ['no_registered_source', 'no_records'])` returns the honest answer.
+**Tests:** `backend/src/tests/market_opportunity_summary.test.ts` covers all four classes, staleness, an unmapped career, the matching-rule boundaries, observations vs distinct postings, and HTTP 401/400/404.
 
 ## 5. C1 evidence
 

@@ -112,3 +112,39 @@ export const TREND_REASON_TEXT: Record<TrendReason, (t: SkillTrends) => string> 
   too_few_postings_per_half: t => `Each half of the period needs at least ${t.minimums.postingsPerHalf} dated postings.`,
   too_few_skill_mentions: t => `Fewer than ${t.minimums.skillMentions} postings mention it.`,
 };
+
+/**
+ * MarketOpportunitySummary (contract v2) for Career Lab / next-best-action consumers.
+ * Mirrors backend/src/services/market/MarketOpportunitySummary.ts. Only evidenceClass
+ * 'sourced_valid' (usableForRecommendations) may inform a real recommendation.
+ */
+export interface MarketOpportunitySummary {
+  contractVersion: 2;
+  careerId: string;
+  careerTitle: string;
+  location: { country: string | null; label: string };
+  period: { from: string; to: string };
+  dataset: MarketDataset;
+  evidenceClass: 'sourced_valid' | 'sourced_sparse' | 'no_legitimate_source' | 'synthetic_test_data';
+  usableForRecommendations: boolean;
+  matchingRule: string | null;
+  sourcedObservations: number;
+  distinctPostings: number;
+  sources: Array<{ id: string; name: string; licence: string; postings: number }>;
+  freshness: { latestPostedAt: string | null; latestRetrievedAt: string | null; ageDays: number | null };
+  demand: null | { monthly: Array<{ month: string; postings: number }>; minimums: { distinctPostings: number; monthsWithPostings: number } };
+  available: boolean;
+  insufficientDataReasons: string[];
+}
+
+export async function fetchMarketOpportunitySummary(
+  careerId: string,
+  options: { country?: string; from?: string; to?: string; dataset?: MarketDataset } = {}
+): Promise<MarketOpportunitySummary> {
+  const params: Record<string, string> = { dataset: options.dataset ?? 'sourced' };
+  if (options.country) params.country = options.country;
+  if (options.from) params.from = options.from;
+  if (options.to) params.to = options.to;
+  const res = await apiClient.get(`/market/careers/${encodeURIComponent(careerId)}/summary`, { params });
+  return res.data.data as MarketOpportunitySummary;
+}

@@ -2,21 +2,37 @@
  * MarketOpportunitySummary: the contract through which Career Lab comparison and, later,
  * next-best-action ranking read labour-market evidence for a career (docs/MARKET_INTELLIGENCE.md §4).
  *
- * Rules every producer must keep:
- *  - Built from sourced records only; synthetic fixtures never produce a summary.
+ * Rules every producer keeps:
+ *  - `evidenceClass` says what the figures rest on. Only 'sourced_valid' may inform real
+ *    user-facing recommendations (`usableForRecommendations`).
  *  - Counts are distinct postings actually held; nothing is estimated, scaled or filled in.
- *  - `demand` is null unless the history meets HISTORY_MINIMUMS; the reasons say why.
- *  - There is no opportunity score. Consumers must keep readiness (about the person) separate
- *    from these figures (about postings).
+ *  - `demand` is null unless the sourced history meets HISTORY_MINIMUMS and is fresh.
+ *  - There is no opportunity score. Readiness (about the person) stays separate from these
+ *    figures (about postings).
  */
+import { MarketDataset } from '../../config/marketSources.js';
 import { HISTORY_MINIMUMS, InsufficiencyReason } from './MarketHistoryService.js';
 
-export const MARKET_SUMMARY_CONTRACT_VERSION = 1 as const;
+export const MARKET_SUMMARY_CONTRACT_VERSION = 2 as const;
+
+/** Sourced records older than this (by latest retrieval) are stale. */
+export const STALE_AFTER_DAYS = 90;
 
 export type SummaryInsufficiencyReason =
   | InsufficiencyReason
   | 'career_not_mapped_to_postings'
-  | 'stale_data';
+  | 'stale_data'
+  | 'synthetic_test_data';
+
+export type EvidenceClass =
+  /** Sourced, sufficient and fresh: may inform real recommendations. */
+  | 'sourced_valid'
+  /** Sourced, but too few, too narrow or too old: counts only. */
+  | 'sourced_sparse'
+  /** No licensed source is registered: nothing real exists to summarise. */
+  | 'no_legitimate_source'
+  /** Generated fixture data: for tests and demonstrations only. */
+  | 'synthetic_test_data';
 
 export interface MarketOpportunitySummary {
   contractVersion: typeof MARKET_SUMMARY_CONTRACT_VERSION;
@@ -26,7 +42,9 @@ export interface MarketOpportunitySummary {
   location: { country: string | null; label: string };
   /** Inclusive months, YYYY-MM. */
   period: { from: string; to: string };
-  dataset: 'sourced';
+  dataset: MarketDataset;
+  evidenceClass: EvidenceClass;
+  usableForRecommendations: boolean;
   /** How postings were attributed to this career, in words, so the figure can be checked. */
   matchingRule: string | null;
   /** Every time a matching posting was seen, re-observations included. */
@@ -34,7 +52,7 @@ export interface MarketOpportunitySummary {
   distinctPostings: number;
   sources: Array<{ id: string; name: string; licence: string; postings: number }>;
   freshness: { latestPostedAt: string | null; latestRetrievedAt: string | null; ageDays: number | null };
-  /** Present only when the history is sufficient. */
+  /** Present only for 'sourced_valid'. */
   demand: null | {
     monthly: Array<{ month: string; postings: number }>;
     minimums: typeof HISTORY_MINIMUMS;
@@ -58,6 +76,8 @@ export function unavailableSummary(
     location: { country, label: country ?? 'All countries' },
     period,
     dataset: 'sourced',
+    evidenceClass: 'no_legitimate_source',
+    usableForRecommendations: false,
     matchingRule: null,
     sourcedObservations: 0,
     distinctPostings: 0,
