@@ -2,7 +2,7 @@ import VoiceRecordingService from './VoiceRecordingService.js';
 import logger from '../../config/logger.js';
 
 /**
- * Runs the voice-recording retention job inside the backend process: once shortly after start
+ * Runs the voice-recording retention job inside the backend process: once five seconds after start
  * and then every VOICE_RETENTION_INTERVAL_HOURS (24 by default). It needs no external scheduler
  * and no paid service, and it runs wherever the backend runs, including Docker Compose.
  *
@@ -11,6 +11,8 @@ import logger from '../../config/logger.js';
  * the command line, for deployments that prefer cron.
  */
 const HOUR_MS = 60 * 60 * 1000;
+/** Soon after start, so recordings that expired while the backend was down do not wait a day. */
+export const FIRST_RUN_DELAY_MS = 5_000;
 
 export function retentionIntervalMs(raw: string | undefined = process.env.VOICE_RETENTION_INTERVAL_HOURS): number {
   const hours = Number(raw);
@@ -30,7 +32,7 @@ export async function runVoiceRetentionOnce(): Promise<void> {
 
 /** Starts the schedule and returns a function that stops it. */
 export function startVoiceRetentionSchedule(): () => void {
-  const first = setTimeout(() => void runVoiceRetentionOnce(), 30_000);
+  const first = setTimeout(() => void runVoiceRetentionOnce(), FIRST_RUN_DELAY_MS);
   const every = setInterval(() => void runVoiceRetentionOnce(), retentionIntervalMs());
   // Never keeps the process alive on its own
   first.unref();

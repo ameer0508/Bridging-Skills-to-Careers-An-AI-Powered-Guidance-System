@@ -354,7 +354,7 @@ deletions, and removes audio files under the recording directory that no record 
 
 | How it runs | When |
 |---|---|
-| Inside the backend process (`voiceRetentionSchedule.ts`) | 30 seconds after every start, then every 24 hours (`VOICE_RETENTION_INTERVAL_HOURS`, 1 to 24; anything else means 24) |
+| Inside the backend process (`voiceRetentionSchedule.ts`) | five seconds after every start, then every 24 hours (`VOICE_RETENTION_INTERVAL_HOURS`, 1 to 24; anything else means 24) |
 | On every use of recordings | Listing, playing or uploading purges expired recordings first |
 | `node backend/dist/scripts/purgeVoiceRecordings.js` | On demand or from cron; exit code 2 when a file is still pending |
 

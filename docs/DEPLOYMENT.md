@@ -120,7 +120,7 @@ recordings survive container restarts and no separate volume is needed. Files ar
 owner-only permissions and are served only to their owner through the API; the directory is not
 published by nginx. Set `VOICE_RECORDING_DIR` to keep them elsewhere.
 
-Retention needs no setup: the backend runs the retention job itself 30 seconds after every start
+Retention needs no setup: the backend runs the retention job itself five seconds after every start
 and then daily (see `docs/INTERVIEWS.md`). It costs nothing and uses no external service.
 
 Optional, for deployments that also want it in cron (for example to be alerted by exit code):
