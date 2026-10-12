@@ -1,4 +1,5 @@
-import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../types/telemetry';
+import { listFrom } from '../../../lib/collections';
 
 export interface MomentumFactor {
   name: string;
@@ -17,7 +18,7 @@ export interface MomentumScoreData {
 
 export const MomentumScoreEngine = {
   calculateMomentum(
-    topMatch: CareerMatchItem | null,
+    _topMatch: CareerMatchItem | null,
     topReadiness: ReadinessItem | null,
     totalSkills: number,
     recommendations: RecommendationItem[],
@@ -26,8 +27,9 @@ export const MomentumScoreEngine = {
   ): MomentumScoreData {
     const roadmapProgress = roadmap?.progressPercentage || 0;
     const readinessScore = topReadiness?.overallScore || 0;
-    const recsCompleted = recommendations.filter((r) => r.status === 'completed').length;
-    const totalRecs = recommendations.length || 1;
+    const safeRecs = listFrom<RecommendationItem>(recommendations, 'recommendations');
+    const recsCompleted = safeRecs.filter((r) => r && r.status === 'completed').length;
+    const totalRecs = safeRecs.length || 1;
 
     // 1. Factor: Roadmap Execution (Weight: 35%)
     const roadmapScore = Math.min(100, roadmapProgress * 1.2);

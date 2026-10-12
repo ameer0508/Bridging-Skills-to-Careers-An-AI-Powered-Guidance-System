@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, Zap, Activity } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface PredictorProps {

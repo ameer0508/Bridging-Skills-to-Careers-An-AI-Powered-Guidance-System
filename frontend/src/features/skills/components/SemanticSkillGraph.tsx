@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GitBranch, Layers, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { GitBranch, ArrowRight } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface SkillGraphNode {
@@ -21,7 +21,7 @@ export interface SemanticSkillGraphProps {
   edges?: SkillGraphEdge[];
 }
 
-export const defaultNodes: SkillGraphNode[] = [
+const defaultNodes: SkillGraphNode[] = [
   { id: 'tf', name: 'TensorFlow', category: 'AI / ML', type: 'core', confidence: 0.96 },
   { id: 'ml', name: 'Machine Learning', category: 'AI / ML', type: 'parent', confidence: 0.98 },
   { id: 'ai', name: 'Artificial Intelligence', category: 'AI / ML', type: 'parent', confidence: 0.99 },
@@ -36,7 +36,7 @@ export const defaultNodes: SkillGraphNode[] = [
   { id: 'vdb', name: 'Vector Databases', category: 'Databases', type: 'prerequisite', confidence: 0.95 }
 ];
 
-export const defaultEdges: SkillGraphEdge[] = [
+const defaultEdges: SkillGraphEdge[] = [
   { source: 'TensorFlow', target: 'Machine Learning', relationship: 'parent' },
   { source: 'Machine Learning', target: 'Artificial Intelligence', relationship: 'parent' },
   { source: 'PyTorch', target: 'Deep Learning', relationship: 'parent' },

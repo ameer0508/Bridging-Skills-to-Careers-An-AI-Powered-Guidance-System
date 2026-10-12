@@ -162,7 +162,7 @@ export const AIInitializationOverlay: React.FC = () => {
                   </div>
                   <div
                     className={`p-2 rounded-lg transition-all ${
-                      initializationState === 'context_activating' || initializationState === 'ready'
+                      initializationState === 'context_activating'
                         ? 'bg-sky-500/20 text-sky-300 border border-sky-500/40'
                         : 'text-neutral-500'
                     }`}

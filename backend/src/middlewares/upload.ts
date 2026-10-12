@@ -78,6 +78,19 @@ export const validateResumeUpload = (req: Request, _res: Response, next: NextFun
       return next(error);
     }
 
+    // Verify the actual bytes: the extension and MIME type are both client-controlled
+    const head = file.buffer.subarray(0, 1024);
+    const looksLikePdf = head.includes(Buffer.from('%PDF-'));
+    const looksLikeDocx = head.length >= 4 && head[0] === 0x50 && head[1] === 0x4b && head[2] === 0x03 && head[3] === 0x04;
+    if ((ext === 'pdf' && !looksLikePdf) || (ext === 'docx' && !looksLikeDocx)) {
+      const error = new Error(
+        `The uploaded file is not a valid ${ext.toUpperCase()} document.`
+      ) as AppError;
+      error.statusCode = 400;
+      error.code = 'INVALID_FILE_CONTENT';
+      return next(error);
+    }
+
     next();
   });
 };

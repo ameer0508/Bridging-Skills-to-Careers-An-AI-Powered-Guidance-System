@@ -1,5 +1,5 @@
 import React from 'react';
-import { Compass, ShieldCheck, Award, Sparkles } from 'lucide-react';
+import { Compass } from 'lucide-react';
 
 interface ReadinessTelemetryHUDProps {
   careerTitle?: string;

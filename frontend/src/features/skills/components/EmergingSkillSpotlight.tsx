@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, TrendingUp, Cpu, Sparkles } from 'lucide-react';
+import { Zap, TrendingUp } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface EmergingTechItem {
@@ -10,7 +10,7 @@ export interface EmergingTechItem {
   isExtracted: boolean;
 }
 
-export const defaultEmergingTech: EmergingTechItem[] = [
+const defaultEmergingTech: EmergingTechItem[] = [
   { name: 'Generative AI & LLMs', category: 'AI / ML', growthTrend: '+45% YoY Demand', marketCategory: 'Next-Gen AI Stack', isExtracted: true },
   { name: 'RAG Pipelines & Embeddings', category: 'AI / ML', growthTrend: '+52% YoY Demand', marketCategory: 'Next-Gen AI Stack', isExtracted: true },
   { name: 'Vector Databases (Milvus/Pinecone)', category: 'Databases', growthTrend: '+60% YoY Demand', marketCategory: 'Next-Gen AI Stack', isExtracted: true },

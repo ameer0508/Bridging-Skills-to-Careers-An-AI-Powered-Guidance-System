@@ -1,6 +1,7 @@
 import re
 from typing import List
 from app.resume_intelligence.semantic_entities import SemanticProject, SemanticExtractedEntity
+from app.resume_intelligence.skill_lexicon import get_lexicon
 
 class ProjectParser:
     """
@@ -26,7 +27,6 @@ class ProjectParser:
             contributions = [
                 SemanticExtractedEntity(
                     value=l.strip('•-*\t '),
-                    confidence=0.90,
                     source="project_bullets",
                     transformer_model="project-parser-v1",
                     extraction_method="bullet-extraction"
@@ -37,14 +37,12 @@ class ProjectParser:
             projects.append(SemanticProject(
                 name=SemanticExtractedEntity(
                     value=name,
-                    confidence=0.93,
                     source="project_title",
                     transformer_model="project-parser-v1",
                     extraction_method="title-ner"
                 ),
                 description=SemanticExtractedEntity(
                     value=description,
-                    confidence=0.90,
                     source="project_summary",
                     transformer_model="project-parser-v1",
                     extraction_method="text-summary"
@@ -52,7 +50,6 @@ class ProjectParser:
                 technologies=[
                     SemanticExtractedEntity(
                         value=t,
-                        confidence=0.95,
                         source="project_tech",
                         transformer_model="project-parser-v1",
                         extraction_method="tech-regex"
@@ -69,4 +66,5 @@ class ProjectParser:
         match = re.search(r'(?:Technologies|Tech Stack|Built with|Tools used)[:\s]*(.+)', text, re.IGNORECASE)
         if match:
             return [t.strip() for t in match.group(1).split(',') if t.strip()]
-        return []
+        # No explicit "Technologies:" line: use the known skills named in the project text
+        return [skill.name for skill in get_lexicon().find_skills(text)]

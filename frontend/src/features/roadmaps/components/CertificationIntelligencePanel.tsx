@@ -28,7 +28,6 @@ export interface CertificationIntelligencePanelProps {
 
 export const CertificationIntelligencePanel: React.FC<CertificationIntelligencePanelProps> = ({
   technologyTarget = 'Cloud & AI Engineering',
-  onExploreRoadmap,
 }) => {
   const { addToast } = useToast();
 
@@ -315,7 +314,7 @@ export const CertificationIntelligencePanel: React.FC<CertificationIntelligenceP
               AI Multi-Criteria Certification Synthesis ({technologyTarget})
             </span>
             <p className="text-slate-300 leading-relaxed">
-              Certifications ranked using <strong className="text-cyan-300">Skill Gap Fit (35%)</strong>, <strong className="text-cyan-300">Employer Recognition (25%)</strong>, and <strong className="text-emerald-400">Salary Impact (20%)</strong> with <strong className="text-emerald-400">98.4% Confidence</strong>.
+              Certifications ranked using <strong className="text-cyan-300">Skill Gap Fit (35%)</strong>, <strong className="text-cyan-300">Employer Recognition (25%)</strong>, and <strong className="text-emerald-400">Salary Impact (20%)</strong>.
             </p>
           </div>
         </div>
@@ -340,6 +339,7 @@ export const CertificationIntelligencePanel: React.FC<CertificationIntelligenceP
             {/* Provider Filter */}
             <div className="lg:col-span-3">
               <select
+                aria-label="Filter by provider"
                 value={selectedProvider}
                 onChange={(e) => setSelectedProvider(e.target.value)}
                 className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 cursor-pointer"
@@ -357,6 +357,7 @@ export const CertificationIntelligencePanel: React.FC<CertificationIntelligenceP
             {/* Level Filter */}
             <div className="lg:col-span-2">
               <select
+                aria-label="Filter by level"
                 value={selectedLevel}
                 onChange={(e) => setSelectedLevel(e.target.value)}
                 className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 cursor-pointer"
@@ -371,8 +372,9 @@ export const CertificationIntelligencePanel: React.FC<CertificationIntelligenceP
             {/* Sort By */}
             <div className="lg:col-span-2">
               <select
+                aria-label="Sort certifications"
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
                 className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 cursor-pointer"
               >
                 <option value="rank-desc" className="bg-slate-900 text-white">AI Rank Fit Score</option>
@@ -558,10 +560,10 @@ export const CertificationIntelligencePanel: React.FC<CertificationIntelligenceP
                 <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
-                  formatter={(val: number | string) => [`+$${Number(val).toLocaleString()}/yr`, 'Estimated Salary Boost']}
+                  formatter={(val) => [`+$${Number(val).toLocaleString()}/yr`, 'Estimated Salary Boost']}
                 />
                 <Bar dataKey="salaryBoostUsd" radius={[6, 6, 0, 0]} name="Annual Salary Increase ($)">
-                  {certs.map((entry, index) => (
+                  {certs.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={index === 0 ? '#10b981' : '#06b6d4'} />
                   ))}
                 </Bar>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Brain, ShieldCheck, AlertCircle, Zap, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Brain, AlertCircle, Zap, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface ExecutiveInsightsProps {

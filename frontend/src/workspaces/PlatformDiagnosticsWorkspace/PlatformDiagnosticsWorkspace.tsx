@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   Activity,
   Zap,
@@ -88,10 +88,10 @@ export const PlatformDiagnosticsWorkspace: React.FC = () => {
   };
 
   // Filtered Providers
-  const filteredProviders = useMemo(() => {
-    if (selectedDomainFilter === 'all') return providerHealthData;
-    return providerHealthData.filter((p) => p.domain.toLowerCase() === selectedDomainFilter.toLowerCase());
-  }, [selectedDomainFilter]);
+  const filteredProviders =
+    selectedDomainFilter === 'all'
+      ? providerHealthData
+      : providerHealthData.filter((p) => p.domain.toLowerCase() === selectedDomainFilter.toLowerCase());
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-12 px-4">

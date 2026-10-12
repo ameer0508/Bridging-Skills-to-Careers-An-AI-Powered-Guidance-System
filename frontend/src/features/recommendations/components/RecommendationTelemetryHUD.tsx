@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, Award, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Zap } from 'lucide-react';
 
 interface RecommendationTelemetryHUDProps {
   totalActive: number;

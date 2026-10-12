@@ -1,4 +1,4 @@
-import { CareerMatchItem, ReadinessItem, RoadmapData } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { CareerMatchItem, ReadinessItem, RoadmapData } from '../../../types/telemetry';
 
 export interface OpportunityForecastData {
   projectedReadinessScore: number;
@@ -10,7 +10,7 @@ export interface OpportunityForecastData {
 
 export const ForecastEngine = {
   calculateForecast(
-    topMatch: CareerMatchItem | null,
+    _topMatch: CareerMatchItem | null,
     topReadiness: ReadinessItem | null,
     roadmap: RoadmapData | null
   ): OpportunityForecastData {

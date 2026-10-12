@@ -54,7 +54,7 @@ export const GitHubIntelligenceWorkspace: React.FC = () => {
     queryKey: ['user', 'me'],
     queryFn: async () => {
       const response = await apiClient.get('/users/me');
-      return response.data.data.user;
+      return response.data.data ?? null;
     },
   });
 
@@ -138,7 +138,7 @@ export const GitHubIntelligenceWorkspace: React.FC = () => {
         language: p.technologies?.[0] || 'TypeScript',
         stars: 0,
         forks: 0,
-        topics: p.technologies?.map((t: string) => t.toLowerCase()) || ['engineering', 'software'],
+        topics: p.technologies?.map((t: string | { value?: string }) => (typeof t === 'string' ? t : t.value || '').toLowerCase()) || ['engineering', 'software'],
         hasDockerfile: p.technologies?.some((t: string) => /docker|k8s|container/i.test(t)) || false,
         hasCi: false,
       }));

@@ -66,13 +66,6 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
     { level: 'Principal', avgSalary: 275000, maxSalary: 340000 },
   ];
 
-  const industryBenchmarks = [
-    { industry: 'Artificial Intelligence', avgSalary: 205000, growth: '+28%' },
-    { industry: 'Cloud Infrastructure', avgSalary: 185000, growth: '+22%' },
-    { industry: 'Cybersecurity', avgSalary: 178000, growth: '+24%' },
-    { industry: 'FinTech Systems', avgSalary: 192000, growth: '+18%' },
-    { industry: 'HealthTech AI', avgSalary: 175000, growth: '+20%' },
-  ];
 
   const certBoosts = [
     { name: 'AWS Solutions Architect', boost: 15000, color: 'text-amber-400' },
@@ -96,9 +89,7 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
   ];
 
   // Calculated Values
-  const currentRegion = useMemo(() => {
-    return regions.find((r) => r.name === selectedRegion) || regions[0];
-  }, [selectedRegion]);
+  const currentRegion = regions.find((r) => r.name === selectedRegion) || regions[0];
 
   const levelMultiplier = useMemo(() => {
     if (experienceLevel === 'Junior') return 0.7;
@@ -108,11 +99,9 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
     return 1.45;
   }, [experienceLevel]);
 
-  const totalCertBoost = useMemo(() => {
-    return certBoosts
-      .filter((c) => activeCertifications.includes(c.name))
-      .reduce((acc, c) => acc + c.boost, 0);
-  }, [activeCertifications]);
+  const totalCertBoost = certBoosts
+    .filter((c) => activeCertifications.includes(c.name))
+    .reduce((acc, c) => acc + c.boost, 0);
 
   const calculatedSalary = useMemo(() => {
     const base = currentRegion.baseMedian * levelMultiplier;
@@ -202,10 +191,10 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
           <Sparkles className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
           <div className="space-y-1">
             <span className="font-bold text-white block">
-              AI Grounding Explanation ({jobTitle})
+              About these figures ({jobTitle})
             </span>
             <p className="text-slate-300 leading-relaxed">
-              Compensation estimate calculated via multi-provider linear regression matching your 18 verified technical competencies against current <strong className="text-cyan-300">{currentRegion.name}</strong> market distributions (<strong className="text-emerald-400">98.4% Confidence</strong>).
+              These salary ranges for <strong className="text-cyan-300">{currentRegion.name}</strong> are built-in example values. They are not calculated from your profile and do not come from a live compensation source.
             </p>
           </div>
         </div>
@@ -261,6 +250,7 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
                 Target Region
               </span>
               <select
+                aria-label="Region"
                 value={selectedRegion}
                 onChange={(e) => setSelectedRegion(e.target.value)}
                 className="w-full py-1.5 px-2.5 rounded-lg bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
@@ -278,8 +268,9 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
                 Experience Level
               </span>
               <select
+                aria-label="Experience level"
                 value={experienceLevel}
-                onChange={(e) => setExperienceLevel(e.target.value as any)}
+                onChange={(e) => setExperienceLevel(e.target.value as typeof experienceLevel)}
                 className="w-full py-1.5 px-2.5 rounded-lg bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
               >
                 <option value="Junior">Junior</option>
@@ -375,7 +366,7 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
                 <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={(v) => `$${v / 1000}k`} tickLine={false} />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
-                  formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Compensation']}
+                  formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Compensation']}
                 />
                 <Area type="monotone" dataKey="targetSalary" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorTarget)" name="SkillBridge Optimized Target" />
                 <Area type="monotone" dataKey="baseSalary" stroke="#06b6d4" strokeWidth={2} strokeDasharray="4 4" fillOpacity={1} fill="url(#colorBase)" name="Market Baseline" />
@@ -402,7 +393,7 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
                 <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={(v) => `$${v / 1000}k`} tickLine={false} />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
-                  formatter={(val: any) => [`$${Number(val).toLocaleString()}`, 'Average Salary']}
+                  formatter={(val) => [`$${Number(val).toLocaleString()}`, 'Average Salary']}
                 />
                 <Bar dataKey="avgSalary" radius={[6, 6, 0, 0]}>
                   {experienceTrajectory.map((entry, index) => (

@@ -31,7 +31,7 @@ class AIConfig(BaseModel):
         "gemini": ProviderConfig(
             name="gemini",
             enabled=True,
-            default_model="gemini-2.5-flash",
+            default_model=os.getenv("GEMINI_MODEL", "gemini-3.6-flash"),
             api_key_env_var="GEMINI_API_KEY",
             rate_limit_rpm=120,
         ),

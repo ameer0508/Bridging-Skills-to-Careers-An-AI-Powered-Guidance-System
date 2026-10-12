@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, Zap, Clock, Award } from 'lucide-react';
+import { Layers, Zap, Award } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface MatrixItem {
@@ -10,7 +10,7 @@ export interface MatrixItem {
   impactBoost: number;
 }
 
-export const defaultMatrixItems: MatrixItem[] = [
+const defaultMatrixItems: MatrixItem[] = [
   { id: '1', title: 'Add Milvus Vector DB Terminology to Resume', type: 'resume_improvement', quadrant: 'Quick Win', impactBoost: 15.0 },
   { id: '2', title: 'Build Enterprise AI Microservices Capstone', type: 'project', quadrant: 'Major Capstone', impactBoost: 22.0 },
   { id: '3', title: 'AWS Certified Solutions Architect', type: 'certification', quadrant: 'Major Capstone', impactBoost: 18.0 },
@@ -23,7 +23,6 @@ export const PriorityMatrix: React.FC<{ items?: MatrixItem[] }> = ({
 }) => {
   const quickWins = items.filter(i => i.quadrant === 'Quick Win');
   const majorCapstones = items.filter(i => i.quadrant === 'Major Capstone');
-  const fillers = items.filter(i => i.quadrant === 'Filler' || i.quadrant === 'Low Priority');
 
   return (
     <GlassPanel className="p-6 space-y-6 border-cyan-500/30">

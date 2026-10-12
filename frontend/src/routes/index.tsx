@@ -1,10 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import React, { lazy, Suspense } from 'react';
+import { createBrowserRouter } from 'react-router-dom';
+import React, { lazy, Suspense, useEffect } from 'react';
+import { useAuthStore } from '../store/authStore';
 import { GuestRoute, ProtectedRoute } from '../components/RouteGuards';
 import { AppShell } from '../layouts/AppShell';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { ErrorBoundary } from '../components/common/ErrorBoundary';
+import { NotFoundPage } from '../components/common/NotFoundPage';
 import { AIThinkingAnimation } from '../components/experience';
 
 // Lazy-loaded Workspaces for Route Code Splitting
@@ -36,6 +38,7 @@ const OpportunityDiscoveryWorkspace = lazy(() => import('../workspaces/Opportuni
 const AIOrchestratorDashboard = lazy(() => import('../workspaces/AIOrchestratorDashboard/AIOrchestratorDashboard'));
 const PersonalMemoryWorkspace = lazy(() => import('../workspaces/PersonalMemoryWorkspace/PersonalMemoryWorkspace'));
 const CareerOSDashboard = lazy(() => import('../workspaces/CareerOSDashboard/CareerOSDashboard'));
+const CareerIdentityWorkspace = lazy(() => import('../workspaces/CareerIdentityWorkspace/CareerIdentityWorkspace'));
 
 // Feature Pages
 import LoginForm from '../features/auth/components/LoginForm';
@@ -62,9 +65,22 @@ const WorkspaceSuspense: React.FC<{ children: React.ReactNode }> = ({ children }
 );
 
 import LandingPage from '../features/landing/LandingPage';
+import { DemoWorkspace } from '../components/common/IllustrativeNotice';
 
 // Root redirect handler based on authentication status
 const RootRedirect: React.FC = () => {
+  const accessToken = useAuthStore(state => state.accessToken);
+  const fetchCurrentUser = useAuthStore(state => state.fetchCurrentUser);
+  const clearSession = useAuthStore(state => state.clearSession);
+
+  useEffect(() => {
+    if (accessToken) {
+      fetchCurrentUser().catch(() => {
+        clearSession();
+      });
+    }
+  }, [accessToken, fetchCurrentUser, clearSession]);
+
   return <LandingPage />;
 };
 
@@ -145,7 +161,7 @@ export const router = createBrowserRouter([
             path: '/profile',
             element: (
               <WorkspaceSuspense>
-                <SettingsWorkspace />
+                <CareerIdentityWorkspace />
               </WorkspaceSuspense>
             ),
           },
@@ -173,7 +189,9 @@ export const router = createBrowserRouter([
             path: '/diagnostics',
             element: (
               <WorkspaceSuspense>
-                <PlatformDiagnosticsWorkspace />
+                <DemoWorkspace>
+                  <PlatformDiagnosticsWorkspace />
+                </DemoWorkspace>
               </WorkspaceSuspense>
             ),
           },
@@ -181,7 +199,9 @@ export const router = createBrowserRouter([
             path: '/graph',
             element: (
               <WorkspaceSuspense>
-                <KnowledgeGraphExplorerWorkspace />
+                <DemoWorkspace>
+                  <KnowledgeGraphExplorerWorkspace />
+                </DemoWorkspace>
               </WorkspaceSuspense>
             ),
           },
@@ -189,7 +209,9 @@ export const router = createBrowserRouter([
             path: '/events',
             element: (
               <WorkspaceSuspense>
-                <EventMonitoringConsoleWorkspace />
+                <DemoWorkspace>
+                  <EventMonitoringConsoleWorkspace />
+                </DemoWorkspace>
               </WorkspaceSuspense>
             ),
           },
@@ -197,7 +219,9 @@ export const router = createBrowserRouter([
             path: '/features',
             element: (
               <WorkspaceSuspense>
-                <AIFeatureExplorerWorkspace />
+                <DemoWorkspace>
+                  <AIFeatureExplorerWorkspace />
+                </DemoWorkspace>
               </WorkspaceSuspense>
             ),
           },
@@ -205,7 +229,9 @@ export const router = createBrowserRouter([
             path: '/ops',
             element: (
               <WorkspaceSuspense>
-                <AIOperationsCenterWorkspace />
+                <DemoWorkspace>
+                  <AIOperationsCenterWorkspace />
+                </DemoWorkspace>
               </WorkspaceSuspense>
             ),
           },
@@ -213,7 +239,9 @@ export const router = createBrowserRouter([
             path: '/github',
             element: (
               <WorkspaceSuspense>
-                <GitHubIntelligenceWorkspace />
+                <DemoWorkspace>
+                  <GitHubIntelligenceWorkspace />
+                </DemoWorkspace>
               </WorkspaceSuspense>
             ),
           },
@@ -221,7 +249,9 @@ export const router = createBrowserRouter([
             path: '/linkedin',
             element: (
               <WorkspaceSuspense>
-                <LinkedInIntelligenceWorkspace />
+                <DemoWorkspace>
+                  <LinkedInIntelligenceWorkspace />
+                </DemoWorkspace>
               </WorkspaceSuspense>
             ),
           },
@@ -229,7 +259,9 @@ export const router = createBrowserRouter([
             path: '/portfolio',
             element: (
               <WorkspaceSuspense>
-                <PortfolioIntelligenceWorkspace />
+                <DemoWorkspace>
+                  <PortfolioIntelligenceWorkspace />
+                </DemoWorkspace>
               </WorkspaceSuspense>
             ),
           },
@@ -237,7 +269,9 @@ export const router = createBrowserRouter([
             path: '/coding',
             element: (
               <WorkspaceSuspense>
-                <CodingIntelligenceWorkspace />
+                <DemoWorkspace>
+                  <CodingIntelligenceWorkspace />
+                </DemoWorkspace>
               </WorkspaceSuspense>
             ),
           },
@@ -245,7 +279,9 @@ export const router = createBrowserRouter([
             path: '/opensource',
             element: (
               <WorkspaceSuspense>
-                <OpenSourceIntelligenceWorkspace />
+                <DemoWorkspace>
+                  <OpenSourceIntelligenceWorkspace />
+                </DemoWorkspace>
               </WorkspaceSuspense>
             ),
           },
@@ -253,7 +289,9 @@ export const router = createBrowserRouter([
             path: '/brand',
             element: (
               <WorkspaceSuspense>
-                <ProfessionalBrandWorkspace />
+                <DemoWorkspace>
+                  <ProfessionalBrandWorkspace />
+                </DemoWorkspace>
               </WorkspaceSuspense>
             ),
           },
@@ -261,7 +299,9 @@ export const router = createBrowserRouter([
             path: '/digital-twin',
             element: (
               <WorkspaceSuspense>
-                <ProfessionalDigitalTwinWorkspace />
+                <DemoWorkspace>
+                  <ProfessionalDigitalTwinWorkspace />
+                </DemoWorkspace>
               </WorkspaceSuspense>
             ),
           },
@@ -269,7 +309,9 @@ export const router = createBrowserRouter([
             path: '/agent',
             element: (
               <WorkspaceSuspense>
-                <CareerPlanningAgentWorkspace />
+                <DemoWorkspace>
+                  <CareerPlanningAgentWorkspace />
+                </DemoWorkspace>
               </WorkspaceSuspense>
             ),
           },
@@ -317,7 +359,9 @@ export const router = createBrowserRouter([
             path: '/networking-agent',
             element: (
               <WorkspaceSuspense>
-                <NetworkingAgentWorkspace />
+                <DemoWorkspace>
+                  <NetworkingAgentWorkspace />
+                </DemoWorkspace>
               </WorkspaceSuspense>
             ),
           },
@@ -349,7 +393,9 @@ export const router = createBrowserRouter([
             path: '/memory',
             element: (
               <WorkspaceSuspense>
-                <PersonalMemoryWorkspace />
+                <DemoWorkspace>
+                  <PersonalMemoryWorkspace />
+                </DemoWorkspace>
               </WorkspaceSuspense>
             ),
           },
@@ -357,7 +403,9 @@ export const router = createBrowserRouter([
             path: '/career-os',
             element: (
               <WorkspaceSuspense>
-                <CareerOSDashboard />
+                <DemoWorkspace>
+                  <CareerOSDashboard />
+                </DemoWorkspace>
               </WorkspaceSuspense>
             ),
           },
@@ -367,11 +415,10 @@ export const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: <Navigate to="/" replace />,
+    element: <NotFoundPage />,
   },
 ], {
   future: {
-    v7_startTransition: true,
     v7_relativeSplatPath: true,
   },
 });

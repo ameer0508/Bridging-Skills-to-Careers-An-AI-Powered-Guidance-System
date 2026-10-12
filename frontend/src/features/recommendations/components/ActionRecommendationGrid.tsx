@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, CheckCircle2, Bookmark, Trash2, ExternalLink, Clock, BarChart3, ShieldCheck } from 'lucide-react';
+import { Zap, CheckCircle2, Bookmark, Trash2, ShieldCheck } from 'lucide-react';
 
 interface IRecommendation {
   _id: string;

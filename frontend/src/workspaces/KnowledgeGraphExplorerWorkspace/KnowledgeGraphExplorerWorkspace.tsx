@@ -32,7 +32,6 @@ export const KnowledgeGraphExplorerWorkspace: React.FC = () => {
   // State Management
   const [selectedNodeId, setSelectedNodeId] = useState<string>('role-ai-engineer');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [selectedRelType, setSelectedRelType] = useState<string>('all');
   const [startNodeId, setStartNodeId] = useState<string>('role-backend-dev');
   const [targetNodeId, setTargetNodeId] = useState<string>('skill-vector');
   const [highlightedPath, setHighlightedPath] = useState<string[]>(['role-backend-dev', 'role-ai-engineer', 'skill-vector']);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, CheckCircle2, Sparkles, Clock } from 'lucide-react';
+import { Layers } from 'lucide-react';
 
 interface BlueprintTelemetryHUDProps {
   careerTitle?: string;

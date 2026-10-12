@@ -23,14 +23,12 @@ class LanguageDetector:
             return [SemanticLanguage(
                 language=SemanticExtractedEntity(
                     value="English",
-                    confidence=0.99,
                     source="language_detector",
                     transformer_model="language-detector-v1",
                     extraction_method="default-fallback"
                 ),
                 proficiency=SemanticExtractedEntity(
                     value="Native / Professional",
-                    confidence=0.95,
                     source="language_detector",
                     transformer_model="language-detector-v1",
                     extraction_method="default-fallback"
@@ -43,14 +41,12 @@ class LanguageDetector:
                 detected.append(SemanticLanguage(
                     language=SemanticExtractedEntity(
                         value=lang,
-                        confidence=0.96,
                         source="languages_section",
                         transformer_model="language-detector-v1",
                         extraction_method="language-ner"
                     ),
                     proficiency=SemanticExtractedEntity(
                         value=proficiency,
-                        confidence=0.90,
                         source="languages_section",
                         transformer_model="language-detector-v1",
                         extraction_method="proficiency-regex"
@@ -61,7 +57,6 @@ class LanguageDetector:
             detected.append(SemanticLanguage(
                 language=SemanticExtractedEntity(
                     value="English",
-                    confidence=0.98,
                     source="document_analysis",
                     transformer_model="language-detector-v1",
                     extraction_method="document-lang-inference"

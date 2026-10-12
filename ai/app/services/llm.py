@@ -12,7 +12,8 @@ def parse_resume_text(text: str) -> ParsedResumeResponse:
         payload=text,
         schema_class=ParsedResumeResponse
     )
-    if not response.success or not response.response:
+    # The development mock returns a fixed, fictional resume; it is never accepted here
+    if not response.success or not response.response or response.provider == "mock":
         raise ValueError(f"AI Resume Parsing failed: {response.errors}")
     
     return ParsedResumeResponse.model_validate(response.response)

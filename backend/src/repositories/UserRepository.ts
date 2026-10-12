@@ -5,7 +5,8 @@ export class UserRepository {
    * Finds a user by email, explicitly including the hashed password for verification.
    */
   async findByEmail(email: string): Promise<IUser | null> {
-    return User.findOne({ email }).select('+passwordHash');
+    const normalized = (email || '').toLowerCase().trim();
+    return User.findOne({ email: normalized }).select('+passwordHash');
   }
 
   /**
@@ -19,6 +20,9 @@ export class UserRepository {
    * Creates a new user document in the database.
    */
   async create(userData: Partial<IUser>): Promise<IUser> {
+    if (userData.email) {
+      userData.email = userData.email.toLowerCase().trim();
+    }
     const user = new User(userData);
     return user.save();
   }

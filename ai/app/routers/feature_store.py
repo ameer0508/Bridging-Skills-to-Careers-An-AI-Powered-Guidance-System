@@ -1,3 +1,6 @@
+# NOTE: this module has no live data source. It returns built-in illustrative sample data,
+# labelled as such in every response. It is not used by the product's user workflows.
+ILLUSTRATIVE = "illustrative_sample"
 from fastapi import APIRouter, Query, HTTPException
 from typing import List, Dict, Any
 from app.feature_store.feature_store import feature_store_instance
@@ -25,7 +28,7 @@ async def materialize_entity_features(entity_id: str, raw_payload: Dict[str, Any
     """
     try:
         res = feature_store_instance.materialize_entity(entity_id, raw_payload)
-        return {"success": True, "data": res}
+        return {"success": True, "data_origin": ILLUSTRATIVE, "data": res}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

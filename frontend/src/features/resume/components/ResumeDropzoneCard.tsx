@@ -17,6 +17,9 @@ export const ResumeDropzoneCard: React.FC<ResumeDropzoneCardProps> = ({
   onFileSelect,
 }) => {
   const [dragActive, setDragActive] = useState(false);
+  // Problems found before anything is sent (wrong type, too large)
+  const [localError, setLocalError] = useState<string | null>(null);
+  const shownError = localError || validationError;
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleDrag = (e: React.DragEvent) => {
@@ -44,17 +47,19 @@ export const ResumeDropzoneCard: React.FC<ResumeDropzoneCardProps> = ({
   const validateAndSubmit = (file: File) => {
     const validTypes = [
       'application/pdf',
-      'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     ];
-    if (!validTypes.includes(file.type)) {
-      alert('Invalid file format. Please upload a PDF or Word document (.pdf, .doc, .docx).');
+    const extension = file.name.slice(file.name.lastIndexOf('.') + 1).toLowerCase();
+    if (!validTypes.includes(file.type) || (extension !== 'pdf' && extension !== 'docx')) {
+      setLocalError('That file type is not supported. Please choose a PDF or Word document (.pdf or .docx).');
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      alert('File size exceeds maximum limit of 10MB.');
+    // Same limit as the server (UPLOAD_MAX_SIZE)
+    if (file.size > 5 * 1024 * 1024) {
+      setLocalError('That file is larger than the 5 MB limit.');
       return;
     }
+    setLocalError(null);
     onFileSelect(file);
   };
 
@@ -75,7 +80,7 @@ export const ResumeDropzoneCard: React.FC<ResumeDropzoneCardProps> = ({
         <input
           ref={inputRef}
           type="file"
-          accept=".pdf,.doc,.docx"
+          accept=".pdf,.docx"
           onChange={handleChange}
           className="hidden"
         />
@@ -90,7 +95,7 @@ export const ResumeDropzoneCard: React.FC<ResumeDropzoneCardProps> = ({
               {hasActiveResume ? 'Drag & Drop to Replace Active Resume' : 'Drag & Drop Your Resume File'}
             </h3>
             <p className="text-xs text-slate-400">
-              Supports PDF, DOC, DOCX up to <span className="text-cyan-300 font-bold">10 MB</span>
+              Supports PDF and DOCX up to <span className="text-cyan-300 font-bold">5 MB</span>
             </p>
           </div>
         </div>
@@ -143,9 +148,9 @@ export const ResumeDropzoneCard: React.FC<ResumeDropzoneCardProps> = ({
         </div>
       )}
 
-      {validationError && (
+      {shownError && (
         <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300">
-          {validationError}
+          {shownError}
         </div>
       )}
     </div>

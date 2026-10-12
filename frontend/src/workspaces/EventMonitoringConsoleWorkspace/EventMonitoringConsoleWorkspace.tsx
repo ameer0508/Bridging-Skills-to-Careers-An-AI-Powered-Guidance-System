@@ -94,13 +94,6 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
     { name: 'PredictiveAnalyticsEngine', subscribedTo: 'RoadmapUpdated', status: 'Healthy', latencyMs: 30, processed: 1100 },
   ];
 
-  const throughputData = [
-    { time: '20:06', eventsPerSec: 120, latencyMs: 0.32 },
-    { time: '20:07', eventsPerSec: 145, latencyMs: 0.35 },
-    { time: '20:08', eventsPerSec: 130, latencyMs: 0.30 },
-    { time: '20:09', eventsPerSec: 160, latencyMs: 0.28 },
-    { time: '20:10', eventsPerSec: 180, latencyMs: 0.33 },
-  ];
 
   // Filtered Events
   const filteredEvents = useMemo(() => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, Cpu, Server, Database, ShieldCheck } from 'lucide-react';
+import { Layers } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface SkillCluster {
@@ -10,7 +10,7 @@ export interface SkillCluster {
   proficiencyLevel: 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';
 }
 
-export const defaultClusters: SkillCluster[] = [
+const defaultClusters: SkillCluster[] = [
   {
     clusterName: 'Software Engineering & Full Stack',
     categoryCount: 5,

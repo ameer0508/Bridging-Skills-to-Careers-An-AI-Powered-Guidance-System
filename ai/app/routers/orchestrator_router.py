@@ -1,3 +1,6 @@
+# NOTE: this module has no live data source. It returns built-in illustrative sample data,
+# labelled as such in every response. It is not used by the product's user workflows.
+ILLUSTRATIVE = "illustrative_sample"
 from fastapi import APIRouter, Query, HTTPException
 from app.agent_orchestrator.orchestrator import multi_agent_orchestrator_instance
 
@@ -14,6 +17,6 @@ async def execute_multi_agent_workflow(
     """
     try:
         data = multi_agent_orchestrator_instance.execute_career_goal(user_id, goal=goal, target_company=target_company)
-        return {"success": True, "data": data}
+        return {"success": True, "data_origin": ILLUSTRATIVE, "data": data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

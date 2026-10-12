@@ -25,6 +25,8 @@ export interface RecommendationItem {
   impact?: number;
   estimatedTime?: string;
   status?: string;
+  /** Kind of recommendation as stored by the API (e.g. skill, project, interview). */
+  type?: string;
 }
 
 export interface RoadmapPhaseItem {

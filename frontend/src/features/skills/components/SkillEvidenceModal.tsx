@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, X, FileText, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, X, FileText } from 'lucide-react';
 
 interface IEvidence {
   sourceType: string;

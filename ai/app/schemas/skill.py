@@ -11,7 +11,7 @@ class SkillRelationship(BaseModel):
 
 class SkillProficiency(BaseModel):
     level: str = Field(default="Intermediate", description="Beginner, Intermediate, Advanced, Expert")
-    confidence: float = Field(default=0.90, ge=0.0, le=1.0)
+    confidence: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Estimate reported by an AI model when one produced this value. None when no confidence was measured.")
     evidence_score: float = Field(default=0.85, ge=0.0, le=1.0)
 
 class SkillCareerRelevance(BaseModel):
@@ -32,7 +32,7 @@ class NormalizedSkill(BaseModel):
     is_emerging: bool = False
     transferable_skills: List[str] = Field(default_factory=list)
     evidence: List[str] = Field(default_factory=list)
-    confidence: float = Field(default=0.95, ge=0.0, le=1.0)
+    confidence: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Estimate reported by an AI model when one produced this value. None when no confidence was measured, which is always the case for the rule-based parser.")
     source: str = Field(default="semantic_skill_engine")
 
 class NormalizedSkillResponse(BaseModel):

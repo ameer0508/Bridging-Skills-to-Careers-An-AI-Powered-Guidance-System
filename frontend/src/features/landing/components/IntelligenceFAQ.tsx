@@ -79,7 +79,7 @@ export const IntelligenceFAQ: React.FC = () => {
         ].map((cat) => (
           <button
             key={cat.id}
-            onClick={() => setActiveCategory(cat.id as any)}
+            onClick={() => setActiveCategory(cat.id as typeof activeCategory)}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 ${
               activeCategory === cat.id
                 ? 'bg-cyan-500/20 text-cyan-200 border border-cyan-400 scale-105'

@@ -139,7 +139,7 @@ export const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
                 </h4>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                {course.whyRecommended} Target curriculum bridges verified skill vector gaps with <strong className="text-cyan-300">98.4% AI Match Confidence</strong>.
+                {course.whyRecommended}
               </p>
             </GlassPanel>
 

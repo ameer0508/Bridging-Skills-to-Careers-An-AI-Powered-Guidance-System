@@ -5,15 +5,38 @@ import { LearningResource } from '../models/LearningResource.js';
 import { ProjectTemplate } from '../models/ProjectTemplate.js';
 import { Certification } from '../models/Certification.js';
 import logger from '../config/logger.js';
+import { LEARNING_RESOURCES } from '../seed/learningResources.js';
+import { AppError } from '../middlewares/errorHandler.js';
 
 class RecommendationService {
   /**
    * Fetch user recommendations
    */
   public async getUserRecommendations(userId: string) {
-    return await Recommendation.find({ userId: new mongoose.Types.ObjectId(userId) })
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const docs = await Recommendation.find({ userId: userObjectId })
       .sort({ priorityScore: -1 })
-      .populate('careerId', 'title category');
+      .populate<{ careerId: { _id: mongoose.Types.ObjectId; title: string; category?: string } | null }>('careerId', 'title category');
+
+    // The user's primary career: the role chosen in their profile when it is one of their
+    // matches, otherwise their best match. Its recommendations are listed first so the top
+    // action never argues from a different career than the one the user is aiming for.
+    const { CareerMatch } = await import('../models/CareerMatch.js');
+    const { User } = await import('../models/User.js');
+    const matches = await CareerMatch.find({ userId: userObjectId })
+      .sort({ matchScore: -1, confidence: -1, _id: 1 })
+      .populate<{ careerId: { _id: mongoose.Types.ObjectId; title: string } | null }>('careerId', 'title');
+    const targetRole = ((await User.findById(userObjectId).select('targetRole'))?.targetRole || '').trim().toLowerCase();
+    const valid = matches.filter(m => m.careerId);
+    const primary = (targetRole && valid.find(m => m.careerId!.title.toLowerCase() === targetRole)) || valid[0];
+    const primaryCareerId = primary?.careerId?._id.toString() ?? null;
+
+    const withFlag = docs.map(doc => ({
+      ...doc.toObject(),
+      isPrimaryCareer: primaryCareerId !== null && doc.careerId?._id.toString() === primaryCareerId,
+    }));
+    // Stable: primary-career items first, each group still ordered by priority
+    return [...withFlag.filter(r => r.isPrimaryCareer), ...withFlag.filter(r => !r.isPrimaryCareer)];
   }
 
   /**
@@ -24,12 +47,15 @@ class RecommendationService {
     recommendationId: string,
     status: RecommendationStatus
   ) {
+    if (!mongoose.Types.ObjectId.isValid(recommendationId)) {
+      throw new AppError('Recommendation not found', 404, 'RECOMMENDATION_NOT_FOUND');
+    }
     const rec = await Recommendation.findOne({
       _id: new mongoose.Types.ObjectId(recommendationId),
       userId: new mongoose.Types.ObjectId(userId)
     });
 
-    if (!rec) throw new Error('Recommendation not found');
+    if (!rec) throw new AppError('Recommendation not found', 404, 'RECOMMENDATION_NOT_FOUND');
 
     const previousStatus = rec.status;
     rec.status = status;
@@ -50,40 +76,19 @@ class RecommendationService {
    */
   public async seedInitialResources(): Promise<void> {
     try {
-      const count = await LearningResource.countDocuments();
-      if (count > 0) return; // Already seeded
+      // Idempotent: add any curated resource that is not present yet (matched by URL)
+      let added = 0;
+      for (const resource of LEARNING_RESOURCES) {
+        const result = await LearningResource.updateOne(
+          { url: resource.url },
+          { $setOnInsert: { ...resource, estimatedTime: 'Self-paced' } },
+          { upsert: true }
+        );
+        if (result.upsertedCount > 0) added++;
+      }
+      if (added > 0) logger.info(`Added ${added} curated learning resources.`);
 
-      logger.info('Seeding initial Resource Catalogs...');
-
-      await LearningResource.insertMany([
-        {
-          title: 'Docker for Beginners',
-          provider: 'Official Docs',
-          url: 'https://docs.docker.com/get-started/',
-          targetSkills: ['Docker'],
-          difficulty: 'Beginner',
-          estimatedTime: '4 hours',
-          type: 'Documentation'
-        },
-        {
-          title: 'CI/CD Pipelines with GitHub Actions',
-          provider: 'FreeCodeCamp',
-          url: 'https://www.freecodecamp.org',
-          targetSkills: ['CI/CD'],
-          difficulty: 'Intermediate',
-          estimatedTime: '6 hours',
-          type: 'Course'
-        },
-        {
-          title: 'Advanced React Patterns',
-          provider: 'Frontend Masters',
-          url: 'https://frontendmasters.com',
-          targetSkills: ['React'],
-          difficulty: 'Advanced',
-          estimatedTime: '10 hours',
-          type: 'Course'
-        }
-      ]);
+      if ((await ProjectTemplate.countDocuments()) > 0) return; // Templates already seeded
 
       await ProjectTemplate.insertMany([
         {

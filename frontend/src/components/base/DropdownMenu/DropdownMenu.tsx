@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Portal } from '../../primitives/Portal';
+import { assignRef, type TriggerElement } from '../triggerProps';
 
 export interface DropdownMenuItem {
   key: string;
@@ -15,7 +16,7 @@ export interface DropdownMenuProps {
   items: DropdownMenuItem[];
   align?: 'left' | 'right';
   className?: string;
-  children: React.ReactElement;
+  children: TriggerElement;
 }
 
 export const DropdownMenu: React.FC<DropdownMenuProps> = ({
@@ -68,11 +69,9 @@ export const DropdownMenu: React.FC<DropdownMenuProps> = ({
   return (
     <>
       {React.cloneElement(children, {
-        ref: (node: HTMLElement) => {
+        ref: (node: HTMLElement | null) => {
           triggerRef.current = node;
-          const childRef = (children as React.ReactElement & { ref?: React.Ref<unknown> }).ref;
-          if (typeof childRef === 'function') childRef(node);
-          else if (childRef) childRef.current = node;
+          assignRef(children.props.ref, node);
         },
         onClick: (e: React.MouseEvent) => {
           children.props.onClick?.(e);

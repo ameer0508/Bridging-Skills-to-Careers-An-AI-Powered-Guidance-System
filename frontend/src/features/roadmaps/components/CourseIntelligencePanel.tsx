@@ -30,7 +30,6 @@ export interface CourseIntelligencePanelProps {
 
 export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = ({
   skillTarget = 'Vector Indexing & Cloud Infrastructure',
-  onNavigateToRoadmap,
 }) => {
   const { addToast } = useToast();
 
@@ -339,7 +338,7 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
               AI Multi-Criteria Selection Synthesis ({skillTarget})
             </span>
             <p className="text-slate-300 leading-relaxed">
-              Courses ranked using <strong className="text-cyan-300">Skill Gap Fit (35%)</strong>, <strong className="text-cyan-300">Rating (25%)</strong>, and <strong className="text-emerald-400">Market Relevance (20%)</strong> with <strong className="text-emerald-400">98.4% Grounding Confidence</strong>.
+              Courses ranked using <strong className="text-cyan-300">Skill Gap Fit (35%)</strong>, <strong className="text-cyan-300">Rating (25%)</strong>, and <strong className="text-emerald-400">Market Relevance (20%)</strong>.
             </p>
           </div>
         </div>
@@ -364,6 +363,7 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
             {/* Provider Filter */}
             <div className="lg:col-span-2">
               <select
+                aria-label="Filter by provider"
                 value={selectedProvider}
                 onChange={(e) => setSelectedProvider(e.target.value)}
                 className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
@@ -381,6 +381,7 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
             {/* Difficulty Filter */}
             <div className="lg:col-span-2">
               <select
+                aria-label="Filter by level"
                 value={selectedDifficulty}
                 onChange={(e) => setSelectedDifficulty(e.target.value)}
                 className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
@@ -395,6 +396,7 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
             {/* Price Filter */}
             <div className="lg:col-span-2">
               <select
+                aria-label="Filter by price"
                 value={selectedPrice}
                 onChange={(e) => setSelectedPrice(e.target.value)}
                 className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
@@ -408,8 +410,9 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
             {/* Sort By */}
             <div className="lg:col-span-2">
               <select
+                aria-label="Sort courses"
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
                 className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
               >
                 <option value="rank-desc" className="bg-slate-900 text-white">AI Rank Fit Score</option>
@@ -600,7 +603,7 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
                 />
                 <Bar dataKey="certValue" radius={[6, 6, 0, 0]} name="Certification Value Rating">
-                  {providerStats.map((entry, index) => (
+                  {providerStats.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={index === 0 ? '#6366f1' : '#06b6d4'} />
                   ))}
                 </Bar>

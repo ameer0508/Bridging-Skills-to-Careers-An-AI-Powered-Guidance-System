@@ -1,4 +1,5 @@
 import re
+from app.resume_intelligence.skill_lexicon import get_lexicon
 from typing import Dict, Optional, Tuple
 
 class SemanticSimilarity:
@@ -44,26 +45,32 @@ class SemanticSimilarity:
     }
 
     @classmethod
-    def resolve_canonical_name(cls, raw_skill: str) -> Tuple[str, float]:
+    def resolve_canonical_name(cls, raw_skill: str) -> Tuple[str, str]:
         """
-        Resolves a raw skill string to its canonical name and similarity confidence.
-        Returns (canonical_name, confidence).
+        Resolves a raw skill string to its canonical name.
+        Returns (canonical_name, method), where method says how the name was found. It is a rule
+        lookup, so there is no similarity score or confidence to report.
         """
         if not raw_skill or not raw_skill.strip():
-            return "", 0.0
+            return "", "empty input"
 
         clean = raw_skill.strip().lower()
 
+        # 0. Shared lexicon (single source of truth for canonical names)
+        known = get_lexicon().lookup(raw_skill)
+        if known:
+            return known.name, "shared skill lexicon"
+
         # 1. Exact Alias Lookup
         if clean in cls.ALIAS_MAP:
-            return cls.ALIAS_MAP[clean], 0.99
+            return cls.ALIAS_MAP[clean], "alias table"
 
         # 2. Stripped Punctuation / Version Match
         clean_no_version = re.sub(r'\s+v?[0-9]+(?:\.[0-9]+)*$', '', clean).strip()
         if clean_no_version in cls.ALIAS_MAP:
-            return cls.ALIAS_MAP[clean_no_version], 0.96
+            return cls.ALIAS_MAP[clean_no_version], "alias table after removing a version number"
 
         # 3. Capitalization Normalization Fallback
         words = raw_skill.strip().split()
         capitalized = " ".join([w.capitalize() if w.lower() not in ["and", "of", "in", "for", "on"] else w for w in words])
-        return capitalized, 0.90
+        return capitalized, "not recognised; kept as written"

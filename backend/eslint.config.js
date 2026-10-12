@@ -32,5 +32,14 @@ export default [
       '@typescript-eslint/no-explicit-any': 'warn',
       'no-console': 'warn'
     }
+  },
+  {
+    // Tests and command-line scripts report to the console by design, and tests
+    // deliberately pass loosely typed fixtures.
+    files: ['src/tests/**/*.ts', 'src/scripts/**/*.ts'],
+    rules: {
+      'no-console': 'off',
+      '@typescript-eslint/no-explicit-any': 'off'
+    }
   }
 ];

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, CheckCircle2, Clock, ShieldCheck, ChevronRight, Circle, PlayCircle } from 'lucide-react';
+import { Layers, CheckCircle2, Clock, ShieldCheck, Circle, PlayCircle } from 'lucide-react';
 
 interface IRoadmapItem {
   _id: string;

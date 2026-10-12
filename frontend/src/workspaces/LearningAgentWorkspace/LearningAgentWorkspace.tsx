@@ -20,6 +20,7 @@ import { GlassPanel } from '../../components/experience/workspace';
 import { WorkspaceHero, AIStatusBar } from '../../components/experience/workspace';
 import { useToast } from '../../components/composite/Toast';
 import { AIThinkingAnimation } from '../../components/experience';
+import { primaryReadiness } from '../../lib/readiness';
 
 export const LearningAgentWorkspace: React.FC = () => {
   const { addToast } = useToast();
@@ -110,8 +111,8 @@ export const LearningAgentWorkspace: React.FC = () => {
     return Math.round((completedCount / totalCount) * 100);
   }, [completedCount, totalCount, roadmapItems]);
 
-  const overallReadiness = readinessData?.overallScore || 0;
-  const readinessBoostLabel = `+${Math.min(15, Math.round(completionPercent * 0.15))}% Readiness Boost`;
+  const overallReadiness = primaryReadiness(readinessData)?.overallScore ?? 0;
+  const readinessBoostLabel = `${Math.round(completionPercent)}% of roadmap done`;
 
   // Item Status Mutation
   const updateStatusMutation = useMutation({

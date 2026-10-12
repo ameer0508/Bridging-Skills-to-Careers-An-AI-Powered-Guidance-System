@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Award, ArrowRight, Zap, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface RecommendationSpotlightProps {
@@ -18,7 +18,6 @@ export interface RecommendationSpotlightProps {
 
 export const RecommendationSpotlight: React.FC<RecommendationSpotlightProps> = ({
   title = 'Build an Enterprise AI Engineer Microservices Project',
-  type = 'project',
   reason = 'Hands-on portfolio demonstration directly aligned with Senior AI Engineer role postings.',
   whyRecommended = 'Recommended to bridge key skill delta in System Design, Microservices, and FastAPI/Node.js.',
   estimatedReadinessBoost = 18.0,
@@ -82,8 +81,8 @@ export const RecommendationSpotlight: React.FC<RecommendationSpotlightProps> = (
         <div className="md:col-span-4 p-4 bg-slate-950/80 border border-white/5 rounded-2xl flex flex-col justify-between space-y-4">
           <div className="space-y-3">
             <div className="flex justify-between items-center text-xs font-mono">
-              <span className="text-slate-400">Readiness Boost:</span>
-              <span className="font-bold text-emerald-400">+{estimatedReadinessBoost}%</span>
+              <span className="text-slate-400">Gap impact:</span>
+              <span className="font-bold text-emerald-400">{estimatedReadinessBoost}/100</span>
             </div>
             <div className="flex justify-between items-center text-xs font-mono">
               <span className="text-slate-400">Match Gain:</span>

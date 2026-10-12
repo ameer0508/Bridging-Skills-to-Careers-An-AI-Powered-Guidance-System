@@ -18,7 +18,6 @@ import {
   Briefcase,
   Bot,
   MessageSquare,
-  GitBranch,
 } from 'lucide-react';
 import { SidebarItem } from './SidebarItem';
 import { useAuthStore } from '../../store/authStore';
@@ -56,6 +55,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   // Grouped Navigation Items with Shortcuts
+  interface SidebarNavItem {
+    to: string;
+    label: string;
+    icon: React.ReactNode;
+    shortcut?: string;
+    isAi?: boolean;
+  }
   const navGroups = [
     {
       title: 'MISSION CONTROL',
@@ -145,11 +151,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label: 'Agent Orchestrator',
           icon: <Bot className="w-4 h-4 text-purple-400" />,
         },
-        {
-          to: '/github',
-          label: 'GitHub Intelligence',
-          icon: <GitBranch className="w-4 h-4 text-slate-300" />,
-        },
       ],
     },
     {
@@ -238,7 +239,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                 )}
                 {(!isCollapsible || agentsExpanded || isCollapsed) &&
-                  group.items.map((item) => (
+                  group.items.map((item: SidebarNavItem) => (
                     <SidebarItem
                       key={item.to}
                       to={item.to}

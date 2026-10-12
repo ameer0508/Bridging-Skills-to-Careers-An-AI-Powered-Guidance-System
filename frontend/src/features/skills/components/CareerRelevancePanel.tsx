@@ -1,5 +1,5 @@
 import React from 'react';
-import { Target, TrendingUp, Award, BarChart3 } from 'lucide-react';
+import { Target, BarChart3 } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface RelevanceMetric {
@@ -11,7 +11,7 @@ export interface RelevanceMetric {
   recommendedAction: string;
 }
 
-export const defaultRelevanceMetrics: RelevanceMetric[] = [
+const defaultRelevanceMetrics: RelevanceMetric[] = [
   {
     skillName: 'Python & Async FastAPI',
     relevanceScore: 96.5,

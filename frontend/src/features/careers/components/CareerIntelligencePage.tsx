@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Brain, FileText, Compass, Search } from 'lucide-react';
 import apiClient from '../../../lib/axios';
-import { useAuthStore } from '../../../store/authStore';
 
 import { CareerTelemetryHUD } from './CareerTelemetryHUD';
 import { CareerObservatoryGrid } from './CareerObservatoryGrid';
@@ -41,7 +40,6 @@ interface ICareerMatch {
 
 export const CareerIntelligencePage: React.FC = () => {
   const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -207,7 +205,7 @@ export const CareerIntelligencePage: React.FC = () => {
       </div>
 
       {/* SECTION 5 — LIVE JOB INTELLIGENCE FEED */}
-      <JobIntelligenceFeed />
+      <JobIntelligenceFeed careerMatches={[]} onSelectJobForDetail={() => undefined} />
 
       {/* SECTION 6 — COMMAND CENTER SHORTCUTS */}
       <PremiumSection

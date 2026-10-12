@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar as CalendarIcon, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Calendar as CalendarIcon } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface CalendarWeek {
@@ -8,7 +8,7 @@ export interface CalendarWeek {
   isCompleted: boolean;
 }
 
-export const defaultWeeks: CalendarWeek[] = [
+const defaultWeeks: CalendarWeek[] = [
   { weekNumber: 1, focusTopic: 'Async FastAPI Architecture', isCompleted: true },
   { weekNumber: 2, focusTopic: 'PostgreSQL Relational Schemas', isCompleted: true },
   { weekNumber: 3, focusTopic: 'Redis Caching & Session Store', isCompleted: true },

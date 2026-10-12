@@ -1,45 +1,65 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { RecommendationItem } from '../../types/telemetry';
+import { listFrom } from '../../lib/collections';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import {
-  FileText,
-  Award,
-  Briefcase,
-  Video,
-  ArrowRight,
-  Target,
-  ShieldCheck,
-  Zap,
-} from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { AlertCircle } from 'lucide-react';
 import apiClient from '../../lib/axios';
 import { useAuthStore } from '../../store/authStore';
-import {
-  QuickActionGrid,
-  AIStatusBar,
-  WorkspaceDivider,
-  PremiumSection,
-  GlassPanel,
-} from '../../components/experience/workspace';
-import {
-  AIThinkingAnimation,
-  SkeletonShimmer,
-  SessionMemoryLayer,
-} from '../../components/experience';
+import { SkeletonShimmer, SessionMemoryLayer } from '../../components/experience';
 
-import { CareerOSOrbitalField } from '../../features/home/components/CareerOSOrbitalField';
-import { CareerOSTelemetryHUD } from '../../features/home/components/CareerOSTelemetryHUD';
-import { CareerOSPriorityBanner } from '../../features/home/components/CareerOSPriorityBanner';
-import { CareerOSMetricGrid } from '../../features/home/components/CareerOSMetricGrid';
-import { CareerJourneyProgressionTimeline } from '../../features/telemetry/components/CareerJourneyProgressionTimeline';
+import { motion } from 'framer-motion';
+import {
+  SpatialCareerObservatory,
+  SpatialCareerTrajectory,
+  SpatialOpportunityRadar,
+  SpatialInterviewChamber,
+  SpatialCareerInsights,
+  SpatialCareerNetwork,
+  AmbientParticleField,
+  AmbientIntelligenceDock,
+  NextBestActionInfo,
+} from '../../features/home/components';
+
+import '../../features/home/styles/spatial_command_center.css';
 
 export interface UnifiedCareerSnapshot {
   targetCareer: string;
-  matchScore: number;
-  readinessScore: number;
+  targetRole?: string;
+  primaryCareerDomain?: string;
+  matchScore: number | null;
+  isMatchEvaluated: boolean;
+  readinessScore: number | null;
+  isReadinessEvaluated: boolean;
+  careerHealth: number | null;
+  isCareerHealthEvaluated: boolean;
   totalSkills: number;
   criticalGaps: string[];
   roadmapProgress: number;
+  isRoadmapInitialized: boolean;
+  activePhaseTitle?: string | null;
+  roadmap?: {
+    isInitialized: boolean;
+    progress: number;
+    title: string | null;
+    currentPhaseTitle: string | null;
+    totalMilestones: number;
+    completedMilestones: number;
+    phases: Array<{
+      title: string;
+      description?: string;
+      items?: Array<{ title: string; status: string }>;
+    }>;
+  };
   activeRecommendationsCount: number;
+  topRecommendations?: Array<{
+    id?: string;
+    title: string;
+    reason?: string;
+    category?: string;
+    priority?: string;
+  }>;
+  nextBestAction?: NextBestActionInfo;
   opportunities: {
     saved: number;
     applied: number;
@@ -47,34 +67,62 @@ export interface UnifiedCareerSnapshot {
     offer: number;
     rejected?: number;
     withdrawn?: number;
+    total: number;
   };
   interviews: {
     total: number;
     completed: number;
-    averageScore: number;
-    latestScore: number;
+    averageScore: number | null;
+    latestScore: number | null;
+    isEvaluated: boolean;
     latestWeaknesses?: string[];
   };
   resumeInfo?: {
     hasResume: boolean;
+    fileName?: string | null;
+    detectedSkillsCount?: number;
+    atsScore?: number | null;
+    experienceCount?: number;
+    projectsCount?: number;
+    educationCount?: number;
+    certificationsCount?: number;
+    parsingStatus?: string;
     updatedAt?: string | null;
+  };
+  telemetry?: {
+    timestamp: string;
+    databaseStatus: string;
+    primaryProvider: string;
+    aiStatus?: 'LIVE' | 'FALLBACK';
+    marketStatus?: 'LIVE' | 'SANDBOX';
   };
 }
 
 export const HomeWorkspace: React.FC = () => {
   const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
+  const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+  const [isRefreshingManually, setIsRefreshingManually] = useState(false);
+  const [trajectoryHoveredDomainId, setTrajectoryHoveredDomainId] = useState<string | null>(null);
+  const [cursorPos, setCursorPos] = useState({ x: 50, y: 20 });
 
-  // Hook 1: Unified Canonical Server-Side Career Snapshot
-  const { data: snapshotData, isLoading: snapshotLoading } = useQuery<UnifiedCareerSnapshot>({
+  // Hook 1: Authoritative Career Snapshot
+  const {
+    data: snapshotData,
+    isLoading: snapshotLoading,
+    error: snapshotError,
+    refetch: refetchSnapshot,
+  } = useQuery<UnifiedCareerSnapshot>({
     queryKey: ['career-snapshot'],
     queryFn: async () => {
       const response = await apiClient.get('/users/me/career-snapshot');
       return response.data.data;
     },
+    staleTime: 15000,
+    refetchOnWindowFocus: true,
   });
 
-  // Hook 2: User Extracted Skills List for Orbital Canvas
+  // Hook 2: User Extracted Skills
   const { data: skillsData, isLoading: skillsLoading } = useQuery<{
     categories?: Record<string, Array<{ name: string; category?: string }>>;
     totalSkills: number;
@@ -84,6 +132,7 @@ export const HomeWorkspace: React.FC = () => {
       const response = await apiClient.get('/skills/me');
       return response.data.data;
     },
+    staleTime: 30000,
   });
 
   // Hook 3: Recommendations
@@ -93,23 +142,59 @@ export const HomeWorkspace: React.FC = () => {
       const response = await apiClient.get('/recommendations');
       return response.data.data.recommendations || [];
     },
+    staleTime: 30000,
   });
 
-  const snapshot: UnifiedCareerSnapshot = useMemo(
-    () =>
-      snapshotData || {
-        targetCareer: user?.targetRole || user?.primaryCareerDomain || 'Target Career Role',
-        matchScore: 0,
-        readinessScore: 0,
-        totalSkills: 0,
-        criticalGaps: [],
-        roadmapProgress: 0,
-        activeRecommendationsCount: 0,
-        opportunities: { saved: 0, applied: 0, interviewing: 0, offer: 0 },
-        interviews: { total: 0, completed: 0, averageScore: 0, latestScore: 0 },
+  // Canonical Snapshot Assembly with Guaranteed Truthful Fallback
+  const snapshot: UnifiedCareerSnapshot = useMemo(() => {
+    if (snapshotData) return snapshotData;
+    return {
+      targetCareer: user?.targetRole || user?.primaryCareerDomain || 'Target Career Track',
+      targetRole: user?.targetRole || '',
+      primaryCareerDomain: user?.primaryCareerDomain || '',
+      matchScore: null,
+      isMatchEvaluated: false,
+      readinessScore: null,
+      isReadinessEvaluated: false,
+      careerHealth: null,
+      isCareerHealthEvaluated: false,
+      totalSkills: 0,
+      criticalGaps: [],
+      roadmapProgress: 0,
+      isRoadmapInitialized: false,
+      roadmap: {
+        isInitialized: false,
+        progress: 0,
+        title: null,
+        currentPhaseTitle: null,
+        totalMilestones: 0,
+        completedMilestones: 0,
+        phases: [],
       },
-    [snapshotData, user]
-  );
+      activeRecommendationsCount: 0,
+      opportunities: { saved: 0, applied: 0, interviewing: 0, offer: 0, rejected: 0, withdrawn: 0, total: 0 },
+      interviews: { total: 0, completed: 0, averageScore: null, latestScore: null, isEvaluated: false, latestWeaknesses: [] },
+      resumeInfo: {
+        hasResume: false,
+        fileName: null,
+        detectedSkillsCount: 0,
+        atsScore: null,
+        experienceCount: 0,
+        projectsCount: 0,
+        educationCount: 0,
+        certificationsCount: 0,
+        parsingStatus: 'none',
+        updatedAt: null,
+      },
+      telemetry: {
+        timestamp: new Date().toISOString(),
+        databaseStatus: 'CONNECTED',
+        primaryProvider: 'Local AI Fallback (Deterministic Mode)',
+        aiStatus: 'FALLBACK',
+        marketStatus: 'SANDBOX',
+      },
+    };
+  }, [snapshotData, user]);
 
   const userSkillsList = useMemo(() => {
     if (!skillsData?.categories) return [];
@@ -118,364 +203,314 @@ export const HomeWorkspace: React.FC = () => {
     );
   }, [skillsData]);
 
-  const topRec = recommendationsData?.[0] || null;
+  const safeRecsList = useMemo(() => listFrom<RecommendationItem>(recommendationsData, 'recommendations'), [recommendationsData]);
+
+  const topRec = useMemo(() => {
+    // Either source may supply the headline recommendation; only these fields are read from it
+    const raw: { title: string; reason?: string; category?: string; type?: string } | null = (snapshot.topRecommendations && snapshot.topRecommendations.length > 0)
+      ? snapshot.topRecommendations[0]
+      : safeRecsList.length > 0
+      ? safeRecsList[0]
+      : null;
+
+    if (!raw) return null;
+
+    // Contextual route and action label based on category/type
+    let route = '/recommendations';
+    let actionLabel = 'Explore Directives';
+    const type = (raw.type || '').toLowerCase();
+    const cat = (raw.category || '').toLowerCase();
+
+    if (type === 'project' || cat.includes('project')) {
+      route = '/roadmap';
+      actionLabel = 'Start Hands-On Project';
+    } else if (type === 'course' || cat.includes('learning') || cat.includes('course')) {
+      route = '/roadmap';
+      actionLabel = 'Open Learning Module';
+    } else if (type === 'certification' || cat.includes('certification')) {
+      route = '/recommendations';
+      actionLabel = 'Explore Certification';
+    } else if (type === 'resume_improvement' || cat.includes('resume')) {
+      route = '/resume';
+      actionLabel = 'Review Resume Portfolio';
+    } else if (type === 'interview' || cat.includes('interview')) {
+      route = '/interview-agent';
+      actionLabel = 'Launch Interview Practice';
+    }
+
+    return {
+      title: raw.title,
+      type: raw.type || raw.category || 'Strategic Directive',
+      reason: raw.reason,
+      route,
+      actionLabel,
+    };
+  }, [snapshot.topRecommendations, safeRecsList]);
+
   const isLoading = snapshotLoading || skillsLoading || recsLoading;
 
   useEffect(() => {
     if (!isLoading && snapshot) {
       SessionMemoryLayer.updateMemory(
-        snapshot.readinessScore,
+        snapshot.readinessScore || 0,
         snapshot.roadmapProgress,
         snapshot.targetCareer
       );
     }
   }, [isLoading, snapshot]);
 
-  // Dynamic Next Best Action calculation from candidate database state
-  const nextBestAction = useMemo(() => {
+  // Clean, human-centered Next Best Action
+  const nextBestAction: NextBestActionInfo = useMemo(() => {
+    if (snapshot.nextBestAction) {
+      return snapshot.nextBestAction;
+    }
     if (!snapshot.resumeInfo?.hasResume) {
       return {
-        title: 'Upload Resume File to Activate ATS Intelligence',
-        subtitle: 'Uploading your PDF/DOCX resume file parses contact details, skills, and projects.',
+        action: 'upload_resume',
+        title: 'Awaken your profile intelligence',
+        subtitle: 'Uploading your PDF or DOCX resume extracts verified capabilities, projects, and populates your capability landscape.',
         route: '/resume',
-        icon: FileText,
-        actionLabel: 'Upload Resume File',
-        badge: 'Priority Action: Resume Upload',
+        actionLabel: 'Upload Resume Document',
+        badge: 'Priority Activation',
       };
     }
     if (snapshot.totalSkills === 0) {
       return {
-        title: 'Verify Your Core Skills & Competencies',
-        subtitle: 'Extracted skills ground career matching, readiness calculation, and opportunity search.',
+        action: 'verify_skills',
+        title: 'Review and verify your extracted competencies',
+        subtitle: 'Confirmed skills form the foundation of your role match benchmarking, readiness audit, and job discovery.',
         route: '/skills',
-        icon: ShieldCheck,
-        actionLabel: 'Manage Verified Skills',
-        badge: 'Priority Action: Skill Verification',
+        actionLabel: 'Verify Skill Portfolio',
+        badge: 'Competency Review',
       };
     }
     if (snapshot.criticalGaps && snapshot.criticalGaps.length > 0) {
       return {
-        title: `Close Highest-Priority Skill Gap: [${snapshot.criticalGaps[0]}]`,
-        subtitle: `Closing ${snapshot.criticalGaps[0]} will directly increase your readiness score for ${snapshot.targetCareer}.`,
+        action: 'close_skill_gap',
+        title: `Bridge high-leverage gap: ${snapshot.criticalGaps[0]}`,
+        subtitle: `Mastering ${snapshot.criticalGaps[0]} directly elevates your readiness alignment for ${snapshot.targetCareer}.`,
         route: '/roadmap',
-        icon: Target,
-        actionLabel: 'Execute Roadmap Module',
-        badge: 'Priority Action: Skill Gap Closure',
+        actionLabel: 'Open Learning Module',
+        badge: 'Targeted Growth',
       };
     }
-    if (snapshot.opportunities && snapshot.opportunities.saved > 0) {
+    if (snapshot.opportunities && snapshot.opportunities.saved > 0 && snapshot.interviews.total === 0) {
       return {
-        title: 'Prepare STAR Interview Sessions for Saved Opportunities',
-        subtitle: `You have ${snapshot.opportunities.saved} saved opportunities. Conduct mock technical interviews to boost offer probability.`,
+        action: 'prepare_interview',
+        title: 'Conduct interactive mock interview coaching',
+        subtitle: `You have ${snapshot.opportunities.saved} saved opportunities. Sharpen your behavioral and architectural responses with AI simulations.`,
         route: '/interview-agent',
-        icon: Video,
-        actionLabel: 'Start Mock Interview Studio',
-        badge: 'Priority Action: Interview Prep',
+        actionLabel: 'Start Mock Interview',
+        badge: 'Interview Practice',
       };
     }
     return {
-      title: `Discover Live JSearch Opportunities for ${snapshot.targetCareer}`,
-      subtitle: 'Query live market job postings matched to your verified tech stack.',
-      route: '/job-agent',
-      icon: Briefcase,
-      actionLabel: 'Discover Live Jobs',
-      badge: 'Priority Action: Job Discovery',
+      action: 'explore_opportunities',
+      title: `Explore active market opportunities for ${snapshot.targetCareer}`,
+      subtitle: 'Browse live openings matched directly to your current skill profile and career goals.',
+      route: '/opportunities',
+      actionLabel: 'Browse Matched Openings',
+      badge: 'Market Radar',
     };
   }, [snapshot]);
 
+  const handleManualRefresh = async () => {
+    setIsRefreshingManually(true);
+    try {
+      await Promise.all([
+        refetchSnapshot(),
+        queryClient.invalidateQueries({ queryKey: ['skills', 'me'] }),
+        queryClient.invalidateQueries({ queryKey: ['recommendations'] }),
+      ]);
+    } finally {
+      setTimeout(() => setIsRefreshingManually(false), 500);
+    }
+  };
+
+  const formattedSyncTime = useMemo(() => {
+    if (!snapshot.telemetry?.timestamp) return 'Just now';
+    try {
+      const date = new Date(snapshot.telemetry.timestamp);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return 'Real-time';
+    }
+  }, [snapshot.telemetry?.timestamp]);
+
+  // Clean, quiet loading skeleton
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4 font-mono">
-        <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
-          <AIThinkingAnimation statusText="Orchestrating Unified SkillBridge CareerOS Telemetry..." />
+      <div className="home-command-center max-w-7xl mx-auto space-y-10 pb-20 px-4 sm:px-6 pt-4">
+        <SkeletonShimmer height={260} />
+        <SkeletonShimmer height={120} />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div className="lg:col-span-8 space-y-8">
+            <SkeletonShimmer height={400} />
+          </div>
+          <div className="lg:col-span-4 space-y-8">
+            <SkeletonShimmer height={400} />
+          </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-          <SkeletonShimmer height={120} />
-          <SkeletonShimmer height={120} />
-          <SkeletonShimmer height={120} />
-          <SkeletonShimmer height={120} />
-        </div>
+        <SkeletonShimmer height={220} />
       </div>
     );
   }
 
-  // Command Center 12 System Shortcuts
-  const quickActions = [
-    {
-      id: 'resume',
-      title: 'Resume Studio',
-      subtitle: 'Parsed ATS evidence',
-      icon: FileText,
-      shortcut: '⌘1',
-      color: 'text-indigo-400',
-      onClick: () => navigate('/resume'),
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.09,
+      },
     },
-    {
-      id: 'skills',
-      title: 'Skill Intelligence',
-      subtitle: 'Verified competency mesh',
-      icon: ShieldCheck,
-      shortcut: '⌘2',
-      color: 'text-emerald-400',
-      onClick: () => navigate('/skills'),
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 16 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
     },
-    {
-      id: 'careers',
-      title: 'Career Intelligence',
-      subtitle: 'Taxonomy & matching',
-      icon: Target,
-      shortcut: '⌘3',
-      color: 'text-cyan-400',
-      onClick: () => navigate('/careers'),
-    },
-    {
-      id: 'readiness',
-      title: 'Career Readiness',
-      subtitle: 'Dimensional scores',
-      icon: Award,
-      shortcut: '⌘4',
-      color: 'text-purple-400',
-      onClick: () => navigate('/readiness'),
-    },
-    {
-      id: 'opportunities',
-      title: 'Live Opportunities',
-      subtitle: 'JSearch live discovery',
-      icon: Briefcase,
-      shortcut: '⌘5',
-      color: 'text-amber-400',
-      onClick: () => navigate('/opportunities'),
-    },
-    {
-      id: 'interviews',
-      title: 'Interview Agent',
-      subtitle: 'STAR AI evaluator',
-      icon: Video,
-      shortcut: '⌘6',
-      color: 'text-rose-400',
-      onClick: () => navigate('/interviews'),
-    },
-  ];
+  };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 pb-16 px-4 font-mono">
-      {/* SECTION 1 — CAREEROS TELEMETRY HERO HUD */}
-      <CareerOSTelemetryHUD
-        userName={user?.fullName || user?.email?.split('@')[0]}
-        targetRole={snapshot.targetCareer}
-        readinessScore={snapshot.readinessScore}
-        matchScore={snapshot.matchScore}
-        totalSkills={snapshot.totalSkills}
-        activePhaseTitle={`Roadmap Progress: ${snapshot.roadmapProgress}%`}
-        hasData={snapshot.totalSkills > 0}
-        onPrimaryAction={() => navigate(snapshot.totalSkills > 0 ? '/roadmap' : '/resume')}
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          setCursorPos({
+            x: Math.round(((e.clientX - rect.left) / rect.width) * 100),
+            y: Math.round(((e.clientY - rect.top) / rect.height) * 100),
+          });
+        }
+      }}
+      className="spatial-command-center max-w-7xl mx-auto space-y-10 pb-32 px-4 sm:px-6 pt-4 relative z-10"
+    >
+      {/* Dynamic Cursor Reactive Ambient Atmosphere */}
+      <div
+        className="pointer-events-none absolute inset-0 transition-opacity duration-700 opacity-50 z-0"
+        style={{
+          background: `radial-gradient(700px circle at ${cursorPos.x}% ${cursorPos.y}%, rgba(226, 179, 87, 0.06), rgba(99, 102, 241, 0.04) 40%, transparent 80%)`,
+        }}
       />
 
-      {/* DYNAMIC NEXT BEST ACTION CARD */}
-      <GlassPanel className="p-5 space-y-3 border-indigo-500/40 bg-indigo-950/20">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] font-mono font-bold px-2.5 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 uppercase">
-            {nextBestAction.badge}
-          </span>
-          <span className="text-[10px] text-slate-400 font-mono">Derived from candidate database telemetry</span>
-        </div>
+      {/* 3D Atmospheric Particle Dust & Perspective Lattice */}
+      <AmbientParticleField particleCount={45} />
+      <div className="spatial-grid-matrix" />
 
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <h4 className="text-sm font-bold text-white flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-400 shrink-0" />
-              {nextBestAction.title}
-            </h4>
-            <p className="text-xs text-slate-300 leading-relaxed max-w-3xl">
-              {nextBestAction.subtitle}
-            </p>
+      {/* Network / Connection Fallback Banner */}
+      {snapshotError && (
+        <motion.div
+          variants={itemVariants}
+          className="p-4 rounded-2xl border border-amber-500/25 bg-amber-950/30 text-amber-200 flex items-center justify-between text-xs relative z-10 backdrop-blur-xl"
+        >
+          <div className="flex items-center gap-2.5">
+            <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>Connection momentarily offline. Displaying cached career cartography.</span>
           </div>
-
           <button
-            onClick={() => navigate(nextBestAction.route)}
-            className="py-2.5 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/30 shrink-0 transition-all"
+            onClick={() => refetchSnapshot()}
+            className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 font-semibold cursor-pointer transition-colors"
           >
-            <span>{nextBestAction.actionLabel}</span>
-            <ArrowRight className="w-4 h-4" />
+            Retry Sync
           </button>
-        </div>
-      </GlassPanel>
+        </motion.div>
+      )}
 
-      {/* SECTION 2 — UNIFIED CAREER JOURNEY PROGRESSION TIMELINE */}
-      <CareerJourneyProgressionTimeline
-        hasTargetRole={Boolean(user?.targetRole || user?.primaryCareerDomain)}
-        targetRole={snapshot.targetCareer}
-        primaryDomain={user?.primaryCareerDomain || ''}
-        hasResume={Boolean(snapshot.resumeInfo?.hasResume)}
-        totalSkills={snapshot.totalSkills}
-        readinessScore={snapshot.readinessScore}
-        roadmapProgress={snapshot.roadmapProgress}
-        savedOpportunitiesCount={snapshot.opportunities.saved}
-        applicationsCount={snapshot.opportunities.applied}
-        interviewsCount={snapshot.interviews.total}
-        onNavigateNode={(route) => navigate(route)}
-      />
+      {/* 01 — THE SPATIAL CAREER OBSERVATORY (Dominant Visual Centerpiece & Interactive Constellation) */}
+      <motion.div variants={itemVariants} className="relative z-10">
+        <SpatialCareerObservatory
+          userName={user?.fullName || user?.email?.split('@')[0] || 'Candidate'}
+          targetRole={snapshot.targetCareer || 'Target Career Summit'}
+          primaryDomain={user?.primaryCareerDomain || ''}
+          readinessScore={snapshot.readinessScore ?? null}
+          isReadinessEvaluated={Boolean(snapshot.isReadinessEvaluated)}
+          syncTime={formattedSyncTime}
+          isRefreshing={isRefreshingManually}
+          skills={userSkillsList || []}
+          criticalGaps={snapshot.criticalGaps || []}
+          nextBestAction={nextBestAction}
+          onRefresh={handleManualRefresh}
+          onNavigate={(route) => navigate(route)}
+          onUploadResume={() => navigate('/resume')}
+          onNavigateSkills={() => navigate('/skills')}
+          onBridgeGap={() => navigate('/roadmap')}
+        />
+      </motion.div>
 
-      {/* SECTION 3 — ORBITAL SKILL CANVAS & TELEMETRY GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7">
-          <PremiumSection
-            title="Orbital Skill Telemetry"
-            subtitle="Extracted skill profile orbiting target career core"
-            badge="Neural Mesh"
-          >
-            <CareerOSOrbitalField
-              userSkills={userSkillsList}
-              targetRole={snapshot.targetCareer}
-              onUploadResume={() => navigate('/resume')}
-            />
-          </PremiumSection>
-        </div>
+      {/* 02 — CONTINUOUS LUMINOUS CAREER TRAJECTORY (Secondary Connecting River) */}
+      <motion.div variants={itemVariants} className="relative z-10">
+        <SpatialCareerTrajectory
+          hasTargetRole={Boolean(user?.targetRole || user?.primaryCareerDomain)}
+          targetRole={snapshot.targetCareer || 'Target Career Summit'}
+          hasResume={Boolean(snapshot.resumeInfo?.hasResume)}
+          totalSkills={snapshot.totalSkills || 0}
+          readinessScore={snapshot.readinessScore ?? null}
+          roadmapProgress={snapshot.roadmapProgress || 0}
+          savedOpportunitiesCount={snapshot.opportunities?.total || 0}
+          interviewsCount={snapshot.interviews?.total || 0}
+          onNavigate={(route) => navigate(route)}
+          onHoverStage={setTrajectoryHoveredDomainId}
+        />
+      </motion.div>
 
-        {/* SUBSYSTEM INTEGRATION METRIC CARDS (5 COLS) */}
-        <div className="lg:col-span-5 space-y-4">
-          {/* OPPORTUNITY PIPELINE TELEMETRY CARD */}
-          <GlassPanel className="p-4 space-y-3 border-amber-500/30">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-white text-xs flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-amber-400" />
-                Live Opportunity Pipeline
-              </span>
-              <span className="text-[10px] text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30 font-bold">
-                JSEARCH LIVE
-              </span>
-            </div>
+      {/* 03 — SUPPORTING SPATIAL ENVIRONMENTS: OPPORTUNITY RADAR & INTERVIEW PREPARATION CHAMBER */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
+        <motion.div variants={itemVariants} className="lg:col-span-6">
+          <SpatialOpportunityRadar
+            opportunities={snapshot.opportunities || { saved: 0, applied: 0, interviewing: 0, offer: 0, total: 0 }}
+            onNavigate={(route) => navigate(route)}
+            targetRole={snapshot.targetCareer || 'Target Role'}
+            marketStatus={snapshot.telemetry?.marketStatus || 'SANDBOX'}
+          />
+        </motion.div>
 
-            <div className="grid grid-cols-4 gap-2 text-center">
-              <button
-                onClick={() => navigate('/opportunities?tab=SAVED&status=saved')}
-                className="p-2 rounded bg-slate-950/80 border border-white/10 hover:border-amber-500/40 hover:bg-slate-900 transition-all cursor-pointer text-center"
-              >
-                <span className="text-slate-500 block text-[9px]">SAVED</span>
-                <strong className="text-white text-sm">{snapshot.opportunities.saved}</strong>
-              </button>
-              <button
-                onClick={() => navigate('/opportunities?tab=SAVED&status=applied')}
-                className="p-2 rounded bg-slate-950/80 border border-white/10 hover:border-amber-500/40 hover:bg-slate-900 transition-all cursor-pointer text-center"
-              >
-                <span className="text-slate-500 block text-[9px]">APPLIED</span>
-                <strong className="text-amber-400 text-sm">{snapshot.opportunities.applied}</strong>
-              </button>
-              <button
-                onClick={() => navigate('/interviews')}
-                className="p-2 rounded bg-slate-950/80 border border-white/10 hover:border-purple-500/40 hover:bg-slate-900 transition-all cursor-pointer text-center"
-              >
-                <span className="text-slate-500 block text-[9px]">INTERVIEW</span>
-                <strong className="text-purple-300 text-sm">{snapshot.opportunities.interviewing}</strong>
-              </button>
-              <button
-                onClick={() => navigate('/opportunities?tab=SAVED&status=offer')}
-                className="p-2 rounded bg-slate-950/80 border border-white/10 hover:border-emerald-500/40 hover:bg-slate-900 transition-all cursor-pointer text-center"
-              >
-                <span className="text-slate-500 block text-[9px]">OFFER</span>
-                <strong className="text-emerald-400 text-sm">{snapshot.opportunities.offer}</strong>
-              </button>
-            </div>
-
-            <button
-              onClick={() => navigate('/opportunities')}
-              className="w-full py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 font-bold text-xs hover:bg-amber-500/20 cursor-pointer flex items-center justify-center gap-1"
-            >
-              <span>Explore Live Opportunities</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </GlassPanel>
-
-          {/* INTERVIEW INTELLIGENCE TELEMETRY CARD */}
-          <GlassPanel className="p-4 space-y-3 border-rose-500/30">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-white text-xs flex items-center gap-2">
-                <Video className="w-4 h-4 text-rose-400" />
-                Interview Intelligence Telemetry
-              </span>
-              <span className="text-[10px] text-rose-300 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/30 font-bold">
-                STAR EVALUATED
-              </span>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <button
-                onClick={() => navigate('/interviews')}
-                className="p-2 rounded bg-slate-950/80 border border-white/10 hover:border-rose-500/40 hover:bg-slate-900 transition-all cursor-pointer text-center"
-              >
-                <span className="text-slate-500 block text-[9px]">TOTAL SESSIONS</span>
-                <strong className="text-white text-sm">{snapshot.interviews.total}</strong>
-              </button>
-              <button
-                onClick={() => navigate('/interviews')}
-                className="p-2 rounded bg-slate-950/80 border border-white/10 hover:border-rose-500/40 hover:bg-slate-900 transition-all cursor-pointer text-center"
-              >
-                <span className="text-slate-500 block text-[9px]">AVG SCORE</span>
-                <strong className="text-emerald-400 text-sm">{snapshot.interviews.averageScore}%</strong>
-              </button>
-              <button
-                onClick={() => navigate('/interviews')}
-                className="p-2 rounded bg-slate-950/80 border border-white/10 hover:border-rose-500/40 hover:bg-slate-900 transition-all cursor-pointer text-center"
-              >
-                <span className="text-slate-500 block text-[9px]">LATEST SCORE</span>
-                <strong className="text-indigo-300 text-sm">{snapshot.interviews.latestScore}%</strong>
-              </button>
-            </div>
-
-            <button
-              onClick={() => navigate('/interviews')}
-              className="w-full py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 font-bold text-xs hover:bg-rose-500/20 cursor-pointer flex items-center justify-center gap-1"
-            >
-              <span>Launch Interview Studio</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </GlassPanel>
-        </div>
+        <motion.div variants={itemVariants} className="lg:col-span-6">
+          <SpatialInterviewChamber
+            interviews={snapshot.interviews || { total: 0, completed: 0, averageScore: null, latestScore: null, isEvaluated: false }}
+            onNavigate={(route) => navigate(route)}
+          />
+        </motion.div>
       </div>
 
-      {/* SECTION 4 — DYNAMIC PRIORITY BANNER */}
-      <CareerOSPriorityBanner
-        title={topRec?.title}
-        description={topRec?.reason}
-        category={topRec?.category}
-        priority={topRec?.priority}
-        hasRecommendation={!!topRec}
-        onAction={() => navigate(topRec ? '/recommendations' : '/resume')}
-      />
-
-      {/* SECTION 5 — COMMAND CENTER SHORTCUTS */}
-      <PremiumSection
-        title="Subsystem Shortucts"
-        subtitle="Quick access to production-verified intelligence modules"
-        badge="Command Center"
-      >
-        <QuickActionGrid actions={quickActions} columns={3} />
-      </PremiumSection>
-
-      <WorkspaceDivider label="Subsystem Metric Telemetry" />
-
-      {/* SECTION 6 — TELEMETRY METRIC GRID */}
-      <PremiumSection
-        title="Career Health Telemetry"
-        subtitle="Canonical capability metrics & match coverage"
-        badge="Authoritative"
-      >
-        <CareerOSMetricGrid
-          readinessScore={snapshot.readinessScore}
-          matchScore={snapshot.matchScore}
-          totalSkills={snapshot.totalSkills}
-          milestoneProgress={snapshot.roadmapProgress}
+      {/* 04 — STRATEGIC CAREER DIRECTIVE BLADE */}
+      <motion.div variants={itemVariants} className="relative z-10">
+        <SpatialCareerInsights
+          topRecommendation={topRec}
           onNavigate={(route) => navigate(route)}
         />
-      </PremiumSection>
+      </motion.div>
 
-      {/* SECTION 7 — LIVE AI STATUS FOOTER */}
-      <AIStatusBar
-        status={isLoading ? 'thinking' : 'active'}
-        confidence={98.4}
-        lastUpdated="Unified CareerOS Orchestrated"
-      />
-    </div>
+      {/* 05 — INTERCONNECTED CAREER INTELLIGENCE SYSTEM MAP */}
+      <motion.div variants={itemVariants} className="relative z-10">
+        <SpatialCareerNetwork
+          onNavigate={(route) => navigate(route)}
+          hasResume={Boolean(snapshot.resumeInfo?.hasResume)}
+          totalSkills={snapshot.totalSkills || 0}
+          readinessScore={snapshot.readinessScore ?? null}
+          savedOpportunities={snapshot.opportunities?.saved || 0}
+          totalInterviews={snapshot.interviews?.total || 0}
+          targetRole={snapshot.targetCareer || 'Career Target'}
+          externalHighlightId={trajectoryHoveredDomainId}
+        />
+      </motion.div>
+
+      {/* 06 — AMBIENT INTELLIGENCE TELEMETRY DOCK */}
+      <motion.div variants={itemVariants} className="relative z-10">
+        <AmbientIntelligenceDock
+          provider={snapshot.telemetry?.primaryProvider || 'Local AI Fallback (Deterministic Mode)'}
+          lastUpdated={formattedSyncTime}
+          isOnline={!snapshotError}
+          aiStatus={snapshot.telemetry?.aiStatus || 'FALLBACK'}
+          marketStatus={snapshot.telemetry?.marketStatus || 'SANDBOX'}
+        />
+      </motion.div>
+    </motion.div>
   );
 };
 

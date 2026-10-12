@@ -1,3 +1,6 @@
+# NOTE: this module has no live data source. It returns built-in illustrative sample data,
+# labelled as such in every response. It is not used by the product's user workflows.
+ILLUSTRATIVE = "illustrative_sample"
 from fastapi import APIRouter, Query, HTTPException
 from typing import List, Optional
 from app.opensource_intelligence.opensource_engine import opensource_intelligence_instance
@@ -14,6 +17,6 @@ async def analyze_opensource_contributor(
     """
     try:
         data = opensource_intelligence_instance.analyze_contributor(username, target_skills=skills)
-        return {"success": True, "data": data}
+        return {"success": True, "data_origin": ILLUSTRATIVE, "data": data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

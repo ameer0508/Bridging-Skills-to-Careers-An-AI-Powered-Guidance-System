@@ -1,103 +1,124 @@
 import { ICareerRequirement } from '../models/CareerRequirement.js';
 import { IUserSkill } from '../models/UserSkill.js';
-import { ISkill } from '../models/Skill.js';
+import { IRequirementBreakdown, RequirementStatus } from '../models/CareerMatch.js';
+import { buildUserSkillIndex, findUserSkill, hasAppliedEvidence } from '../utils/skillMatching.js';
 
 export interface ScoreResult {
   totalScore: number; // 0-100
   matchingSkills: string[];
   missingSkills: string[];
   confidence: number;
+  breakdown: IRequirementBreakdown[];
+  missingRequiredCount: number;
+  requiredCount: number;
 }
+
+/** Weight multiplier per requirement importance. */
+export const IMPORTANCE_MULTIPLIER = { required: 3, preferred: 2, supporting: 1 } as const;
+
+/**
+ * Credit for a requirement the candidate has: half for having it at all, the other half
+ * scaled by how strong the evidence is. A skill that is only listed earns ~55%; one used
+ * across jobs and projects earns up to 100%.
+ */
+export const requirementCredit = (evidenceScore: number): number =>
+  0.5 + 0.5 * (Math.max(0, Math.min(100, evidenceScore)) / 100);
+
+/** Share of the score removed when every required skill is missing (scaled by the share missing). */
+export const MISSING_REQUIRED_PENALTY = 0.3;
 
 export class CareerScoringEngine {
   /**
-   * Deterministically calculates the match score between a user's skills and a career's requirements.
+   * Career match score: how much of a career's skill profile the candidate covers.
+   *
+   *   score = 100 x sum(points earned) / sum(points possible) x (1 - penalty)
+   *
+   *   points possible = requirement weight (1-5) x importance (required 3, preferred 2, supporting 1)
+   *   points earned   = points possible x requirementCredit(evidence) when the skill is evidenced,
+   *                     otherwise 0
+   *   penalty         = MISSING_REQUIRED_PENALTY x (required skills missing / required skills)
+   *
+   * 0 means none of the career's skills appear in the candidate's evidence. 100 means every
+   * skill is covered with the strongest evidence. It measures skill coverage against a curated
+   * baseline of requirements; it is not a prediction of hiring outcomes.
    */
   public static calculateScore(
     requirements: ICareerRequirement[],
     userSkills: IUserSkill[] // Populated with skillId
   ): ScoreResult {
-    let maxPossibleScore = 0;
-    let earnedScore = 0;
-    let requiredMatches = 0;
-    let requiredCount = 0;
-
+    const userSkillIndex = buildUserSkillIndex(userSkills);
+    const breakdown: IRequirementBreakdown[] = [];
     const matchingSkills: string[] = [];
     const missingSkills: string[] = [];
 
-    // Pre-map user skills for fast lookup (using canonical names)
-    const userSkillMap = new Map<string, number>(); // Name -> evidenceScore
-    for (const us of userSkills) {
-      const skill = us.skillId as unknown as ISkill;
-      if (skill && skill.canonicalName) {
-        userSkillMap.set(skill.canonicalName.toLowerCase(), us.evidenceScore);
+    let pointsPossible = 0;
+    let pointsEarned = 0;
+    let requiredCount = 0;
+    let missingRequiredCount = 0;
+    let appliedCount = 0;
 
-        // Also map aliases just in case
-        skill.aliases.forEach(a => {
-          userSkillMap.set(a.toLowerCase(), us.evidenceScore);
-        });
-      }
-    }
-
-    // Evaluate each requirement
     for (const req of requirements) {
-      // Importance modifiers
-      let multiplier = 1;
-      if (req.importance === 'required') {
-        multiplier = 3;
-        requiredCount++;
-      } else if (req.importance === 'preferred') {
-        multiplier = 2;
-      } else if (req.importance === 'supporting') {
-        multiplier = 1;
-      }
+      const possible = req.weight * (IMPORTANCE_MULTIPLIER[req.importance] ?? 1);
+      pointsPossible += possible;
+      if (req.importance === 'required') requiredCount++;
 
-      // Max score for this requirement based on its weight and importance
-      const maxReqScore = req.weight * multiplier * 100; // if evidence score was 100
-      maxPossibleScore += maxReqScore;
+      const match = findUserSkill(userSkillIndex, req.skillName);
+      let status: RequirementStatus = 'missing';
+      let earned = 0;
 
-      // Check if user has this skill
-      const userEvidenceScore = userSkillMap.get(req.skillName.toLowerCase());
-
-      if (userEvidenceScore !== undefined) {
-        // User has the skill
-        earnedScore += (userEvidenceScore / 100) * maxReqScore;
+      if (match) {
+        earned = possible * requirementCredit(match.evidenceScore);
+        const applied = hasAppliedEvidence(match.evidences);
+        status = match.inferredFrom ? 'inferred' : applied ? 'applied' : 'listed';
+        if (status === 'applied') appliedCount++;
         matchingSkills.push(req.skillName);
-
-        if (req.importance === 'required') {
-          requiredMatches++;
-        }
       } else {
-        // User is missing the skill
         missingSkills.push(req.skillName);
+        if (req.importance === 'required') missingRequiredCount++;
       }
+
+      pointsEarned += earned;
+      breakdown.push({
+        skillName: req.skillName,
+        importance: req.importance,
+        weight: req.weight,
+        status,
+        evidenceScore: match ? match.evidenceScore : 0,
+        matchedVia: match ? match.canonicalName : undefined,
+        pointsEarned: Math.round(earned * 100) / 100,
+        pointsPossible: possible
+      });
     }
 
-    if (maxPossibleScore === 0) {
-      return { totalScore: 0, matchingSkills, missingSkills, confidence: 0 };
+    if (pointsPossible === 0) {
+      return {
+        totalScore: 0,
+        matchingSkills,
+        missingSkills,
+        confidence: 0,
+        breakdown,
+        missingRequiredCount,
+        requiredCount
+      };
     }
 
-    let finalScore = (earnedScore / maxPossibleScore) * 100;
+    const coverage = pointsEarned / pointsPossible;
+    const penalty =
+      requiredCount > 0 ? MISSING_REQUIRED_PENALTY * (missingRequiredCount / requiredCount) : 0;
 
-    // Penalize heavily if missing required skills (deterministic cap)
-    if (requiredCount > 0 && requiredMatches < requiredCount) {
-      const missingRatio = (requiredCount - requiredMatches) / requiredCount;
-      finalScore = finalScore * (1 - missingRatio * 0.5); // Drops score by up to 50%
-    }
-
-    // Calculate confidence based on data volume
-    // High confidence if they have many mapped skills and requirements are thoroughly tested
-    let confidence = 50; // Baseline
-    if (userSkills.length > 5) confidence += 20;
-    if (userSkills.length > 10) confidence += 10;
-    if (userSkills.length > 20) confidence += 10;
-    if (requirements.length > 5) confidence += 10;
+    // Confidence: share of the matched requirements backed by applied evidence (work, project
+    // or certification) rather than a bare listing or an inference.
+    const confidence =
+      matchingSkills.length > 0 ? Math.round((appliedCount / matchingSkills.length) * 100) : 0;
 
     return {
-      totalScore: Math.round(finalScore),
+      totalScore: Math.round(coverage * (1 - penalty) * 100),
       matchingSkills,
       missingSkills,
-      confidence: Math.min(confidence, 100)
+      confidence,
+      breakdown,
+      missingRequiredCount,
+      requiredCount
     };
   }
 }

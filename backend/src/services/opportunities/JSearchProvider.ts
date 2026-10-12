@@ -5,6 +5,7 @@ import {
   OpportunityProviderHealth,
 } from './OpportunityProvider.js';
 import env from '../../config/env.js';
+import { searchSampleOpportunities } from './sampleOpportunities.js';
 
 /**
  * Sanitizes external HTML text to prevent script execution / XSS / prompt injection.
@@ -50,7 +51,7 @@ export class JSearchProvider implements OpportunityProvider {
       return {
         status: 'PENDING_CREDS',
         provider: this.name,
-        message: 'JSearch RapidAPI Key not configured in environment (RAPIDAPI_KEY / JSEARCH_API_KEY). Provider in sandbox mode.',
+        message: 'No live job provider key is configured (RAPIDAPI_KEY / JSEARCH_API_KEY). Showing built-in demo listings only.',
       };
     }
     return {
@@ -70,9 +71,9 @@ export class JSearchProvider implements OpportunityProvider {
     const location = query.location || '';
     const fullQuery = location ? `${searchQuery} in ${location}` : searchQuery;
 
-    // If API credentials are not set, return sandbox live opportunities
+    // Without credentials only the clearly labelled demo listings are available
     if (!apiKey) {
-      return this.getSandboxOpportunities(fullQuery);
+      return searchSampleOpportunities(query);
     }
 
     try {
@@ -109,23 +110,43 @@ export class JSearchProvider implements OpportunityProvider {
 
       return results.map((item, idx) => {
         const externalId = String(item.job_id || `jsearch_${idx}`);
-        const title = String(item.job_title || 'Software Opportunity');
-        const company = String(item.employer_name || 'Verified Employer');
+        const title = String(item.job_title || 'Untitled role');
+        const company = String(item.employer_name || 'Employer not stated');
         const description = sanitizeText(String(item.job_description || 'No description provided by employer.'));
         const jobCity = item.job_city ? String(item.job_city) : '';
         const jobCountry = item.job_country ? String(item.job_country) : '';
-        const locationStr = jobCity ? `${jobCity}, ${jobCountry}` : 'Remote / Global';
+        const locationStr = [jobCity, jobCountry].filter(Boolean).join(', ') || 'Location not stated';
         const isRemote = Boolean(item.job_is_remote);
-        const employmentType = String(item.job_employment_type || 'FULL_TIME').toUpperCase();
+        const employmentType = String(item.job_employment_type || 'NOT_STATED').toUpperCase();
         const minSalary = typeof item.job_min_salary === 'number' ? item.job_min_salary : undefined;
         const maxSalary = typeof item.job_max_salary === 'number' ? item.job_max_salary : undefined;
-        const salaryObj = minSalary || maxSalary ? { min: minSalary, max: maxSalary, currency: 'USD', period: 'YEARLY' } : null;
-        const postedAt = item.job_posted_at_timestamp ? new Date((item.job_posted_at_timestamp as number) * 1000).toISOString() : new Date().toISOString();
+        // Currency and period are only reported when the provider states them
+        const salaryObj = minSalary || maxSalary
+          ? {
+              min: minSalary,
+              max: maxSalary,
+              currency: item.job_salary_currency ? String(item.job_salary_currency) : undefined,
+              period: item.job_salary_period ? String(item.job_salary_period).toUpperCase() : undefined,
+            }
+          : null;
+        // Null rather than "now" when the provider gives no date, so freshness is never invented
+        const postedAt = typeof item.job_posted_at_timestamp === 'number'
+          ? new Date(item.job_posted_at_timestamp * 1000).toISOString()
+          : null;
         const applicationUrl = sanitizeUrl(String(item.job_apply_link || item.job_google_link || ''));
         const sourceUrl = sanitizeUrl(String(item.job_google_link || ''));
         const requiredSkills = Array.isArray(item.job_required_skills)
           ? item.job_required_skills.map((s) => String(s))
           : [];
+        const highlights = (item.job_highlights || {}) as Record<string, unknown>;
+        const qualifications = Array.isArray(highlights.Qualifications)
+          ? highlights.Qualifications.map((q) => sanitizeText(String(q)))
+          : [];
+
+        // Safe public destination URL - never direct the user's browser to the raw RapidAPI backend endpoint
+        const fallbackSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(`${title} ${company} jobs`)}`;
+        const safeApplicationUrl = applicationUrl || sourceUrl || fallbackSearchUrl;
+        const safeSourceUrl = sourceUrl || safeApplicationUrl;
 
         return {
           externalId,
@@ -138,9 +159,10 @@ export class JSearchProvider implements OpportunityProvider {
           employmentType,
           salary: salaryObj,
           postedAt,
-          applicationUrl: applicationUrl || 'https://jsearch.p.rapidapi.com',
-          sourceUrl,
+          applicationUrl: safeApplicationUrl,
+          sourceUrl: safeSourceUrl,
           skills: requiredSkills,
+          qualifications,
           fetchedAt: new Date().toISOString(),
         };
       });
@@ -148,7 +170,7 @@ export class JSearchProvider implements OpportunityProvider {
       const errorMsg = err instanceof Error ? err.message : 'Unknown JSearch API error';
       // When API credentials are configured, do not substitute fake sandbox data on failure.
       // Rethrow to allow caller to handle honest provider failure state.
-      throw new Error(`JSearch Provider Error: ${errorMsg}`);
+      throw new Error(`JSearch Provider Error: ${errorMsg}`, { cause: err });
     }
   }
 
@@ -156,49 +178,14 @@ export class JSearchProvider implements OpportunityProvider {
    * Retrieves single opportunity by external ID.
    */
   async getById(externalId: string): Promise<CanonicalOpportunity | null> {
-    const list = await this.search({ keywords: 'Software' });
-    return list.find((item) => item.externalId === externalId) || null;
+    // JSearch offers no stable lookup by id on this plan; callers use recent search results
+    void externalId;
+    return null;
   }
 
-  /**
-   * Sandbox provider results when live API keys are pending.
-   */
-  private getSandboxOpportunities(searchQuery: string): CanonicalOpportunity[] {
-    const now = new Date().toISOString();
-    return [
-      {
-        externalId: 'live_opp_sandbox_01',
-        provider: 'JSearch Provider (Sandbox Mode)',
-        title: `Senior ${searchQuery} Lead`,
-        company: 'CloudScale Infrastructure Systems',
-        description: `Lead architecture and high-throughput microservices development for ${searchQuery} platforms. Requires TypeScript, React, Node.js, and API design.`,
-        location: 'San Francisco, CA',
-        remote: true,
-        employmentType: 'FULL_TIME',
-        salary: { min: 140000, max: 195000, currency: 'USD', period: 'YEARLY' },
-        postedAt: now,
-        applicationUrl: 'https://jsearch.p.rapidapi.com',
-        sourceUrl: 'https://jsearch.p.rapidapi.com',
-        skills: ['TypeScript', 'React', 'Node.js', 'FastAPI', 'System Design'],
-        fetchedAt: now,
-      },
-      {
-        externalId: 'live_opp_sandbox_02',
-        provider: 'JSearch Provider (Sandbox Mode)',
-        title: `${searchQuery} Systems Engineer`,
-        company: 'OpenAI Ecosystem Partner',
-        description: `Build scalable AI infrastructure and high-frequency data pipelines for ${searchQuery} workloads.`,
-        location: 'New York, NY',
-        remote: true,
-        employmentType: 'FULL_TIME',
-        salary: { min: 150000, max: 210000, currency: 'USD', period: 'YEARLY' },
-        postedAt: now,
-        applicationUrl: 'https://jsearch.p.rapidapi.com',
-        sourceUrl: 'https://jsearch.p.rapidapi.com',
-        skills: ['Python', 'FastAPI', 'Docker', 'Kubernetes', 'MongoDB'],
-        fetchedAt: now,
-      },
-    ];
+  /** Demo listings, as returned when no live key is configured. */
+  getSandboxOpportunities(searchQuery: string): CanonicalOpportunity[] {
+    return searchSampleOpportunities({ keywords: searchQuery });
   }
 }
 

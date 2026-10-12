@@ -3,3 +3,4 @@ export * from './ConversationSidebar';
 export * from './MessageBubble';
 export * from './PromptSuggestions';
 export * from './ChatWindow';
+export * from './neural';

@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { User, Target, ShieldCheck, AlertTriangle, Layers, Sparkles, Cpu } from 'lucide-react';
 
 interface AICareerContextPanelProps {

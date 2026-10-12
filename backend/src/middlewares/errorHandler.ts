@@ -45,6 +45,19 @@ export const errorHandler = (
     return;
   }
 
+  // Malformed ids in the URL or body (e.g. "/roadmap/undefined") are a client error, not a crash
+  if (err.name === 'BSONError' || err.name === 'CastError') {
+    res.status(400).json({
+      success: false,
+      error: {
+        code: 'INVALID_ID',
+        message: 'The request contains an invalid identifier.',
+        details: null,
+      },
+    });
+    return;
+  }
+
   // Handle standard application or unexpected exceptions
   const appErr = err as AppError;
   const statusCode = appErr.statusCode || 500;

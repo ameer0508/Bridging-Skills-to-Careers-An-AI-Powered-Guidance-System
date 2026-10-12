@@ -1,3 +1,6 @@
+# NOTE: this module has no live data source. It returns built-in illustrative sample data,
+# labelled as such in every response. It is not used by the product's user workflows.
+ILLUSTRATIVE = "illustrative_sample"
 from fastapi import APIRouter, Query, HTTPException
 from typing import Optional, List
 from app.course_intelligence.course_engine import course_engine_instance
@@ -29,6 +32,6 @@ async def get_course_intelligence(
             filter_params=filter_params,
             target_skills=target_skills
         )
-        return {"success": True, "data": result}
+        return {"success": True, "data_origin": ILLUSTRATIVE, "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

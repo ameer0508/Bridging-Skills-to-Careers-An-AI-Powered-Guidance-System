@@ -8,6 +8,9 @@ export const CareerOSReveal: React.FC = () => {
 
   return (
     <section id="careeros" className="py-28 px-4 max-w-7xl mx-auto relative overflow-hidden">
+      <p className="mb-6 text-center text-xs text-slate-400" data-testid="landing-sample-note">
+        The screens in this section are illustrations with sample data. They are not results for any real person.
+      </p>
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 backdrop-blur-md">

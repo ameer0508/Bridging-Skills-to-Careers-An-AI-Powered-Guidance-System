@@ -91,7 +91,7 @@ export const DecisionSimulator: React.FC<DecisionSimulatorProps> = ({
             </div>
             <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
               <TrendingUp className="w-4 h-4" />
-              <span>+{simulationResult.readinessBoost}% Readiness Boost</span>
+              <span>+{simulationResult.readinessBoost}% rough estimate</span>
             </div>
           </div>
 

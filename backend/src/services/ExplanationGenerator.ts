@@ -1,68 +1,51 @@
-import { ICareerRequirement } from '../models/CareerRequirement.js';
-import { IUserSkill } from '../models/UserSkill.js';
-import { ISkill } from '../models/Skill.js';
+import { IRequirementBreakdown } from '../models/CareerMatch.js';
 
 export class ExplanationGenerator {
   /**
-   * Generates readable explainable AI strengths and weaknesses based on evidence.
+   * Turns the per-requirement score breakdown into plain-language strengths and gaps.
+   * Every statement is derived from a specific requirement and the evidence found for it.
    */
-  public static generate(
-    requirements: ICareerRequirement[],
-    userSkills: IUserSkill[],
-    missingSkills: string[]
-  ): { strengths: string[]; weaknesses: string[] } {
+  public static generate(breakdown: IRequirementBreakdown[]): {
+    strengths: string[];
+    weaknesses: string[];
+    summary: string;
+  } {
     const strengths: string[] = [];
     const weaknesses: string[] = [];
 
-    const reqMap = new Map<string, ICareerRequirement>();
-    for (const req of requirements) {
-      reqMap.set(req.skillName.toLowerCase(), req);
-    }
+    const byImpact = [...breakdown].sort((a, b) => b.pointsPossible - a.pointsPossible);
 
-    // Process strengths (matching skills with evidence)
-    for (const us of userSkills) {
-      const skill = us.skillId as unknown as ISkill;
-      if (!skill) continue;
-
-      const req = reqMap.get(skill.canonicalName.toLowerCase());
-      if (req) {
-        if (us.evidenceScore >= 75) {
-          strengths.push(
-            `✓ Strong ${skill.canonicalName} evidence (${us.evidenceScore}% proficiency context)`
-          );
-        } else if (us.evidenceScore >= 40) {
-          strengths.push(`✓ Demonstrated ${skill.canonicalName} capability`);
-        }
-
-        // Add explicit context if it comes from experience
-        const expEvidence = us.evidences.find(e => e.sourceType === 'resume_experience');
-        if (expEvidence && us.evidenceScore >= 50) {
-          strengths.push(`✓ Applied ${skill.canonicalName} in professional experience`);
-        }
+    for (const item of byImpact) {
+      const label = `${item.importance} skill`;
+      if (item.status === 'applied') {
+        strengths.push(
+          `${item.skillName}: used in your experience or projects (evidence ${item.evidenceScore}/100, ${label})`
+        );
+      } else if (item.status === 'inferred') {
+        strengths.push(
+          `${item.skillName}: inferred from your ${item.matchedVia} evidence (${label}); listing it explicitly would strengthen this`
+        );
+      } else if (item.status === 'listed') {
+        weaknesses.push(
+          `${item.skillName}: listed on your resume but not shown in any role or project (${label})`
+        );
+      } else {
+        weaknesses.push(`${item.skillName}: no evidence found on your resume (${label})`);
       }
     }
 
-    // Filter strengths to top 5 most impactful to avoid noise
-    const topStrengths = [...new Set(strengths)].slice(0, 5);
+    const total = breakdown.length;
+    const covered = breakdown.filter(b => b.status !== 'missing').length;
+    const required = breakdown.filter(b => b.importance === 'required');
+    const requiredCovered = required.filter(b => b.status !== 'missing').length;
 
-    // Process weaknesses
-    for (const missing of missingSkills) {
-      const req = reqMap.get(missing.toLowerCase());
-      if (req && req.importance === 'required') {
-        weaknesses.push(`✗ Missing critical requirement: ${missing}`);
-      } else if (req && req.importance === 'preferred') {
-        weaknesses.push(`- Lacks preferred skill: ${missing}`);
-      }
-    }
+    const summary =
+      total === 0
+        ? 'No skill requirements are defined for this career.'
+        : `Your resume evidences ${covered} of ${total} skills for this career` +
+          (required.length > 0 ? `, including ${requiredCovered} of ${required.length} required skills.` : '.');
 
-    // Suggest alternative paths if missing many core skills
-    if (weaknesses.length > requirements.length / 2) {
-      weaknesses.push(`! Core competency gaps indicate this may be a stretch role.`);
-    }
-
-    const topWeaknesses = [...new Set(weaknesses)].slice(0, 5);
-
-    return { strengths: topStrengths, weaknesses: topWeaknesses };
+    return { strengths: strengths.slice(0, 6), weaknesses: weaknesses.slice(0, 6), summary };
   }
 }
 

@@ -1,4 +1,5 @@
-import { RecommendationItem, RoadmapData } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { RecommendationItem, RoadmapData } from '../../../types/telemetry';
+import { listFrom } from '../../../lib/collections';
 
 export interface Mission {
   id: string;
@@ -38,7 +39,8 @@ export const MissionEngine = {
     }
 
     // Weekly Objective from Recommendations
-    const topRec = recommendations.find((r) => r.status !== 'completed');
+    const safeRecs: RecommendationItem[] = listFrom<RecommendationItem>(recommendations, 'recommendations');
+    const topRec = safeRecs.find((r) => r && r.status !== 'completed');
     if (topRec) {
       missions.push({
         id: 'mission-weekly',

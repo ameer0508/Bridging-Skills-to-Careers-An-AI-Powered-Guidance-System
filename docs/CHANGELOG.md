@@ -7,7 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased] - finalization (branch `work/skillbridge-opus55-finalization`)
+
+Verified status and evidence for every item are in `FINALIZATION_CHECKLIST.md`.
+
+### Added
+- Resume reprocessing, recovery of failed and interrupted jobs, and a report of skills added and removed after a replacement.
+- Job search filters (date, salary, type, remote), result metadata, re-post deduplication, notes, follow-up reminders and status history.
+- Interview questions generated per user (AI when available, otherwise a 108-question bank), with source labels and rubric dimensions in reports.
+- Labelled chat fallback with retry; ordered timeouts between browser, backend and AI service.
+- Not-found page, load-failure notice on every signed-in page, accessible names on all controls of the main pages.
+- Browser smoke tests (`pnpm test:e2e`) and five more backend test suites.
+
+### Changed
+- Scores, labels and figures that were invented or hardcoded were removed or replaced by stored data; sample content is labelled.
+- Career match, readiness, job match and interview scoring are documented in `SCORING.md`.
+- Every write endpoint validates its input; saved-job operations answer 404 for unknown or foreign records.
+- The AI service requires an internal key and never answers chat, interview questions or interview scoring with its development mock.
+
+### Security and integrity (release candidate)
+- Infrastructure diagnostics (`GET /api/v1/realtime`) are no longer public; `/health` reports only up or down.
+- No confidence figure is attached where none is measured: AI response envelopes, the rule-based resume parser and skill normalisation now report `null` and the method used.
+- The resume parser's AI fallback can no longer return the development mock's fictional resume.
+- Docker Compose stack verified on a GitHub Actions runner (`docker-smoke.yml`).
+
+### Not verified
+- A deployment on a server, live Gemini generation and live JSearch search.
+
+---
+
 ## [1.0.0] - 2026-07-21
+
+> Entries from here down were written before the finalization work and describe intentions as
+> much as results. In particular "production-grade" was not backed by a deployment.
 
 ### Changed
 - **Production Hardening Milestone**: Transformed the platform into a production-grade SaaS application.

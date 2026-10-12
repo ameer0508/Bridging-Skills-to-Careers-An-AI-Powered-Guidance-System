@@ -1,4 +1,4 @@
-import { CareerMatchItem } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { CareerMatchItem } from '../../../types/telemetry';
 
 export interface TradeoffAnalysisResult {
   pathA: { title: string; score: number; uniqueGaps: string[] };

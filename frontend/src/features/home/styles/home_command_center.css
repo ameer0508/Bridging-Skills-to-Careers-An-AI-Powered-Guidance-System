@@ -1,0 +1,166 @@
+/* ============================================================
+   SkillBridge — The Career Cartography: Architecture of Discovery
+   Aesthetic: Obsidian Noir, Champagne Gold, Architectural Glass, Topological Vectors
+   Scope: Strictly isolated to .home-command-center
+   ============================================================ */
+
+.home-command-center {
+  --carto-void: #05070c;
+  --carto-canvas: #070a12;
+  
+  /* Layered Glass Topography */
+  --carto-glass-sunken: rgba(10, 14, 24, 0.5);
+  --carto-glass-base: rgba(13, 18, 30, 0.7);
+  --carto-glass-elevated: rgba(18, 25, 42, 0.85);
+  --carto-glass-floating: rgba(24, 34, 56, 0.95);
+
+  /* Subtle Razor Borders */
+  --carto-border-hairline: rgba(255, 255, 255, 0.06);
+  --carto-border-soft: rgba(255, 255, 255, 0.11);
+  --carto-border-gold: rgba(226, 179, 87, 0.3);
+
+  /* Editorial Palette */
+  --carto-gold: #e2b357;
+  --carto-gold-bright: #fcd34d;
+  --carto-gold-dim: rgba(226, 179, 87, 0.12);
+
+  --carto-violet: #818cf8;
+  --carto-violet-dim: rgba(129, 140, 248, 0.12);
+
+  --carto-sage: #10b981;
+  --carto-sage-dim: rgba(16, 185, 129, 0.12);
+
+  --carto-text-hero: #f8fafc;
+  --carto-text-body: #cbd5e1;
+  --carto-text-muted: #64748b;
+
+  position: relative;
+  background-color: var(--carto-canvas);
+  color: var(--carto-text-hero);
+  min-height: 100vh;
+}
+
+/* Atmospheric Starless Nebula Falloff */
+.home-command-center::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  left: 15%;
+  width: 70vw;
+  height: 600px;
+  background: radial-gradient(ellipse at center, rgba(226, 179, 87, 0.03) 0%, rgba(99, 102, 241, 0.02) 40%, transparent 70%);
+  filter: blur(150px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.home-command-center::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 5%;
+  width: 50vw;
+  height: 700px;
+  background: radial-gradient(ellipse at center, rgba(129, 140, 248, 0.025) 0%, transparent 65%);
+  filter: blur(160px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Spatial Topography Surface */
+.home-command-center .carto-surface {
+  position: relative;
+  background: var(--carto-glass-base);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--carto-border-hairline);
+  border-radius: 1.75rem;
+  box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.65), inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+/* Razor Specular Top-Edge Reflection */
+.home-command-center .carto-surface::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.18) 35%, rgba(255, 255, 255, 0.28) 50%, rgba(255, 255, 255, 0.18) 65%, transparent 100%);
+  pointer-events: none;
+}
+
+.home-command-center .carto-surface:hover {
+  border-color: var(--carto-border-soft);
+  box-shadow: 0 28px 56px -15px rgba(0, 0, 0, 0.75), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+/* Tactile Catalyst Action Button (Champagne Luminous Pearl) */
+.home-command-center .catalyst-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.9375rem 2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #070a12;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #f59e0b 100%);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 20px -4px rgba(245, 158, 11, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+}
+
+.home-command-center .catalyst-btn:hover {
+  background: linear-gradient(135deg, #ffffff 0%, #fef3c7 60%, #fbbf24 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -4px rgba(245, 158, 11, 0.5), 0 0 20px rgba(245, 158, 11, 0.2);
+}
+
+.home-command-center .catalyst-btn:active {
+  transform: scale(0.98);
+}
+
+/* Secondary Editorial Ghost Action */
+.home-command-center .carto-ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--carto-text-body);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--carto-border-hairline);
+  border-radius: 0.875rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.home-command-center .carto-ghost-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.07);
+  border-color: var(--carto-border-soft);
+}
+
+/* Subtle Fluid River Track */
+.home-command-center .river-track {
+  position: relative;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.2) 0%, rgba(226, 179, 87, 0.25) 50%, rgba(255, 255, 255, 0.05) 100%);
+  height: 2px;
+}
+
+/* No Scrollbar Utility */
+.home-command-center .no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.home-command-center .no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

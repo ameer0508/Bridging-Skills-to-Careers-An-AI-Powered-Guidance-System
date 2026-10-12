@@ -14,9 +14,7 @@ export const RecommendationReasoningPanel: React.FC<ReasoningPanelProps> = ({
     'Target role postings list FastAPI and System Architecture as mandatory competencies.',
     'Completing this item directly elevates your candidate profile competitiveness.',
     'High recruiter search index in top tech companies.'
-  ],
-  skillsImproved = ['System Architecture', 'FastAPI', 'Microservices']
-}) => {
+  ]}) => {
   return (
     <GlassPanel className="p-4 space-y-3 border-indigo-500/20 text-xs">
       <div className="flex items-center gap-2 text-indigo-400 font-bold border-b border-white/5 pb-2">

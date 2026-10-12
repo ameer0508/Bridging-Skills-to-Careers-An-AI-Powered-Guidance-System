@@ -103,7 +103,7 @@ export const CareerOSDashboard: React.FC = () => {
         <button
           onClick={() => {
             setIsCommandPaletteOpen(true);
-            addToast({ title: 'Command Palette', message: 'Command Palette triggered (Ctrl + K)', type: 'info' });
+            addToast({ message: 'Command Palette triggered (Ctrl + K)', type: 'info' });
           }}
           className="absolute top-4 right-4 py-2 px-4 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-xs font-mono font-bold text-indigo-300 flex items-center gap-2 transition-all cursor-pointer shadow-lg"
         >

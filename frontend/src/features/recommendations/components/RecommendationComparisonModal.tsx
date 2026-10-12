@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, ArrowRight, Zap, CheckCircle2 } from 'lucide-react';
+import { X } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface ComparisonItem {
@@ -54,8 +54,8 @@ export const RecommendationComparisonModal: React.FC<ComparisonModalProps> = ({
 
               <div className="space-y-2 text-xs font-mono pt-2 border-t border-white/5">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Readiness Boost:</span>
-                  <span className="font-bold text-emerald-400">+{item.readinessGain}%</span>
+                  <span className="text-slate-400">Gap impact:</span>
+                  <span className="font-bold text-emerald-400">{item.readinessGain}/100</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Match Gain:</span>

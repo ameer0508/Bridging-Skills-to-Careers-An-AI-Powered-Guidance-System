@@ -8,13 +8,18 @@ import { UserSkill } from '../models/UserSkill.js';
 import ReadinessCalculator from './ReadinessCalculator.js';
 import GapPrioritizer from './GapPrioritizer.js';
 import logger from '../config/logger.js';
+import { withUserLock } from '../utils/userLock.js';
 
 export class CareerReadinessService {
   /**
    * Re-evaluates readiness and gap analysis for a specific user.
    * This is typically invoked asynchronously after skill updates or manually.
    */
-  public async evaluateUser(userId: string): Promise<void> {
+  public evaluateUser(userId: string): Promise<void> {
+    return withUserLock(`readiness:${userId}`, () => this.runEvaluation(userId));
+  }
+
+  private async runEvaluation(userId: string): Promise<void> {
     try {
       logger.info(`Starting Career Readiness Evaluation for user ${userId}`);
 
@@ -27,7 +32,8 @@ export class CareerReadinessService {
         return;
       }
 
-      const allCareers = await Career.find({ isActive: true });
+      // $ne: false also covers careers stored before the isActive flag existed
+      const allCareers = await Career.find({ isActive: { $ne: false } });
 
       // Clean up previous readiness data (replace with fresh computed data)
       await CareerReadiness.deleteMany({ userId: new mongoose.Types.ObjectId(userId) });
@@ -56,6 +62,7 @@ export class CareerReadinessService {
             careerId: career._id,
             overallScore: readinessData.overallScore,
             readinessTier: readinessData.tier,
+            interpretation: readinessData.interpretation,
             dimensions: readinessData.dimensions
           });
 
@@ -81,11 +88,9 @@ export class CareerReadinessService {
         await ReadinessHistory.insertMany(newHistories);
         logger.info(`Saved ${newReadiness.length} Readiness records for user ${userId}`);
 
-        // 3. Trigger Recommendations Async
+        // 3. Refresh recommendations (and any roadmaps) from the new gap analysis
         const RecommendationEngine = (await import('./RecommendationEngine.js')).default;
-        RecommendationEngine.generateForUser(userId).catch(e => {
-          logger.error(`Async Recommendation Generation failed for ${userId}: ${e.message}`);
-        });
+        await RecommendationEngine.generateForUser(userId);
       }
     } catch (error: unknown) {
       const err = error as Error;

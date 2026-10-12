@@ -61,7 +61,7 @@ export const NotificationPreferences: React.FC = () => {
               Important account security and parse status updates
             </span>
           </div>
-          <Switch checked={emailAlerts} onChange={e => togglePref('emailAlerts', e.target.checked)} />
+          <Switch aria-label="Security and system alerts" checked={emailAlerts} onChange={e => togglePref('emailAlerts', e.target.checked)} />
         </div>
 
         <div className="flex items-center justify-between p-3 bg-[var(--color-bg-surface-sunken)] border border-[var(--color-border-subtle)] rounded-[var(--radius-md)]">
@@ -73,7 +73,7 @@ export const NotificationPreferences: React.FC = () => {
               Weekly notifications when new career matches or fit score recalculations occur
             </span>
           </div>
-          <Switch checked={careerDigest} onChange={e => togglePref('careerDigest', e.target.checked)} />
+          <Switch aria-label="Career alignment digest" checked={careerDigest} onChange={e => togglePref('careerDigest', e.target.checked)} />
         </div>
 
         <div className="flex items-center justify-between p-3 bg-[var(--color-bg-surface-sunken)] border border-[var(--color-border-subtle)] rounded-[var(--radius-md)]">
@@ -85,7 +85,7 @@ export const NotificationPreferences: React.FC = () => {
               Reminders to complete milestone action items in your active learning roadmap
             </span>
           </div>
-          <Switch checked={roadmapReminders} onChange={e => togglePref('roadmapReminders', e.target.checked)} />
+          <Switch aria-label="Roadmap milestone reminders" checked={roadmapReminders} onChange={e => togglePref('roadmapReminders', e.target.checked)} />
         </div>
 
         <div className="flex items-center justify-between p-3 bg-[var(--color-bg-surface-sunken)] border border-[var(--color-border-subtle)] rounded-[var(--radius-md)]">
@@ -97,7 +97,7 @@ export const NotificationPreferences: React.FC = () => {
               Proactive AI career advice and skill gap notifications
             </span>
           </div>
-          <Switch checked={aiTips} onChange={e => togglePref('aiTips', e.target.checked)} />
+          <Switch aria-label="AI advisory insights" checked={aiTips} onChange={e => togglePref('aiTips', e.target.checked)} />
         </div>
       </CardBody>
     </Card>

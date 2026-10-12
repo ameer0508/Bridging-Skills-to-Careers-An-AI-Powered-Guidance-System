@@ -8,7 +8,16 @@ export const ImmersiveNavbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const clearSession = useAuthStore((state) => state.clearSession);
   const navigate = useNavigate();
+
+  const handleGoToApp = () => {
+    if (isAuthenticated) {
+      navigate('/home');
+    } else {
+      navigate('/login', { state: { from: { pathname: '/home' } } });
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -74,15 +83,23 @@ export const ImmersiveNavbar: React.FC = () => {
         {/* Desktop Authentication Action Buttons */}
         <div className="hidden md:flex items-center gap-3">
           {isAuthenticated ? (
-            <button
-              onClick={() => navigate('/home')}
-              className="relative group overflow-hidden rounded-full bg-linear-to-r from-indigo-500 via-purple-500 to-cyan-500 p-px font-medium text-xs text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/50 transition-all duration-300"
-            >
-              <span className="flex items-center gap-2 rounded-full bg-slate-950 px-5 py-2 group-hover:bg-opacity-80 transition-all">
-                <span>Go to App</span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-              </span>
-            </button>
+            <>
+              <button
+                onClick={() => navigate('/home')}
+                className="relative group overflow-hidden rounded-full bg-linear-to-r from-indigo-500 via-purple-500 to-cyan-500 p-px font-medium text-xs text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/50 transition-all duration-300"
+              >
+                <span className="flex items-center gap-2 rounded-full bg-slate-950 px-5 py-2 group-hover:bg-opacity-80 transition-all">
+                  <span>Go to App</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </button>
+              <button
+                onClick={() => clearSession()}
+                className="px-3 py-2 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+              >
+                Sign Out
+              </button>
+            </>
           ) : (
             <>
               <Link
@@ -99,6 +116,15 @@ export const ImmersiveNavbar: React.FC = () => {
                 <span>Get Started</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </Link>
+              <button
+                onClick={handleGoToApp}
+                className="relative group overflow-hidden rounded-full bg-linear-to-r from-indigo-500 via-purple-500 to-cyan-500 p-px font-medium text-xs text-white shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/50 transition-all duration-300"
+              >
+                <span className="flex items-center gap-2 rounded-full bg-slate-950 px-5 py-2 group-hover:bg-opacity-80 transition-all">
+                  <span>Go to App</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </button>
             </>
           )}
         </div>
@@ -139,18 +165,39 @@ export const ImmersiveNavbar: React.FC = () => {
 
             <div className="pt-4 border-t border-white/10 flex flex-col gap-3">
               {isAuthenticated ? (
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    navigate('/home');
-                  }}
-                  className="w-full py-3.5 px-4 rounded-2xl font-bold text-sm text-white bg-indigo-600 hover:bg-indigo-500 flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30"
-                >
-                  <span>Launch Dashboard</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
+                <>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      navigate('/home');
+                    }}
+                    className="w-full py-3.5 px-4 rounded-2xl font-bold text-sm text-white bg-indigo-600 hover:bg-indigo-500 flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30"
+                  >
+                    <span>Launch Dashboard</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      clearSession();
+                    }}
+                    className="w-full py-2.5 text-center font-medium text-xs text-slate-400 hover:text-white"
+                  >
+                    Sign Out
+                  </button>
+                </>
               ) : (
                 <>
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleGoToApp();
+                    }}
+                    className="w-full py-3.5 px-4 rounded-2xl font-bold text-sm text-white bg-linear-to-r from-indigo-600 via-purple-600 to-cyan-500 flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30"
+                  >
+                    <span>Go to App</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
                   <Link
                     to="/login"
                     onClick={() => setMobileMenuOpen(false)}
@@ -161,7 +208,7 @@ export const ImmersiveNavbar: React.FC = () => {
                   <Link
                     to="/register"
                     onClick={() => setMobileMenuOpen(false)}
-                    className="w-full py-3.5 text-center font-bold text-sm text-white bg-linear-to-r from-indigo-600 via-purple-600 to-cyan-500 rounded-2xl shadow-xl shadow-indigo-600/30 flex items-center justify-center gap-2"
+                    className="w-full py-3 text-center font-bold text-sm text-indigo-300 hover:text-white border border-indigo-500/20 hover:border-indigo-500/40 rounded-2xl flex items-center justify-center gap-2"
                   >
                     <Sparkles className="w-4 h-4" />
                     <span>Get Started</span>

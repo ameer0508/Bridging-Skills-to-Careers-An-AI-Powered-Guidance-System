@@ -6,13 +6,18 @@ import { UserSkill } from '../models/UserSkill.js';
 import CareerScoringEngine from './CareerScoringEngine.js';
 import ExplanationGenerator from './ExplanationGenerator.js';
 import logger from '../config/logger.js';
+import { withUserLock } from '../utils/userLock.js';
 
 export class CareerMatchingEngine {
   /**
    * Recomputes career matches for a specific user.
    * Typically called after their skills are updated.
    */
-  public async evaluateUser(userId: string): Promise<void> {
+  public evaluateUser(userId: string): Promise<void> {
+    return withUserLock(`match:${userId}`, () => this.runEvaluation(userId));
+  }
+
+  private async runEvaluation(userId: string): Promise<void> {
     try {
       logger.info(`Starting deterministic Career Matching for user ${userId}`);
 
@@ -25,7 +30,8 @@ export class CareerMatchingEngine {
         return;
       }
 
-      const allCareers = await Career.find({ isActive: true });
+      // $ne: false also covers careers stored before the isActive flag existed
+      const allCareers = await Career.find({ isActive: { $ne: false } });
       const newMatches = [];
 
       // Clear old matches
@@ -39,10 +45,8 @@ export class CareerMatchingEngine {
         }
 
         const scoreResult = CareerScoringEngine.calculateScore(requirements, userSkills);
-        const { strengths, weaknesses } = ExplanationGenerator.generate(
-          requirements,
-          userSkills,
-          scoreResult.missingSkills
+        const { strengths, weaknesses, summary } = ExplanationGenerator.generate(
+          scoreResult.breakdown
         );
 
         // Only save matches above a baseline threshold (e.g., > 10%) so we don't spam the DB
@@ -55,7 +59,9 @@ export class CareerMatchingEngine {
             missingSkills: scoreResult.missingSkills,
             strengths,
             weaknesses,
-            confidence: scoreResult.confidence
+            confidence: scoreResult.confidence,
+            breakdown: scoreResult.breakdown,
+            summary
           });
         }
       }

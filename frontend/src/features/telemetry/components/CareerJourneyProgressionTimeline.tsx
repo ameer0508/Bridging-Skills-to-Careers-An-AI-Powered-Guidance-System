@@ -22,7 +22,7 @@ export interface CareerJourneyProgressionTimelineProps {
   primaryDomain: string;
   hasResume: boolean;
   totalSkills: number;
-  readinessScore: number;
+  readinessScore?: number | null;
   roadmapProgress: number;
   savedOpportunitiesCount: number;
   applicationsCount: number;
@@ -43,6 +43,8 @@ export const CareerJourneyProgressionTimeline: React.FC<CareerJourneyProgression
   interviewsCount,
   onNavigateNode,
 }) => {
+  const isReadinessValid = typeof readinessScore === 'number' && readinessScore > 0;
+
   const steps = [
     {
       id: 'profile',
@@ -79,17 +81,17 @@ export const CareerJourneyProgressionTimeline: React.FC<CareerJourneyProgression
     {
       id: 'readiness',
       label: 'READINESS',
-      subtitle: readinessScore > 0 ? `${readinessScore}% Score` : 'Unevaluated',
+      subtitle: isReadinessValid ? `${readinessScore}% Score` : 'Unevaluated',
       icon: Target,
-      status: readinessScore > 0 ? ('COMPLETED' as const) : ('NOT_STARTED' as const),
+      status: isReadinessValid ? ('COMPLETED' as const) : ('NOT_STARTED' as const),
       route: '/readiness',
     },
     {
       id: 'roadmap',
       label: 'ROADMAP',
-      subtitle: roadmapProgress > 0 ? `${roadmapProgress}% Complete` : 'Mission Active',
+      subtitle: roadmapProgress > 0 ? `${roadmapProgress}% Complete` : 'Not Initialized',
       icon: Layers,
-      status: roadmapProgress > 0 ? ('IN_PROGRESS' as const) : ('NOT_STARTED' as const),
+      status: roadmapProgress > 0 ? (roadmapProgress >= 100 ? ('COMPLETED' as const) : ('IN_PROGRESS' as const)) : ('NOT_STARTED' as const),
       route: '/roadmap',
     },
     {
@@ -98,7 +100,7 @@ export const CareerJourneyProgressionTimeline: React.FC<CareerJourneyProgression
       subtitle: savedOpportunitiesCount > 0 ? `${savedOpportunitiesCount} Saved` : 'Live Discovery',
       icon: Briefcase,
       status: savedOpportunitiesCount > 0 ? ('COMPLETED' as const) : ('ACTIVE' as const),
-      route: '/job-agent',
+      route: '/opportunities',
     },
     {
       id: 'applications',
@@ -106,7 +108,7 @@ export const CareerJourneyProgressionTimeline: React.FC<CareerJourneyProgression
       subtitle: applicationsCount > 0 ? `${applicationsCount} Tracking` : 'Pipeline Ready',
       icon: Send,
       status: applicationsCount > 0 ? ('COMPLETED' as const) : ('NOT_STARTED' as const),
-      route: '/job-agent',
+      route: '/opportunities?tab=SAVED&status=applied',
     },
     {
       id: 'interviews',
@@ -122,7 +124,7 @@ export const CareerJourneyProgressionTimeline: React.FC<CareerJourneyProgression
       subtitle: 'Target Role Offer',
       icon: Award,
       status: 'ACTIVE' as const,
-      route: '/analytics',
+      route: '/opportunities',
     },
   ];
 
@@ -168,7 +170,7 @@ export const CareerJourneyProgressionTimeline: React.FC<CareerJourneyProgression
 
       {/* HORIZONTAL STEP NODES GRID */}
       <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2 font-mono">
-        {steps.map((step, idx) => {
+        {steps.map((step) => {
           const Icon = step.icon;
           const isCompleted = step.status === 'COMPLETED';
           const isInProgress = step.status === 'IN_PROGRESS';

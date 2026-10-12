@@ -1,17 +1,25 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Search, Brain, Target, Compass, FileText } from 'lucide-react';
+import {
+  Search,
+  Brain,
+  Compass,
+  FileText,
+  Filter,
+  Layers,
+} from 'lucide-react';
 import apiClient from '../../../lib/axios';
-import { useAuthStore } from '../../../store/authStore';
-import { SkillTelemetryHUD } from './SkillTelemetryHUD';
-import { SkillNodeMatrix } from './SkillNodeMatrix';
-import { SkillEvidenceModal } from './SkillEvidenceModal';
-import { SemanticSkillGraph } from './SemanticSkillGraph';
-import { SkillClusterCards } from './SkillClusterCards';
-import { TransferableSkillExplorer } from './TransferableSkillExplorer';
-import { EmergingSkillSpotlight } from './EmergingSkillSpotlight';
-import { CareerRelevancePanel } from './CareerRelevancePanel';
+
+// Components
+import { LivingCapabilityHUD } from './LivingCapabilityHUD';
+import {
+  CapabilityMatrixCanvas,
+  type CapabilitySkill,
+  type SkillGraphEdge,
+} from './CapabilityMatrixCanvas';
+import { CapabilityEvidenceInspector } from './CapabilityEvidenceInspector';
+import { CapabilityActivationHub } from './CapabilityActivationHub';
 
 // Design System 2.0 Components
 import {
@@ -19,37 +27,30 @@ import {
   AIStatusBar,
   WorkspaceDivider,
   PremiumSection,
-  PremiumEmptyState,
   PremiumErrorState,
 } from '../../../components/experience/workspace';
 import { AIThinkingAnimation } from '../../../components/experience';
 
-interface IEvidence {
-  sourceType: string;
-  description: string;
-  weight: number;
-}
-
-interface IUserSkill {
-  id: string;
-  skillId: string;
-  name: string;
-  evidenceScore: number;
-  evidences: IEvidence[];
-  aliases: string[];
-}
-
 export const SkillIntelligencePage: React.FC = () => {
   const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedSkillForModal, setSelectedSkillForModal] = useState<IUserSkill | null>(null);
+  const [selectedStrength, setSelectedStrength] = useState<string>('all');
+  const [selectedCareerId, setSelectedCareerId] = useState<string | null>(null);
 
-  // Fetch User Skills
-  const { data, isLoading, error, refetch } = useQuery<{
-    categories: Record<string, IUserSkill[]>;
+  // Inspector State
+  const [inspectingSkill, setInspectingSkill] = useState<CapabilitySkill | null>(null);
+  const [isInspectorOpen, setIsInspectorOpen] = useState(false);
+
+  // Query 1: User's Verified Skills
+  const {
+    data: skillsData,
+    isLoading: skillsLoading,
+    error: skillsError,
+    refetch: refetchSkills,
+  } = useQuery<{
+    categories: Record<string, CapabilitySkill[]>;
     totalSkills: number;
   }>({
     queryKey: ['skills', 'me'],
@@ -59,47 +60,94 @@ export const SkillIntelligencePage: React.FC = () => {
     },
   });
 
-  const categories = useMemo(() => data?.categories || {}, [data]);
-  const totalSkills = data?.totalSkills || 0;
-  const categoryKeys = useMemo(() => ['all', ...Object.keys(categories)], [categories]);
+  // Query 2: Canonical Ontology Graph Edges
+  const { data: graphData } = useQuery<{ edges: SkillGraphEdge[] }>({
+    queryKey: ['skills', 'graph'],
+    queryFn: async () => {
+      const response = await apiClient.get('/skills/graph');
+      return response.data.data;
+    },
+  });
 
-  // Compute Peak Evidence Score & Top Category
-  const maxScore = useMemo(() => {
-    let max = 0;
-    Object.values(categories).forEach((skills) => {
-      skills.forEach((s) => {
-        if (s.evidenceScore > max) max = s.evidenceScore;
-      });
-    });
-    return max || 95;
+  // Query 3: Career Matches (for target role capability coverage & gap analysis)
+  const { data: careersData } = useQuery({
+    queryKey: ['careers-matches'],
+    queryFn: async () => {
+      const response = await apiClient.get('/careers/matches');
+      return response.data.data.matches || [];
+    },
+  });
+
+  const categories = useMemo(() => skillsData?.categories || {}, [skillsData]);
+  const totalSkills = skillsData?.totalSkills || 0;
+  const graphEdges = useMemo(() => graphData?.edges || [], [graphData]);
+
+  // Flatten all skills with category assigned
+  const allSkills: CapabilitySkill[] = useMemo(() => {
+    return Object.entries(categories).flatMap(([cat, skills]) =>
+      skills.map((s) => ({ ...s, category: cat }))
+    );
   }, [categories]);
 
-  const topCategory = useMemo(() => {
-    let topCat = 'AI & Engineering';
+  // Compute Dominant Domain & High-Evidence Counts
+  const { topCategory, topCategoryCount, highEvidenceCount } = useMemo(() => {
+    let topCat = 'General';
     let maxCount = 0;
+
     Object.entries(categories).forEach(([cat, skills]) => {
       if (skills.length > maxCount) {
         maxCount = skills.length;
         topCat = cat;
       }
     });
-    return topCat;
-  }, [categories]);
 
-  // Filter skills by search query & category selection
+    const highEv = allSkills.filter((s) => s.evidenceScore >= 75).length;
+
+    return {
+      topCategory: topCat,
+      topCategoryCount: maxCount,
+      highEvidenceCount: highEv,
+    };
+  }, [categories, allSkills]);
+
+  // Target Career context
+  const activeCareerId =
+    selectedCareerId ||
+    (careersData && careersData.length > 0 ? careersData[0].careerId._id : null);
+
+  const activeCareer = useMemo(() => {
+    if (!careersData || careersData.length === 0) return null;
+    return careersData.find((c: { careerId: { _id: string } }) => c.careerId._id === activeCareerId) || careersData[0];
+  }, [careersData, activeCareerId]);
+
+  const targetRoleTitle = activeCareer?.careerId?.title || null;
+  // The career-match API names this field `matchingSkills`.
+  const matchedSkills: string[] = activeCareer?.matchingSkills || [];
+  const missingSkills: string[] = activeCareer?.missingSkills || [];
+
+  // Filter skills by search query, category, and strength tier
   const filteredCategories = useMemo(() => {
-    const result: Record<string, IUserSkill[]> = {};
+    const result: Record<string, CapabilitySkill[]> = {};
 
     Object.entries(categories).forEach(([cat, skills]) => {
       if (selectedCategory !== 'all' && cat !== selectedCategory) return;
 
       const filtered = skills.filter((skill) => {
-        if (!searchQuery.trim()) return true;
-        const q = searchQuery.toLowerCase();
-        return (
-          skill.name.toLowerCase().includes(q) ||
-          (skill.aliases && skill.aliases.some((a) => a.toLowerCase().includes(q)))
-        );
+        // 1. Search Query filter (matches name or aliases)
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase();
+          const matchesName = skill.name.toLowerCase().includes(q);
+          const matchesAlias = skill.aliases?.some((a) => a.toLowerCase().includes(q));
+          if (!matchesName && !matchesAlias) return false;
+        }
+
+        // 2. Strength tier filter
+        if (selectedStrength === 'expert' && skill.evidenceScore < 90) return false;
+        if (selectedStrength === 'advanced' && (skill.evidenceScore < 70 || skill.evidenceScore >= 90)) return false;
+        if (selectedStrength === 'working' && (skill.evidenceScore < 40 || skill.evidenceScore >= 70)) return false;
+        if (selectedStrength === 'foundational' && skill.evidenceScore >= 40) return false;
+
+        return true;
       });
 
       if (filtered.length > 0) {
@@ -108,25 +156,36 @@ export const SkillIntelligencePage: React.FC = () => {
     });
 
     return result;
-  }, [categories, selectedCategory, searchQuery]);
+  }, [categories, selectedCategory, selectedStrength, searchQuery]);
 
-  if (isLoading) {
+  const categoryKeys = useMemo(() => ['all', ...Object.keys(categories)], [categories]);
+
+  const handleSelectSkill = (skill: CapabilitySkill) => {
+    setInspectingSkill(skill);
+    setIsInspectorOpen(true);
+  };
+
+  const handleBridgeGap = () => {
+    navigate('/roadmap');
+  };
+
+  if (skillsLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
-          <AIThinkingAnimation statusText="Indexing Skill Taxonomy Vector Graph..." />
+        <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[280px]">
+          <AIThinkingAnimation statusText="Constructing Verified Skill Taxonomy & Living Capability Map..." />
         </div>
       </div>
     );
   }
 
-  if (error) {
+  if (skillsError) {
     return (
       <div className="max-w-7xl mx-auto pb-12 px-4">
         <PremiumErrorState
-          title="Skill Intelligence Telemetry Connection Error"
-          message={`Failed to load skill taxonomy graph: ${(error as Error).message}`}
-          onRetry={() => refetch()}
+          title="Skill Taxonomy Telemetry Connection Error"
+          message={`Failed to retrieve verified skills: ${(skillsError as Error).message}`}
+          onRetry={() => refetchSkills()}
         />
       </div>
     );
@@ -134,19 +193,8 @@ export const SkillIntelligencePage: React.FC = () => {
 
   if (totalSkills === 0) {
     return (
-      <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <PremiumEmptyState
-          title="No Verified Skills Extracted Yet"
-          description="Skill intelligence requires evidence parsing from your experience. Upload your resume to extract deterministic skill taxonomy vectors."
-          primaryAction={{
-            label: 'Upload Resume Now',
-            onClick: () => navigate('/resume'),
-          }}
-          secondaryAction={{
-            label: 'Explore AI Strategy',
-            onClick: () => navigate('/ai'),
-          }}
-        />
+      <div className="max-w-7xl mx-auto pb-16 px-4">
+        <CapabilityActivationHub />
       </div>
     );
   }
@@ -155,126 +203,152 @@ export const SkillIntelligencePage: React.FC = () => {
     {
       id: 'ai',
       title: 'Ask AI Architect',
-      subtitle: 'Skill gap advisory',
+      subtitle: 'Analyze skill capability gaps',
       icon: Brain,
       shortcut: '⌘1',
       color: 'text-cyan-400',
       onClick: () => navigate('/ai'),
     },
     {
-      id: 'careers',
-      title: 'Career Matches',
-      subtitle: 'Skill alignment score',
-      icon: Target,
+      id: 'roadmap',
+      title: 'Learning Roadmap',
+      subtitle: 'Bridge identified skill gaps',
+      icon: Layers,
       shortcut: '⌘2',
       color: 'text-indigo-400',
+      onClick: () => navigate('/roadmap'),
+    },
+    {
+      id: 'careers',
+      title: 'Career Intelligence',
+      subtitle: 'Role match alignment',
+      icon: Compass,
+      shortcut: '⌘3',
+      color: 'text-emerald-400',
       onClick: () => navigate('/careers'),
     },
     {
       id: 'resume',
       title: 'Resume Studio',
-      subtitle: 'Parser evidence',
+      subtitle: 'Update evidence sources',
       icon: FileText,
-      shortcut: '⌘3',
-      color: 'text-emerald-400',
+      shortcut: '⌘4',
+      color: 'text-purple-400',
       onClick: () => navigate('/resume'),
     },
   ];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 pb-16 px-4">
-      {/* SECTION 1 — HERO TELEMETRY HUD */}
-      <SkillTelemetryHUD
+    <div className="max-w-7xl mx-auto space-y-8 pb-16 px-4">
+      {/* SECTION 1 — LIVING CAPABILITY TELEMETRY HUD */}
+      <LivingCapabilityHUD
         totalSkills={totalSkills}
         topCategory={topCategory}
-        maxScore={maxScore}
+        topCategoryCount={topCategoryCount}
+        highEvidenceCount={highEvidenceCount}
+        targetRoleTitle={targetRoleTitle}
+        targetMatchedSkillsCount={matchedSkills.length}
+        targetTotalRequiredCount={matchedSkills.length + missingSkills.length}
+        careers={careersData || []}
+        activeCareerId={activeCareerId}
+        onSelectCareer={setSelectedCareerId}
       />
 
-      {/* SECTION 2 — SEARCH & CATEGORY FILTER BAR */}
-      <div className="p-4 rounded-2xl border border-white/10 bg-slate-950/70 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search skills or aliases..."
-            className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 outline-none focus:border-indigo-500/50 transition-colors"
-          />
-        </div>
+      {/* SECTION 2 — INTELLIGENT COMMAND & FILTER STRIP */}
+      <div className="p-4 rounded-2xl border border-white/10 bg-slate-950/70 backdrop-blur-xl space-y-3">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+          {/* Search Box */}
+          <div className="relative w-full sm:w-80">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search competencies or aliases..."
+              className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 outline-none focus:border-indigo-500/50 transition-colors"
+            />
+          </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto custom-scrollbar pb-1 sm:pb-0">
-          {categoryKeys.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-xl font-mono text-xs transition-colors shrink-0 cursor-pointer ${
-                selectedCategory === cat
-                  ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30'
-                  : 'bg-slate-900 text-slate-400 hover:text-white border border-white/5'
-              }`}
+          {/* Strength Level Dropdown Filter */}
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <span className="text-xs font-mono text-slate-400 flex items-center gap-1">
+              <Filter className="w-3.5 h-3.5 text-indigo-400" />
+              Strength:
+            </span>
+            <select
+              aria-label="Filter by evidence strength"
+              value={selectedStrength}
+              onChange={(e) => setSelectedStrength(e.target.value)}
+              className="px-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-white font-mono outline-none focus:border-indigo-500/50 cursor-pointer"
             >
-              {cat === 'all' ? 'All Categories' : cat}
-            </button>
-          ))}
+              <option value="all">All Levels</option>
+              <option value="expert">Expert (≥90%)</option>
+              <option value="advanced">Advanced (70-89%)</option>
+              <option value="working">Working (40-69%)</option>
+              <option value="foundational">Foundational (&lt;40%)</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Domain Category Filter Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full custom-scrollbar pb-1 pt-1">
+          {categoryKeys.map((cat) => {
+            const isSelected = selectedCategory === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-3 py-1.5 rounded-xl font-mono text-xs transition-all shrink-0 cursor-pointer border ${
+                  isSelected
+                    ? 'bg-indigo-600 border-indigo-400 text-white font-bold shadow-md shadow-indigo-600/30'
+                    : 'bg-slate-900/80 border-white/5 text-slate-400 hover:text-white hover:border-white/20'
+                }`}
+              >
+                {cat === 'all' ? 'All Domains' : cat}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* SECTION 3 — SKILL NODE MATRIX */}
+      {/* SECTION 3 — THE LIVING CAPABILITY MATRIX CANVAS */}
+      <CapabilityMatrixCanvas
+        categories={filteredCategories}
+        allSkills={allSkills}
+        graphEdges={graphEdges}
+        targetRoleTitle={targetRoleTitle}
+        matchedSkills={matchedSkills}
+        missingSkills={missingSkills}
+        onSelectSkill={handleSelectSkill}
+        onBridgeGap={handleBridgeGap}
+      />
+
+      <WorkspaceDivider label="Capability Acceleration & Career Actions" />
+
+      {/* SECTION 4 — INTELLIGENCE SHORTCUTS */}
       <PremiumSection
-        title="Verified Skill Taxonomy Matrix"
-        subtitle="Click any skill node to view exact resume evidence records"
-        badge="Taxonomy"
+        title="Capability Operations Shortcuts"
+        subtitle="Leverage your verified skills across downstream intelligence systems"
+        badge="Shortcuts"
       >
-        <SkillNodeMatrix
-          categories={filteredCategories}
-          onSelectSkill={(skill) => setSelectedSkillForModal(skill)}
-        />
+        <QuickActionGrid actions={quickActions} columns={4} />
       </PremiumSection>
 
-      <WorkspaceDivider label="Visual Knowledge Graph & Advanced Insights" />
-
-      {/* SECTION 4 — SEMANTIC SKILL KNOWLEDGE GRAPH */}
-      <PremiumSection
-        title="2D Knowledge Relationship Graph"
-        subtitle="Visual vector relationships and prerequisite connections between skills"
-        badge="Knowledge Graph"
-      >
-        <SemanticSkillGraph />
-      </PremiumSection>
-
-      {/* SECTION 5 — CLUSTERS & TRANSFERABLE SKILLS */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SkillClusterCards />
-        <TransferableSkillExplorer />
-      </div>
-
-      {/* SECTION 6 — EMERGING SKILLS & CAREER RELEVANCE */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <EmergingSkillSpotlight />
-        <CareerRelevancePanel />
-      </div>
-
-      {/* SECTION 7 — COMMAND CENTER SHORTCUTS */}
-      <PremiumSection
-        title="Intelligence Shortcuts"
-        subtitle="Execute downstream career analysis"
-        badge="Actions"
-      >
-        <QuickActionGrid actions={quickActions} columns={3} />
-      </PremiumSection>
-
-      {/* SECTION 8 — LIVE AI STATUS FOOTER */}
+      {/* SECTION 5 — LIVE AI STATUS FOOTER */}
       <AIStatusBar
         status="active"
-        confidence={95.0}
-        lastUpdated="Just now"
+        confidence={98.5}
+        lastUpdated="Telemetry Live"
       />
 
-      {/* SKILL EVIDENCE MODAL DRAWER */}
-      <SkillEvidenceModal
-        skill={selectedSkillForModal}
-        onClose={() => setSelectedSkillForModal(null)}
+      {/* CAPABILITY EVIDENCE INSPECTOR (Slide-over deep inspection studio) */}
+      <CapabilityEvidenceInspector
+        skill={inspectingSkill}
+        isOpen={isInspectorOpen}
+        onClose={() => setIsInspectorOpen(false)}
+        graphEdges={graphEdges}
+        targetRoleTitle={targetRoleTitle}
       />
     </div>
   );

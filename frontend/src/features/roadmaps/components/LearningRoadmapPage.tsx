@@ -1,9 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Brain, FileText, Compass, Target } from 'lucide-react';
+import { Brain, Compass, Target } from 'lucide-react';
 import apiClient from '../../../lib/axios';
-import { useAuthStore } from '../../../store/authStore';
 
 import { BlueprintTelemetryHUD } from './BlueprintTelemetryHUD';
 import { PhasedBlueprintTimeline } from './PhasedBlueprintTimeline';
@@ -58,7 +57,6 @@ interface ILearningRoadmap {
 export const LearningRoadmapPage: React.FC = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
 
   const [selectedCareerId, setSelectedCareerId] = useState<string | null>(null);
 

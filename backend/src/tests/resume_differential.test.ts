@@ -1,3 +1,5 @@
+/* global Express */
+import './setupEnv.js';
 import assert from 'node:assert';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
@@ -5,9 +7,13 @@ import ResumeService from '../services/ResumeService.js';
 import UserSkillService from '../services/UserSkillService.js';
 import AuthService from '../services/AuthService.js';
 import { Resume } from '../models/Resume.js';
+import { ensureFakeAiService } from './helpers/fakeAiService.js';
 
 export async function runResumeDifferentialTest(): Promise<void> {
   console.log('🧪 Running Differential Resume Upload & Cross-System Cascade Unit Tests...');
+
+  // Resume parsing goes through the AI service; use the deterministic local stand-in
+  const fakeAi = await ensureFakeAiService();
 
   let mongoServer: MongoMemoryServer | null = null;
   if (mongoose.connection.readyState === 0) {
@@ -132,6 +138,14 @@ export async function runResumeDifferentialTest(): Promise<void> {
     assert.ok(skillNamesB.some(s => s.includes('react') || s.includes('typescript') || s.includes('frontend')), 'Resume B must contain frontend skills');
 
     // 8. Assert Differential Integrity Across Uploads
+    assert.ok(
+      !skillNamesB.includes('fastapi') && !skillNamesB.includes('kafka'),
+      'Skills from the replaced resume must not linger after replacement'
+    );
+    assert.ok(
+      fakeAi.requests.filter(r => r === 'POST /api/v1/extract').length >= 2,
+      'Both resumes must have been sent to the AI service with valid service credentials'
+    );
     assert.notStrictEqual(resumeA.id, resumeB.id, 'Resume IDs must be unique');
     assert.notStrictEqual(parsedA.personalInfo.email?.value, parsedB.personalInfo.email?.value, 'Extracted email must change from Resume A to Resume B');
     console.log('  ✓ Dynamic Differential Real-Time Upload Verified: Data updated cleanly between Resume A and Resume B!');

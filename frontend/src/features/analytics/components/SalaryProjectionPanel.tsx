@@ -1,5 +1,5 @@
 import React from 'react';
-import { DollarSign, TrendingUp, Award, Zap } from 'lucide-react';
+import { DollarSign } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface SalaryProjectionProps {

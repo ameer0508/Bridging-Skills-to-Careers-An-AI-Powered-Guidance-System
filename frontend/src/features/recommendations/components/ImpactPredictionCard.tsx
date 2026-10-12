@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, Award, Zap, DollarSign } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface ImpactPredictionProps {

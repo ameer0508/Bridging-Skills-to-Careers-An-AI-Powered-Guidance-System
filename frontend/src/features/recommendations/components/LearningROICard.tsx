@@ -1,6 +1,4 @@
 import React from 'react';
-import { Clock, ShieldCheck, Zap } from 'lucide-react';
-import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface LearningROIProps {
   itemType: string;
@@ -10,7 +8,6 @@ export interface LearningROIProps {
 }
 
 export const LearningROICard: React.FC<LearningROIProps> = ({
-  itemType,
   roiLevel = 'Exceptional',
   learningTime = '2-3 weeks',
   difficulty = 'Intermediate'

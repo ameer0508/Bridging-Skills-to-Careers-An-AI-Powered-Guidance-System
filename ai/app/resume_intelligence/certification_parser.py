@@ -26,21 +26,18 @@ class CertificationParser:
             certs.append(SemanticCertification(
                 name=SemanticExtractedEntity(
                     value=line,
-                    confidence=0.92,
                     source="cert_title",
                     transformer_model="cert-parser-v1",
                     extraction_method="cert-ner"
                 ),
                 issuer=SemanticExtractedEntity(
                     value=issuer,
-                    confidence=0.94,
                     source="cert_issuer",
                     transformer_model="cert-parser-v1",
                     extraction_method="issuer-regex"
                 ) if issuer else None,
                 year=SemanticExtractedEntity(
                     value=year,
-                    confidence=0.90,
                     source="cert_year",
                     transformer_model="cert-parser-v1",
                     extraction_method="year-regex"

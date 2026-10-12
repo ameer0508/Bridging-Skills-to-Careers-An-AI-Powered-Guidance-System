@@ -1,0 +1,182 @@
+/* ============================================================
+   SkillBridge — Neural AI Command Center Style System
+   Aesthetic: Deep Obsidian Void, Cyan Neural Luminescence,
+              Synaptic Axons, Quantum Glass Blades
+   ============================================================ */
+
+.neural-command-center {
+  --neural-void: #030509;
+  --neural-canvas: #050811;
+
+  /* Material Refractions */
+  --neural-glass-subtle: rgba(10, 18, 32, 0.45);
+  --neural-glass-surface: rgba(12, 22, 40, 0.65);
+  --neural-glass-floating: rgba(16, 28, 52, 0.85);
+
+  /* Specular & Rim Lighting */
+  --neural-border-hairline: rgba(255, 255, 255, 0.08);
+  --neural-border-active: rgba(6, 182, 212, 0.45);
+  --neural-border-reasoning: rgba(139, 92, 246, 0.45);
+  --neural-specular-rim: rgba(255, 255, 255, 0.25);
+
+  /* Luminous Accent Tones */
+  --neural-cyan: #06b6d4;
+  --neural-cyan-bright: #22d3ee;
+  --neural-indigo: #6366f1;
+  --neural-purple: #a855f7;
+  --neural-amber: #f59e0b;
+  --neural-emerald: #10b981;
+  --neural-crimson: #ef4444;
+
+  position: relative;
+  background-color: var(--neural-canvas);
+  color: #f8fafc;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Atmospheric Volumetric Nebula Lighting — Cyan and Indigo Intelligence Haze */
+.neural-command-center::before {
+  content: '';
+  position: absolute;
+  top: -120px;
+  left: 15%;
+  width: 70vw;
+  height: 650px;
+  background: radial-gradient(
+    ellipse 60% 50% at 50% 40%,
+    rgba(6, 182, 212, 0.08) 0%,
+    rgba(99, 102, 241, 0.08) 35%,
+    rgba(168, 85, 247, 0.04) 60%,
+    transparent 80%
+  );
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.neural-command-center::after {
+  content: '';
+  position: absolute;
+  top: 45%;
+  right: 5%;
+  width: 60vw;
+  height: 750px;
+  background: radial-gradient(
+    ellipse 50% 60% at 60% 50%,
+    rgba(139, 92, 246, 0.07) 0%,
+    rgba(6, 182, 212, 0.06) 40%,
+    transparent 75%
+  );
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Neural Synapse Grid Matrix */
+.neural-grid-matrix {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(6, 182, 212, 0.025) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(99, 102, 241, 0.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 75% 65% at 50% 40%, black 30%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse 75% 65% at 50% 40%, black 30%, transparent 85%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Seamless Floating Glass Blade */
+.neural-glass-blade {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.035) 0%,
+    rgba(12, 20, 36, 0.55) 40%,
+    rgba(6, 10, 20, 0.75) 100%
+  );
+  backdrop-filter: blur(32px);
+  -webkit-backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.75rem;
+  box-shadow: 
+    0 24px 64px -16px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.12),
+    inset 0 0 24px 0 rgba(6, 182, 212, 0.03);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.neural-glass-blade:hover {
+  border-color: rgba(6, 182, 212, 0.25);
+  box-shadow: 
+    0 32px 80px -16px rgba(0, 0, 0, 0.9),
+    0 0 35px -8px rgba(6, 182, 212, 0.12),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Neural Reticle & Synaptic Pulsing Keyframes */
+@keyframes neural-pulse-slow {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.85;
+    filter: drop-shadow(0 0 15px rgba(6, 182, 212, 0.4));
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+    filter: drop-shadow(0 0 30px rgba(6, 182, 212, 0.75));
+  }
+}
+
+@keyframes neural-ring-spin-cw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes neural-ring-spin-ccw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes axon-photon-travel {
+  0% {
+    stroke-dashoffset: 200;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-neural-core {
+  animation: neural-pulse-slow 4s ease-in-out infinite;
+}
+
+.animate-ring-cw {
+  animation: neural-ring-spin-cw 36s linear infinite;
+}
+
+.animate-ring-ccw {
+  animation: neural-ring-spin-ccw 24s linear infinite;
+}
+
+.animate-ring-cw-fast {
+  animation: neural-ring-spin-cw 12s linear infinite;
+}
+
+/* Photon flow line */
+.neural-axon-path {
+  stroke-dasharray: 8 16;
+  animation: axon-photon-travel 2.4s linear infinite;
+}
+
+/* Focus and active highlight styles */
+.neural-node-active {
+  border-color: rgba(6, 182, 212, 0.6) !important;
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.35) !important;
+}
+
+.neural-node-reasoning {
+  border-color: rgba(139, 92, 246, 0.6) !important;
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.35) !important;
+}

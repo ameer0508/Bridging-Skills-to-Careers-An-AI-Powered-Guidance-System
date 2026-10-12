@@ -69,6 +69,27 @@ class RecommendationController {
       next(error);
     }
   };
+
+  /**
+   * Forces fresh recalculation of recommendations for the authenticated user.
+   */
+  regenerateRecommendations = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication is required.', 401);
+
+      await RecommendationEngine.generateForUser(userId);
+      const fresh = await RecommendationService.getUserRecommendations(userId);
+
+      res.status(200).json({
+        success: true,
+        data: { recommendations: fresh }
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 }
+
 
 export default new RecommendationController();

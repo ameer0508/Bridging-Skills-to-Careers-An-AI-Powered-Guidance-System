@@ -8,7 +8,16 @@ export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const clearSession = useAuthStore((state) => state.clearSession);
   const navigate = useNavigate();
+
+  const handleGoToApp = () => {
+    if (isAuthenticated) {
+      navigate('/home');
+    } else {
+      navigate('/login', { state: { from: { pathname: '/home' } } });
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -77,15 +86,23 @@ export const Navbar: React.FC = () => {
         {/* Action Buttons */}
         <div className="hidden md:flex items-center gap-3">
           {isAuthenticated ? (
-            <button
-              onClick={() => navigate('/home')}
-              className="relative group overflow-hidden rounded-full bg-linear-to-r from-indigo-500 via-purple-500 to-cyan-500 p-px font-medium text-xs text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all duration-300"
-            >
-              <span className="flex items-center gap-2 rounded-full bg-slate-950 px-5 py-2 group-hover:bg-opacity-80 transition-all">
-                <span>Go to App</span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-              </span>
-            </button>
+            <>
+              <button
+                onClick={() => navigate('/home')}
+                className="relative group overflow-hidden rounded-full bg-linear-to-r from-indigo-500 via-purple-500 to-cyan-500 p-px font-medium text-xs text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all duration-300"
+              >
+                <span className="flex items-center gap-2 rounded-full bg-slate-950 px-5 py-2 group-hover:bg-opacity-80 transition-all">
+                  <span>Go to App</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </span>
+              </button>
+              <button
+                onClick={() => clearSession()}
+                className="px-3 py-2 text-xs font-medium text-slate-400 hover:text-white transition-colors"
+              >
+                Sign Out
+              </button>
+            </>
           ) : (
             <>
               <Link
@@ -101,6 +118,15 @@ export const Navbar: React.FC = () => {
                 <span>Get Started</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </Link>
+              <button
+                onClick={handleGoToApp}
+                className="relative group overflow-hidden rounded-full bg-linear-to-r from-indigo-500 via-purple-500 to-cyan-500 p-px font-medium text-xs text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all duration-300"
+              >
+                <span className="flex items-center gap-2 rounded-full bg-slate-950 px-5 py-2 group-hover:bg-opacity-80 transition-all">
+                  <span>Go to App</span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                </span>
+              </button>
             </>
           )}
         </div>

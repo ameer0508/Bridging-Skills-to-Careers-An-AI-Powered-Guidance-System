@@ -3,9 +3,9 @@ from pydantic import BaseModel, Field
 
 class SemanticExtractedEntity(BaseModel):
     value: str
-    confidence: float = Field(default=0.95, ge=0.0, le=1.0)
+    confidence: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Estimate reported by an AI model when one produced this value. None when no confidence was measured, which is always the case for the rule-based parser.")
     source: str = Field(default="resume_body")
-    transformer_model: str = Field(default="transformer-ner-v1")
+    transformer_model: Optional[str] = None
     extraction_method: str = Field(default="semantic-ner")
 
 class SemanticPersonalInfo(BaseModel):
@@ -41,9 +41,9 @@ class SemanticProject(BaseModel):
 class SemanticSkill(BaseModel):
     name: str
     category: str = Field(description="e.g., Programming Languages, Frameworks, Databases, Cloud, DevOps, AI/ML, Cybersecurity, Tools, Soft Skills")
-    confidence: float = Field(default=0.95, ge=0.0, le=1.0)
+    confidence: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Estimate reported by an AI model when one produced this value. None when no confidence was measured, which is always the case for the rule-based parser.")
     source: str = Field(default="skill_engine")
-    transformer_model: str = Field(default="transformer-skill-v1")
+    transformer_model: Optional[str] = None
     extraction_method: str = Field(default="taxonomy-mapping")
     parent_domains: List[str] = Field(default_factory=list)
 

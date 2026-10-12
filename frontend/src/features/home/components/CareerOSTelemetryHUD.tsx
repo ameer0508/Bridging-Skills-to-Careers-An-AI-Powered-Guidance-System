@@ -5,21 +5,25 @@ import { Sparkles, ArrowRight, ShieldCheck, Cpu } from 'lucide-react';
 interface CareerOSTelemetryHUDProps {
   userName?: string;
   targetRole?: string;
-  readinessScore?: number;
-  matchScore?: number;
+  readinessScore?: number | null;
+  matchScore?: number | null;
+  careerHealth?: number | null;
   totalSkills?: number;
-  activePhaseTitle?: string;
+  activePhaseTitle?: string | null;
+  hasResume?: boolean;
   hasData: boolean;
   onPrimaryAction: () => void;
 }
 
 export const CareerOSTelemetryHUD: React.FC<CareerOSTelemetryHUDProps> = ({
-  userName = 'Developer',
+  userName = 'Candidate',
   targetRole = 'Target Career Blueprint',
   readinessScore,
   matchScore,
+  careerHealth,
   totalSkills = 0,
   activePhaseTitle,
+  hasResume = false,
   hasData,
   onPrimaryAction,
 }) => {
@@ -49,16 +53,23 @@ export const CareerOSTelemetryHUD: React.FC<CareerOSTelemetryHUDProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-3 pt-2 text-xs font-mono text-slate-400">
-            {readinessScore !== undefined && (
-              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900 border border-white/10">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Readiness: {readinessScore}%</span>
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900 border border-white/10">
+              <ShieldCheck className={`w-3.5 h-3.5 ${typeof readinessScore === 'number' ? 'text-emerald-400' : 'text-slate-500'}`} />
+              <span>
+                {typeof readinessScore === 'number' ? `Readiness: ${readinessScore}%` : 'Readiness: Unevaluated'}
+              </span>
+            </span>
+            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900 border border-white/10">
+              <Cpu className={`w-3.5 h-3.5 ${totalSkills > 0 ? 'text-cyan-400' : 'text-slate-500'}`} />
+              <span>
+                {totalSkills > 0 ? `${totalSkills} Vector Skills` : '0 Skills Extracted'}
+              </span>
+            </span>
+            {typeof careerHealth === 'number' && (
+              <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-950/60 border border-indigo-500/30 text-indigo-300">
+                <span>Health Index: <strong>{careerHealth}%</strong></span>
               </span>
             )}
-            <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-900 border border-white/10">
-              <Cpu className="w-3.5 h-3.5 text-cyan-400" />
-              <span>{totalSkills} Vector Skills</span>
-            </span>
           </div>
         </div>
 
@@ -69,16 +80,16 @@ export const CareerOSTelemetryHUD: React.FC<CareerOSTelemetryHUDProps> = ({
               <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest block">
                 Match Rate
               </span>
-              <span className="font-display text-xl sm:text-2xl font-bold text-cyan-400">
-                {matchScore !== undefined ? `${matchScore}%` : 'Pending'}
+              <span className="font-display text-lg sm:text-2xl font-bold text-cyan-400 truncate block">
+                {typeof matchScore === 'number' ? `${matchScore}%` : 'Awaiting Profile'}
               </span>
             </div>
             <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-white/10 text-center space-y-1">
               <span className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest block">
                 Current Phase
               </span>
-              <span className="font-display text-xl sm:text-2xl font-bold text-indigo-400 truncate block">
-                {activePhaseTitle ? activePhaseTitle.split(':')[0] : 'Phase 1'}
+              <span className="font-display text-lg sm:text-2xl font-bold text-indigo-400 truncate block">
+                {activePhaseTitle ? activePhaseTitle.split(':')[0] : (hasData ? 'Phase 1' : 'Not Initialized')}
               </span>
             </div>
           </div>
@@ -89,7 +100,7 @@ export const CareerOSTelemetryHUD: React.FC<CareerOSTelemetryHUDProps> = ({
             onClick={onPrimaryAction}
             className="w-full py-3 px-5 rounded-xl font-bold text-xs text-white bg-linear-to-r from-indigo-600 via-purple-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
           >
-            <span>{hasData ? 'Open Active Milestone Roadmap' : 'Upload Resume to Activate AI'}</span>
+            <span>{hasResume || totalSkills > 0 ? 'Open Active Milestone Roadmap' : 'Upload Resume to Activate AI'}</span>
             <ArrowRight className="w-4 h-4" />
           </motion.button>
         </div>

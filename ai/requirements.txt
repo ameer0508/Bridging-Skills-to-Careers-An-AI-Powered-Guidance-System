@@ -10,6 +10,7 @@ pymupdf>=1.23.22
 python-docx>=1.1.0
 python-multipart>=0.0.9
 google-genai>=0.1.2
+google-antigravity>=0.1.17
 
 # TODO: Re-enable in later milestones when NLP/ML models are implemented
 # spacy>=3.7.2

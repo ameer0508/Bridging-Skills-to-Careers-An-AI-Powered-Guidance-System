@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation } from '@tanstack/react-query';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   User,
@@ -39,7 +39,9 @@ type RegisterFields = z.infer<typeof registerSchema>;
 
 export const RegisterForm: React.FC = () => {
   const navigate = useNavigate();
-  const setSession = useAuthStore((state) => state.stateSession ?? state.setSession);
+  const location = useLocation();
+  const from = (location.state as { from?: { pathname?: string } })?.from?.pathname || '/home';
+  const setSession = useAuthStore((state) => state.setSession);
 
   const [confirmPassword, setConfirmPassword] = useState('');
   const [confirmError, setConfirmError] = useState('');
@@ -63,7 +65,7 @@ export const RegisterForm: React.FC = () => {
     },
     onSuccess: (data) => {
       setSession(data.user, data.accessToken, data.refreshToken);
-      navigate('/home');
+      navigate(from, { replace: true });
     },
   });
 

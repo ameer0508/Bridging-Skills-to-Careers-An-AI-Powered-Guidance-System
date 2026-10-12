@@ -1,4 +1,4 @@
-import { CareerMatchItem } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { CareerMatchItem } from '../../../types/telemetry';
 
 export interface PathComparisonItem {
   id: string;

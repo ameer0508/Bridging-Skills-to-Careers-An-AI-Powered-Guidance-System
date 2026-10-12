@@ -1,0 +1,221 @@
+# How SkillBridge scores are calculated
+
+Every score shown to a user is computed from that user's own stored data with the fixed
+formulas below. None of them is produced by a machine-learning model, and none is a
+prediction of interview or hiring outcomes. Expected values for each formula are pinned in
+`backend/src/tests/scoring_accuracy.test.ts` and `backend/src/tests/interview_evaluation.test.ts`.
+
+## 1. Skill extraction
+
+Skills are found by matching resume and job text against a shared lexicon of 128 skills
+(`ai/app/resources/skill_lexicon.json`, mirrored in `backend/src/seed/skillLexicon.ts`; a test
+fails if the two differ).
+
+- Links and e-mail addresses are ignored, so `github.com/jane` is not the skill "GitHub".
+- A term matches only as a whole token: "Java" is not found inside "JavaScript", "C" is not found in "C++".
+- Longer terms win: "React Native" is not also counted as "React".
+- A skill is counted once, however often it is mentioned.
+- Names that are ordinary words (Go, Swift, Express) need exact casing; single letters (C, R) must be list items.
+- In a resume, skills are read from the skills, summary, experience, projects, certifications and
+  education sections, not from the contact header.
+
+**Limits.** Only skills in the lexicon are recognised. Tested on English, single-column, text-based
+PDF, DOCX and TXT resumes. Scanned or image-only PDFs, multi-column layouts and other languages are
+not supported and not tested.
+
+## 2. Evidence score per skill (0-100)
+
+| Evidence found in the resume | Points |
+|---|---|
+| Used in a work role | 40 for the first role, 15 for the second, 5 for each further one |
+| Used in a project | 25 for the first project, 10 for the second, 5 for each further one |
+| Named in a degree or branch of study | 15 (once) |
+| Named in a certification | 30 (once) |
+| Mentioned anywhere in the resume | 10 |
+
+Capped at 100. Repeating a skill inside one role or project adds nothing.
+Proficiency estimate: 85+ expert, 60+ advanced, 35+ intermediate, otherwise beginner. A skill that
+is only listed (10) is always "beginner".
+
+A skill can also be **inferred** from a related one (PostgreSQL implies SQL, React implies
+JavaScript). An inferred skill is credited at 70% of the source skill's evidence score.
+
+## 3. Career match (0-100)
+
+How much of a career's skill profile the resume covers.
+
+```
+points possible = requirement weight (1-5) x importance (required 3, preferred 2, supporting 1)
+points earned   = points possible x (0.5 + 0.5 x evidence/100)   if the skill is evidenced, else 0
+score           = 100 x sum(earned) / sum(possible) x (1 - 0.3 x required missing / required total)
+```
+
+- **0** means none of the career's skills appear in the resume evidence.
+- **100** means every skill is present with the strongest evidence.
+- A skill that is only listed earns 55% of its points; one used across roles and projects earns up to 100%.
+- Each requirement is reported as `applied`, `listed`, `inferred` or `missing`, with the points it earned.
+- `confidence` is the share of matched requirements backed by directly applied evidence.
+
+Career requirements are an editorial baseline curated for this project (14 careers, 109
+requirements). They are not derived from labour-market data.
+
+### Worked example
+
+The synthetic resume used in testing lists 11 skills, with one internship and one project.
+For *Full Stack Developer* (87 points possible):
+
+| Requirement | Status | Evidence | Earned / possible |
+|---|---|---|---|
+| JavaScript (required) | inferred from React | 53 | 11.48 / 15 |
+| React (required) | applied | 75 | 10.5 / 12 |
+| Node.js (required) | applied | 75 | 10.5 / 12 |
+| REST APIs (required) | applied | 50 | 9 / 12 |
+| Git (required) | listed | 10 | 4.95 / 9 |
+| MongoDB (preferred) | applied | 50 | 4.5 / 6 |
+| SQL (preferred) | inferred from PostgreSQL | 25 | 3.75 / 6 |
+| TypeScript (supporting) | applied | 50 | 2.25 / 3 |
+| HTML (preferred) | missing | 0 | 0 / 6 |
+| CSS (preferred) | missing | 0 | 0 / 6 |
+
+56.93 / 87 = **65%**, no required skill missing so no penalty.
+
+Before this was corrected the same resume scored **26%**. The causes were defects, not a lack of
+skills: "REST APIs" could not be extracted at all, PostgreSQL did not count towards SQL, React and
+Node.js gave JavaScript no credit, and one number mixed coverage with depth of evidence. The same
+resume still scores **0%** for *UI/UX Designer*, because it shows no design skills.
+
+## 4. Career readiness (0-100)
+
+How deeply the resume evidences the same requirements. It is deliberately stricter than the match
+score: for the example above it is **48% ("Developing")**.
+
+```
+technical skills            50%   evidence-weighted coverage of the requirements
+work experience             25%   share of requirement weight used in a work role
+projects                    15%   share of requirement weight used in a project
+education and certifications 10%
+penalty: up to 40%, scaled by the share of requirements that are required and missing
+```
+
+Tiers describe the amount of evidence only: Strong evidence (75+), Solid foundation (50+),
+Developing (25+), Early stage. They make no claim about seniority or employability.
+
+## 5. Job match (0-100, or not scored)
+
+Requirements are taken from what the employer wrote: the provider's required-skills list and
+qualification bullets, and skills named in the description. A skill is treated as optional when
+its sentence says so ("nice to have", "preferred", "a plus").
+
+```
+points possible: required skill 2, preferred skill 1
+points earned:   possible x (0.5 + 0.5 x evidence/100)   if evidenced, else 0
+score = 100 x earned / possible x (1 - 0.3 x required missing / required total)
+```
+
+No score is produced, and the reason is returned instead, when:
+
+- the posting names no recognisable skills (`NO_REQUIREMENTS`), or
+- the candidate has no evidenced skills yet (`NO_CANDIDATE_EVIDENCE`).
+
+There is no minimum score. Previously every job scored between 65 and 99, postings without skills
+were given a fixed list of five, and matched skills were invented when none matched.
+
+## 6. Interview answers (0-100)
+
+**AI rubric (when a provider is available).** The model rates relevance, completeness,
+specificity, structure and technical accuracy from 0 to 5 against written anchors and returns
+structured output, which is validated before use. Weights: relevance 25, completeness 20,
+specificity 20, structure 15, technical accuracy 20. STAR structure is expected for behavioural
+questions only. Whatever the model returns, an off-topic answer is capped at 20, an answer under
+15 words at 30 and under 40 words at 60.
+
+**Rule-based rubric (fallback, labelled as such).** Relevance 35% (topical overlap with the
+question, full at three hits), completeness 25% (full from about 120 words), specificity 20%
+(named technologies and measured results), structure 20% (STAR parts for behavioural questions,
+explicit reasoning for technical ones). Caps: under 15 words 25, under 40 words 50, off-topic 15,
+and never above 80, because it cannot check technical correctness. That dimension is reported as
+not assessed.
+
+An unanswered question counts as zero in the session score.
+
+The old scorer gave every answer, including an empty one, at least 30 points, then added points
+for single keywords, any action verb and any number. The one-sentence answer below scored 90
+under it (measured in the milestone-1 test run).
+
+| Answer | Rule-based rubric now |
+|---|---|
+| Empty | 0 |
+| "I would use caching and make it scalable and fault tolerant." | 2 |
+| One sentence with a metric (the answer that used to score 90) | 44 |
+| 50 words about hiking (off-topic) | 15 |
+| A list of the question's keywords | 25 |
+| 130-word structured STAR answer with measured results | 80 |
+| 150-word technical design answer, no STAR | 80 |
+
+## 7. Other figures
+
+- **Resume completeness score** (the field is named `atsScore` for compatibility): points for
+  which sections and contact details were found. It is not the output of any applicant tracking system.
+- **Token usage**: counts reported by the AI provider when available (`source: provider`);
+  otherwise estimated from text length (`source: estimated`). Cost is always an estimate from a
+  static price table.
+- **Confidence** is never invented. Where nothing measures it, the value is `null`:
+  - AI service response envelopes carry `confidence: null` and `confidence_basis: not_measured`.
+    They used to carry a fixed number chosen by provider name (0.98 for Gemini).
+  - The rule-based resume parser attaches no confidence to names, dates, roles or skills. It used
+    to attach a per-rule constant between 0.85 and 0.99. Each field reports its extraction method
+    instead.
+  - Skill normalisation reports how a name was resolved (shared lexicon, alias table, or "not
+    recognised; kept as written"), not a similarity percentage: it is a table lookup.
+  - When an AI model produces a structured result, any confidence in it is the model's own
+    estimate and is passed through as such. No AI path has been run against a live provider.
+  - The career match's "confidence" (section 3) is different: it is a defined, calculated share
+    of matched requirements backed by applied evidence, not a probability.
+  - The development mock provider and the simulated modules below still contain fixed sample
+    numbers. The mock never answers chat, interview questions or interview scoring, and resume
+    extraction does not use it.
+- AI service modules with no live data source (market, salary, GitHub, LinkedIn and the agent
+  demos) label every response `data_origin: illustrative_sample`. No user workflow uses them.
+
+## 8. Interview questions
+
+Questions are not scored, but how they are chosen affects what an interview measures.
+
+**When an AI provider answers**, it is given the target role, interview mode, the user's skills
+(strongest evidence first), the gaps for the target career, the roles and project names on the
+active resume, the job posting if the session was started from one, and the questions asked in the
+last ten sessions as ones to avoid. Its output is accepted only if it contains at least the
+requested number of usable questions (known category, not a repeat). Otherwise it is discarded
+whole: questions are never padded. The session is marked `questionSource: ai`.
+
+**Otherwise** questions come from a built-in bank of 108 (`backend/src/seed/interviewQuestionBank.ts`),
+and the session is marked `questionSource: question_bank`. Selection is deterministic for a given
+user and session number:
+
+1. The mode fixes the category of each slot (for example a mixed session cycles technical,
+   behavioural, project, technical, resume, career).
+2. A question is eligible only if the facts it needs exist. A template about a skill needs a skill
+   on the profile; one about a project needs a project name on the resume. No skill, employer or
+   project is invented, and a test checks that no question names a skill that is not on record.
+3. Role-family questions (frontend, backend, data, machine learning, DevOps, security, design,
+   mobile, product) are chosen from the role title. An unrecognised title gets the general set.
+4. Technical slots rotate between a question about a specific skill, a gap, the role family and a
+   general skill question, and questions are spread across different skills.
+5. Questions asked in the last ten sessions are avoided while unused ones remain. Six consecutive
+   technical sessions of five questions give thirty different questions in the test profile.
+6. With a job posting, about half of a technical, career or mixed session is tied to it; other
+   modes open with one question about it. A skill the posting names that the profile lacks is
+   asked about as a gap, never as existing experience.
+
+## 9. Chat replies
+
+A chat reply is either written by an AI provider or it is a fallback; there is no score.
+
+- An AI reply is stored with `source: ai` and the provider and model that produced it.
+- When the provider is unavailable, times out or fails, the stored reply has `source: fallback`.
+  Its text says it is not an AI-generated answer and lists only figures already stored for the
+  user (target role, number of skills and the three with the strongest evidence, readiness, largest
+  gaps, top recommendation, roadmap progress). It does not attempt to answer the question.
+- No confidence figure or token cost is attached to a chat reply.
+- The development mock provider is never allowed to answer chat, interview questions or interview
+  scoring.

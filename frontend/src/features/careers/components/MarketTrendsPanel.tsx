@@ -1,15 +1,12 @@
-import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
 import {
   TrendingUp,
   Sparkles,
   Zap,
   Globe,
-  Award,
   AlertTriangle,
   Flame,
   Clock,
-  Layers,
   ArrowUpRight,
   Bookmark,
   Building2,
@@ -45,12 +42,12 @@ export const MarketTrendsPanel: React.FC<MarketTrendsPanelProps> = ({
 
   // State Management
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
-  const [selectedCountry, setSelectedCountry] = useState<string>('United States');
+  const [selectedCountry] = useState<string>('United States');
   const [trackedSkillNames, setTrackedSkillNames] = useState<string[]>(() => {
     const saved = localStorage.getItem('sb-tracked-skills');
     return saved ? JSON.parse(saved) : ['Vector Indexing (Milvus/Pinecone)', 'LangChain & LlamaIndex'];
   });
-  const [savedReports, setSavedReports] = useState<string[]>([]);
+  const [, setSavedReports] = useState<string[]>([]);
 
   // Market Telemetry Datasets
   const trendingSkills = [
@@ -129,10 +126,8 @@ export const MarketTrendsPanel: React.FC<MarketTrendsPanelProps> = ({
   };
 
   // Filtered Skills
-  const filteredSkills = useMemo(() => {
-    if (selectedCategory === 'all') return trendingSkills;
-    return trendingSkills.filter((s) => s.category === selectedCategory);
-  }, [selectedCategory, trendingSkills]);
+  const filteredSkills =
+    selectedCategory === 'all' ? trendingSkills : trendingSkills.filter((s) => s.category === selectedCategory);
 
   return (
     <div className="space-y-8">
@@ -184,7 +179,7 @@ export const MarketTrendsPanel: React.FC<MarketTrendsPanelProps> = ({
               AI Market Velocity Synthesis (Q3 2024 Index)
             </span>
             <p className="text-slate-300 leading-relaxed">
-              <strong className="text-cyan-300">Vector Indexing (Milvus)</strong> and <strong className="text-cyan-300">LangChain</strong> lead market demand with <strong className="text-emerald-400">+42% YoY hiring growth</strong> across San Francisco, NYC, and Global Remote markets (<strong className="text-emerald-400">98.4% Confidence</strong>).
+              <strong className="text-cyan-300">Vector Indexing (Milvus)</strong> and <strong className="text-cyan-300">LangChain</strong> lead market demand with <strong className="text-emerald-400">+42% YoY hiring growth</strong> across San Francisco, NYC, and Global Remote markets (example figures, not live market data).
             </p>
           </div>
         </div>
@@ -241,6 +236,7 @@ export const MarketTrendsPanel: React.FC<MarketTrendsPanelProps> = ({
 
             {/* Category Filter Dropdown */}
             <select
+              aria-label="Filter by category"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="py-1 px-2.5 rounded-lg bg-slate-950 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
@@ -413,10 +409,10 @@ export const MarketTrendsPanel: React.FC<MarketTrendsPanelProps> = ({
                 <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
-                  formatter={(val: any, name: any, item: any) => [val, item.payload.label]}
+                  formatter={(val, _name, item) => [val, (item.payload as { label?: string } | undefined)?.label ?? '']}
                 />
                 <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                  {lifecycleData.map((entry, index) => (
+                  {lifecycleData.map((_entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={index === 1 ? '#6366f1' : index === 2 ? '#06b6d4' : '#334155'}

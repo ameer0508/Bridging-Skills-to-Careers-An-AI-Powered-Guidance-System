@@ -1,3 +1,4 @@
+import './setupEnv.js';
 import snapshotService from '../services/SnapshotService.js';
 import contextAssembler from '../services/ContextAssembler.js';
 import interviewService from '../services/InterviewService.js';
@@ -18,7 +19,7 @@ export async function runUnifiedOrchestrationTests() {
     criticalGapsCount: snapshotA.criticalGaps?.length,
   });
 
-  if (!snapshotA.targetCareer || typeof snapshotA.readinessScore !== 'number') {
+  if (!snapshotA.targetCareer || (snapshotA.readinessScore !== null && typeof snapshotA.readinessScore !== 'number')) {
     throw new Error('Unified career snapshot assembly failed');
   }
 
@@ -68,7 +69,10 @@ export async function runUnifiedOrchestrationTests() {
   console.log('✅ All Unified Career Intelligence Orchestration Tests Passed Successfully!\n');
 }
 
-runUnifiedOrchestrationTests().catch((err) => {
-  console.error('❌ Unified Orchestration Test Failed:', err);
-  process.exit(1);
-});
+// Run only when this file is executed directly, not when imported by runAllTests
+if (process.argv[1]?.includes('unified_orchestration.test')) {
+  runUnifiedOrchestrationTests().catch((err) => {
+    console.error('❌ Unified Orchestration Test Failed:', err);
+    process.exit(1);
+  });
+}

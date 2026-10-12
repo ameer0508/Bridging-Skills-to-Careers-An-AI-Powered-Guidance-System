@@ -1,8 +1,8 @@
 import React, { useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, type HTMLMotionProps } from 'framer-motion';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 
-export interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface MagneticButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
   children: React.ReactNode;
   magneticStrength?: number;
   className?: string;

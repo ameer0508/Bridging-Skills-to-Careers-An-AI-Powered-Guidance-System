@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useMemo, useEffect } from 'react';
+import { messageOf } from '../../lib/collections';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
   Brain,
@@ -7,13 +8,8 @@ import {
   Target,
   Layers,
   Award,
-  TrendingUp,
-  BarChart3,
   CheckCircle2,
   ShieldCheck,
-  Globe,
-  Briefcase,
-  DollarSign,
   Compass,
 } from 'lucide-react';
 import apiClient from '../../lib/axios';
@@ -26,23 +22,39 @@ import { JobIntelligenceFeed, JobItem } from '../../features/careers/components/
 import { JobMatchDetailModal } from '../../features/careers/components/JobMatchDetailModal';
 import { SalaryIntelligencePanel } from '../../features/careers/components/SalaryIntelligencePanel';
 import { MarketTrendsPanel } from '../../features/careers/components/MarketTrendsPanel';
+import { CareerAlignmentLabView } from '../../features/careers/components/CareerAlignmentLabView';
 
 // Design System 2.0 Components
 import {
   WorkspaceHero,
   AIInsightBanner,
   QuickActionGrid,
-  PremiumMetricCard,
   WorkspaceSpotlight,
   AIStatusBar,
   WorkspaceDivider,
   PremiumSection,
   GlassPanel,
   WorkspaceToolbar,
-  PremiumEmptyState,
   PremiumErrorState,
 } from '../../components/experience/workspace';
 import { AIThinkingAnimation } from '../../components/experience';
+import { IllustrativeNotice } from '../../components/common/IllustrativeNotice';
+
+interface MatchBreakdownRow {
+  skillName: string;
+  importance: 'required' | 'preferred' | 'supporting';
+  status: 'applied' | 'listed' | 'inferred' | 'missing';
+  matchedVia?: string;
+  pointsEarned: number;
+  pointsPossible: number;
+}
+
+const BREAKDOWN_STATUS_LABEL: Record<MatchBreakdownRow['status'], string> = {
+  applied: 'Used in a role or project',
+  listed: 'Listed only',
+  inferred: 'Inferred from a related skill',
+  missing: 'Not found',
+};
 
 export const CareerIntelligenceWorkspace: React.FC = () => {
   const navigate = useNavigate();
@@ -51,14 +63,55 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
   // Filter & Sort State
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [sortBy, setSortBy] = useState<string>('matchScore-desc');
+   
+  const [sortBy] = useState<string>('matchScore-desc');
   const [comparedIds, setComparedIds] = useState<string[]>([]);
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
 
   // Job Detail Modal State
   const [selectedJobForDetail, setSelectedJobForDetail] = useState<JobItem | null>(null);
   const [isJobDetailModalOpen, setIsJobDetailModalOpen] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  // Resume status query to monitor real-time background parsing
+  const { data: resumeData } = useQuery({
+    queryKey: ['resumes', 'me'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get('/resumes/me');
+        return response.data?.data?.resume || null;
+      } catch {
+        return null;
+      }
+    },
+    refetchInterval: (query) => {
+      const status = query.state.data?.parsingStatus;
+      if (status === 'pending' || status === 'processing') {
+        return 2000;
+      }
+      return false;
+    },
+  });
+
+  // Resume upload mutation
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const formData = new FormData();
+      formData.append('resume', file);
+      const response = await apiClient.post('/resumes/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['resumes', 'me'] });
+      queryClient.invalidateQueries({ queryKey: ['careers', 'matches'] });
+      queryClient.invalidateQueries({ queryKey: ['skills'] });
+    },
+  });
 
   // Fetch Career Matches Query
   const { data, isLoading, error, refetch } = useQuery<{ matches: CareerMatchData[] }>({
@@ -72,6 +125,13 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
   const rawMatches = data?.matches;
   const matches = useMemo(() => rawMatches || [], [rawMatches]);
 
+  // When parsing transitions to completed, refetch matches automatically
+  useEffect(() => {
+    if (resumeData?.parsingStatus === 'completed' && matches.length === 0) {
+      queryClient.invalidateQueries({ queryKey: ['careers', 'matches'] });
+    }
+  }, [resumeData?.parsingStatus, matches.length, queryClient]);
+
   // Extract Categories
   const categories = useMemo(() => {
     const set = new Set(matches.map((m) => m.careerId.category));
@@ -79,16 +139,7 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
   }, [matches]);
 
   // Derived Overview Stats
-  const topFitScore = useMemo(() => {
-    if (matches.length === 0) return 0;
-    return Math.max(...matches.map((m) => m.matchScore));
-  }, [matches]);
 
-  const avgConfidence = useMemo(() => {
-    if (matches.length === 0) return 0;
-    const sum = matches.reduce((acc, m) => acc + (m.confidence || 0), 0);
-    return Math.round(sum / matches.length);
-  }, [matches]);
 
   // Filtered & Sorted Matches
   const filteredMatches = useMemo(() => {
@@ -163,19 +214,30 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
   }
 
   if (matches.length === 0) {
+    const uploadStatus: 'idle' | 'uploading' | 'processing' | 'completed' | 'error' =
+      uploadMutation.isPending
+        ? 'uploading'
+        : resumeData?.parsingStatus === 'processing' || resumeData?.parsingStatus === 'pending'
+          ? 'processing'
+          : resumeData?.parsingStatus === 'completed'
+            ? 'completed'
+            : uploadMutation.isError || resumeData?.parsingStatus === 'failed'
+              ? 'error'
+              : 'idle';
+
+    const errorMessage = uploadMutation.error
+      ? messageOf(uploadMutation.error, 'The upload failed.')
+      : resumeData?.parsingStatus === 'failed'
+        ? 'Resume evidence extraction failed. Please ensure the document is not password-protected or corrupted.'
+        : undefined;
+
     return (
-      <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <PremiumEmptyState
-          title="No Career Matches Computed Yet"
-          description="Career alignments require parsed resume evidence and skill extraction. Upload your resume to calculate deterministic role fit scores."
-          primaryAction={{
-            label: 'Upload Resume Now',
-            onClick: () => navigate('/resume'),
-          }}
-          secondaryAction={{
-            label: 'Learn More',
-            onClick: () => navigate('/ai'),
-          }}
+      <div className="max-w-7xl mx-auto space-y-8 pb-16 px-4">
+        <CareerAlignmentLabView
+          onUpload={(file: File) => uploadMutation.mutate(file)}
+          isUploading={uploadStatus === 'uploading'}
+          parsingStatus={uploadStatus === 'processing' ? 'processing' : uploadStatus === 'completed' ? 'completed' : null}
+          validationError={uploadStatus === 'error' ? errorMessage : null}
         />
       </div>
     );
@@ -245,16 +307,16 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
     <div className="max-w-7xl mx-auto space-y-10 pb-16 px-4">
       {/* SECTION 1 — WORKSPACE HERO */}
       <WorkspaceHero
-        greeting="Executive Research Hub"
+        greeting="Career matches"
         userName={user?.fullName || user?.email?.split('@')[0]}
-        title="Career & Job Intelligence Engine"
-        description="AI continuously analyzes live market positions, skill vector compatibility, company hiring velocity, and salary trends to accelerate your career."
-        aiSummary={`AI Market Analysis Synced • ${matches.length} Target Roles Vectorized • ${avgConfidence || 98}% Grounding`}
+        title="Career Intelligence"
+        description="Careers ranked by how much of each role's skill baseline your resume evidences. Scores are calculated from your resume only and are not predictions of hiring outcomes."
+        aiSummary={`${matches.length} career${matches.length === 1 ? '' : 's'} matched from your resume evidence`}
         stats={[
-          { label: 'Career Matches', value: `${matches.length} Roles`, change: 'Tier 1 Target', isPositive: true },
-          { label: 'Market Trend', value: '+18% YoY', change: 'High Velocity', isPositive: true },
-          { label: 'AI Confidence', value: `${avgConfidence || 98.4}%`, change: 'Deterministic', isPositive: true },
-          { label: 'Industries Tracked', value: `${categories.length > 1 ? categories.length - 1 : 5} Sectors`, change: 'Synced', isPositive: true },
+          { label: 'Career Matches', value: matches.length },
+          { label: 'Top Match', value: `${topMatch?.matchScore ?? 0}%`, change: topMatch?.careerId?.title },
+          { label: 'Skills Evidenced', value: topMatch?.matchingSkills?.length ?? 0, change: 'for the top match' },
+          { label: 'Skills Missing', value: topMatch?.missingSkills?.length ?? 0, change: 'for the top match', isPositive: false },
         ]}
         primaryAction={{
           label: 'Compare Top Careers',
@@ -276,87 +338,50 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
         onCommandPaletteOpen={() => alert('Command Palette triggered (⌘K).')}
       />
 
-      {/* SECTION 2 — CAREER MATCH OVERVIEW (METRIC CARDS) */}
-      <PremiumSection
-        title="Career & Market Intelligence Telemetry"
-        subtitle="Real-time capability fit & live market demand analytics"
-        badge="Analytics"
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <PremiumMetricCard
-            title="Top Match Fit Score"
-            value={topFitScore || 94.8}
-            suffix="%"
-            trend="+4.2% this month"
-            isPositive={true}
-            confidence={avgConfidence || 98.4}
-            icon={Award}
-            sparklineData={[70, 78, 85, 90, 94.8]}
-          />
-          <PremiumMetricCard
-            title="Target Salary Range"
-            value={185}
-            prefix="$"
-            suffix="k/yr"
-            trend="+15% Market Premium"
-            isPositive={true}
-            confidence={97.5}
-            icon={DollarSign}
-            sparklineData={[140, 155, 165, 175, 185]}
-          />
-          <PremiumMetricCard
-            title="Industry Growth Velocity"
-            value={24}
-            suffix="% YoY"
-            trend="Strong Outlook"
-            isPositive={true}
-            confidence={99.1}
-            icon={TrendingUp}
-            sparklineData={[10, 14, 18, 20, 24]}
-          />
-          <PremiumMetricCard
-            title="Career Readiness Index"
-            value={94.8}
-            suffix="%"
-            trend="Tier 1 Threshold"
-            isPositive={true}
-            confidence={98.2}
-            icon={BarChart3}
-            sparklineData={[60, 72, 82, 90, 94.8]}
-          />
-          <PremiumMetricCard
-            title="Opportunities Tracked"
-            value={matches.length}
-            suffix=" Active Roles"
-            trend="12 Hiring Fast"
-            isPositive={true}
-            confidence={98.8}
-            icon={Briefcase}
-            sparklineData={[3, 5, 8, 10, matches.length]}
-          />
-          <PremiumMetricCard
-            title="Remote Option Availability"
-            value={78}
-            suffix="%"
-            trend="Global Hiring"
-            isPositive={true}
-            confidence={96.4}
-            icon={Globe}
-            sparklineData={[50, 60, 68, 72, 78]}
-          />
-        </div>
-      </PremiumSection>
-
-      {/* SECTION 3 — TOP CAREER RECOMMENDATION BANNER */}
+      {/* SECTION 2 — TOP MATCH EXPLANATION */}
       <AIInsightBanner
-        title={`Top Match: ${topMatch?.careerId?.title || 'AI Systems Architect'}`}
-        description={`AI cosine vector analysis computed a ${topMatch?.matchScore || 94.8}% match probability with your experience. Skill alignment is strong across 18 core technical entities.`}
-        confidence={topMatch?.confidence || 98.4}
+        title={`Top match: ${topMatch?.careerId?.title ?? 'none yet'} (${topMatch?.matchScore ?? 0}%)`}
+        description={
+          topMatch?.summary ||
+          'The match score is the weighted share of this career\'s skills that your resume evidences.'
+        }
+        confidence={typeof topMatch?.confidence === 'number' ? topMatch.confidence : undefined}
         priority="high"
-        evidence={['Resume Vector Embedding', 'Skill Graph Analysis', 'Market Salary Premium']}
-        actionLabel="Explore Strategy"
-        onAction={() => navigate('/ai')}
+        evidence={(topMatch?.strengths || []).slice(0, 3)}
+        actionLabel="See readiness and gaps"
+        onAction={() => navigate('/readiness')}
       />
+
+      {Array.isArray(topMatch?.breakdown) && topMatch.breakdown.length > 0 && (
+        <PremiumSection
+          title="How this score was calculated"
+          subtitle="Each skill the career expects, and the evidence found for it on your resume"
+          badge="Explanation"
+        >
+          <div className="overflow-x-auto rounded-xl border border-white/10">
+            <table className="w-full text-left text-xs text-slate-200">
+              <thead className="bg-slate-900/80 text-[10px] uppercase tracking-wider text-slate-400">
+                <tr>
+                  <th scope="col" className="px-3 py-2">Skill</th>
+                  <th scope="col" className="px-3 py-2">Importance</th>
+                  <th scope="col" className="px-3 py-2">Evidence on your resume</th>
+                  <th scope="col" className="px-3 py-2 text-right">Points</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topMatch.breakdown.map((row: MatchBreakdownRow, index: number) => (
+                  <tr key={`${row.skillName}-${index}`} className="border-t border-white/5">
+                    <td className="px-3 py-2 font-semibold text-white">{row.skillName}</td>
+                    <td className="px-3 py-2 capitalize">{row.importance}</td>
+                    <td className="px-3 py-2">{BREAKDOWN_STATUS_LABEL[row.status]}{row.status === 'inferred' && row.matchedVia ? ` (${row.matchedVia})` : ''}</td>
+                    <td className="px-3 py-2 text-right font-mono">{row.pointsEarned} / {row.pointsPossible}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </PremiumSection>
+      )}
 
       <WorkspaceDivider label="Live Job Intelligence Feed" />
 
@@ -366,6 +391,7 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
         subtitle="Real-time job openings matched directly to your parsed skill vectors"
         badge="Market Feed"
       >
+        <IllustrativeNotice className="mb-4" />
         <JobIntelligenceFeed
           careerMatches={matches}
           onSelectJobForDetail={handleOpenJobDetail}
@@ -382,6 +408,7 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
         subtitle="Real-time salary estimates, regional cost-of-living adjustments, and certification premiums"
         badge="Salary Intelligence"
       >
+        <IllustrativeNotice className="mb-4" />
         <SalaryIntelligencePanel
           jobTitle={topMatch?.careerId?.title || 'AI Systems Architect'}
           onExploreRoadmap={() => navigate('/roadmap')}
@@ -425,6 +452,7 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
         subtitle="Real-time labor market analytics, emerging technology forecasts, and skill demand velocity"
         badge="Market Signals"
       >
+        <IllustrativeNotice className="mb-4" />
         <MarketTrendsPanel
           initialCategory="all"
           onExploreRoadmap={() => navigate('/roadmap')}
@@ -528,7 +556,7 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
       {/* SECTION 10 — AI STATUS BAR */}
       <AIStatusBar
         status={isLoading ? 'thinking' : 'active'}
-        confidence={avgConfidence || 98.4}
+        
         lastUpdated="Just now"
       />
 

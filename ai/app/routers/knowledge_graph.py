@@ -1,3 +1,6 @@
+# NOTE: this module has no live data source. It returns built-in illustrative sample data,
+# labelled as such in every response. It is not used by the product's user workflows.
+ILLUSTRATIVE = "illustrative_sample"
 from fastapi import APIRouter, Query, HTTPException
 from typing import Optional
 from app.knowledge_graph.graph_engine import knowledge_graph_instance
@@ -11,7 +14,7 @@ async def get_node_neighborhood(node_id: str):
     """
     try:
         result = knowledge_graph_instance.query_neighborhood(node_id)
-        return {"success": True, "data": result}
+        return {"success": True, "data_origin": ILLUSTRATIVE, "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -25,7 +28,7 @@ async def get_shortest_path(
     """
     try:
         result = knowledge_graph_instance.find_shortest_learning_path(start_id, target_id)
-        return {"success": True, "data": result}
+        return {"success": True, "data_origin": ILLUSTRATIVE, "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

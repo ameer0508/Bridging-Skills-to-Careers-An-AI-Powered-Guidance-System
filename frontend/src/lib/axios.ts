@@ -8,7 +8,8 @@ export const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
-  timeout: 10000 // 10 seconds timeout
+  // Default for ordinary requests. Calls that wait on the AI service pass their own, longer timeout.
+  timeout: 20000
 });
 
 // Dedicated Axios instance to execute refresh calls.

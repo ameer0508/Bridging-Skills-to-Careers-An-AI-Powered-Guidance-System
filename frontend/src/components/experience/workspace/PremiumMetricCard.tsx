@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, TrendingDown, CheckCircle2 } from 'lucide-react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 import { TiltCard } from '../../../features/landing/components/effects/TiltCard';
 import { Counter } from '../../../features/landing/components/effects/Counter';
 
@@ -10,6 +10,7 @@ export interface PremiumMetricCardProps {
   suffix?: string;
   trend?: string;
   isPositive?: boolean;
+  /** Accepted for compatibility but never displayed: no confidence value is measured. */
   confidence?: number;
   icon?: React.ElementType;
   sparklineData?: number[];
@@ -23,7 +24,6 @@ export const PremiumMetricCard: React.FC<PremiumMetricCardProps> = ({
   suffix = '',
   trend,
   isPositive = true,
-  confidence,
   icon: Icon,
   sparklineData = [30, 45, 60, 55, 75, 88, 94],
   className = '',
@@ -93,12 +93,6 @@ export const PremiumMetricCard: React.FC<PremiumMetricCardProps> = ({
           </span>
         )}
 
-        {confidence !== undefined && (
-          <span className="text-slate-400 flex items-center gap-1 font-mono">
-            <CheckCircle2 className="w-3 h-3 text-cyan-400" />
-            {confidence}% AI Confidence
-          </span>
-        )}
       </div>
     </TiltCard>
   );

@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import { AIThinkingAnimation } from '../../components/experience';
+import { QueryErrorBanner } from '../../components/common/QueryErrorBanner';
 
 export interface WorkspaceContainerProps {
   children?: React.ReactNode;
@@ -32,6 +33,10 @@ export const WorkspaceContainer: React.FC<WorkspaceContainerProps> = ({ children
               </div>
             }
           >
+            {/* Says so when a page's data failed to load, instead of leaving zeros on screen */}
+            <div className="px-4 pt-4 empty:hidden">
+              <QueryErrorBanner />
+            </div>
             <AnimatePresence mode="wait">
               <motion.div
                 key={location.pathname}

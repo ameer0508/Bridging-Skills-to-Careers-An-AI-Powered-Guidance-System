@@ -6,8 +6,8 @@ interface SkillItem {
   id?: string;
   name: string;
   category?: string;
+  /** 0-100: how strongly the resume supports the skill (see docs/SCORING.md). */
   evidenceScore?: number;
-  confidence?: number;
 }
 
 interface ExtractedSkillMatrixProps {
@@ -27,7 +27,7 @@ export const ExtractedSkillMatrix: React.FC<ExtractedSkillMatrixProps> = ({
         </div>
         <h4 className="text-sm font-bold text-white">No Extracted Skills Displayed Yet</h4>
         <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
-          Upload your PDF or Word resume to execute the 14-stage Transformer NLP skill extraction engine.
+          Upload your PDF or Word resume to see the skills recognised in it.
         </p>
       </GlassPanel>
     );
@@ -41,13 +41,14 @@ export const ExtractedSkillMatrix: React.FC<ExtractedSkillMatrixProps> = ({
           <p className="text-xs text-slate-400">Verified vector skill nodes from resume NLP parsing</p>
         </div>
         <span className="px-2.5 py-1 rounded bg-indigo-500/20 text-indigo-300 font-mono text-[10px] font-bold border border-indigo-500/30">
-          {totalSkills || skills.length} Verified Skills
+          {totalSkills || skills.length} skills recognised
         </span>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {skills.map((skill, idx) => {
-          const confidence = Math.round(skill.confidence ? skill.confidence * 100 : skill.evidenceScore || 85);
+          // The bar shows the evidence score; a skill without one shows no figure rather than a made-up one
+          const evidence = typeof skill.evidenceScore === 'number' ? Math.round(skill.evidenceScore) : null;
 
           return (
             <div
@@ -61,13 +62,13 @@ export const ExtractedSkillMatrix: React.FC<ExtractedSkillMatrixProps> = ({
 
               <div className="flex items-center justify-between text-[9px] font-mono text-slate-400">
                 <span className="truncate">{skill.category || 'Skill'}</span>
-                <span className="text-emerald-400 font-bold">{confidence}%</span>
+                <span className="text-emerald-400 font-bold" title="Evidence score">{evidence === null ? '—' : `${evidence}/100`}</span>
               </div>
 
               <div className="w-full bg-slate-800 rounded-full h-1 overflow-hidden">
                 <div
                   className="bg-linear-to-r from-indigo-500 to-cyan-400 h-1 rounded-full"
-                  style={{ width: `${confidence}%` }}
+                  style={{ width: `${evidence ?? 0}%` }}
                 />
               </div>
             </div>

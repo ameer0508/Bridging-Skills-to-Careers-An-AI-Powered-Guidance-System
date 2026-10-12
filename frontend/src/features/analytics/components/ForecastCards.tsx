@@ -1,5 +1,4 @@
 import React from 'react';
-import { TrendingUp, DollarSign, Activity, Award } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface ForecastCardsProps {

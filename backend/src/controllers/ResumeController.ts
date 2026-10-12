@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import ResumeService from '../services/ResumeService.js';
+import ResumeService, { isResumeStuck } from '../services/ResumeService.js';
 import { AppError } from '../middlewares/errorHandler.js';
 
 export class ResumeController {
@@ -140,7 +140,12 @@ export class ResumeController {
             parsingStatus: resume.parsingStatus,
             parsingError: resume.parsingError,
             uploadedAt: resume.uploadedAt,
+            // True when a run has been pending/processing for too long; the client offers "Reprocess".
+            isStuck: isResumeStuck(resume),
+            skillChanges: resume.skillChanges ?? null,
             atsScore: parsedResume?.atsScore || 0,
+            atsScoreNote:
+              'Resume completeness heuristic based on which sections and details were found. It is not the result of any real applicant tracking system.',
             sectionHealth: parsedResume?.sectionHealth || [],
             personalInfo: parsedResume?.personalInfo || {},
             education: parsedResume?.education || [],
@@ -150,6 +155,37 @@ export class ResumeController {
             achievements: parsedResume?.achievements || [],
             languages: parsedResume?.languages || [],
             interests: parsedResume?.interests || [],
+          }
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * Runs extraction again on the stored file of the caller's active resume.
+   */
+  reprocess = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) {
+        const error = new Error('Authentication is required.') as AppError;
+        error.statusCode = 401;
+        error.code = 'UNAUTHORIZED';
+        return next(error);
+      }
+
+      const resume = await this.resumeService.reprocessResume(userId);
+
+      res.status(202).json({
+        success: true,
+        data: {
+          resume: {
+            id: resume.id,
+            originalFileName: resume.originalFileName,
+            parsingStatus: resume.parsingStatus,
+            uploadedAt: resume.uploadedAt
           }
         }
       });

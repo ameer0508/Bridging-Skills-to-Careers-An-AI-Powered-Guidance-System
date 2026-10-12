@@ -18,8 +18,33 @@ export interface IParsedResumeData {
   skills?: Array<{
     name: string;
     category: string;
-    confidence: number;
+    confidence: number | null;
   }>;
+}
+
+/** A job still marked pending/processing after this long is treated as stuck. */
+export const RESUME_STUCK_AFTER_MS = 3 * 60 * 1000;
+
+const INTERRUPTED_MESSAGE =
+  'Processing was interrupted before it finished. Choose "Reprocess" to run it again; your file is still stored.';
+
+export function isResumeStuck(resume: Pick<IResume, 'parsingStatus' | 'parsingStartedAt' | 'updatedAt'>): boolean {
+  if (resume.parsingStatus !== 'pending' && resume.parsingStatus !== 'processing') return false;
+  const since = resume.parsingStartedAt ?? resume.updatedAt;
+  return !!since && Date.now() - new Date(since).getTime() > RESUME_STUCK_AFTER_MS;
+}
+
+function appError(message: string, statusCode: number, code: string): AppError {
+  const error = new Error(message) as AppError;
+  error.statusCode = statusCode;
+  error.code = code;
+  return error;
+}
+
+async function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  return Buffer.concat(chunks);
 }
 
 export class ResumeService {
@@ -146,8 +171,84 @@ export class ResumeService {
     // Mark database record as inactive / deleted
     await this.resumeRepository.markAllInactive(userId, 'deleted');
 
-    // Remove physical file from disk
-    await StorageService.deleteFile(activeResume.storagePath);
+    // Remove physical file from disk. A file that is already gone must not block the deletion.
+    try {
+      await StorageService.deleteFile(activeResume.storagePath);
+    } catch (err) {
+      logger.error(`Failed to unlink deleted resume file: ${activeResume.storagePath}`, err);
+    }
+
+    // The parsed content and everything calculated from it no longer describe the user.
+    const ParsedResume = (await import('../models/ParsedResume.js')).default;
+    const ExtractedSkill = (await import('../models/ExtractedSkill.js')).default;
+    await ParsedResume.deleteMany({ resumeId: activeResume._id });
+    await ExtractedSkill.deleteMany({ resumeId: activeResume._id });
+    const UserSkillService = (await import('./UserSkillService.js')).default;
+    await UserSkillService.clearDerivedIntelligence(userId);
+
+    const ProgressEventService = (await import('./ProgressEventService.js')).default;
+    ProgressEventService.logEvent(userId, 'resume_deleted', { fileName: activeResume.originalFileName }).catch(e => logger.error(e));
+  }
+
+  /**
+   * Runs extraction again on the stored file of the active resume. Allowed once the previous
+   * run has finished (completed or failed) or has been stuck for RESUME_STUCK_AFTER_MS.
+   */
+  async reprocessResume(userId: string): Promise<IResume> {
+    const activeResume = await this.resumeRepository.findActiveByUserId(userId);
+    if (!activeResume) throw appError('No active resume found to reprocess.', 404, 'RESUME_NOT_FOUND');
+
+    const inFlight = activeResume.parsingStatus === 'pending' || activeResume.parsingStatus === 'processing';
+    if (inFlight && !isResumeStuck(activeResume)) {
+      throw appError('This resume is still being processed. Please wait for it to finish.', 409, 'RESUME_PROCESSING');
+    }
+
+    let fileBuffer: Buffer;
+    try {
+      fileBuffer = await streamToBuffer(await StorageService.getFileStream(activeResume.storagePath));
+    } catch {
+      throw appError(
+        'The stored resume file could not be read. Please upload the resume again.',
+        410,
+        'RESUME_FILE_MISSING'
+      );
+    }
+
+    const updated = await this.resumeRepository.update(activeResume.id, {
+      parsingStatus: 'pending',
+      parsingError: undefined,
+      parsingStartedAt: new Date(),
+    });
+
+    const QueueService = (await import('./QueueService.js')).default;
+    QueueService.enqueueResumeProcessing({
+      userId,
+      resumeId: activeResume.id,
+      fileBuffer,
+      fileName: activeResume.originalFileName,
+    });
+
+    const ProgressEventService = (await import('./ProgressEventService.js')).default;
+    ProgressEventService.logEvent(userId, 'resume_reprocessed', { fileName: activeResume.originalFileName }, activeResume.id).catch(e => logger.error(e));
+
+    return updated ?? activeResume;
+  }
+
+  /**
+   * Processing runs in this process's memory, so a restart loses any job that was in flight.
+   * Called once at startup: such resumes are marked failed with a recoverable message instead
+   * of staying "processing" forever. Nothing is deleted.
+   */
+  async recoverInterruptedJobs(): Promise<number> {
+    const { default: Resume } = await import('../models/Resume.js');
+    const result = await Resume.updateMany(
+      { isActive: true, parsingStatus: { $in: ['pending', 'processing'] } },
+      { $set: { parsingStatus: 'failed', parsingError: INTERRUPTED_MESSAGE } }
+    );
+    if (result.modifiedCount > 0) {
+      logger.warn(`Marked ${result.modifiedCount} interrupted resume job(s) as failed so they can be reprocessed.`);
+    }
+    return result.modifiedCount;
   }
 
   /**
@@ -225,9 +326,9 @@ export class ResumeService {
       sectionName: 'Contact Information',
       iconName: 'user',
       score: hasInfo ? 95 : 0,
-      status: hasInfo ? 'Verified' : 'Missing',
-      qualitativeConfidence: hasInfo ? 'Very High' : 'Low',
-      extractionMethod: 'Regex & Header NER',
+      status: hasInfo ? 'Found' : 'Missing',
+      qualitativeConfidence: hasInfo ? 'Detected' : 'Not found',
+      extractionMethod: 'Rule-based parser',
       description: hasInfo
         ? `Email: ${emailVal || 'N/A'}, Phone: ${phoneVal || 'N/A'}`
         : 'No contact details detected in resume.'
@@ -239,8 +340,8 @@ export class ResumeService {
       iconName: 'briefcase',
       score: exp.length > 0 ? Math.min(95, 60 + exp.length * 15) : 0,
       status: exp.length > 0 ? `${exp.length} Roles Found` : 'Empty',
-      qualitativeConfidence: exp.length > 0 ? 'High' : 'Low',
-      extractionMethod: 'Transformer Sequence Classifier',
+      qualitativeConfidence: exp.length > 0 ? 'Detected' : 'Not found',
+      extractionMethod: 'Rule-based parser',
       description: exp.length > 0
         ? `${exp.length} work experience entry/entries detected.`
         : 'No work experience section found.'
@@ -252,8 +353,8 @@ export class ResumeService {
       iconName: 'folder',
       score: proj.length > 0 ? Math.min(95, 60 + proj.length * 10) : 0,
       status: proj.length > 0 ? `${proj.length} Projects` : 'Empty',
-      qualitativeConfidence: proj.length > 0 ? 'Very High' : 'Low',
-      extractionMethod: 'Layout & Heading Detector',
+      qualitativeConfidence: proj.length > 0 ? 'Detected' : 'Not found',
+      extractionMethod: 'Rule-based parser',
       description: proj.length > 0
         ? `${proj.length} project entries detected.`
         : 'No project section found.'
@@ -268,8 +369,8 @@ export class ResumeService {
       iconName: 'graduation',
       score: edu.length > 0 ? 95 : 0,
       status: edu.length > 0 ? 'Extracted' : 'Missing',
-      qualitativeConfidence: edu.length > 0 ? 'Very High' : 'Low',
-      extractionMethod: 'Fuzzy Section Heading Match',
+      qualitativeConfidence: edu.length > 0 ? 'Detected' : 'Not found',
+      extractionMethod: 'Rule-based parser',
       description: edu.length > 0
         ? `${degVal || 'Education'} at ${instVal || 'Institution'}`
         : 'No education section found.'
@@ -281,10 +382,10 @@ export class ResumeService {
       iconName: 'target',
       score: skills.length > 0 ? Math.min(98, 50 + skills.length * 3) : 0,
       status: skills.length > 0 ? `${skills.length} Skills Mapped` : 'Empty',
-      qualitativeConfidence: skills.length > 0 ? 'Very High' : 'Low',
-      extractionMethod: 'Taxonomy Embedding Equivalence',
+      qualitativeConfidence: skills.length > 0 ? 'Detected' : 'Not found',
+      extractionMethod: 'Rule-based parser',
       description: skills.length > 0
-        ? `${skills.length} skill entities mapped to domain taxonomy.`
+        ? `${skills.length} skills recognised from the skill lexicon.`
         : 'No skills section found.'
     });
 
@@ -294,8 +395,8 @@ export class ResumeService {
       iconName: 'award',
       score: certs.length > 0 ? 90 : 0,
       status: certs.length > 0 ? `${certs.length} Certs` : 'None Listed',
-      qualitativeConfidence: certs.length > 0 ? 'High' : 'Low',
-      extractionMethod: 'Issuer NER Pattern Match',
+      qualitativeConfidence: certs.length > 0 ? 'Detected' : 'Not found',
+      extractionMethod: 'Rule-based parser',
       description: certs.length > 0
         ? `${certs.length} certification entry/entries detected.`
         : 'No certifications listed in resume.'
@@ -307,8 +408,8 @@ export class ResumeService {
       iconName: 'trophy',
       score: ach.length > 0 ? 85 : 0,
       status: ach.length > 0 ? `${ach.length} Achievements` : 'None Listed',
-      qualitativeConfidence: ach.length > 0 ? 'Medium' : 'Low',
-      extractionMethod: 'Semantic Bullet Classifier',
+      qualitativeConfidence: ach.length > 0 ? 'Detected' : 'Not found',
+      extractionMethod: 'Rule-based parser',
       description: ach.length > 0
         ? `${ach.length} achievement entry/entries detected.`
         : 'No explicit achievements section listed.'
@@ -320,8 +421,8 @@ export class ResumeService {
       iconName: 'languages',
       score: lang.length > 0 ? 94 : 0,
       status: lang.length > 0 ? `${lang.length} Languages` : 'None Listed',
-      qualitativeConfidence: lang.length > 0 ? 'Very High' : 'Low',
-      extractionMethod: 'Natural Language Detector',
+      qualitativeConfidence: lang.length > 0 ? 'Detected' : 'Not found',
+      extractionMethod: 'Rule-based parser',
       description: lang.length > 0
         ? `${lang.map(l => l.value).join(', ')} detected.`
         : 'No explicit language skills listed.'
@@ -341,7 +442,7 @@ export class ResumeService {
   ): Promise<void> {
     try {
       // 1. Update status to processing
-      await this.resumeRepository.update(resumeId, { parsingStatus: 'processing' });
+      await this.resumeRepository.update(resumeId, { parsingStatus: 'processing', parsingStartedAt: new Date() });
 
       const AIClientService = (await import('./AIClientService.js')).default;
       const ParsedResume = (await import('../models/ParsedResume.js')).default;
@@ -349,6 +450,14 @@ export class ResumeService {
 
       // 2. Call AI Service
       const parsedData = (await AIClientService.extractResume(fileBuffer, fileName)) as IParsedResumeData;
+
+      // The user may have replaced or deleted this resume while it was being read. Its result
+      // must not overwrite the skill profile that now belongs to a newer resume.
+      const stillActive = await this.resumeRepository.findActiveByUserId(userId);
+      if (!stillActive || stillActive.id !== resumeId) {
+        logger.info(`Resume ${resumeId} is no longer the active resume; discarding its extraction result.`);
+        return;
+      }
 
       // 3. Clear any existing parsed data for this resume
       await ParsedResume.deleteMany({ resumeId });
@@ -386,7 +495,7 @@ export class ResumeService {
               resumeId: new mongoose.Types.ObjectId(resumeId),
               name: skill.name.trim(),
               category: skill.category.trim(),
-              confidence: skill.confidence,
+              confidence: typeof skill.confidence === 'number' ? skill.confidence : null,
             });
           }
         }
@@ -395,15 +504,19 @@ export class ResumeService {
 
       // 6. Build the User Skill Intelligence layer from extracted data
       const UserSkillService = (await import('./UserSkillService.js')).default;
-      UserSkillService.buildUserSkillsFromResume(userId, resumeId).catch((e: Error) => {
-        logger.error(`Async skill processing failed for ${userId}: ${e.message}`);
-      });
+      // Awaited so `parsingStatus: completed` means skills, matches, readiness and
+      // recommendations are all ready to read (this already runs in the background).
+      const skillChanges = await UserSkillService.buildUserSkillsFromResume(userId, resumeId);
 
       const ProgressEventService = (await import('./ProgressEventService.js')).default;
       ProgressEventService.logEvent(userId, 'resume_parsed', { resumeId: resumeId }).catch((e: Error) => {
         logger.error(`Async progress log failed: ${e.message}`);
       });
-      await this.resumeRepository.update(resumeId, { parsingStatus: 'completed' });
+      await this.resumeRepository.update(resumeId, {
+        parsingStatus: 'completed',
+        parsingError: undefined,
+        ...(skillChanges ? { skillChanges } : {}),
+      });
       logger.info(`Successfully parsed and saved resume ${resumeId} for user ${userId}`);
     } catch (error: unknown) {
       const err = error as Error;

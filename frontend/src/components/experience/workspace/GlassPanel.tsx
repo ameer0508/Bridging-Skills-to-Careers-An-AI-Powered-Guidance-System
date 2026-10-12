@@ -6,6 +6,8 @@ export interface GlassPanelProps {
   className?: string;
   glowColor?: string;
   animateIn?: boolean;
+  /** Makes the whole panel an accessible button (click, Enter or Space). */
+  onClick?: () => void;
 }
 
 export const GlassPanel: React.FC<GlassPanelProps> = ({
@@ -13,10 +15,43 @@ export const GlassPanel: React.FC<GlassPanelProps> = ({
   className = '',
   glowColor = 'rgba(99, 102, 241, 0.12)',
   animateIn = true,
+  onClick,
 }) => {
+  const interactive = onClick
+    ? {
+        role: 'button' as const,
+        tabIndex: 0,
+        onClick,
+        onKeyDown: (event: React.KeyboardEvent) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onClick();
+          }
+        },
+      }
+    : {};
+  // Separate layout/grid classes for outer element so grid and flex containers work reliably
+  const classTokens = className.split(/\s+/).filter(Boolean);
+  const layoutClasses: string[] = [];
+  const innerClasses: string[] = [];
+
+  classTokens.forEach((token) => {
+    if (
+      token.includes('col-span') ||
+      token.includes('row-span') ||
+      token.startsWith('flex-') ||
+      token.startsWith('order-') ||
+      token.startsWith('self-')
+    ) {
+      layoutClasses.push(token);
+    } else {
+      innerClasses.push(token);
+    }
+  });
+
   const content = (
     <div
-      className={`relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl transition-all duration-300 group hover:border-white/20 ${className}`}
+      className={`w-full relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl transition-all duration-300 group hover:border-white/20 ${innerClasses.join(' ')}`}
     >
       {/* Reflection Glow */}
       <div
@@ -29,7 +64,15 @@ export const GlassPanel: React.FC<GlassPanelProps> = ({
     </div>
   );
 
-  if (!animateIn) return content;
+  const outerClass = `w-full ${layoutClasses.join(' ')}`.trim();
+
+  if (!animateIn) {
+    return (
+      <div className={outerClass} {...interactive}>
+        {content}
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -37,6 +80,8 @@ export const GlassPanel: React.FC<GlassPanelProps> = ({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.4 }}
+      className={outerClass}
+      {...interactive}
     >
       {content}
     </motion.div>

@@ -1,5 +1,4 @@
 import bcrypt from 'bcrypt';
-import mongoose from 'mongoose';
 import UserRepository from '../repositories/UserRepository.js';
 import RefreshTokenRepository from '../repositories/RefreshTokenRepository.js';
 import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../utils/jwt.js';
@@ -18,7 +17,8 @@ export class AuthService {
    * Registers a new user, hashes their password, and issues initial access and refresh tokens.
    */
   async register(fullName: string, email: string, password: string) {
-    const existingUser = await this.userRepository.findByEmail(email);
+    const normalizedEmail = (email || '').toLowerCase().trim();
+    const existingUser = await this.userRepository.findByEmail(normalizedEmail);
     if (existingUser) {
       const error = new Error('Email address is already registered.') as AppError;
       error.statusCode = 400;
@@ -31,18 +31,18 @@ export class AuthService {
 
     const user = await this.userRepository.create({
       fullName,
-      email,
-      passwordHash
+      email: normalizedEmail,
+      passwordHash,
     });
 
-    const accessToken = signAccessToken(user.id, user.role);
+    const accessToken = signAccessToken(user.id, user.role || 'user');
     const refreshTokenString = signRefreshToken(user.id);
 
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days from now
     await this.refreshTokenRepository.create({
-      userId: user._id as mongoose.Types.ObjectId,
+      userId: user._id ? user._id.toString() : user.id,
       token: refreshTokenString,
-      expiresAt
+      expiresAt,
     });
 
     return {
@@ -51,11 +51,16 @@ export class AuthService {
         fullName: user.fullName,
         email: user.email,
         role: user.role,
-        onboardingCompleted: user.onboardingCompleted,
-        profileCompleted: user.profileCompleted
+        primaryCareerDomain: user.primaryCareerDomain || '',
+        secondaryCareerDomains: user.secondaryCareerDomains || [],
+        targetRole: user.targetRole || '',
+        targetCareerId: user.targetCareerId || null,
+        onboardingCompleted: Boolean(user.onboardingCompleted),
+        onboardingCompletedAt: user.onboardingCompletedAt || null,
+        profileCompleted: Boolean(user.profileCompleted),
       },
       accessToken,
-      refreshToken: refreshTokenString
+      refreshToken: refreshTokenString,
     };
   }
 
@@ -63,7 +68,9 @@ export class AuthService {
    * Log in user credentials, hashes password, and issues access/refresh tokens.
    */
   async login(email: string, password: string) {
-    const user = await this.userRepository.findByEmail(email);
+    const normalizedEmail = (email || '').toLowerCase().trim();
+    const user = await this.userRepository.findByEmail(normalizedEmail);
+
     if (!user) {
       const error = new Error('Invalid email or password.') as AppError;
       error.statusCode = 401;
@@ -97,14 +104,14 @@ export class AuthService {
     user.lastLogin = new Date();
     await user.save();
 
-    const accessToken = signAccessToken(user.id, user.role);
+    const accessToken = signAccessToken(user.id, user.role || 'user');
     const refreshTokenString = signRefreshToken(user.id);
 
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     await this.refreshTokenRepository.create({
-      userId: user._id as mongoose.Types.ObjectId,
+      userId: user._id ? user._id.toString() : user.id,
       token: refreshTokenString,
-      expiresAt
+      expiresAt,
     });
 
     return {
@@ -113,8 +120,13 @@ export class AuthService {
         fullName: user.fullName,
         email: user.email,
         role: user.role,
-        onboardingCompleted: user.onboardingCompleted,
-        profileCompleted: user.profileCompleted
+        primaryCareerDomain: user.primaryCareerDomain || '',
+        secondaryCareerDomains: user.secondaryCareerDomains || [],
+        targetRole: user.targetRole || '',
+        targetCareerId: user.targetCareerId || null,
+        onboardingCompleted: Boolean(user.onboardingCompleted),
+        onboardingCompletedAt: user.onboardingCompletedAt || null,
+        profileCompleted: Boolean(user.profileCompleted),
       },
       accessToken,
       refreshToken: refreshTokenString
@@ -167,7 +179,7 @@ export class AuthService {
       throw error;
     }
 
-    const newAccessToken = signAccessToken(user.id, user.role);
+    const newAccessToken = signAccessToken(user.id, user.role || 'user');
     const newRefreshTokenString = signRefreshToken(user.id);
 
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -177,9 +189,9 @@ export class AuthService {
 
     // Save new token
     await this.refreshTokenRepository.create({
-      userId: user._id as mongoose.Types.ObjectId,
+      userId: user._id ? user._id.toString() : user.id,
       token: newRefreshTokenString,
-      expiresAt
+      expiresAt,
     });
 
     return {

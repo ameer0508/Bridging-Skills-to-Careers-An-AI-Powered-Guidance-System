@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sliders, Sparkles, TrendingUp, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { Sliders, ArrowRight } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface SimulationResult {

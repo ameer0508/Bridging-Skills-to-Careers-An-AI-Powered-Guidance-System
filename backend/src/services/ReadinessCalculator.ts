@@ -1,7 +1,7 @@
 import { ICareerRequirement } from '../models/CareerRequirement.js';
 import { IUserSkill } from '../models/UserSkill.js';
 import { IDimensionScore } from '../models/CareerReadiness.js';
-import { ISkill } from '../models/Skill.js';
+import { buildUserSkillIndex, findUserSkill } from '../utils/skillMatching.js';
 
 export class ReadinessCalculator {
   /**
@@ -10,7 +10,7 @@ export class ReadinessCalculator {
   public static calculate(
     requirements: ICareerRequirement[],
     userSkills: IUserSkill[]
-  ): { overallScore: number; dimensions: IDimensionScore[]; tier: string } {
+  ): { overallScore: number; dimensions: IDimensionScore[]; tier: string; interpretation: string } {
     let techEarned = 0;
     let techMax = 0;
     let expEarned = 0;
@@ -21,14 +21,7 @@ export class ReadinessCalculator {
     let totalRequirementsCount = requirements.length;
 
     // Pre-map skills
-    const userSkillMap = new Map<string, IUserSkill>();
-    for (const us of userSkills) {
-      const skill = us.skillId as unknown as ISkill;
-      if (skill && skill.canonicalName) {
-        userSkillMap.set(skill.canonicalName.toLowerCase(), us);
-        skill.aliases.forEach(a => userSkillMap.set(a.toLowerCase(), us));
-      }
-    }
+    const userSkillIndex = buildUserSkillIndex(userSkills);
 
     for (const req of requirements) {
       const weightMultiplier =
@@ -37,7 +30,7 @@ export class ReadinessCalculator {
 
       techMax += maxPoints;
 
-      const us = userSkillMap.get(req.skillName.toLowerCase());
+      const us = findUserSkill(userSkillIndex, req.skillName);
       if (us) {
         // Technical dimension (base skill presence)
         techEarned += (us.evidenceScore / 100) * maxPoints;
@@ -59,7 +52,12 @@ export class ReadinessCalculator {
     }
 
     if (techMax === 0) {
-      return { overallScore: 0, dimensions: [], tier: 'Not Ready' };
+      return {
+        overallScore: 0,
+        dimensions: [],
+        tier: 'Early stage',
+        interpretation: 'No skill requirements are defined for this career.'
+      };
     }
 
     const techScore = (techEarned / techMax) * 100;
@@ -84,12 +82,22 @@ export class ReadinessCalculator {
 
     overallScore = Math.round(Math.min(overallScore, 100));
 
-    let tier = 'Not Ready';
-    if (overallScore >= 80) tier = 'Senior Level Ready';
-    else if (overallScore >= 60) tier = 'Mid Level Ready';
-    else if (overallScore >= 35) tier = 'Entry Level Ready';
+    // Tiers describe how much resume evidence exists. They deliberately make no claim about
+    // seniority or employability.
+    let tier = 'Early stage';
+    if (overallScore >= 75) tier = 'Strong evidence';
+    else if (overallScore >= 50) tier = 'Solid foundation';
+    else if (overallScore >= 25) tier = 'Developing';
 
-    return { overallScore, dimensions, tier };
+    const requiredTotal = requirements.filter(r => r.importance === 'required').length;
+    const requiredMet = requiredTotal - requiredMissingCount;
+    const interpretation =
+      `${tier}: your resume shows evidence for ${requiredMet} of ${requiredTotal} required skills. ` +
+      'Readiness measures how well your resume evidences the skill baseline for this career ' +
+      '(skills 50%, work experience 25%, projects 15%, education and certifications 10%). ' +
+      'It is not a prediction of interview or hiring outcomes.';
+
+    return { overallScore, dimensions, tier, interpretation };
   }
 }
 

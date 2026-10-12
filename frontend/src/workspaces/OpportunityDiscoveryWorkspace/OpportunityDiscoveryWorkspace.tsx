@@ -32,6 +32,7 @@ import { GlassPanel } from '../../components/experience/workspace';
 import { WorkspaceHero, AIStatusBar } from '../../components/experience/workspace';
 import { useToast } from '../../components/composite/Toast';
 import { AIThinkingAnimation } from '../../components/experience';
+import { primaryReadiness } from '../../lib/readiness';
 
 export interface OpportunityItem {
   externalId: string;
@@ -47,7 +48,7 @@ export interface OpportunityItem {
   applicationUrl: string;
   sourceUrl?: string;
   skills: string[];
-  skillbridgeMatchScore: number;
+  skillbridgeMatchScore: number | null;
   matchedSkills: string[];
   missingSkills: string[];
   matchExplanation?: string;
@@ -66,10 +67,11 @@ export interface SavedOpportunityItem {
   savedAt: string;
   status: 'saved' | 'applied' | 'interviewing' | 'offer' | 'rejected' | 'withdrawn';
   notes?: string;
-  skillbridgeMatchScore: number;
+  skillbridgeMatchScore: number | null;
   matchedSkills: string[];
   missingSkills: string[];
   description?: string;
+  employmentType?: string;
 }
 
 export const OpportunityDiscoveryWorkspace: React.FC = () => {
@@ -214,9 +216,9 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
     },
   });
 
-  const liveOpportunities: OpportunityItem[] = opportunitiesData?.opportunities || [];
+  const liveOpportunities: OpportunityItem[] = useMemo(() => opportunitiesData?.opportunities || [], [opportunitiesData]);
   const providerHealth = opportunitiesData?.providerHealth || { status: 'UP', provider: 'JSearch API' };
-  const savedOpportunities: SavedOpportunityItem[] = savedData || [];
+  const savedOpportunities: SavedOpportunityItem[] = useMemo(() => savedData || [], [savedData]);
   const matches = matchesData || [];
   const topMatch = matches[0] || null;
   const targetRoleTitle = topMatch?.careerId?.title || 'Target Career Role';
@@ -226,8 +228,11 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
   }, [savedOpportunities]);
 
   // Telemetry Metrics
-  const topMatchScore = liveOpportunities[0]?.skillbridgeMatchScore || topMatch?.matchScore || 90;
-  const readinessScore = readinessData?.overallScore || 0;
+  // Best real score among the listed postings; null when none could be scored
+  const scoredOpportunity = liveOpportunities.find((o) => typeof o.skillbridgeMatchScore === 'number');
+  const topMatchScore: number | null = scoredOpportunity?.skillbridgeMatchScore ?? null;
+  const topMatchLabel = topMatchScore === null ? 'Not scored' : `${topMatchScore}%`;
+  const readinessScore = primaryReadiness(readinessData)?.overallScore ?? 0;
 
   const userSkillNames = useMemo(() => {
     if (skillsData?.categories) {
@@ -278,7 +283,12 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
         });
         addToast({ type: 'success', message: `Saved [${opp.title}] to opportunity pipeline!` });
       }
-      await Promise.all([refetchSaved(), refetchTelemetry()]);
+      await Promise.all([
+        refetchSaved(),
+        refetchTelemetry(),
+        queryClient.invalidateQueries({ queryKey: ['career-snapshot'] }),
+        queryClient.invalidateQueries({ queryKey: ['careerSnapshot'] }),
+      ]);
     } catch {
       addToast({ type: 'error', message: 'Failed to update saved opportunity state.' });
     }
@@ -289,7 +299,12 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
     try {
       await apiClient.patch(`/opportunities/saved/${externalId}/status`, { status: newStatus, notes });
       addToast({ type: 'success', message: `Pipeline status updated to [${newStatus.toUpperCase()}].` });
-      await Promise.all([refetchSaved(), refetchTelemetry()]);
+      await Promise.all([
+        refetchSaved(),
+        refetchTelemetry(),
+        queryClient.invalidateQueries({ queryKey: ['career-snapshot'] }),
+        queryClient.invalidateQueries({ queryKey: ['careerSnapshot'] }),
+      ]);
     } catch {
       addToast({ type: 'error', message: 'Failed to update pipeline status.' });
     }
@@ -341,9 +356,9 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
         userName={targetRoleTitle}
         title="Opportunity Discovery Agent"
         description="Multi-modal opportunity discovery across verified career roles, research grants, skill fellowships, and high-impact industry programs."
-        aiSummary={`Top Match: ${topMatchScore}% • Eligibility: ${eligibilityPercent}% • Discovered: ${liveOpportunities.length} Live Opportunities`}
+        aiSummary={`Top Match: ${topMatchLabel} • Eligibility: ${eligibilityPercent}% • Discovered: ${liveOpportunities.length} Live Opportunities`}
         stats={[
-          { label: 'Top Match Score', value: `${topMatchScore} / 100`, change: targetRoleTitle, isPositive: topMatchScore >= 80 },
+          { label: 'Top Match Score', value: topMatchScore === null ? 'Not scored' : `${topMatchScore} / 100`, change: targetRoleTitle, isPositive: topMatchScore !== null && topMatchScore >= 80 },
           { label: 'Skill Eligibility Rate', value: `${eligibilityPercent}%`, change: `${userSkillNames.length} Verified Skills`, isPositive: eligibilityPercent >= 60 },
           { label: 'Live Discovered', value: `${liveOpportunities.length} Jobs`, change: 'RapidAPI JSearch Feed', isPositive: true },
           { label: 'Pipeline Saved', value: `${savedOpportunities.length} Bookmarks`, change: 'Persisted Records', isPositive: true },
@@ -678,7 +693,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                         {/* MATCH SCORE BADGE & SAVE BUTTON */}
                         <div className="flex items-center gap-2 shrink-0">
                           <span className="text-emerald-400 font-bold text-xs flex items-center gap-1 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/30">
-                            <Sparkles className="w-3.5 h-3.5" /> SkillBridge Match: {opp.skillbridgeMatchScore}%
+                            <Sparkles className="w-3.5 h-3.5" /> SkillBridge Match: {opp.skillbridgeMatchScore === null ? 'Not scored' : `${opp.skillbridgeMatchScore}%`}
                           </span>
 
                           <button
@@ -732,6 +747,22 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                             className="text-xs text-indigo-400 hover:text-indigo-300 font-bold underline cursor-pointer"
                           >
                             Inspect Details
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              navigate('/job-agent', {
+                                state: {
+                                  opportunity: opp,
+                                  selectedOpportunityId: opp.externalId,
+                                },
+                              })
+                            }
+                            className="py-1 px-2.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
+                            title="Analyze this opportunity in Autonomous Job Search Agent"
+                          >
+                            <Briefcase className="w-3.5 h-3.5 text-cyan-400" />
+                            <span>Job Search Agent</span>
                           </button>
 
                           <a
@@ -986,7 +1017,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                   LIVE EXTERNAL DATA • JSEARCH
                 </span>
                 <span className="text-emerald-400 font-bold text-xs bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/30">
-                  Match Score: {selectedOpportunity.skillbridgeMatchScore}%
+                  Match Score: {selectedOpportunity.skillbridgeMatchScore === null ? 'Not scored' : `${selectedOpportunity.skillbridgeMatchScore}%`}
                 </span>
               </div>
               <h2 id="opportunity-drawer-title" className="text-xl font-bold text-white">
@@ -1057,7 +1088,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
             </div>
 
             {/* FOOTER ACTIONS */}
-            <div className="flex items-center justify-between pt-4 border-t border-white/10">
+            <div className="flex items-center justify-between pt-4 border-t border-white/10 flex-wrap gap-3">
               <button
                 onClick={() => {
                   handleToggleSave(selectedOpportunity);
@@ -1069,15 +1100,32 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                 {savedExternalIds.has(selectedOpportunity.externalId) ? 'Remove Bookmark' : 'Save Opportunity'}
               </button>
 
-              <a
-                href={selectedOpportunity.applicationUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="py-2 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center gap-2 shadow-lg shadow-indigo-600/30"
-              >
-                <span>VIEW OPPORTUNITY</span>
-                <ExternalLink className="w-4 h-4" />
-              </a>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    navigate('/job-agent', {
+                      state: {
+                        opportunity: selectedOpportunity,
+                        selectedOpportunityId: selectedOpportunity.externalId,
+                      },
+                    });
+                  }}
+                  className="py-2 px-4 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-500/40 text-cyan-300 font-bold flex items-center gap-2 transition cursor-pointer"
+                >
+                  <Briefcase className="w-4 h-4 text-cyan-400" />
+                  <span>Job Search Agent</span>
+                </button>
+
+                <a
+                  href={selectedOpportunity.applicationUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="py-2 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center gap-2 shadow-lg shadow-indigo-600/30"
+                >
+                  <span>VIEW OPPORTUNITY</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
             </div>
           </GlassPanel>
         </div>
@@ -1086,7 +1134,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
       {/* BOTTOM STATUS BAR */}
       <AIStatusBar
         status={isAnalyzing ? 'thinking' : 'active'}
-        confidence={topMatchScore || 90}
+        confidence={topMatchScore ?? 0}
         lastUpdated="Opportunity Agent Active"
       />
     </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Target, ShieldCheck, AlertTriangle, ChevronRight, Sparkles } from 'lucide-react';
+import { Target, ShieldCheck, AlertTriangle, ChevronRight } from 'lucide-react';
 
 interface ICareerMatch {
   id: string;

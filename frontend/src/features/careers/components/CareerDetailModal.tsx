@@ -1,5 +1,5 @@
 import React from 'react';
-import { Target, X, CheckCircle2, AlertTriangle, ExternalLink, ShieldCheck } from 'lucide-react';
+import { X, CheckCircle2, AlertTriangle, ExternalLink, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface ICareerMatch {

@@ -1,4 +1,5 @@
-import { ReadinessItem, RecommendationItem, RoadmapData } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { ReadinessItem, RecommendationItem, RoadmapData } from '../../../types/telemetry';
+import { listFrom } from '../../../lib/collections';
 
 export interface HealthDimension {
   dimension: string;
@@ -21,7 +22,8 @@ export const CareerHealthEngine = {
   ): CareerHealthData {
     const roadmapProgress = roadmap?.progressPercentage || 0;
     const readinessScore = topReadiness?.overallScore || 0;
-    const recsCompleted = recommendations.filter((r) => r.status === 'completed').length;
+    const safeRecs = listFrom<RecommendationItem>(recommendations, 'recommendations');
+    const recsCompleted = safeRecs.filter((r) => r && r.status === 'completed').length;
 
     const dimensions: HealthDimension[] = [
       {

@@ -1,3 +1,6 @@
+# NOTE: this module has no live data source. It returns built-in illustrative sample data,
+# labelled as such in every response. It is not used by the product's user workflows.
+ILLUSTRATIVE = "illustrative_sample"
 from fastapi import APIRouter, Query, HTTPException
 from app.memory_engine.memory_manager import long_term_memory_manager_instance
 
@@ -10,7 +13,7 @@ async def get_memory_context(user_id: str, agent_id: str = Query("orchestrator",
     """
     try:
         data = long_term_memory_manager_instance.get_agent_memory_context(user_id, agent_id=agent_id)
-        return {"success": True, "data": data}
+        return {"success": True, "data_origin": ILLUSTRATIVE, "data": data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -21,6 +24,6 @@ async def forget_memory_category(user_id: str, category: str = Query("episodic",
     """
     try:
         data = long_term_memory_manager_instance.forget_user_category(user_id, category)
-        return {"success": True, "data": data}
+        return {"success": True, "data_origin": ILLUSTRATIVE, "data": data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

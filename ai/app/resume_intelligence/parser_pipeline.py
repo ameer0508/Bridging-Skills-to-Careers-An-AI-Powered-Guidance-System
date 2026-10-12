@@ -4,7 +4,6 @@ import logging
 from typing import Dict, Any, Optional
 from app.resume_intelligence.layout_detector import LayoutDetector
 from app.resume_intelligence.section_classifier import SectionClassifier
-from app.resume_intelligence.transformer_parser import transformer_manager
 from app.resume_intelligence.skill_mapper import SkillMapper
 from app.resume_intelligence.experience_parser import ExperienceParser
 from app.resume_intelligence.education_parser import EducationParser
@@ -22,8 +21,8 @@ logger = logging.getLogger("skillbridge-ai")
 
 class ResumeIntelligencePipeline:
     """
-    Enterprise Transformer-Based Resume Intelligence Engine.
-    Executes the 14-stage pipeline with automatic fallback strategy safeguards.
+    Rule-based resume parser: section detection, regular expressions and the shared skill
+    lexicon. If it fails, the configured AI provider is used as a fallback.
     """
 
     @classmethod
@@ -43,15 +42,14 @@ class ResumeIntelligencePipeline:
             sections = SectionClassifier.classify_sections(text)
             logger.info(f"[ResumeIntelligencePipeline] Classifed Sections: {list(sections.keys())}")
 
-            # 4. Transformer NLP Embeddings
-            embeddings = transformer_manager.encode_text(text[:500])
-            active_model = transformer_manager.active_model_name
+            # 4. All extraction below is deterministic and rule-based
+            active_model = "rule-based"
 
             # 5. Personal Info Semantic Extraction
             personal_info = cls._extract_personal_info(sections.get("header", "") + "\n" + sections.get("summary", ""), active_model)
 
             # 6. Domain Intelligence Sub-Engines
-            skills = SkillMapper.extract_semantic_skills(sections.get("skills", "") + "\n" + text)
+            skills = SkillMapper.extract_from_sections(sections, text)
             experiences = ExperienceParser.parse_experience_section(sections.get("experience", ""))
             educations = EducationParser.parse_education_section(sections.get("education", ""))
             projects = ProjectParser.parse_projects_section(sections.get("projects", ""))
@@ -88,40 +86,42 @@ class ResumeIntelligencePipeline:
 
         # Name extraction heuristic (first line of header)
         lines = [l.strip() for l in header_text.splitlines() if l.strip()]
-        full_name = lines[0] if lines and len(lines[0]) < 40 and not email_match else "Candidate"
+        # The name is the first header line that looks like one: 2-4 alphabetic words and no
+        # digits, "@" or links. Contact details on the following lines do not affect it.
+        full_name = None
+        for candidate in lines[:3]:
+            words = candidate.split()
+            if 2 <= len(words) <= 4 and all(re.fullmatch(r"[A-Za-z][A-Za-z.'-]*", w) for w in words):
+                full_name = candidate
+                break
 
         return SemanticPersonalInfo(
             fullName=SemanticExtractedEntity(
                 value=full_name,
-                confidence=0.95,
                 source="resume_header",
                 transformer_model=model_name,
-                extraction_method="header-ner"
-            ),
+                extraction_method="header-heuristic"
+            ) if full_name else None,
             email=SemanticExtractedEntity(
                 value=email_match.group(0),
-                confidence=0.99,
                 source="resume_header",
                 transformer_model=model_name,
                 extraction_method="regex-email"
             ) if email_match else None,
             phone=SemanticExtractedEntity(
                 value=phone_match.group(0),
-                confidence=0.96,
                 source="resume_header",
                 transformer_model=model_name,
                 extraction_method="regex-phone"
             ) if phone_match else None,
             linkedin=SemanticExtractedEntity(
                 value=linkedin_match.group(0),
-                confidence=0.98,
                 source="resume_header",
                 transformer_model=model_name,
                 extraction_method="regex-social"
             ) if linkedin_match else None,
             github=SemanticExtractedEntity(
                 value=github_match.group(0),
-                confidence=0.98,
                 source="resume_header",
                 transformer_model=model_name,
                 extraction_method="regex-social"
@@ -179,6 +179,15 @@ class ResumeIntelligencePipeline:
     @classmethod
     def _execute_fallback(cls, file_path: str, raw_text: Optional[str]) -> ParsedResumeResponse:
         logger.info("[ResumeIntelligencePipeline] Executing Fallback Strategy via AI Gateway")
+        # Only a real provider may read a resume. The development mock returns a fixed, fictional
+        # resume, which must never be stored as if it were the user's own.
+        try:
+            real_providers = [p for p in ai_gateway.get_provider_chain() if p.provider_name != "mock"]
+        except Exception:
+            real_providers = []
+        if not real_providers:
+            raise RuntimeError("The resume could not be parsed, and no AI provider is available to try instead.")
+
         text = raw_text or extract_text_from_file(file_path)
         ai_resp = ai_gateway.route_request(
             service_name="resume_parsing",
@@ -186,6 +195,6 @@ class ResumeIntelligencePipeline:
             payload=text,
             schema_class=ParsedResumeResponse
         )
-        if ai_resp.success and ai_resp.response:
+        if ai_resp.success and ai_resp.response and ai_resp.provider != "mock":
             return ParsedResumeResponse.model_validate(ai_resp.response)
         raise RuntimeError(f"Resume processing fallback failed: {'; '.join(ai_resp.errors)}")

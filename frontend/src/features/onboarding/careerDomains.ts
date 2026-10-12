@@ -1,0 +1,30 @@
+/** Career domains and their specialisation tags, offered during onboarding and in profile settings. */
+export const CAREER_DOMAINS = [
+  { id: 'software-engineering', name: 'Software Engineering', desc: 'Enterprise systems, architecture, and backend infrastructure' },
+  { id: 'ai-ml', name: 'Artificial Intelligence & Machine Learning', desc: 'LLMs, computer vision, neural networks, and RAG pipelines' },
+  { id: 'data-science', name: 'Data Science & Analytics', desc: 'Big data pipelines, statistical modeling, and business intelligence' },
+  { id: 'cybersecurity', name: 'Cybersecurity', desc: 'Application security, penetration testing, SOC, and cloud security' },
+  { id: 'cloud-devops', name: 'Cloud & DevOps', desc: 'Kubernetes, CI/CD pipelines, terraform, and infrastructure as code' },
+  { id: 'web-fullstack', name: 'Web & Full Stack Development', desc: 'React, Node.js, modern web frameworks, and client UX' },
+  { id: 'mobile-dev', name: 'Mobile Development', desc: 'iOS Swift, Android Kotlin, React Native, and cross-platform apps' },
+  { id: 'product-management', name: 'Product Management', desc: 'Product strategy, roadmap execution, and user research' },
+  { id: 'ui-ux-design', name: 'UI/UX & Design', desc: 'Design systems, user research, wireframing, and interactive prototyping' },
+  { id: 'business-consulting', name: 'Business & Consulting', desc: 'Strategy consulting, process optimization, and operations management' },
+  { id: 'finance-fintech', name: 'Finance & Fintech', desc: 'Quantitative finance, trading platforms, and financial intelligence' },
+  { id: 'research-academia', name: 'Research & Academia', desc: 'Applied scientific research, paper publishing, and R&D' },
+];
+
+export const SECONDARY_INTEREST_TAGS: Record<string, string[]> = {
+  'software-engineering': ['Distributed Systems', 'Microservices', 'System Design', 'API Architecture', 'Database Optimization'],
+  'ai-ml': ['PyTorch / TensorFlow', 'Vector Databases', 'Prompt Engineering', 'MLOps', 'Computer Vision'],
+  'data-science': ['Pandas & NumPy', 'SQL & Data Warehousing', 'PowerBI / Tableau', 'Predictive Modeling'],
+  'cybersecurity': ['Cloud Security (AWS/GCP)', 'Penetration Testing', 'SIEM & Threat Detection', 'Zero Trust Architecture'],
+  'cloud-devops': ['Kubernetes & Helm', 'Docker Containers', 'Terraform', 'GitHub Actions CI/CD', 'AWS / Azure'],
+  'web-fullstack': ['React 19 & Next.js', 'Node.js & Express', 'TypeScript', 'Tailwind CSS', 'GraphQL'],
+  'mobile-dev': ['React Native', 'Swift & SwiftUI', 'Kotlin', 'Flutter', 'Mobile System Design'],
+  'product-management': ['Agile & Scrum', 'User Analytics', 'Feature Prioritization', 'Product Growth'],
+  'ui-ux-design': ['Figma Design Systems', 'User Research', 'Prototyping', 'Accessibility (WCAG)'],
+  'business-consulting': ['Business Strategy', 'Financial Modeling', 'Process Automation', 'Stakeholder Management'],
+  'finance-fintech': ['Algorithmic Trading', 'Risk Analytics', 'Payment Gateways', 'Blockchain & Smart Contracts'],
+  'research-academia': ['Deep Learning Papers', 'Algorithm Complexity', 'Experimental Design', 'Data Visualization'],
+};

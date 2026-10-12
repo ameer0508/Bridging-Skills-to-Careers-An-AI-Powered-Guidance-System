@@ -19,7 +19,13 @@ export const AppShellContent: React.FC<AppShellProps> = ({ children }) => {
   const navigate = useNavigate();
   const { isLaptop, isMobile } = useBreakpoint();
   const { theme, setTheme } = useTheme();
-  const user = useAuthStore((state) => state.user);
+  const { user, isHydrated, fetchCurrentUser, accessToken } = useAuthStore();
+
+  useEffect(() => {
+    if (accessToken) {
+      fetchCurrentUser();
+    }
+  }, [accessToken, fetchCurrentUser]);
 
   // Sidebar collapse state
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
@@ -170,7 +176,7 @@ export const AppShellContent: React.FC<AppShellProps> = ({ children }) => {
 
       {/* CAREER DOMAIN ONBOARDING MODAL */}
       <CareerDomainOnboardingModal
-        isOpen={Boolean(user && (!user.onboardingCompleted || !user.primaryCareerDomain))}
+        isOpen={Boolean(isHydrated && user && !user.onboardingCompleted)}
       />
 
       {/* AI INITIALIZATION OVERLAY */}

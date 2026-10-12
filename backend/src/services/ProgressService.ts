@@ -1,84 +1,97 @@
 import mongoose from 'mongoose';
-import { LearningRoadmap, RoadmapItemStatus } from '../models/LearningRoadmap.js';
+import {
+  LearningRoadmap,
+  ILearningRoadmap,
+  RoadmapItemStatus
+} from '../models/LearningRoadmap.js';
 import { RoadmapHistory } from '../models/RoadmapHistory.js';
-
+import { EventType } from '../models/ProgressEvent.js';
+import { AppError } from '../middlewares/errorHandler.js';
+import { RoadmapEngine } from './RoadmapEngine.js';
+import ProgressEventService from './ProgressEventService.js';
 
 export class ProgressService {
   /**
-   * Updates the status of a specific roadmap item and recalculates overall roadmap progress.
+   * Updates the status of a specific roadmap item, recalculates phase and overall progress,
+   * and returns the saved roadmap.
    */
   public async updateItemStatus(
     userId: string,
     careerId: string,
     itemId: string,
     newStatus: RoadmapItemStatus
-  ): Promise<void> {
+  ): Promise<ILearningRoadmap> {
+    if (!mongoose.Types.ObjectId.isValid(careerId) || !mongoose.Types.ObjectId.isValid(itemId)) {
+      throw new AppError('Invalid career or roadmap item id.', 400, 'INVALID_ID');
+    }
+
     const roadmap = await LearningRoadmap.findOne({
       userId: new mongoose.Types.ObjectId(userId),
       careerId: new mongoose.Types.ObjectId(careerId)
     });
 
     if (!roadmap) {
-      throw new Error('Roadmap not found for this user and career.');
+      throw new AppError('Roadmap not found for this user and career.', 404, 'ROADMAP_NOT_FOUND');
     }
 
-    let itemFound = false;
-    let totalItems = 0;
-    let completedItems = 0;
+    const phase = roadmap.phases.find(p => p.items.some(i => i._id?.toString() === itemId));
+    const item = phase?.items.find(i => i._id?.toString() === itemId);
 
-    for (const phase of roadmap.phases) {
-      for (const item of phase.items) {
-        totalItems++;
+    if (!phase || !item) {
+      throw new AppError('Roadmap item not found.', 404, 'ROADMAP_ITEM_NOT_FOUND');
+    }
 
-        if (item._id && item._id.toString() === itemId) {
-          itemFound = true;
+    const previousStatus = item.status;
+    item.status = newStatus;
 
-          if (item.status !== newStatus) {
-            // Record History
-            await RoadmapHistory.create({
-              userId: new mongoose.Types.ObjectId(userId),
-              careerId: new mongoose.Types.ObjectId(careerId),
-              roadmapId: roadmap._id,
-              action: `item_${newStatus}`,
-              itemId: item._id,
-              details: `Item "${item.title}" status changed to ${newStatus}`
-            });
-          }
+    if (newStatus === 'completed') {
+      item.completedAt = new Date();
+      if (!item.startedAt) item.startedAt = item.completedAt;
+    } else {
+      item.completedAt = undefined;
+      if (newStatus === 'in_progress' && !item.startedAt) item.startedAt = new Date();
+      if (newStatus === 'not_started') item.startedAt = undefined;
+    }
 
-          item.status = newStatus;
+    phase.status = RoadmapEngine.derivePhaseStatus(phase.items);
 
-          if (newStatus === 'completed') {
-            item.completedAt = new Date();
-          } else if (newStatus === 'in_progress' && !item.startedAt) {
-            item.startedAt = new Date();
-          }
-        }
+    const wasCompleted = roadmap.status === 'completed';
+    roadmap.progressPercentage = RoadmapEngine.calculateProgress(roadmap.phases);
+    roadmap.status = roadmap.progressPercentage === 100 ? 'completed' : 'active';
 
-        if (item.status === 'completed' || item.status === 'skipped') {
-          completedItems++;
-        }
+    await roadmap.save();
+
+    if (previousStatus !== newStatus) {
+      await RoadmapHistory.create({
+        userId: roadmap.userId,
+        careerId: roadmap.careerId,
+        roadmapId: roadmap._id,
+        action: `item_${newStatus}`,
+        itemId: item._id,
+        details: `Item "${item.title}" status changed from ${previousStatus} to ${newStatus}`
+      });
+
+      if (newStatus === 'completed') {
+        await ProgressEventService.logEvent(
+          userId,
+          EventType.ROADMAP_ITEM_COMPLETED,
+          { title: item.title, targetSkill: item.targetSkill, progress: roadmap.progressPercentage },
+          roadmap._id.toString()
+        );
       }
     }
 
-    if (!itemFound) {
-      throw new Error('Roadmap item not found.');
-    }
-
-    roadmap.progressPercentage =
-      totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
-
-    if (roadmap.progressPercentage === 100 && roadmap.status !== 'completed') {
-      roadmap.status = 'completed';
+    if (roadmap.status === 'completed' && !wasCompleted) {
       await RoadmapHistory.create({
-        userId: new mongoose.Types.ObjectId(userId),
-        careerId: new mongoose.Types.ObjectId(careerId),
+        userId: roadmap.userId,
+        careerId: roadmap.careerId,
         roadmapId: roadmap._id,
         action: 'completed',
         details: 'Roadmap fully completed.'
       });
     }
 
-    await roadmap.save();
+    return roadmap;
   }
 }
 

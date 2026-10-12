@@ -1,12 +1,11 @@
 import React from 'react';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from 'react-router-dom';
 import { ThemeProvider } from '../theme/ThemeContext';
 import { ExperienceProvider } from '../contexts/ExperienceProvider';
 import router from '../routes';
 import ErrorBoundary from '../components/ErrorBoundary';
-
-const queryClient = new QueryClient();
+import { queryClient } from '../lib/queryClient';
 
 export const AppProviders: React.FC = () => {
   return (
