@@ -130,6 +130,16 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       const notice = page.getByTestId('job-source-notice');
       expect((await notice.getAttribute('data-source')) === 'sample', 'listings are not labelled as demo');
       expect(/not real vacancies/i.test(await notice.innerText()), 'the demo notice does not say they are not real');
+      // A sample listing is never given an age: its date belongs to the demonstration
+      const ages = page.getByTestId('job-freshness');
+      const count = await ages.count();
+      expect(count > 0, 'no listing shows a freshness label');
+      for (let i = 0; i < count; i++) {
+        expect((await ages.nth(i).getAttribute('data-freshness')) === 'sample' && /Sample listing, no real date/.test(await ages.nth(i).innerText()), `listing ${i + 1} is shown with an age although it is a sample`);
+      }
+      const stored = (await api('GET', '/opportunities')).data;
+      expect(stored.opportunities.every((o) => o.freshness.status === 'sample' && o.freshness.ageDays === null) && stored.meta.providerQuota === null, 'the API gives a sample listing an age or a provider allowance');
+      return `${count} sample listings, none given an age`;
     });
     await t.step('a file that is not a resume is rejected with a message', async () => {
       await gotoAndSettle(page, `${webUrl}/resume`, 1500);
@@ -1005,6 +1015,17 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       await page.waitForTimeout(2000);
       const saved = (await api('GET', '/opportunities/saved')).data;
       expect(saved.total === 1 && saved.savedOpportunities[0].status === 'applied', 'the tracked job is not there after signing in again');
+    });
+
+    await t.step('searching too often is refused with a clear message; saved jobs stay reachable', async () => {
+      // Use up this minute's searches for the signed-in user
+      let last = null;
+      for (let i = 0; i < 31; i++) last = await api('GET', '/opportunities?search=Developer');
+      expect(last.status === 429 && last.json?.error?.code === 'JOB_SEARCH_RATE_LIMITED', `search 31 answered ${last.status}`);
+      expect((await api('GET', '/opportunities/saved')).status === 200, 'saved jobs are blocked by the search limit');
+      await gotoAndSettle(page, `${webUrl}/job-agent`, 4000);
+      expect(/You can search for jobs 30 times a minute/.test(await bodyText(page)), 'the page does not explain that searching is limited');
+      return 'search 31 in a minute refused with an explanation';
     });
 
     await t.step('no unexpected API failures or console errors during the journey', async () => {

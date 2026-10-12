@@ -14,6 +14,11 @@ export interface OpportunitySearchMeta {
   salaryDataAvailable: boolean;
   salaryFilter: { requestedMin: number; excludedWithoutSalary: number } | null;
   excludedWithoutDate: number;
+  unavailableReason?: 'provider_error' | 'quota_exhausted' | null;
+  resultAgeSeconds?: number | null;
+  stale?: boolean;
+  freshness?: Record<'new' | 'recent' | 'old' | 'undated' | 'sample', number>;
+  providerQuota?: { limit: number; used: number; remaining: number; resetsAt: string } | null;
 }
 
 interface SearchResultsNoticeProps {
@@ -47,6 +52,24 @@ export const SearchResultsNotice: React.FC<SearchResultsNoticeProps> = ({ meta, 
     notes.push(`${meta.excludedWithoutDate} posting${meta.excludedWithoutDate === 1 ? '' : 's'} hidden by the date filter because no posting date is stated.`);
   }
 
+  if (meta.source !== 'unavailable' && meta.freshness) {
+    if (meta.freshness.old > 0) notes.push(`${meta.freshness.old} posted more than 30 days ago and may no longer be open.`);
+    if (meta.freshness.undated > 0) notes.push(`${meta.freshness.undated} with no posting date from the source.`);
+  }
+
+  if (meta.source === 'unavailable' && meta.unavailableReason === 'quota_exhausted') {
+    return (
+      <div role="alert" className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex items-start gap-3" data-testid="job-source-notice" data-source="unavailable" data-reason="quota_exhausted">
+        <AlertTriangle className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
+        <div className="space-y-1">
+          <p className="text-xs font-bold text-white">Today's limit of job searches has been reached, so no new search was made.</p>
+          <p className="text-xs text-amber-100">{providerMessage || 'New searches are possible tomorrow.'}</p>
+          <p className="text-xs text-slate-300">Searches you already ran today are still shown from memory. Demo listings are not shown in their place. Your saved jobs are unaffected.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (meta.source === 'unavailable') {
     return (
       <div role="alert" className="p-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3" data-testid="job-source-notice" data-source="unavailable">
@@ -77,7 +100,7 @@ export const SearchResultsNotice: React.FC<SearchResultsNoticeProps> = ({ meta, 
         <p className="text-xs font-bold text-white">
           {isSample
             ? 'Demo listings: no live job provider is configured.'
-            : `Live listings${meta.fetchedAt ? `, fetched ${formatDateTime(meta.fetchedAt)}` : ''}${meta.fromCache ? ' (from the last 15 minutes)' : ''}.`}
+            : `Live listings${meta.fetchedAt ? `, fetched ${formatDateTime(meta.fetchedAt)}` : ''}${meta.stale ? ` (${Math.round((meta.resultAgeSeconds ?? 0) / 60)} minutes old: today's search limit is used up, so they could not be refreshed)` : meta.fromCache ? ' (from the last 15 minutes)' : ''}.`}
         </p>
         <p className="text-xs text-slate-300">
           {isSample

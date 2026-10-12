@@ -10,7 +10,7 @@ An item is **Done** only when it has a working screen, an authenticated API, sto
 needed, validation and error states, documented limits, and passing service, HTTP and browser
 tests. Code that exists but is not verified earns nothing.
 
-Expansion total: 100 points. **Current: 53 / 100.**
+Expansion total: 100 points. **Current: 54 / 100.**
 
 ## Phase 1. Advanced career intelligence (15)
 
@@ -77,7 +77,7 @@ One point each. An enhancement is counted here once, even when a feature above d
 | X4 | Evidence-grounded readiness calibration | 1 | **Done** | Suite `readiness_basis` (unit and HTTP); browser suite `pnpm test:e2e` (48/48): every readiness record states what share of its credited evidence is verified by skill check, self-reported in the portfolio, stated in the resume or inferred (whole percentages adding up to 100, none when nothing is credited), recomputed with the score; shown on the readiness page with the statement that readiness is not calibrated against outcomes. This grounds the score in its evidence; it is not a statistical calibration, which would need outcome data that does not exist. `docs/SCORING.md` section 19 |
 | X5 | Measurable, personalised recommendations | 1 | **Done** | Delivered by R3: each recommended action carries a measured hypothetical score change equal to the what-if result, and a passed skill check gives exactly the predicted score (suite `next_best_action`) |
 | X6 | Time- and progress-aware roadmaps | 1 | **Done** | Delivered by B4: the roadmap is laid out in weeks from the user's own hours, moves with progress and is adjusted when evidence changes. Suite `learning_plan` |
-| X7 | Job freshness, deduplication and rate limits | 1 | Pending |  |
+| X7 | Job freshness, deduplication and rate limits | 1 | **Done** | Suite `job_freshness` (unit and HTTP); browser smoke 50/50: listing age only from the source's date (new, recent, old, undated), samples given no age; duplicates across sources hidden in search and not tracked twice; 30 searches per user per minute with a clear `429`; a daily allowance of outbound provider searches that is never exceeded, with stale results marked and exhaustion or failure shown as unavailable, never replaced by samples. The live-source paths are exercised with an in-process stand-in provider: no licensed live job source is in use, so real users see labelled samples. `docs/SCORING.md` section 22 |
 | X8 | Application histories, reminders and outcomes | 1 | **Done** | Application history, notes and reminders (smoke journey) and outcome analytics (C6), both verified in the integrated tree |
 | X9 | Interview scoring quality | 1 | Pending | Not claimed. Role-specific rubrics with stable historical scores (D5) improve scoring quality; left for the final review to decide whether that satisfies this item |
 | X10 | Cross-module Command Center state | 1 | **Done** | Browser suite (47/47): the Command Center shows the study plan (roadmap and weekly hours), ranked next steps drawn from skill checks, practice projects and the portfolio, the learning streak, and the top bar shows real unread notifications. Each is asserted equal to the stored data |
@@ -97,10 +97,10 @@ One point each. An enhancement is counted here once, even when a feature above d
 
 | ID | Item | Points | Status | Evidence |
 |---|---|---|---|---|
-| V1 | Original regression baseline still passes (19 backend suites, 104 AI tests, 35 browser checks) | 2 | Pending | Passing on the integrated tree: 47 backend suites, 154 AI tests, browser smoke 49/49, market 15/15, outcomes 10/10, salaries 14/14, applications 15/15, interviews 21/21. Awarded at the end of the expansion |
+| V1 | Original regression baseline still passes (19 backend suites, 104 AI tests, 35 browser checks) | 2 | Pending | Passing on the integrated tree: 48 backend suites, 154 AI tests, browser smoke 50/50, market 15/15, outcomes 10/10, salaries 14/14, applications 15/15, interviews 21/21. Awarded at the end of the expansion |
 | V2 | Cross-user isolation and input validation for every new endpoint | 2 | Pending |  |
 | V3 | Accessibility and failure states for every new screen | 2 | Pending |  |
-| V4 | Docker Compose workflow passes with the expansion | 2 | Pending |  |
+| V4 | Docker Compose workflow passes with the expansion | 2 | Pending | Passes on the integrated tree at `83ee8ed` (run 38289501799), now including recording upload, playback, persistence across a restart, deletion, expiry by the retention job and the in-process schedule. To be re-run and awarded at the end of the expansion |
 | V5 | Documentation, limits and research write-up | 2 | Pending |  |
 
 ## Not verified live

@@ -196,7 +196,7 @@ export const JobSearchAgentWorkspace: React.FC = () => {
         await apiClient.delete(`/opportunities/saved/${encodeURIComponent(opp.externalId)}`);
         addToast({ type: 'info', message: `Removed "${opp.title}" from tracked jobs.` });
       } else {
-        await apiClient.post('/opportunities/save', {
+        const response = await apiClient.post('/opportunities/save', {
           externalId: opp.externalId,
           provider: opp.provider,
           title: opp.title,
@@ -215,7 +215,9 @@ export const JobSearchAgentWorkspace: React.FC = () => {
           remote: opp.remote,
           isSample: Boolean(opp.isSample),
         });
-        addToast({ type: 'success', message: `Saved "${opp.title}" at ${opp.company}.` });
+        // The same job found under another id or from another source is not tracked twice
+        if (response.data?.data?.alreadyTracked) addToast({ type: 'info', message: 'You are already tracking this job; it was not added a second time.' });
+        else addToast({ type: 'success', message: `Saved "${opp.title}" at ${opp.company}.` });
       }
       await invalidateTracking();
     } catch (error) {

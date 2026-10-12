@@ -1,3 +1,5 @@
+import type { ListingFreshness, ListingFreshnessStatus } from './freshness.js';
+
 export interface OpportunitySearchQuery {
   keywords?: string;
   location?: string;
@@ -40,6 +42,8 @@ export interface CanonicalOpportunity {
 }
 
 export interface EnrichedOpportunity extends CanonicalOpportunity {
+  /** How old the listing is, from the source's own date; samples and undated listings say so. */
+  freshness: ListingFreshness;
   /** 0-100, or null when no honest score can be calculated (see matchStatus). */
   skillbridgeMatchScore: number | null;
   matchStatus: 'SCORED' | 'NO_REQUIREMENTS' | 'NO_CANDIDATE_EVIDENCE';
@@ -72,6 +76,16 @@ export interface OpportunitySearchMeta {
   salaryFilter: { requestedMin: number; excludedWithoutSalary: number } | null;
   /** Postings dropped by a date filter because the provider gave no publication date. */
   excludedWithoutDate: number;
+  /** Why nothing is shown, when source is 'unavailable'. */
+  unavailableReason: 'provider_error' | 'quota_exhausted' | null;
+  /** Seconds since these results were fetched from the provider (0 when just fetched). */
+  resultAgeSeconds: number | null;
+  /** True when results older than the cache window are served because today's provider quota is used up. */
+  stale: boolean;
+  /** How many of the shown listings are new, recent, old, undated or samples. */
+  freshness: Record<ListingFreshnessStatus, number>;
+  /** Outbound provider searches today. Present for a live provider only. */
+  providerQuota: { limit: number; used: number; remaining: number; resetsAt: string } | null;
 }
 
 export interface OpportunityProviderHealth {

@@ -35,6 +35,7 @@ import { runPortfolioDedupTests } from './portfolio_dedup.test.js';
 import { runCareerMarketTests } from './career_market.test.js';
 import { runVoiceRetentionTests } from './voice_retention.test.js';
 import { runInterviewIntegrationTests } from './interview_integration.test.js';
+import { runJobFreshnessTests } from './job_freshness.test.js';
 import { runCostPolicyTests } from './cost_policy.test.js';
 import { runMarketIntelligenceTests } from './market_intelligence.test.js';
 import { runZeroCostRuntimeTests } from './zero_cost_runtime.test.js';
@@ -120,6 +121,7 @@ async function runAll() {
     await runVoiceInterviewTests();
     await runVoiceRetentionTests();
     await runInterviewIntegrationTests();
+    await runJobFreshnessTests();
     const after = fingerprint();
     const touched = before.filter((entry, i) => entry !== after[i]);
     if (touched.length > 0) {

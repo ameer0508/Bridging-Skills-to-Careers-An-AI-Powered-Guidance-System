@@ -32,6 +32,8 @@ export interface OpportunityItem {
   matchStatus?: 'SCORED' | 'NO_REQUIREMENTS' | 'NO_CANDIDATE_EVIDENCE';
   /** True for built-in demo listings (no live provider configured). */
   isSample?: boolean;
+  /** From the server: how old the listing is by the source's own date, or that it is a sample or undated. */
+  freshness?: { status: 'new' | 'recent' | 'old' | 'undated' | 'sample'; ageDays: number | null; label: string };
   status?: string;
   // Tracking fields, present on saved jobs
   notes?: string;
@@ -222,9 +224,19 @@ export const OpportunityStreamFeed: React.FC<OpportunityStreamFeedProps> = ({
                     </span>
                   )}
 
-                  <span className="flex items-center gap-1 font-mono text-[11px] text-slate-500">
-                    <Clock className="w-3 h-3 text-slate-500" />
-                    {formatPostedDate(opp.postedAt)}
+                  <span
+                    className={`flex items-center gap-1 font-mono text-[11px] ${opp.freshness?.status === 'old' ? 'text-amber-300' : 'text-slate-500'}`}
+                    data-testid="job-freshness"
+                    data-freshness={opp.freshness?.status ?? ''}
+                    title={opp.freshness?.label}
+                  >
+                    <Clock className="w-3 h-3" aria-hidden="true" />
+                    {/* A sample listing's date belongs to the demonstration, so no age is shown for it */}
+                    {opp.freshness
+                      ? opp.freshness.status === 'sample'
+                        ? 'Sample listing, no real date'
+                        : opp.freshness.label
+                      : formatPostedDate(opp.postedAt)}
                   </span>
 
                   {statusBadge && (

@@ -14,6 +14,7 @@ import { extractJobRequirements, matchOpportunity } from './opportunities/Opport
 import CareerMatch from '../models/CareerMatch.js';
 import SavedOpportunity, { ApplicationStatus, ISavedOpportunity } from '../models/SavedOpportunity.js';
 import { AppError } from '../middlewares/errorHandler.js';
+import { listingFreshness, providerDailyLimit, ProviderDailyQuota, repostKey, type ListingFreshnessStatus } from './opportunities/freshness.js';
 
 function sanitizeText(raw?: string): string {
   if (!raw) return '';
@@ -36,9 +37,6 @@ const yearlyTop = (salary: CanonicalOpportunity['salary']): number | null => {
 
 const DATE_WINDOW_DAYS: Record<string, number> = { today: 1, '3days': 3, week: 7, month: 30 };
 
-/** Same role re-posted by the same employer in the same place counts as one posting. */
-const repostKey = (opp: CanonicalOpportunity): string =>
-  [opp.title, opp.company, opp.location].map(v => (v || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()).join('|');
 
 export function formatSalary(salary?: CanonicalOpportunity['salary'] | null): string {
   if (!salary || (!salary.min && !salary.max)) return 'Salary not disclosed';
@@ -70,15 +68,45 @@ function sanitizeUrl(urlStr?: string): string {
   return '';
 }
 
+const FRESHNESS_ZERO = { new: 0, recent: 0, old: 0, undated: 0, sample: 0 } as const;
+
+const countFreshness = (list: EnrichedOpportunity[]): Record<ListingFreshnessStatus, number> => {
+  const counts: Record<ListingFreshnessStatus, number> = { ...FRESHNESS_ZERO };
+  for (const item of list) counts[item.freshness.status]++;
+  return counts;
+};
+
+/** The meta of a search that shows nothing because no results could be obtained. */
+const emptyMeta = (page: number, limit: number): OpportunitySearchMeta => ({
+  total: 0, page, limit, hasMore: false, source: 'unavailable', fetchedAt: null, fromCache: false,
+  duplicatesRemoved: 0, salaryDataAvailable: false, salaryFilter: null, excludedWithoutDate: 0,
+  unavailableReason: 'provider_error', resultAgeSeconds: null, stale: false, freshness: { ...FRESHNESS_ZERO }, providerQuota: null,
+});
+
 class OpportunityService {
   private provider: OpportunityProvider;
   // Provider results only, keyed by search. Match scores are never cached: they are computed
   // per request from the user's current skills.
   private cache: Map<string, { data: CanonicalOpportunity[]; timestamp: number; duplicatesRemoved: number }> = new Map();
   private readonly CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
+  // Outbound searches to a live provider per UTC day; cached results and samples do not count
+  private quota = new ProviderDailyQuota(providerDailyLimit());
 
   constructor() {
     this.provider = new JSearchProvider();
+  }
+
+  /** Replaces the provider and its daily allowance. For tests: no real provider is ever contacted by them. */
+  public useProvider(provider: OpportunityProvider, dailyLimit = providerDailyLimit()): () => void {
+    const previous = { provider: this.provider, quota: this.quota, cache: this.cache };
+    this.provider = provider;
+    this.quota = new ProviderDailyQuota(dailyLimit);
+    this.cache = new Map();
+    return () => {
+      this.provider = previous.provider;
+      this.quota = previous.quota;
+      this.cache = previous.cache;
+    };
   }
 
   /**
@@ -118,11 +146,30 @@ class OpportunityService {
     let duplicatesRemoved: number;
     let fetchedAt: number;
     let rawCount: number;
+    let stale = false;
+    // Only a live provider has a quota to protect; samples and blocked providers make no request
+    const live = health.status === 'UP';
     if (fromCache && cached) {
       deduplicatedList = cached.data;
       duplicatesRemoved = cached.duplicatesRemoved;
       fetchedAt = cached.timestamp;
       rawCount = cached.data.length + cached.duplicatesRemoved;
+    } else if (live && !this.quota.take()) {
+      // Today's allowance of outbound searches is used up: no request is made
+      if (cached) {
+        deduplicatedList = cached.data;
+        duplicatesRemoved = cached.duplicatesRemoved;
+        fetchedAt = cached.timestamp;
+        rawCount = cached.data.length + cached.duplicatesRemoved;
+        stale = true;
+      } else {
+        const status = this.quota.status();
+        return {
+          opportunities: [],
+          providerHealth: { status: 'UP', provider: this.provider.name, message: `Today's limit of ${status.limit} job searches has been reached. New searches are possible after ${status.resetsAt}.` },
+          meta: { ...emptyMeta(page, limit), unavailableReason: 'quota_exhausted', providerQuota: status },
+        };
+      }
     } else {
       let fetched: CanonicalOpportunity[];
       try {
@@ -132,10 +179,7 @@ class OpportunityService {
         return {
           opportunities: [],
           providerHealth: { status: 'DOWN', provider: this.provider.name, message: errorMsg },
-          meta: {
-            total: 0, page, limit, hasMore: false, source: 'unavailable', fetchedAt: null, fromCache: false,
-            duplicatesRemoved: 0, salaryDataAvailable: false, salaryFilter: null, excludedWithoutDate: 0,
-          },
+          meta: { ...emptyMeta(page, limit), unavailableReason: 'provider_error', providerQuota: live ? this.quota.status() : null },
         };
       }
       rawCount = fetched.length;
@@ -197,11 +241,16 @@ class OpportunityService {
         hasMore: sorted.length > limit || (!isSample && rawCount >= 10),
         source: isSample ? 'sample' : 'live',
         fetchedAt: new Date(fetchedAt).toISOString(),
-        fromCache,
+        fromCache: fromCache || stale,
         duplicatesRemoved,
         salaryDataAvailable,
         salaryFilter,
         excludedWithoutDate,
+        unavailableReason: null,
+        resultAgeSeconds: Math.max(0, Math.round((Date.now() - fetchedAt) / 1000)),
+        stale,
+        freshness: countFreshness(sorted.slice(0, limit)),
+        providerQuota: live ? this.quota.status() : null,
       },
     };
   }
@@ -224,6 +273,7 @@ class OpportunityService {
       description,
       applicationUrl: sanitizeUrl(opp.applicationUrl) || `https://www.google.com/search?q=${encodeURIComponent(`${opp.title} ${opp.company} jobs`)}`,
       isSample: Boolean(opp.isSample),
+      freshness: listingFreshness(opp),
       skillbridgeMatchScore: match.score,
       matchStatus: match.status,
       matchedSkills: match.matchedSkills,
@@ -293,6 +343,19 @@ class OpportunityService {
 
     const provider = oppData.provider || 'JSearch API';
     const salaryStr = formatSalary(oppData.salary);
+
+    // The same role from the same employer in the same place, already tracked under another id
+    // (a re-post, or the same job from a second source), is not tracked twice
+    const key = repostKey({ title: sanitizeText(oppData.title), company: sanitizeText(oppData.company), location: sanitizeText(oppData.location || 'Location not stated') });
+    const tracked = await SavedOpportunity.find({ userId }).select('title company location provider externalId');
+    const twin = tracked.find(s => !(s.provider === provider && s.externalId === oppData.externalId) && repostKey(s) === key);
+    if (twin) {
+      const existing = await SavedOpportunity.findById(twin._id);
+      if (existing) {
+        (existing as ISavedOpportunity & { alreadyTracked?: boolean }).alreadyTracked = true;
+        return existing;
+      }
+    }
 
     const saved = await SavedOpportunity.findOneAndUpdate(
       { userId, provider, externalId: oppData.externalId },

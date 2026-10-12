@@ -157,9 +157,15 @@ class OpportunityController {
       const oppData = { ...parsed.data, salary: typeof parsed.data.salary === 'object' ? parsed.data.salary : null };
       const saved = await OpportunityService.saveOpportunity(userId, oppData);
 
-      res.status(201).json({
+      // The same job, already tracked under another id, is returned as it is instead of being added again
+      const alreadyTracked = Boolean((saved as { alreadyTracked?: boolean }).alreadyTracked);
+      res.status(alreadyTracked ? 200 : 201).json({
         success: true,
-        data: { savedOpportunity: presentSaved(saved) },
+        data: {
+          savedOpportunity: presentSaved(saved),
+          alreadyTracked,
+          ...(alreadyTracked ? { message: 'You are already tracking this job; it was not added a second time.' } : {}),
+        },
       });
     } catch (error) {
       next(error);

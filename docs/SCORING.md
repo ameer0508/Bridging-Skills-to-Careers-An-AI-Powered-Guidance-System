@@ -508,3 +508,43 @@ section 20 and advertised salaries from the market service, or "Market data unav
 no market figure at all. The old panel components remain in the repository but nothing reaches
 them. Screens under an "Illustrative sample data" banner are demonstrations and are labelled as
 such on every page.
+
+## 22. Job listings: freshness, duplicates and limits
+
+**Freshness.** A listing's age comes only from the publication date its source gave.
+
+| Listing | Shown as |
+|---|---|
+| Published up to 7 days ago | New, "Posted N days ago" |
+| Up to 30 days ago | Recent |
+| More than 30 days ago | Old, with "it may no longer be open" |
+| No date from the source | "No posting date given by the source"; never assumed to be new |
+| Built-in sample listing | "Sample listing, no real date": the dates of samples are generated for the demonstration, so no age is given |
+
+A date in the future is treated as today. The thresholds are a stated policy. Whether a vacancy
+is still open is known only to the employer; "old" is a warning, not a fact about the vacancy.
+Search results also state when they were fetched and how old they are.
+
+**Duplicates.** In a search, the same record returned twice and the same role from the same
+employer in the same place (compared on title, employer and location with case, spacing and
+punctuation removed) are shown once, whatever source each came from; the number hidden is shown.
+When a user tracks a job they already track under another id or source, the existing record is
+returned and nothing is added. Saving the same listing again updates it. The same title at the
+same employer in another place is a different job.
+
+**Limits.**
+
+| Limit | Value | Behaviour |
+|---|---|---|
+| General API limit | 1000 requests per address per 15 minutes (`API_RATE_LIMIT_MAX`) | `429` |
+| Job searches | 30 per user per minute (`JOB_SEARCH_RATE_PER_MINUTE`, 1 to 600) | `429 JOB_SEARCH_RATE_LIMITED` with a plain message; saved jobs stay reachable |
+| Outbound provider searches | 50 per UTC day (`JOB_PROVIDER_DAILY_QUOTA`, 0 to 10000; never unlimited) | No request is made once it is used up. Earlier searches are served from memory and marked as stale with their age; a new search answers "unavailable: limit reached" |
+
+Cached searches (15 minutes) and sample listings use none of the provider allowance. The daily
+count is held in memory, so a restart resets it; the default is therefore kept far below any
+provider quota. When a provider fails or the allowance is used up, the result is an explicit
+"unavailable" state. Sample listings are never shown in place of live results.
+
+**No live provider is in use.** The zero-cost policy blocks the only job provider, so users see
+labelled sample listings. The live-source behaviour above is exercised by tests with an
+in-process stand-in provider; no external request is made by any test.
