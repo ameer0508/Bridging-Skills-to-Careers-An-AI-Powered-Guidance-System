@@ -20,6 +20,7 @@ import {
   Briefcase,
   Bot,
   MessageSquare,
+  Wallet,
 } from 'lucide-react';
 import { SidebarItem } from './SidebarItem';
 import { useAuthStore } from '../../store/authStore';
@@ -136,6 +137,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           to: '/market',
           label: 'Market Evidence',
           icon: <LineChart className="w-4 h-4" />,
+        },
+        {
+          to: '/market/salaries',
+          label: 'Salary Insights',
+          icon: <Wallet className="w-4 h-4" />,
         },
         {
           to: '/application-outcomes',

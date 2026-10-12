@@ -29,6 +29,7 @@ import { runZeroCostRuntimeTests } from './zero_cost_runtime.test.js';
 import { runApplicationOutcomeTests } from './application_outcomes.test.js';
 import { runMarketSkillTrendTests } from './market_skill_trends.test.js';
 import { runMarketOpportunitySummaryTests } from './market_opportunity_summary.test.js';
+import { runMarketSalaryTests } from './market_salaries.test.js';
 
 async function runAll() {
   console.log('🚀 Starting Comprehensive SkillBridge Backend Test Suite...');
@@ -78,6 +79,7 @@ async function runAll() {
     await runApplicationOutcomeTests();
     await runMarketSkillTrendTests();
     await runMarketOpportunitySummaryTests();
+    await runMarketSalaryTests();
     const after = fingerprint();
     const touched = before.filter((entry, i) => entry !== after[i]);
     if (touched.length > 0) {
