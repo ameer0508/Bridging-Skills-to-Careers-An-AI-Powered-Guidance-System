@@ -41,6 +41,7 @@ const CareerOSDashboard = lazy(() => import('../workspaces/CareerOSDashboard/Car
 const MarketEvidencePage = lazy(() => import('../features/market/components/MarketEvidencePage'));
 const SalaryInsightsPage = lazy(() => import('../features/market/components/SalaryInsightsPage'));
 const ApplicationHistoryPage = lazy(() => import('../features/applications/components/ApplicationHistoryPage'));
+const TechnicalAssessmentPage = lazy(() => import('../features/interview/components/TechnicalAssessmentPage'));
 const ApplicationOutcomesPage = lazy(() => import('../features/applications/components/ApplicationOutcomesPage'));
 const CareerIdentityWorkspace = lazy(() => import('../workspaces/CareerIdentityWorkspace/CareerIdentityWorkspace'));
 
@@ -390,6 +391,14 @@ export const router = createBrowserRouter([
             element: (
               <WorkspaceSuspense>
                 <SalaryInsightsPage />
+              </WorkspaceSuspense>
+            ),
+          },
+          {
+            path: '/interview-agent/assessments',
+            element: (
+              <WorkspaceSuspense>
+                <TechnicalAssessmentPage />
               </WorkspaceSuspense>
             ),
           },
