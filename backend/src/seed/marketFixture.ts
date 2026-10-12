@@ -24,6 +24,19 @@ const CITIES = [
   { location: 'London', country: 'GB', currency: 'GBP', min: 40000, max: 65000, period: 'YEAR' },
 ];
 
+/**
+ * Spreads a city's band by the posting's serial number, without drawing from the random
+ * generator (so posting volume, dates and skills stay exactly as before). Every 13th salary
+ * states only a maximum and every 17th only a minimum, to exercise one-bound handling.
+ */
+function fixtureSalary(city: (typeof CITIES)[number], serial: number) {
+  const min = Math.round(city.min * (1 + (serial % 7) * 0.05));
+  const max = Math.round(city.max * (1 + (serial % 5) * 0.05));
+  if (serial % 13 === 0) return { max, currency: city.currency, period: city.period };
+  if (serial % 17 === 0) return { min, currency: city.currency, period: city.period };
+  return { min, max, currency: city.currency, period: city.period };
+}
+
 /** Small deterministic generator so every run produces the same fixture. */
 function mulberry32(seed: number) {
   let a = seed >>> 0;
@@ -79,7 +92,7 @@ export function buildSyntheticMarketFixture(options: FixtureOptions): ImportRequ
           remote: random() < 0.3,
           postedAt: `${month}-${day}T09:00:00.000Z`,
           description: late ? `${role.text} Kubernetes clusters in production.` : role.text,
-          salary: random() < 0.6 ? { min: city.min, max: city.max, currency: city.currency, period: city.period } : undefined,
+          salary: random() < 0.6 ? fixtureSalary(city, serial) : undefined,
         });
       }
     });

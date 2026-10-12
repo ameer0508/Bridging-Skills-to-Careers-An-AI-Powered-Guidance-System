@@ -9,7 +9,8 @@
 | **C4** job-description skill trend mining | **Implemented and tested** on synthetic data (see §5a). On real data it stays *unavailable* until a licensed source is registered. |
 | C5 market signals contract | `MarketOpportunitySummary` contract and its unavailable form are defined and tested. The producer is not built yet. |
 | C6 application outcomes | Implemented and tested; see [`APPLICATION_OUTCOMES.md`](APPLICATION_OUTCOMES.md) |
-| C2, C3, R4, X7, X8 | Not started |
+| **C3** salary insights | **Implemented and tested** on synthetic data (see §5b). Real salary insights answer *DATA UNAVAILABLE* until a licensed source is registered. |
+| C2, R4, X7, X8 | Not started |
 
 ## 1. Principles
 
@@ -122,6 +123,58 @@ const s = await fetchMarketOpportunitySummary(careerId, { country: 'IN' });
   - `backend/src/tests/market_skill_trends.test.ts` covers the statistic, the fixture trend, duplicates and contradicting re-imports, windows, aliases, sparse sourced data, zero mentions and HTTP validation.
   - `e2e/tests/market.mjs` covers 4 C4 steps.
 
+## 5b. C3 salary insights
+
+`GET /api/v1/market/salaries?dataset&country&currency&period&skill&from&to` (sign-in required). Service: `backend/src/services/market/MarketSalaryService.ts`. Screen: `/market/salaries` "Salary Insights".
+
+- **Only stated salaries.** Figures come from the `salary` a source gave for each posting. Nothing is inferred from titles, levels or other postings.
+- **One market at a time.** Each statistic covers one country, one currency (ISO 4217, never converted) and one pay period. Without filters, every market is shown as its own card. The filters narrow which markets appear; they never merge them.
+- **Unit and duplicates.** The unit is a distinct stored posting, so C1's duplicate control carries through: a cross-post or re-import adds nothing. Postings without a publication date are left out and counted, as in the history.
+- **Range shapes.**
+  - *Complete ranges* give the median stated minimum, median stated maximum and median midpoint ((min + max) / 2). The midpoint is a summary convention, not a pay figure.
+  - *"From" figures* (minimum only) and *"up to" figures* (maximum only) are counted and summarised separately, never treated as ranges.
+- **Minimum samples.**
+
+  | Figure | Needs |
+  |---|---|
+  | Median of complete ranges | 10 complete ranges in the market |
+  | Quartiles (P25–P75) and the midpoint distribution (6 equal-width bands) | 20 |
+  | Median of a one-bound figure | 10 such postings |
+
+  Below these minimums, the count is shown with "Not given: n of 10 complete ranges needed".
+- **Method.** Quantiles use linear interpolation (Hyndman–Fan type 7). Amounts are rounded to whole units, or to two decimals for hourly pay.
+- **Exclusions, each counted and shown:**
+  - no salary stated;
+  - a salary with no country;
+  - a missing or non-positive amount;
+  - a range whose maximum is more than 10× its minimum, treated as a data error.
+- **States.**
+  - `data_unavailable`: no licensed source is registered. The screen shows **DATA UNAVAILABLE** and no figure.
+  - `insufficient_data`: postings exist but have no salaries, or no market reaches the minimum.
+  - `available`: at least one market meets the minimum.
+
+  The synthetic fixture is shown only in **demonstration mode**, under a dashed **SYNTHETIC TEST DATA** banner.
+- **Provenance per market.** Every card shows:
+  - the sources, with licence and link;
+  - first and latest retrieval dates;
+  - publication date range;
+  - posting counts.
+- **Limits.**
+  - Advertised salaries are not pay received.
+  - Postings that state a salary are a selective subset.
+  - Remote postings are counted under the country the source gave.
+  - At most 50,000 postings are read per request, and the response says when that cap is reached.
+- **Tests.**
+  - `backend/src/tests/market_salaries.test.ts` covers:
+    - quantiles, rounding, bins and shape classification;
+    - `data_unavailable` with no source;
+    - synthetic figures re-computed from the stored postings;
+    - exact medians on a hand-built sourced set;
+    - periods and currencies kept apart;
+    - one-bound figures, all four exclusions, every filter and re-import stability;
+    - sign-in and 9 invalid queries.
+  - `e2e/tests/salaries.mjs` covers 14 browser steps, including DATA UNAVAILABLE before and after a fixture import, the labelled demo, filters, exclusions, the error state, 390 px and the console.
+
 ## 6. Known limits
 
 - No real market data: no free, licensed job-posting source has been verified (see the zero-cost policy). All non-empty screens show synthetic data, labelled as such.
@@ -137,8 +190,26 @@ Shared files touched, each kept to a minimum:
 | File | Change |
 |---|---|
 | `backend/src/app.ts` | Mounts `/api/v1/market` (2 lines). |
-| `frontend/src/routes/index.tsx` | Adds the lazy `/market` route. |
-| `frontend/src/layouts/Sidebar/Sidebar.tsx` | Adds the "Market Evidence" item. |
-| `backend/src/tests/runAllTests.ts` | Registers the market and cost-policy suites. |
+| `frontend/src/routes/index.tsx` | Adds the lazy `/market` and `/market/salaries` routes. |
+| `frontend/src/layouts/Sidebar/Sidebar.tsx` | Adds the "Market Evidence" and "Salary Insights" items. |
+| `backend/src/tests/runAllTests.ts` | Registers the market, salary and cost-policy suites. |
 
-Existing screens that show **invented market data**: `frontend/src/features/careers/components/MarketTrendsPanel.tsx` and `SalaryIntelligencePanel.tsx` hard-code US skill demand and salaries. They are shown in `CareerIntelligenceWorkspace`, which Agent A owns. They should be removed or replaced with `MarketOpportunitySummary` and C3 data once those exist.
+### 7a. Audit: hard-coded market panels (not edited here)
+
+Both panels are rendered by `frontend/src/workspaces/CareerIntelligenceWorkspace/CareerIntelligenceWorkspace.tsx` (lines 412 and 456) and `frontend/src/features/careers/components/CareerIntelligencePage.tsx` (lines 203–204). Both are in Agent A's area, so this branch does not edit them.
+
+| Panel | Invented values | Why it is unsafe |
+|---|---|---|
+| `SalaryIntelligencePanel.tsx` | `regions` (six US/UK cities with `baseMedian` 152,000–195,000 and cost-of-living factors), `experienceTrajectory`, `certBoosts`, `skillBoosts`, `forecastData`; a "simulator" multiplies these together, and the text claims "live market salary premiums". | Every figure is made up. They are shown in dollars with no source, no sample and no period, and certification "boosts" read like causal pay effects. |
+| `MarketTrendsPanel.tsx` | `trendingSkills` (demand scores 91–97, YoY growth), `emergingTech`, `decliningSkills`, `lifecycleData`, `regionalDemands` (demand index, remote %) | Every figure is made up. None comes from postings, and the decline labels could steer users away from real skills. |
+
+**Replacement strategy for integration** (Agent A applies it, or it is done together at merge time):
+
+1. Delete the hard-coded arrays and the salary simulator. No figure on these panels may lack a source.
+2. **Salary panel.** Replace it with a compact card that calls `fetchSalaryInsights({ dataset: 'sourced', country })` from `frontend/src/features/market/marketApi.ts`:
+   - It shows the median midpoint and sample size of the user's market only when `status === 'available'`.
+   - Otherwise it shows "DATA UNAVAILABLE" with the reason.
+   - It always links to `/market/salaries`.
+3. **Trends panel.** Replace it with `fetchSkillTrends` (C4) for skill shares and change flags, and with `fetchMarketOpportunitySummary` for career-level counts. When there are no figures, use the same unavailable and insufficient wording.
+4. Never show synthetic data on these panels. Demonstration mode lives only on the market pages, where it is labelled.
+5. Browser check: the Career Intelligence page shows no currency amounts or demand scores while no licensed source is registered.

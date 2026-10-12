@@ -1,36 +1,10 @@
 // Browser test for Market Evidence (C1): sourced history is unavailable until a licensed source
 // exists, and synthetic fixture data is always labelled as test data. Run with
 //   E2E_TEST_FILE=./tests/market.mjs node run.mjs
-import { spawnSync } from 'node:child_process';
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { Reporter, bodyText, completeOnboarding, expect, gotoAndSettle, launchBrowser, register, watch } from '../lib/harness.mjs';
+import { importFixture } from '../lib/marketData.mjs';
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-const backendDir = path.resolve(here, '..', '..', 'backend');
-const tsxCli = path.join(backendDir, 'node_modules', 'tsx', 'dist', 'cli.mjs');
 const PASSWORD = 'Password123!';
-
-/** The URI of the embedded database the e2e backend started, as written to its log. */
-function databaseUri(tmpDir) {
-  const log = fs.readFileSync(path.join(tmpDir, 'backend.log'), 'utf8');
-  // The log is coloured: stop at the first character that cannot be part of host, port or name
-  const match = log.match(/Persistent local database active on URI: (mongodb:\/\/[\w.:-]+\/[\w-]*)/);
-  if (!match) throw new Error('could not find the database URI in the backend log');
-  return match[1];
-}
-
-/** Imports the synthetic fixture with the operator CLI, as an operator would. */
-function importFixture(tmpDir, email) {
-  const result = spawnSync(
-    process.execPath,
-    [tsxCli, path.join('src', 'scripts', 'importMarketPostings.ts'), '--synthetic-fixture', '--imported-by', email],
-    { cwd: backendDir, env: { ...process.env, MONGODB_URI: databaseUri(tmpDir), NODE_ENV: 'development' }, encoding: 'utf8' }
-  );
-  if (result.status !== 0) throw new Error(`import failed: ${result.stderr || result.stdout}`);
-  return JSON.parse(result.stdout.trim().split('\n').pop());
-}
 
 export async function run({ webUrl, apiUrl, tmpDir }) {
   const t = new Reporter();

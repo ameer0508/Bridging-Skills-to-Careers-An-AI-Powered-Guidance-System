@@ -5,6 +5,8 @@ import MarketIngestionService, { importRequestSchema } from '../services/market/
 import MarketHistoryService, { MAX_HISTORY_MONTHS, monthRange } from '../services/market/MarketHistoryService.js';
 import MarketSkillTrendService from '../services/market/MarketSkillTrendService.js';
 import MarketOpportunityService from '../services/market/MarketOpportunityService.js';
+import MarketSalaryService from '../services/market/MarketSalaryService.js';
+import { SALARY_PERIODS, SalaryPeriod } from '../models/MarketPosting.js';
 import mongoose from 'mongoose';
 import { Career } from '../models/Career.js';
 import { AppError } from '../middlewares/errorHandler.js';
@@ -39,6 +41,18 @@ const summaryQuerySchema = z
   .object({
     dataset: z.enum(['sourced', 'synthetic_fixture']).default('sourced'),
     country: z.string().trim().regex(/^[A-Za-z]{2}$/, 'must be an ISO 3166-1 alpha-2 code').optional(),
+    from: month.optional(),
+    to: month.optional(),
+  })
+  .strict();
+
+const salaryQuerySchema = z
+  .object({
+    dataset: z.enum(['sourced', 'synthetic_fixture']).default('sourced'),
+    country: z.string().trim().regex(/^[A-Za-z]{2}$/, 'must be an ISO 3166-1 alpha-2 code').optional(),
+    currency: z.string().trim().regex(/^[A-Za-z]{3}$/, 'must be a 3-letter ISO 4217 code').optional(),
+    period: z.string().trim().transform(v => v.toUpperCase()).pipe(z.enum(SALARY_PERIODS as [string, ...string[]])).optional(),
+    skill: z.string().trim().min(1).max(80).optional(),
     from: month.optional(),
     to: month.optional(),
   })
@@ -150,6 +164,28 @@ class MarketController {
       { id: career._id.toString(), title: career.title },
       { dataset: q.dataset, country: q.country?.toUpperCase(), from, to }
     );
+    res.status(200).json({ success: true, data });
+  });
+
+  /** C3: advertised salaries per country, currency and pay period, never converted or merged. */
+  salaries = handle(async (req, res) => {
+    userIdOf(req);
+    const q = parse(salaryQuerySchema, req.query);
+    const { from, to } = this.period(q.from, q.to);
+    let skill: string | undefined;
+    if (q.skill) {
+      skill = lookupSkill(q.skill)?.name;
+      if (!skill) throw new AppError(`Invalid request: '${q.skill}' is not a recognised skill`, 400, 'UNKNOWN_SKILL');
+    }
+    const data = await MarketSalaryService.insights({
+      dataset: q.dataset,
+      country: q.country?.toUpperCase(),
+      currency: q.currency?.toUpperCase(),
+      period: q.period as SalaryPeriod | undefined,
+      skill,
+      from,
+      to,
+    });
     res.status(200).json({ success: true, data });
   });
 

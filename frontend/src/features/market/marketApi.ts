@@ -148,3 +148,97 @@ export async function fetchMarketOpportunitySummary(
   const res = await apiClient.get(`/market/careers/${encodeURIComponent(careerId)}/summary`, { params });
   return res.data.data as MarketOpportunitySummary;
 }
+
+/** C3 salary insights. Mirrors backend/src/services/market/MarketSalaryService.ts. */
+export type SalaryPeriod = 'HOUR' | 'DAY' | 'WEEK' | 'MONTH' | 'YEAR';
+export type SalaryReason = 'no_registered_source' | 'no_records' | 'no_salary_records' | 'too_few_complete_ranges';
+export type SalaryExclusion = 'no_salary_stated' | 'country_not_stated' | 'implausible_range' | 'invalid_amount';
+
+export interface SalaryGroup {
+  key: string;
+  country: string;
+  currency: string;
+  period: SalaryPeriod;
+  postings: number;
+  completeRanges: {
+    count: number;
+    lower: number | null;
+    upper: number | null;
+    midpoint: number | null;
+    midpointQuartiles: { p25: number; median: number; p75: number } | null;
+    distribution: Array<{ from: number; to: number; postings: number }>;
+  };
+  minimumOnly: { count: number; medianMinimum: number | null };
+  maximumOnly: { count: number; medianMaximum: number | null };
+  sufficient: boolean;
+  reasons: SalaryReason[];
+  remotePostings: number;
+  sources: Array<{ id: string; name: string; licence: string; url: string; attribution: string; postings: number }>;
+  collection: { firstRetrievedAt: string; latestRetrievedAt: string };
+  postedBetween: { earliest: string; latest: string };
+}
+
+export interface SalaryInsights {
+  dataset: MarketDataset;
+  isSynthetic: boolean;
+  status: 'data_unavailable' | 'insufficient_data' | 'available';
+  reasons: SalaryReason[];
+  query: { from: string; to: string; country?: string; currency?: string; period?: SalaryPeriod; skill?: string };
+  totals: {
+    postingsConsidered: number;
+    postingsWithUsableSalary: number;
+    outsideCurrencyOrPeriodFilter: number;
+    undatedExcluded: number;
+    excluded: Record<SalaryExclusion, number>;
+    scanLimitReached: boolean;
+  };
+  groups: SalaryGroup[];
+  available: { currencies: string[]; periods: SalaryPeriod[]; countries: string[] };
+  method: string[];
+  minimums: { forMedian: number; forDistribution: number; forOneBoundMedian: number };
+  caveats: string[];
+}
+
+export interface SalaryFilters {
+  dataset: MarketDataset;
+  country?: string;
+  currency?: string;
+  period?: SalaryPeriod | '';
+  skill?: string;
+  from?: string;
+  to?: string;
+}
+
+export async function fetchSalaryInsights(filters: SalaryFilters): Promise<SalaryInsights> {
+  const params: Record<string, string> = { dataset: filters.dataset };
+  for (const key of ['country', 'currency', 'period', 'skill', 'from', 'to'] as const) {
+    const value = filters[key]?.trim();
+    if (value) params[key] = value;
+  }
+  const res = await apiClient.get('/market/salaries', { params });
+  return res.data.data as SalaryInsights;
+}
+
+export const SALARY_REASON_TEXT: Record<SalaryReason, (s: SalaryInsights) => string> = {
+  no_registered_source: () =>
+    'No licensed market data source is registered, so SkillBridge holds no real salary records. No salary figure is estimated in their place.',
+  no_records: () => 'No postings match these filters in this period.',
+  no_salary_records: () => 'Postings match, but none states a usable salary.',
+  too_few_complete_ranges: s =>
+    `No group has the ${s.minimums.forMedian} complete salary ranges needed before a median is given. Counts are shown instead.`,
+};
+
+export const EXCLUSION_TEXT: Record<SalaryExclusion, string> = {
+  no_salary_stated: 'No salary stated',
+  country_not_stated: 'Salary stated, country not stated',
+  implausible_range: 'Range maximum more than 10× its minimum',
+  invalid_amount: 'Missing or non-positive amount',
+};
+
+export const PERIOD_LABEL: Record<SalaryPeriod, string> = {
+  YEAR: 'per year',
+  MONTH: 'per month',
+  WEEK: 'per week',
+  DAY: 'per day',
+  HOUR: 'per hour',
+};
