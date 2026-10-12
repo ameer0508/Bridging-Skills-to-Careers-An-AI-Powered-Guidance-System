@@ -113,9 +113,9 @@ export async function runInterviewQualityTests() {
   const userId = user._id.toString();
   const session = await interviewService.startSession(userId, { targetCareerTitle: 'Backend Engineer', questionCount: 3, adaptiveFollowUps: true });
   const sid = session._id.toString();
-  let after = await interviewService.respondToQuestion(userId, sid, { questionIndex: 0, candidateResponse: 'मैंने इस समस्या पर टीम के साथ काम किया और एक भरोसेमंद समाधान बनाया जो भारी ट्रैफ़िक में भी चलता रहा।' });
+  const after = await interviewService.respondToQuestion(userId, sid, { questionIndex: 0, candidateResponse: 'मैंने इस समस्या पर टीम के साथ काम किया और एक भरोसेमंद समाधान बनाया जो भारी ट्रैफ़िक में भी चलता रहा।' });
   assert.equal(after.questions.filter(q => q.followUpOf).length, 0, 'no follow-up for an unscored answer');
-  after = await interviewService.respondToQuestion(userId, sid, { questionIndex: 1, candidateResponse: EXCELLENT });
+  await interviewService.respondToQuestion(userId, sid, { questionIndex: 1, candidateResponse: EXCELLENT });
   const done = await interviewService.completeSession(userId, sid);
   const scored = done.questions.filter(q => !q.followUpOf && q.evaluation && !q.evaluation.notScored);
   const planned = done.questions.filter(q => !q.followUpOf).length;

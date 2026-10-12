@@ -34,7 +34,7 @@ type AnalysisPayload = {
   fileType: string;
 };
 
-const displayName = (name: string) => path.basename((name || '').replace(/\\/g, '/')).replace(/[\u0000-\u001F]/g, '').slice(0, 120);
+const displayName = (name: string) => path.basename((name || '').replace(/\\/g, '/')).split('').filter(c => c.charCodeAt(0) >= 0x20).join('').slice(0, 120);
 
 function view(doc: IResumeLanguageAnalysis, withLines = true) {
   return {
