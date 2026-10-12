@@ -7,6 +7,7 @@ import MarketSkillTrendService from '../services/market/MarketSkillTrendService.
 import MarketOpportunityService from '../services/market/MarketOpportunityService.js';
 import MarketSalaryService from '../services/market/MarketSalaryService.js';
 import MarketForecastService, { lastCompleteMonth, MAX_HORIZON } from '../services/market/MarketForecastService.js';
+import MarketSignalService from '../services/market/MarketSignalService.js';
 import { SALARY_PERIODS, SalaryPeriod } from '../models/MarketPosting.js';
 import mongoose from 'mongoose';
 import { Career } from '../models/Career.js';
@@ -45,6 +46,17 @@ const forecastQuerySchema = z
     country: z.string().trim().regex(/^[A-Za-z]{2}$/, 'must be an ISO 3166-1 alpha-2 code').optional(),
     to: month.optional(),
     horizon: z.coerce.number().int().min(1).max(MAX_HORIZON).default(MAX_HORIZON),
+  })
+  .strict();
+
+const signalQuerySchema = z
+  .object({
+    dataset: z.enum(['sourced', 'synthetic_fixture']).default('sourced'),
+    country: z.string().trim().regex(/^[A-Za-z]{2}$/, 'must be an ISO 3166-1 alpha-2 code').optional(),
+    from: month.optional(),
+    to: month.optional(),
+    // Comma-separated skill names, e.g. the applicant's gaps; aliases are canonicalised
+    skills: z.string().trim().max(400).optional(),
   })
   .strict();
 
@@ -221,6 +233,30 @@ class MarketController {
       to: q.to ?? latestComplete,
       horizon: q.horizon,
     });
+    res.status(200).json({ success: true, data });
+  });
+
+  /** C5/R4: typed market signals for one career, neutral unless evidence is valid and consistent. */
+  careerSignals = handle(async (req, res) => {
+    userIdOf(req);
+    const { careerId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(careerId)) throw new AppError('Invalid request: careerId is not a valid id', 400, 'VALIDATION_ERROR');
+    const q = parse(signalQuerySchema, req.query);
+    const { from, to } = this.period(q.from, q.to);
+    let skills: string[] | undefined;
+    if (q.skills) {
+      const names = q.skills.split(',').map(s => s.trim()).filter(Boolean);
+      if (names.length > 10) throw new AppError('Invalid request: at most 10 skills', 400, 'VALIDATION_ERROR');
+      const unknown = names.filter(n => !lookupSkill(n));
+      if (unknown.length) throw new AppError(`Invalid request: not recognised skill(s): ${unknown.join(', ')}`, 400, 'UNKNOWN_SKILL');
+      skills = [...new Set(names.map(n => lookupSkill(n)!.name))];
+    }
+    const career = await Career.findById(careerId).select('title');
+    if (!career) throw new AppError('Career not found.', 404, 'CAREER_NOT_FOUND');
+    const data = await MarketSignalService.signalsForCareer(
+      { id: career._id.toString(), title: career.title },
+      { dataset: q.dataset, country: q.country?.toUpperCase(), from, to, skills }
+    );
     res.status(200).json({ success: true, data });
   });
 

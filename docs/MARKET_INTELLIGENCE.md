@@ -7,12 +7,13 @@
 |---|---|
 | **C1** sourced, dated job-demand records and history | **Implemented and tested** (see §5). Real-market history stays *unavailable*: no licensed source is registered yet. |
 | **C4** job-description skill trend mining | **Implemented and tested** on synthetic data (see §5a). On real data it stays *unavailable* until a licensed source is registered. |
-| C5 market signals contract | `MarketOpportunitySummary` contract and its unavailable form are defined and tested. The producer is not built yet. |
+| C5 summary producer | `MarketOpportunitySummary` v2 producer built and tested (§4). |
 | C6 application outcomes | Implemented and tested; see [`APPLICATION_OUTCOMES.md`](APPLICATION_OUTCOMES.md) |
 | **C3** salary insights | **Implemented and tested** on synthetic data (see §5b). Real salary insights answer *DATA UNAVAILABLE* until a licensed source is registered. |
 | **X8** application history | **Implemented and tested** on real user-recorded data; see [`APPLICATION_OUTCOMES.md`](APPLICATION_OUTCOMES.md#application-history-x8) |
 | **C2** cautious forecasting | **Implemented and tested** with a held-out synthetic evaluation (see §5c). Real forecasts are *FORECAST UNAVAILABLE*: no licensed source. |
-| R4, X7 | Not started |
+| **C5 / R4** market signals | **Implemented and tested** as contract v1 (see §4a); neutral without valid sourced evidence. **Integration with Agent A's R3 ranking pending.** |
+| X7 | Not started |
 
 ## 1. Principles
 
@@ -97,6 +98,59 @@ const s = await fetchMarketOpportunitySummary(careerId, { country: 'IN' });
 ```
 
 **Tests:** `backend/src/tests/market_opportunity_summary.test.ts` covers all four classes, staleness, an unmapped career, the matching-rule boundaries, observations vs distinct postings, and HTTP 401/400/404.
+
+## 4a. Market signals (C5) and market-aware adaptation (R4): contract v1 for Agent A
+
+- **Producer:** `MarketSignalService.signalsForCareer`, served at `GET /api/v1/market/careers/:careerId/signals?dataset&country&from&to&skills=a,b` (sign-in required; at most 10 skills; unknown parameters → 400).
+- **Types and helpers:** `backend/src/services/market/MarketSignalService.ts`.
+
+**What a response holds:**
+
+| Field | Contents |
+|---|---|
+| `demand` | Distinct postings; earlier-half vs recent-half counts; direction (`rising`, `falling`, `stable` or `null`); per-source directions |
+| `skills` | Per requested skill, share, mentions and C4 change, with `usable` |
+| `provenance` | Matching rule, sources, licences and links |
+| `dataAsOf` | The latest retrieval the signals rest on |
+| `generatedAt` | When the signals were computed |
+| `influence` | Whether consumers may use the signals, as below |
+| `separation` | States that readiness is a separate input |
+
+**Direction.** A two-period Poisson comparison, z = (recent − earlier) / √(recent + earlier), with |z| ≥ 1.96. It needs at least 15 postings in each half; otherwise the direction is `null`.
+
+**Influence:**
+- `{mode: 'evidence', demandDirection, distinctPostings, asOf}` only when the summary is `sourced_valid` **and** no two sources state opposite directions.
+- `{mode: 'neutral', reasons}` in every other case. The reasons are: `no_registered_source`, `synthetic_test_data`, `stale_data`, `too_few_postings`, `too_few_months_with_postings`, `career_not_mapped_to_postings` and `conflicting_sources`.
+
+**No score, weight or boost exists.** Signals describe postings, not the applicant. The service does not read readiness, and nothing combines the two.
+
+**How a ranking consumer (R3) may use it.** Only as the final tie-break:
+
+```ts
+import { compareWithMarketTieBreak } from '../market/MarketSignalService.js';
+items.sort((a, b) => ownOrder(a, b) || compareWithMarketTieBreak(a.marketInfluence, b.marketInfluence));
+```
+
+`compareWithMarketTieBreak` returns 0 unless both items carry evidence with a stated direction; then rising comes before stable, which comes before falling. So:
+- neutral, missing or undetermined signals never change an order;
+- a market signal can never move an item past one the consumer ranked differently.
+
+**Counterfactual tests** (`backend/src/tests/market_signals.test.ts`). The same career is evaluated under each evidence condition:
+
+| Evidence | Influence |
+|---|---|
+| No source | neutral |
+| Sourced and rising | **evidence, rising** |
+| The same records read 4 months later | neutral, `stale_data` |
+| Sparse | neutral, `too_few_postings` |
+| One source rising and one falling | neutral, `conflicting_sources` |
+| Flat | evidence, `stable` |
+| Postings only in the recent half | evidence, direction `null` |
+| The same rising counts, synthetic | neutral, `synthetic_test_data` |
+
+The contract test shows that only an exactly tied pair is reordered, that all-neutral signals leave the baseline order unchanged, and that the consumer's order is never overridden. The test also asserts that the response contains no score, boost or weight.
+
+**Status.** Implemented and tested here. It is **not yet integrated**: Agent A's R3 ranking, `RecommendationEngine` and Career Lab were not edited. C5/R4 stay pending until the merge wires the tie-break in and the combined regression passes.
 
 ## 5. C1 evidence
 

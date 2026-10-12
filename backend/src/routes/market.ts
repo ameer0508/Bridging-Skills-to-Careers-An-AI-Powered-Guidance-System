@@ -13,6 +13,7 @@ router.get('/skill-trends', MarketController.skillTrends);
 router.get('/salaries', MarketController.salaries);
 router.get('/forecast', MarketController.forecast);
 router.get('/careers/:careerId/summary', MarketController.careerSummary);
+router.get('/careers/:careerId/signals', MarketController.careerSignals);
 
 // Write side: importing postings from a registered source is an operator task
 router.post('/imports', authorize(['admin']), MarketController.importPostings);
