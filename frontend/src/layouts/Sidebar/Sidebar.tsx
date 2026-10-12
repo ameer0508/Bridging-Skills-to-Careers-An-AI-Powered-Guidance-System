@@ -22,6 +22,7 @@ import {
   MessageSquare,
   Wallet,
   ClipboardList,
+  GraduationCap,
 } from 'lucide-react';
 import { SidebarItem } from './SidebarItem';
 import { useAuthStore } from '../../store/authStore';
@@ -143,6 +144,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           to: '/market/salaries',
           label: 'Salary Insights',
           icon: <Wallet className="w-4 h-4" />,
+        },
+        {
+          to: '/exams',
+          label: 'Exam Practice',
+          icon: <GraduationCap className="w-4 h-4" />,
         },
         {
           to: '/applications',
