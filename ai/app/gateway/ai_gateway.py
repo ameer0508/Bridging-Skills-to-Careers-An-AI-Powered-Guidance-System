@@ -16,6 +16,7 @@ from app.utils.caching_layer import ai_cache
 from app.utils.rate_limiter import rate_limiter
 from app.utils.retry_manager import RetryManager
 from app.utils.response_normalizer import ResponseNormalizer
+from app.observability import audit_log, categorize_failure
 
 logger = logging.getLogger("skillbridge-ai")
 
@@ -108,14 +109,20 @@ class AIGateway:
             cached_resp = ai_cache.get(service_name, payload)
             if cached_resp:
                 logger.info(f"[AI Gateway] Cache HIT for service '{service_name}'")
+                audit_log.record("cache_hit", service_name, personal_data=carries_personal_data(service_name))
                 return cached_resp
 
         # 2. Resolve Provider Fallback Chain
         personal = carries_personal_data(service_name)
-        if personal:
-            provider_chain = self.get_provider_chain(requested_provider)
-        else:
-            provider_chain = self.get_provider_chain(requested_provider, contains_personal_data=False)
+        try:
+            if personal:
+                provider_chain = self.get_provider_chain(requested_provider)
+            else:
+                provider_chain = self.get_provider_chain(requested_provider, contains_personal_data=False)
+        except RuntimeError:
+            audit_log.record("no_provider", service_name, personal_data=personal, skipped=self._skip_reasons([], personal))
+            raise
+        audit_log.record("chain_resolved", service_name, personal_data=personal, skipped=self._skip_reasons(provider_chain, personal))
         errors: List[str] = []
 
         for idx, provider in enumerate(provider_chain):
@@ -129,6 +136,7 @@ class AIGateway:
                 runtime_policy.require(provider_name, contains_personal_data=personal)
             except ProviderBlockedError as blocked:
                 logger.warning(f"[AI Gateway] {blocked}")
+                audit_log.record("policy_refused", service_name, provider_name, reason=blocked.decision.reason.value, attempt=idx + 1, personal_data=personal)
                 errors.append(f"{provider_name}: refused by the zero-cost policy ({blocked.decision.reason.value})")
                 continue
 
@@ -136,6 +144,7 @@ class AIGateway:
             if not rate_limiter.check_rate_limit(provider_name, rpm):
                 err_msg = f"Rate limit exceeded for provider '{provider_name}'"
                 logger.warn(f"[AI Gateway] {err_msg}")
+                audit_log.record("rate_limited", service_name, provider_name, attempt=idx + 1, personal_data=personal)
                 errors.append(err_msg)
                 continue
 
@@ -157,6 +166,7 @@ class AIGateway:
                         else:
                             return target_func(payload)
 
+                call_started = time.time()
                 response: UnifiedAIResponse = RetryManager.execute_with_retry(
                     _invoke,
                     max_retries=cfg.max_retries if cfg else 2
@@ -165,6 +175,15 @@ class AIGateway:
                 if response and response.success:
                     if fallback_used:
                         response.metadata["fallback_used"] = True
+                    # X11: where the answer came from, so callers can label it honestly
+                    response.metadata["observability"] = {
+                        "provider": provider_name,
+                        "attempt": idx + 1,
+                        "fallbackUsed": fallback_used,
+                        "testProvider": provider_name == "mock",
+                    }
+                    audit_log.record("success", service_name, provider_name, attempt=idx + 1,
+                                     latency_ms=(time.time() - call_started) * 1000, personal_data=personal)
                     
                     # Log Metrics
                     logger.info(
@@ -181,16 +200,19 @@ class AIGateway:
                     err = runtime_policy.redact(response.errors[0] if response and response.errors else "Unknown provider failure")
                     logger.warning(f"[AI Gateway] Provider '{provider_name}' failed for service '{service_name}': {err}")
                     errors.append(f"{provider_name}: {err}")
+                    self._record_failure(service_name, provider_name, err, idx + 1, personal)
                     self._note_quota_error(provider_name, err)
 
             except Exception as e:
                 err_msg = runtime_policy.redact(f"{provider_name} Exception: {str(e)}")
                 logger.error(f"[AI Gateway] {err_msg}")
                 errors.append(err_msg)
+                self._record_failure(service_name, provider_name, err_msg, idx + 1, personal)
                 self._note_quota_error(provider_name, err_msg)
 
         total_latency = (time.time() - start_total) * 1000
         logger.error(f"[AI Gateway] All providers failed for service '{service_name}'. Errors: {errors}")
+        audit_log.record("all_failed", service_name, personal_data=personal)
         
         return ResponseNormalizer.normalize_error(
             error_msg=f"All AI Providers failed: {'; '.join(errors)}",
@@ -199,6 +221,29 @@ class AIGateway:
             latency_ms=total_latency,
             metadata={"all_errors": errors}
         )
+
+    def _skip_reasons(self, chain: List[BaseAIProvider], personal: bool) -> Dict[str, str]:
+        """Why each registered provider is not in the chain: the policy's reason, or unavailable."""
+        reasons: Dict[str, str] = {}
+        for name, provider in self.providers.items():
+            if provider in chain:
+                continue
+            decision = runtime_policy.check(name, personal)
+            if not decision.allowed and decision.reason is not None:
+                reasons[name] = decision.reason.value
+            elif not provider.is_available():
+                reasons[name] = "unavailable"
+            else:
+                reasons[name] = "not_configured_in_chain"
+        return reasons
+
+    @staticmethod
+    def _record_failure(service_name: str, provider_name: str, message: str, attempt: int, personal: bool) -> None:
+        """Only the failure category is recorded, never the message (it may echo user content)."""
+        category = categorize_failure(message)
+        audit_log.record("provider_failed", service_name, provider_name, reason=category, attempt=attempt, personal_data=personal)
+        if category == "quota":
+            audit_log.record("quota_paused", service_name, provider_name, personal_data=personal)
 
     @staticmethod
     def _note_quota_error(provider_name: str, message: str) -> None:

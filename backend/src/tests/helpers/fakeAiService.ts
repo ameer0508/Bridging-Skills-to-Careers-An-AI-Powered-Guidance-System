@@ -198,6 +198,16 @@ export async function startFakeAiService(serviceKey: string, listenPort = 0): Pr
         }
         return reply();
       }
+      // AI observability (X11): echoes the forwarded query. The real audit log is tested in
+      // ai/tests/test_observability.py.
+      if (path.startsWith('/api/v1/observability/')) {
+        const query = Object.fromEntries(new URL(req.url || '', 'http://fake').searchParams);
+        const section = path.slice('/api/v1/observability/'.length);
+        if (section === 'summary') return send(200, { success: true, data: { windowHours: Number(query.window_hours), events: 2, providers: { mock: { attempts: 1, successes: 1, failures: {}, policyRefusals: {}, rateLimited: 0, quotaPauses: 0, lastFailureAt: null, latencyMs: { p50: 12, p95: 12, samples: 1 }, failureRate: 0 } }, services: { chat_architect: { requests: 1, successes: 1, allFailed: 0, noProvider: 0, cacheHits: 0, fallbacks: 0 } }, retentionDays: 14, persisted: false } });
+        if (section === 'events') return send(200, { success: true, data: { events: [{ at: '2026-10-12T00:00:00+00:00', kind: 'success', service: 'chat_architect', provider: 'mock', reason: null, attempt: 1, latency_ms: 12, personal_data: true, skipped: {} }], retentionDays: 14, query } });
+        if (section === 'providers') return send(200, { success: true, data: { providers: [{ provider: 'openai', status: 'BLOCKED', available: false, personalData: { allowed: false, reason: 'blocked' }, nonPersonalData: { allowed: false, reason: 'blocked' }, quotaRemaining: null }] } });
+        return send(404, { detail: 'Not found' });
+      }
       // Multilingual analysis (E5): a fixed-shape reply keyed on markers in the text. The real
       // extraction is tested in ai/tests/test_multilingual.py.
       if (path === '/api/v1/multilingual/analyze' || path === '/api/v1/multilingual/analyze-text') {
