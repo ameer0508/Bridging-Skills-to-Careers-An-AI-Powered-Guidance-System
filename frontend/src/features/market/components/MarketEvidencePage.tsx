@@ -5,6 +5,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { Card, CardBody, CardHeader } from '../../../components/base/Card';
 import { messageOf } from '../../../lib/collections';
 import { fetchMarketHistory, MarketDataset, MarketHistory, MarketHistoryFilters, REASON_TEXT } from '../marketApi';
+import { SkillTrendsSection } from './SkillTrendsSection';
 
 const COUNTRIES = [
   { value: '', label: 'All countries' },
@@ -120,6 +121,8 @@ export const MarketEvidencePage: React.FC = () => {
         )}
         {query.data && <HistoryView history={query.data} />}
       </div>
+
+      <SkillTrendsSection filters={filters} />
     </div>
   );
 };

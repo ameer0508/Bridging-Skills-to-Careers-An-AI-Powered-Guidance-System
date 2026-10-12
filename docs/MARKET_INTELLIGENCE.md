@@ -6,8 +6,10 @@
 | ID | Status on this branch |
 |---|---|
 | **C1** sourced, dated job-demand records and history | **Implemented and tested** (see §5). Real-market history stays *unavailable*: no licensed source is registered yet. |
+| **C4** job-description skill trend mining | **Implemented and tested** on synthetic data (see §5a). On real data it stays *unavailable* until a licensed source is registered. |
 | C5 market signals contract | `MarketOpportunitySummary` contract and its unavailable form are defined and tested. The producer is not built yet. |
-| C2, C3, C4, C6, R4, X7, X8 | Not started |
+| C6 application outcomes | Implemented and tested; see [`APPLICATION_OUTCOMES.md`](APPLICATION_OUTCOMES.md) |
+| C2, C3, R4, X7, X8 | Not started |
 
 ## 1. Principles
 
@@ -108,6 +110,24 @@ Until the producer is built, `unavailableSummary(career, period, ['no_registered
 | Screen | `/market` "Market Evidence": dataset switch, filters, monthly chart with a table alternative, sources and licence, caveats, loading, error and insufficient states | `frontend/src/features/market/` |
 | Service and HTTP tests | Fingerprints; lexicon skills; import counts; re-import; conflict; refused sources and dates; history totals, filters and sufficiency; sourced/synthetic separation; licensed source; sign-in; admin-only; 7 invalid queries; contract | `backend/src/tests/market_intelligence.test.ts` |
 | Browser test, 11 steps | Sign-in required; sidebar link; honest empty sourced view; CLI import; no leak into sourced view; synthetic banner, counts, source, table; insufficient skill; error state; 390 px fit; no console errors | `e2e/tests/market.mjs` (run with `E2E_TEST_FILE=./tests/market.mjs node run.mjs`) |
+
+## 5a. C4 skill trends
+
+`GET /api/v1/market/skill-trends?dataset&country&from&to&granularity=quarter|month&skills=a,b&limit` (sign-in required).
+
+- **What is counted.** The unit is a distinct stored posting. Duplicates were merged on import and re-observations add nothing. A skill counts once per posting, whichever alias appeared (`postgres` and `PostgreSQL` are one skill).
+- **Denominator.** A share's denominator is *every* dated posting in the same period and filters, including postings with no recognised skill. Undated postings are excluded and reported.
+- **When a change is described.** The earlier half of the period is compared with the recent half. A change is stated only when *all* of these hold:
+  - each half has at least 30 postings;
+  - the period has postings in at least 6 months;
+  - the skill has at least 10 mentions;
+  - a two-proportion z-test reaches |z| ≥ 1.96.
+
+  Otherwise the result is "no clear change", or the counts are shown with the reasons no trend is stated.
+- **Datasets.** Synthetic and sourced postings are never combined. The synthetic section is labelled `SYNTHETIC TEST DATA`.
+- **Tests.**
+  - `backend/src/tests/market_skill_trends.test.ts` covers the statistic, the fixture trend, duplicates and contradicting re-imports, windows, aliases, sparse sourced data, zero mentions and HTTP validation.
+  - `e2e/tests/market.mjs` covers 4 C4 steps.
 
 ## 6. Known limits
 

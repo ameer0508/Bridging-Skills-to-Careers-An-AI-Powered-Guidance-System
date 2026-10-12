@@ -69,6 +69,13 @@ export async function run({ webUrl, apiUrl, tmpDir }) {
     });
 
     let counts;
+    await t.step('without a licensed source no skill trends are mined', async () => {
+      await page.getByTestId('skill-trends-empty').waitFor({ timeout: 15_000 });
+      const text = await page.getByTestId('skill-trends-empty').innerText();
+      expect(/no real postings to mine/.test(text), `skill trends empty state: ${text}`);
+      expect((await page.getByTestId('skill-trends-table').count()) === 0, 'a skill table is shown with no records');
+    });
+
     await t.step('operator imports the synthetic fixture', async () => {
       const result = importFixture(tmpDir, email);
       counts = result.counts;
@@ -93,6 +100,22 @@ export async function run({ webUrl, apiUrl, tmpDir }) {
       expect(/Undated \(not counted\) 1/.test(text), 'the undated posting is not reported');
       await page.getByText('View as table').click();
       expect((await page.getByTestId('history-table').locator('tbody tr').count()) === 12, 'the table does not list 12 months');
+    });
+
+    await t.step('skill trends show shares with their denominators and test-backed changes', async () => {
+      const table = page.getByTestId('skill-trends-table');
+      await table.waitFor({ timeout: 15_000 });
+      const scope = await page.getByTestId('skill-trends-scope').innerText();
+      expect(/Shares are out of \d+ dated postings/.test(scope), `scope: ${scope}`);
+      const row = async (skill) => (await table.locator('tbody tr').filter({ has: page.getByRole('rowheader', { name: skill, exact: true }) }).innerText()).replace(/\s+/g, ' ');
+      const kubernetes = await row('Kubernetes');
+      expect(/20 of \d+/.test(kubernetes) && /Higher share in the recent half/.test(kubernetes), `Kubernetes row: ${kubernetes}`);
+      const python = await row('Python');
+      expect(/No clear change/.test(python), `Python row: ${python}`);
+      expect(/SYNTHETIC TEST DATA/.test(await page.getByTestId('skill-trends').innerText()), 'the trend section is not labelled synthetic');
+      await page.getByLabel('Group by').selectOption('month');
+      await page.waitForTimeout(600);
+      expect(/2026-09 \(\d+\)/.test(await page.getByTestId('skill-trends-scope').innerText()), 'monthly periods are not listed');
     });
 
     await t.step('a skill with too few postings is reported as insufficient', async () => {
@@ -120,7 +143,7 @@ export async function run({ webUrl, apiUrl, tmpDir }) {
     });
 
     await t.step('no unexpected API failures or console errors', async () => {
-      const failed = log.failed.filter((f) => !/^400 GET \/market\/history\?.*skill=NotARealSkill/.test(f));
+      const failed = log.failed.filter((f) => !/^400 GET \/market\/(history\?.*skill|skill-trends\?.*skills)=NotARealSkill/.test(f));
       // The unknown-skill step provokes one 400 on purpose; the browser and the app both log it
       const consoleErrors = log.console.filter((c) => !/status of 400 \(Bad Request\)|NotARealSkill/.test(c));
       expect(failed.length === 0, `API failures: ${failed.join(', ')}`);

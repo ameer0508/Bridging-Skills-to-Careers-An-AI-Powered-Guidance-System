@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { listMarketSources } from '../config/marketSources.js';
 import MarketIngestionService, { importRequestSchema } from '../services/market/MarketIngestionService.js';
 import MarketHistoryService, { MAX_HISTORY_MONTHS, monthRange } from '../services/market/MarketHistoryService.js';
+import MarketSkillTrendService from '../services/market/MarketSkillTrendService.js';
 import { AppError } from '../middlewares/errorHandler.js';
 import { lookupSkill } from '../utils/skillLexicon.js';
 
@@ -15,6 +16,19 @@ const historyQuerySchema = z
     country: z.string().trim().regex(/^[A-Za-z]{2}$/, 'must be an ISO 3166-1 alpha-2 code').optional(),
     from: month.optional(),
     to: month.optional(),
+  })
+  .strict();
+
+const skillTrendQuerySchema = z
+  .object({
+    dataset: z.enum(['sourced', 'synthetic_fixture']).default('sourced'),
+    country: z.string().trim().regex(/^[A-Za-z]{2}$/, 'must be an ISO 3166-1 alpha-2 code').optional(),
+    from: month.optional(),
+    to: month.optional(),
+    granularity: z.enum(['month', 'quarter']).default('quarter'),
+    // Comma-separated skill names; aliases are accepted and canonicalised
+    skills: z.string().trim().max(400).optional(),
+    limit: z.coerce.number().int().min(1).max(50).default(15),
   })
   .strict();
 
@@ -75,6 +89,41 @@ class MarketController {
     });
     res.status(200).json({ success: true, data });
   });
+
+  skillTrends = handle(async (req, res) => {
+    userIdOf(req);
+    const q = parse(skillTrendQuerySchema, req.query);
+    const { from, to } = this.period(q.from, q.to);
+    let skills: string[] | undefined;
+    if (q.skills) {
+      const names = q.skills.split(',').map(s => s.trim()).filter(Boolean);
+      if (names.length > 10) throw new AppError('Invalid request: at most 10 skills may be compared', 400, 'VALIDATION_ERROR');
+      const unknown = names.filter(n => !lookupSkill(n));
+      if (unknown.length) throw new AppError(`Invalid request: not recognised skill(s): ${unknown.join(', ')}`, 400, 'UNKNOWN_SKILL');
+      skills = [...new Set(names.map(n => lookupSkill(n)!.name))];
+    }
+    const data = await MarketSkillTrendService.trends({
+      dataset: q.dataset,
+      country: q.country?.toUpperCase(),
+      from,
+      to,
+      granularity: q.granularity,
+      skills,
+      limit: q.limit,
+    });
+    res.status(200).json({ success: true, data });
+  });
+
+  /** The requested period, or the 12 months ending now; validated for order and length. */
+  private period(fromQuery?: string, toQuery?: string) {
+    const to = toQuery ?? currentMonth();
+    const from = fromQuery ?? monthsBefore(to, 11);
+    if (from > to) throw new AppError('Invalid request: from must not be after to', 400, 'VALIDATION_ERROR');
+    if (monthRange(from, to).length > MAX_HISTORY_MONTHS) {
+      throw new AppError(`Invalid request: the period may span at most ${MAX_HISTORY_MONTHS} months`, 400, 'VALIDATION_ERROR');
+    }
+    return { from, to };
+  }
 
   importPostings = handle(async (req, res) => {
     const request = parse(importRequestSchema, req.body);

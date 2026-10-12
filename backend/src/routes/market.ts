@@ -9,6 +9,7 @@ router.use(requireAuth);
 // Read side: registered sources and dated posting history
 router.get('/sources', MarketController.listSources);
 router.get('/history', MarketController.history);
+router.get('/skill-trends', MarketController.skillTrends);
 
 // Write side: importing postings from a registered source is an operator task
 router.post('/imports', authorize(['admin']), MarketController.importPostings);
