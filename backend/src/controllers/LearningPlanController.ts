@@ -15,8 +15,12 @@ const preferencesSchema = z
       .min(HOURS_PER_WEEK_LIMITS.min, `must be at least ${HOURS_PER_WEEK_LIMITS.min}`)
       .max(HOURS_PER_WEEK_LIMITS.max, `must be at most ${HOURS_PER_WEEK_LIMITS.max}`)
       .nullable()
+      .optional(),
+    reminders: z.boolean().optional(),
+    milestoneNotifications: z.boolean().optional()
   })
-  .strict();
+  .strict()
+  .refine(value => Object.values(value).some(v => v !== undefined), { message: 'needs hoursPerWeek, reminders or milestoneNotifications' });
 
 const userIdOf = (req: Request): string => {
   const userId = req.user?.userId;
@@ -34,13 +38,24 @@ export async function hoursPerWeekOf(userId: string): Promise<number | null> {
   return user?.learningPreferences?.hoursPerWeek ?? null;
 }
 
+/** Everything is as the user left it; reminders and milestone notifications are off by default. */
+async function preferencesOf(userId: string) {
+  const user = await User.findById(userId).select('learningPreferences').lean();
+  return {
+    hoursPerWeek: user?.learningPreferences?.hoursPerWeek ?? null,
+    reminders: Boolean(user?.learningPreferences?.reminders),
+    milestoneNotifications: Boolean(user?.learningPreferences?.milestoneNotifications),
+    limits: HOURS_PER_WEEK_LIMITS
+  };
+}
+
 /** The user's stated study time and the roadmap schedule that follows from it. */
 class LearningPlanController {
   getPreferences = handle(async (req, res) => {
-    res.status(200).json({ success: true, data: { hoursPerWeek: await hoursPerWeekOf(userIdOf(req)), limits: HOURS_PER_WEEK_LIMITS } });
+    res.status(200).json({ success: true, data: await preferencesOf(userIdOf(req)) });
   });
 
-  /** `hoursPerWeek: null` clears the setting; SkillBridge never fills one in. */
+  /** Only the fields sent are changed. `hoursPerWeek: null` clears it; SkillBridge never fills one in. */
   updatePreferences = handle(async (req, res) => {
     const userId = userIdOf(req);
     const parsed = preferencesSchema.safeParse(req.body ?? {});
@@ -48,8 +63,12 @@ class LearningPlanController {
       const detail = parsed.error.issues.map(i => `${i.path.join('.') || 'request'} ${i.message}`).join('; ');
       throw new AppError(`Invalid request: ${detail}`, 400, 'VALIDATION_ERROR');
     }
-    await User.updateOne({ _id: userId }, { $set: { 'learningPreferences.hoursPerWeek': parsed.data.hoursPerWeek } });
-    res.status(200).json({ success: true, data: { hoursPerWeek: parsed.data.hoursPerWeek, limits: HOURS_PER_WEEK_LIMITS } });
+    const set: Record<string, unknown> = {};
+    for (const [field, value] of Object.entries(parsed.data)) {
+      if (value !== undefined) set[`learningPreferences.${field}`] = value;
+    }
+    await User.updateOne({ _id: userId }, { $set: set });
+    res.status(200).json({ success: true, data: await preferencesOf(userId) });
   });
 
   /** Computed on every read, so it always reflects current progress and the current weekly hours. */

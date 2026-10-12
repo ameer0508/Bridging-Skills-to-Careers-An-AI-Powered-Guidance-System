@@ -494,6 +494,47 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       return `"${title}" counted with a link, shown publicly only while shared, evidence restored after removal`;
     });
 
+    await t.step('learning activity: a real streak, and notifications only after opting in', async () => {
+      const stored = async () => (await api('GET', '/activity')).data;
+      const start = await stored();
+      expect(start.streak.current === 1 && start.streak.activeToday, `streak ${JSON.stringify(start.streak)} after a day with recorded activity`);
+      expect(start.notifications.length === 0 && !start.preferences.reminders && !start.preferences.milestoneNotifications, 'notifications exist although nothing was switched on');
+
+      await gotoAndSettle(page, `${webUrl}/activity`, 2500);
+      expect((await page.getByTestId('streak').getAttribute('data-current')) === '1', 'the page does not show the one-day streak');
+      expect((await page.getByTestId('recent-activity').locator('li').count()) === start.recent.length, 'recent activity differs from what is stored');
+      expect(/Notifications are switched off/.test(await page.getByTestId('notifications').innerText()), 'the page does not say that notifications are off');
+      expect(/UTC calendar days/.test(await page.getByTestId('activity-note').innerText()), 'how a day is counted is not explained');
+      expect((await page.getByTestId('notification-bell').getAttribute('data-unread')) === '0', 'the bell shows unread notifications that do not exist');
+
+      // The switch shows the stored value, so it moves once the server has saved it
+      await page.getByLabel(/^Milestones:/).click();
+      await page.waitForTimeout(1200);
+      expect((await stored()).preferences.milestoneNotifications === true, 'the milestone setting was not stored');
+
+      // A milestone reached now is announced once; the bell follows
+      const careerId = (await api('GET', '/careers/matches')).data.matches[0].careerId._id;
+      const mine = (await api('GET', '/projects')).data.projects[0];
+      await api('PATCH', `/projects/${mine.id}`, { status: 'in_progress' });
+      await api('PATCH', `/projects/${mine.id}`, { status: 'completed' });
+      await page.reload();
+      const notice = page.getByTestId('notification');
+      await notice.first().waitFor({ timeout: 15_000 });
+      expect((await notice.count()) === 1 && (await notice.first().getAttribute('data-read')) === 'false', 'expected exactly one unread notification');
+      expect(/Practice project marked complete/.test(await notice.first().innerText()), 'the milestone is not described');
+      await page.locator('[data-testid="notification-bell"][data-unread="1"]').waitFor({ timeout: 15_000 });
+
+      await notice.first().getByRole('button', { name: /^Mark read:/ }).click();
+      await page.locator('[data-testid="notification-bell"][data-unread="0"]').waitFor({ timeout: 15_000 });
+      await notice.first().getByRole('button', { name: /^Dismiss:/ }).click();
+      await page.getByText('Nothing to tell you right now.').waitFor({ timeout: 15_000 });
+      // Switched off again so the rest of the journey is unaffected
+      await page.getByLabel(/^Milestones:/).click();
+      await page.waitForTimeout(1000);
+      void careerId;
+      return `${start.recent.length} recorded activities, 1-day streak; one milestone after opting in, read and dismissed`;
+    });
+
     // ---- Resume: replace, reprocess, recover ----------------------------------------------------------
     await t.step('replacing the resume rebuilds skills and reports what changed', async () => {
       await gotoAndSettle(page, `${webUrl}/resume`, 2000);
@@ -732,7 +773,7 @@ export async function run({ webUrl, apiUrl, aiControl }) {
     // ---- Layout and accessibility basics ------------------------------------------------------------------------------
     await t.step('main pages render, fit a phone screen, and name their controls', async () => {
       const problems = [];
-      const routes = ['/home', '/ai', '/resume', '/skills', '/careers', '/career-lab', '/portfolio', '/readiness', '/roadmap', '/recommendations', '/job-agent', '/interview-agent', '/analytics', '/profile', '/settings'];
+      const routes = ['/home', '/ai', '/resume', '/skills', '/careers', '/career-lab', '/portfolio', '/activity', '/readiness', '/roadmap', '/recommendations', '/job-agent', '/interview-agent', '/analytics', '/profile', '/settings'];
       for (const route of routes) {
         await gotoAndSettle(page, webUrl + route, 2200);
         const text = await bodyText(page);
@@ -752,7 +793,7 @@ export async function run({ webUrl, apiUrl, aiControl }) {
         if (audit.unnamed || audit.unlabelled || audit.noAlt) problems.push(`${route}: ${JSON.stringify(audit)}`);
       }
       await page.setViewportSize({ width: 390, height: 844 });
-      for (const route of ['/home', '/resume', '/careers', '/career-lab', '/portfolio', '/job-agent', '/roadmap', '/interview-agent', '/readiness']) {
+      for (const route of ['/home', '/resume', '/careers', '/career-lab', '/portfolio', '/activity', '/job-agent', '/roadmap', '/interview-agent', '/readiness']) {
         await gotoAndSettle(page, webUrl + route, 2200);
         const width = await page.evaluate(() => document.documentElement.scrollWidth);
         if (width > 395) problems.push(`${route}: ${width}px wide at 390px`);
@@ -781,7 +822,7 @@ export async function run({ webUrl, apiUrl, aiControl }) {
           : route.continue();
       await page.route(`${apiUrl}/**`, failReads);
       const silent = [];
-      const routes = ['/home', '/ai', '/resume', '/skills', '/careers', '/career-lab', '/portfolio', '/readiness', '/roadmap', '/recommendations', '/job-agent', '/interview-agent', '/analytics', '/profile'];
+      const routes = ['/home', '/ai', '/resume', '/skills', '/careers', '/career-lab', '/portfolio', '/activity', '/readiness', '/roadmap', '/recommendations', '/job-agent', '/interview-agent', '/analytics', '/profile'];
       for (const route of routes) {
         await page.goto(webUrl + route);
         const shown = await page.getByTestId('load-error-banner').waitFor({ timeout: 15_000 }).then(() => true, () => false);

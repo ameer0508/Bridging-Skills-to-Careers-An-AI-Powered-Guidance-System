@@ -5,6 +5,8 @@ import LearningProject, { type ILearningProject, type LearningProjectStatus } fr
 import { PROJECT_BRIEFS, PROJECT_BRIEFS_VERSION, type ProjectBrief } from '../seed/projectBriefs.js';
 import CareerScenarioService from './CareerScenarioService.js';
 import { AppError } from '../middlewares/errorHandler.js';
+import LearningActivityService from './LearningActivityService.js';
+import { EventType } from '../models/ProgressEvent.js';
 
 /**
  * Practice projects chosen from the user's own gaps for one career.
@@ -195,6 +197,13 @@ class ProjectSuggestionService {
       }
     }
     await project.save();
+    const justCompleted = change.status === 'completed' && Boolean(project.completedAt) && project.completedAt!.getTime() === now.getTime();
+    if (change.task?.done || justCompleted) {
+      await LearningActivityService.recordActivity(userId, EventType.PRACTICE_PROJECT_PROGRESS, { title: project.title, status: project.status }, project._id.toString());
+    }
+    if (justCompleted) {
+      await LearningActivityService.notify(userId, 'milestone', `project:${project._id.toString()}`, `Practice project marked complete: ${project.title}`, 'Add it to your portfolio with a link to make it count as evidence.', '/portfolio');
+    }
     return this.present(project);
   }
 

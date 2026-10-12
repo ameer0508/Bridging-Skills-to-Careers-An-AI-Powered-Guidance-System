@@ -16,6 +16,8 @@ import {
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuthStore } from '../../store/authStore';
 import { Avatar } from '../../components/base/Avatar';
+import { useQuery } from '@tanstack/react-query';
+import apiClient from '../../lib/axios';
 
 export interface TopBarProps {
   onOpenMobileSidebar?: () => void;
@@ -25,6 +27,8 @@ export interface TopBarProps {
 const routeTitleMap: Record<string, { title: string; category: string }> = {
   '/home': { title: 'Home Command Center', category: 'Mission Control' },
   '/profile': { title: 'Profile & Settings', category: 'Identity' },
+  '/activity': { title: 'Learning Activity', category: 'Progress' },
+  '/portfolio': { title: 'Portfolio', category: 'Evidence' },
   '/careers': { title: 'Career Intelligence', category: 'Analytics' },
   '/readiness': { title: 'Career Readiness', category: 'Assessment' },
   '/skills': { title: 'Skill Intelligence', category: 'Taxonomy' },
@@ -48,6 +52,14 @@ export const TopBar: React.FC<TopBarProps> = ({
   const { theme, setTheme } = useTheme();
   const clearSession = useAuthStore((state) => state.clearSession);
   const user = useAuthStore((state) => state.user);
+
+  // Real unread notifications; refreshed with the activity page and when the tab regains focus
+  const unread = useQuery<number>({
+    queryKey: ['activity', 'unread'],
+    queryFn: async () => (await apiClient.get('/activity/unread-count')).data.data.unreadCount,
+    staleTime: 60_000,
+  });
+  const unreadCount = unread.data ?? 0;
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
@@ -133,13 +145,15 @@ export const TopBar: React.FC<TopBarProps> = ({
         {/* NOTIFICATIONS BUTTON */}
         <button
           type="button"
-          aria-label="Notifications"
-          onClick={() => navigate('/recommendations')}
+          aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+          data-testid="notification-bell"
+          data-unread={unreadCount}
+          onClick={() => navigate('/activity')}
           className="relative p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
         >
           <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-cyan-400" />
+          {/* Shown only when there really is something unread */}
+          {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-cyan-400" />}
         </button>
 
         {/* USER PROFILE DROPDOWN */}

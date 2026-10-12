@@ -4,6 +4,10 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 export interface ILearningPreferences {
   /** Hours a week the user says they can study; absent until they set it. */
   hoursPerWeek?: number | null;
+  /** In-app reminders. Off until the user switches them on. */
+  reminders?: boolean;
+  /** In-app milestone notifications. Off until the user switches them on. */
+  milestoneNotifications?: boolean;
 }
 
 export interface IUser extends Document<Types.ObjectId> {
@@ -56,7 +60,9 @@ const UserSchema = new Schema<IUser>(
     avatarUrl: { type: String, default: '' },
     lastLogin: { type: Date },
     learningPreferences: {
-      hoursPerWeek: { type: Number, min: 1, max: 60, default: null }
+      hoursPerWeek: { type: Number, min: 1, max: 60, default: null },
+      reminders: { type: Boolean, default: false },
+      milestoneNotifications: { type: Boolean, default: false }
     }
   },
   { timestamps: true }

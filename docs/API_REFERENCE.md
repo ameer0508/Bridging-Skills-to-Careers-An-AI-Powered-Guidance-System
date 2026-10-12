@@ -115,7 +115,7 @@ Nothing in this group changes the user's skills or scores, except recording a co
 | `PATCH` | `/api/v1/roadmap/:id/items/:id/status` | Yes | Set an item to not_started, in_progress, completed or skipped. |
 | `GET` | `/api/v1/roadmap/:id/schedule` | Yes | Hours of work remaining as a range, weeks and finish dates when weekly hours are set (`needsAvailability` otherwise), per-item effort with its basis (`catalogue` or `assumption`), blocked items, the next item, the assumptions used, and the last change to the roadmap with what was added or removed. `404 ROADMAP_NOT_FOUND`; does not create a roadmap. |
 | `GET` | `/api/v1/users/me/learning-preferences` | Yes | `hoursPerWeek` (null until the user sets it) and its limits. |
-| `PUT` | `/api/v1/users/me/learning-preferences` | Yes | Body `hoursPerWeek`: a whole number from 1 to 60, or `null` to clear it. |
+| `PUT` | `/api/v1/users/me/learning-preferences` | Yes | Any of `hoursPerWeek` (a whole number from 1 to 60, or `null` to clear it), `reminders`, `milestoneNotifications` (booleans, both `false` until set). Only the fields sent change. |
 | `GET` | `/api/v1/projects/suggestions` | Yes | Up to five practice projects for a career (`careerId` query; default the target role or best match), each tied to the caller's gaps, with reason, tasks, deliverables, assumed effort and the hypothetical score change. Empty with `hasProfile: false` when there is no skill profile. |
 | `GET` | `/api/v1/projects` | Yes | Projects the caller has taken on. |
 | `POST` | `/api/v1/projects` | Yes | Body `briefId`, optional `careerId`. Takes a project on (`201`), or returns the existing one (`200`). `409 PROJECT_NOT_RELEVANT` when it addresses none of the caller's gaps. |
@@ -127,6 +127,12 @@ Nothing in this group changes the user's skills or scores, except recording a co
 | `DELETE` | `/api/v1/portfolio/:id` | Yes | Remove an entry and the evidence it added. |
 | `PUT` | `/api/v1/portfolio/share` | Yes | Body `enabled` and/or `showName`. Switching on issues a new link token; switching off disables it. |
 | `GET` | `/api/v1/portfolio/shared/:token` | No | Public. Entries marked as shared, the owner's name only if allowed, and a note on what the entries mean. `404` for an unknown or switched-off link. |
+| `GET` | `/api/v1/activity` | Yes | Learning streak (UTC days), the last 10 recorded learning activities, in-app notifications with the unread count, and the two notification settings. Works out any reminder that is due. |
+| `GET` | `/api/v1/activity/unread-count` | Yes | Number of unread notifications. |
+| `POST` | `/api/v1/activity/notifications/:id/read` | Yes | Mark one notification read. |
+| `POST` | `/api/v1/activity/notifications/read-all` | Yes | Mark all read. |
+| `DELETE` | `/api/v1/activity/notifications/:id` | Yes | Dismiss one; it is not created again for the same occasion. |
+| `DELETE` | `/api/v1/activity/notifications` | Yes | Dismiss all. |
 
 ### Jobs and application tracking
 

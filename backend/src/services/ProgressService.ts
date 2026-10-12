@@ -8,7 +8,7 @@ import { RoadmapHistory } from '../models/RoadmapHistory.js';
 import { EventType } from '../models/ProgressEvent.js';
 import { AppError } from '../middlewares/errorHandler.js';
 import { RoadmapEngine } from './RoadmapEngine.js';
-import ProgressEventService from './ProgressEventService.js';
+import LearningActivityService from './LearningActivityService.js';
 
 export class ProgressService {
   /**
@@ -72,12 +72,15 @@ export class ProgressService {
       });
 
       if (newStatus === 'completed') {
-        await ProgressEventService.logEvent(
+        await LearningActivityService.recordActivity(
           userId,
           EventType.ROADMAP_ITEM_COMPLETED,
           { title: item.title, targetSkill: item.targetSkill, progress: roadmap.progressPercentage },
           roadmap._id.toString()
         );
+        if (phase.status === 'completed' && phase._id) {
+          await LearningActivityService.notify(userId, 'milestone', `phase:${roadmap._id.toString()}:${phase._id.toString()}`, `Roadmap phase finished: ${phase.title}`, `Every item in this phase is done. Your roadmap is ${roadmap.progressPercentage}% complete.`, '/roadmap');
+        }
       }
     }
 
@@ -89,6 +92,7 @@ export class ProgressService {
         action: 'completed',
         details: 'Roadmap fully completed.'
       });
+      await LearningActivityService.notify(userId, 'milestone', `roadmap:${roadmap._id.toString()}`, 'Roadmap complete', 'Every item on this roadmap is done or skipped.', '/roadmap');
     }
 
     return roadmap;

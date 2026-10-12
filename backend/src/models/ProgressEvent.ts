@@ -11,6 +11,9 @@ export const EventType = {
   RESUME_REPROCESSED: 'resume_reprocessed',
   RESUME_DELETED: 'resume_deleted',
   INTERVIEW_COMPLETED: 'interview_completed',
+  SKILL_CHECK_SUBMITTED: 'skill_check_submitted',
+  PRACTICE_PROJECT_PROGRESS: 'practice_project_progress',
+  PORTFOLIO_ENTRY_ADDED: 'portfolio_entry_added',
   OPPORTUNITY_SAVED: 'opportunity_saved',
   APPLICATION_STATUS_CHANGED: 'application_status_changed',
   WORKFLOW_EXECUTED: 'workflow_executed'

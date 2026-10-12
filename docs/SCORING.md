@@ -376,3 +376,34 @@ token); it shows only entries marked as shared, with title, description, date, l
 The owner's name appears only if they allow it. No scores, resume data, ids or contact details
 are included. Switching sharing off disables the link permanently; switching it on again issues a
 new one.
+
+## 16. Learning streaks and notifications
+
+**Streak.** A day is active when SkillBridge recorded at least one of: a roadmap item completed,
+a skill check submitted (passed or not), a practice project task ticked off or the project marked
+complete, a portfolio entry added, a mock interview completed. Opening the app, uploading a
+resume or saving a job does not count, and nothing the user did elsewhere can be entered.
+
+- Days are UTC calendar days, because no time zone is stored for a user. Someone far from UTC
+  will see the day change at an hour that is not their midnight.
+- Current streak: consecutive active days ending today, or ending yesterday (a streak stays
+  alive until the end of the following day). Longest streak and active days in the last 30 are
+  reported alongside. Several activities on one day count as one day.
+- A streak is information only. It changes no score.
+
+**Notifications.** In-app only: nothing is sent by e-mail, SMS or push. Two kinds, each **off
+until the user switches it on**:
+
+| Kind | Created when |
+|---|---|
+| Milestone | A skill check is passed for the first time; a roadmap phase or the whole roadmap is finished; a practice project is marked complete; the streak reaches 3, 7, 14 or 30 days |
+| Reminder | No recorded activity for 7 days while a roadmap item is still open; a roadmap item has been "in progress" for 14 days |
+
+- One notification per occasion. Repeating the occasion (passing the same skill check again,
+  reopening and completing a project) creates nothing new, and a dismissed notification does not
+  come back.
+- A milestone reached while the kind was off is not announced later.
+- Reminders are worked out when the user opens the app. Nothing runs on a timer, so a reminder
+  cannot reach a user who does not open SkillBridge.
+- Switching a kind off stops new notifications of that kind. Existing ones stay until dismissed.
+- The 7- and 14-day limits and the streak steps are chosen values.

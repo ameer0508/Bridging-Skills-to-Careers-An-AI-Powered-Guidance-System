@@ -122,7 +122,7 @@ export async function runLearningPlanTests() {
     const roadmap = await roadmapOf();
     const items = itemsOf(roadmap);
     assert.ok(items.length >= 4);
-    assert.deepEqual((await h.api('GET', '/users/me/learning-preferences', { token: alice.token })).body.data, { hoursPerWeek: null, limits: { min: 1, max: 60 } }, 'no weekly hours are assumed for a new user');
+    assert.deepEqual((await h.api('GET', '/users/me/learning-preferences', { token: alice.token })).body.data, { hoursPerWeek: null, reminders: false, milestoneNotifications: false, limits: { min: 1, max: 60 } }, 'no weekly hours are assumed for a new user, and notifications are off');
 
     let schedule = (await scheduleOf()).body.data.schedule;
     assert.equal(schedule.needsAvailability, true);

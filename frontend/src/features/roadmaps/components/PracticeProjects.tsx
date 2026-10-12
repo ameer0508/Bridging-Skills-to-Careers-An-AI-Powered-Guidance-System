@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Hammer } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import apiClient from '../../../lib/axios';
 import { EmptyState, ErrorNote, Loading, Note, SkillChips } from '../../careerLab/components/labUi';
 import { errorText, formatDate, labelClass, panelClass, primaryButton, quietButton } from '../../careerLab/components/labStyles';
@@ -158,7 +159,7 @@ export const PracticeProjectsPanel: React.FC<{ careerId: string }> = ({ careerId
                 <p className="text-[11px] text-slate-400">
                   {project.completedAt ? `Marked complete ${formatDate(project.completedAt)}. ` : project.startedAt ? `Started ${formatDate(project.startedAt)}. ` : ''}
                   {project.evidence}
-                  {project.status === 'completed' && <> <a href="/portfolio" className="text-cyan-300 underline">Add it to your portfolio</a> with a link to make it count.</>}
+                  {project.status === 'completed' && <> <Link to="/portfolio" className="text-cyan-300 underline">Add it to your portfolio</Link> with a link to make it count.</>}
                 </p>
               </li>
             ))}

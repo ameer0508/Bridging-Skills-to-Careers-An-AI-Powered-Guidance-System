@@ -9,6 +9,8 @@ import RecalculationService from './RecalculationService.js';
 import { findOrCreateCanonicalSkill, recogniseSkill } from '../utils/canonicalSkill.js';
 import { withUserLock } from '../utils/userLock.js';
 import { AppError } from '../middlewares/errorHandler.js';
+import LearningActivityService from './LearningActivityService.js';
+import { EventType } from '../models/ProgressEvent.js';
 
 /**
  * The user's portfolio: finished work recorded as evidence of skills.
@@ -81,6 +83,7 @@ class PortfolioService {
         throw new AppError('That practice project is already in your portfolio.', 409, 'PROJECT_ALREADY_IN_PORTFOLIO');
       }
       const entry = await PortfolioEntry.create({ userId: uid, ...fields });
+      await LearningActivityService.recordActivity(userId, EventType.PORTFOLIO_ENTRY_ADDED, { title: entry.title }, entry._id.toString());
       const recalculation = await this.syncAndRecalculate(userId, entry._id.toString());
       return { entry: this.present(entry, await UserSkill.find({ userId: uid }).populate('skillId')), recalculation };
     });

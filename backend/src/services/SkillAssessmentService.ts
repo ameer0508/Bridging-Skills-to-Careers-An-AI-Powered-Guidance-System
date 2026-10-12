@@ -16,6 +16,8 @@ import { lookupSkill } from '../utils/skillLexicon.js';
 import { findOrCreateCanonicalSkill } from '../utils/canonicalSkill.js';
 import { withUserLock } from '../utils/userLock.js';
 import { AppError } from '../middlewares/errorHandler.js';
+import LearningActivityService from './LearningActivityService.js';
+import { EventType } from '../models/ProgressEvent.js';
 
 /**
  * Skill checks: a short multiple-choice quiz per skill, scored on the server.
@@ -211,6 +213,10 @@ class SkillAssessmentService {
         evidence = await this.recordPass(uid, attempt.skillName, attempt._id.toString(), correctCount, review.length, now);
         const run = await RecalculationService.run(userId, 'skill_evidence_changed', attempt._id.toString());
         recalculation = { status: run.status, modulesRecomputed: run.modulesRecomputed };
+      }
+      await LearningActivityService.recordActivity(userId, EventType.SKILL_CHECK_SUBMITTED, { skill: attempt.skillName, correct: correctCount, of: review.length, passed }, attempt._id.toString());
+      if (passed && evidence?.added) {
+        await LearningActivityService.notify(userId, 'milestone', `skillcheck:${attempt.skillName}`, `${attempt.skillName} verified by skill check`, `You passed with ${correctCount} of ${review.length}. It is recorded as assessed evidence, not as a certification.`, '/career-lab');
       }
 
       return {

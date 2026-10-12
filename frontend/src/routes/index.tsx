@@ -12,6 +12,7 @@ import { AIThinkingAnimation } from '../components/experience';
 // Lazy-loaded Workspaces for Route Code Splitting
 const HomeWorkspace = lazy(() => import('../workspaces/HomeWorkspace/HomeWorkspace'));
 const CareerLabWorkspace = lazy(() => import('../workspaces/CareerLabWorkspace/CareerLabWorkspace'));
+const ActivityWorkspace = lazy(() => import('../workspaces/ActivityWorkspace/ActivityWorkspace'));
 const PortfolioWorkspace = lazy(() => import('../workspaces/PortfolioWorkspace/PortfolioWorkspace'));
 const PublicPortfolioPage = lazy(() => import('../workspaces/PortfolioWorkspace/PublicPortfolioPage'));
 const CareerIntelligenceWorkspace = lazy(() => import('../workspaces/CareerIntelligenceWorkspace/CareerIntelligenceWorkspace'));
@@ -150,6 +151,14 @@ export const router = createBrowserRouter([
             ),
           },
           {
+            path: '/activity',
+            element: (
+              <WorkspaceSuspense>
+                <ActivityWorkspace />
+              </WorkspaceSuspense>
+            ),
+          },
+          {
             path: '/portfolio',
             element: (
               <WorkspaceSuspense>
@@ -284,7 +293,8 @@ export const router = createBrowserRouter([
             ),
           },
           {
-            path: '/portfolio',
+            // The illustrative mock-up that used to answer /portfolio; the real portfolio has that address now
+            path: '/portfolio-demo',
             element: (
               <WorkspaceSuspense>
                 <DemoWorkspace>
