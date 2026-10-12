@@ -1,16 +1,21 @@
 import mongoose from 'mongoose';
-import InterviewSession, { IInterviewSession, IQuestionItem } from '../models/InterviewSession.js';
+import InterviewSession, { IInterviewSession } from '../models/InterviewSession.js';
 import UserSkill from '../models/UserSkill.js';
 import CareerMatch from '../models/CareerMatch.js';
 import GapAnalysis from '../models/GapAnalysis.js';
 import ParsedResume from '../models/ParsedResume.js';
+import Resume from '../models/Resume.js';
+import { User } from '../models/User.js';
 import { evaluateAnswer } from './InterviewEvaluator.js';
+import { generateInterviewQuestions, INTERVIEW_MODES, type InterviewMode } from './InterviewQuestionGenerator.js';
+import { extractSkills } from '../utils/skillLexicon.js';
+import logger from '../config/logger.js';
 import { AppError } from '../middlewares/errorHandler.js';
 
 export interface StartInterviewDTO {
   targetCareerId?: string;
   targetCareerTitle?: string;
-  mode?: 'technical' | 'behavioral' | 'project' | 'resume' | 'career' | 'mixed';
+  mode?: InterviewMode;
   questionCount?: number;
   opportunityContext?: {
     title?: string;
@@ -37,9 +42,10 @@ export class InterviewService {
     }
 
     const userObjectId = new mongoose.Types.ObjectId(userId);
+    const job = dto.opportunityContext;
 
-    // Fetch verified candidate context
-    let targetCareerTitle = dto.targetCareerTitle || dto.opportunityContext?.title || '';
+    // A session started from a job posting prepares for that posting's role
+    let targetCareerTitle = dto.targetCareerTitle || job?.title || '';
     let targetCareerIdObj: mongoose.Types.ObjectId | undefined = dto.targetCareerId && mongoose.Types.ObjectId.isValid(dto.targetCareerId)
       ? new mongoose.Types.ObjectId(dto.targetCareerId)
       : undefined;
@@ -47,60 +53,111 @@ export class InterviewService {
     let userSkillNames: string[] = [];
     let criticalGaps: string[] = [];
     let resumeExperience: string[] = [];
+    let resumeProjects: string[] = [];
+    let recentQuestionIds: string[] = [];
+    let recentQuestionTexts: string[] = [];
+    let sessionOrdinal = 0;
 
     if (mongoose.connection.readyState === 1) {
       try {
-        // Top career match
+        const topMatch = await CareerMatch.findOne({ userId: userObjectId })
+          .sort({ matchScore: -1, confidence: -1, _id: 1 })
+          .populate<{ careerId: { _id: mongoose.Types.ObjectId; title: string } }>('careerId');
+        const topCareer = topMatch?.careerId && typeof topMatch.careerId === 'object' ? topMatch.careerId : null;
+
         if (!targetCareerTitle) {
-          const topMatch = await CareerMatch.findOne({ userId: userObjectId }).sort({ matchScore: -1, confidence: -1, _id: 1 }).populate<{ careerId: { title: string } }>('careerId');
-          if (topMatch?.careerId && typeof topMatch.careerId === 'object') {
-            targetCareerTitle = topMatch.careerId.title;
-            targetCareerIdObj = topMatch.careerId as unknown as mongoose.Types.ObjectId;
-          }
+          // The role the user chose during onboarding comes first, then their best match
+          const user = await User.findById(userObjectId).select('targetRole');
+          targetCareerTitle = user?.targetRole || topCareer?.title || '';
+        }
+        if (!targetCareerIdObj && topCareer && topCareer.title === targetCareerTitle) {
+          targetCareerIdObj = topCareer._id;
         }
 
-        // Verified skills
-        const skillsDocs = await UserSkill.find({ userId: userObjectId }).populate<{ skillId: { name: string } }>('skillId');
+        // Skills on the profile, strongest evidence first
+        const skillsDocs = await UserSkill.find({ userId: userObjectId })
+          .sort({ evidenceScore: -1 })
+          .populate<{ skillId: { name: string } }>('skillId');
         userSkillNames = skillsDocs
           .map((s) => (s.skillId && typeof s.skillId === 'object' ? s.skillId.name : null))
           .filter((n): n is string => Boolean(n));
 
-        // Gap Analysis
-        const gapDoc = await GapAnalysis.findOne({ userId: userObjectId }).sort({ updatedAt: -1 });
+        // Gaps for the career being prepared for; otherwise for the best match
+        const gapCareerId = targetCareerIdObj ?? topCareer?._id;
+        const gapDoc = gapCareerId
+          ? await GapAnalysis.findOne({ userId: userObjectId, careerId: gapCareerId })
+          : await GapAnalysis.findOne({ userId: userObjectId }).sort({ updatedAt: -1 });
         if (gapDoc?.criticalGaps) {
           criticalGaps = gapDoc.criticalGaps.map((g) => g.skillName);
         }
 
-        // Parsed resume experience
-        const resumeDoc = await ParsedResume.findOne({ userId: userObjectId }).sort({ updatedAt: -1 });
+        // Only the active resume: a replaced or deleted resume no longer describes the user
+        const activeResume = await Resume.findOne({ userId: userObjectId, isActive: true });
+        const resumeDoc = activeResume ? await ParsedResume.findOne({ resumeId: activeResume._id }) : null;
         if (resumeDoc?.experience) {
           // Only real entries: no placeholder role or employer is ever inserted
           resumeExperience = resumeDoc.experience
             .filter((w) => w.role?.value && w.company?.value)
             .map((w) => `${w.role?.value} at ${w.company?.value}`);
         }
-      } catch {
-        // Fallback to defaults if MongoDB query encounters issues
+        if (resumeDoc?.projects) {
+          resumeProjects = resumeDoc.projects
+            .map((p) => (p as { name?: { value?: string } }).name?.value)
+            .filter((n): n is string => typeof n === 'string' && n.trim().length > 0 && n.length <= 80);
+        }
+
+        const previous = await InterviewSession.find({ userId: userObjectId })
+          .sort({ createdAt: -1 })
+          .limit(10)
+          .select('questions.questionId questions.question');
+        recentQuestionIds = previous.flatMap((p) => p.questions.map((q) => q.questionId));
+        recentQuestionTexts = previous.flatMap((p) => p.questions.map((q) => q.question));
+        sessionOrdinal = await InterviewSession.countDocuments({ userId: userObjectId });
+      } catch (error) {
+        logger.warn(`Interview context could not be fully loaded: ${error instanceof Error ? error.message : error}`);
       }
     }
 
     if (!targetCareerTitle) {
-      targetCareerTitle = 'Full Stack Software Engineer';
+      // Nothing on record yet: a neutral title, never a role the user did not choose
+      targetCareerTitle = 'General Interview Practice';
     }
 
-    const mode = dto.mode || 'technical';
-    const questionCount = dto.questionCount || 5;
+    const mode: InterviewMode = dto.mode && INTERVIEW_MODES.includes(dto.mode) ? dto.mode : 'technical';
+    const questionCount = Math.min(10, Math.max(1, Math.round(dto.questionCount || 5)));
 
-    // Generate grounded contextual questions
-    const questions = this.generateGroundedQuestions(
-      targetCareerTitle,
+    // Skills named in the job posting, split by whether the profile shows them
+    const profileSkills = new Set(userSkillNames.map((n) => n.toLowerCase()));
+    const postingSkills = job?.description ? extractSkills(job.description) : [];
+    // A role title alone is just the target role; a posting has an employer or a description
+    const hasJob = Boolean(job && (job.company?.trim() || job.description?.trim()));
+
+    const generated = await generateInterviewQuestions({
+      userId,
+      roleTitle: targetCareerTitle,
       mode,
-      questionCount,
-      userSkillNames,
-      criticalGaps,
-      resumeExperience,
-      dto.opportunityContext
-    );
+      count: questionCount,
+      skills: userSkillNames,
+      gaps: criticalGaps,
+      experience: resumeExperience,
+      projects: resumeProjects,
+      job: hasJob
+        ? {
+            title: job?.title,
+            company: job?.company,
+            description: job?.description,
+            matchedSkills: postingSkills.filter((n) => profileSkills.has(n.toLowerCase())),
+            missingSkills: postingSkills.filter((n) => !profileSkills.has(n.toLowerCase())),
+          }
+        : undefined,
+      recentQuestionIds,
+      recentQuestionTexts,
+      sessionOrdinal,
+    });
+    const questions = generated.questions;
+    if (questions.length === 0) {
+      throw new AppError('No interview questions could be prepared. Please try again.', 503, 'QUESTIONS_UNAVAILABLE');
+    }
 
     const sessionData = {
       _id: new mongoose.Types.ObjectId(),
@@ -113,6 +170,8 @@ export class InterviewService {
       questionCount: questions.length,
       currentQuestionIndex: 0,
       questions,
+      questionSource: generated.source,
+      opportunityContext: hasJob ? { title: job?.title, company: job?.company } : undefined,
       strengths: [],
       weaknesses: [],
       preparationRecommendations: [],
@@ -289,81 +348,6 @@ export class InterviewService {
       }
       return results;
     }
-  }
-
-  /**
-   * Helper: Generate grounded contextual questions
-   */
-  private generateGroundedQuestions(
-    roleTitle: string,
-    mode: string,
-    count: number,
-    verifiedSkills: string[],
-    criticalGaps: string[],
-    resumeExperience: string[],
-    opportunityContext?: { company?: string; description?: string }
-  ): IQuestionItem[] {
-    const company = opportunityContext?.company ? `at ${opportunityContext.company}` : '';
-    // Questions only refer to skills, gaps and experience the candidate actually has on record
-    const skillsList = verifiedSkills.slice(0, 3).join(', ');
-    const gapList = criticalGaps.slice(0, 2).join(', ');
-
-    const pool: IQuestionItem[] = [
-      {
-        questionId: 'q_tech_01',
-        question: skillsList
-          ? `How would you design a reliable, scalable service for a ${roleTitle} role ${company} using your experience with ${skillsList}?`
-          : `How would you design a reliable, scalable service for a ${roleTitle} role ${company}? Explain your main design decisions.`,
-        category: 'technical',
-        difficulty: 'hard',
-        expectedConcepts: ['Scalability', 'Fault Tolerance', 'API Rate Limiting', 'Caching'],
-      },
-      {
-        questionId: 'q_tech_02',
-        question: gapList
-          ? `Your profile shows little evidence of ${gapList}, which ${roleTitle} roles commonly expect. How would you get productive in ${gapList} on a real project?`
-          : `Describe how you get productive in a technology you have not used before when a ${roleTitle} project requires it.`,
-        category: 'technical',
-        difficulty: 'medium',
-        expectedConcepts: ['Skill Gap Mitigation', 'Continuous Learning', 'System Reliability'],
-      },
-      {
-        questionId: 'q_beh_01',
-        question: `Describe a challenging situation in your previous work where a critical production bug occurred. Use the STAR method to explain your action and quantified result.`,
-        category: 'behavioral',
-        difficulty: 'medium',
-        expectedConcepts: ['Situation/Task', 'Action Verb Vocabulary', 'Quantified Impact Metrics'],
-      },
-      {
-        questionId: 'q_proj_01',
-        question: `Walk through a key technical architecture decision in one of your recent software projects. What trade-offs did you evaluate?`,
-        category: 'project',
-        difficulty: 'hard',
-        expectedConcepts: ['Architectural Trade-offs', 'Database Selection', 'Security Isolation'],
-      },
-      {
-        questionId: 'q_res_01',
-        question: resumeExperience[0]
-          ? `From your time as ${resumeExperience[0]}, describe a piece of work you are proud of and how you kept it maintainable.`
-          : 'Describe a project you have worked on and how you kept the code maintainable as it grew.',
-        category: 'resume',
-        difficulty: 'medium',
-        expectedConcepts: ['Code Quality', 'Refactoring', 'Test Coverage'],
-      },
-    ];
-
-    // Questions of the requested kind first, then the rest; never the same question twice
-    const prioritised = (categories: string[]) =>
-      [...pool.filter((q) => categories.includes(q.category)), ...pool.filter((q) => !categories.includes(q.category))].slice(0, count);
-
-    if (mode === 'behavioral') {
-      return prioritised(['behavioral', 'resume']);
-    }
-    if (mode === 'project') {
-      return prioritised(['project', 'technical']);
-    }
-
-    return pool.slice(0, count);
   }
 }
 

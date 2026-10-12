@@ -16,6 +16,8 @@ import { runApiIntegrationTests } from './api_integration.test.js';
 import { runLegacyMigrationTests } from './legacy_migration.test.js';
 import { runScoringAccuracyTests } from './scoring_accuracy.test.js';
 import { runInterviewEvaluationTests } from './interview_evaluation.test.js';
+import { runResumeLifecycleTests } from './resume_lifecycle.test.js';
+import { runInterviewQuestionTests } from './interview_questions.test.js';
 
 async function runAll() {
   console.log('🚀 Starting Comprehensive SkillBridge Backend Test Suite...');
@@ -52,6 +54,8 @@ async function runAll() {
     await runLegacyMigrationTests();
     await runScoringAccuracyTests();
     await runInterviewEvaluationTests();
+    await runResumeLifecycleTests();
+    await runInterviewQuestionTests();
     const after = fingerprint();
     const touched = before.filter((entry, i) => entry !== after[i]);
     if (touched.length > 0) {

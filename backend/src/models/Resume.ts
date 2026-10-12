@@ -3,6 +3,14 @@ import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 export type ResumeUploadStatus = 'active' | 'replaced' | 'deleted';
 export type ResumeParsingStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
+export interface IResumeSkillChanges {
+  /** False for a first upload, where there was nothing to compare against. */
+  comparedToPrevious: boolean;
+  added: string[];
+  removed: string[];
+  unchangedCount: number;
+}
+
 export interface IResume extends Document<Types.ObjectId> {
   userId: Types.ObjectId;
   originalFileName: string;
@@ -17,6 +25,8 @@ export interface IResume extends Document<Types.ObjectId> {
   parsingStatus: ResumeParsingStatus;
   parsingError?: string;
   parsingStartedAt?: Date;
+  /** What changed in the recognised skills compared with the user's previous skill profile. */
+  skillChanges?: IResumeSkillChanges;
   uploadedAt: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -40,6 +50,17 @@ const ResumeSchema = new Schema<IResume>(
       default: 'pending'
     },
     parsingError: { type: String },
+    skillChanges: {
+      type: new Schema(
+        {
+          comparedToPrevious: { type: Boolean, default: false },
+          added: { type: [String], default: [] },
+          removed: { type: [String], default: [] },
+          unchangedCount: { type: Number, default: 0 },
+        },
+        { _id: false }
+      ),
+    },
     parsingStartedAt: { type: Date },
     uploadedAt: { type: Date, default: Date.now }
   },

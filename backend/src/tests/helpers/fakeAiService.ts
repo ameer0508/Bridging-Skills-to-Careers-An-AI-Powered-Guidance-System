@@ -56,7 +56,8 @@ function parseResumeText(text: string) {
 
   return {
     personalInfo: {
-      fullName: entity(lines[0] || 'Candidate'),
+      // Skip the "%PDF-" marker the test payloads start with
+      fullName: entity(lines.find(l => l && !l.startsWith('%')) || 'Candidate'),
       email: email ? entity(email) : null,
       phone: phone ? entity(phone) : null,
       linkedin: linkedin ? entity(linkedin) : null,
@@ -107,6 +108,13 @@ export interface FakeAiService {
   url: string;
   /** How /api/v1/interview/evaluate behaves. Defaults to 'unavailable' (no provider). */
   interview: { mode: FakeInterviewMode; rubric: Record<string, unknown> };
+  /**
+   * How /api/v1/interview/questions behaves. Defaults to 'unavailable' (no provider).
+   * 'ok' returns `set`; 'short' returns one question fewer than requested.
+   */
+  questions: { mode: 'unavailable' | 'ok' | 'short'; set: Array<Record<string, unknown>>; payloads: Array<Record<string, any>> };
+  /** How /api/v1/extract behaves: 'ok', 'fail' (500) or 'slow' (answers after `delayMs`). */
+  extract: { mode: 'ok' | 'fail' | 'slow'; delayMs: number };
   /** Paths requested since start, e.g. "POST /api/v1/extract". */
   requests: string[];
   stop: () => Promise<void>;
@@ -129,6 +137,8 @@ export async function ensureFakeAiService(): Promise<FakeAiService> {
 export async function startFakeAiService(serviceKey: string): Promise<FakeAiService> {
   const requests: string[] = [];
   const interview: FakeAiService['interview'] = { mode: 'unavailable', rubric: {} };
+  const extract: FakeAiService['extract'] = { mode: 'ok', delayMs: 400 };
+  const questions: FakeAiService['questions'] = { mode: 'unavailable', set: [], payloads: [] };
 
   const server = http.createServer((req, res) => {
     const chunks: Buffer[] = [];
@@ -151,8 +161,14 @@ export async function startFakeAiService(serviceKey: string): Promise<FakeAiServ
 
       const raw = Buffer.concat(chunks);
       if (path === '/api/v1/extract') {
+        if (extract.mode === 'fail') return send(500, { detail: 'Extraction failed (simulated).' });
         const data = parseResumeText(extractUploadedText(raw));
-        return send(200, { success: true, provider: 'fake_ai_service', data, response: data });
+        const reply = () => send(200, { success: true, provider: 'fake_ai_service', data, response: data });
+        if (extract.mode === 'slow') {
+          setTimeout(reply, extract.delayMs).unref();
+          return;
+        }
+        return reply();
       }
       if (path === '/api/v1/skills/normalize') {
         const { skills = [] } = JSON.parse(raw.toString('utf8') || '{}') as { skills?: string[] };
@@ -177,6 +193,14 @@ export async function startFakeAiService(serviceKey: string): Promise<FakeAiServ
         }
         return send(200, { success: true, provider: 'fake', model: 'fake-rubric', data: interview.rubric });
       }
+      if (path === '/api/v1/interview/questions') {
+        const body = JSON.parse(raw.toString('utf8') || '{}') as Record<string, any>;
+        questions.payloads.push(body);
+        if (questions.mode === 'unavailable') return send(503, { success: false, error: 'AI question generation is unavailable.' });
+        const count = Number(body.count) || 5;
+        const set = questions.set.slice(0, questions.mode === 'short' ? count - 1 : count);
+        return send(200, { success: true, provider: 'fake', model: 'fake-questions', data: { questions: set } });
+      }
       if (path === '/api/v1/chat') {
         return send(200, { success: true, data: 'Deterministic test reply.', provider: 'fake_ai_service' });
       }
@@ -192,6 +216,8 @@ export async function startFakeAiService(serviceKey: string): Promise<FakeAiServ
     url: `http://127.0.0.1:${port}`,
     requests,
     interview,
+    extract,
+    questions,
     stop: () => new Promise<void>(resolve => server.close(() => resolve()))
   };
 }

@@ -21,7 +21,17 @@ export class ResumeRepository {
    * Updates an existing resume document.
    */
   async update(id: string, updateData: Partial<IResume>): Promise<IResume | null> {
-    return Resume.findByIdAndUpdate(id, { $set: updateData }, { new: true });
+    // A field passed as `undefined` is removed (e.g. clearing a previous parsingError)
+    const set: Record<string, unknown> = {};
+    const unset: Record<string, ''> = {};
+    for (const [key, value] of Object.entries(updateData)) {
+      if (value === undefined) unset[key] = '';
+      else set[key] = value;
+    }
+    const update: Record<string, unknown> = {};
+    if (Object.keys(set).length) update.$set = set;
+    if (Object.keys(unset).length) update.$unset = unset;
+    return Resume.findByIdAndUpdate(id, update, { new: true });
   }
 
   /**

@@ -1,6 +1,24 @@
 import { Request, Response, NextFunction } from 'express';
 import interviewService from '../services/InterviewService.js';
 import { AppError } from '../middlewares/errorHandler.js';
+import { z } from 'zod';
+
+const startSessionSchema = z
+  .object({
+    targetCareerId: z.string().max(40).optional(),
+    targetCareerTitle: z.string().trim().max(160).optional(),
+    mode: z.enum(['technical', 'behavioral', 'project', 'resume', 'career', 'mixed']).optional(),
+    questionCount: z.number().int().min(1).max(10).optional(),
+    opportunityContext: z
+      .object({
+        title: z.string().trim().max(200).optional(),
+        company: z.string().trim().max(200).optional(),
+        description: z.string().max(20000).optional(),
+      })
+      .strict()
+      .optional(),
+  })
+  .strict();
 
 export class InterviewController {
   /**
@@ -12,12 +30,21 @@ export class InterviewController {
       const userId = req.user?.userId;
       if (!userId) throw new AppError('Authentication required', 401);
 
-      const session = await interviewService.startSession(userId, req.body);
+      const parsed = startSessionSchema.safeParse(req.body ?? {});
+      if (!parsed.success) {
+        throw new AppError(
+          `Invalid interview request: ${parsed.error.issues.map(i => `${i.path.join('.') || 'body'} ${i.message}`).join('; ')}`,
+          400,
+          'VALIDATION_ERROR'
+        );
+      }
+
+      const session = await interviewService.startSession(userId, parsed.data);
 
       res.status(201).json({
         success: true,
         data: session,
-        message: 'Grounded AI interview session initialized successfully',
+        message: 'Interview session started',
       });
     } catch (err) {
       next(err);
@@ -134,6 +161,12 @@ export class InterviewController {
           targetCareerTitle: session.targetCareerTitle,
           mode: session.mode,
           status: session.status,
+          // Who wrote the questions and who scored the answers, so the client can label both honestly
+          questionSource: session.questionSource ?? null,
+          evaluationSource: session.evaluationSource ?? null,
+          opportunityContext: session.opportunityContext ?? null,
+          answeredCount: session.answeredCount ?? 0,
+          questionCount: session.questions.length,
           startedAt: session.startedAt,
           completedAt: session.completedAt,
           overallScore: session.overallScore || 0,

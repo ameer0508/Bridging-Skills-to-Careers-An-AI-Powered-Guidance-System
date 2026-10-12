@@ -8,6 +8,8 @@ export const EventType = {
   RESUME_UPLOADED: 'resume_uploaded',
   RESUME_REPLACED: 'resume_replaced',
   RESUME_PARSED: 'resume_parsed',
+  RESUME_REPROCESSED: 'resume_reprocessed',
+  RESUME_DELETED: 'resume_deleted',
   INTERVIEW_COMPLETED: 'interview_completed',
   OPPORTUNITY_SAVED: 'opportunity_saved',
   APPLICATION_STATUS_CHANGED: 'application_status_changed',

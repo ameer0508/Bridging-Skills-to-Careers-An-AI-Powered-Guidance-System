@@ -249,7 +249,11 @@ export class SnapshotService {
     const activeResume = await Resume.findOne({ userId: userObjId, isActive: true });
     const resumeDoc = activeResume
       ? await ParsedResume.findOne({ resumeId: activeResume._id })
-      : await ParsedResume.findOne({ userId: userObjId }).sort({ updatedAt: -1 });
+      : // Legacy data may hold parsed content without an upload record. Once any upload record
+        // exists, "no active resume" means the user replaced or deleted it, so nothing is shown.
+        (await Resume.exists({ userId: userObjId }))
+        ? null
+        : await ParsedResume.findOne({ userId: userObjId }).sort({ updatedAt: -1 });
 
     // 10. Canonical Career Health Calculation (Weighted Formula)
     // Formula Breakdown:

@@ -9,6 +9,7 @@ import { ExtractedSkillMatrix } from './ExtractedSkillMatrix';
 import { AIResumeInsightsPanel } from './AIResumeInsightsPanel';
 import { SectionHealthCards } from './SectionHealthCards';
 import { ExtractionQualityMetrics } from './ExtractionQualityMetrics';
+import { ResumeStatusPanel, type ResumeSkillChanges } from './ResumeStatusPanel';
 
 // Design System 2.0 Components
 import {
@@ -31,12 +32,24 @@ interface ResumeMetadata {
   parsingError?: string;
   uploadedAt: string;
   atsScore?: number;
-  sectionHealth?: any[];
-  personalInfo?: any;
-  experience?: any[];
-  projects?: any[];
-  certifications?: any[];
+  isStuck?: boolean;
+  skillChanges?: ResumeSkillChanges | null;
+  sectionHealth?: React.ComponentProps<typeof SectionHealthCards>['sections'];
+  personalInfo?: Partial<Record<'fullName' | 'email' | 'phone' | 'linkedin' | 'github', ExtractedField | null>>;
+  experience?: unknown[];
+  projects?: unknown[];
+  certifications?: unknown[];
 }
+
+/** The parser returns each personal detail as `{ value, confidence }`. */
+interface ExtractedField {
+  value?: string | null;
+}
+
+const fieldValue = (field?: ExtractedField | null): string | undefined => {
+  const value = field?.value;
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+};
 
 export const ResumePage: React.FC = () => {
   const queryClient = useQueryClient();
@@ -44,6 +57,7 @@ export const ResumePage: React.FC = () => {
 
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   // Complete downstream query invalidation handler
   const invalidateAllDownstreamQueries = useCallback(() => {
@@ -77,9 +91,9 @@ export const ResumePage: React.FC = () => {
     },
   });
 
-  // Automatically trigger downstream refetch when parsing completes
+  // Refetch everything derived from the resume once a run ends, whether it succeeded or not
   React.useEffect(() => {
-    if (resume?.parsingStatus === 'completed') {
+    if (resume?.parsingStatus === 'completed' || resume?.parsingStatus === 'failed') {
       invalidateAllDownstreamQueries();
     }
   }, [resume?.parsingStatus, invalidateAllDownstreamQueries]);
@@ -110,27 +124,28 @@ export const ResumePage: React.FC = () => {
     const recs: Array<{ title: string; impact: string; suggestion: string }> = [];
 
     if (resume.atsScore && resume.atsScore >= 70) {
-      strengths.push(`Strong ATS Compatibility Index (${resume.atsScore}/100)`);
+      strengths.push(`Resume completeness ${resume.atsScore}/100 (sections and details found)`);
     }
     if (extractedSkills.length > 0) {
-      strengths.push(`${extractedSkills.length} Verified Skill Entities Extracted & Vectorized`);
+      strengths.push(`${extractedSkills.length} skills recognised`);
     }
     if (resume.experience && resume.experience.length > 0) {
-      strengths.push(`${resume.experience.length} Work Experience Entry/Entries Parsed`);
+      strengths.push(`${resume.experience.length} work experience ${resume.experience.length === 1 ? 'entry' : 'entries'} found`);
     }
     if (resume.projects && resume.projects.length > 0) {
-      strengths.push(`${resume.projects.length} Project Capstones Mapped`);
+      strengths.push(`${resume.projects.length} project${resume.projects.length === 1 ? '' : 's'} found`);
     }
 
-    if (!resume.personalInfo?.phone) weak.push('Phone number is missing from parsed contact section.');
-    if (!resume.personalInfo?.linkedin && !resume.personalInfo?.github) weak.push('No social profiles (LinkedIn/GitHub) detected in header.');
+    const info = resume.personalInfo ?? {};
+    if (!fieldValue(info.phone)) weak.push('No phone number was found in the contact details.');
+    if (!fieldValue(info.linkedin) && !fieldValue(info.github)) weak.push('No LinkedIn or GitHub link was found.');
     if (!resume.certifications || resume.certifications.length === 0) missing.push('Certifications Section');
 
-    if (!resume.personalInfo?.linkedin) {
-      recs.push({ title: 'Add LinkedIn URL', impact: '+5 ATS Points', suggestion: 'Include a direct LinkedIn profile link in header.' });
+    if (!fieldValue(info.linkedin)) {
+      recs.push({ title: 'Add a LinkedIn URL', impact: 'Completeness', suggestion: 'Include a direct LinkedIn profile link in the header.' });
     }
     if (extractedSkills.length < 10) {
-      recs.push({ title: 'Expand Technical Skill Matrix', impact: '+10 ATS Points', suggestion: 'Add domain-relevant framework and library keywords.' });
+      recs.push({ title: 'List more of your skills', impact: 'Completeness', suggestion: 'Name the tools, frameworks and libraries you have actually used.' });
     }
 
     return { topStrengths: strengths, weakSections: weak, missingSections: missing, recommendedImprovements: recs };
@@ -168,6 +183,7 @@ export const ResumePage: React.FC = () => {
   const replaceMutation = useMutation({
     mutationFn: async (file: File) => {
       setValidationError(null);
+      setActionError(null);
       const formData = new FormData();
       formData.append('resume', file);
       setUploadProgress(0);
@@ -195,10 +211,28 @@ export const ResumePage: React.FC = () => {
   // Delete Mutation
   const deleteMutation = useMutation({
     mutationFn: async () => {
+      setActionError(null);
       await apiClient.delete('/resumes');
     },
     onSuccess: () => {
       invalidateAllDownstreamQueries();
+    },
+    onError: (err: { message?: string }) => {
+      setActionError(err.message || 'The resume could not be deleted. Please try again.');
+    },
+  });
+
+  // Reprocess Mutation: run extraction again on the stored file
+  const reprocessMutation = useMutation({
+    mutationFn: async () => {
+      setActionError(null);
+      await apiClient.post('/resumes/reprocess');
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['activeResume'] });
+    },
+    onError: (err: { message?: string }) => {
+      setActionError(err.message || 'Reprocessing could not be started. Please try again.');
     },
   });
 
@@ -215,8 +249,10 @@ export const ResumePage: React.FC = () => {
       document.body.appendChild(link);
       link.click();
       link.remove();
+      window.URL.revokeObjectURL(url);
+      setActionError(null);
     } catch {
-      alert('Failed to download resume file.');
+      setActionError('The resume file could not be downloaded. Please try again.');
     }
   };
 
@@ -225,11 +261,13 @@ export const ResumePage: React.FC = () => {
     else uploadMutation.mutate(file);
   };
 
+  const isInFlight = resume?.parsingStatus === 'pending' || resume?.parsingStatus === 'processing';
+
   if (isResumeLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
         <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
-          <AIThinkingAnimation statusText="Connecting Transformer Resume Intelligence Engine..." />
+          <AIThinkingAnimation statusText="Loading your resume..." />
         </div>
       </div>
     );
@@ -272,10 +310,27 @@ export const ResumePage: React.FC = () => {
       <ResumeStudioHeader
         hasActiveResume={!!resume}
         originalFileName={resume?.originalFileName}
+        candidateName={fieldValue(resume?.personalInfo?.fullName)}
+        isProcessing={isInFlight && !resume?.isStuck}
+        isReprocessing={reprocessMutation.isPending}
+        isDeleting={deleteMutation.isPending}
         onDownload={handleDownload}
         onDelete={() => deleteMutation.mutate()}
+        onReprocess={() => reprocessMutation.mutate()}
         onRefresh={() => refetch()}
       />
+
+      {(resume || actionError) && (
+        <ResumeStatusPanel
+          parsingStatus={resume?.parsingStatus}
+          parsingError={resume?.parsingError}
+          isStuck={resume?.isStuck}
+          skillChanges={resume?.skillChanges}
+          actionError={actionError}
+          isReprocessing={reprocessMutation.isPending}
+          onReprocess={() => reprocessMutation.mutate()}
+        />
+      )}
 
       {/* SECTION 2 — 2-COLUMN STUDIO WORKSPACE */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -306,7 +361,7 @@ export const ResumePage: React.FC = () => {
 
           <PremiumSection
             title="Skill Extraction Matrix"
-            subtitle="Verified vector skills parsed from resume text"
+            subtitle="Skills recognised in your resume text"
             badge="Taxonomy"
           >
             <ExtractedSkillMatrix
@@ -339,7 +394,6 @@ export const ResumePage: React.FC = () => {
       {/* SECTION 5 — LIVE AI STATUS FOOTER */}
       <AIStatusBar
         status={resume?.parsingStatus === 'processing' ? 'thinking' : 'active'}
-        confidence={resume?.atsScore || 85}
         lastUpdated="Just now"
       />
     </div>

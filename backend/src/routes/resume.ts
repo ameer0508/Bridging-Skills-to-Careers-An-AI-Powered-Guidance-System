@@ -15,6 +15,9 @@ router.post('/upload', validateResumeUpload, controller.upload);
 // PUT /api/v1/resumes/replace - Secure resume replacement
 router.put('/replace', validateResumeUpload, controller.replace);
 
+// POST /api/v1/resumes/reprocess - Run extraction again on the stored active resume
+router.post('/reprocess', controller.reprocess);
+
 // GET /api/v1/resumes/me - Fetch currently active resume metadata
 router.get('/me', controller.getMe);
 

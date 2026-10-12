@@ -68,6 +68,9 @@ const connectDatabase = async (): Promise<void> => {
     await CareerService.seedInitialTaxonomy();
     const RecommendationService = (await import('./services/RecommendationService.js')).default;
     await RecommendationService.seedInitialResources();
+    // Resume jobs run in memory; anything left in flight by the previous process is made recoverable.
+    const { default: ResumeService } = await import('./services/ResumeService.js');
+    await new ResumeService().recoverInterruptedJobs();
   } catch (error) {
     logger.error(
       'Failed to establish MongoDB connection on startup. API will remain active but degraded:',

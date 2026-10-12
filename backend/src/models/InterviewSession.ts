@@ -22,12 +22,18 @@ export interface IQuestionEvaluation {
   evaluatedAt: Date;
 }
 
+/** Who wrote a question: an AI provider, or the built-in question bank used when AI is unavailable. */
+export type InterviewQuestionSource = 'ai' | 'question_bank';
+
 export interface IQuestionItem {
   questionId: string;
   question: string;
   category: string;
   difficulty: string;
   expectedConcepts: string[];
+  source?: InterviewQuestionSource;
+  /** The fact on record the question is based on, e.g. "Skill on your resume: React". */
+  groundedIn?: string;
   candidateResponse?: string;
   evaluation?: IQuestionEvaluation;
 }
@@ -43,6 +49,10 @@ export interface IInterviewSession extends Document<Types.ObjectId> {
   questionCount: number;
   currentQuestionIndex: number;
   questions: IQuestionItem[];
+  /** Where this session's questions came from. Absent on sessions created before this field existed. */
+  questionSource?: InterviewQuestionSource;
+  /** The job posting this session prepares for, when it was started from one. */
+  opportunityContext?: { title?: string; company?: string };
   strengths: string[];
   weaknesses: string[];
   overallScore?: number;
@@ -82,6 +92,8 @@ const QuestionItemSchema = new Schema<IQuestionItem>(
     category: { type: String, default: 'technical' },
     difficulty: { type: String, default: 'medium' },
     expectedConcepts: { type: [String], default: [] },
+    source: { type: String, enum: ['ai', 'question_bank'] },
+    groundedIn: { type: String },
     candidateResponse: { type: String },
     evaluation: { type: QuestionEvaluationSchema }
   },
@@ -98,6 +110,10 @@ const InterviewSessionSchema = new Schema<IInterviewSession>(
     questionCount: { type: Number, default: 5 },
     currentQuestionIndex: { type: Number, default: 0 },
     questions: { type: [QuestionItemSchema], default: [] },
+    questionSource: { type: String, enum: ['ai', 'question_bank'] },
+    opportunityContext: {
+      type: new Schema({ title: { type: String }, company: { type: String } }, { _id: false }),
+    },
     strengths: { type: [String], default: [] },
     weaknesses: { type: [String], default: [] },
     overallScore: { type: Number },
