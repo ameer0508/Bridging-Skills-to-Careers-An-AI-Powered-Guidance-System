@@ -146,6 +146,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: <Wallet className="w-4 h-4" />,
         },
         {
+          to: '/career-domains',
+          label: 'More Career Domains',
+          icon: <Compass className="w-4 h-4" />,
+        },
+        {
           to: '/exams',
           label: 'Exam Practice',
           icon: <GraduationCap className="w-4 h-4" />,
