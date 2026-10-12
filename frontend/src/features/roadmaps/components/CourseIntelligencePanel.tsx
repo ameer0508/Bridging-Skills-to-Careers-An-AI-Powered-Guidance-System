@@ -30,7 +30,6 @@ export interface CourseIntelligencePanelProps {
 
 export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = ({
   skillTarget = 'Vector Indexing & Cloud Infrastructure',
-  onNavigateToRoadmap,
 }) => {
   const { addToast } = useToast();
 
@@ -600,7 +599,7 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
                 />
                 <Bar dataKey="certValue" radius={[6, 6, 0, 0]} name="Certification Value Rating">
-                  {providerStats.map((entry, index) => (
+                  {providerStats.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={index === 0 ? '#6366f1' : '#06b6d4'} />
                   ))}
                 </Bar>

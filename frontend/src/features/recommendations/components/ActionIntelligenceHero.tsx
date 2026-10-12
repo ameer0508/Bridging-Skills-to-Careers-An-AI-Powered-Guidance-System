@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, RefreshCw, Zap, Target, ArrowRight, ShieldCheck, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Sparkles, RefreshCw, Zap, Target, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export interface ActionIntelligenceHeroProps {
@@ -24,7 +24,6 @@ export interface ActionIntelligenceHeroProps {
 }
 
 export const ActionIntelligenceHero: React.FC<ActionIntelligenceHeroProps> = ({
-  userName = 'Commander',
   targetRole = 'Senior AI Engineer',
   careerDomain = 'Artificial Intelligence & Systems',
   readinessScore = 74,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Award, ArrowRight, Zap, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface RecommendationSpotlightProps {
@@ -18,7 +18,6 @@ export interface RecommendationSpotlightProps {
 
 export const RecommendationSpotlight: React.FC<RecommendationSpotlightProps> = ({
   title = 'Build an Enterprise AI Engineer Microservices Project',
-  type = 'project',
   reason = 'Hands-on portfolio demonstration directly aligned with Senior AI Engineer role postings.',
   whyRecommended = 'Recommended to bridge key skill delta in System Design, Microservices, and FastAPI/Node.js.',
   estimatedReadinessBoost = 18.0,

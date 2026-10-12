@@ -1,4 +1,4 @@
-import { ReadinessItem, RecommendationItem, RoadmapData } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { ReadinessItem, RecommendationItem, RoadmapData } from '../../../types/telemetry';
 
 export interface HealthDimension {
   dimension: string;

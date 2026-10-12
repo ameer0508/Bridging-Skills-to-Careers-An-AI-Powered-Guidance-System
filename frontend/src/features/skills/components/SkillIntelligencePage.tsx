@@ -4,17 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import {
   Search,
   Brain,
-  Target,
   Compass,
   FileText,
   Filter,
   Layers,
-  Sparkles,
-  ArrowRight,
-  ShieldCheck,
 } from 'lucide-react';
 import apiClient from '../../../lib/axios';
-import { useAuthStore } from '../../../store/authStore';
 
 // Components
 import { LivingCapabilityHUD } from './LivingCapabilityHUD';
@@ -38,7 +33,6 @@ import { AIThinkingAnimation } from '../../../components/experience';
 
 export const SkillIntelligencePage: React.FC = () => {
   const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -170,7 +164,7 @@ export const SkillIntelligencePage: React.FC = () => {
     setIsInspectorOpen(true);
   };
 
-  const handleBridgeGap = (gapSkill: string) => {
+  const handleBridgeGap = () => {
     navigate('/roadmap');
   };
 

@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, FileText, CheckCircle2, AlertCircle, Loader2, Compass, ShieldCheck, ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Upload, FileText, AlertCircle, Loader2, Compass, ShieldCheck } from 'lucide-react';
 
 export interface CareerActivationConsoleProps {
   onUpload: (file: File) => void;

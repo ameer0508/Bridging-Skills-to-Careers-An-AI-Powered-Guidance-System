@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Portal } from '../../primitives/Portal';
+import { assignRef, type TriggerElement } from '../triggerProps';
 
 export interface TooltipProps {
   content: React.ReactNode;
   position?: 'top' | 'bottom' | 'left' | 'right';
   delay?: number;
   className?: string;
-  children: React.ReactElement;
+  children: TriggerElement;
 }
 
 export const Tooltip: React.FC<TooltipProps> = ({
@@ -63,11 +64,9 @@ export const Tooltip: React.FC<TooltipProps> = ({
   return (
     <>
       {React.cloneElement(children, {
-        ref: (node: HTMLElement) => {
+        ref: (node: HTMLElement | null) => {
           targetRef.current = node;
-          const childRef = (children as React.ReactElement & { ref?: React.Ref<unknown> }).ref;
-          if (typeof childRef === 'function') childRef(node);
-          else if (childRef) childRef.current = node;
+          assignRef(children.props.ref, node);
         },
         onMouseEnter: (e: React.MouseEvent) => {
           children.props.onMouseEnter?.(e);

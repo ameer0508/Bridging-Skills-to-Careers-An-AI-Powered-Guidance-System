@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   Video,
-  Sparkles,
   Building,
   Target,
   History,

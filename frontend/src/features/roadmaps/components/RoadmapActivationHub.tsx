@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import {
   FileText,
   Target,
@@ -7,7 +6,6 @@ import {
   GitBranch,
   Layers,
   ArrowRight,
-  Sparkles,
   UploadCloud,
   Compass,
 } from 'lucide-react';
@@ -23,7 +21,6 @@ export interface RoadmapActivationHubProps {
 export const RoadmapActivationHub: React.FC<RoadmapActivationHubProps> = ({
   hasTargetRole = false,
   targetRoleTitle,
-  onSelectCareer,
   className = '',
 }) => {
   const navigate = useNavigate();

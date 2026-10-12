@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Target, ArrowRight, Sparkles, Check, ChevronRight } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
 import { MagneticButton } from './MagneticButton';
 
 export interface SpatialCareerTrajectoryProps {
@@ -17,7 +17,6 @@ export interface SpatialCareerTrajectoryProps {
 }
 
 export const SpatialCareerTrajectory: React.FC<SpatialCareerTrajectoryProps> = ({
-  hasTargetRole,
   targetRole,
   hasResume,
   totalSkills,
@@ -39,7 +38,7 @@ export const SpatialCareerTrajectory: React.FC<SpatialCareerTrajectoryProps> = (
   const isStage6Complete = readinessScore !== null && readinessScore >= 85 && isStage5Complete;
 
   // Determine current active focal stage
-  let activeIndex = 0;
+  let activeIndex: number;
   if (!isStage1Complete) activeIndex = 0;
   else if (!isStage2Complete) activeIndex = 1;
   else if (!isStage3Complete) activeIndex = 2;

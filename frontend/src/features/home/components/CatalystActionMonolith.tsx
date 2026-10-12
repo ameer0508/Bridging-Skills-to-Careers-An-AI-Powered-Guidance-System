@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import { NextBestActionInfo } from './PriorityActionHero';
 
 export interface CatalystActionMonolithProps {

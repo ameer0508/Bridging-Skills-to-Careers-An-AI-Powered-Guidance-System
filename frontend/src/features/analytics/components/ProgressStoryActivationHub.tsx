@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   Sparkles,
@@ -7,10 +6,7 @@ import {
   Cpu,
   Target,
   Layers,
-  Compass,
   ArrowRight,
-  ShieldCheck,
-  Activity,
   CheckCircle2,
 } from 'lucide-react';
 
@@ -102,7 +98,7 @@ export const ProgressStoryActivationHub: React.FC<ProgressStoryActivationHubProp
 
       {/* 4 Pipeline Stages */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
-        {stages.map((stg, idx) => {
+        {stages.map((stg) => {
           const IconComp = stg.icon;
           return (
             <div

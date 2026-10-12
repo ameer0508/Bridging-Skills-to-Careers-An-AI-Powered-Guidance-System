@@ -7,10 +7,6 @@ import {
   Bookmark,
   BookmarkCheck,
   CheckCircle2,
-  Globe,
-  Sparkles,
-  Award,
-  Layers,
   Search,
 } from 'lucide-react';
 

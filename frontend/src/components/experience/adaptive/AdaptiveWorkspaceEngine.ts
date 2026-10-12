@@ -1,7 +1,7 @@
 import { WorkspaceInsightsHub, WorkspaceInsightsData } from '../momentum/WorkspaceInsightsHub';
 import { ContextPrioritizationEngine, ContextPrioritizationResult } from './ContextPrioritizationEngine';
 import { AdaptiveLayoutEngine, LayoutConfig } from './AdaptiveLayoutEngine';
-import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../types/telemetry';
 
 export interface ComprehensiveAdaptiveWorkspaceState {
   insights: WorkspaceInsightsData;

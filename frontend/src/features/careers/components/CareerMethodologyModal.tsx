@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Calculator, ShieldCheck, Compass, FileText, CheckCircle2 } from 'lucide-react';
+import { X, Calculator, ShieldCheck, Compass } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export interface CareerMethodologyModalProps {

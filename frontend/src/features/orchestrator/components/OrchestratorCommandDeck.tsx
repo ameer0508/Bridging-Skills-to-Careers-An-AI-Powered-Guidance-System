@@ -6,8 +6,6 @@ import {
   Search,
   Sparkles,
   Zap,
-  Layers,
-  Award,
   CheckCircle2
 } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';

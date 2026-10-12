@@ -1,10 +1,6 @@
 import React from 'react';
 import {
   X,
-  FileText,
-  Cpu,
-  Code2,
-  Award,
   Clock,
   ArrowRight,
   ShieldCheck,

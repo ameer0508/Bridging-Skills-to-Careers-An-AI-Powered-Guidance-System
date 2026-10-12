@@ -1,5 +1,5 @@
 import React from 'react';
-import { HelpCircle, CheckCircle2, ShieldCheck, Zap, ArrowUpRight } from 'lucide-react';
+import { HelpCircle } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface PhaseInsight {

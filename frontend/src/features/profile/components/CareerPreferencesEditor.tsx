@@ -1,13 +1,7 @@
 import React, { useState } from 'react';
 import {
   Compass,
-  X,
-  Check,
-  Tag,
-  Briefcase,
-  Layers,
-  Sparkles
-} from 'lucide-react';
+  X} from 'lucide-react';
 import {
   CAREER_DOMAINS,
   SECONDARY_INTEREST_TAGS
@@ -60,7 +54,7 @@ export const CareerPreferencesEditor: React.FC<CareerPreferencesEditorProps> = (
     setSelectedDomainId(domainId);
     const domain = CAREER_DOMAINS.find((d) => d.id === domainId);
     if (domain) {
-      setTargetRole(domain.roles[0] || domain.name);
+      setTargetRole(domain.name);
       setSelectedTags([]);
     }
   };
@@ -130,13 +124,12 @@ export const CareerPreferencesEditor: React.FC<CareerPreferencesEditorProps> = (
                         : 'bg-slate-950/60 border-white/5 text-slate-400 hover:border-white/20'
                     }`}
                   >
-                    <span className="text-base mt-0.5">{domain.icon}</span>
                     <div className="space-y-0.5 min-w-0">
                       <strong className="text-xs font-bold block truncate text-white">
                         {domain.name}
                       </strong>
                       <span className="text-[10px] text-slate-400 block line-clamp-1">
-                        {domain.description}
+                        {domain.desc}
                       </span>
                     </div>
                   </button>
@@ -158,21 +151,6 @@ export const CareerPreferencesEditor: React.FC<CareerPreferencesEditorProps> = (
               required
               className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-xs"
             />
-            {currentDomain.roles.length > 0 && (
-              <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                <span className="text-[10px] text-slate-500">Suggestions:</span>
-                {currentDomain.roles.map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setTargetRole(r)}
-                    className="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] transition cursor-pointer"
-                  >
-                    {r}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Step 3: Seniority / Experience Tier */}

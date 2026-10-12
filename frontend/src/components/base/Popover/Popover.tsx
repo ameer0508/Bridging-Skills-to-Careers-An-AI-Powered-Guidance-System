@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Portal } from '../../primitives/Portal';
+import { assignRef, type TriggerElement } from '../triggerProps';
 
 export interface PopoverProps {
   content: React.ReactNode;
   position?: 'bottom-start' | 'bottom-end' | 'top-start' | 'top-end';
   className?: string;
-  children: React.ReactElement;
+  children: TriggerElement;
 }
 
 export const Popover: React.FC<PopoverProps> = ({
@@ -67,11 +68,9 @@ export const Popover: React.FC<PopoverProps> = ({
   return (
     <>
       {React.cloneElement(children, {
-        ref: (node: HTMLElement) => {
+        ref: (node: HTMLElement | null) => {
           triggerRef.current = node;
-          const childRef = (children as React.ReactElement & { ref?: React.Ref<unknown> }).ref;
-          if (typeof childRef === 'function') childRef(node);
-          else if (childRef) childRef.current = node;
+          assignRef(children.props.ref, node);
         },
         onClick: (e: React.MouseEvent) => {
           children.props.onClick?.(e);

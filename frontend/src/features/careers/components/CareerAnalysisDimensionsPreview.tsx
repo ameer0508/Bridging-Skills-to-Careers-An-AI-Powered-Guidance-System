@@ -1,6 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Layers, ShieldCheck, Target, TrendingUp, BarChart3, Award, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Target, TrendingUp, BarChart3 } from 'lucide-react';
 
 export const CareerAnalysisDimensionsPreview: React.FC = () => {
   return (

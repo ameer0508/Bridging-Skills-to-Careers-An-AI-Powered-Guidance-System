@@ -66,13 +66,6 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
     { level: 'Principal', avgSalary: 275000, maxSalary: 340000 },
   ];
 
-  const industryBenchmarks = [
-    { industry: 'Artificial Intelligence', avgSalary: 205000, growth: '+28%' },
-    { industry: 'Cloud Infrastructure', avgSalary: 185000, growth: '+22%' },
-    { industry: 'Cybersecurity', avgSalary: 178000, growth: '+24%' },
-    { industry: 'FinTech Systems', avgSalary: 192000, growth: '+18%' },
-    { industry: 'HealthTech AI', avgSalary: 175000, growth: '+20%' },
-  ];
 
   const certBoosts = [
     { name: 'AWS Solutions Architect', boost: 15000, color: 'text-amber-400' },

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GitBranch, Layers, ArrowRight, ShieldCheck, Zap } from 'lucide-react';
+import { GitBranch, ArrowRight } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface SkillGraphNode {

@@ -40,7 +40,6 @@ import {
   PremiumSection,
   GlassPanel,
   WorkspaceToolbar,
-  PremiumEmptyState,
   PremiumErrorState,
 } from '../../components/experience/workspace';
 import { AIThinkingAnimation } from '../../components/experience';
@@ -52,8 +51,8 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
   // Filter & Sort State
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [sortBy, setSortBy] = useState<string>('matchScore-desc');
+   
+  const [sortBy] = useState<string>('matchScore-desc');
   const [comparedIds, setComparedIds] = useState<string[]>([]);
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
 
@@ -232,12 +231,10 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
     return (
       <div className="max-w-7xl mx-auto space-y-8 pb-16 px-4">
         <CareerAlignmentLabView
-          onUploadResume={async (file: File) => {
-            await uploadMutation.mutateAsync(file);
-          }}
-          uploadStatus={uploadStatus}
-          errorMessage={errorMessage}
-          onExploreSystem={() => navigate('/ai')}
+          onUpload={(file: File) => uploadMutation.mutate(file)}
+          isUploading={uploadStatus === 'uploading'}
+          parsingStatus={uploadStatus === 'processing' ? 'processing' : uploadStatus === 'completed' ? 'completed' : null}
+          validationError={uploadStatus === 'error' ? errorMessage : null}
         />
       </div>
     );

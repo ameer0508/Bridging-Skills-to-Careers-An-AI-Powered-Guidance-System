@@ -3,8 +3,6 @@ import {
   History,
   X,
   ChevronRight,
-  Target,
-  Award,
   Calendar,
   Layers,
   ArrowLeft

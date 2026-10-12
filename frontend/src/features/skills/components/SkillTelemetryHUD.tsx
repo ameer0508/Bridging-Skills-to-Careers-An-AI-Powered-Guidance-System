@@ -1,5 +1,5 @@
 import React from 'react';
-import { Cpu, ShieldCheck, Award, Sparkles } from 'lucide-react';
+import { Cpu } from 'lucide-react';
 
 interface SkillTelemetryHUDProps {
   totalSkills: number;

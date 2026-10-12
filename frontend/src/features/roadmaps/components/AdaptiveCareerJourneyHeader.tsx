@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import {
   Compass,
   Target,
-  Sparkles,
   ArrowRight,
   RefreshCw,
   CheckCircle2,
@@ -12,7 +11,6 @@ import {
   ChevronRight,
   Zap,
 } from 'lucide-react';
-import { GlassCard } from '../../../components/experience/cards/GlassCard';
 import { useReducedMotion } from '../../../components/experience/hooks/useReducedMotion';
 
 export interface CareerOption {

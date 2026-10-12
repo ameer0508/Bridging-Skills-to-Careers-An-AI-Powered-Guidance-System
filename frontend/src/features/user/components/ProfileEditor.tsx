@@ -102,7 +102,7 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
             {(fullName !== initialFullName || avatarUrl !== initialAvatarUrl) && (
               <Button
                 type="button"
-                variant="subtle"
+                variant="ghost"
                 size="md"
                 onClick={() => {
                   setFullName(initialFullName);

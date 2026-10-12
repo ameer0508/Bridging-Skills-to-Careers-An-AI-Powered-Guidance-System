@@ -3,8 +3,6 @@ import {
   BookOpen,
   Edit3,
   Check,
-  X,
-  Sparkles,
   FileText,
   Quote
 } from 'lucide-react';

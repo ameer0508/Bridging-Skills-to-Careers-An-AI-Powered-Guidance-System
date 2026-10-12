@@ -2,7 +2,7 @@ import { StrategyGenerator, StrategySummary } from './StrategyGenerator';
 import { CareerPathComparisonEngine, PathComparisonItem } from './CareerPathComparisonEngine';
 import { TradeoffAnalyzerEngine, TradeoffAnalysisResult } from './TradeoffAnalyzerEngine';
 import { ScenarioSimulatorEngine, ScenarioResult } from './ScenarioSimulatorEngine';
-import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../types/telemetry';
 import { WorkspaceInsightsHub, WorkspaceInsightsData } from '../momentum/WorkspaceInsightsHub';
 
 export interface ComprehensiveArchitectStrategy {
@@ -83,11 +83,12 @@ export const CareerArchitectEngine = {
     } catch (err) {
       console.error('CareerArchitectEngine: Error simulating scenario', err);
       return {
-        simulatedScore: currentScore,
-        scoreDelta: 0,
-        unlockedOpportunitiesCount: 0,
-        projectedTimeline: 'Adaptive',
-        strategicInsight: 'Scenario simulation temporarily initializing.',
+        scenarioTitle: '',
+        projectedMatchScore: currentScore,
+        readinessDelta: 0,
+        unlockedOpportunities: [],
+        rearrangedPhasesCount: 0,
+        explanation: 'This scenario could not be calculated.',
       };
     }
   },

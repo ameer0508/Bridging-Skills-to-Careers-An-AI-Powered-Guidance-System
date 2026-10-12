@@ -3,12 +3,7 @@ import { motion } from 'framer-motion';
 import {
   GitBranch,
   CheckCircle2,
-  Lock,
   ArrowRight,
-  Sparkles,
-  Info,
-  Layers,
-  Target,
   Zap,
 } from 'lucide-react';
 import { useReducedMotion } from '../../../components/experience/hooks/useReducedMotion';
@@ -106,7 +101,7 @@ export const DependencyTreeEngine: React.FC<DependencyTreeEngineProps> = ({
         {/* Left Column: Sequenced Stage Columns */}
         <div className="lg:col-span-8 p-6 rounded-3xl bg-slate-950/80 border border-white/10 backdrop-blur-xl shadow-xl overflow-x-auto space-y-6">
           <div className="flex items-start gap-6 min-w-[580px]">
-            {phaseOrders.map((order, phaseIdx) => {
+            {phaseOrders.map((order) => {
               const phaseItems = phasesMap.get(order) || [];
 
               return (
@@ -125,7 +120,6 @@ export const DependencyTreeEngine: React.FC<DependencyTreeEngineProps> = ({
                   <div className="space-y-2.5">
                     {phaseItems.map((item) => {
                       const isSelected = item.id === selectedItemId;
-                      const isHovered = item.id === hoveredItemId;
                       const isCompleted = item.status === 'completed';
                       const isInProgress = item.status === 'in_progress';
 

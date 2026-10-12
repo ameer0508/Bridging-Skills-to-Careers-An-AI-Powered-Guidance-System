@@ -1,16 +1,10 @@
 import React, { useState } from 'react';
 import {
-  User as UserIcon,
   MapPin,
   Briefcase,
   Sparkles,
   Edit3,
-  Check,
-  X,
-  ShieldCheck,
-  Compass,
-  ArrowUpRight
-} from 'lucide-react';
+  X} from 'lucide-react';
 
 export interface CareerIdentityHeroProps {
   fullName: string;
@@ -33,7 +27,6 @@ export const CareerIdentityHero: React.FC<CareerIdentityHeroProps> = ({
   primaryCareerDomain,
   location,
   experienceLevel = 'entry',
-  bio,
   onUpdateIdentity,
   isUpdating = false,
 }) => {

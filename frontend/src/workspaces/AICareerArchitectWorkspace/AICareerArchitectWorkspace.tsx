@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
 import apiClient from '../../lib/axios';
 import { useAuthStore } from '../../store/authStore';
 
@@ -24,7 +23,6 @@ import { ChatMessage } from '../../features/ai/components/MessageBubble';
 
 export const AICareerArchitectWorkspace: React.FC = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
 
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -68,7 +66,7 @@ export const AICareerArchitectWorkspace: React.FC = () => {
   });
 
   // 5. Fetch all conversations list
-  const { data: conversationsData, isLoading: loadingConvs } = useQuery({
+  const { data: conversationsData } = useQuery({
     queryKey: ['conversations'],
     queryFn: async () => {
       const response = await apiClient.get('/ai');
@@ -223,7 +221,7 @@ export const AICareerArchitectWorkspace: React.FC = () => {
     const msg = inputMessage.trim();
     if (!activeConversationId) {
       createConversationMutation.mutate(undefined, {
-        onSuccess: (newConv) => {
+        onSuccess: () => {
           sendMessageMutation.mutate(msg);
           setInputMessage('');
         },

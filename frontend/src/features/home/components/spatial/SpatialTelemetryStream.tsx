@@ -1,5 +1,5 @@
 import React from 'react';
-import { Briefcase, Video, Sparkles, ArrowUpRight, ChevronRight, TrendingUp, ShieldCheck } from 'lucide-react';
+import { Briefcase, Video, Sparkles, ArrowUpRight, ChevronRight } from 'lucide-react';
 
 export interface SpatialTelemetryStreamProps {
   opportunities: {

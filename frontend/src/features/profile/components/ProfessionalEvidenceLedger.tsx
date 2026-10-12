@@ -4,14 +4,8 @@ import {
   Cpu,
   Code2,
   Award,
-  ExternalLink,
-  Info,
-  Clock,
   ArrowRight,
-  Database,
-  Layers,
-  CheckCircle2
-} from 'lucide-react';
+  Database} from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 import { SourceEvidenceInspectorModal, SourceEvidenceDetail } from './SourceEvidenceInspectorModal';
 

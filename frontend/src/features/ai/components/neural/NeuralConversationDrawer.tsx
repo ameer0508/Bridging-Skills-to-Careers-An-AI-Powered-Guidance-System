@@ -139,7 +139,7 @@ export const NeuralConversationDrawer: React.FC<NeuralConversationDrawerProps> =
                   key={msg._id}
                   message={msg}
                   userName={userName}
-                  onFeedback={(isHelpful) => onFeedback(msg._id, isHelpful)}
+                  onFeedback={onFeedback}
                 />
               ))}
               <div ref={scrollRef} />

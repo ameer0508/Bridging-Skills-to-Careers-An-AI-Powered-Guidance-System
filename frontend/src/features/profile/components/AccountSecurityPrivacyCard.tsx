@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import {
   ShieldCheck,
   Lock,
-  Key,
   LogOut,
   AlertTriangle,
-  Database,
   CheckCircle2,
   X
 } from 'lucide-react';
@@ -24,7 +22,6 @@ export interface AccountSecurityPrivacyCardProps {
 export const AccountSecurityPrivacyCard: React.FC<AccountSecurityPrivacyCardProps> = ({
   userId,
   email,
-  role,
   accountStatus,
   createdAt,
   onLogout,

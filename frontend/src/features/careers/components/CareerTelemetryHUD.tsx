@@ -1,5 +1,5 @@
 import React from 'react';
-import { Target, Award, Sparkles, TrendingUp } from 'lucide-react';
+import { Target } from 'lucide-react';
 
 interface CareerTelemetryHUDProps {
   totalMatches: number;

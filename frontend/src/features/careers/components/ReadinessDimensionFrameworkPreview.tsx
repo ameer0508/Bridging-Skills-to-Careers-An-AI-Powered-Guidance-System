@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Cpu, Briefcase, FolderGit2, GraduationCap, ArrowUpRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Cpu, Briefcase, FolderGit2, GraduationCap, CheckCircle2 } from 'lucide-react';
 
 interface DimensionPreviewItem {
   id: string;

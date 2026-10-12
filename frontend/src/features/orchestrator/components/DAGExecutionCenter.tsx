@@ -2,20 +2,16 @@ import React, { useState } from 'react';
 import {
   Workflow,
   CheckCircle2,
-  Clock,
   Sparkles,
-  ArrowRight,
   ExternalLink,
   ShieldCheck,
   ChevronDown,
   ChevronUp,
-  FileText,
-  Zap,
   Layers,
   Database
 } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
-import { IWorkflowExecution } from '../../../../../backend/src/services/OrchestratorService';
+import { IWorkflowExecution } from '../../../types/orchestrator';
 
 export interface DAGExecutionCenterProps {
   execution: IWorkflowExecution | null;

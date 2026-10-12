@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Mic, ArrowRight, Activity, AlertCircle, Play } from 'lucide-react';
+import { Mic, ArrowRight, Activity, Play } from 'lucide-react';
 import { MagneticButton } from './MagneticButton';
 
 export interface SpatialInterviewChamberProps {

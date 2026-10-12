@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Compass, Sparkles, FileText, ArrowRight, ShieldCheck, Target, Calculator } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Compass, ShieldCheck, Target, Calculator } from 'lucide-react';
 
 import { CareerAlignmentPipelineVisual } from './CareerAlignmentPipelineVisual';
 import { CareerActivationConsole } from './CareerActivationConsole';
@@ -23,7 +21,6 @@ export const CareerAlignmentLabView: React.FC<CareerAlignmentLabViewProps> = ({
   parsingStatus = null,
   validationError = null,
 }) => {
-  const navigate = useNavigate();
   const [isMethodologyOpen, setIsMethodologyOpen] = useState(false);
 
   const isProcessing = parsingStatus === 'pending' || parsingStatus === 'processing' || isUploading;

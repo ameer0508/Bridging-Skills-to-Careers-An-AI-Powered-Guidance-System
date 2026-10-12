@@ -1,17 +1,14 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import {
   Search,
   MapPin,
   Briefcase,
   SlidersHorizontal,
   RefreshCw,
-  Sparkles,
   Compass,
   Cpu,
   Target,
   ShieldCheck,
-  CheckCircle2,
   Globe,
 } from 'lucide-react';
 

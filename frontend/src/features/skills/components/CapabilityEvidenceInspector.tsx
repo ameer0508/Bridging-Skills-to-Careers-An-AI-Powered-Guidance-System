@@ -9,11 +9,9 @@ import {
   FolderGit2,
   GraduationCap,
   Award,
-  Sparkles,
   ArrowRight,
   GitBranch,
   Target,
-  ExternalLink,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useReducedMotion } from '../../../components/experience/hooks/useReducedMotion';
@@ -32,7 +30,6 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
   isOpen,
   onClose,
   graphEdges = [],
-  targetRoleTitle = 'Target Role',
 }) => {
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();

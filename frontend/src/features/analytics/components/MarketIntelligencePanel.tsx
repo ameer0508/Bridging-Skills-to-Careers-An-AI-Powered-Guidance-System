@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, TrendingUp, Globe, Cpu } from 'lucide-react';
+import { Activity, TrendingUp } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface TechTrendItem {

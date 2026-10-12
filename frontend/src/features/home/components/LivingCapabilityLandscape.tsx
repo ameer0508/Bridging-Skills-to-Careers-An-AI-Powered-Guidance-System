@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { ArrowUpRight, Upload, Sparkles, BookOpen, Layers } from 'lucide-react';
+import { ArrowUpRight, Upload, Sparkles, BookOpen } from 'lucide-react';
 
 export interface LivingCapabilityLandscapeProps {
   skills: Array<{ name: string; category?: string }>;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpRight, Briefcase, Video, Sparkles, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { ArrowUpRight, Briefcase, Video, Sparkles, ChevronRight } from 'lucide-react';
 import { SpotlightSurface } from './SpotlightSurface';
 
 export interface SpatialMarketStreamProps {

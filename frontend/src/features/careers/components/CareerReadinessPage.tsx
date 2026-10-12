@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Brain, FileText, Target, ChevronRight, Sparkles, Filter, X } from 'lucide-react';
+import { Brain, FileText, Target, ChevronRight, Filter, X } from 'lucide-react';
 import apiClient from '../../../lib/axios';
-import { useAuthStore } from '../../../store/authStore';
 
 import { ReadinessTelemetryHUD } from './ReadinessTelemetryHUD';
 import { ReadinessDimensionGrid } from './ReadinessDimensionGrid';
@@ -52,7 +51,6 @@ interface ICareerReadiness {
 
 export const CareerReadinessPage: React.FC = () => {
   const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
   const queryClient = useQueryClient();
 
   const [selectedCareerId, setSelectedCareerId] = useState<string | null>(null);

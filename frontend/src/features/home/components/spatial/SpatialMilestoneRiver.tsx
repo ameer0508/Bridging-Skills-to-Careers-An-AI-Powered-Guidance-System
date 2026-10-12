@@ -128,7 +128,7 @@ export const SpatialMilestoneRiver: React.FC<SpatialMilestoneRiverProps> = ({
 
           {/* Milestones Flow */}
           <div className="relative flex justify-between z-10">
-            {milestones.map((m, idx) => (
+            {milestones.map((m) => (
               <div
                 key={m.id}
                 onClick={() => onNavigate(m.route)}

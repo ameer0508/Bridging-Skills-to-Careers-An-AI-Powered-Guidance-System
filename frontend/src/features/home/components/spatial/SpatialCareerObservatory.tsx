@@ -1,5 +1,4 @@
 import React, { useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
 import {
   Target,
   Sparkles,
@@ -8,16 +7,12 @@ import {
   ShieldCheck,
   Compass,
   ArrowRight,
-  ArrowUpRight,
-  BookOpen,
   CheckCircle2,
   AlertCircle,
   X,
   ChevronRight,
-  Cpu,
 } from 'lucide-react';
 import { MagneticButton } from './MagneticButton';
-import { SpotlightSurface } from './SpotlightSurface';
 import { NextBestActionInfo } from '../index';
 
 export interface SpatialCareerObservatoryProps {

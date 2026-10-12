@@ -1,8 +1,8 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, type HTMLMotionProps } from 'framer-motion';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 
-export interface FloatingActionButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface FloatingActionButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
   icon: React.ReactNode;
   label?: string;
   className?: string;

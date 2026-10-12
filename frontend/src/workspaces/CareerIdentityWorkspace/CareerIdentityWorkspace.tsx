@@ -29,7 +29,6 @@ export const CareerIdentityWorkspace: React.FC = () => {
   const {
     data: profileData,
     isLoading: isProfileLoading,
-    refetch: refetchProfile,
   } = useQuery({
     queryKey: ['userProfile'],
     queryFn: async () => {
@@ -41,7 +40,6 @@ export const CareerIdentityWorkspace: React.FC = () => {
   // Query 2: Real Active Resume Metadata from /resumes/me
   const {
     data: resumeData,
-    refetch: refetchResume,
   } = useQuery({
     queryKey: ['activeResume'],
     queryFn: async () => {
@@ -57,7 +55,6 @@ export const CareerIdentityWorkspace: React.FC = () => {
   // Query 3: Real Verified Skills from /skills/me
   const {
     data: skillsData,
-    refetch: refetchSkills,
   } = useQuery({
     queryKey: ['skills', 'me'],
     queryFn: async () => {

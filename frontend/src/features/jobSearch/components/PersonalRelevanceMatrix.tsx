@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   Award,
@@ -9,8 +8,6 @@ import {
   ArrowRight,
   Layers,
   Video,
-  FileText,
-  Sparkles,
   ShieldCheck,
   Target,
 } from 'lucide-react';
@@ -25,7 +22,6 @@ export interface PersonalRelevanceMatrixProps {
 export const PersonalRelevanceMatrix: React.FC<PersonalRelevanceMatrixProps> = ({
   opportunity,
   targetRoleTitle,
-  userSkillsCount,
 }) => {
   const navigate = useNavigate();
 

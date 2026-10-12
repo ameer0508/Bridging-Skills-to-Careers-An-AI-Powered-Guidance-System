@@ -1,15 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp,
   Sparkles,
   Zap,
   Globe,
-  Award,
   AlertTriangle,
   Flame,
   Clock,
-  Layers,
   ArrowUpRight,
   Bookmark,
   Building2,
@@ -45,12 +42,12 @@ export const MarketTrendsPanel: React.FC<MarketTrendsPanelProps> = ({
 
   // State Management
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory);
-  const [selectedCountry, setSelectedCountry] = useState<string>('United States');
+  const [selectedCountry] = useState<string>('United States');
   const [trackedSkillNames, setTrackedSkillNames] = useState<string[]>(() => {
     const saved = localStorage.getItem('sb-tracked-skills');
     return saved ? JSON.parse(saved) : ['Vector Indexing (Milvus/Pinecone)', 'LangChain & LlamaIndex'];
   });
-  const [savedReports, setSavedReports] = useState<string[]>([]);
+  const [, setSavedReports] = useState<string[]>([]);
 
   // Market Telemetry Datasets
   const trendingSkills = [
@@ -413,10 +410,10 @@ export const MarketTrendsPanel: React.FC<MarketTrendsPanelProps> = ({
                 <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
-                  formatter={(val: any, name: any, item: any) => [val, item.payload.label]}
+                  formatter={(val: any, _name: any, item: any) => [val, item.payload.label]}
                 />
                 <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                  {lifecycleData.map((entry, index) => (
+                  {lifecycleData.map((_entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={index === 1 ? '#6366f1' : index === 2 ? '#06b6d4' : '#334155'}

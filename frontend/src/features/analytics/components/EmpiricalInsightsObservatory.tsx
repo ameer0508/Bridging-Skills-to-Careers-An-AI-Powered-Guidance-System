@@ -4,11 +4,7 @@ import {
   Brain,
   TrendingUp,
   Award,
-  ShieldCheck,
-  Sparkles,
-  ArrowUpRight,
   Clock,
-  Layers,
   CheckCircle2,
 } from 'lucide-react';
 

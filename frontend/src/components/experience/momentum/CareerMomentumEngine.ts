@@ -4,7 +4,7 @@ import { TrendAnalysisEngine, TrendAnalysisResult } from './TrendAnalysisEngine'
 import { PlateauDetectionEngine, PlateauAnalysis } from './PlateauDetectionEngine';
 import { GrowthStoryEngine, GrowthStoryData } from './GrowthStoryEngine';
 import { CareerHealthEngine, CareerHealthData } from './CareerHealthEngine';
-import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../types/telemetry';
 
 export interface ComprehensiveMomentumTelemetry {
   momentumScore: MomentumScoreData;

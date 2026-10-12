@@ -38,7 +38,6 @@ export const CareerTrajectoryHorizon: React.FC<CareerTrajectoryHorizonProps> = (
   roadmapProgress,
   isInitialized,
   savedOpportunitiesCount,
-  applicationsCount,
   interviewsCount,
   phases,
   onViewFullRoadmap,

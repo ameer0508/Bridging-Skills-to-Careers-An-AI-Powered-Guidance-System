@@ -1,12 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import {
-  Activity,
-  CheckCircle2,
-  Cpu,
-  Search,
-  Layers,
-  Sparkles,
   ShieldCheck,
 } from 'lucide-react';
 

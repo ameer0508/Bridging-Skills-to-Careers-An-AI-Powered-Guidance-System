@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertTriangle, Sparkles, ExternalLink, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, ExternalLink, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface IGapItem {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Filter, SlidersHorizontal, BookOpen, Terminal, Award, FileText, CheckCircle2 } from 'lucide-react';
+import { Search, Filter, SlidersHorizontal, BookOpen, Terminal, Award, FileText } from 'lucide-react';
 
 export interface IntelligenceCategoryFilterProps {
   activeStatus: string;

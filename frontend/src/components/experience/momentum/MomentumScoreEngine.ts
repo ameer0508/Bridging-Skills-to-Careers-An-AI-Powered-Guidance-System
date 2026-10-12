@@ -1,4 +1,4 @@
-import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../types/telemetry';
 
 export interface MomentumFactor {
   name: string;
@@ -17,7 +17,7 @@ export interface MomentumScoreData {
 
 export const MomentumScoreEngine = {
   calculateMomentum(
-    topMatch: CareerMatchItem | null,
+    _topMatch: CareerMatchItem | null,
     topReadiness: ReadinessItem | null,
     totalSkills: number,
     recommendations: RecommendationItem[],

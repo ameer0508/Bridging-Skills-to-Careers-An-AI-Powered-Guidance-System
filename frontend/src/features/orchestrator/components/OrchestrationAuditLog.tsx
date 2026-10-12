@@ -4,14 +4,9 @@ import {
   Activity,
   Layers,
   Clock,
-  Calendar,
-  ChevronRight,
-  ShieldCheck,
-  CheckCircle2,
-  AlertCircle
-} from 'lucide-react';
+  ChevronRight} from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
-import { IWorkflowExecution } from '../../../../../backend/src/services/OrchestratorService';
+import { IWorkflowExecution } from '../../../types/orchestrator';
 
 export interface OrchestrationAuditLogProps {
   executions: IWorkflowExecution[];

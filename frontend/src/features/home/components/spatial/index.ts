@@ -10,7 +10,7 @@ export * from './SpatialCommandRail';
 export * from './SpatialOrientationCanvas';
 export * from './SpatialCareerConstellation';
 export * from './SpatialCatalystAction';
-export * from './SpatialTrajectoryHorizon';
+export { SpatialTrajectoryHorizon } from './SpatialTrajectoryHorizon';
 export * from './SpatialMarketStream';
 export * from './SpatialEcosystemDock';
 export * from './SpatialOpportunityRadar';

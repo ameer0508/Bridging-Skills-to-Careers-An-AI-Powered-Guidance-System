@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar as CalendarIcon, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { Calendar as CalendarIcon } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface CalendarWeek {

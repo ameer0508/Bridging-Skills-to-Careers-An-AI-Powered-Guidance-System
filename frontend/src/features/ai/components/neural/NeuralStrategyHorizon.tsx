@@ -38,7 +38,7 @@ export const NeuralStrategyHorizon: React.FC<NeuralStrategyHorizonProps> = ({
     }, 400);
   };
 
-  const highLeverageItems = strategy?.strategySummary?.strategicPriorities || [];
+  const highLeverageItems = strategy?.strategySummary?.recommendedSequence || [];
   const tradeoff = strategy?.tradeoffAnalysis;
 
   return (
@@ -93,25 +93,12 @@ export const NeuralStrategyHorizon: React.FC<NeuralStrategyHorizonProps> = ({
                   key={idx}
                   className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-cyan-400/30 transition-all duration-200 space-y-2 group"
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">
-                      {item.title}
-                    </span>
+                  <div className="flex items-center gap-3">
                     <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/25 shrink-0">
-                      {item.category}
+                      Step {idx + 1}
                     </span>
-                  </div>
-
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    {item.rationale}
-                  </p>
-
-                  <div className="flex items-center justify-between pt-1 text-[11px] text-slate-400">
-                    <span className="font-mono text-amber-300/90 font-semibold">
-                      Impact: {item.expectedImpact}
-                    </span>
-                    <span className="font-mono text-slate-400">
-                      Est. Effort: {item.estimatedEffort}
+                    <span className="text-xs font-bold text-white group-hover:text-cyan-300 transition-colors">
+                      {item}
                     </span>
                   </div>
                 </div>
@@ -124,10 +111,10 @@ export const NeuralStrategyHorizon: React.FC<NeuralStrategyHorizonProps> = ({
             <div className="p-4 rounded-2xl bg-indigo-950/30 border border-indigo-500/20 space-y-2.5">
               <div className="flex items-center gap-2 text-xs font-bold text-indigo-300">
                 <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Path Trade-off Analysis: {tradeoff.pathA} vs. {tradeoff.pathB}</span>
+                <span>Path Trade-off Analysis: {tradeoff.pathA.title} vs. {tradeoff.pathB.title}</span>
               </div>
               <p className="text-xs text-slate-300 leading-relaxed">
-                {tradeoff.summary}
+                {tradeoff.reasoning}
               </p>
             </div>
           )}
@@ -192,17 +179,15 @@ export const NeuralStrategyHorizon: React.FC<NeuralStrategyHorizonProps> = ({
 
                 <div className="flex items-center gap-3">
                   <div className="text-2xl font-black font-display text-white">
-                    +{scenarioResult.scoreDelta}%
+                    +{scenarioResult.readinessDelta}%
                   </div>
                   <div className="text-[11px] text-slate-300 leading-tight">
-                    Projected Readiness: <span className="text-emerald-400 font-bold">{scenarioResult.projectedScore}%</span>
-                    <br />
-                    <span className="text-slate-400">Estimated Timeline: {scenarioResult.timelineWeeks} weeks</span>
+                    Projected Readiness: <span className="text-emerald-400 font-bold">{scenarioResult.projectedMatchScore}%</span>
                   </div>
                 </div>
 
                 <p className="text-xs text-slate-300/90 pt-1 border-t border-cyan-500/20 leading-relaxed">
-                  {scenarioResult.rationale}
+                  {scenarioResult.explanation}
                 </p>
               </motion.div>
             )}

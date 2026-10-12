@@ -383,10 +383,7 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
       />
 
       {/* AI STATUS & PROVENANCE BAR */}
-      <AIStatusBar
-        status={`STUDIO STATUS: ${studioMode} MODE • TARGET: ${targetRoleTitle.toUpperCase()} • SIMULATED EMPLOYER: ${targetCompany.toUpperCase()}`}
-        provenance="GROUND TRUTH: SKILLBRIDGE DB (VERIFIED SKILLS, GAPS, RESUME) • AI EVALUATOR: STAR RUBRIC"
-      />
+      <AIStatusBar status="idle" provider="Answers are scored by an AI rubric when a provider is available, otherwise by a rule-based rubric" />
 
       {/* MODE 1: STUDIO LOBBY */}
       {studioMode === 'LOBBY' && (

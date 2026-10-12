@@ -1,14 +1,10 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import {
   Compass,
-  Calendar,
   Download,
   Activity,
-  Layers,
   Sparkles,
   ShieldCheck,
-  TrendingUp,
 } from 'lucide-react';
 import { PeriodType } from './AnalyticsWorkspaceHeader';
 
@@ -25,14 +21,12 @@ export interface ProgressObservatoryHeroProps {
 }
 
 export const ProgressObservatoryHero: React.FC<ProgressObservatoryHeroProps> = ({
-  userName = 'User',
   targetRoleTitle,
   period,
   onPeriodChange,
   snapshotCount,
   overallReadiness,
   readinessGrowth,
-  totalSkills,
   onExport,
 }) => {
   const periods: { id: PeriodType; label: string; range: string }[] = [

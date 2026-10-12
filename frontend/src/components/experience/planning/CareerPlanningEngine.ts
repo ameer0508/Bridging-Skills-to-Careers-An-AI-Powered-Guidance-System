@@ -3,7 +3,7 @@ import { MissionEngine, Mission } from './MissionEngine';
 import { ForecastEngine, OpportunityForecastData } from './ForecastEngine';
 import { ProgressNarrativeEngine } from './ProgressNarrativeEngine';
 import { AchievementEngine, Achievement } from './AchievementEngine';
-import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../types/telemetry';
 
 export interface SimulatedDecisionImpact {
   itemTitle: string;

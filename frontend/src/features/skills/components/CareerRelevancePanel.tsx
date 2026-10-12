@@ -1,5 +1,5 @@
 import React from 'react';
-import { Target, TrendingUp, Award, BarChart3 } from 'lucide-react';
+import { Target, BarChart3 } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface RelevanceMetric {

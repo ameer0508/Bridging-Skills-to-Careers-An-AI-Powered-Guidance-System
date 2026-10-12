@@ -22,14 +22,6 @@ export interface CapabilityOrbitalAtlasProps {
   totalInterviews: number;
 }
 
-interface CapabilityNode {
-  id: string;
-  title: string;
-  subtitle: string;
-  route: string;
-  statusText: string;
-  icon: React.ElementType;
-}
 
 export const CapabilityOrbitalAtlas: React.FC<CapabilityOrbitalAtlasProps> = ({
   onNavigate,

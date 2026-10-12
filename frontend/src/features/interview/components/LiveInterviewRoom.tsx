@@ -78,7 +78,7 @@ export const LiveInterviewRoom: React.FC<LiveInterviewRoomProps> = ({
           transcript += event.results[i][0].transcript;
         }
         if (transcript) {
-          onAnswerChange((prev) => (prev ? `${prev} ${transcript}` : transcript));
+          onAnswerChange(candidateAnswer ? `${candidateAnswer} ${transcript}` : transcript);
         }
       };
 

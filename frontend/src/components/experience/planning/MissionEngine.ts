@@ -1,4 +1,4 @@
-import { RecommendationItem, RoadmapData } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { RecommendationItem, RoadmapData } from '../../../types/telemetry';
 
 export interface Mission {
   id: string;

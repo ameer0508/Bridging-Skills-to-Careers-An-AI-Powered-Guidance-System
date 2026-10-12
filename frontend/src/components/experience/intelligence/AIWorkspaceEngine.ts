@@ -1,4 +1,4 @@
-import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../types/telemetry';
 
 export interface AINormalizedContext {
   topMatch: CareerMatchItem | null;

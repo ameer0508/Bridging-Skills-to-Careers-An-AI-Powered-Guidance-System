@@ -28,7 +28,6 @@ export interface CertificationIntelligencePanelProps {
 
 export const CertificationIntelligencePanel: React.FC<CertificationIntelligencePanelProps> = ({
   technologyTarget = 'Cloud & AI Engineering',
-  onExploreRoadmap,
 }) => {
   const { addToast } = useToast();
 
@@ -558,10 +557,10 @@ export const CertificationIntelligencePanel: React.FC<CertificationIntelligenceP
                 <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
                 <Tooltip
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
-                  formatter={(val: number | string) => [`+$${Number(val).toLocaleString()}/yr`, 'Estimated Salary Boost']}
+                  formatter={(val) => [`+$${Number(val).toLocaleString()}/yr`, 'Estimated Salary Boost']}
                 />
                 <Bar dataKey="salaryBoostUsd" radius={[6, 6, 0, 0]} name="Annual Salary Increase ($)">
-                  {certs.map((entry, index) => (
+                  {certs.map((_entry, index) => (
                     <Cell key={`cell-${index}`} fill={index === 0 ? '#10b981' : '#06b6d4'} />
                   ))}
                 </Bar>

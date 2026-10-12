@@ -97,7 +97,7 @@ export const AICareerArchitectPage: React.FC = () => {
   };
 
   const startNew = () => {
-    createConversationMutation.mutate();
+    createConversationMutation.mutate(undefined);
   };
 
   const suggestedQuestions = [

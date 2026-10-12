@@ -1,5 +1,5 @@
 import React from 'react';
-import { Zap, TrendingUp, Cpu, Sparkles } from 'lucide-react';
+import { Zap, TrendingUp } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface EmergingTechItem {

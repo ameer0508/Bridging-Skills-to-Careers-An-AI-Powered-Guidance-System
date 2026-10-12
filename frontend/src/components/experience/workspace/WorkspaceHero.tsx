@@ -14,7 +14,14 @@ export interface WorkspaceHeroProps {
   greeting?: string;
   userName?: string;
   title: string;
-  description: string;
+  description?: string;
+  /** Older name for `description`, still used by some screens. */
+  subtitle?: string;
+  /** Short label shown in place of the greeting. */
+  badge?: string;
+  badgeColor?: string;
+  /** Older name for `stats`. */
+  metrics?: Array<{ label: string; value: string | number; change?: string; trend?: string }>;
   aiSummary?: string;
   stats?: QuickStat[];
   primaryAction?: {
@@ -29,11 +36,19 @@ export const WorkspaceHero: React.FC<WorkspaceHeroProps> = ({
   userName,
   title,
   description,
+  subtitle,
+  badge,
+  metrics,
   aiSummary,
-  stats = [],
+  stats: statsProp = [],
   primaryAction,
   className = '',
 }) => {
+  const stats: QuickStat[] =
+    statsProp.length > 0
+      ? statsProp
+      : (metrics || []).map((m) => ({ label: m.label, value: m.value, change: m.change, isPositive: m.trend !== 'down' }));
+  const body = description ?? subtitle;
   return (
     <TiltCard glowColor="rgba(99, 102, 241, 0.25)" className={`p-6 sm:p-8 md:p-10 ${className}`}>
       {/* Background Gradient Mesh */}
@@ -46,9 +61,8 @@ export const WorkspaceHero: React.FC<WorkspaceHeroProps> = ({
           <div className="flex items-center gap-2">
             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-              <span>{greeting}{userName ? `, ${userName}` : ''}</span>
+              <span>{badge ?? `${greeting}${userName ? `, ${userName}` : ''}`}</span>
             </span>
-            <span className="text-xs text-slate-500 font-mono">OS v1.0 Sync</span>
           </div>
 
           {/* Main Title */}
@@ -58,7 +72,7 @@ export const WorkspaceHero: React.FC<WorkspaceHeroProps> = ({
 
           {/* Subtitle description */}
           <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-            {description}
+            {body}
           </p>
 
           {/* AI Summary Banner */}

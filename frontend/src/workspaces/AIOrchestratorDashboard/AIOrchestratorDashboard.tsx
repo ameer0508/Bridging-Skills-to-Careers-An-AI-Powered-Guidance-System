@@ -15,7 +15,7 @@ import {
 import {
   IAgentMetadata,
   IWorkflowExecution,
-} from '../../../../../backend/src/services/OrchestratorService';
+} from '../../types/orchestrator';
 
 export const AIOrchestratorDashboard: React.FC = () => {
   const { addToast } = useToast();
@@ -76,18 +76,6 @@ export const AIOrchestratorDashboard: React.FC = () => {
     },
   });
 
-  // Query 4: Career Readiness
-  const { data: readinessData } = useQuery({
-    queryKey: ['readiness'],
-    queryFn: async () => {
-      try {
-        const response = await apiClient.get('/readiness');
-        return response.data.data;
-      } catch {
-        return null;
-      }
-    },
-  });
 
   const matches = matchesData || [];
   const topMatch = matches[0] || null;
@@ -117,7 +105,6 @@ export const AIOrchestratorDashboard: React.FC = () => {
   }, [agentsData, topCareerTitle]);
 
   const activeAgentsCount = agentsList.filter((a) => a.status === 'ACTIVE').length;
-  const readinessScore = readinessData?.overallScore || 80;
   const latestLatency = currentExecution?.latencyMs ?? 0;
 
   // Handler: Execute Multi-Agent Workflow DAG
@@ -216,10 +203,7 @@ export const AIOrchestratorDashboard: React.FC = () => {
       />
 
       {/* AI STATUS BAR */}
-      <AIStatusBar
-        status={`CONTROL PLANE ONLINE • ACTIVE TOPOLOGY: 10 AUTONOMOUS AGENTS • DISPATCH TARGET: ${goalQuery.toUpperCase()}`}
-        provenance="ORCHESTRATION ENGINE: SKILLBRIDGE HYBRID DAG • MODEL GATEWAY: FASTAPI / GEMINI 1.5 FLASH"
-      />
+      <AIStatusBar status="idle" provider="Summary of your stored data (no AI model is run here)" />
 
       {/* LAYER 01 — ORCHESTRATOR COMMAND DECK */}
       <OrchestratorCommandDeck

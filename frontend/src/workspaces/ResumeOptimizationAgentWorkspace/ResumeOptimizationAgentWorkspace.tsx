@@ -95,11 +95,11 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
   }, [skillsData]);
 
   // Target Career Required Skill Names
-  const requiredSkillNames = useMemo(() => {
-    if (topMatch?.careerId?.requirements?.skills) {
-      return topMatch.careerId.requirements.skills.map((s: { skillId?: { name?: string }; skillName?: string }) => s.skillId?.name || s.skillName || 'Engineering');
-    }
-    return [];
+  // The career's requirements come from the match breakdown the API returns
+  const requiredSkillNames = useMemo<string[]>(() => {
+    const breakdown = topMatch?.breakdown as Array<{ skillName: string }> | undefined;
+    if (breakdown && breakdown.length > 0) return breakdown.map((b) => b.skillName);
+    return [...(topMatch?.matchingSkills || []), ...(topMatch?.missingSkills || [])];
   }, [topMatch]);
 
   // Matched vs Missing Keywords

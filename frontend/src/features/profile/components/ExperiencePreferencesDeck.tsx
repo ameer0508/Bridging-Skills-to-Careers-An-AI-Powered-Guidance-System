@@ -5,7 +5,6 @@ import {
   Laptop,
   Bell,
   Check,
-  Shield,
   Sliders
 } from 'lucide-react';
 import { useTheme, Theme } from '../../../theme/ThemeContext';

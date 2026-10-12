@@ -1,13 +1,8 @@
 import React from 'react';
 import {
   Compass,
-  Target,
   ArrowRight,
-  ExternalLink,
-  Sparkles,
-  Layers,
   Award,
-  Briefcase,
   Edit3
 } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';

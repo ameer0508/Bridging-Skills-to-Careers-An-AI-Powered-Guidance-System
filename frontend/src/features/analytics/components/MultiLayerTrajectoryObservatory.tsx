@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -9,7 +8,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
 } from 'recharts';
 import {
   Activity,
@@ -17,10 +15,7 @@ import {
   Award,
   Cpu,
   CheckCircle2,
-  Calendar,
-  Sparkles,
   Info,
-  Filter,
 } from 'lucide-react';
 
 export interface HistoricalSnapshotItem {
@@ -43,14 +38,12 @@ type LayerMode = 'all' | 'readiness' | 'skills' | 'roadmap';
 
 export const MultiLayerTrajectoryObservatory: React.FC<MultiLayerTrajectoryObservatoryProps> = ({
   snapshots,
-  targetRoleTitle,
   periodName,
   activeReadiness,
   activeSkills,
   activeRoadmapItems,
 }) => {
   const [activeLayer, setActiveLayer] = useState<LayerMode>('all');
-  const [hoveredData, setHoveredData] = useState<any | null>(null);
 
   // Normalize snapshots for chart consumption
   const chartData = useMemo(() => {
@@ -165,12 +158,6 @@ export const MultiLayerTrajectoryObservatory: React.FC<MultiLayerTrajectoryObser
           <ComposedChart
             data={chartData}
             margin={{ top: 15, right: 20, left: -10, bottom: 5 }}
-            onMouseMove={(e) => {
-              if (e && e.activePayload && e.activePayload.length > 0) {
-                setHoveredData(e.activePayload[0].payload);
-              }
-            }}
-            onMouseLeave={() => setHoveredData(null)}
           >
             <defs>
               <linearGradient id="readinessGradient" x1="0" y1="0" x2="0" y2="1">

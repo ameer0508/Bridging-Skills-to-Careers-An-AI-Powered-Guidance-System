@@ -1,4 +1,4 @@
-import { CareerMatchItem, ReadinessItem, RoadmapData } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { CareerMatchItem, ReadinessItem, RoadmapData } from '../../../types/telemetry';
 
 export const ProgressNarrativeEngine = {
   generateNarrative(

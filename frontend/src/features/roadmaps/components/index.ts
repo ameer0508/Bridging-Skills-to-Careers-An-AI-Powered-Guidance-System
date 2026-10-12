@@ -12,7 +12,7 @@ export * from './CourseDetailModal';
 export * from './CourseIntelligencePanel';
 export * from './CertificationDetailModal';
 export * from './CertificationIntelligencePanel';
-export * from './AdaptiveCareerJourneyHeader';
+export { AdaptiveCareerJourneyHeader } from './AdaptiveCareerJourneyHeader';
 export * from './AdaptiveMilestoneSpine';
 export * from './ActivePhaseSpotlight';
 export * from './DependencyTreeEngine';

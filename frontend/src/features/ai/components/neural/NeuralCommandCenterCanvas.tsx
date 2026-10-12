@@ -3,7 +3,6 @@ import { motion, useMotionValue, useSpring, AnimatePresence } from 'framer-motio
 import {
   Sparkles,
   Target,
-  RefreshCw,
   Plus,
   ChevronDown,
   Layers,
@@ -189,7 +188,7 @@ export const NeuralCommandCenterCanvas: React.FC<NeuralCommandCenterCanvasProps>
         {/* Layer A: Context Receptor Orbit (Inner Ring) */}
         <NeuralContextOrbit
           telemetry={telemetry}
-          onSelectContextNode={(key) => {
+          onSelectContextNode={() => {
             // Context node clicked
           }}
         />

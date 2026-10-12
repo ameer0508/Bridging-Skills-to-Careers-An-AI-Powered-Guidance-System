@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import apiClient from '../../lib/axios';
 import { useToast } from '../../components/composite/Toast';
 import { AIThinkingAnimation } from '../../components/experience';
@@ -19,7 +19,6 @@ import {
 
 export const JobSearchAgentWorkspace: React.FC = () => {
   const { addToast } = useToast();
-  const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
 

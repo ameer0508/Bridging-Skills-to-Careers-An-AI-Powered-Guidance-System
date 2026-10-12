@@ -1,16 +1,7 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import {
   Brain,
-  ShieldCheck,
-  Target,
-  Award,
-  Layers,
-  Sparkles,
-  Compass,
-  CheckCircle2,
 } from 'lucide-react';
-import { useReducedMotion } from '../../../components/experience/hooks/useReducedMotion';
 
 export interface LivingCapabilityHUDProps {
   totalSkills: number;
@@ -39,7 +30,6 @@ export const LivingCapabilityHUD: React.FC<LivingCapabilityHUDProps> = ({
   onSelectCareer,
   className = '',
 }) => {
-  const prefersReducedMotion = useReducedMotion();
 
   const roleCoveragePercentage =
     targetTotalRequiredCount > 0

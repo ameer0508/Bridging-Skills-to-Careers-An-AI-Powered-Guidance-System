@@ -1,6 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight, Lightbulb, Compass } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import { MagneticButton } from './MagneticButton';
 
 export interface SpatialCareerInsightsProps {

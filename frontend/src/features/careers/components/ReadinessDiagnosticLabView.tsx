@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Compass, ShieldCheck, Sparkles, Activity, Layers, ArrowUpRight, Brain, BookOpen } from 'lucide-react';
+import { Compass, ShieldCheck, Activity } from 'lucide-react';
 import { ReadinessDiagnosticPipelineVisual } from './ReadinessDiagnosticPipelineVisual';
 import { ReadinessActivationConsole } from './ReadinessActivationConsole';
 import { ReadinessDimensionFrameworkPreview } from './ReadinessDimensionFrameworkPreview';

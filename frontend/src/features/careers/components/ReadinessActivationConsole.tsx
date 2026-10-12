@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { UploadCloud, FileText, CheckCircle2, AlertCircle, Loader2, Sparkles, BookOpen, Brain } from 'lucide-react';
+import { UploadCloud, CheckCircle2, AlertCircle, Loader2, Sparkles, BookOpen, Brain } from 'lucide-react';
 
 interface ReadinessActivationConsoleProps {
   onUploadResume: (file: File) => Promise<void>;

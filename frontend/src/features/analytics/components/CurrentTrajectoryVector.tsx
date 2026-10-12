@@ -7,10 +7,7 @@ import {
   Award,
   Cpu,
   Layers,
-  CheckCircle2,
   AlertTriangle,
-  ArrowUpRight,
-  ShieldCheck,
 } from 'lucide-react';
 
 export interface TrajectoryMetrics {

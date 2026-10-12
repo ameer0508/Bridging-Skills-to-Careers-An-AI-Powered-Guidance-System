@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { Brain, Compass, Target, Sparkles } from 'lucide-react';
+import { Brain, Compass, Target } from 'lucide-react';
 import apiClient from '../../../lib/axios';
 import { useAuthStore } from '../../../store/authStore';
 
@@ -236,7 +236,7 @@ export const RecommendationPage: React.FC = () => {
     <div className="max-w-7xl mx-auto space-y-8 pb-16 px-4 sm:px-6">
       {/* SECTION 1 — PERSONALIZED INTELLIGENCE HERO */}
       <ActionIntelligenceHero
-        userName={user?.name || 'Commander'}
+        userName={user?.fullName || ''}
         targetRole={snapshotData?.careerDomain?.targetRole || 'Senior AI Engineer'}
         careerDomain={snapshotData?.careerDomain?.name || 'Artificial Intelligence & Systems'}
         readinessScore={snapshotData?.readiness?.score || 74}

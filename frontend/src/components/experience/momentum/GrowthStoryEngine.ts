@@ -1,4 +1,4 @@
-import { CareerMatchItem, ReadinessItem, RoadmapData } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { CareerMatchItem, ReadinessItem, RoadmapData } from '../../../types/telemetry';
 
 export interface GrowthStoryData {
   headline: string;
@@ -8,7 +8,7 @@ export interface GrowthStoryData {
 
 export const GrowthStoryEngine = {
   generateGrowthStory(
-    userName: string,
+    _userName: string,
     topMatch: CareerMatchItem | null,
     topReadiness: ReadinessItem | null,
     totalSkills: number,

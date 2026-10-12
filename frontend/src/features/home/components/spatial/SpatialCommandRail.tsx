@@ -40,7 +40,7 @@ export const SpatialCommandRail: React.FC<SpatialCommandRailProps> = ({
         {
           id: 'resume',
           title: 'Profile Intelligence',
-          subtitle: Boolean(hasResume) ? 'Document active' : 'Upload document',
+          subtitle: hasResume ? 'Document active' : 'Upload document',
           icon: FileText,
           route: '/resume',
         },

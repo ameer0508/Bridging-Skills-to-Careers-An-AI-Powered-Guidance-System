@@ -296,9 +296,7 @@ export const ResumePage: React.FC = () => {
           </PremiumSection>
 
           <ExtractionQualityMetrics
-            extractionConfidence={resume?.atsScore || 0}
-            processingTime="1.2s"
-            sectionsDetected={resume?.sectionHealth?.length || 0}
+            extractionQualityScore={resume?.atsScore || 0}
           />
         </div>
 

@@ -6,6 +6,8 @@ export interface GlassPanelProps {
   className?: string;
   glowColor?: string;
   animateIn?: boolean;
+  /** Makes the whole panel an accessible button (click, Enter or Space). */
+  onClick?: () => void;
 }
 
 export const GlassPanel: React.FC<GlassPanelProps> = ({
@@ -13,7 +15,21 @@ export const GlassPanel: React.FC<GlassPanelProps> = ({
   className = '',
   glowColor = 'rgba(99, 102, 241, 0.12)',
   animateIn = true,
+  onClick,
 }) => {
+  const interactive = onClick
+    ? {
+        role: 'button' as const,
+        tabIndex: 0,
+        onClick,
+        onKeyDown: (event: React.KeyboardEvent) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onClick();
+          }
+        },
+      }
+    : {};
   // Separate layout/grid classes for outer element so grid and flex containers work reliably
   const classTokens = className.split(/\s+/).filter(Boolean);
   const layoutClasses: string[] = [];
@@ -51,7 +67,11 @@ export const GlassPanel: React.FC<GlassPanelProps> = ({
   const outerClass = `w-full ${layoutClasses.join(' ')}`.trim();
 
   if (!animateIn) {
-    return <div className={outerClass}>{content}</div>;
+    return (
+      <div className={outerClass} {...interactive}>
+        {content}
+      </div>
+    );
   }
 
   return (
@@ -61,6 +81,7 @@ export const GlassPanel: React.FC<GlassPanelProps> = ({
       viewport={{ once: true }}
       transition={{ duration: 0.4 }}
       className={outerClass}
+      {...interactive}
     >
       {content}
     </motion.div>

@@ -14,7 +14,6 @@ import {
   Share2,
   X,
 } from 'lucide-react';
-import { MagneticButton } from './MagneticButton';
 
 export interface SpatialCareerNetworkProps {
   onNavigate: (route: string) => void;

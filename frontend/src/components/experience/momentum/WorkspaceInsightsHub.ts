@@ -1,6 +1,6 @@
 import { CareerPlanningEngine, ComprehensivePlan } from '../planning/CareerPlanningEngine';
 import { CareerMomentumEngine, ComprehensiveMomentumTelemetry } from './CareerMomentumEngine';
-import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { CareerMatchItem, ReadinessItem, RecommendationItem, RoadmapData } from '../../../types/telemetry';
 
 export interface WorkspaceInsightsData {
   planning: ComprehensivePlan;

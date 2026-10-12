@@ -56,6 +56,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   // Grouped Navigation Items with Shortcuts
+  interface SidebarNavItem {
+    to: string;
+    label: string;
+    icon: React.ReactNode;
+    shortcut?: string;
+    isAi?: boolean;
+  }
   const navGroups = [
     {
       title: 'MISSION CONTROL',
@@ -238,7 +245,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                 )}
                 {(!isCollapsible || agentsExpanded || isCollapsed) &&
-                  group.items.map((item) => (
+                  group.items.map((item: SidebarNavItem) => (
                     <SidebarItem
                       key={item.to}
                       to={item.to}

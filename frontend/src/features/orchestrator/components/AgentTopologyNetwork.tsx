@@ -1,18 +1,11 @@
 import React, { useState } from 'react';
 import {
-  Cpu,
   Workflow,
-  Sparkles,
-  ArrowRight,
-  Activity,
-  Layers,
   ChevronRight,
-  CheckCircle2,
-  Zap,
   Info
 } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
-import { IAgentMetadata } from '../../../../../backend/src/services/OrchestratorService';
+import { IAgentMetadata } from '../../../types/orchestrator';
 
 export interface AgentTopologyNetworkProps {
   agents: IAgentMetadata[];

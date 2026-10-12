@@ -3,16 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
   Sparkles,
-  CheckCircle2,
-  TrendingUp,
-  Clock,
   Target,
   FileText,
   Layers,
   Award,
   Compass,
-  CheckSquare,
-  GitBranch,
 } from 'lucide-react';
 import apiClient from '../../lib/axios';
 import { useAuthStore } from '../../store/authStore';
@@ -43,7 +38,6 @@ import {
   AIStatusBar,
   WorkspaceDivider,
   PremiumSection,
-  WorkspaceToolbar,
   PremiumErrorState,
 } from '../../components/experience/workspace';
 
@@ -52,7 +46,6 @@ import {
   CareerPlanningEngine,
   DecisionSimulator,
   OpportunityForecast,
-  ProfessionalAchievements,
   AIThinkingAnimation,
 } from '../../components/experience';
 
@@ -63,8 +56,6 @@ export const LearningJourneyWorkspace: React.FC = () => {
 
   const [selectedCareerId, setSelectedCareerId] = useState<string | null>(null);
   const [selectedPhaseOrder, setSelectedPhaseOrder] = useState<number | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
 
   // Inspector State
   const [inspectingTask, setInspectingTask] = useState<TaskInspectorData | null>(null);
@@ -365,7 +356,7 @@ export const LearningJourneyWorkspace: React.FC = () => {
         progressPercentage={progressPercentage}
         completedTasksCount={completedTasksCount}
         totalTasksCount={totalTasksCount}
-        nextBestItem={nextBestItem}
+        nextBestItem={nextBestItem?._id ? { ...nextBestItem, _id: nextBestItem._id } : null}
         onStartNextTask={(id) => handleStatusChange(id, 'in_progress')}
         onRegenerateRoadmap={() => regenerateRoadmapMutation.mutate()}
         isRegenerating={regenerateRoadmapMutation.isPending}
@@ -440,6 +431,7 @@ export const LearningJourneyWorkspace: React.FC = () => {
                   key={phase._id}
                   phase={{
                     ...phase,
+                    objective: phase.objective || '',
                     skillsGained: phase.skillsGained || [],
                     estimatedCompletionTime: phase.estimatedCompletionTime || '',
                     items: phase.items.map((i) => ({

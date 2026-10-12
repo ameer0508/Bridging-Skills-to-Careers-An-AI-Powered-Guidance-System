@@ -1,5 +1,5 @@
 import React from 'react';
-import { Activity, Zap, CheckCircle2, Bookmark, Flame, Award, TrendingUp } from 'lucide-react';
+import { Zap, CheckCircle2, Bookmark, Flame, TrendingUp } from 'lucide-react';
 
 export interface ActionVelocityStripProps {
   activeCount: number;

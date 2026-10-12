@@ -1,22 +1,13 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   Building2,
   MapPin,
-  Globe,
   DollarSign,
   ExternalLink,
   Bookmark,
   BookmarkCheck,
-  Calendar,
-  Layers,
-  FileText,
-  ShieldCheck,
   Video,
-  Sparkles,
-  Award,
-  CheckCircle2,
 } from 'lucide-react';
 import { OpportunityItem } from './OpportunityStreamFeed';
 

@@ -1,17 +1,12 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   Compass,
-  Search,
   Sparkles,
   ArrowRight,
   FileText,
   Cpu,
-  Target,
-  Briefcase,
   RefreshCw,
-  SlidersHorizontal,
 } from 'lucide-react';
 
 export interface OpportunityActivationHubProps {

@@ -4,14 +4,10 @@ import {
   Layers,
   GitBranch,
   Target,
-  ShieldCheck,
   CheckCircle2,
   AlertCircle,
   ArrowRight,
-  ExternalLink,
   ChevronRight,
-  Sparkles,
-  Zap,
 } from 'lucide-react';
 import { useReducedMotion } from '../../../components/experience/hooks/useReducedMotion';
 

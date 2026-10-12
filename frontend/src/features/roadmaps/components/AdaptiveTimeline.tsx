@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckCircle2, Clock, PlayCircle, SkipForward, Sparkles, ShieldCheck, Layers, GitBranch } from 'lucide-react';
+import { CheckCircle2, SkipForward, GitBranch } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface MilestoneItem {
@@ -87,7 +87,7 @@ export const AdaptiveTimeline: React.FC<AdaptiveTimelineProps> = ({
         milestones: p.milestones.map(m => {
           if (m.id !== mId) return m;
           const nextStatus = action === 'complete' ? (m.status === 'completed' ? 'not_started' : 'completed') : 'skipped';
-          return { ...m, status: nextStatus };
+          return { ...m, status: nextStatus as typeof m.status };
         })
       };
     });

@@ -12,9 +12,7 @@ import {
   Compass,
   FileText,
   ChevronRight,
-  ShieldAlert,
-  HelpCircle
-} from 'lucide-react';
+  ShieldAlert} from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 import { InterviewSession, QuestionItem } from '../../../workspaces/InterviewPrepAgentWorkspace/InterviewPrepAgentWorkspace';
 

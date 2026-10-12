@@ -2,13 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import {
   CheckCircle2,
-  Layers,
-  Target,
   Award,
   ChevronRight,
-  Clock,
-  Sparkles,
-  Lock,
 } from 'lucide-react';
 import { useReducedMotion } from '../../../components/experience/hooks/useReducedMotion';
 

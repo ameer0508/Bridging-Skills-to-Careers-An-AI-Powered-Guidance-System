@@ -1,4 +1,4 @@
-import { RoadmapData } from '../../../workspaces/HomeWorkspace/HomeWorkspace';
+import { RoadmapData } from '../../../types/telemetry';
 
 export interface Achievement {
   id: string;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Send, Sparkles, RefreshCw, Terminal, Command } from 'lucide-react';
+import { Send, RefreshCw, Terminal, Command } from 'lucide-react';
 
 interface NeuralCommandDeckProps {
   inputMessage: string;

@@ -1,19 +1,10 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import {
-  Layers,
   Sparkles,
   CheckCircle2,
-  Clock,
-  Target,
-  PlayCircle,
-  ArrowRight,
-  ShieldCheck,
   ChevronRight,
   Flame,
-  Award,
 } from 'lucide-react';
-import { useReducedMotion } from '../../../components/experience/hooks/useReducedMotion';
 
 export interface ActiveRoadmapItem {
   _id?: string;
@@ -54,7 +45,6 @@ export const ActivePhaseSpotlight: React.FC<ActivePhaseSpotlightProps> = ({
   onInspectTask,
   className = '',
 }) => {
-  const prefersReducedMotion = useReducedMotion();
 
   const totalTasks = phase.items.length;
   const completedTasks = phase.items.filter((i) => i.status === 'completed' || i.status === 'skipped').length;

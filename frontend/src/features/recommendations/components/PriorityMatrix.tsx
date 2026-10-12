@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, Zap, Clock, Award } from 'lucide-react';
+import { Layers, Zap, Award } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface MatrixItem {
@@ -23,7 +23,6 @@ export const PriorityMatrix: React.FC<{ items?: MatrixItem[] }> = ({
 }) => {
   const quickWins = items.filter(i => i.quadrant === 'Quick Win');
   const majorCapstones = items.filter(i => i.quadrant === 'Major Capstone');
-  const fillers = items.filter(i => i.quadrant === 'Filler' || i.quadrant === 'Low Priority');
 
   return (
     <GlassPanel className="p-6 space-y-6 border-cyan-500/30">

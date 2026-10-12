@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Clock,
   Sparkles,
@@ -8,10 +8,6 @@ import {
   CheckCircle2,
   Video,
   Award,
-  Filter,
-  ArrowRight,
-  ShieldCheck,
-  Calendar,
 } from 'lucide-react';
 
 export interface ProgressEventItem {
@@ -30,7 +26,6 @@ export interface ProgressMomentsStreamProps {
 
 export const ProgressMomentsStream: React.FC<ProgressMomentsStreamProps> = ({
   events = [],
-  onNavigateAction,
 }) => {
   const [filterType, setFilterType] = useState<string>('all');
 

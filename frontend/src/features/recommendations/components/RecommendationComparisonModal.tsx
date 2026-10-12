@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, ArrowRight, Zap, CheckCircle2 } from 'lucide-react';
+import { X } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 
 export interface ComparisonItem {

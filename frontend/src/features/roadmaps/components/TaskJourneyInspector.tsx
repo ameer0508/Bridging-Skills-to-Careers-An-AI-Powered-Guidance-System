@@ -7,11 +7,6 @@ import {
   Target,
   Sparkles,
   Layers,
-  ArrowRight,
-  ShieldCheck,
-  Zap,
-  ExternalLink,
-  BookOpen,
 } from 'lucide-react';
 import { useReducedMotion } from '../../../components/experience/hooks/useReducedMotion';
 
@@ -44,7 +39,6 @@ export const TaskJourneyInspector: React.FC<TaskJourneyInspectorProps> = ({
   isOpen,
   onClose,
   onStatusChange,
-  targetRoleTitle = 'Target Role',
 }) => {
   const prefersReducedMotion = useReducedMotion();
 

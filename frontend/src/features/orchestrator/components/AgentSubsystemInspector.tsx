@@ -1,19 +1,15 @@
 import React from 'react';
 import {
-  Cpu,
   X,
   ExternalLink,
-  ShieldCheck,
   Zap,
-  ArrowRight,
-  Layers,
   Wrench,
   CheckCircle2,
   Database,
   GitFork
 } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
-import { IAgentMetadata } from '../../../../../backend/src/services/OrchestratorService';
+import { IAgentMetadata } from '../../../types/orchestrator';
 
 export interface AgentSubsystemInspectorProps {
   agent: IAgentMetadata | null;

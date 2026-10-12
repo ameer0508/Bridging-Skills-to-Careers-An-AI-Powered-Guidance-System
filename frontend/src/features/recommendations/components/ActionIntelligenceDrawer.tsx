@@ -3,16 +3,10 @@ import {
   X,
   Sparkles,
   ShieldCheck,
-  TrendingUp,
-  Clock,
-  Layers,
-  ArrowRight,
   ExternalLink,
   CheckCircle2,
   Bookmark,
   Trash2,
-  HelpCircle,
-  Award,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IRecommendation } from './IntelligenceStreamFeed';

@@ -130,7 +130,7 @@ export const SpatialTrajectoryHorizon: React.FC<SpatialTrajectoryHorizonProps> =
 
           {/* Milestones Flow */}
           <div className="relative flex justify-between z-10">
-            {milestones.map((m, idx) => {
+            {milestones.map((m) => {
               return (
                 <div
                   key={m.id}

@@ -1,19 +1,15 @@
 import React from 'react';
 import {
-  ExternalLink,
   CheckCircle2,
   Bookmark,
   Trash2,
-  Clock,
   ShieldCheck,
-  TrendingUp,
   HelpCircle,
   Sparkles,
   BookOpen,
   Terminal,
   Award,
   FileText,
-  ChevronRight,
   ArrowUpRight,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
