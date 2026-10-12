@@ -3,7 +3,7 @@
 Progress is the sum of points for items marked **Done**. An item is only marked Done when
 the stated verification has actually been run and passed. "Code exists" does not count.
 
-Total: 100 points. **Current: 77 / 100.**
+Total: 100 points. **Current: 94 / 100.**
 
 Verification levels used below:
 
@@ -27,10 +27,10 @@ Verification levels used below:
 
 | # | Item | Pts | Status | Verification |
 |---|---|---|---|---|
-| B1 | Upload, replace, download, delete | 2 | Pending | Partly verified: upload and rejection of a non-resume file pass in the browser; replace, download and delete were not driven through the UI |
+| B1 | Upload, replace, download, delete | 2 | **Done** | `pnpm test:e2e` (34/34): upload, byte-identical download, replace, confirmed delete; HTTP test resume_lifecycle |
 | B2 | Better extraction accuracy (skills and sections; AI-assisted with fallback) | 3 | **Done** | AI test: 25 fixture tests over TXT, PDF and DOCX in five layouts; live check with a real PDF. Scope: English, single-column, text-based documents only |
 | B3 | Honest ATS and section labels | 1 | **Done** | browser check: resume page shows "Rule-based parser"; invented quality defaults removed |
-| B4 | Reprocess endpoint and recovery of stuck jobs | 2 | Pending | API |
+| B4 | Reprocess endpoint and recovery of stuck jobs | 2 | **Done** | HTTP test resume_lifecycle (reprocess, 409 while running, failed/stuck/interrupted jobs recoverable); `pnpm test:e2e` (34/34) drives reprocess and failure recovery in the UI |
 | B5 | Differential processing on replace | 2 | **Done** | service test (old resume's skills do not linger after replacement) |
 
 ## C. Skill intelligence (8)
@@ -68,8 +68,8 @@ Verification levels used below:
 |---|---|---|---|---|
 | F1 | Saved jobs keep URL, notes, status; counted in Command Center | 2 | **Done** | service test |
 | F2 | Honest match score (no floor, no invented skills) | 2 | **Done** | service test (0, partial, 100, aliases, unscoreable postings, repeats, substring traps) + HTTP test + live check |
-| F3 | Filters, ranking, freshness, deduplication | 2 | Pending | Partly done: unscored postings sort last and scores are never served from a stale cache (HTTP test); filters and freshness not yet tested |
-| F4 | Application history, reminders, outcomes | 2 | Pending | Status changes are now recorded as history in the API; reminders and UI not done |
+| F3 | Filters, ranking, freshness, deduplication | 2 | **Done** | HTTP test opportunity_tracking: keyword, location, remote, type, date, salary (stated salaries only), sorting, page size, re-post deduplication, result metadata; `pnpm test:e2e` (34/34) |
+| F4 | Application history, reminders, outcomes | 2 | **Done** | HTTP test opportunity_tracking: status history, notes, follow-up reminders, due reminders in snapshot, 404 semantics; `pnpm test:e2e` (34/34) drives the tracking panel |
 | F5 | Jobs pages verified; sandbox data labelled | 2 | **Done** | browser journey: search, save, status change to Applied, survives reload; without a provider key listings are labelled "demo listing" / sandbox |
 
 ## G. Interview intelligence (10)
@@ -77,9 +77,9 @@ Verification levels used below:
 | # | Item | Pts | Status | Verification |
 |---|---|---|---|---|
 | G1 | Answers, evaluations and scores persisted | 2 | **Done** | service test |
-| G2 | AI question generation with deterministic fallback | 2 | Pending | service test |
+| G2 | AI question generation with deterministic fallback | 2 | **Done** | AI test test_interview_questions (12) and HTTP test interview_questions: AI questions when a provider answers, otherwise a 108-question bank selected by role, skills, gaps and job posting, with no repeats across sessions |
 | G3 | AI evaluation with labelled heuristic fallback; honest dimension scores | 3 | **Done** | service test (empty, one-sentence, off-topic, keyword list, STAR, technical, AI output validation, unavailable, invalid, timeout) + AI test. The AI path was tested with mocked provider output only |
-| G4 | Report and history pages verified | 2 | Pending | Partly verified: a five-question interview was completed in the browser and the report shows the stored score; the history view was not asserted |
+| G4 | Report and history pages verified | 2 | **Done** | `pnpm test:e2e` (34/34): report shows question source, scoring source and real rubric dimensions; history lists sessions and reopens a stored report |
 | G5 | Fix wrong history path in profile workspace | 1 | **Done** | browser journey: profile page loads interview history with no failed request |
 
 ## H. Command Center (8)
@@ -98,7 +98,7 @@ Verification levels used below:
 | I1 | AI service authentication and restricted CORS | 2 | **Done** | AI test (all 52 operations audited) + live check |
 | I2 | Upload filename sanitization, size limit, content validation | 1 | **Done** | AI test + HTTP test |
 | I3 | Gemini configuration verified; fallback and observability | 2 | **Done** | Model id confirmed present for the configured key via the model-list endpoint (no prompt sent); no silent model substitution, provider-reported token counts (AI test, mocked). No real generation request has been made |
-| I4 | Chat timeout alignment and fallback flag | 2 | Pending | API + UI |
+| I4 | Chat timeout alignment and fallback flag | 2 | **Done** | AI test test_chat, HTTP test chat_reliability, `pnpm test:e2e` (34/34): timeouts ordered (provider 20s, server 25s, browser 40s); fallback replies labelled and retryable; mock provider never answers chat |
 | I5 | Simulated modules hidden or labelled as demos | 1 | **Done** | 16 simulated workspaces wrapped in a "design preview" banner (verified in the browser on one of them); sample market, salary, course and certification panels carry an "Illustrative sample data" notice |
 
 ## J. Reliability, security, testing, UX, deployment (20)
@@ -107,16 +107,16 @@ Verification levels used below:
 |---|---|---|---|---|
 | J1 | Models tracked, typed, matching services; backend `tsc --noEmit` clean | 3 | **Done** | `tsc --noEmit`: 0 errors |
 | J2 | Recalculations serialized per user | 1 | **Done** | service test (duplicate checks) |
-| J3 | Docker Compose starts a working stack | 3 | Pending | Configuration corrected but NOT run: Docker is not installed on the development machine |
-| J4 | Correct error codes and input validation | 2 | Pending | Partly done: not-found and invalid ids now return 404/400 (HTTP test); request body schemas still missing on several routes |
+| J3 | Docker Compose starts a working stack | 3 | Pending | NOT run: Docker is still not installed on the development machine. Configuration was corrected by inspection only |
+| J4 | Correct error codes and input validation | 2 | **Done** | HTTP test input_validation: 40 malformed requests across every write endpoint return the expected 4xx with an error code, none 500, none changes data |
 | J5 | All test suites isolated, run once, pass | 3 | **Done** | `pnpm --filter backend test`: 13 suites pass; pytest: 78 pass |
 | J6 | Frontend type-check is real and build passes | 3 | **Done** | `pnpm --filter frontend build` now runs `tsc --noEmit -p tsconfig.app.json` first: 0 errors (was 514), then `vite build` passes. No strictness relaxed, no `@ts-ignore`/`@ts-nocheck` added |
-| J7 | Lint clean | 1 | Pending | Backend lint is clean (`--max-warnings 0`). Frontend lint: 0 errors, 108 warnings (73 `no-explicit-any`, 22 hook dependencies, 13 fast-refresh), so the frontend lint script still exits non-zero |
-| J8 | UX polish, accessibility, loading and error states | 2 | Pending | Partly done: 5 pages checked for unnamed controls, unlabelled inputs and missing alt text (all fixed), keyboard focus checked on one page, 6 pages checked at 390px with no horizontal overflow. Loading and error states were not reviewed; no screen-reader or contrast audit |
-| J9 | README and docs match the implementation | 1 | Pending | review |
+| J7 | Lint clean | 1 | **Done** | `pnpm lint`: backend 0 warnings; frontend 0 warnings (was 108), no rule disabled or suppression added. Seven suppressions that predate this work remain in context/provider files |
+| J8 | UX polish, accessibility, loading and error states | 2 | Pending | Partly done: `pnpm test:e2e` (34/34) checks accessible names on 13 pages, 390px layout on 7 and keyboard focus; loading, empty, error and retry states added for resume, jobs and chat. Other pages' loading/error states were not reviewed; no screen-reader or contrast audit |
+| J9 | README and docs match the implementation | 1 | Pending | Not done: e2e/README.md is accurate, but README.md, docs/DEPLOYMENT.md and docs/API_REFERENCE.md have not been brought in line with the implementation |
 | J10 | Full demo journey run-through | 1 | **Done** | browser journey: 27 of 27 checks pass on a clean temporary database (register, onboarding, upload, extraction, skills, matches, readiness, roadmap, jobs, interview, Home, reload, logout, re-login, cross-user isolation, invalid input, navigation, 390px layout, basic accessibility) |
 
-## Environment limitations (as of milestone 4)
+## Environment limitations (as of milestone 5)
 
 - **Docker is not installed** on the development machine, so `docker compose up` and the
   image builds have not been executed. The Compose file, Dockerfiles, nginx config and
@@ -128,9 +128,10 @@ Verification levels used below:
 - **No real Gemini generation request has been made.** The configured model id was confirmed
   to exist for the key via the model-list endpoint only. Chat, AI interview evaluation and the
   AI resume-parsing fallback are therefore verified with mocked provider output, not live.
-- **Browser testing used Microsoft Edge headless only**, driven by a script kept outside the
-  repository. There is no committed frontend test runner, and no other browser, real mobile
-  device or screen reader was used.
+- **Browser testing used Microsoft Edge headless only**, through the committed suite in `e2e/`
+  (`pnpm test:e2e`), which uses a stub AI service. No other browser, real mobile device or
+  screen reader was used.
+- **JSearch has never been called.** Live job search is verified only against a stubbed provider.
 
 ## Known limitations carried forward
 
@@ -140,7 +141,6 @@ Verification levels used below:
 - Scoring formulas, their limits and a worked example are documented in `docs/SCORING.md`.
 - Skill extraction only recognises the 128 skills in the shared lexicon, and resume parsing is
   verified for English, single-column, text-based documents only.
-- Interview questions still come from a fixed pool of five templates (G2).
 - `ai/app/services/gemini.py` is unused dead code with a different hardcoded model id; it was left in place.
 - The public landing page still shows product mock-ups with sample percentages (for example "94.8%" match cards). Its statistics strip now uses real counts from the codebase.
 - Unknown URLs redirect to the landing page; there is no dedicated not-found page.
