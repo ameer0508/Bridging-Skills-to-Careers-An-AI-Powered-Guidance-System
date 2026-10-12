@@ -126,7 +126,7 @@ export const ActivePhaseSpotlight: React.FC<ActivePhaseSpotlightProps> = ({
                   Immediate Priority
                 </span>
                 <span className="text-xs font-mono text-slate-400">
-                  {activeItem.category || 'Skill Task'} • Est. {activeItem.estimatedDuration || '30 mins'}
+                  {activeItem.category || 'Skill Task'} • Est. {activeItem.estimatedDuration || 'Self-paced'}
                 </span>
               </div>
 

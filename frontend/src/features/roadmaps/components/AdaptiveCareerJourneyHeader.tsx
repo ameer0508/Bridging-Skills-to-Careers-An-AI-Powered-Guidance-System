@@ -240,7 +240,7 @@ export const AdaptiveCareerJourneyHeader: React.FC<AdaptiveCareerJourneyHeaderPr
                 </div>
                 <h4 className="text-sm font-bold text-white truncate">{nextBestItem.title}</h4>
                 <p className="text-[11px] text-slate-400">
-                  {nextBestItem.category || 'Core Skill'} • {nextBestItem.estimatedDuration || '30 mins'}
+                  {nextBestItem.category || 'Core Skill'} • {nextBestItem.estimatedDuration || 'Self-paced'}
                 </p>
               </div>
 

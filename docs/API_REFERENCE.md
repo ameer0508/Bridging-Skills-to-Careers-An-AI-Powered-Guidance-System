@@ -111,8 +111,11 @@ Nothing in this group changes the user's skills or scores, except recording a co
 | `POST` | `/api/v1/recommendations/generate` | Yes | Regenerate from the current gap analysis. |
 | `PATCH` | `/api/v1/recommendations/:id/status` | Yes | Set a recommendation's status. |
 | `GET` | `/api/v1/roadmap/:id` | Yes | Roadmap for a career id; created on first request. |
-| `POST` | `/api/v1/roadmap/:id/regenerate` | Yes | Rebuild the roadmap; completed items stay completed. |
+| `POST` | `/api/v1/roadmap/:id/regenerate` | Yes | Rebuild the roadmap; items keep their ids, and anything started, completed or skipped stays. |
 | `PATCH` | `/api/v1/roadmap/:id/items/:id/status` | Yes | Set an item to not_started, in_progress, completed or skipped. |
+| `GET` | `/api/v1/roadmap/:id/schedule` | Yes | Hours of work remaining as a range, weeks and finish dates when weekly hours are set (`needsAvailability` otherwise), per-item effort with its basis (`catalogue` or `assumption`), blocked items, the next item, the assumptions used, and the last change to the roadmap with what was added or removed. `404 ROADMAP_NOT_FOUND`; does not create a roadmap. |
+| `GET` | `/api/v1/users/me/learning-preferences` | Yes | `hoursPerWeek` (null until the user sets it) and its limits. |
+| `PUT` | `/api/v1/users/me/learning-preferences` | Yes | Body `hoursPerWeek`: a whole number from 1 to 60, or `null` to clear it. |
 
 ### Jobs and application tracking
 

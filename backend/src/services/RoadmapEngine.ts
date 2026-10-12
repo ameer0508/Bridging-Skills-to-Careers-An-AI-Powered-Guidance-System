@@ -6,7 +6,8 @@ import {
   IRoadmapItem,
   RoadmapItemStatus
 } from '../models/LearningRoadmap.js';
-import { RoadmapHistory } from '../models/RoadmapHistory.js';
+import { RoadmapHistory, type IRoadmapChanges } from '../models/RoadmapHistory.js';
+import { UserSkill } from '../models/UserSkill.js';
 import DependencyResolver from './DependencyResolver.js';
 import logger from '../config/logger.js';
 import { withUserLock } from '../utils/userLock.js';
@@ -50,33 +51,31 @@ export class RoadmapEngine {
         .sort({ priorityScore: -1 })
         .lean();
 
-      if (recommendations.length === 0) {
-        logger.info(
-          `No active recommendations found for roadmap generation. User ${userId} is fully ready.`
-        );
-        return;
-      }
-
-      // 2. Fetch existing roadmap to preserve completed items
+      // 2. Fetch existing roadmap to preserve what the user has done
       const existingRoadmap = await LearningRoadmap.findOne({
         userId: new mongoose.Types.ObjectId(userId),
         careerId: new mongoose.Types.ObjectId(careerId)
       });
 
-      // Recommendations are regenerated with new ids, so progress is carried over by item title
+      if (recommendations.length === 0 && !existingRoadmap) {
+        logger.info(`No recommendations to build a roadmap from for user ${userId}.`);
+        return;
+      }
+
+      // Recommendations are regenerated with new ids, so items are recognised by title
       const previousItemsByTitle = new Map<string, IRoadmapItem>();
+      const previousPhaseOrder = new Map<string, number>();
       if (existingRoadmap) {
         existingRoadmap.phases.forEach(phase => {
           phase.items.forEach(item => {
-            if (item.status !== 'not_started') {
-              previousItemsByTitle.set(item.title, item);
-            }
+            previousItemsByTitle.set(item.title, item);
+            previousPhaseOrder.set(item.title, phase.order);
           });
         });
       }
 
       // 3. Resolve Dependencies and create tiers
-      const tiers = DependencyResolver.resolveTiers(recommendations);
+      const tiers = recommendations.length > 0 ? DependencyResolver.resolveTiers(recommendations) : [];
 
       // 4. Map tiers to Roadmap Phases
       const phases: IRoadmapPhase[] = [];
@@ -108,6 +107,8 @@ export class RoadmapEngine {
             careerRelevance: rec.reason as string,
             expectedOutcome: `Demonstrated capability in ${(rec.targetSkill as string) || 'this area'}`,
             completionCriteria: 'Complete associated resources or verify via new evidence',
+            // The same item keeps its id, so a link or an open page still points at it
+            ...(previous?._id ? { _id: previous._id } : {}),
             status: previous?.status ?? 'not_started',
             startedAt: previous?.startedAt,
             completedAt: previous?.completedAt,
@@ -128,6 +129,46 @@ export class RoadmapEngine {
         });
       }
 
+      // Work the user has started or finished stays on the roadmap even when the recommendation
+      // behind it is gone, for example because new evidence closed that gap
+      const currentTitles = new Set(phases.flatMap(phase => phase.items.map(item => item.title)));
+      let preserved = 0;
+      const removed: IRoadmapChanges['removed'] = [];
+      const evidenced = new Set(
+        (await UserSkill.find({ userId: new mongoose.Types.ObjectId(userId) }).populate('skillId'))
+          .map(us => ((us.skillId as unknown as { canonicalName?: string } | null)?.canonicalName || '').toLowerCase())
+          .filter(Boolean)
+      );
+      for (const [title, item] of previousItemsByTitle.entries()) {
+        if (item.status !== 'not_started') preserved++;
+        if (currentTitles.has(title)) continue;
+        if (item.status === 'not_started') {
+          const targetSkill = item.targetSkill || '';
+          removed.push({ title, targetSkill, reason: targetSkill && evidenced.has(targetSkill.toLowerCase()) ? 'evidenced' : 'no_longer_recommended' });
+          continue;
+        }
+        const kept = ((item as unknown as { toObject?: () => IRoadmapItem }).toObject?.() ?? { ...item }) as IRoadmapItem;
+        let phase = phases.find(p => p.order === previousPhaseOrder.get(title)) || phases[phases.length - 1];
+        if (!phase) {
+          phase = { title: 'Completed earlier', order: 1, objective: 'Work you did before the roadmap was last updated.', skillsGained: [], items: [] };
+          phases.push(phase);
+        }
+        phase.items.push(kept);
+        phase.status = RoadmapEngine.derivePhaseStatus(phase.items);
+      }
+      const added = [...currentTitles].filter(title => !previousItemsByTitle.has(title));
+      const changes: IRoadmapChanges = { added, removed, preserved };
+      const describe = (): string => {
+        const parts: string[] = [];
+        if (added.length > 0) parts.push(`Added: ${added.join('; ')}.`);
+        if (removed.length > 0) {
+          parts.push(`No longer needed: ${removed.map(r => (r.reason === 'evidenced' ? `${r.title} (${r.targetSkill} is now on your profile)` : r.title)).join('; ')}.`);
+        }
+        if (parts.length === 0) parts.push('No items were added or removed.');
+        if (preserved > 0) parts.push(`${preserved} item${preserved === 1 ? '' : 's'} you had started or finished ${preserved === 1 ? 'was' : 'were'} kept.`);
+        return parts.join(' ');
+      };
+
       // 5. Save Roadmap
       let finalRoadmapId: mongoose.Types.ObjectId;
 
@@ -145,7 +186,8 @@ export class RoadmapEngine {
           careerId: new mongoose.Types.ObjectId(careerId),
           roadmapId: finalRoadmapId,
           action: 'regenerated',
-          details: 'Roadmap regenerated based on new intelligence or gap analysis.'
+          details: `Roadmap updated. ${describe()}`,
+          changes
         });
       } else {
         const newRoadmap = await LearningRoadmap.create({

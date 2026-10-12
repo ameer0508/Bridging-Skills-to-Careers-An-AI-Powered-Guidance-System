@@ -124,6 +124,7 @@ export class SnapshotService {
           currentPhaseTitle: null,
           totalMilestones: 0,
           completedMilestones: 0,
+          schedule: null,
           phases: [],
         },
         activeRecommendationsCount: 0,
@@ -218,6 +219,22 @@ export class SnapshotService {
     const isRoadmapInitialized = roadmaps.length > 0 && totalItems > 0;
     const roadmapProgress = isRoadmapInitialized ? Math.round((completedItems / totalItems) * 100) : 0;
     const activeRoadmap = roadmaps[0] || null;
+    // The plan that follows from the weekly hours the user entered; null fields when none are set
+    const roadmapSchedule = activeRoadmap
+      ? await (async () => {
+          const { buildSchedule } = await import('./RoadmapScheduler.js');
+          const { hoursPerWeekOf } = await import('../controllers/LearningPlanController.js');
+          const s = buildSchedule(activeRoadmap.phases, await hoursPerWeekOf(userId));
+          return {
+            hoursPerWeek: s.hoursPerWeek,
+            remainingItems: s.remainingItems,
+            remainingHours: s.remainingHours,
+            weeksRemaining: s.weeksRemaining,
+            finishBetween: s.finishBetween,
+            nextItemTitle: s.nextItem?.title ?? null
+          };
+        })()
+      : null;
     const activePhase = activeRoadmap?.phases?.find((p: IRoadmapPhase) => p.status !== 'completed') || activeRoadmap?.phases?.[0];
 
     // 7. Saved Opportunity Telemetry
@@ -436,6 +453,7 @@ export class SnapshotService {
         currentPhaseTitle: activePhase?.title || null,
         totalMilestones: totalItems,
         completedMilestones: completedItems,
+        schedule: roadmapSchedule,
         phases: activeRoadmap?.phases?.slice(0, 3).map((p: IRoadmapPhase) => ({
           title: p.title,
           description: p.objective,

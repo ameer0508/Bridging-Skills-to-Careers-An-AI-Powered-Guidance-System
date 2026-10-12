@@ -49,6 +49,7 @@ import {
   AIThinkingAnimation,
 } from '../../components/experience';
 import { IllustrativeNotice } from '../../components/common/IllustrativeNotice';
+import { StudyPlanPanel } from '../../features/roadmaps/components/StudyPlan';
 
 /** A roadmap phase and its items as returned by GET /roadmap/:careerId. */
 interface ApiRoadmapItem extends Partial<Omit<ActiveRoadmapItem, 'title'>> {
@@ -220,7 +221,7 @@ export const LearningJourneyWorkspace: React.FC = () => {
       description: i.description || '',
       category: i.category || 'Skill Task',
       priority: i.priority || 'Medium',
-      estimatedDuration: i.estimatedDuration || '30 mins',
+      estimatedDuration: i.estimatedDuration || 'Self-paced',
       difficulty: i.difficulty || 'Intermediate',
       prerequisites: i.prerequisites || [],
       careerRelevance: i.careerRelevance || '',
@@ -388,6 +389,9 @@ export const LearningJourneyWorkspace: React.FC = () => {
         />
       ) : (
         <>
+          {/* Weekly hours and the schedule that follows from them */}
+          {activeCareerId && <StudyPlanPanel careerId={activeCareerId} />}
+
           {/* SECTION 2 — ADAPTIVE MILESTONE SPINE (JOURNEY MAP) */}
           <PremiumSection
             title="Adaptive Career Milestone Spine"

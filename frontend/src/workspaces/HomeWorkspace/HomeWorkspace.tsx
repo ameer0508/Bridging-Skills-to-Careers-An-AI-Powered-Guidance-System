@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { StudyPlanSummary } from '../../features/roadmaps/components/StudyPlan';
 import type { RecommendationItem } from '../../types/telemetry';
 import { listFrom } from '../../lib/collections';
 import { useNavigate } from 'react-router-dom';
@@ -45,6 +46,7 @@ export interface UnifiedCareerSnapshot {
     currentPhaseTitle: string | null;
     totalMilestones: number;
     completedMilestones: number;
+    schedule?: React.ComponentProps<typeof StudyPlanSummary>['schedule'] | null;
     phases: Array<{
       title: string;
       description?: string;
@@ -458,6 +460,12 @@ export const HomeWorkspace: React.FC = () => {
           onHoverStage={setTrajectoryHoveredDomainId}
         />
       </motion.div>
+
+      {snapshot.roadmap?.isInitialized && snapshot.roadmap.schedule && (
+        <motion.div variants={itemVariants} className="relative z-10">
+          <StudyPlanSummary schedule={snapshot.roadmap.schedule} onOpen={() => navigate('/roadmap')} />
+        </motion.div>
+      )}
 
       {/* 03 — SUPPORTING SPATIAL ENVIRONMENTS: OPPORTUNITY RADAR & INTERVIEW PREPARATION CHAMBER */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">

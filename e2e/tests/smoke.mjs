@@ -367,6 +367,37 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       completedBeforeReplace = after.completedMilestones;
       return `0% → ${after.progress}%`;
     });
+    await t.step('study plan: weeks appear only after weekly hours are set, and match the dashboard', async () => {
+      const careerId = (await api('GET', '/careers/matches')).data.matches[0].careerId._id;
+      const stored = async () => (await api('GET', `/roadmap/${careerId}/schedule`)).data.schedule;
+      const plan = page.getByTestId('study-plan');
+      await plan.waitFor({ timeout: 15_000 });
+      const summary = page.getByTestId('study-plan-summary');
+      expect(/Set your weekly hours to see weeks/.test(await summary.innerText()), 'weeks are shown before any weekly hours were entered');
+      expect((await stored()).weeksRemaining === null, 'the stored plan has weeks without weekly hours');
+      expect((await page.locator('[data-testid="study-plan-item"][data-status="completed"]').count()) === 1, 'the completed item is not marked in the plan');
+      expect(/has not measured/.test(await page.getByTestId('study-plan-assumptions').textContent()), 'the assumptions behind the schedule are not stated');
+
+      await page.fill('#hours-per-week', '0');
+      await page.getByRole('button', { name: 'Save hours' }).click();
+      expect(/whole number of hours from 1 to 60/.test(await plan.innerText()), 'an invalid number of hours was not rejected with a message');
+      expect((await stored()).hoursPerWeek === null, 'an invalid value was stored');
+
+      await page.fill('#hours-per-week', '6');
+      await page.getByRole('button', { name: 'Save hours' }).click();
+      await page.locator('[data-testid="study-plan-summary"]:not([data-weeks-low=""])').waitFor({ timeout: 15_000 });
+      const schedule = await stored();
+      expect(schedule.hoursPerWeek === 6 && schedule.weeksRemaining.low === Math.ceil(schedule.remainingHours.low / 6), `stored plan ${JSON.stringify(schedule.weeksRemaining)}`);
+      const weeks = `${schedule.weeksRemaining.low} to ${schedule.weeksRemaining.high} weeks at 6 hours a week`;
+      expect((await summary.innerText()).includes(weeks), `the page does not show "${weeks}"`);
+
+      await gotoAndSettle(page, `${webUrl}/home`, 3500);
+      const home = await page.getByTestId('home-study-plan').innerText();
+      expect(home.includes(weeks) && home.includes(schedule.nextItem.title), `the dashboard shows "${home}"`);
+      await gotoAndSettle(page, `${webUrl}/roadmap`, 3500);
+      expect((await page.inputValue('#hours-per-week')) === '6', 'the weekly hours were not kept after a reload');
+      return `${schedule.remainingItems} items, ${weeks}; same on the dashboard`;
+    });
 
     // ---- Resume: replace, reprocess, recover ----------------------------------------------------------
     await t.step('replacing the resume rebuilds skills and reports what changed', async () => {

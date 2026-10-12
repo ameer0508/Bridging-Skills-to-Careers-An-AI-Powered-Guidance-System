@@ -1,5 +1,11 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
 
+/** What the user has told SkillBridge about how they study. Nothing here is assumed for them. */
+export interface ILearningPreferences {
+  /** Hours a week the user says they can study; absent until they set it. */
+  hoursPerWeek?: number | null;
+}
+
 export interface IUser extends Document<Types.ObjectId> {
   fullName?: string;
   name?: string;
@@ -21,6 +27,7 @@ export interface IUser extends Document<Types.ObjectId> {
   avatar?: string;
   avatarUrl?: string;
   lastLogin?: Date;
+  learningPreferences?: ILearningPreferences;
   __v?: number;
   createdAt?: Date;
   updatedAt?: Date;
@@ -47,7 +54,10 @@ const UserSchema = new Schema<IUser>(
     location: { type: String, default: '' },
     avatar: { type: String, default: '' },
     avatarUrl: { type: String, default: '' },
-    lastLogin: { type: Date }
+    lastLogin: { type: Date },
+    learningPreferences: {
+      hoursPerWeek: { type: Number, min: 1, max: 60, default: null }
+    }
   },
   { timestamps: true }
 );

@@ -10,7 +10,7 @@ An item is **Done** only when it has a working screen, an authenticated API, sto
 needed, validation and error states, documented limits, and passing service, HTTP and browser
 tests. Code that exists but is not verified earns nothing.
 
-Expansion total: 100 points. **Current: 22 / 100.**
+Expansion total: 100 points. **Current: 26 / 100.**
 
 ## Phase 1. Advanced career intelligence (15)
 
@@ -29,7 +29,7 @@ Expansion total: 100 points. **Current: 22 / 100.**
 | B1 | Learning-platform and course integration | 2 | Pending |  |
 | B2 | Personalised project suggestions | 2 | Pending |  |
 | B3 | Practical quizzes and skill verification | 4 | **Done** | HTTP suite `skill_assessment`; browser suite `pnpm test:e2e` (41/41): versioned bank for **8 skills only** (JavaScript, TypeScript, React, Node.js, Python, SQL, Git, Docker; 56 questions), server-side scoring with answers never sent before submission, shuffled options, per-skill pass criteria (4 of 5), 15-minute limit, 3 attempts per skill per day, single submission, owner-only. A fail changes no score; a pass adds `assessed` evidence worth 15 points once per skill and triggers one recalculation; a repeat pass adds nothing. Survives reprocessing and deleting the resume. Limits in `docs/SCORING.md` section 12: unsupervised, memorisable, not a certification |
-| B4 | Availability- and progress-aware roadmaps | 3 | Pending |  |
+| B4 | Availability- and progress-aware roadmaps | 3 | **Done** | Suite `learning_plan` (unit and HTTP); browser suite `pnpm test:e2e` (42/42): weekly hours set by the user (1-60, none assumed), effort per item as a range labelled `catalogue` or `assumption`, weeks and finish dates as ranges, prerequisites block dependants, completing an item shortens the plan. Regeneration keeps item ids, completion dates and anything started; an untouched item whose gap is now evidenced is removed and the history says why. Same figures on the dashboard. Assumptions in `docs/SCORING.md` section 13: effort ranges are not measured |
 | B5 | Evidence-backed portfolios | 2 | Pending |  |
 | B6 | Streaks, opt-in reminders and milestone notifications | 2 | Pending |  |
 
@@ -76,11 +76,11 @@ One point each. An enhancement is counted here once, even when a feature above d
 | X3 | Career explanation | 1 | **Done** | Delivered by A5 and the existing breakdown: baseline evidence per requirement, what would change it, and by how much |
 | X4 | Evidence-grounded readiness calibration | 1 | Pending |  |
 | X5 | Measurable, personalised recommendations | 1 | Pending |  |
-| X6 | Time- and progress-aware roadmaps | 1 | Pending |  |
+| X6 | Time- and progress-aware roadmaps | 1 | **Done** | Delivered by B4: the roadmap is laid out in weeks from the user's own hours, moves with progress and is adjusted when evidence changes. Suite `learning_plan` |
 | X7 | Job freshness, deduplication and rate limits | 1 | Pending |  |
 | X8 | Application histories, reminders and outcomes | 1 | Pending |  |
 | X9 | Interview scoring quality | 1 | Pending |  |
-| X10 | Cross-module Command Center state | 1 | Pending |  |
+| X10 | Cross-module Command Center state | 1 | Pending | Partly done: the dashboard shows the study plan from the same data as the roadmap page (suite `learning_plan`, browser check). Remaining modules arrive with B2, B5 and B6 |
 | X11 | AI observability, fallback and confidence calibration | 1 | Pending |  |
 | X12 | Security, privacy, retention and hardening | 1 | Pending |  |
 
@@ -97,7 +97,7 @@ One point each. An enhancement is counted here once, even when a feature above d
 
 | ID | Item | Points | Status | Evidence |
 |---|---|---|---|---|
-| V1 | Original regression baseline still passes (19 backend suites, 104 AI tests, 35 browser checks) | 2 | Pending | Passing at this checkpoint: 21 backend suites (19 original + 2), 104 AI tests, 41 browser checks (35 original + 6). Awarded at the end of the expansion |
+| V1 | Original regression baseline still passes (19 backend suites, 104 AI tests, 35 browser checks) | 2 | Pending | Passing at this checkpoint: 22 backend suites (19 original + 3), 104 AI tests, 42 browser checks (35 original + 7). Awarded at the end of the expansion |
 | V2 | Cross-user isolation and input validation for every new endpoint | 2 | Pending |  |
 | V3 | Accessibility and failure states for every new screen | 2 | Pending |  |
 | V4 | Docker Compose workflow passes with the expansion | 2 | Pending |  |

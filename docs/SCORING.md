@@ -290,3 +290,32 @@ not test building anything, nothing is executed, and the quiz is not supervised.
 questions per skill and the answers explained after each attempt, a person who retries can pass
 by remembering the answers. The questions have not been validated against any external measure
 of ability.
+
+## 13. Roadmap schedule
+
+The roadmap orders items by prerequisite (an item that builds on a skill comes after the item
+that teaches it). A schedule is added only from figures the user supplies.
+
+| Input | Source |
+|---|---|
+| Hours per week | Entered by the user (whole hours, 1 to 60). Never assumed: without it the roadmap shows hours of work but no weeks or dates |
+| Effort per item | The hours the catalogue states for the resource, when it states hours. Otherwise a planning range by kind of item: learning resource 8 to 20 hours, project 15 to 40, certification 30 to 80, anything else 5 to 15 |
+
+**These ranges are assumptions chosen for planning. SkillBridge has not measured how long any
+skill takes to learn.** Every figure derived from them is shown as a range and each item says
+whether its hours are stated by the resource or assumed.
+
+- Remaining work is the sum of the ranges of items that are not completed or skipped. An item
+  that has been started is planned in full, because how much of it is done is not recorded.
+- Weeks remaining = remaining hours / hours per week, rounded up, for the low and the high end.
+  Finish dates are today plus those weeks. Weeks in which the user cannot study are not modelled.
+- An item is "blocked" while a prerequisite item of the same roadmap is unfinished. The next item
+  is the first unfinished one that is not blocked.
+- The schedule is computed on every read, so it follows progress and the weekly hours immediately.
+  The dashboard shows the same figures.
+
+**What a regeneration keeps.** The roadmap is rebuilt whenever recommendations are (new resume,
+passed skill check, changed target role). Items are recognised by title and keep their id.
+Anything the user has started, completed or skipped stays, with its dates, even when the
+recommendation behind it is gone. An untouched item whose recommendation is gone is removed; the
+roadmap history records each removal and whether the skill is now on the profile.
