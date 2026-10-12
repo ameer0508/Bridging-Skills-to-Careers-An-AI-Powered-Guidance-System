@@ -21,6 +21,7 @@ import {
   Bot,
   MessageSquare,
   Wallet,
+  ClipboardList,
 } from 'lucide-react';
 import { SidebarItem } from './SidebarItem';
 import { useAuthStore } from '../../store/authStore';
@@ -142,6 +143,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           to: '/market/salaries',
           label: 'Salary Insights',
           icon: <Wallet className="w-4 h-4" />,
+        },
+        {
+          to: '/applications',
+          label: 'Applications',
+          icon: <ClipboardList className="w-4 h-4" />,
         },
         {
           to: '/application-outcomes',

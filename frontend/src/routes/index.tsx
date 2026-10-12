@@ -40,6 +40,7 @@ const PersonalMemoryWorkspace = lazy(() => import('../workspaces/PersonalMemoryW
 const CareerOSDashboard = lazy(() => import('../workspaces/CareerOSDashboard/CareerOSDashboard'));
 const MarketEvidencePage = lazy(() => import('../features/market/components/MarketEvidencePage'));
 const SalaryInsightsPage = lazy(() => import('../features/market/components/SalaryInsightsPage'));
+const ApplicationHistoryPage = lazy(() => import('../features/applications/components/ApplicationHistoryPage'));
 const ApplicationOutcomesPage = lazy(() => import('../features/applications/components/ApplicationOutcomesPage'));
 const CareerIdentityWorkspace = lazy(() => import('../workspaces/CareerIdentityWorkspace/CareerIdentityWorkspace'));
 
@@ -389,6 +390,14 @@ export const router = createBrowserRouter([
             element: (
               <WorkspaceSuspense>
                 <SalaryInsightsPage />
+              </WorkspaceSuspense>
+            ),
+          },
+          {
+            path: '/applications',
+            element: (
+              <WorkspaceSuspense>
+                <ApplicationHistoryPage />
               </WorkspaceSuspense>
             ),
           },
