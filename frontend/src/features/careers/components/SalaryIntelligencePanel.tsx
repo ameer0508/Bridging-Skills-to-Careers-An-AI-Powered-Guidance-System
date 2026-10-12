@@ -250,6 +250,7 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
                 Target Region
               </span>
               <select
+                aria-label="Region"
                 value={selectedRegion}
                 onChange={(e) => setSelectedRegion(e.target.value)}
                 className="w-full py-1.5 px-2.5 rounded-lg bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
@@ -267,6 +268,7 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
                 Experience Level
               </span>
               <select
+                aria-label="Experience level"
                 value={experienceLevel}
                 onChange={(e) => setExperienceLevel(e.target.value as typeof experienceLevel)}
                 className="w-full py-1.5 px-2.5 rounded-lg bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"

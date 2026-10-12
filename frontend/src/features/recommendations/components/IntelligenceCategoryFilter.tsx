@@ -102,6 +102,7 @@ export const IntelligenceCategoryFilter: React.FC<IntelligenceCategoryFilterProp
             <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400" />
             <span className="text-slate-500 hidden sm:inline">Sort:</span>
             <select
+              aria-label="Sort by"
               value={sortBy}
               onChange={(e) => onSortChange(e.target.value)}
               className="bg-transparent text-white font-bold focus:outline-none cursor-pointer text-xs"

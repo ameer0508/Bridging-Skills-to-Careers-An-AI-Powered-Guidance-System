@@ -276,6 +276,7 @@ export const SkillIntelligencePage: React.FC = () => {
               Strength:
             </span>
             <select
+              aria-label="Filter by evidence strength"
               value={selectedStrength}
               onChange={(e) => setSelectedStrength(e.target.value)}
               className="px-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-white font-mono outline-none focus:border-indigo-500/50 cursor-pointer"

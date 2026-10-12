@@ -86,11 +86,10 @@ export const InterviewJourneyHistory: React.FC<InterviewJourneyHistoryProps> = (
             return (
               <GlassPanel
                 key={sess._id}
-                data-testid="interview-history-item"
                 className="p-5 border-white/10 hover:border-indigo-500/40 transition-all cursor-pointer group"
                 onClick={() => onSelectSession(sess)}
               >
-                <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center justify-between flex-wrap gap-4" data-testid="interview-history-item">
                   <div className="space-y-1.5 max-w-lg">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-sm font-bold text-white group-hover:text-indigo-300 transition">

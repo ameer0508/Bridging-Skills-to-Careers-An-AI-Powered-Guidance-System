@@ -520,6 +520,7 @@ export const SettingsWorkspace: React.FC = () => {
                   <div className="space-y-1.5">
                     <label className="text-slate-400 block text-[11px]">Primary Career Domain:</label>
                     <select
+                      aria-label="Career domain"
                       value={editDomainId}
                       onChange={(e) => {
                         const newId = e.target.value;

@@ -136,7 +136,10 @@ export async function ensureFakeAiService(): Promise<FakeAiService> {
   return shared;
 }
 
-export async function startFakeAiService(serviceKey: string): Promise<FakeAiService> {
+/**
+ * @param listenPort fixed port for runs where another process must be told the URL up front (0 = any free port)
+ */
+export async function startFakeAiService(serviceKey: string, listenPort = 0): Promise<FakeAiService> {
   const requests: string[] = [];
   const interview: FakeAiService['interview'] = { mode: 'unavailable', rubric: {} };
   const extract: FakeAiService['extract'] = { mode: 'ok', delayMs: 400 };
@@ -163,6 +166,26 @@ export async function startFakeAiService(serviceKey: string): Promise<FakeAiServ
       }
 
       const raw = Buffer.concat(chunks);
+
+      // Test control, used by the browser smoke tests (a separate process) to switch behaviour
+      // and to read what was requested. Not part of the real AI service's API.
+      if (path === '/__control') {
+        if (req.method === 'POST') {
+          const patch = JSON.parse(raw.toString('utf8') || '{}') as Record<string, Record<string, unknown>>;
+          Object.assign(interview, patch.interview || {});
+          Object.assign(extract, patch.extract || {});
+          Object.assign(chat, patch.chat || {});
+          Object.assign(questions, patch.questions || {});
+        }
+        return send(200, {
+          requests,
+          interview: { mode: interview.mode },
+          extract: { mode: extract.mode },
+          chat: { mode: chat.mode, prompts: chat.prompts.length },
+          questions: { mode: questions.mode, payloads: questions.payloads.length }
+        });
+      }
+
       if (path === '/api/v1/extract') {
         if (extract.mode === 'fail') return send(500, { detail: 'Extraction failed (simulated).' });
         const data = parseResumeText(extractUploadedText(raw));
@@ -219,7 +242,7 @@ export async function startFakeAiService(serviceKey: string): Promise<FakeAiServ
     });
   });
 
-  await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
+  await new Promise<void>(resolve => server.listen(listenPort, '127.0.0.1', resolve));
   server.unref(); // never keep the test process alive
   const { port } = server.address() as AddressInfo;
 

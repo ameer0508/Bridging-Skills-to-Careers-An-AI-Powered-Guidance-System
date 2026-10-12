@@ -376,6 +376,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
           {/* Sector Dropdown */}
           <div className="lg:col-span-2">
             <select
+              aria-label="Filter by category"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
@@ -391,6 +392,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
           {/* Workplace Type */}
           <div className="lg:col-span-2">
             <select
+              aria-label="Filter by workplace"
               value={selectedWorkplace}
               onChange={(e) => setSelectedWorkplace(e.target.value)}
               className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
@@ -405,6 +407,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
           {/* Experience Level */}
           <div className="lg:col-span-2">
             <select
+              aria-label="Filter by experience level"
               value={selectedExperience}
               onChange={(e) => setSelectedExperience(e.target.value)}
               className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
@@ -420,6 +423,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
           {/* Sort By */}
           <div className="lg:col-span-2">
             <select
+              aria-label="Sort by"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
               className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
@@ -439,6 +443,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
             Min Match Threshold: <strong className="text-cyan-400 font-mono">{minMatchScore}%</strong>
           </span>
           <input
+            aria-label="Minimum match score"
             type="range"
             min="0"
             max="95"

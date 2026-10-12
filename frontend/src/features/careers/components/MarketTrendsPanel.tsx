@@ -236,6 +236,7 @@ export const MarketTrendsPanel: React.FC<MarketTrendsPanelProps> = ({
 
             {/* Category Filter Dropdown */}
             <select
+              aria-label="Filter by category"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="py-1 px-2.5 rounded-lg bg-slate-950 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"

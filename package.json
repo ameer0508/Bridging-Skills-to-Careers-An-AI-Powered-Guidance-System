@@ -11,6 +11,9 @@
     "build:backend": "pnpm --filter backend build",
     "build": "pnpm run build:frontend && pnpm run build:backend",
     "lint": "pnpm --filter frontend lint && pnpm --filter backend lint",
+    "typecheck": "pnpm --filter frontend typecheck && pnpm --filter backend typecheck",
+    "test": "pnpm --filter backend test",
+    "test:e2e": "pnpm --filter e2e test",
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md,css}\""
   },
   "devDependencies": {
