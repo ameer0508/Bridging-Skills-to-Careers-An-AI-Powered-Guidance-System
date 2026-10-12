@@ -286,8 +286,10 @@ export class InterviewService {
     // Follow-ups (D3) are reported on their own and kept out of the overall score and dimensions
     const primary = session.questions.filter((q) => !q.followUpOf);
     const followUps = session.questions.filter((q) => q.followUpOf);
-    const evaluatedQuestions = primary.filter((q) => q.evaluation && typeof q.evaluation.score === 'number');
-    const totalQuestions = primary.length;
+    // X9: answers that could not be scored fairly (not in English) are out of both the total and the count
+    const notScored = primary.filter((q) => q.evaluation?.notScored);
+    const evaluatedQuestions = primary.filter((q) => q.evaluation && typeof q.evaluation.score === 'number' && !q.evaluation.notScored);
+    const totalQuestions = primary.length - notScored.length;
 
     // Unanswered questions count as zero: skipping most of an interview must not look like a pass
     const overallScore =
@@ -297,6 +299,7 @@ export class InterviewService {
 
     session.overallScore = overallScore;
     session.answeredCount = evaluatedQuestions.length;
+    session.notScoredCount = notScored.length;
     session.status = 'completed';
     session.completedAt = new Date();
 
@@ -325,6 +328,9 @@ export class InterviewService {
 
     // Preparation advice derived from this session's own results
     const advice: string[] = [];
+    if (notScored.length > 0) {
+      advice.push(`${notScored.length} answer${notScored.length === 1 ? ' was' : 's were'} not in English and could not be scored; ${notScored.length === 1 ? 'it is' : 'they are'} saved but left out of your overall score.`);
+    }
     const unanswered = totalQuestions - evaluatedQuestions.length;
     if (unanswered > 0) {
       advice.push(`Answer every question next time: ${unanswered} of ${totalQuestions} were left unanswered and scored zero.`);

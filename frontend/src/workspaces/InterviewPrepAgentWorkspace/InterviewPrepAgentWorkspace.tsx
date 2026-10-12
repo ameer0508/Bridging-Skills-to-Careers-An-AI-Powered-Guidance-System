@@ -14,6 +14,7 @@ import {
   InterviewJourneyHistory,
 } from '../../features/interview/components';
 import type { EvaluationDimensions } from '../../features/interview/components/EvaluationProvenance';
+import type { EvaluationQuality } from '../../features/interview/components/EvaluationDetails';
 import { primaryReadiness, dimensionScore, readinessStrengths, readinessGaps } from '../../lib/readiness';
 
 export interface QuestionItem {
@@ -40,7 +41,7 @@ export interface QuestionItem {
     source?: 'ai' | 'heuristic';
     dimensions?: EvaluationDimensions;
     evaluatedAt?: string;
-  };
+  } & EvaluationQuality;
 }
 
 export interface InterviewSession {

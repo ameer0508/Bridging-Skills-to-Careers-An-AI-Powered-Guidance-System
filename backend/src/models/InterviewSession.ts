@@ -22,6 +22,16 @@ export interface IQuestionEvaluation {
   /** Role rubric (D5) whose weights produced the score; absent on evaluations from before rubrics, which used 'general'. */
   rubricId?: string;
   rubricVersion?: number;
+  /** X9: which evaluation method and version produced this result. */
+  method?: string;
+  /** X9: true when the answer could not be scored fairly (e.g. not in English); excluded from the overall score. */
+  notScored?: boolean;
+  notScoredReason?: string;
+  /** X9: the measured inputs behind each dimension, so the score can be checked. */
+  factors?: Record<string, unknown>;
+  /** X9: how much to trust this score, and why. */
+  uncertainty?: { level: 'low' | 'medium' | 'high'; reasons: string[] };
+  limitations?: string[];
   evaluatedAt: Date;
 }
 
@@ -83,6 +93,8 @@ export interface IInterviewSession extends Document<Types.ObjectId> {
   /** Averages of the rubric dimensions over answered questions; null where never judged. */
   dimensionScores?: Record<string, number | null>;
   answeredCount?: number;
+  /** X9: answers that could not be scored fairly (e.g. not in English); kept out of the overall score. */
+  notScoredCount?: number;
   /** 'ai', 'heuristic' or 'mixed': which evaluator produced the scores in this session. */
   evaluationSource?: string;
   preparationRecommendations: string[];
@@ -104,6 +116,12 @@ const QuestionEvaluationSchema = new Schema<IQuestionEvaluation>(
     dimensions: { type: Schema.Types.Mixed },
     rubricId: { type: String },
     rubricVersion: { type: Number },
+    method: { type: String },
+    notScored: { type: Boolean },
+    notScoredReason: { type: String },
+    factors: { type: Schema.Types.Mixed },
+    uncertainty: { type: Schema.Types.Mixed },
+    limitations: { type: [String], default: undefined },
     evaluatedAt: { type: Date, default: Date.now }
   },
   { _id: false }
@@ -152,6 +170,7 @@ const InterviewSessionSchema = new Schema<IInterviewSession>(
     overallScore: { type: Number },
     dimensionScores: { type: Schema.Types.Mixed },
     answeredCount: { type: Number, default: 0 },
+    notScoredCount: { type: Number },
     evaluationSource: { type: String },
     preparationRecommendations: { type: [String], default: [] },
     startedAt: { type: Date, default: Date.now },

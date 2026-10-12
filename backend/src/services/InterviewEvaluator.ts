@@ -5,6 +5,7 @@ import { IQuestionEvaluation, IQuestionItem, IEvaluationDimensions } from '../mo
 import { extractSkills } from '../utils/skillLexicon.js';
 import { escapeRegExp } from '../utils/skillMatching.js';
 import { InterviewRubric, RUBRICS } from './interview/InterviewRubrics.js';
+import { answerLanguage, EVALUATION_METHODS, LIMITATIONS, limitationsFor, uncertaintyFor } from './interview/evaluationQuality.js';
 
 /**
  * Interview answer evaluation.
@@ -78,6 +79,31 @@ const emptyEvaluation = (rubric: InterviewRubric = RUBRICS.general): IQuestionEv
   source: 'heuristic',
   dimensions: { relevance: 0, completeness: 0, specificity: 0, structure: 0, technicalAccuracy: null },
   ...rubricStamp(rubric),
+  method: EVALUATION_METHODS.empty,
+  uncertainty: { level: 'low', reasons: ['No answer was given; there was nothing to judge.'] },
+  limitations: [LIMITATIONS.notHiringPrediction],
+  evaluatedAt: new Date()
+});
+
+/**
+ * X9: an answer the rubric cannot score fairly (not in English). It is kept, explained and left out
+ * of the overall score, instead of being marked down as off-topic.
+ */
+const notScoredEvaluation = (reason: string, rubric: InterviewRubric = RUBRICS.general): IQuestionEvaluation => ({
+  score: 0,
+  starFormatted: false,
+  strengths: [],
+  improvements: [],
+  missingConcepts: [],
+  feedback: `Not scored: ${reason} Practice scoring works in English only; this answer is saved but not counted in your overall score.`,
+  source: 'heuristic',
+  // No dimensions: nothing was measured
+  ...rubricStamp(rubric),
+  method: EVALUATION_METHODS.language,
+  notScored: true,
+  notScoredReason: reason,
+  uncertainty: { level: 'high', reasons: [reason] },
+  limitations: [LIMITATIONS.englishOnly, LIMITATIONS.notHiringPrediction],
   evaluatedAt: new Date()
 });
 
@@ -92,8 +118,12 @@ const emptyEvaluation = (rubric: InterviewRubric = RUBRICS.general): IQuestionEv
  * never above HEURISTIC_MAX_SCORE.
  */
 export function evaluateHeuristically(answer: string, question: IQuestionItem, rubric: InterviewRubric = RUBRICS.general): IQuestionEvaluation {
-  const text = (answer || '').trim();
+  // Whitespace is normalised so multi-word markers ("so that", "as a result") match however the answer is spaced
+  const text = (answer || '').replace(/\s+/g, ' ').trim();
   const words = wordsOf(text);
+  // Language first: the word counter only sees Latin words, so a Hindi answer would look empty
+  const languageCheck = text ? answerLanguage(text) : { english: true };
+  if (!languageCheck.english) return notScoredEvaluation(languageCheck.reason!, rubric);
   if (words.length < 3) return emptyEvaluation(rubric);
 
   // --- Relevance ---
@@ -114,8 +144,10 @@ export function evaluateHeuristically(answer: string, question: IQuestionItem, r
   const completeness = clamp01(words.length / 120);
 
   // --- Specificity ---
-  const technologies = extractSkills(text).length;
-  const metrics = (text.match(METRIC) || []).length;
+  const technologyNames = extractSkills(text);
+  const metricMatches = text.match(METRIC) || [];
+  const technologies = technologyNames.length;
+  const metrics = metricMatches.length;
   const specificity = clamp01((Math.min(technologies, 3) + Math.min(metrics, 2) * 1.5) / 5);
 
   // --- Structure ---
@@ -187,6 +219,18 @@ export function evaluateHeuristically(answer: string, question: IQuestionItem, r
       technicalAccuracy: null
     },
     ...rubricStamp(rubric),
+    method: EVALUATION_METHODS.heuristic,
+    // X9: what each dimension was measured from, so the score can be checked
+    factors: {
+      relevance: { questionTermsMatched: matchedQuestionTerms, conceptsCovered: coveredConcepts, conceptsMissing: missingConcepts, saturatesAt: 3 },
+      completeness: { words: words.length, fullCreditAt: 120 },
+      specificity: { technologies: technologyNames.slice(0, 10), metrics: metricMatches.slice(0, 5).map(m => m.trim()) },
+      structure: isBehavioural ? { kind: 'STAR', partsFound: starParts } : { kind: 'reasoning', reasoningMarkers: reasoningCount, fullCreditAt: 4 },
+      weights: rubric.heuristic,
+      capsApplied: caps,
+    },
+    uncertainty: uncertaintyFor('heuristic', words.length, caps),
+    limitations: limitationsFor('heuristic'),
     evaluatedAt: new Date()
   };
 }
@@ -213,9 +257,18 @@ export function evaluationFromRubric(
 
   // Guard rails applied regardless of what the model returned
   const wordCount = wordsOf(answer).length;
-  if (!rubric.is_relevant || rubric.relevance <= 1) score = Math.min(score, 20);
-  if (wordCount < 15) score = Math.min(score, 30);
-  else if (wordCount < 40) score = Math.min(score, 60);
+  const caps: string[] = [];
+  if (!rubric.is_relevant || rubric.relevance <= 1) {
+    score = Math.min(score, 20);
+    caps.push('it does not address the question');
+  }
+  if (wordCount < 15) {
+    score = Math.min(score, 30);
+    caps.push('the answer is only a sentence long');
+  } else if (wordCount < 40) {
+    score = Math.min(score, 60);
+    caps.push('the answer is brief');
+  }
 
   return {
     score,
@@ -233,6 +286,15 @@ export function evaluationFromRubric(
       technicalAccuracy: hasAccuracy ? (rubric.technical_accuracy as number) * 20 : null
     },
     ...rubricStamp(roleRubric),
+    method: EVALUATION_METHODS.ai,
+    factors: {
+      rubricScoresOutOf5: { relevance: rubric.relevance, completeness: rubric.completeness, specificity: rubric.specificity, structure: rubric.structure, technicalAccuracy: rubric.technical_accuracy ?? null },
+      weights: roleRubric.ai,
+      words: wordCount,
+      capsApplied: caps,
+    },
+    uncertainty: uncertaintyFor('ai', wordCount, caps),
+    limitations: limitationsFor('ai'),
     evaluatedAt: new Date()
   };
 }
@@ -247,6 +309,9 @@ export async function evaluateAnswer(
   roleTitle: string,
   rubric: InterviewRubric = RUBRICS.general
 ): Promise<IQuestionEvaluation> {
+  // X9: the rubric (and the AI prompt) is English; other languages are not scored rather than marked down
+  const languageCheck = (answer || '').trim() ? answerLanguage(answer) : { english: true };
+  if (!languageCheck.english) return notScoredEvaluation(languageCheck.reason!, rubric);
   if (wordsOf(answer || '').length < 3) return emptyEvaluation(rubric);
 
   try {

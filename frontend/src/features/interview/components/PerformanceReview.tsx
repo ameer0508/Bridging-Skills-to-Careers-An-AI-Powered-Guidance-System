@@ -16,6 +16,7 @@ import {
 import { GlassPanel } from '../../../components/experience/workspace';
 import { DimensionBars, SourceBadge } from './EvaluationProvenance';
 import { RubricNote } from './RubricControls';
+import { EvaluationDetails } from './EvaluationDetails';
 import { HEURISTIC_NOTICE } from './evaluationLabels';
 import { InterviewSession, QuestionItem } from '../../../workspaces/InterviewPrepAgentWorkspace/InterviewPrepAgentWorkspace';
 
@@ -317,7 +318,7 @@ export const PerformanceReview: React.FC<PerformanceReviewProps> = ({
                         : 'bg-rose-500/20 text-rose-300'
                     }`}
                   >
-                    {score}%
+                    {q.evaluation?.notScored ? 'not scored' : `${score}%`}
                   </span>
                   {isStar && <span className="text-emerald-400 text-[10px]">★</span>}
                 </button>
@@ -382,7 +383,7 @@ export const PerformanceReview: React.FC<PerformanceReviewProps> = ({
                       {selectedQuestion.evaluation.starFormatted ? 'STAR structure detected' : 'STAR structure not detected'}
                     </span>
                     <span className="px-2.5 py-0.5 rounded-xl bg-slate-900 text-emerald-400 font-bold border border-emerald-500/40">
-                      Score: {selectedQuestion.evaluation.score}/100
+                      {selectedQuestion.evaluation.notScored ? 'Not scored' : `Score: ${selectedQuestion.evaluation.score}/100`}
                     </span>
                   </div>
                 </div>
@@ -392,6 +393,7 @@ export const PerformanceReview: React.FC<PerformanceReviewProps> = ({
                 </p>
 
                 <DimensionBars dimensions={selectedQuestion.evaluation.dimensions} />
+                <EvaluationDetails evaluation={selectedQuestion.evaluation} />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* What Worked */}
