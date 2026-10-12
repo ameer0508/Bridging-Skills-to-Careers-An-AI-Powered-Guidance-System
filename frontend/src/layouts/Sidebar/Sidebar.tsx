@@ -18,6 +18,7 @@ import {
   Briefcase,
   Bot,
   MessageSquare,
+  FlaskConical,
 } from 'lucide-react';
 import { SidebarItem } from './SidebarItem';
 import { useAuthStore } from '../../store/authStore';
@@ -100,6 +101,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label: 'Career Intelligence',
           icon: <Compass className="w-4 h-4" />,
           shortcut: '⌘4',
+        },
+        {
+          to: '/career-lab',
+          label: 'Career Lab',
+          icon: <FlaskConical className="w-4 h-4" />,
         },
         {
           to: '/readiness',

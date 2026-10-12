@@ -8,6 +8,8 @@ import RecalculationRun from '../models/RecalculationRun.js';
 import { AFFECTED_MODULES } from '../services/RecalculationService.js';
 import { FRESHNESS_POLICY, freshnessOf } from '../services/SkillFreshnessService.js';
 import { parsePeriodEnd, monthsBetween } from '../utils/periods.js';
+import EvidenceCalculator from '../services/EvidenceCalculator.js';
+import CareerScenarioService from '../services/CareerScenarioService.js';
 import { ensureFakeAiService } from './helpers/fakeAiService.js';
 import { startHttpHarness, resumeForm, type HttpHarness } from './helpers/httpHarness.js';
 
@@ -77,6 +79,63 @@ export async function runCareerLabTests() {
   assert.equal(freshnessOf([evidence(at(60)), evidence(at(2))], now).status, 'current', 'the most recent dated evidence decides');
   assert.equal(freshnessOf([evidence(at(50), { ongoing: true })], now).monthsSinceLastUse, 0);
   console.log('  ✓ Dates: period ends are read from resume text; unreadable periods stay undated; freshness thresholds hold');
+
+  // === R2 evaluation: the hypothetical evidence model against the real evidence calculator ====
+  // For every combination of existing evidence (0-3 roles, 0-3 projects, with or without a
+  // certification) and every kind of addition, the score the what-if engine predicts must equal
+  // the score the real calculator gives once the resume really contains that addition.
+  {
+    const SKILL = 'Docker';
+    const parsed = (roles: number, projects: number, certified: boolean) =>
+      ({
+        id: 'synthetic',
+        experience: Array.from({ length: roles }, (_, i) => ({
+          role: { value: `Engineer ${i + 1}` },
+          company: { value: `Company ${i + 1}` },
+          duration: { value: `${2018 + i} - ${2019 + i}` },
+          responsibilities: [{ value: `Ran services with ${SKILL}.` }]
+        })),
+        projects: Array.from({ length: projects }, (_, i) => ({ name: { value: `Project ${i + 1}` }, description: { value: `Built with ${SKILL}.` }, technologies: [], contributions: [] })),
+        certifications: certified ? [{ value: `${SKILL} Certified Associate` }] : [],
+        education: []
+      }) as unknown as Parameters<typeof EvidenceCalculator.calculateForSkill>[2];
+    const real = (roles: number, projects: number, certified: boolean) => EvidenceCalculator.calculateForSkill(SKILL, [], parsed(roles, projects, certified));
+
+    let cases = 0;
+    const mismatches: string[] = [];
+    for (let roles = 0; roles <= 3; roles++) {
+      for (let projects = 0; projects <= 3; projects++) {
+        for (const certified of [false, true]) {
+          const base = real(roles, projects, certified);
+          const start = [{ canonicalName: SKILL, aliases: [], evidenceScore: base.score, evidences: base.evidences, hypothetical: false }];
+          const additions: Array<[string, Parameters<typeof CareerScenarioService.applyChanges>[1][number], number]> = [
+            ['project', { type: 'add_project', skills: [SKILL] }, real(roles, projects + 1, certified).score],
+            ['role', { type: 'add_experience', skills: [SKILL] }, real(roles + 1, projects, certified).score],
+            ['certification', { type: 'add_certification', skills: [SKILL] }, real(roles, projects, true).score]
+          ];
+          for (const [label, change, expected] of additions) {
+            const predicted = CareerScenarioService.applyChanges(start, [change], new Set())[0].evidenceScore;
+            cases++;
+            if (predicted !== expected) mismatches.push(`roles=${roles} projects=${projects} cert=${certified} +${label}: predicted ${predicted}, real ${expected}`);
+          }
+        }
+      }
+    }
+    // A skill that is not on the resume at all, then gains each kind of evidence
+    for (const [label, change, expected] of [
+      ['project', { type: 'add_project', skills: [SKILL] }, real(0, 1, false).score],
+      ['role', { type: 'add_experience', skills: [SKILL] }, real(1, 0, false).score],
+      ['certification', { type: 'add_certification', skills: [SKILL] }, real(0, 0, true).score],
+      ['listing', { type: 'add_skill', skill: SKILL }, real(0, 0, false).score]
+    ] as Array<[string, Parameters<typeof CareerScenarioService.applyChanges>[1][number], number]>) {
+      const predicted = CareerScenarioService.applyChanges([], [change], new Set()).find(s => s.canonicalName === SKILL)!.evidenceScore;
+      cases++;
+      if (predicted !== expected) mismatches.push(`new skill +${label}: predicted ${predicted}, real ${expected}`);
+    }
+    assert.deepEqual(mismatches, [], `hypothetical evidence differs from real evidence:\n  ${mismatches.join('\n  ')}`);
+    assert.equal(cases, 100);
+    console.log(`  ✓ R2 evaluation: predicted evidence equals real evidence in all ${cases} cases (0-3 roles x 0-3 projects x certification x addition)`);
+  }
 
   const fakeAi = await ensureFakeAiService();
   void fakeAi;

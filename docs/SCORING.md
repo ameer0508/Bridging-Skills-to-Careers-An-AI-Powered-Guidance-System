@@ -219,3 +219,41 @@ A chat reply is either written by an AI provider or it is a fallback; there is n
 - No confidence figure or token cost is attached to a chat reply.
 - The development mock provider is never allowed to answer chat, interview questions or interview
   scoring.
+
+## 10. Career Lab: comparison, what-if, counterfactuals, transition plans, freshness
+
+None of these has its own formula. Each calls the career match formula of section 3 on a copy of
+the user's skills. The method and its evaluation are written up in
+[`NEXTGEN_RESEARCH.md`](NEXTGEN_RESEARCH.md).
+
+- **Comparison.** For each chosen career: the match score, requirements covered by importance,
+  how many covered requirements are applied, listed only or inferred, the mean evidence score of
+  the covered ones, the skills to acquire and to strengthen, and the score points still open.
+  Effort is expressed in skills and points. No time estimate is given: the system has no data on
+  how long a skill takes to learn.
+- **What-if.** A hypothetical project, role or certification earns the same evidence points as a
+  real one (section 2), including diminishing returns and the cap at 100. A skill that newly
+  appears also earns the 10 points for being listed. The result is never saved.
+- **Counterfactuals.** Each requirement not yet backed by applied evidence is tried as one added
+  project and ranked by score gain. A greedy search adds the best remaining change until the
+  target score (default: current score plus 20) is met or nothing raises the score further.
+- **Transition plan.** Intermediate careers must score higher than the target today, share at
+  least one missing skill with it and have fewer missing skills. Up to two are used, ordered from
+  closest to the user's current evidence. Each stage lists skills not assigned to an earlier
+  stage; its projected score assumes each is used in one project. A stage is "reached" when the
+  user's real evidence covers its skills.
+- **Freshness.** Only dated evidence counts: the end of a role the skill was used in, a
+  confirmation by the user, or an assessment. Used within 18 months is "current", within 36
+  "ageing", beyond that "stale"; no dated evidence is "undated". These limits are a policy chosen
+  for the tool, not a measured rate of forgetting. **Freshness does not change any score.** A
+  user's confirmation is stored as unverified evidence worth 0 points.
+
+Hypothetical scores describe the formula's output. They are not predictions of interviews,
+offers or employment.
+
+## 11. Versions and recalculation
+
+Every recalculation records `scoringVersion` (currently `2026.10-1`, changed whenever a formula,
+weight or threshold in this document changes) and `taxonomyVersion` (a hash of the career and
+requirement data). A transition plan made under other versions is shown as outdated. Which events
+recompute which figures is tabulated in `NEXTGEN_RESEARCH.md` (R1).

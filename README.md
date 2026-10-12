@@ -29,6 +29,7 @@ JSearch) have not been exercised live; see [Verification status](#verification-s
 | Resume | Upload a PDF or DOCX (5 MB at most). Replace, download, reprocess or delete it. After a replacement the page lists which skills were added and which are no longer found. |
 | Skills | Skills are recognised from a fixed lexicon of 128 skills and scored by the evidence in the resume: applied in a role or project scores higher than merely listed. |
 | Career matches | 14 careers with 109 weighted requirements. Each match shows a score and a per-requirement table of how the score was calculated. |
+| Career Lab | Compare two to four careers, try what-if scenarios, see which changes would raise a match most, check how recent each skill is, and build a staged plan to a target career. Scenarios are hypothetical and never change the profile. |
 | Readiness | A 0-100 readiness score per career with a tier and dimension breakdown. It describes resume evidence; it does not predict hiring outcomes. |
 | Recommendations and roadmap | One recommendation per gap, leading with the chosen target career, and a phased roadmap whose progress is saved. |
 | Jobs | Search with keyword, location, remote, employment type, date and salary filters. Save jobs, set a status, keep notes, set follow-up reminders, and see the status history. |
@@ -130,9 +131,9 @@ browser chat request 40 s.
 | `pnpm typecheck` | TypeScript type-check of frontend and backend. |
 | `pnpm lint` | ESLint on frontend and backend; any warning fails. |
 | `pnpm build` | Frontend type-check and production build, then backend build. |
-| `pnpm test` | 19 backend suites on an in-memory database with a stub AI service. |
+| `pnpm test` | 20 backend suites on an in-memory database with a stub AI service. |
 | `cd ai && python -m pytest` | 104 AI service tests; provider calls are mocked. |
-| `pnpm test:e2e` | 35 browser checks against an isolated copy of the whole stack. See [`e2e/README.md`](e2e/README.md). |
+| `pnpm test:e2e` | 40 browser checks against an isolated copy of the whole stack. See [`e2e/README.md`](e2e/README.md). |
 | `gh workflow run docker-smoke.yml --ref <branch>` | Builds and starts the Docker Compose stack on GitHub Actions and runs 11 checks against it. |
 
 None of these contacts Gemini or JSearch, and none reads or writes the development database or
@@ -193,6 +194,8 @@ docs/       Scoring, API reference, deployment, data compatibility, checklist
 ## Further documentation
 
 - [`docs/SCORING.md`](docs/SCORING.md): every formula, its limits and a worked example
+- [`docs/NEXTGEN_CHECKLIST.md`](docs/NEXTGEN_CHECKLIST.md): progress of the next-generation expansion (separate from the original checklist)
+- [`docs/NEXTGEN_RESEARCH.md`](docs/NEXTGEN_RESEARCH.md): method, evaluation and limits of the research contributions
 - [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md): endpoints
 - [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md): production settings and Docker
 - [`docs/DATA_COMPATIBILITY.md`](docs/DATA_COMPATIBILITY.md): legacy data and migration

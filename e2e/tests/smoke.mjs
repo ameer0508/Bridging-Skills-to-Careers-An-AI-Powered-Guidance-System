@@ -200,6 +200,102 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       return `${readiness}% on four pages`;
     });
 
+    // ---- Career Lab (expansion) --------------------------------------------------------------------
+    const openLabTab = async (name) => {
+      await page.getByRole('tab', { name, exact: true }).click();
+      await page.waitForTimeout(800);
+    };
+    await t.step('Career Lab: compare careers with the same scores as the match list', async () => {
+      const matches = (await api('GET', '/careers/matches')).data.matches;
+      const stored = matches.find((m) => m.careerId.title === 'Frontend Engineer');
+      await gotoAndSettle(page, `${webUrl}/career-lab`, 2500);
+      await page.getByLabel('Frontend Engineer', { exact: true }).check();
+      await page.getByLabel('DevOps Engineer', { exact: true }).check();
+      await page.getByRole('button', { name: 'Compare', exact: true }).click();
+      await page.getByTestId('compare-result').waitFor({ timeout: 15_000 });
+      const shown = await page.getByTestId('compare-score-Frontend Engineer').innerText();
+      expect(shown === `${stored.matchScore}%`, `comparison shows ${shown}, the match list has ${stored.matchScore}%`);
+      expect(/No time estimate is given/.test(await page.getByTestId('compare-effort-note').innerText()), 'the effort note does not say that no time estimate is given');
+      expect(/Docker/.test(await page.getByTestId('compare-result').innerText()), 'the DevOps gap (Docker) is not listed');
+      return `Frontend Engineer ${shown}`;
+    });
+    await t.step('Career Lab: counterfactuals and a what-if scenario that changes nothing real', async () => {
+      const stateNow = async () => ({
+        skills: (await api('GET', '/skills/me')).data.totalSkills,
+        matches: JSON.stringify((await api('GET', '/careers/matches')).data.matches.map((m) => [m.careerId.title, m.matchScore])),
+      });
+      const before = await stateNow();
+      await openLabTab('What-if');
+      await page.selectOption('#whatif-career', { label: 'DevOps Engineer' });
+      await page.getByTestId('counterfactuals').waitFor({ timeout: 15_000 });
+      expect((await page.getByTestId('counterfactual-row').count()) > 0, 'no ranked changes are listed');
+      expect(await page.getByTestId('counterfactual-path').isVisible(), 'no route to a higher score is shown');
+
+      await page.fill('#scenario-skill', 'Underwater Basket Weaving');
+      await page.getByRole('button', { name: 'Add to scenario' }).click();
+      await page.getByRole('button', { name: 'Run scenario' }).click();
+      await page.waitForTimeout(1500);
+      expect(/not a skill SkillBridge recognises/.test(await bodyText(page)), 'an unknown skill was not rejected with a message');
+      // That rejection is the expected outcome, not an unexpected API failure
+      log.failed.splice(0, log.failed.length, ...log.failed.filter((entry) => entry !== '400 POST /careers/what-if'));
+      log.console.splice(0, log.console.length, ...log.console.filter((entry) => !/UNKNOWN_SKILL|status of 400/.test(entry)));
+      await page.getByRole('button', { name: 'Clear', exact: true }).click();
+
+      await page.fill('#scenario-skill', 'Docker');
+      await page.getByRole('button', { name: 'Add to scenario' }).click();
+      await page.getByRole('button', { name: 'Run scenario' }).click();
+      await page.getByTestId('whatif-result').waitFor({ timeout: 15_000 });
+      expect(/Nothing was saved/.test(await page.getByTestId('whatif-hypothetical-label').innerText()), 'the result is not labelled hypothetical');
+      const row = await page.getByTestId('whatif-career-row').filter({ hasText: 'DevOps Engineer' }).innerText();
+      const [now, scenario] = [...row.matchAll(/(\d+)%/g)].map((m) => Number(m[1]));
+      expect(scenario > now, `the scenario did not raise the DevOps score (${now}% to ${scenario}%)`);
+
+      const after = await stateNow();
+      expect(after.skills === before.skills && after.matches === before.matches, 'the what-if changed stored skills or scores');
+      return `DevOps Engineer ${now}% to ${scenario}% hypothetically; stored data unchanged`;
+    });
+    await t.step('Career Lab: skill freshness is dated honestly and a confirmation adds no points', async () => {
+      await openLabTab('Skill freshness');
+      const react = page.locator('[data-testid="freshness-skill"][data-skill="React"]');
+      await react.waitFor({ timeout: 15_000 });
+      expect((await react.getAttribute('data-status')) === 'aging', `React is shown as ${await react.getAttribute('data-status')}`);
+      const node = page.locator('[data-testid="freshness-skill"][data-skill="Node.js"]');
+      expect((await node.getAttribute('data-status')) === 'undated', 'a skill with no dated evidence is not shown as undated');
+      const scoreOfReact = async () => (await api('GET', '/skills/freshness')).data.skills.find((s) => s.name === 'React').evidenceScore;
+      const scoreBefore = await scoreOfReact();
+      await react.getByRole('button', { name: 'I have used this recently' }).click();
+      await react.getByRole('button', { name: 'Confirm' }).click();
+      await page.locator('[data-testid="freshness-skill"][data-skill="React"][data-status="current"]').waitFor({ timeout: 15_000 });
+      expect(/Confirmed by you \(not verified\)/.test(await react.innerText()), 'the confirmation is not labelled unverified');
+      const scoreAfter = await scoreOfReact();
+      expect(scoreAfter === scoreBefore, `the confirmation changed the evidence score (${scoreBefore} to ${scoreAfter})`);
+      return 'React ageing to current after confirmation, evidence score unchanged; Node.js undated';
+    });
+    await t.step('Career Lab: a transition plan is built, saved and survives a reload', async () => {
+      await openLabTab('Transition plan');
+      await page.selectOption('#transition-target', { label: 'Machine Learning Engineer' });
+      await page.getByRole('button', { name: 'Build plan' }).click();
+      await page.getByTestId('transition-plan').waitFor({ timeout: 15_000 });
+      const stages = await page.getByTestId('transition-stage').count();
+      expect(stages >= 1, 'the plan has no stages');
+      await page.reload();
+      await page.waitForTimeout(2500);
+      await openLabTab('Transition plan');
+      await page.getByTestId('transition-plan').waitFor({ timeout: 15_000 });
+      expect(/Machine Learning Engineer/.test(await page.getByTestId('transition-plan').innerText()), 'the saved plan is not shown after a reload');
+      return `${stages} stage(s) to Machine Learning Engineer`;
+    });
+    await t.step('Career Lab: activity shows what each event recalculated', async () => {
+      await openLabTab('Activity');
+      await page.getByTestId('recalculation-run').first().waitFor({ timeout: 15_000 });
+      const processed = page.locator('[data-testid="recalculation-run"][data-trigger="resume_processed"]');
+      expect((await processed.count()) === 1, `expected one "resume processed" entry, found ${await processed.count()}`);
+      expect(/Recalculated career matches, readiness and gaps, recommendations/.test(await processed.first().innerText()), 'the entry does not say what was recalculated');
+      const skipped = await page.locator('[data-testid="recalculation-run"][data-status="skipped_duplicate"]').count();
+      expect(skipped >= 1, 'the confirmation that changed no score is not recorded as needing no recalculation');
+      return `one resume run; ${skipped} event(s) correctly recalculated nothing`;
+    });
+
     // ---- Roadmap ------------------------------------------------------------------------------------
     let completedBeforeReplace = 0;
     await t.step('roadmap is generated and completing an item moves progress', async () => {
@@ -453,7 +549,7 @@ export async function run({ webUrl, apiUrl, aiControl }) {
     // ---- Layout and accessibility basics ------------------------------------------------------------------------------
     await t.step('main pages render, fit a phone screen, and name their controls', async () => {
       const problems = [];
-      const routes = ['/home', '/ai', '/resume', '/skills', '/careers', '/readiness', '/roadmap', '/recommendations', '/job-agent', '/interview-agent', '/analytics', '/profile', '/settings'];
+      const routes = ['/home', '/ai', '/resume', '/skills', '/careers', '/career-lab', '/readiness', '/roadmap', '/recommendations', '/job-agent', '/interview-agent', '/analytics', '/profile', '/settings'];
       for (const route of routes) {
         await gotoAndSettle(page, webUrl + route, 2200);
         const text = await bodyText(page);
@@ -473,7 +569,7 @@ export async function run({ webUrl, apiUrl, aiControl }) {
         if (audit.unnamed || audit.unlabelled || audit.noAlt) problems.push(`${route}: ${JSON.stringify(audit)}`);
       }
       await page.setViewportSize({ width: 390, height: 844 });
-      for (const route of ['/home', '/resume', '/careers', '/job-agent', '/roadmap', '/interview-agent', '/readiness']) {
+      for (const route of ['/home', '/resume', '/careers', '/career-lab', '/job-agent', '/roadmap', '/interview-agent', '/readiness']) {
         await gotoAndSettle(page, webUrl + route, 2200);
         const width = await page.evaluate(() => document.documentElement.scrollWidth);
         if (width > 395) problems.push(`${route}: ${width}px wide at 390px`);
@@ -502,7 +598,7 @@ export async function run({ webUrl, apiUrl, aiControl }) {
           : route.continue();
       await page.route(`${apiUrl}/**`, failReads);
       const silent = [];
-      const routes = ['/home', '/ai', '/resume', '/skills', '/careers', '/readiness', '/roadmap', '/recommendations', '/job-agent', '/interview-agent', '/analytics', '/profile'];
+      const routes = ['/home', '/ai', '/resume', '/skills', '/careers', '/career-lab', '/readiness', '/roadmap', '/recommendations', '/job-agent', '/interview-agent', '/analytics', '/profile'];
       for (const route of routes) {
         await page.goto(webUrl + route);
         const shown = await page.getByTestId('load-error-banner').waitFor({ timeout: 15_000 }).then(() => true, () => false);

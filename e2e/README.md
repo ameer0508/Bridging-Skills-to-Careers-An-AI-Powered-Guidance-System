@@ -44,7 +44,8 @@ labelled demo listings. The temp directory and all processes are removed at the 
 
 Registration, sign-in and rejected sign-in; onboarding; resume upload, replacement, reprocessing,
 failed-extraction recovery and confirmed deletion; extracted skills; career matches and score
-breakdown; readiness shown consistently; roadmap generation and progress; job search filters,
+breakdown; the Career Lab (comparison, what-if, counterfactuals, skill freshness, transition plan,
+recalculation activity); readiness shown consistently; roadmap generation and progress; job search filters,
 demo-listing labels, saving, status, notes, reminders and status history; interviews (question
 source, scoring source, rubric dimensions, stored report, history, job-specific practice, no
 repeated questions); chat fallback and retry; the load-failure notice on twelve pages when the API

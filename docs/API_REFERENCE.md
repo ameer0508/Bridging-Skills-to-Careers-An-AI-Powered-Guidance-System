@@ -83,6 +83,23 @@ Rules that apply to every authenticated endpoint:
 | `GET` | `/api/v1/readiness` | Yes | Readiness per career with dimensions and gap analysis. |
 | `GET` | `/api/v1/analytics` | Yes | Progress history. |
 
+### Career Lab
+
+Nothing in this group changes the user's skills or scores, except recording a confirmation.
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| `GET` | `/api/v1/careers/catalog` | Yes | Every career that can be compared or targeted. |
+| `POST` | `/api/v1/careers/compare` | Yes | Body `careerIds` (2 to 4). Requirements, evidence and effort per career. |
+| `POST` | `/api/v1/careers/what-if` | Yes | Body `changes` (1 to 10 of `add_skill`, `remove_skill`, `add_project`, `add_certification`, `add_experience`) and optional `careerIds`. Scores before and after with requirement-level changes. `400 UNKNOWN_SKILL` for a skill that is not recognised. Nothing is saved. |
+| `GET` | `/api/v1/careers/:id/counterfactuals` | Yes | Ranked single changes and a path to `targetScore` (query, 0-100). |
+| `GET` | `/api/v1/careers/transition-plans` | Yes | The caller's plans, each stage re-evaluated against current evidence. |
+| `POST` | `/api/v1/careers/transition-plans` | Yes | Body `targetCareerId`. Builds or replaces the plan. `409 NO_SKILL_PROFILE` without a resume. |
+| `DELETE` | `/api/v1/careers/transition-plans/:id` | Yes | Remove a plan. |
+| `GET` | `/api/v1/skills/freshness` | Yes | When each skill was last shown to be in use, from dated evidence only. |
+| `POST` | `/api/v1/skills/:id/revalidate` | Yes | Record the caller's confirmation of recent use (unverified, 0 points). Optional `note`. |
+| `GET` | `/api/v1/users/me/intelligence-history` | Yes | The last 20 recalculations: trigger, modules recomputed, figures before and after, versions. |
+
 ### Recommendations and roadmap
 
 | Method | Path | Auth | Purpose |

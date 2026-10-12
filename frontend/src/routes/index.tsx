@@ -11,6 +11,7 @@ import { AIThinkingAnimation } from '../components/experience';
 
 // Lazy-loaded Workspaces for Route Code Splitting
 const HomeWorkspace = lazy(() => import('../workspaces/HomeWorkspace/HomeWorkspace'));
+const CareerLabWorkspace = lazy(() => import('../workspaces/CareerLabWorkspace/CareerLabWorkspace'));
 const CareerIntelligenceWorkspace = lazy(() => import('../workspaces/CareerIntelligenceWorkspace/CareerIntelligenceWorkspace'));
 const LearningJourneyWorkspace = lazy(() => import('../workspaces/LearningJourneyWorkspace/LearningJourneyWorkspace'));
 const AnalyticsWorkspace = lazy(() => import('../workspaces/AnalyticsWorkspace/AnalyticsWorkspace'));
@@ -126,6 +127,14 @@ export const router = createBrowserRouter([
             element: (
               <WorkspaceSuspense>
                 <CareerIntelligenceWorkspace />
+              </WorkspaceSuspense>
+            ),
+          },
+          {
+            path: '/career-lab',
+            element: (
+              <WorkspaceSuspense>
+                <CareerLabWorkspace />
               </WorkspaceSuspense>
             ),
           },
