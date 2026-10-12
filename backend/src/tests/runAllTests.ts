@@ -29,6 +29,7 @@ import { runLearningProjectTests } from './learning_projects.test.js';
 import { runPortfolioTests } from './portfolio.test.js';
 import { runLearningActivityTests } from './learning_activity.test.js';
 import { runLearningResourceTests } from './learning_resources.test.js';
+import { runNextBestActionTests } from './next_best_action.test.js';
 
 async function runAll() {
   console.log('🚀 Starting Comprehensive SkillBridge Backend Test Suite...');
@@ -78,6 +79,7 @@ async function runAll() {
     await runPortfolioTests();
     await runLearningActivityTests();
     await runLearningResourceTests();
+    await runNextBestActionTests();
     const after = fingerprint();
     const touched = before.filter((entry, i) => entry !== after[i]);
     if (touched.length > 0) {

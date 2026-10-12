@@ -16,6 +16,7 @@ const label = z.string().trim().max(120).optional();
 const changeSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('add_skill'), skill: skillName }).strict(),
   z.object({ type: z.literal('remove_skill'), skill: skillName }).strict(),
+  z.object({ type: z.literal('pass_assessment'), skill: skillName }).strict(),
   z.object({ type: z.literal('add_project'), skills: skillList, name: label }).strict(),
   z.object({ type: z.literal('add_certification'), skills: skillList, name: label }).strict(),
   z.object({ type: z.literal('add_experience'), skills: skillList, name: label }).strict()

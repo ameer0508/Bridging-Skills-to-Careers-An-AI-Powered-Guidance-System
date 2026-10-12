@@ -42,6 +42,19 @@ interface Gap {
 const key = (name: string): string => name.trim().toLowerCase();
 const MAX_SUGGESTIONS = 5;
 
+/** Gap skills a brief would exercise, taking one skill from each group of alternatives. */
+export function practisedGaps<G>(brief: ProjectBrief, gaps: Map<string, G>, gain: Map<string, number>): G[] {
+  const chosen = brief.skills.filter(skill => gaps.has(key(skill)));
+  for (const group of brief.oneOf) {
+    const inGroup = chosen.filter(skill => group.some(g => key(g) === key(skill)));
+    if (inGroup.length <= 1) continue;
+    // Keep the alternative worth most to this career
+    const best = [...inGroup].sort((a, b) => (gain.get(key(b)) ?? 0) - (gain.get(key(a)) ?? 0) || a.localeCompare(b))[0];
+    for (const skill of inGroup) if (skill !== best) chosen.splice(chosen.indexOf(skill), 1);
+  }
+  return chosen.map(skill => gaps.get(key(skill))!);
+}
+
 class ProjectSuggestionService {
   /** The career to plan for: the one asked for, otherwise the user's target role or best match. */
   private async resolveCareer(userId: string, careerId?: string): Promise<string | null> {
@@ -57,17 +70,8 @@ class ProjectSuggestionService {
     return preferred.careerId ? preferred.careerId._id.toString() : null;
   }
 
-  /** Gap skills a brief would exercise, taking one skill from each group of alternatives. */
   private practised(brief: ProjectBrief, gaps: Map<string, Gap>, gain: Map<string, number>): Gap[] {
-    const chosen = brief.skills.filter(skill => gaps.has(key(skill)));
-    for (const group of brief.oneOf) {
-      const inGroup = chosen.filter(skill => group.some(g => key(g) === key(skill)));
-      if (inGroup.length <= 1) continue;
-      // Keep the alternative worth most to this career
-      const best = [...inGroup].sort((a, b) => (gain.get(key(b)) ?? 0) - (gain.get(key(a)) ?? 0) || a.localeCompare(b))[0];
-      for (const skill of inGroup) if (skill !== best) chosen.splice(chosen.indexOf(skill), 1);
-    }
-    return chosen.map(skill => gaps.get(key(skill))!);
+    return practisedGaps(brief, gaps, gain);
   }
 
   /** The five most useful projects for the career. */

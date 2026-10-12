@@ -10,7 +10,7 @@ An item is **Done** only when it has a working screen, an authenticated API, sto
 needed, validation and error states, documented limits, and passing service, HTTP and browser
 tests. Code that exists but is not verified earns nothing.
 
-Expansion total: 100 points. **Current: 34 / 100.**
+Expansion total: 100 points. **Current: 38 / 100.**
 
 ## Phase 1. Advanced career intelligence (15)
 
@@ -75,12 +75,12 @@ One point each. An enhancement is counted here once, even when a feature above d
 | X2 | Validated proficiency and dated skill evidence | 1 | **Done** | Delivered by F1 and B3: every evidence record carries its points, date and one of three verification states (`stated`, `self_attested` at 0 points, `assessed`); proficiency is derived from the evidence score. Suites `career_lab` and `skill_assessment` |
 | X3 | Career explanation | 1 | **Done** | Delivered by A5 and the existing breakdown: baseline evidence per requirement, what would change it, and by how much |
 | X4 | Evidence-grounded readiness calibration | 1 | Pending |  |
-| X5 | Measurable, personalised recommendations | 1 | Pending |  |
+| X5 | Measurable, personalised recommendations | 1 | **Done** | Delivered by R3: each recommended action carries a measured hypothetical score change equal to the what-if result, and a passed skill check gives exactly the predicted score (suite `next_best_action`) |
 | X6 | Time- and progress-aware roadmaps | 1 | **Done** | Delivered by B4: the roadmap is laid out in weeks from the user's own hours, moves with progress and is adjusted when evidence changes. Suite `learning_plan` |
 | X7 | Job freshness, deduplication and rate limits | 1 | Pending |  |
 | X8 | Application histories, reminders and outcomes | 1 | Pending |  |
 | X9 | Interview scoring quality | 1 | Pending |  |
-| X10 | Cross-module Command Center state | 1 | Pending | Partly done: the dashboard shows the study plan from the same data as the roadmap page, and the top bar shows real unread notifications. A single cross-module state for skill checks, projects, portfolio and streak on the Command Center is still to do |
+| X10 | Cross-module Command Center state | 1 | **Done** | Browser suite (47/47): the Command Center shows the study plan (roadmap and weekly hours), ranked next steps drawn from skill checks, practice projects and the portfolio, the learning streak, and the top bar shows real unread notifications. Each is asserted equal to the stored data |
 | X11 | AI observability, fallback and confidence calibration | 1 | Pending |  |
 | X12 | Security, privacy, retention and hardening | 1 | Pending |  |
 
@@ -90,14 +90,14 @@ One point each. An enhancement is counted here once, even when a feature above d
 |---|---|---|---|---|
 | R1 | Continuously adaptive career intelligence | 2 | **Done** | `docs/NEXTGEN_RESEARCH.md` R1; suite `career_lab`: one run per event, only affected modules recomputed (match record ids unchanged on a role change), duplicates and a burst of ten collapse to one, audit record with before/after figures and versions; shown in the Career Lab Activity tab |
 | R2 | Explainable and counterfactual career matching | 2 | **Done** | `docs/NEXTGEN_RESEARCH.md` R2; suite `career_lab`: hypothetical evidence equals real evidence in 100 of 100 grid cases; end-to-end scores equal after really adding the evidence; path and plan consistent with what-if; isolation checked |
-| R3 | Adaptive next-best-action recommendations | 2 | Pending |  |
+| R3 | Adaptive next-best-action recommendations | 2 | **Done** | `docs/NEXTGEN_RESEARCH.md` R3; suite `next_best_action`; browser check on the dashboard (47/47): deterministic ranking of evidence-producing actions over published factors and chosen weights, market factor neutral; compared with a gap-importance baseline on 42 synthetic profiles (mean gain after three actions 32.1 vs 30.43 points; better in 16, equal in 25, worse in 1). Limits stated, including that the comparison is partly circular and nothing was tried with real users |
 | R4 | Market-aware career adaptation | 2 | Pending |  |
 
 ## Phase 8. Regression, security, UX, CI and release verification (10)
 
 | ID | Item | Points | Status | Evidence |
 |---|---|---|---|---|
-| V1 | Original regression baseline still passes (19 backend suites, 104 AI tests, 35 browser checks) | 2 | Pending | Passing at this checkpoint: 26 backend suites (19 original + 7), 104 AI tests, 46 browser checks (35 original + 11). Awarded at the end of the expansion |
+| V1 | Original regression baseline still passes (19 backend suites, 104 AI tests, 35 browser checks) | 2 | Pending | Passing at this checkpoint: 27 backend suites (19 original + 8), 104 AI tests, 47 browser checks (35 original + 12). Awarded at the end of the expansion |
 | V2 | Cross-user isolation and input validation for every new endpoint | 2 | Pending |  |
 | V3 | Accessibility and failure states for every new screen | 2 | Pending |  |
 | V4 | Docker Compose workflow passes with the expansion | 2 | Pending |  |

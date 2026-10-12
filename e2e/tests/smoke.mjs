@@ -562,6 +562,26 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       return `${stored.coverage.withResources} of ${stored.coverage.gapSkills} gaps have resources; marks stored without changing scores`;
     });
 
+    await t.step('dashboard: ranked next steps with their reasons, matching the stored ranking, and the real streak', async () => {
+      const stored = (await api('GET', '/recommendations/next-actions')).data;
+      const streak = (await api('GET', '/activity')).data.streak.current;
+      await gotoAndSettle(page, `${webUrl}/home`, 3500);
+      const panel = page.getByTestId('next-steps');
+      await panel.waitFor({ timeout: 15_000 });
+      const steps = page.getByTestId('next-step');
+      expect((await steps.count()) === stored.actions.length && stored.actions.length > 0, `page shows ${await steps.count()} steps, the API has ${stored.actions.length}`);
+      const first = steps.first();
+      const top = stored.actions[0];
+      expect((await first.getAttribute('data-action')) === top.id, 'the top-ranked action is not shown first');
+      expect((await first.innerText()).includes(`from ${top.factors.scoreBefore}% to ${top.factors.scoreAfter}% (hypothetical)`), 'the hypothetical score change is not shown');
+      await first.getByRole('button', { name: /^Show why:/ }).click();
+      const why = await first.getByTestId('next-step-why').innerText();
+      expect(why.includes(`Ranking score ${top.score}`) && /No market data is available/.test(why) && /required-first alone/.test(why), `the reasoning is incomplete: ${why}`);
+      expect(/Market demand is not used/.test(await page.getByTestId('next-steps-note').innerText()), 'the note does not say market demand is unused');
+      expect((await page.getByTestId('home-streak').getAttribute('data-current')) === String(streak), 'the dashboard streak differs from the stored one');
+      return `${stored.actions.length} steps for ${stored.career.title}; first: ${top.title}`;
+    });
+
     // ---- Resume: replace, reprocess, recover ----------------------------------------------------------
     await t.step('replacing the resume rebuilds skills and reports what changed', async () => {
       await gotoAndSettle(page, `${webUrl}/resume`, 2000);

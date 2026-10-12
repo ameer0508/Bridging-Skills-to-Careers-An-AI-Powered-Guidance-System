@@ -91,7 +91,7 @@ Nothing in this group changes the user's skills or scores, except recording a co
 |---|---|---|---|
 | `GET` | `/api/v1/careers/catalog` | Yes | Every career that can be compared or targeted. |
 | `POST` | `/api/v1/careers/compare` | Yes | Body `careerIds` (2 to 4). Requirements, evidence and effort per career. |
-| `POST` | `/api/v1/careers/what-if` | Yes | Body `changes` (1 to 10 of `add_skill`, `remove_skill`, `add_project`, `add_certification`, `add_experience`) and optional `careerIds`. Scores before and after with requirement-level changes. `400 UNKNOWN_SKILL` for a skill that is not recognised. Nothing is saved. |
+| `POST` | `/api/v1/careers/what-if` | Yes | Body `changes` (1 to 10 of `add_skill`, `remove_skill`, `add_project`, `add_certification`, `add_experience`, `pass_assessment`) and optional `careerIds`. Scores before and after with requirement-level changes. `400 UNKNOWN_SKILL` for a skill that is not recognised. Nothing is saved. |
 | `GET` | `/api/v1/careers/:id/counterfactuals` | Yes | Ranked single changes and a path to `targetScore` (query, 0-100). |
 | `GET` | `/api/v1/careers/transition-plans` | Yes | The caller's plans, each stage re-evaluated against current evidence. |
 | `POST` | `/api/v1/careers/transition-plans` | Yes | Body `targetCareerId`. Builds or replaces the plan. `409 NO_SKILL_PROFILE` without a resume. |
@@ -136,6 +136,7 @@ Nothing in this group changes the user's skills or scores, except recording a co
 | `GET` | `/api/v1/learning-resources` | Yes | Free third-party resources grouped by the caller's gaps for a career (`careerId` query; default the best match), the gaps the catalogue has nothing for, and coverage figures. Each resource is marked third-party and "not re-checked". |
 | `GET` | `/api/v1/learning-resources/mine` | Yes | Resources the caller saved or marked as worked through. |
 | `PUT` | `/api/v1/learning-resources/:id/status` | Yes | Body `status`: `saved`, `done` or `null` to clear. The caller's own note; changes no score. |
+| `GET` | `/api/v1/recommendations/next-actions` | Yes | Up to five ranked next actions for a career (`careerId` query; default the target role or best match): skill checks, practice projects and portfolio entries, each with its factors (impact, required gaps, existing evidence, prerequisites, effort, capacity, neutral market factor), score, baseline rank, reasons and the scenario changes it stands for. `hasProfile: false` and no actions without a skill profile. |
 
 ### Jobs and application tracking
 

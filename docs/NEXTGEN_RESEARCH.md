@@ -5,7 +5,7 @@ has been implemented, what the method is, how it was evaluated, what the result 
 does not show. Every result below is produced by an automated test in this repository and can be
 reproduced with `pnpm test`.
 
-Status: **R1 and R2 are implemented and evaluated. R3 and R4 are not started.**
+Status: **R1, R2 and R3 are implemented and evaluated. R4 is not started in this branch.**
 
 All evaluation uses synthetic profiles. Nothing here has been tried with real users, so nothing
 here is evidence about usefulness, learning outcomes or employment.
@@ -104,8 +104,8 @@ hypothetical changes to the copy, and calls that same function.
 
 - **Baseline.** The response includes the user's exact current breakdown per requirement
   (status, evidence score, points earned and possible).
-- **Hypothetical evidence.** A hypothetical project, role or certification earns the points the
-  real evidence calculator would award (`EVIDENCE_POINTS`), including diminishing returns for a
+- **Hypothetical evidence.** A hypothetical project, role, certification or passed skill check earns
+  the points the real calculation would award (`EVIDENCE_POINTS`), including diminishing returns for a
   second and third project or role, the single-count rule for certifications, and the cap at 100.
 - **Requirement-level differences.** For each career the response lists every requirement whose
   status or points changed, before and after.
@@ -164,7 +164,98 @@ hiring outcomes.
 
 ## R3. Adaptive next-best-action recommendations
 
-Not started. Planned method and baseline are in the implementation matrix.
+### Problem
+
+A user with several gaps can do many things next: take a skill check, start a practice project,
+record finished work. Ordering these by the importance of the gap alone ignores how much each
+would actually add, what the user already has, whether a skill must be learnt first, and how much
+time the user has.
+
+### Method
+
+`rankNextActions` (backend, `services/NextBestAction.ts`) is a pure function of the user's
+skills, one career's requirements, the user's weekly hours and their progress. It is
+deterministic: there is no learned model and no randomness.
+
+**Candidates.** Only actions that would add evidence are considered:
+
+| Action | Offered when | Evidence it would add |
+|---|---|---|
+| Take a skill check | The career requires a skill that has a skill check and is not yet verified | 15 points, once (SCORING section 12) |
+| Do (or continue) a practice project | A brief exercises a requirement not yet shown in use | Project points for those skills (section 14) |
+| Add a finished practice project to the portfolio | The project is marked complete and is not in the portfolio | Project points for its skills (section 15) |
+
+**Factors**, all returned with each action:
+
+| Factor | Source |
+|---|---|
+| Impact | Change in the career's match score when the action's evidence is added, computed by the shared scoring engine (the same figure the Career Lab what-if returns) |
+| Gap severity | Number of required requirements the action addresses that are not yet shown in use |
+| Existing evidence | Mean evidence score the user already has for the skills involved |
+| Prerequisites | Skills not on the profile at all, which must be learnt before the action |
+| Effort | The 15-minute limit for a skill check (a fact); a planning range for projects and for learning (assumptions, labelled as such) |
+| Capacity | With weekly hours set: weeks needed, and whether the action fits into two weeks. Without them: not stated |
+| Market demand | Declared, with no data. Value unknown, weight 0 |
+
+**Formula** (weights are chosen values in match-score points, not fitted):
+
+```
+score = impact
+      + 4 x min(2, required gaps addressed)
+      + 3 if the action fits into two weeks of the user's hours (0 when no hours are set)
+      - 2 if a skill must be learnt first
+      + 0 x market demand
+```
+
+Ties are broken by less assumed effort, then by a fixed id order. The response also gives each
+action's position under the baseline, so the effect of the formula is visible per action.
+
+### Baseline
+
+The same candidates ordered by gap importance only: actions addressing a required skill first,
+then preferred, then supporting, with a fixed id order inside each group. It uses no impact,
+evidence, prerequisite or capacity information.
+
+### Evaluation
+
+Test suite `next_best_action`. 42 synthetic profiles: for each of the 14 careers, a starter (two
+requirements listed only, 5 hours a week), someone half-way (every other requirement used in a
+project, 10 hours a week) and an experienced person with gaps (most requirements used at work, no
+hours stated). For each profile both orderings are followed step by step: take the first action,
+add its evidence, rank again.
+
+| Measure | Adaptive ranking | Baseline | Profiles better / equal / worse |
+|---|---|---|---|
+| Mean match-score gain after three actions | 32.1 points | 30.43 points | 16 / 25 / 1 |
+| Mean gain within 40 assumed hours | 6.36 points | 5.57 points | 8 / 33 / 1 |
+| Mean assumed hours for the three actions | 99.44 | 111.99 | |
+
+Properties asserted on all 42 profiles (399 ranked actions): the same input gives the same order;
+every score can be recomputed from the published factors and weights; every action has a positive
+impact; the market factor is null with weight 0; no capacity claim is made without weekly hours;
+learning time is always labelled an assumption; a verified skill is not offered for verification
+again; a finished project is offered as a portfolio entry, not as a project to do.
+
+Against a real profile through the API: each action's impact equals the what-if result for the
+same change, and after really passing a suggested skill check the stored match score equals the
+score the action predicted.
+
+### Limits
+
+- **The comparison is partly circular.** Impact is the largest term in the ranking and the
+  evaluation measures score gain, so the ranking is expected to do at least as well as a baseline
+  that ignores impact. The result shows the formula behaves as designed; it does not show that
+  users who follow it learn more or get hired.
+- The differences are small: equal in 25 of 42 profiles over three actions, and worse in one.
+  The cause of that one case was not investigated.
+- Everything is synthetic. No real user has followed these rankings and no outcome was observed.
+- The weights (4, 3, 2) are chosen, not estimated. Different weights give different orders.
+- Effort for projects and learning is an assumption; the "within 40 hours" row inherits it.
+- Skill checks exist for 8 skills and project briefs for 15 projects, so the candidate set is
+  small and for some careers is dominated by one kind of action.
+- Greedy step-by-step choice is not guaranteed to be the best sequence.
+- Market demand does not influence anything. When dated market records exist (R4, owned by the
+  market module) the factor can be given a weight; until then it is neutral by construction.
 
 ## R4. Market-aware career adaptation
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { StudyPlanSummary } from '../../features/roadmaps/components/StudyPlan';
+import { NextStepsPanel } from '../../features/home/NextSteps';
 import type { RecommendationItem } from '../../types/telemetry';
 import { listFrom } from '../../lib/collections';
 import { useNavigate } from 'react-router-dom';
@@ -459,6 +460,10 @@ export const HomeWorkspace: React.FC = () => {
           onNavigate={(route) => navigate(route)}
           onHoverStage={setTrajectoryHoveredDomainId}
         />
+      </motion.div>
+
+      <motion.div variants={itemVariants} className="relative z-10">
+        <NextStepsPanel />
       </motion.div>
 
       {snapshot.roadmap?.isInitialized && snapshot.roadmap.schedule && (

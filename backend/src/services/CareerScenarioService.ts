@@ -27,10 +27,11 @@ export type ScenarioChange =
   | { type: 'add_project'; skills: string[]; name?: string }
   | { type: 'add_certification'; skills: string[]; name?: string }
   | { type: 'add_experience'; skills: string[]; name?: string }
-  | { type: 'remove_skill'; skill: string };
+  | { type: 'remove_skill'; skill: string }
+  | { type: 'pass_assessment'; skill: string };
 
 /** A skill as the scoring engine needs it, detached from the database. */
-interface ScenarioSkill {
+export interface ScenarioSkill {
   canonicalName: string;
   aliases: string[];
   evidenceScore: number;
@@ -69,7 +70,7 @@ const projectCount = (skill: ScenarioSkill): number =>
   skill.evidences.filter(e => e.sourceType === 'resume_projects' || (e.sourceType === 'portfolio_project' && (e.points || 0) > 0)).length;
 
 /** The scoring engine reads `skillId.canonicalName`, `skillId.aliases`, `evidenceScore` and `evidences`. */
-const asEngineInput = (skills: ScenarioSkill[]): IUserSkill[] =>
+export const asEngineInput = (skills: ScenarioSkill[]): IUserSkill[] =>
   skills.map(s => ({
     skillId: { canonicalName: s.canonicalName, aliases: s.aliases },
     evidenceScore: s.evidenceScore,
@@ -119,6 +120,13 @@ class CareerScenarioService {
       .filter(career => career.requirements.length > 0);
   }
 
+  /** A user's skills and one career's requirements, detached from the database, for scenario work. */
+  public async context(userId: string, careerId: string) {
+    const [skills, [career], requirementKeys] = await Promise.all([this.loadSkills(userId), this.loadCareers([careerId]), this.knownRequirementKeys()]);
+    if (!career) throw new AppError('Career not found.', 404, 'CAREER_NOT_FOUND');
+    return { skills, career, requirementKeys };
+  }
+
   /** Requirement names across all careers, used to accept skill names that are not in the lexicon. */
   private async knownRequirementKeys(): Promise<Set<string>> {
     const names: string[] = await CareerRequirement.distinct('skillName');
@@ -139,7 +147,7 @@ class CareerScenarioService {
       const keys = new Set(skillKeys(canonicalSkillName(name)));
       return result.find(s => [s.canonicalName, ...s.aliases].some(n => skillKeys(n).some(k => keys.has(k))));
     };
-    const ensure = (name: string): ScenarioSkill => {
+    const ensure = (name: string, listed = true): ScenarioSkill => {
       const existing = find(name);
       if (existing) return existing;
       const known = lookupSkill(name);
@@ -149,9 +157,10 @@ class CareerScenarioService {
       const created: ScenarioSkill = {
         canonicalName: known?.name || name.trim(),
         aliases: known?.aliases || [],
-        // A skill that newly appears also earns the baseline for being listed
-        evidenceScore: EVIDENCE_POINTS.listed,
-        evidences: [{ sourceType: 'resume_skills', description: 'Hypothetical: listed', weight: 0.2 }],
+        // A skill that newly appears on a resume also earns the baseline for being listed.
+        // One that appears through a skill check does not: it is not on any resume.
+        evidenceScore: listed ? EVIDENCE_POINTS.listed : 0,
+        evidences: listed ? [{ sourceType: 'resume_skills', description: 'Hypothetical: listed', weight: 0.2 }] : [],
         hypothetical: true
       };
       result.push(created);
@@ -185,6 +194,12 @@ class CareerScenarioService {
             add(skill, stepped(EVIDENCE_POINTS.experience, countOf(skill, 'resume_experience')), 'resume_experience', `Hypothetical role${change.name ? `: ${change.name}` : ''}`);
           }
           break;
+        case 'pass_assessment': {
+          const skill = ensure(change.skill, false);
+          // A skill check counts once per skill, as in the real calculation
+          if (countOf(skill, 'assessment') === 0) add(skill, EVIDENCE_POINTS.assessment, 'assessment', 'Hypothetical: passed skill check');
+          break;
+        }
         case 'add_certification':
           for (const name of change.skills) {
             const skill = ensure(name);

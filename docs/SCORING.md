@@ -425,3 +425,18 @@ nothing is named as such; it is not hidden.
 - No rating, duration, price or completion rate is shown, because none is known.
 - "Saved" and "worked through" are the user's private notes. They are not course completions,
   are not learning activity for the streak, and change no score.
+
+## 18. Next steps (next-best-action ranking)
+
+The dashboard's "next steps" are ranked by a fixed formula over published factors:
+
+```
+score = impact + 4 x min(2, required gaps addressed) + 3 if it fits two weeks of your hours - 2 if a skill must be learnt first
+```
+
+Impact is the hypothetical change in the match score for the target career (section 10). Market
+demand is a declared factor with weight 0 because no market data exists. Each action shows its
+factors, its score and where it would stand if actions were ordered by gap importance alone. The
+method, the baseline comparison and its limits are in [`NEXTGEN_RESEARCH.md`](NEXTGEN_RESEARCH.md)
+(R3). The what-if engine also accepts a hypothetical passed skill check (`pass_assessment`): 15
+points once per skill, without the "listed in a resume" points for a skill new to the profile.
