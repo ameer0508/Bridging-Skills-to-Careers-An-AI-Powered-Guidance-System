@@ -8,7 +8,8 @@
 | **D4** technical assessments without code execution | **Implemented and tested** (U H B D) |
 | **D3** answer-adaptive follow-ups | **Implemented and tested** (U H B) |
 | **D6** historical performance comparison | **Implemented and tested** (U H B) |
-| D2, D1 | Not started |
+| **D2** speech-to-text with typed fallback | **Implemented and tested** (U H B D); real recognition needs a manual check, see limits |
+| D1 | Not started |
 
 ## D5. Role-specific scoring rubrics
 
@@ -207,3 +208,55 @@ The candidate answers with an option index, a line number or a short value, whic
   - date ordering;
   - HTTP: own completed sessions only, the mode filter and 2 invalid queries.
 - `e2e/tests/interviews.mjs` adds 1 browser step: the panel's values equal the API, three sessions state a direction, and rule-based sessions have no accuracy row.
+
+## D2. Speech-to-text with an unsupported-browser fallback
+
+**Where audio goes.** SkillBridge never receives dictation audio. The browser's Web Speech API turns speech into text, either:
+- on the device, where the browser confirms on-device recognition (`SpeechRecognition.available({processLocally: true})`); or
+- through the **browser vendor's speech service**. In Chrome or Edge, that means Google or Microsoft receive the audio, under their own terms.
+
+Only the resulting text is put into the answer box, where it stays editable. Only text is sent, stored and scored.
+
+**Consent first, stored with the account.**
+- Dictation is off until the user chooses, in a dialog that says the above:
+  - "Only on this device" is enabled only when the browser confirms on-device recognition;
+  - "Allow my browser's speech service";
+  - "Not now".
+- The choice is stored in `VoiceSettings.dictationConsent` (`none`, `on_device_only` or `browser_service`) via `GET` and `PUT /interviews/voice-settings`. Every change is appended to an audit history.
+- *Turn off dictation* withdraws consent.
+- If the user allowed on-device only and the browser cannot do it, dictation stays off and the screen says so.
+
+**Fallback.**
+- Typing works in every browser.
+- Without the Web Speech API (for example Firefox), the room shows "Voice dictation is not available in this browser. Type your answer" and no dictation button.
+- Recognition errors are explained, and the text written so far is kept:
+  - microphone refused;
+  - service unreachable;
+  - no speech heard;
+  - no microphone;
+  - unsupported language.
+
+**What is recorded.** Each answer stores `answerInputMethod`:
+- `typed`, which is the default;
+- `dictated`;
+- `mixed`, meaning dictated and then edited.
+
+No audio is stored for dictation. The lobby no longer says dictation is "supported locally", which was not true for browser-service recognition.
+
+**Limits.**
+- The browser test uses a stand-in `SpeechRecognition`, so it can check consent, transcript insertion, editing, errors and the fallback deterministically.
+- Real recognition quality and vendor processing in Chrome or Edge were **not** tested automatically. They need a manual check with a microphone.
+- The language is fixed to `en-US`.
+
+**Tests:**
+- `backend/src/tests/voice_interviews.test.ts` covers:
+  - consent none by default;
+  - changes audited once each;
+  - 5 invalid updates refused;
+  - settings per user;
+  - `answerInputMethod` stored, with typed by default and invalid values refused.
+- `e2e/tests/interviews.mjs` adds 4 browser steps:
+  - nothing starts before consent, the consent text names the vendor, and on-device is disabled when unavailable;
+  - dictated text appears, is edited and is stored as `mixed`;
+  - an error message is shown and consent is withdrawn;
+  - a browser without speech recognition gets the typed fallback and the typed answer is scored.

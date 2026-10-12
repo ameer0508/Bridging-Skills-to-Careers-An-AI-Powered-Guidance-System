@@ -121,6 +121,8 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
   const [rubricChoice, setRubricChoice] = useState<string>('');
   // D3 follow-ups are opt-in
   const [adaptiveFollowUps, setAdaptiveFollowUps] = useState<boolean>(false);
+  // D2: typed, dictated or both, for the answer being written
+  const [inputMethod, setInputMethod] = useState<'typed' | 'dictated' | 'mixed'>('typed');
 
   // Query 1: Career Readiness Dimensions
   const {
@@ -291,6 +293,7 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
       const response = await apiClient.post(`/interviews/${activeSession._id}/respond`, {
         questionIndex: activeSession.currentQuestionIndex,
         candidateResponse: candidateAnswer,
+        inputMethod,
       }, { timeout: AI_BACKED_REQUEST_TIMEOUT_MS });
 
       const updated = response.data.data;
@@ -455,6 +458,7 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
           onEvaluate={handleEvaluateAnswer}
           onNextQuestion={handleNextQuestion}
           onCompleteSession={handleCompleteSession}
+          onInputMethodChange={setInputMethod}
         />
       )}
 

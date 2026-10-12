@@ -4,6 +4,7 @@ import { AppError } from '../middlewares/errorHandler.js';
 import { z } from 'zod';
 import { resolveRubric, RUBRIC_IDS, RUBRICS, rubricById, type RubricId } from '../services/interview/InterviewRubrics.js';
 import InterviewProgressService from '../services/interview/InterviewProgressService.js';
+import VoiceSettingsService from '../services/interview/VoiceSettingsService.js';
 
 /** Longest interview answer accepted, in characters. */
 const MAX_ANSWER_LENGTH = 10000;
@@ -72,6 +73,40 @@ export class InterviewController {
         // `resolved` is the rubric a session for `role` would use when none is chosen
         data: { rubrics: RUBRIC_IDS.map(id => RUBRICS[id]), resolved: resolveRubric(parsed.data.role).id },
       });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /** GET /api/v1/interviews/voice-settings: dictation and recording consent (D1, D2) */
+  getVoiceSettings = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication required', 401);
+      res.status(200).json({ success: true, data: await VoiceSettingsService.get(userId) });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /** PUT /api/v1/interviews/voice-settings: every change is recorded in the settings history */
+  updateVoiceSettings = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication required', 401);
+      const parsed = z
+        .object({
+          dictationConsent: z.enum(['none', 'on_device_only', 'browser_service']).optional(),
+          recordingConsent: z.boolean().optional(),
+          retentionDays: z.union([z.literal(0), z.literal(7), z.literal(30)]).optional(),
+        })
+        .strict()
+        .refine((b) => Object.keys(b).length > 0, { message: 'nothing to change' })
+        .safeParse(req.body ?? {});
+      if (!parsed.success) {
+        throw new AppError(`Invalid request: ${parsed.error.issues.map((i) => `${i.path.join('.') || 'body'} ${i.message}`).join('; ')}`, 400, 'VALIDATION_ERROR');
+      }
+      res.status(200).json({ success: true, data: await VoiceSettingsService.update(userId, parsed.data) });
     } catch (err) {
       next(err);
     }
@@ -147,7 +182,10 @@ export class InterviewController {
       if (!userId) throw new AppError('Authentication required', 401);
 
       const { id } = req.params;
-      const { questionIndex, candidateResponse } = req.body;
+      const { questionIndex, candidateResponse, inputMethod } = req.body;
+      if (inputMethod !== undefined && !['typed', 'dictated', 'mixed'].includes(inputMethod)) {
+        throw new AppError('inputMethod must be typed, dictated or mixed', 400, 'VALIDATION_ERROR');
+      }
 
       if (!Number.isInteger(questionIndex) || questionIndex < 0 || typeof candidateResponse !== 'string') {
         throw new AppError('questionIndex (a whole number) and candidateResponse (text) are required', 400, 'VALIDATION_ERROR');
@@ -159,7 +197,7 @@ export class InterviewController {
         throw new AppError(`An answer can be at most ${MAX_ANSWER_LENGTH} characters.`, 400, 'VALIDATION_ERROR');
       }
 
-      const session = await interviewService.respondToQuestion(userId, id, { questionIndex, candidateResponse });
+      const session = await interviewService.respondToQuestion(userId, id, { questionIndex, candidateResponse, inputMethod });
 
       res.status(200).json({
         success: true,

@@ -33,6 +33,8 @@ export interface StartInterviewDTO {
 export interface RespondQuestionDTO {
   questionIndex: number;
   candidateResponse: string;
+  /** D2: how the answer was entered; dictated text is always editable before it is sent. */
+  inputMethod?: 'typed' | 'dictated' | 'mixed';
 }
 
 export class InterviewService {
@@ -246,6 +248,7 @@ export class InterviewService {
 
     const q = session.questions[dto.questionIndex];
     q.candidateResponse = dto.candidateResponse;
+    q.answerInputMethod = dto.inputMethod ?? 'typed';
 
     // AI rubric when available, otherwise the labelled rule-based rubric
     // The rubric stored with the session; sessions from before rubrics were scored with 'general'

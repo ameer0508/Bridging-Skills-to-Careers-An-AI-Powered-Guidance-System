@@ -14,6 +14,38 @@ export async function run({ webUrl, apiUrl }) {
   const { browser, channel } = await launchBrowser();
   console.log(`[e2e] browser channel: ${channel}`);
   const context = await browser.newContext({ viewport: { width: 1366, height: 900 } });
+  // A stand-in for the browser's speech recognition, so the test controls what is "heard" and can
+  // see whether recognition was started. No microphone or speech service is used.
+  await context.addInitScript(() => {
+    const state = { starts: 0, stops: 0, processLocally: null, current: null };
+    class FakeRecognition {
+      constructor() {
+        this.continuous = false;
+        this.interimResults = false;
+        this.lang = '';
+        this.onresult = null;
+        this.onerror = null;
+        this.onend = null;
+      }
+      start() {
+        state.starts += 1;
+        state.processLocally = this.processLocally ?? null;
+        state.current = this;
+      }
+      stop() {
+        state.stops += 1;
+        this.onend?.();
+      }
+      static available() {
+        return Promise.resolve('unavailable');
+      }
+    }
+    window.SpeechRecognition = FakeRecognition;
+    window.webkitSpeechRecognition = FakeRecognition;
+    window.__speech = state;
+    window.__hear = (text) => state.current?.onresult?.({ resultIndex: 0, results: [[{ transcript: text }]] });
+    window.__speechError = (error) => state.current?.onerror?.({ error });
+  });
   const page = await context.newPage();
   const log = watch(page, apiUrl);
   const api = apiClient(page, apiUrl);
@@ -123,6 +155,73 @@ export async function run({ webUrl, apiUrl }) {
       expect(/Improved|Declined|No clear change/.test(row), `three sessions should state a direction: ${row}`);
       expect((await panel.locator('tr[data-dimension="technicalAccuracy"]').count()) === 0, 'rule-based sessions show no accuracy row');
       return row;
+    });
+
+    // ---- D2 speech-to-text --------------------------------------------------------------------------------
+    await t.step('dictation does nothing until the user consents, and says where audio goes', async () => {
+      await gotoAndSettle(page, `${webUrl}/interview-agent`, 2000);
+      await page.getByRole('button', { name: /ENTER INTERVIEW STUDIO/ }).click();
+      await page.locator('textarea').first().waitFor({ timeout: 20_000 });
+      const enable = page.getByRole('button', { name: 'Enable voice dictation' });
+      await enable.waitFor({ timeout: 10_000 });
+      expect((await page.evaluate(() => window.__speech.starts)) === 0, 'recognition started without consent');
+      await enable.click();
+      const dialog = page.getByTestId('dictation-consent');
+      const text = await dialog.innerText();
+      expect(/does not receive or store your voice/.test(text) && /browser vendor/.test(text), `consent text: ${text}`);
+      expect(await dialog.getByRole('button', { name: 'Only on this device' }).isDisabled(), 'on-device offered though the browser cannot do it');
+      await dialog.getByRole('button', { name: /Allow my browser/ }).click();
+      await page.getByTestId('dictation-status').waitFor({ timeout: 10_000 });
+      const settings = (await api('GET', '/interviews/voice-settings')).data;
+      expect(settings.dictationConsent === 'browser_service' && settings.history.length === 1, `stored consent ${JSON.stringify(settings)}`);
+    });
+
+    await t.step('dictated text lands in the answer, stays editable, and the answer is stored as mixed input', async () => {
+      await page.getByRole('button', { name: 'Dictate' }).click();
+      expect((await page.evaluate(() => window.__speech.starts)) === 1, 'recognition did not start');
+      await page.evaluate(() => window.__hear('I compared the two groups with an A B test'));
+      const box = page.getByLabel('Your answer');
+      await page.waitForFunction(() => document.querySelector('textarea')?.value.includes('A B test'));
+      await page.getByRole('button', { name: /Listening/ }).click();
+      await box.fill((await box.inputValue()).replace('A B test', 'A/B test') + ' and measured conversion over two weeks because that is the decision metric.');
+      await page.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+      await page.waitForTimeout(1500);
+      const session = await latestSession();
+      expect(session.questions[0].answerInputMethod === 'mixed', `stored input method ${session.questions[0].answerInputMethod}`);
+      expect(/A\/B test/.test(session.questions[0].candidateResponse), 'the edited text was not the one stored');
+    });
+
+    await t.step('a dictation error is explained and typing still works; dictation can be turned off', async () => {
+      await page.getByRole('button', { name: 'Dictate' }).click();
+      await page.evaluate(() => window.__speechError('not-allowed'));
+      await page.getByRole('alert').filter({ hasText: 'Microphone access was refused' }).waitFor({ timeout: 5000 });
+      await page.getByRole('button', { name: 'Turn off dictation' }).click();
+      await page.getByRole('button', { name: 'Enable voice dictation' }).waitFor({ timeout: 10_000 });
+      expect((await api('GET', '/interviews/voice-settings')).data.dictationConsent === 'none', 'consent was not withdrawn');
+      await page.getByRole('button', { name: /Conclude Round/ }).click();
+      await page.waitForTimeout(2500);
+    });
+
+    await t.step('a browser without speech recognition gets the typed fallback', async () => {
+      const plain = await browser.newContext({ viewport: { width: 1366, height: 900 } });
+      await plain.addInitScript(() => {
+        delete window.SpeechRecognition;
+        delete window.webkitSpeechRecognition;
+      });
+      const other = await plain.newPage();
+      const otherApi = apiClient(other, apiUrl);
+      await register(other, webUrl, 'No Speech Tester', `nospeech.${stamp}@example.com`, PASSWORD);
+      await completeOnboarding(other, 'Data Analyst');
+      await gotoAndSettle(other, `${webUrl}/interview-agent`, 2000);
+      await other.getByRole('button', { name: /ENTER INTERVIEW STUDIO/ }).click();
+      await other.getByTestId('dictation-unsupported').waitFor({ timeout: 20_000 });
+      expect((await other.getByRole('button', { name: /dictat/i }).count()) === 0, 'a dictation button is shown without support');
+      await other.getByLabel('Your answer').fill(ANSWER);
+      await other.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+      await other.waitForTimeout(1500);
+      const stored = (await otherApi('GET', '/interviews/history')).data.history[0];
+      await plain.close();
+      expect(stored.questions[0].answerInputMethod === 'typed' && stored.questions[0].evaluation, 'the typed answer was not stored and scored');
     });
 
     // ---- D4 technical assessments --------------------------------------------------------------------------

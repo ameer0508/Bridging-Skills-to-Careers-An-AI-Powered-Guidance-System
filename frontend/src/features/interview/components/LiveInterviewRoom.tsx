@@ -4,8 +4,6 @@ import {
   Send,
   ArrowRight,
   RefreshCw,
-  Mic,
-  MicOff,
   CheckCircle2,
   AlertTriangle,
   Clock,
@@ -16,23 +14,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { QuestionItem, InterviewSession } from '../../../workspaces/InterviewPrepAgentWorkspace/InterviewPrepAgentWorkspace';
-
-/** The parts of the browser Web Speech API this component uses. */
-interface SpeechRecognitionEventLike {
-  resultIndex: number;
-  results: ArrayLike<ArrayLike<{ transcript: string }>>;
-}
-interface SpeechRecognitionLike {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
-  onerror: (() => void) | null;
-  onend: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-}
-type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
+import { DictationControl } from './DictationControl';
 
 export interface LiveInterviewRoomProps {
   session: InterviewSession;
@@ -43,6 +25,8 @@ export interface LiveInterviewRoomProps {
   onEvaluate: () => void;
   onNextQuestion: () => void;
   onCompleteSession: () => void;
+  /** D2: how the current answer was entered so far. */
+  onInputMethodChange?: (method: 'typed' | 'dictated' | 'mixed') => void;
 }
 
 export const LiveInterviewRoom: React.FC<LiveInterviewRoomProps> = ({
@@ -54,12 +38,9 @@ export const LiveInterviewRoom: React.FC<LiveInterviewRoomProps> = ({
   onEvaluate,
   onNextQuestion,
   onCompleteSession,
+  onInputMethodChange,
 }) => {
-  // Voice Dictation (Web Speech API)
-  const [isListening, setIsListening] = useState(false);
-  const [speechSupported, setSpeechSupported] = useState(false);
   const [showExpectedConcepts, setShowExpectedConcepts] = useState(false);
-  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
 
   // Elapsed Session Timer
   const [secondsElapsed, setSecondsElapsed] = useState(0);
@@ -77,64 +58,28 @@ export const LiveInterviewRoom: React.FC<LiveInterviewRoomProps> = ({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  // The dictation handler is created once, so it reads the current answer through a ref
+  // Dictated text is appended to the current answer, read through a ref
   const answerRef = useRef(candidateAnswer);
   useEffect(() => {
     answerRef.current = candidateAnswer;
   }, [candidateAnswer]);
 
-  // Initialize Speech Recognition if available in browser
+  // D2: whether this answer was typed, dictated or both; reset for every question
+  const methodRef = useRef({ typed: false, dictated: false });
+  const questionKey = currentQuestion?.questionId;
   useEffect(() => {
-    const speechWindow = window as Window & {
-      SpeechRecognition?: SpeechRecognitionConstructor;
-      webkitSpeechRecognition?: SpeechRecognitionConstructor;
-    };
-    const SpeechRecognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
-
-    if (SpeechRecognition) {
-      setSpeechSupported(true);
-      const recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      // Final phrases only: interim results would be appended again as they are revised
-      recognition.interimResults = false;
-      recognition.lang = 'en-US';
-
-      recognition.onresult = (event) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
-        }
-        if (transcript) {
-          const current = answerRef.current;
-          onAnswerChange(current ? `${current} ${transcript.trim()}` : transcript.trim());
-        }
-      };
-
-      recognition.onerror = () => {
-        setIsListening(false);
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current = recognition;
-    }
-  }, [onAnswerChange]);
-
-  const toggleSpeech = () => {
-    if (!recognitionRef.current) return;
-    if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-    } else {
-      try {
-        recognitionRef.current.start();
-        setIsListening(true);
-      } catch {
-        setIsListening(false);
-      }
-    }
+    methodRef.current = { typed: false, dictated: false };
+    onInputMethodChange?.('typed');
+  }, [questionKey, onInputMethodChange]);
+  const noteMethod = (kind: 'typed' | 'dictated') => {
+    methodRef.current[kind] = true;
+    const { typed, dictated } = methodRef.current;
+    onInputMethodChange?.(typed && dictated ? 'mixed' : dictated ? 'dictated' : 'typed');
+  };
+  const appendDictation = (text: string) => {
+    const current = answerRef.current;
+    onAnswerChange(current ? `${current} ${text}` : text);
+    noteMethod('dictated');
   };
 
   // Real-time STAR telemetry heuristic
@@ -321,39 +266,20 @@ export const LiveInterviewRoom: React.FC<LiveInterviewRoomProps> = ({
                 <div className="relative">
                   <textarea
                     value={candidateAnswer}
-                    onChange={(e) => onAnswerChange(e.target.value)}
+                    onChange={(e) => {
+                      onAnswerChange(e.target.value);
+                      noteMethod('typed');
+                    }}
+                    aria-label="Your answer"
                     disabled={isEvaluating}
                     placeholder="Structure your answer using the STAR method: Situation (Context), Task (Objective), Action (Specific engineering decisions you spearheaded), and Result (Quantified impact and technical trade-offs)..."
                     rows={6}
                     className="w-full p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-white/10 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono leading-relaxed transition resize-y"
                   />
 
-                  {/* Dictation Button inside response area */}
-                  {speechSupported && (
-                    <button
-                      onClick={toggleSpeech}
-                      type="button"
-                      title={isListening ? 'Stop dictation' : 'Start voice dictation'}
-                      className={`absolute bottom-4 right-4 p-2.5 rounded-xl border transition cursor-pointer flex items-center gap-1.5 text-xs font-bold ${
-                        isListening
-                          ? 'bg-rose-600/30 border-rose-500 text-rose-300 animate-pulse'
-                          : 'bg-slate-800/80 border-white/10 text-slate-400 hover:text-white hover:bg-slate-800'
-                      }`}
-                    >
-                      {isListening ? (
-                        <>
-                          <Mic className="w-4 h-4 text-rose-400" />
-                          <span className="text-[10px]">Listening...</span>
-                        </>
-                      ) : (
-                        <>
-                          <MicOff className="w-4 h-4" />
-                          <span className="text-[10px]">Voice Dictate</span>
-                        </>
-                      )}
-                    </button>
-                  )}
                 </div>
+
+                <DictationControl onTranscript={appendDictation} disabled={isEvaluating} />
 
                 {/* Actions & Next Flow */}
                 <div className="flex items-center justify-between pt-2 flex-wrap gap-3">

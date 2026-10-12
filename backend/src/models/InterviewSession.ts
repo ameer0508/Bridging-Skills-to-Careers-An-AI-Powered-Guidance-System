@@ -47,6 +47,8 @@ export interface IQuestionItem {
   /** The fact on record the question is based on, e.g. "Skill on your resume: React". */
   groundedIn?: string;
   candidateResponse?: string;
+  /** D2: typed, dictated (speech-to-text) or both. The text, not audio, is what is stored and scored. */
+  answerInputMethod?: 'typed' | 'dictated' | 'mixed';
   evaluation?: IQuestionEvaluation;
   /** Set on follow-up questions (D3): the questionId they follow up. */
   followUpOf?: string;
@@ -121,6 +123,7 @@ const QuestionItemSchema = new Schema<IQuestionItem>(
     followUpOf: { type: String },
     followUpReason: { type: new Schema({ type: { type: String }, concept: { type: String } }, { _id: false }) },
     candidateResponse: { type: String },
+    answerInputMethod: { type: String, enum: ['typed', 'dictated', 'mixed'] },
     evaluation: { type: QuestionEvaluationSchema }
   },
   { _id: false }
