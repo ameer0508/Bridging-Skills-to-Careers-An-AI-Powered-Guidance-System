@@ -63,7 +63,8 @@ export class CareerReadinessService {
             overallScore: readinessData.overallScore,
             readinessTier: readinessData.tier,
             interpretation: readinessData.interpretation,
-            dimensions: readinessData.dimensions
+            dimensions: readinessData.dimensions,
+            evidenceBasis: ReadinessCalculator.evidenceBasis(requirements, userSkills)
           });
 
           newGaps.push({

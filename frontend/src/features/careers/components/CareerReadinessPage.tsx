@@ -19,6 +19,7 @@ import {
   PremiumErrorState,
 } from '../../../components/experience/workspace';
 import { AIThinkingAnimation } from '../../../components/experience';
+import { EvidenceBasisPanel, type EvidenceBasis } from './EvidenceBasisPanel';
 
 interface IGapItem {
   skillName: string;
@@ -43,6 +44,7 @@ interface ICareerReadiness {
   overallScore: number;
   readinessTier: string;
   dimensions: IDimension[];
+  evidenceBasis?: EvidenceBasis;
   gaps: {
     criticalGaps: IGapItem[];
     weakAreas: IGapItem[];
@@ -282,6 +284,8 @@ export const CareerReadinessPage: React.FC = () => {
           </PremiumSection>
         </div>
       </div>
+
+      <EvidenceBasisPanel basis={activeItem.evidenceBasis} careerTitle={activeItem.careerId.title} />
 
       <WorkspaceDivider label="Gap Prioritization & Action Strategy" />
 

@@ -440,3 +440,26 @@ factors, its score and where it would stand if actions were ordered by gap impor
 method, the baseline comparison and its limits are in [`NEXTGEN_RESEARCH.md`](NEXTGEN_RESEARCH.md)
 (R3). The what-if engine also accepts a hypothetical passed skill check (`pass_assessment`): 15
 points once per skill, without the "listed in a resume" points for a skill new to the profile.
+
+## 19. What a readiness score rests on
+
+Each readiness record carries an evidence basis: the skill evidence credited towards that career,
+divided by how far it was checked.
+
+| Share | Evidence |
+|---|---|
+| Verified by skill check | Points from a passed SkillBridge skill check (section 12) |
+| Portfolio, self-reported | Points from portfolio entries with a link (section 15) |
+| Stated in the resume | Points from resume evidence (section 2) |
+| Inferred | Requirements met only through a related skill (section 2) |
+
+For each covered requirement, its credited points (evidence score x weight x importance) are
+divided among the kinds of evidence behind the skill in proportion to their points. The four
+shares are whole percentages adding up to 100; when nothing is credited no percentages are given.
+The record also counts requirements covered, requirements whose skill was verified by a skill
+check, and required skills missing.
+
+**The basis describes the evidence. It does not change the readiness score.** Readiness has not
+been calibrated against interview or hiring outcomes, because SkillBridge holds no outcome data.
+A higher score means more recorded evidence; it is not a measured probability of anything. What
+the basis adds is the ability to see how much of a score depends on unchecked statements.

@@ -35,6 +35,7 @@ export interface CompareResult {
   hasProfile: boolean;
   careers: ComparedCareer[];
   effortNote: string;
+  marketData: { available: boolean; reason: string };
 }
 
 export type ScenarioChangeType = 'add_skill' | 'add_project' | 'add_certification' | 'add_experience' | 'remove_skill';

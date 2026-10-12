@@ -10,13 +10,13 @@ An item is **Done** only when it has a working screen, an authenticated API, sto
 needed, validation and error states, documented limits, and passing service, HTTP and browser
 tests. Code that exists but is not verified earns nothing.
 
-Expansion total: 100 points. **Current: 38 / 100.**
+Expansion total: 100 points. **Current: 39 / 100.**
 
 ## Phase 1. Advanced career intelligence (15)
 
 | ID | Item | Points | Status | Evidence |
 |---|---|---|---|---|
-| A1 | Compare careers by requirements, evidence, effort and opportunities | 3 | Pending | Partly done: comparison by requirements, evidence and effort works and is tested (HTTP and browser). The opportunities dimension is not shown because there are no dated market records yet (C1); no points until it is |
+| A1 | Compare careers by requirements, evidence, effort and opportunities | 3 | Pending | Partly done: comparison by requirements, evidence and effort works and is tested (HTTP and browser). The opportunities row and the API field `marketData` now state "Market data unavailable" explicitly instead of omitting the dimension. No points until dated market records from the market module are integrated |
 | A2 | What-if changes from skills, projects and certifications | 3 | **Done** | HTTP suite `career_lab`; browser suite `pnpm test:e2e` (40/40): scores before and after hypothetical skills, projects, certifications or roles with requirement-level changes; nothing is saved; unknown skills rejected. After the evidence was really added, 6 career scores equalled the hypothetical ones exactly |
 | A3 | Skill freshness and revalidation | 3 | **Done** | HTTP suite `career_lab`; browser suite `pnpm test:e2e` (41/41): freshness from dated evidence only (role periods), "undated" when the resume gives no date; a user's confirmation is labelled unverified, adds no points and survives reprocessing. A passed skill check (B3) also dates the skill and is labelled as assessed |
 | A4 | Multi-stage career transition plans | 3 | **Done** | HTTP suite `career_lab`; browser suite `pnpm test:e2e` (40/40): staged plan through nearer careers, saved per user, re-evaluated on read, projected scores agree with what-if, survives a reload, private to its owner |
@@ -74,7 +74,7 @@ One point each. An enhancement is counted here once, even when a feature above d
 | X1 | Multi-layout and multilingual resume extraction | 1 | Pending |  |
 | X2 | Validated proficiency and dated skill evidence | 1 | **Done** | Delivered by F1 and B3: every evidence record carries its points, date and one of three verification states (`stated`, `self_attested` at 0 points, `assessed`); proficiency is derived from the evidence score. Suites `career_lab` and `skill_assessment` |
 | X3 | Career explanation | 1 | **Done** | Delivered by A5 and the existing breakdown: baseline evidence per requirement, what would change it, and by how much |
-| X4 | Evidence-grounded readiness calibration | 1 | Pending |  |
+| X4 | Evidence-grounded readiness calibration | 1 | **Done** | Suite `readiness_basis` (unit and HTTP); browser suite `pnpm test:e2e` (48/48): every readiness record states what share of its credited evidence is verified by skill check, self-reported in the portfolio, stated in the resume or inferred (whole percentages adding up to 100, none when nothing is credited), recomputed with the score; shown on the readiness page with the statement that readiness is not calibrated against outcomes. This grounds the score in its evidence; it is not a statistical calibration, which would need outcome data that does not exist. `docs/SCORING.md` section 19 |
 | X5 | Measurable, personalised recommendations | 1 | **Done** | Delivered by R3: each recommended action carries a measured hypothetical score change equal to the what-if result, and a passed skill check gives exactly the predicted score (suite `next_best_action`) |
 | X6 | Time- and progress-aware roadmaps | 1 | **Done** | Delivered by B4: the roadmap is laid out in weeks from the user's own hours, moves with progress and is adjusted when evidence changes. Suite `learning_plan` |
 | X7 | Job freshness, deduplication and rate limits | 1 | Pending |  |
@@ -97,7 +97,7 @@ One point each. An enhancement is counted here once, even when a feature above d
 
 | ID | Item | Points | Status | Evidence |
 |---|---|---|---|---|
-| V1 | Original regression baseline still passes (19 backend suites, 104 AI tests, 35 browser checks) | 2 | Pending | Passing at this checkpoint: 27 backend suites (19 original + 8), 104 AI tests, 47 browser checks (35 original + 12). Awarded at the end of the expansion |
+| V1 | Original regression baseline still passes (19 backend suites, 104 AI tests, 35 browser checks) | 2 | Pending | Passing at this checkpoint: 28 backend suites (19 original + 9), 104 AI tests, 48 browser checks (35 original + 13). Awarded at the end of the expansion |
 | V2 | Cross-user isolation and input validation for every new endpoint | 2 | Pending |  |
 | V3 | Accessibility and failure states for every new screen | 2 | Pending |  |
 | V4 | Docker Compose workflow passes with the expansion | 2 | Pending |  |

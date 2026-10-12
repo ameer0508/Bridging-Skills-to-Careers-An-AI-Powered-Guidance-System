@@ -1,6 +1,6 @@
 import { ICareerRequirement } from '../models/CareerRequirement.js';
 import { IUserSkill } from '../models/UserSkill.js';
-import { IDimensionScore } from '../models/CareerReadiness.js';
+import { IDimensionScore, type IEvidenceBasis } from '../models/CareerReadiness.js';
 import { buildUserSkillIndex, findUserSkill } from '../utils/skillMatching.js';
 
 export class ReadinessCalculator {
@@ -100,6 +100,75 @@ export class ReadinessCalculator {
       'It is not a prediction of interview or hiring outcomes.';
 
     return { overallScore, dimensions, tier, interpretation };
+  }
+
+  /**
+   * How much of the credited skill evidence was checked, and how. Each covered requirement
+   * contributes its credited points (evidence score x weight x importance), divided among the
+   * kinds of evidence behind the skill in proportion to their points.
+   *
+   * This describes the evidence; it does not change the readiness score. Readiness has not been
+   * calibrated against interview or hiring outcomes, because SkillBridge holds no such data.
+   */
+  public static evidenceBasis(requirements: ICareerRequirement[], userSkills: IUserSkill[]): IEvidenceBasis {
+    const index = buildUserSkillIndex(userSkills);
+    const credited = { assessed: 0, selfReported: 0, stated: 0, inferred: 0 };
+    let covered = 0;
+    let assessedCount = 0;
+    let requiredMissing = 0;
+
+    for (const req of requirements) {
+      const match = findUserSkill(index, req.skillName);
+      if (!match) {
+        if (req.importance === 'required') requiredMissing++;
+        continue;
+      }
+      covered++;
+      const multiplier = req.importance === 'required' ? 3 : req.importance === 'preferred' ? 2 : 1;
+      const points = (match.evidenceScore / 100) * req.weight * multiplier;
+      if (match.inferredFrom) {
+        credited.inferred += points;
+        continue;
+      }
+      if (match.evidences.some(e => e.sourceType === 'assessment')) assessedCount++;
+      const byKind = { assessed: 0, selfReported: 0, stated: 0 };
+      for (const evidence of match.evidences) {
+        const value = evidence.points ?? 0;
+        if (evidence.sourceType === 'assessment') byKind.assessed += value;
+        else if (evidence.sourceType === 'portfolio_project') byKind.selfReported += value;
+        else if (evidence.sourceType.startsWith('resume_')) byKind.stated += value;
+      }
+      const total = byKind.assessed + byKind.selfReported + byKind.stated;
+      if (total === 0) {
+        // Records made before points were stored per evidence can only have come from a resume
+        credited.stated += points;
+        continue;
+      }
+      credited.assessed += (points * byKind.assessed) / total;
+      credited.selfReported += (points * byKind.selfReported) / total;
+      credited.stated += (points * byKind.stated) / total;
+    }
+
+    const counts = {
+      requirementsTotal: requirements.length,
+      requirementsCovered: covered,
+      requirementsAssessed: assessedCount,
+      requiredMissing
+    };
+    const sum = credited.assessed + credited.selfReported + credited.stated + credited.inferred;
+    if (sum === 0) return { assessed: null, selfReported: null, stated: null, inferred: null, ...counts };
+
+    // Whole percentages that add up to exactly 100 (largest remainders get the spare points)
+    const kinds = ['assessed', 'selfReported', 'stated', 'inferred'] as const;
+    const exact = kinds.map(kind => (credited[kind] / sum) * 100);
+    const shares = exact.map(Math.floor);
+    let spare = 100 - shares.reduce((a, b) => a + b, 0);
+    for (const i of exact.map((value, position) => [value - Math.floor(value), position]).sort((a, b) => b[0] - a[0] || a[1] - b[1]).map(pair => pair[1])) {
+      if (spare <= 0) break;
+      shares[i]++;
+      spare--;
+    }
+    return { assessed: shares[0], selfReported: shares[1], stated: shares[2], inferred: shares[3], ...counts };
   }
 }
 

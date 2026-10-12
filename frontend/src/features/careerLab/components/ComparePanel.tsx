@@ -136,6 +136,12 @@ export const ComparePanel: React.FC<ComparePanelProps> = ({ careers }) => {
                     <td key={c.careerId} className="py-2 px-3"><SkillChips skills={c.sharedWithOthers} tone="good" emptyText="None" /></td>
                   ))}
                 </tr>
+                <tr data-testid="compare-market-row" data-available={result.marketData.available}>
+                  <th scope="row" className="py-2 pr-3 font-semibold text-slate-300">Opportunities</th>
+                  {result.careers.map((c) => (
+                    <td key={c.careerId} className="py-2 px-3 text-slate-400">Market data unavailable</td>
+                  ))}
+                </tr>
               </tbody>
             </table>
           </div>

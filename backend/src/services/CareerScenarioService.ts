@@ -345,6 +345,9 @@ class CareerScenarioService {
       hasProfile: skills.length > 0,
       careers: rows,
       effortNote: 'Effort is shown as the number of skills to acquire and the score points still open. No time estimate is given because none can be supported by data.',
+      // The opportunities dimension needs dated market records, which this module does not hold.
+      // It is reported as unavailable, never as zero openings.
+      marketData: { available: false as const, reason: 'Market data unavailable: no dated job-market records are connected to the comparison yet.' },
       scoringVersion: SCORING_VERSION,
       taxonomyVersion: taxonomyVersion()
     };

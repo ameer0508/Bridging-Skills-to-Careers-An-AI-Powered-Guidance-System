@@ -217,6 +217,8 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       expect(shown === `${stored.matchScore}%`, `comparison shows ${shown}, the match list has ${stored.matchScore}%`);
       expect(/No time estimate is given/.test(await page.getByTestId('compare-effort-note').innerText()), 'the effort note does not say that no time estimate is given');
       expect(/Docker/.test(await page.getByTestId('compare-result').innerText()), 'the DevOps gap (Docker) is not listed');
+      const market = page.getByTestId('compare-market-row');
+      expect((await market.getAttribute('data-available')) === 'false' && /Market data unavailable/.test(await market.innerText()), 'the opportunities row does not say that market data is unavailable');
       return `Frontend Engineer ${shown}`;
     });
     await t.step('Career Lab: counterfactuals and a what-if scenario that changes nothing real', async () => {
@@ -351,6 +353,21 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       const shown = await page.locator('[data-testid="freshness-skill"][data-skill="JavaScript"]').innerText();
       expect(/Verified by a SkillBridge skill check/.test(shown) && /Not a professional certification/.test(shown), 'the freshness list does not say how the skill was verified');
       return `0, ${partial.correct} and 5 of 5; evidence ${before.evidenceScore} to ${after.evidenceScore}; fourth attempt blocked`;
+    });
+
+    await t.step('readiness says what it rests on, and a passed skill check shows up as assessed evidence', async () => {
+      const stored = (await api('GET', '/readiness')).data.readiness[0];
+      const basis = stored.evidenceBasis;
+      expect(basis && basis.assessed > 0 && basis.assessed + basis.selfReported + basis.stated + basis.inferred === 100, `stored basis ${JSON.stringify(basis)}`);
+      await gotoAndSettle(page, `${webUrl}/readiness`, 3500);
+      const panel = page.getByTestId('evidence-basis');
+      await panel.waitFor({ timeout: 15_000 });
+      for (const kind of ['assessed', 'selfReported', 'stated', 'inferred']) {
+        const shown = await page.locator(`[data-testid="evidence-share"][data-kind="${kind}"]`).getAttribute('data-share');
+        expect(shown === String(basis[kind]), `${kind} shown as ${shown}%, stored ${basis[kind]}%`);
+      }
+      expect(/has not been calibrated against interview or hiring outcomes/.test(await page.getByTestId('evidence-basis-note').innerText()), 'the page does not say readiness is uncalibrated');
+      return `${stored.careerId.title}: ${basis.stated}% stated, ${basis.assessed}% assessed, ${basis.selfReported}% self-reported, ${basis.inferred}% inferred`;
     });
 
     // ---- Roadmap ------------------------------------------------------------------------------------

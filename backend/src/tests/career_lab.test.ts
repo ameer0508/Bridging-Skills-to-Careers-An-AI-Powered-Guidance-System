@@ -219,6 +219,8 @@ export async function runCareerLabTests() {
       assert.ok(row.sharedWithOthers.every((s: string) => row.effort.skillsToAcquire.includes(s)));
       assert.ok(!JSON.stringify(row).match(/hours|weeks|months/i), 'no time estimate is invented');
     }
+    assert.deepEqual([compared.marketData.available, /^Market data unavailable/.test(compared.marketData.reason)], [false, true], 'the opportunities dimension is reported as unavailable, not as zero');
+    assert.ok(compared.careers.every((c: any) => !('openings' in c) && !('opportunities' in c)), 'no opportunity count is invented');
     const fe = compared.careers[0];
     const ops = compared.careers[1];
     assert.ok(fe.matchScore > ops.matchScore && fe.effort.pointsToClose < ops.effort.pointsToClose, 'a frontend resume is closer to the frontend career');
