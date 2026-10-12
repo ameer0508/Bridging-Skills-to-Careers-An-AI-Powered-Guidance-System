@@ -9,6 +9,7 @@ import { errorText, fieldClass, formatDate, labelClass, panelClass, primaryButto
 interface EntrySkill {
   skill: string;
   points: number;
+  countedElsewhere: 'resume_project' | 'portfolio_entry' | null;
   verifiedBySkillCheck: boolean;
 }
 interface Entry {
@@ -261,8 +262,10 @@ export const PortfolioWorkspace: React.FC = () => {
                 </p>
                 <ul className="flex flex-wrap gap-1.5">
                   {entry.skills.map((s) => (
-                    <li key={s.skill} className="px-2 py-0.5 rounded text-[11px] font-semibold border bg-slate-900 text-slate-200 border-white/10" data-testid="portfolio-skill" data-skill={s.skill} data-points={s.points}>
-                      {s.skill}{s.points > 0 ? ` +${s.points}` : ''}{s.verifiedBySkillCheck ? ' (also verified by skill check)' : ''}
+                    <li key={s.skill} className="px-2 py-0.5 rounded text-[11px] font-semibold border bg-slate-900 text-slate-200 border-white/10" data-testid="portfolio-skill" data-skill={s.skill} data-points={s.points} data-counted-elsewhere={s.countedElsewhere ?? ''}>
+                      {s.skill}{s.points > 0 ? ` +${s.points}` : ''}
+                      {s.countedElsewhere === 'resume_project' ? ' (same project is on your resume: counted once)' : s.countedElsewhere === 'portfolio_entry' ? ' (same project is in another entry: counted once)' : ''}
+                      {s.verifiedBySkillCheck ? ' (also verified by skill check)' : ''}
                     </li>
                   ))}
                 </ul>
@@ -272,6 +275,7 @@ export const PortfolioWorkspace: React.FC = () => {
         )}
         <Note testId="portfolio-note">
           {data.note} A skill is marked "verified by skill check" only when you passed that skill check; an entry never verifies a skill by itself.
+          A project that is also on your resume, or in another entry with the same title or link, earns points once; the extra record is kept and simply adds none.
           Portfolio entries stay when you replace or delete your resume.
         </Note>
       </section>

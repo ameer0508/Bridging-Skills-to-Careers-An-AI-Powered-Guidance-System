@@ -255,7 +255,7 @@ offers or employment.
 
 ## 11. Versions and recalculation
 
-Every recalculation records `scoringVersion` (currently `2026.10-3`, changed whenever a formula,
+Every recalculation records `scoringVersion` (currently `2026.10-4`, changed whenever a formula,
 weight or threshold in this document changes) and `taxonomyVersion` (a hash of the career and
 requirement data). A transition plan made under other versions is shown as outdated. Which events
 recompute which figures is tabulated in `NEXTGEN_RESEARCH.md` (R1).
@@ -356,8 +356,19 @@ check who made the work or judge its quality.
 | Without a link | Recorded and dated (it updates freshness). 0 points. It does not put a new skill on the profile |
 
 - A project on a resume and a portfolio entry with a link are treated alike because both are
-  unchecked statements by the user. The same piece of work entered in both places is counted
-  twice; nothing detects that.
+  unchecked statements by the user.
+- **One project, one credit.** For each skill, a portfolio entry earns nothing when the same
+  project is already credited: on the resume (equal title), or in an earlier portfolio entry
+  (equal title or equal link). Titles are compared after lower-casing and removing everything
+  that is not a letter or digit, and only when at least four characters remain; links are
+  compared by host and path. The entry is kept, dated and shown as "counted once"; no record is
+  deleted or changed. Where the resume project did not credit a skill that the entry names, the
+  entry still counts for that skill.
+- The match is conservative on purpose. The same work described with different titles and
+  different links is not recognised and is still counted twice. A link does not show that a
+  project was finished or who made it; entries stay self-reported whatever they link to.
+- The what-if engine applies the same rule: a hypothetical project with the title of one that is
+  already credited for a skill adds nothing for it.
 - A skill known only from the portfolio has its project points and no "listed in a resume" points.
 - An entry never makes a skill "verified". A skill is shown as verified by skill check only when
   the user passed that skill check (section 12), and the two kinds of evidence are stored as
@@ -463,3 +474,26 @@ check, and required skills missing.
 been calibrated against interview or hiring outcomes, because SkillBridge holds no outcome data.
 A higher score means more recorded evidence; it is not a measured probability of anything. What
 the basis adds is the ability to see how much of a score depends on unchecked statements.
+
+## 20. Opportunities in the career comparison
+
+The comparison reads labour-market evidence per career from the market module's
+`MarketOpportunitySummary` (contract version 2, [`MARKET_INTELLIGENCE.md`](MARKET_INTELLIGENCE.md)).
+It always asks for sourced records over the twelve months ending now; a client cannot choose the
+dataset or supply evidence.
+
+| What the summary says | What the comparison shows |
+|---|---|
+| Sourced, sufficient (at least 30 distinct postings in at least 3 months) and collected within 90 days | The number of distinct postings, with source and licence, location, period, months with postings, collection date and the matching rule |
+| No licensed source registered | "Market data unavailable": no source |
+| Sourced but too few postings or months, or none matched | "Market data unavailable": too few |
+| Sourced but collected more than 90 days ago | "Market data unavailable": stale |
+| Generated test data | "Market data unavailable"; never shown as demand |
+| Summary missing, failed or in another contract version | "Market data unavailable": could not be loaded |
+
+Unavailable is never shown as zero, and no number accompanies it. Posting counts describe
+postings. They do not enter the match or readiness score, which describe the person, and they do
+not affect the next-step ranking (section 18): its market weight is 0.
+
+**No licensed market source is registered at present**, so every comparison currently shows
+"Market data unavailable". The count path is exercised only by tests that register a test source.

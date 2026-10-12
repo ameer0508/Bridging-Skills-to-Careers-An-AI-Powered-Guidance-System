@@ -254,8 +254,18 @@ score the action predicted.
 - Skill checks exist for 8 skills and project briefs for 15 projects, so the candidate set is
   small and for some careers is dominated by one kind of action.
 - Greedy step-by-step choice is not guaranteed to be the best sequence.
-- Market demand does not influence anything. When dated market records exist (R4, owned by the
-  market module) the factor can be given a weight; until then it is neutral by construction.
+- Market demand does not influence anything. Each action carries a market factor read from the
+  market module's summary: `eligible` is true only for valid, fresh, genuinely sourced evidence
+  (`usableForRecommendations`), and its weight is 0 in every case. Suite `career_market` shows
+  that synthetic, sparse, stale, missing and inconsistent evidence, and valid evidence too, leave
+  every score and rank unchanged.
+- **Intended normalisation, not activated.** If a weight is ever given, the plan is: use only
+  eligible evidence; compare a career's distinct postings with the median across the careers
+  that have eligible evidence for the same location and period; cap the factor at plus or minus
+  one step so demand can reorder near-ties but never outweigh a required gap; treat a career
+  without eligible evidence as the median (no penalty for missing data). This must be evaluated
+  against the current ranking on real sourced records before it is switched on. No such records
+  exist yet, so nothing has been activated.
 
 ## R4. Market-aware career adaptation
 

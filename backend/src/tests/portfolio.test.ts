@@ -79,7 +79,7 @@ export async function runPortfolioTests() {
       {
         title: 'Deploy tool',
         description: 'A small CLI',
-        skills: [{ skill: 'Docker', points: 0, verifiedBySkillCheck: false }, { skill: 'Node.js', points: 0, verifiedBySkillCheck: false }],
+        skills: [{ skill: 'Docker', points: 0, countedElsewhere: null, verifiedBySkillCheck: false }, { skill: 'Node.js', points: 0, countedElsewhere: null, verifiedBySkillCheck: false }],
         verification: 'self_reported',
         counts: false,
         visibility: 'private',

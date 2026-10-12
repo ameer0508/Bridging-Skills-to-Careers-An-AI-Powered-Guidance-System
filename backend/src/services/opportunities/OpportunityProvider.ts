@@ -75,7 +75,8 @@ export interface OpportunitySearchMeta {
 }
 
 export interface OpportunityProviderHealth {
-  status: 'UP' | 'DOWN' | 'PENDING_CREDS';
+  // BLOCKED_BY_POLICY: a key is configured but the zero-cost policy does not allow live calls
+  status: 'UP' | 'DOWN' | 'PENDING_CREDS' | 'BLOCKED_BY_POLICY';
   provider: string;
   message?: string;
 }

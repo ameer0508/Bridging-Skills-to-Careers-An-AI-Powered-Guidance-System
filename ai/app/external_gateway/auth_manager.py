@@ -10,13 +10,14 @@ class AuthManager:
     """
 
     def __init__(self):
-        self._credentials: Dict[str, str] = {}
+        self._credentials: Dict[str, Optional[str]] = {}
         self._load_environment_keys()
 
     def _load_environment_keys(self):
-        self._credentials["coursera"] = os.getenv("COURSERA_API_KEY", "env-coursera-key")
-        self._credentials["adzuna"] = os.getenv("ADZUNA_API_KEY", "env-adzuna-key")
-        self._credentials["jsearch"] = os.getenv("JSEARCH_API_KEY", "env-jsearch-key")
+        # None when not configured: a placeholder would make an unavailable integration look set up
+        self._credentials["coursera"] = os.getenv("COURSERA_API_KEY") or None
+        self._credentials["adzuna"] = os.getenv("ADZUNA_API_KEY") or None
+        self._credentials["jsearch"] = os.getenv("JSEARCH_API_KEY") or None
 
     def get_credential(self, provider_id: str) -> Optional[str]:
         return self._credentials.get(provider_id.lower())

@@ -5,7 +5,7 @@ import { CAREER_TAXONOMY } from '../seed/careerTaxonomy.js';
  * Identifies the scoring rules in force (docs/SCORING.md). Change it whenever a formula,
  * weight or threshold changes, so stored results can be told apart from newer ones.
  */
-export const SCORING_VERSION = '2026.10-3';
+export const SCORING_VERSION = '2026.10-4';
 
 let cachedTaxonomyVersion: string | null = null;
 

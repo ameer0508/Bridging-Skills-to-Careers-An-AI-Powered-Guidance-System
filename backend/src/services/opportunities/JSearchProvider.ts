@@ -6,6 +6,7 @@ import {
 } from './OpportunityProvider.js';
 import env from '../../config/env.js';
 import { searchSampleOpportunities } from './sampleOpportunities.js';
+import { checkLiveCall, guardedFetch } from '../../config/costPolicy.js';
 
 /**
  * Sanitizes external HTML text to prevent script execution / XSS / prompt injection.
@@ -38,6 +39,9 @@ function sanitizeUrl(urlStr?: string): string {
   return '';
 }
 
+/** The process environment (enable flags are not part of the parsed env schema) plus parsed values. */
+const policyEnv = (envObj: Record<string, string>) => ({ ...process.env, ...envObj });
+
 export class JSearchProvider implements OpportunityProvider {
   public readonly name = 'JSearch Provider';
 
@@ -52,6 +56,15 @@ export class JSearchProvider implements OpportunityProvider {
         status: 'PENDING_CREDS',
         provider: this.name,
         message: 'No live job provider key is configured (RAPIDAPI_KEY / JSEARCH_API_KEY). Showing built-in demo listings only.',
+      };
+    }
+    // A key alone does not make the provider live: the zero-cost policy must clear it
+    const decision = checkLiveCall('jsearch', policyEnv(envObj));
+    if (!decision.allowed) {
+      return {
+        status: 'BLOCKED_BY_POLICY',
+        provider: this.name,
+        message: `Live job search is off under the zero-cost policy (${decision.reason}). Showing built-in demo listings only.`,
       };
     }
     return {
@@ -71,8 +84,9 @@ export class JSearchProvider implements OpportunityProvider {
     const location = query.location || '';
     const fullQuery = location ? `${searchQuery} in ${location}` : searchQuery;
 
-    // Without credentials only the clearly labelled demo listings are available
-    if (!apiKey) {
+    // Without credentials, or while the zero-cost policy does not clear JSearch, only the
+    // clearly labelled demo listings are available
+    if (!apiKey || !checkLiveCall('jsearch', policyEnv(envObj)).allowed) {
       return searchSampleOpportunities(query);
     }
 
@@ -86,14 +100,14 @@ export class JSearchProvider implements OpportunityProvider {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-      const response = await fetch(url, {
+      const response = await guardedFetch('jsearch', url, {
         method: 'GET',
         headers: {
           'X-RapidAPI-Key': apiKey,
           'X-RapidAPI-Host': 'jsearch.p.rapidapi.com',
         },
         signal: controller.signal,
-      });
+      }, policyEnv(envObj));
 
       clearTimeout(timeoutId);
 

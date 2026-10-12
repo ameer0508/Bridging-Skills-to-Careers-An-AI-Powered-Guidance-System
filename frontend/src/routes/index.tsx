@@ -42,6 +42,9 @@ const OpportunityDiscoveryWorkspace = lazy(() => import('../workspaces/Opportuni
 const AIOrchestratorDashboard = lazy(() => import('../workspaces/AIOrchestratorDashboard/AIOrchestratorDashboard'));
 const PersonalMemoryWorkspace = lazy(() => import('../workspaces/PersonalMemoryWorkspace/PersonalMemoryWorkspace'));
 const CareerOSDashboard = lazy(() => import('../workspaces/CareerOSDashboard/CareerOSDashboard'));
+const MarketEvidencePage = lazy(() => import('../features/market/components/MarketEvidencePage'));
+const SalaryInsightsPage = lazy(() => import('../features/market/components/SalaryInsightsPage'));
+const ApplicationOutcomesPage = lazy(() => import('../features/applications/components/ApplicationOutcomesPage'));
 const CareerIdentityWorkspace = lazy(() => import('../workspaces/CareerIdentityWorkspace/CareerIdentityWorkspace'));
 
 // Feature Pages
@@ -408,6 +411,30 @@ export const router = createBrowserRouter([
             element: (
               <WorkspaceSuspense>
                 <OpportunityDiscoveryWorkspace />
+              </WorkspaceSuspense>
+            ),
+          },
+          {
+            path: '/market',
+            element: (
+              <WorkspaceSuspense>
+                <MarketEvidencePage />
+              </WorkspaceSuspense>
+            ),
+          },
+          {
+            path: '/market/salaries',
+            element: (
+              <WorkspaceSuspense>
+                <SalaryInsightsPage />
+              </WorkspaceSuspense>
+            ),
+          },
+          {
+            path: '/application-outcomes',
+            element: (
+              <WorkspaceSuspense>
+                <ApplicationOutcomesPage />
               </WorkspaceSuspense>
             ),
           },

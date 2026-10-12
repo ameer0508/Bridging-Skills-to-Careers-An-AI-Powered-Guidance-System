@@ -30,6 +30,10 @@ class _FakeModels:
 
 
 def _provider(monkeypatch, failing=(), fallbacks=None):
+    # A Gemini free tier the operator has enabled and attested (docs/ZERO_COST_API_POLICY.md)
+    monkeypatch.setenv("SKILLBRIDGE_ENABLE_GEMINI", "true")
+    monkeypatch.setenv("SKILLBRIDGE_GEMINI_NO_BILLING_ATTESTED", "true")
+    monkeypatch.setenv("GEMINI_API_KEY", "test-only-not-a-real-key")
     monkeypatch.setenv("GEMINI_MODEL", "configured-model")
     if fallbacks is None:
         monkeypatch.delenv("GEMINI_FALLBACK_MODELS", raising=False)

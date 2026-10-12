@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { careerLabApi, type CareerOption, type CompareResult } from '../careerLabApi';
 import { EmptyState, ErrorNote, Note, SkillChips } from './labUi';
-import { errorText, labelClass, panelClass, primaryButton } from './labStyles';
+import { errorText, formatDate, labelClass, panelClass, primaryButton } from './labStyles';
 
 interface ComparePanelProps {
   careers: CareerOption[];
@@ -139,16 +139,31 @@ export const ComparePanel: React.FC<ComparePanelProps> = ({ careers }) => {
                 <tr data-testid="compare-market-row" data-available={result.marketData.available}>
                   <th scope="row" className="py-2 pr-3 font-semibold text-slate-300">Opportunities</th>
                   {result.careers.map((c) => (
-                    <td key={c.careerId} className="py-2 px-3 text-slate-400">Market data unavailable</td>
+                    <td key={c.careerId} className="py-2 px-3 align-top" data-testid="compare-market-cell" data-state={c.market.state} data-usable={c.market.usable}>
+                      {c.market.usable && c.market.evidence ? (
+                        <div className="space-y-1">
+                          <p className="font-bold text-white">{c.market.evidence.distinctPostings} postings</p>
+                          <p className="text-[11px] text-slate-400">
+                            {c.market.evidence.location}, {c.market.evidence.period.from} to {c.market.evidence.period.to}, in {c.market.evidence.monthsWithPostings} months.
+                            Source: {c.market.evidence.sources.map((s) => `${s.name} (${s.licence})`).join('; ')}.
+                            {c.market.evidence.latestRetrievedAt ? ` Collected ${formatDate(c.market.evidence.latestRetrievedAt)}${c.market.evidence.ageDays !== null ? `, ${c.market.evidence.ageDays} days ago` : ''}.` : ''}
+                          </p>
+                          <p className="text-[11px] text-slate-500">{c.market.evidence.matchingRule}</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          <p className="text-slate-300">Market data unavailable</p>
+                          <p className="text-[11px] text-slate-400">{c.market.detail}</p>
+                        </div>
+                      )}
+                    </td>
                   ))}
                 </tr>
               </tbody>
             </table>
           </div>
           <Note testId="compare-effort-note">{result.effortNote}</Note>
-          <Note>
-            Job openings for each career are not shown here: SkillBridge has no dated market records to count yet. Use the job search to see current listings.
-          </Note>
+          <Note testId="compare-market-note">{result.marketData.reason} {result.marketData.note}</Note>
         </div>
       )}
     </section>

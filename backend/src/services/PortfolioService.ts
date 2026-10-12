@@ -8,6 +8,7 @@ import EvidenceCalculator, { EVIDENCE_POINTS } from './EvidenceCalculator.js';
 import RecalculationService from './RecalculationService.js';
 import { findOrCreateCanonicalSkill, recogniseSkill } from '../utils/canonicalSkill.js';
 import { withUserLock } from '../utils/userLock.js';
+import { creditedProjectKeys, linkKey, projectKey } from '../utils/projectIdentity.js';
 import { AppError } from '../middlewares/errorHandler.js';
 import LearningActivityService from './LearningActivityService.js';
 import { EventType } from '../models/ProgressEvent.js';
@@ -177,6 +178,8 @@ class PortfolioService {
         return {
           skill,
           points: evidence?.points ?? 0,
+          // Set when the same project is already credited elsewhere, so this entry adds no points for the skill
+          countedElsewhere: evidence?.duplicateOf ?? null,
           // Verified separately, by a skill check; never because of this entry
           verifiedBySkillCheck: Boolean(userSkill?.evidences.some(e => e.sourceType === 'assessment'))
         };
@@ -216,6 +219,7 @@ class PortfolioService {
     }
 
     const now = new Date();
+    const creditedLinks = new Map<string, Set<string>>();
     for (const entry of entries) {
       for (const skillName of entry.skills) {
         let doc = bySkill.get(skillName.toLowerCase());
@@ -228,16 +232,37 @@ class PortfolioService {
           basePoints.set(doc._id.toString(), 0);
         }
         const projectsSoFar = doc.evidences.filter(e => e.sourceType === 'resume_projects' || (e.sourceType === PORTFOLIO_SOURCE && (e.points || 0) > 0)).length;
+        // The same project already credited for this skill, from the resume or an earlier entry,
+        // is not credited again. The entry is kept and dated; it simply earns nothing here.
+        const titleKey = projectKey(entry.title);
+        const urlKey = linkKey(entry.evidenceUrl);
+        const docLinks = creditedLinks.get(doc._id.toString()) ?? new Set<string>();
+        creditedLinks.set(doc._id.toString(), docLinks);
+        const resumeKeys = creditedProjectKeys(doc.evidences.filter(e => e.sourceType === 'resume_projects'));
+        const portfolioKeys = creditedProjectKeys(doc.evidences.filter(e => e.sourceType === PORTFOLIO_SOURCE));
+        const duplicateOf: IEvidence['duplicateOf'] = !entry.evidenceUrl
+          ? undefined
+          : titleKey && resumeKeys.has(titleKey)
+            ? 'resume_project'
+            : (titleKey && portfolioKeys.has(titleKey)) || (urlKey && docLinks.has(urlKey))
+              ? 'portfolio_entry'
+              : undefined;
         const evidence: IEvidence = {
           sourceType: PORTFOLIO_SOURCE,
           sourceId: entry._id.toString(),
-          description: `Portfolio project: ${entry.title}${entry.evidenceUrl ? '' : ' (no link given)'}. Your own record, not checked`,
+          description:
+            `Portfolio project: ${entry.title}${entry.evidenceUrl ? '' : ' (no link given)'}. Your own record, not checked` +
+            (duplicateOf === 'resume_project' ? '. The same project is on your resume, so it is counted once' : duplicateOf === 'portfolio_entry' ? '. The same project is in another portfolio entry, so it is counted once' : ''),
           weight: 0.6,
-          points: entry.evidenceUrl ? stepped(EVIDENCE_POINTS.projects, projectsSoFar) : 0,
+          points: entry.evidenceUrl && !duplicateOf ? stepped(EVIDENCE_POINTS.projects, projectsSoFar) : 0,
           observedAt: entry.completedOn,
           verification: 'self_attested',
-          recordedAt: now
+          recordedAt: now,
+          label: entry.title,
+          ...(duplicateOf ? { duplicateOf } : {})
         };
+        // A duplicate stands for a project that is credited, so its link identifies that project too
+        if (urlKey && ((evidence.points || 0) > 0 || duplicateOf)) docLinks.add(urlKey);
         doc.evidences.push(evidence);
       }
     }

@@ -9,6 +9,8 @@ import {
   Layers,
   Cpu,
   BarChart3,
+  LineChart,
+  Target,
   FileText,
   User,
   ChevronLeft,
@@ -19,7 +21,9 @@ import {
   Bot,
   MessageSquare,
   FlaskConical,
+  Flame,
   FolderGit2,
+  Wallet,
 } from 'lucide-react';
 import { SidebarItem } from './SidebarItem';
 import { useAuthStore } from '../../store/authStore';
@@ -125,6 +129,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: <Layers className="w-4 h-4" />,
           shortcut: '⌘6',
         },
+        {
+          to: '/activity',
+          label: 'Learning Activity',
+          icon: <Flame className="w-4 h-4" />,
+        },
       ],
     },
     {
@@ -141,6 +150,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label: 'Progress Analytics',
           icon: <BarChart3 className="w-4 h-4" />,
           shortcut: '⌘8',
+        },
+        {
+          to: '/market',
+          label: 'Market Evidence',
+          icon: <LineChart className="w-4 h-4" />,
+        },
+        {
+          to: '/market/salaries',
+          label: 'Salary Insights',
+          icon: <Wallet className="w-4 h-4" />,
+        },
+        {
+          to: '/application-outcomes',
+          label: 'Application Outcomes',
+          icon: <Target className="w-4 h-4" />,
         },
       ],
     },

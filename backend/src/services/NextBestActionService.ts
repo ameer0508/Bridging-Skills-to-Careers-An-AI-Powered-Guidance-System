@@ -6,6 +6,7 @@ import LearningProject from '../models/LearningProject.js';
 import { PortfolioEntry } from '../models/PortfolioEntry.js';
 import CareerScenarioService from './CareerScenarioService.js';
 import { NBA_WEIGHTS, rankNextActions } from './NextBestAction.js';
+import { marketEvidenceForCareers } from './CareerMarketEvidence.js';
 import { SCORING_VERSION, taxonomyVersion } from '../utils/versions.js';
 
 export const MAX_NEXT_ACTIONS = 5;
@@ -46,7 +47,9 @@ class NextBestActionService {
     ]);
     const inPortfolio = new Set(entries.map(e => e.sourceProjectId?.toString()).filter(Boolean));
 
+    const market = (await marketEvidenceForCareers([{ id: career.id, title: career.title }])).get(career.id) ?? null;
     const ranked = rankNextActions({
+      market,
       skills,
       requirements: career.requirements,
       requirementKeys,

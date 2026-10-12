@@ -90,7 +90,7 @@ Nothing in this group changes the user's skills or scores, except recording a co
 | Method | Path | Auth | Purpose |
 |---|---|---|---|
 | `GET` | `/api/v1/careers/catalog` | Yes | Every career that can be compared or targeted. |
-| `POST` | `/api/v1/careers/compare` | Yes | Body `careerIds` (2 to 4). Requirements, evidence and effort per career. |
+| `POST` | `/api/v1/careers/compare` | Yes | Body `careerIds` (2 to 4). Requirements, evidence and effort per career, plus `market` per career (state `sourced_valid`, `no_source`, `sparse`, `stale`, `synthetic` or `error`; a posting count with source, period and freshness only when `usable`) and `marketData`. Market evidence is read server-side from sourced records only; it cannot be supplied in the request. |
 | `POST` | `/api/v1/careers/what-if` | Yes | Body `changes` (1 to 10 of `add_skill`, `remove_skill`, `add_project`, `add_certification`, `add_experience`, `pass_assessment`) and optional `careerIds`. Scores before and after with requirement-level changes. `400 UNKNOWN_SKILL` for a skill that is not recognised. Nothing is saved. |
 | `GET` | `/api/v1/careers/:id/counterfactuals` | Yes | Ranked single changes and a path to `targetScore` (query, 0-100). |
 | `GET` | `/api/v1/careers/transition-plans` | Yes | The caller's plans, each stage re-evaluated against current evidence. |

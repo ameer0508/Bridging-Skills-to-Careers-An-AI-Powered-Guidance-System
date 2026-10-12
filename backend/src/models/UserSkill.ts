@@ -32,6 +32,10 @@ export interface IEvidence {
   verification?: EvidenceVerification;
   /** When this record was created. */
   recordedAt?: Date;
+  /** Title of the project this evidence comes from, for project evidence. */
+  label?: string;
+  /** Set when the same project is already credited from another record, so this one earns nothing. */
+  duplicateOf?: 'resume_project' | 'portfolio_entry';
 }
 
 export type ProficiencyLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
@@ -59,7 +63,9 @@ const EvidenceSchema = new Schema<IEvidence>(
     observedAt: { type: Date, default: null },
     ongoing: { type: Boolean },
     verification: { type: String, enum: ['stated', 'self_attested', 'assessed'] },
-    recordedAt: { type: Date }
+    recordedAt: { type: Date },
+    label: { type: String },
+    duplicateOf: { type: String, enum: ['resume_project', 'portfolio_entry'] }
   },
   { _id: false }
 );

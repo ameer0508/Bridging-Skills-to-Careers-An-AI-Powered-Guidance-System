@@ -10,6 +10,8 @@ import { canonicalSkillName, lookupSkill } from '../utils/skillLexicon.js';
 import { skillKeys } from '../utils/skillMatching.js';
 import { SCORING_VERSION, taxonomyVersion } from '../utils/versions.js';
 import { AppError } from '../middlewares/errorHandler.js';
+import { marketEvidenceForCareers } from './CareerMarketEvidence.js';
+import { creditedProjectKeys, projectKey } from '../utils/projectIdentity.js';
 
 /**
  * Career comparison, what-if analysis, counterfactual explanations and transition plans.
@@ -92,7 +94,7 @@ class CareerScenarioService {
         canonicalName: skill.canonicalName,
         aliases: skill.aliases || [],
         evidenceScore: doc.evidenceScore,
-        evidences: doc.evidences.map(e => ({ sourceType: e.sourceType, description: e.description, weight: e.weight, points: e.points })),
+        evidences: doc.evidences.map(e => ({ sourceType: e.sourceType, description: e.description, weight: e.weight, points: e.points, label: e.label })),
         hypothetical: false
       });
     }
@@ -166,9 +168,9 @@ class CareerScenarioService {
       result.push(created);
       return created;
     };
-    const add = (skill: ScenarioSkill, points: number, sourceType: IEvidence['sourceType'], description: string) => {
+    const add = (skill: ScenarioSkill, points: number, sourceType: IEvidence['sourceType'], description: string, label?: string) => {
       skill.evidenceScore = Math.min(100, skill.evidenceScore + points);
-      skill.evidences.push({ sourceType, description, weight: 0 });
+      skill.evidences.push({ sourceType, description, weight: 0, ...(label ? { label } : {}) });
       skill.hypothetical = true;
     };
 
@@ -185,7 +187,11 @@ class CareerScenarioService {
         case 'add_project':
           for (const name of change.skills) {
             const skill = ensure(name);
-            add(skill, stepped(EVIDENCE_POINTS.projects, projectCount(skill)), 'resume_projects', `Hypothetical project${change.name ? `: ${change.name}` : ''}`);
+            // A project already credited for this skill under the same title adds nothing, as in
+            // the real calculation
+            const titleKey = projectKey(change.name);
+            if (titleKey && creditedProjectKeys(skill.evidences).has(titleKey)) continue;
+            add(skill, stepped(EVIDENCE_POINTS.projects, projectCount(skill)), 'resume_projects', `Hypothetical project${change.name ? `: ${change.name}` : ''}`, change.name);
           }
           break;
         case 'add_experience':
@@ -341,13 +347,28 @@ class CareerScenarioService {
       r.sharedWithOthers = r.effort.skillsToAcquire.filter(s => (gapCounts.get(s) || 0) > 1);
     });
 
+    // Opportunities: market evidence per career, read through the market module's contract. It is
+    // shown beside the scores and never enters them. Where no valid sourced evidence exists the
+    // career is reported as unavailable, never as zero openings.
+    const market = await marketEvidenceForCareers(rows.map(r => ({ id: r.careerId, title: r.careerTitle })));
+    const withMarket = rows.map(r => ({ ...r, market: market.get(r.careerId)! }));
+    const usable = withMarket.filter(r => r.market.usable).length;
+
     return {
       hasProfile: skills.length > 0,
-      careers: rows,
+      careers: withMarket,
       effortNote: 'Effort is shown as the number of skills to acquire and the score points still open. No time estimate is given because none can be supported by data.',
-      // The opportunities dimension needs dated market records, which this module does not hold.
-      // It is reported as unavailable, never as zero openings.
-      marketData: { available: false as const, reason: 'Market data unavailable: no dated job-market records are connected to the comparison yet.' },
+      marketData: {
+        available: usable > 0,
+        careersWithEvidence: usable,
+        reason:
+          usable === withMarket.length
+            ? 'Posting counts come from licensed sources and describe postings, not your chances.'
+            : usable > 0
+              ? 'Posting counts are shown only for careers with enough recent sourced postings; the others are unavailable, not zero.'
+              : 'Market data unavailable: no valid, recent, sourced job-market records exist for these careers.',
+        note: 'Opportunities describe job postings. They are separate from your match and readiness, which describe your evidence, and do not change them.'
+      },
       scoringVersion: SCORING_VERSION,
       taxonomyVersion: taxonomyVersion()
     };

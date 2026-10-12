@@ -29,13 +29,31 @@ export interface ComparedCareer {
     pointsPossible: number;
   };
   sharedWithOthers: string[];
+  market: CareerMarketEvidence;
+}
+
+export interface CareerMarketEvidence {
+  state: 'sourced_valid' | 'no_source' | 'sparse' | 'stale' | 'synthetic' | 'error';
+  usable: boolean;
+  label: string;
+  detail: string;
+  evidence: null | {
+    distinctPostings: number;
+    monthsWithPostings: number;
+    location: string;
+    period: { from: string; to: string };
+    sources: Array<{ name: string; licence: string; postings: number }>;
+    latestRetrievedAt: string | null;
+    ageDays: number | null;
+    matchingRule: string;
+  };
 }
 
 export interface CompareResult {
   hasProfile: boolean;
   careers: ComparedCareer[];
   effortNote: string;
-  marketData: { available: boolean; reason: string };
+  marketData: { available: boolean; careersWithEvidence: number; reason: string; note: string };
 }
 
 export type ScenarioChangeType = 'add_skill' | 'add_project' | 'add_certification' | 'add_experience' | 'remove_skill';

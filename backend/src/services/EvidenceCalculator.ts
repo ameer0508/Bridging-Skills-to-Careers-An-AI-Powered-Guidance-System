@@ -103,6 +103,7 @@ export class EvidenceCalculator {
           sourceType: 'resume_projects',
           sourceId: parsedResume.id,
           description: `Applied in project: ${proj.name?.value || 'Unnamed project'}`,
+          label: proj.name?.value || undefined,
           weight: 0.6,
           points,
           observedAt: null,

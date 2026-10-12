@@ -5,6 +5,7 @@ import { practisedGaps } from './ProjectSuggestionService.js';
 import { ASSESSMENT_POLICY, assessableSkill } from './SkillAssessmentService.js';
 import { EFFORT_ASSUMPTIONS } from './RoadmapScheduler.js';
 import { PROJECT_BRIEFS } from '../seed/projectBriefs.js';
+import type { CareerMarketEvidence } from './CareerMarketEvidence.js';
 
 /**
  * Next-best-action ranking (research contribution R3).
@@ -45,6 +46,8 @@ export interface NextActionInput {
   briefStatus: Record<string, string>;
   /** Practice projects marked complete that are not in the portfolio yet. */
   unpublishedProjects: Array<{ id: string; title: string; skills: string[] }>;
+  /** Market evidence for the career, when it was looked up. Absent means unknown. */
+  market?: CareerMarketEvidence | null;
 }
 
 export interface RankedAction {
@@ -72,9 +75,43 @@ export interface RankedAction {
     needsLearningFirst: string[];
     effortHours: { low: number; high: number; basis: 'time limit' | 'assumption' };
     capacity: { hoursPerWeek: number | null; weeks: { low: number; high: number } | null; fitsTwoWeeks: boolean | null };
-    market: { value: null; weight: 0; note: string };
+    market: MarketFactor;
   };
   reasons: string[];
+}
+
+/**
+ * The market factor of an action. Its weight is 0 in every case: market demand does not move the
+ * ranking. `eligible` records whether the evidence would be allowed to, which is only when it is
+ * valid, fresh and genuinely sourced. Even then the value is carried for display and audit only,
+ * until a normalisation is agreed and documented (docs/NEXTGEN_RESEARCH.md, R3).
+ */
+export interface MarketFactor {
+  /** Distinct sourced postings for the career, only when eligible; otherwise null. */
+  value: number | null;
+  weight: 0;
+  eligible: boolean;
+  state: string;
+  note: string;
+}
+
+export function marketFactor(market: CareerMarketEvidence | null | undefined): MarketFactor {
+  if (market?.usable && market.state === 'sourced_valid' && market.evidence) {
+    return {
+      value: market.evidence.distinctPostings,
+      weight: NBA_WEIGHTS.market,
+      eligible: true,
+      state: market.state,
+      note: `${market.evidence.distinctPostings} sourced postings exist for this career. They are shown for information; market demand does not affect this ranking yet.`
+    };
+  }
+  return {
+    value: null,
+    weight: NBA_WEIGHTS.market,
+    eligible: false,
+    state: market?.state ?? 'not_looked_up',
+    note: 'No market data is available, so demand does not affect this ranking.'
+  };
 }
 
 const key = (name: string): string => name.trim().toLowerCase();
@@ -185,7 +222,9 @@ export function rankNextActions(input: NextActionInput): { scoreNow: number; act
       impact +
       NBA_WEIGHTS.requiredGap * Math.min(2, requiredGapsAddressed) +
       (capacity.fitsTwoWeeks ? NBA_WEIGHTS.fitsCapacity : 0) -
-      (needsLearningFirst.length > 0 ? NBA_WEIGHTS.needsLearningFirst : 0);
+      (needsLearningFirst.length > 0 ? NBA_WEIGHTS.needsLearningFirst : 0) +
+      // Zero by construction: the weight is 0 whatever the evidence says
+      NBA_WEIGHTS.market * (marketFactor(input.market).value ?? 0);
 
     const reasons = [`Would move the match from ${base.totalScore}% to ${after.totalScore}% (hypothetical).`];
     if (requiredGapsAddressed > 0) reasons.push(`Addresses ${requiredGapsAddressed} required skill${requiredGapsAddressed === 1 ? '' : 's'} you have not yet shown in use.`);
@@ -212,7 +251,7 @@ export function rankNextActions(input: NextActionInput): { scoreNow: number; act
           needsLearningFirst,
           effortHours: effort,
           capacity,
-          market: { value: null, weight: 0 as const, note: 'No market data is available, so demand does not affect this ranking.' }
+          market: marketFactor(input.market)
         },
         reasons
       }

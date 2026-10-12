@@ -218,6 +218,10 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       expect(/No time estimate is given/.test(await page.getByTestId('compare-effort-note').innerText()), 'the effort note does not say that no time estimate is given');
       expect(/Docker/.test(await page.getByTestId('compare-result').innerText()), 'the DevOps gap (Docker) is not listed');
       const market = page.getByTestId('compare-market-row');
+      const cells = page.getByTestId('compare-market-cell');
+      expect((await cells.count()) === 2 && (await cells.first().getAttribute('data-state')) === 'no_source' && (await cells.first().getAttribute('data-usable')) === 'false', 'without a licensed source each career should be shown as having no market source');
+      expect(/No licensed job-market source is connected/.test(await cells.first().innerText()) && !/\d+ postings/.test(await market.innerText()), 'a posting count is shown although no sourced data exists');
+      expect(/separate from your match and readiness/.test(await page.getByTestId('compare-market-note').innerText()), 'the note does not keep opportunities apart from readiness');
       expect((await market.getAttribute('data-available')) === 'false' && /Market data unavailable/.test(await market.innerText()), 'the opportunities row does not say that market data is unavailable');
       return `Frontend Engineer ${shown}`;
     });
