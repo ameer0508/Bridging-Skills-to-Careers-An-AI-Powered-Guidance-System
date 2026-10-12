@@ -30,9 +30,9 @@ graph TD
 
 ### 3. Intelligence Layer (AI Service)
 
-- **Technology:** Python, FastAPI, Uvicorn, spaCy, scikit-learn.
+- **Technology:** Python, FastAPI, Uvicorn, pdfplumber / PyMuPDF and python-docx for reading resumes, and the Google GenAI SDK for the optional AI provider.
 - **Architectural Pattern:** Independent Service Architecture.
-- **Core Principle:** Decoupled computing. Heavy operations (NLP processing, embedding generation, text parsing) are performed asynchronously in Python, keeping the Node.js API highly responsive.
+- **Core Principle:** Decoupled computing. Resume text extraction, rule-based parsing against the shared skill lexicon, and calls to the AI provider run in Python. Embeddings and vector search are not used by any endpoint; an experimental embedding-based parser (`resume_intelligence/transformer_parser.py`) is present but not called. Only the backend may call this service, with a shared internal key.
 
 ---
 
@@ -101,7 +101,7 @@ app/
 ├── config/         # App base settings (Pydantic Settings)
 ├── routers/        # FastAPI sub-routers (health, skills, analysis)
 ├── schemas/        # Request and response models (Pydantic)
-├── services/       # Document parsers, embeddings processors, similarity logic
+├── services/       # Document parsers and provider-backed services
 ├── utils/          # General helper functions
 └── main.py         # App entry and middleware configurations
 ```

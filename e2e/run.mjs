@@ -161,7 +161,7 @@ async function main() {
       return res.json();
     };
 
-    const { run } = await import('./tests/smoke.mjs');
+    const { run } = await import(process.env.E2E_TEST_FILE || './tests/smoke.mjs');
     failures = await run({ webUrl, apiUrl, aiControl, tmpDir });
   } catch (error) {
     console.error(`[e2e] ${error.stack || error.message}`);

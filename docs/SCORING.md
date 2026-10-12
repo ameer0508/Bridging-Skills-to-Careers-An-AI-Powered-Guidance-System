@@ -163,3 +163,46 @@ under it (measured in the milestone-1 test run).
   `confidence_basis: heuristic_not_model_reported`.
 - AI service modules with no live data source (market, salary, GitHub, LinkedIn and the agent
   demos) label every response `data_origin: illustrative_sample`. No user workflow uses them.
+
+## 8. Interview questions
+
+Questions are not scored, but how they are chosen affects what an interview measures.
+
+**When an AI provider answers**, it is given the target role, interview mode, the user's skills
+(strongest evidence first), the gaps for the target career, the roles and project names on the
+active resume, the job posting if the session was started from one, and the questions asked in the
+last ten sessions as ones to avoid. Its output is accepted only if it contains at least the
+requested number of usable questions (known category, not a repeat). Otherwise it is discarded
+whole: questions are never padded. The session is marked `questionSource: ai`.
+
+**Otherwise** questions come from a built-in bank of 108 (`backend/src/seed/interviewQuestionBank.ts`),
+and the session is marked `questionSource: question_bank`. Selection is deterministic for a given
+user and session number:
+
+1. The mode fixes the category of each slot (for example a mixed session cycles technical,
+   behavioural, project, technical, resume, career).
+2. A question is eligible only if the facts it needs exist. A template about a skill needs a skill
+   on the profile; one about a project needs a project name on the resume. No skill, employer or
+   project is invented, and a test checks that no question names a skill that is not on record.
+3. Role-family questions (frontend, backend, data, machine learning, DevOps, security, design,
+   mobile, product) are chosen from the role title. An unrecognised title gets the general set.
+4. Technical slots rotate between a question about a specific skill, a gap, the role family and a
+   general skill question, and questions are spread across different skills.
+5. Questions asked in the last ten sessions are avoided while unused ones remain. Six consecutive
+   technical sessions of five questions give thirty different questions in the test profile.
+6. With a job posting, about half of a technical, career or mixed session is tied to it; other
+   modes open with one question about it. A skill the posting names that the profile lacks is
+   asked about as a gap, never as existing experience.
+
+## 9. Chat replies
+
+A chat reply is either written by an AI provider or it is a fallback; there is no score.
+
+- An AI reply is stored with `source: ai` and the provider and model that produced it.
+- When the provider is unavailable, times out or fails, the stored reply has `source: fallback`.
+  Its text says it is not an AI-generated answer and lists only figures already stored for the
+  user (target role, number of skills and the three with the strongest evidence, readiness, largest
+  gaps, top recommendation, roadmap progress). It does not attempt to answer the question.
+- No confidence figure or token cost is attached to a chat reply.
+- The development mock provider is never allowed to answer chat, interview questions or interview
+  scoring.

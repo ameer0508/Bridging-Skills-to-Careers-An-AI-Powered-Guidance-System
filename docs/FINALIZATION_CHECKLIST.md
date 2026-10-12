@@ -3,7 +3,7 @@
 Progress is the sum of points for items marked **Done**. An item is only marked Done when
 the stated verification has actually been run and passed. "Code exists" does not count.
 
-Total: 100 points. **Current: 94 / 100.**
+Total: 100 points. **Current: 97 / 100.**
 
 Verification levels used below:
 
@@ -27,10 +27,10 @@ Verification levels used below:
 
 | # | Item | Pts | Status | Verification |
 |---|---|---|---|---|
-| B1 | Upload, replace, download, delete | 2 | **Done** | `pnpm test:e2e` (34/34): upload, byte-identical download, replace, confirmed delete; HTTP test resume_lifecycle |
+| B1 | Upload, replace, download, delete | 2 | **Done** | `pnpm test:e2e` (35/35): upload, byte-identical download, replace, confirmed delete; HTTP test resume_lifecycle |
 | B2 | Better extraction accuracy (skills and sections; AI-assisted with fallback) | 3 | **Done** | AI test: 25 fixture tests over TXT, PDF and DOCX in five layouts; live check with a real PDF. Scope: English, single-column, text-based documents only |
 | B3 | Honest ATS and section labels | 1 | **Done** | browser check: resume page shows "Rule-based parser"; invented quality defaults removed |
-| B4 | Reprocess endpoint and recovery of stuck jobs | 2 | **Done** | HTTP test resume_lifecycle (reprocess, 409 while running, failed/stuck/interrupted jobs recoverable); `pnpm test:e2e` (34/34) drives reprocess and failure recovery in the UI |
+| B4 | Reprocess endpoint and recovery of stuck jobs | 2 | **Done** | HTTP test resume_lifecycle (reprocess, 409 while running, failed/stuck/interrupted jobs recoverable); `pnpm test:e2e` (35/35) drives reprocess and failure recovery in the UI |
 | B5 | Differential processing on replace | 2 | **Done** | service test (old resume's skills do not linger after replacement) |
 
 ## C. Skill intelligence (8)
@@ -68,8 +68,8 @@ Verification levels used below:
 |---|---|---|---|---|
 | F1 | Saved jobs keep URL, notes, status; counted in Command Center | 2 | **Done** | service test |
 | F2 | Honest match score (no floor, no invented skills) | 2 | **Done** | service test (0, partial, 100, aliases, unscoreable postings, repeats, substring traps) + HTTP test + live check |
-| F3 | Filters, ranking, freshness, deduplication | 2 | **Done** | HTTP test opportunity_tracking: keyword, location, remote, type, date, salary (stated salaries only), sorting, page size, re-post deduplication, result metadata; `pnpm test:e2e` (34/34) |
-| F4 | Application history, reminders, outcomes | 2 | **Done** | HTTP test opportunity_tracking: status history, notes, follow-up reminders, due reminders in snapshot, 404 semantics; `pnpm test:e2e` (34/34) drives the tracking panel |
+| F3 | Filters, ranking, freshness, deduplication | 2 | **Done** | HTTP test opportunity_tracking: keyword, location, remote, type, date, salary (stated salaries only), sorting, page size, re-post deduplication, result metadata; `pnpm test:e2e` (35/35) |
+| F4 | Application history, reminders, outcomes | 2 | **Done** | HTTP test opportunity_tracking: status history, notes, follow-up reminders, due reminders in snapshot, 404 semantics; `pnpm test:e2e` (35/35) drives the tracking panel |
 | F5 | Jobs pages verified; sandbox data labelled | 2 | **Done** | browser journey: search, save, status change to Applied, survives reload; without a provider key listings are labelled "demo listing" / sandbox |
 
 ## G. Interview intelligence (10)
@@ -79,7 +79,7 @@ Verification levels used below:
 | G1 | Answers, evaluations and scores persisted | 2 | **Done** | service test |
 | G2 | AI question generation with deterministic fallback | 2 | **Done** | AI test test_interview_questions (12) and HTTP test interview_questions: AI questions when a provider answers, otherwise a 108-question bank selected by role, skills, gaps and job posting, with no repeats across sessions |
 | G3 | AI evaluation with labelled heuristic fallback; honest dimension scores | 3 | **Done** | service test (empty, one-sentence, off-topic, keyword list, STAR, technical, AI output validation, unavailable, invalid, timeout) + AI test. The AI path was tested with mocked provider output only |
-| G4 | Report and history pages verified | 2 | **Done** | `pnpm test:e2e` (34/34): report shows question source, scoring source and real rubric dimensions; history lists sessions and reopens a stored report |
+| G4 | Report and history pages verified | 2 | **Done** | `pnpm test:e2e` (35/35): report shows question source, scoring source and real rubric dimensions; history lists sessions and reopens a stored report |
 | G5 | Fix wrong history path in profile workspace | 1 | **Done** | browser journey: profile page loads interview history with no failed request |
 
 ## H. Command Center (8)
@@ -98,7 +98,7 @@ Verification levels used below:
 | I1 | AI service authentication and restricted CORS | 2 | **Done** | AI test (all 52 operations audited) + live check |
 | I2 | Upload filename sanitization, size limit, content validation | 1 | **Done** | AI test + HTTP test |
 | I3 | Gemini configuration verified; fallback and observability | 2 | **Done** | Model id confirmed present for the configured key via the model-list endpoint (no prompt sent); no silent model substitution, provider-reported token counts (AI test, mocked). No real generation request has been made |
-| I4 | Chat timeout alignment and fallback flag | 2 | **Done** | AI test test_chat, HTTP test chat_reliability, `pnpm test:e2e` (34/34): timeouts ordered (provider 20s, server 25s, browser 40s); fallback replies labelled and retryable; mock provider never answers chat |
+| I4 | Chat timeout alignment and fallback flag | 2 | **Done** | AI test test_chat, HTTP test chat_reliability, `pnpm test:e2e` (35/35): timeouts ordered (provider 20s, server 25s, browser 40s); fallback replies labelled and retryable; mock provider never answers chat |
 | I5 | Simulated modules hidden or labelled as demos | 1 | **Done** | 16 simulated workspaces wrapped in a "design preview" banner (verified in the browser on one of them); sample market, salary, course and certification panels carry an "Illustrative sample data" notice |
 
 ## J. Reliability, security, testing, UX, deployment (20)
@@ -112,8 +112,8 @@ Verification levels used below:
 | J5 | All test suites isolated, run once, pass | 3 | **Done** | `pnpm --filter backend test`: 13 suites pass; pytest: 78 pass |
 | J6 | Frontend type-check is real and build passes | 3 | **Done** | `pnpm --filter frontend build` now runs `tsc --noEmit -p tsconfig.app.json` first: 0 errors (was 514), then `vite build` passes. No strictness relaxed, no `@ts-ignore`/`@ts-nocheck` added |
 | J7 | Lint clean | 1 | **Done** | `pnpm lint`: backend 0 warnings; frontend 0 warnings (was 108), no rule disabled or suppression added. Seven suppressions that predate this work remain in context/provider files |
-| J8 | UX polish, accessibility, loading and error states | 2 | Pending | Partly done: `pnpm test:e2e` (34/34) checks accessible names on 13 pages, 390px layout on 7 and keyboard focus; loading, empty, error and retry states added for resume, jobs and chat. Other pages' loading/error states were not reviewed; no screen-reader or contrast audit |
-| J9 | README and docs match the implementation | 1 | Pending | Not done: e2e/README.md is accurate, but README.md, docs/DEPLOYMENT.md and docs/API_REFERENCE.md have not been brought in line with the implementation |
+| J8 | UX polish, accessibility, loading and error states | 2 | **Done** | `pnpm test:e2e` (35/35): accessible names on every control of 13 pages, 7 pages fit 390px, keyboard focus order, and a load-failure notice with retry on 12 pages when the API fails; loading, empty, error and retry states for resume, jobs, interviews and chat. Not covered: screen readers, colour contrast, non-Chromium browsers |
+| J9 | README and docs match the implementation | 1 | **Done** | README, DEPLOYMENT, SECURITY, ARCHITECTURE, CHANGELOG, SCORING and the `.env.example` files rewritten or corrected against the code; the endpoint table in API_REFERENCE is checked against all 54 routes. The older per-endpoint examples in API_REFERENCE were not re-verified one by one and say so |
 | J10 | Full demo journey run-through | 1 | **Done** | browser journey: 27 of 27 checks pass on a clean temporary database (register, onboarding, upload, extraction, skills, matches, readiness, roadmap, jobs, interview, Home, reload, logout, re-login, cross-user isolation, invalid input, navigation, 390px layout, basic accessibility) |
 
 ## Environment limitations (as of milestone 5)

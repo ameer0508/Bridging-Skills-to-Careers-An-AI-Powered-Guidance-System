@@ -54,8 +54,9 @@ export const ResumeDropzoneCard: React.FC<ResumeDropzoneCardProps> = ({
       setLocalError('That file type is not supported. Please choose a PDF or Word document (.pdf or .docx).');
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      setLocalError('That file is larger than the 10 MB limit.');
+    // Same limit as the server (UPLOAD_MAX_SIZE)
+    if (file.size > 5 * 1024 * 1024) {
+      setLocalError('That file is larger than the 5 MB limit.');
       return;
     }
     setLocalError(null);
@@ -94,7 +95,7 @@ export const ResumeDropzoneCard: React.FC<ResumeDropzoneCardProps> = ({
               {hasActiveResume ? 'Drag & Drop to Replace Active Resume' : 'Drag & Drop Your Resume File'}
             </h3>
             <p className="text-xs text-slate-400">
-              Supports PDF and DOCX up to <span className="text-cyan-300 font-bold">10 MB</span>
+              Supports PDF and DOCX up to <span className="text-cyan-300 font-bold">5 MB</span>
             </p>
           </div>
         </div>

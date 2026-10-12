@@ -25,7 +25,8 @@ labelled demo listings. The temp directory and all processes are removed at the 
 
 ## Requirements
 
-- Node.js 20 or newer and the repository's dependencies (`pnpm install`).
+- Node.js and the repository's dependencies (`pnpm install`). The suite has been run on Node.js 24
+  on Windows; other versions and platforms are untested.
 - Microsoft Edge or Google Chrome installed. The tests use the installed browser through
   `playwright-core`; no browser is downloaded.
 - Python is **not** required: the AI service is replaced by the stub.
@@ -36,6 +37,7 @@ labelled demo listings. The temp directory and all processes are removed at the 
 |---|---|
 | `E2E_BROWSER_CHANNEL` | `msedge`, `chrome` or `chromium`. Default: the first one installed. |
 | `E2E_HEADED=1` | Show the browser window. |
+| `E2E_TEST_FILE` | Run another test module instead of `./tests/smoke.mjs` (path relative to `e2e/`). |
 | `E2E_KEEP=1` | Keep the temp directory (database, uploads, `backend.log`, `frontend.log`, `ai.log`). |
 
 ## What is covered
@@ -45,7 +47,8 @@ failed-extraction recovery and confirmed deletion; extracted skills; career matc
 breakdown; readiness shown consistently; roadmap generation and progress; job search filters,
 demo-listing labels, saving, status, notes, reminders and status history; interviews (question
 source, scoring source, rubric dimensions, stored report, history, job-specific practice, no
-repeated questions); chat fallback and retry; Command Center values against stored data; reload
+repeated questions); chat fallback and retry; the load-failure notice on twelve pages when the API
+fails; Command Center values against stored data; reload
 persistence; sign-out and protected routes; nine cross-account requests; the not-found page;
 phone-width layout and accessible names on the main pages.
 

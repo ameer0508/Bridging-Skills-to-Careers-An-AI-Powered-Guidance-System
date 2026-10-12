@@ -494,6 +494,28 @@ export async function run({ webUrl, apiUrl, aiControl }) {
 
     const unexpected = { failed: [...new Set(log.failed)], console: [...new Set(log.console)] };
 
+    // ---- When the server fails ----------------------------------------------------------------------------------------
+    await t.step('a failed data load is announced on every page and can be retried', async () => {
+      const failReads = (route) =>
+        route.request().method() === 'GET'
+          ? route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Simulated failure' } }) })
+          : route.continue();
+      await page.route(`${apiUrl}/**`, failReads);
+      const silent = [];
+      const routes = ['/home', '/ai', '/resume', '/skills', '/careers', '/readiness', '/roadmap', '/recommendations', '/job-agent', '/interview-agent', '/analytics', '/profile'];
+      for (const route of routes) {
+        await page.goto(webUrl + route);
+        const shown = await page.getByTestId('load-error-banner').waitFor({ timeout: 15_000 }).then(() => true, () => false);
+        if (!shown) silent.push(route);
+      }
+      expect(silent.length === 0, `no failure notice on ${silent.join(', ')}`);
+
+      await page.unroute(`${apiUrl}/**`, failReads);
+      await page.getByTestId('load-error-banner').getByRole('button', { name: 'Try again' }).click();
+      await page.getByTestId('load-error-banner').waitFor({ state: 'detached', timeout: 20_000 });
+      return `${routes.length} pages show the notice; "Try again" reloads and clears it`;
+    });
+
     // ---- Cross-user isolation ------------------------------------------------------------------------------------------
     await t.step('another account cannot see or change any of this', async () => {
       const conversationId = (await api('GET', '/ai')).data[0]._id;

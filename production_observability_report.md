@@ -1,5 +1,12 @@
 # SkillBridge Platform — Production Observability, Performance & Stabilization Report
 
+> **Historical document, not a verified record.** This file predates the finalization work. Its
+> statements about deployments, uptime, provider status and performance were not produced by any
+> test in this repository and should not be relied on. The verified status of the project is in
+> [`docs/FINALIZATION_CHECKLIST.md`](docs/FINALIZATION_CHECKLIST.md); deployment instructions are in
+> [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md). No Docker deployment has been run, and Gemini and JSearch
+> have not been called live.
+
 ## 1. System Operational Health
 
 - **Operational Health Endpoint**: `GET /health`
