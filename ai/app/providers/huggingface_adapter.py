@@ -5,6 +5,7 @@ import logging
 import urllib.request
 import urllib.error
 from typing import Any, List, Dict, Optional
+from app.cost_policy import ProviderBlockedError, runtime_policy
 from app.providers.base_provider import BaseAIProvider
 from app.schemas.ai_response import UnifiedAIResponse
 from app.prompts.prompt_manager import PromptManager
@@ -30,9 +31,13 @@ class HuggingFaceAdapter(BaseAIProvider):
         return self._model_name
 
     def is_available(self) -> bool:
-        return bool(self.api_key or os.getenv("HUGGINGFACE_API_KEY"))
+        # Hosted inference is billed (free accounts get no credits), so the policy keeps it blocked
+        return bool(self.api_key or os.getenv("HUGGINGFACE_API_KEY")) and runtime_policy.check(self.provider_name).allowed
 
     def _call_hf_api(self, prompt: str) -> str:
+        decision = runtime_policy.check(self.provider_name)
+        if not decision.allowed:
+            raise ProviderBlockedError(decision)
         api_key = self.api_key or os.getenv("HUGGINGFACE_API_KEY")
         if not api_key:
             raise ValueError("HUGGINGFACE_API_KEY is not set.")

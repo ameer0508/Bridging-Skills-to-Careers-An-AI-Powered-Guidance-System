@@ -23,6 +23,34 @@ import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 from app.main import app  # noqa: E402
 from app.core.security import INTERNAL_KEY_HEADER  # noqa: E402
+from app.cost_policy import runtime_policy  # noqa: E402
+from app.cost_policy.network_guard import block_external_network  # noqa: E402
+
+# Test doubles stand in for a real provider under this name. They run in-process, so the
+# zero-cost policy treats them like any other local provider.
+TEST_PROVIDER_NAMES = ("fake_llm",)
+
+
+@pytest.fixture(autouse=True, scope="session")
+def no_live_network_calls():
+    """Every test runs with outbound connections blocked: any live provider call fails loudly."""
+    with block_external_network() as net:
+        yield net
+    assert net.attempts == [], f"tests attempted live network calls: {net.attempts}"
+
+
+@pytest.fixture(autouse=True, scope="session")
+def register_test_providers():
+    for name in TEST_PROVIDER_NAMES:
+        runtime_policy.providers[name] = {
+            "kind": "local",
+            "status": "APPROVED",
+            "allows_personal_data": True,
+            "credential_env": [],
+        }
+    yield
+    for name in TEST_PROVIDER_NAMES:
+        runtime_policy.providers.pop(name, None)
 
 
 @pytest.fixture

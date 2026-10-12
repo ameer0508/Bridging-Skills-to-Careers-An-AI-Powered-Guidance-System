@@ -10,6 +10,7 @@ import { formatSalary } from '../services/OpportunityService.js';
 import { SAMPLE_PROVIDER_NAME } from '../services/opportunities/sampleOpportunities.js';
 import { ensureFakeAiService } from './helpers/fakeAiService.js';
 import { startHttpHarness, resumeForm, type HttpHarness } from './helpers/httpHarness.js';
+import { BACKEND_PROVIDERS } from '../config/costPolicy.js';
 
 /**
  * Job search filters, honest labelling of demo and unavailable results, and application
@@ -144,7 +145,12 @@ export async function runOpportunityTrackingTests() {
     console.log('  ✓ Invalid search parameters are rejected with 400');
 
     // --- Live provider: mapped honestly; failure is not replaced by demo data ------------------------------------
+    // Models a JSearch the zero-cost policy has cleared (approved and switched on). Today it is
+    // unverified, and a key alone gives demo listings: see zero_cost_runtime.test.ts.
     envRecord.RAPIDAPI_KEY = 'test-key-not-real';
+    const policyStatus = BACKEND_PROVIDERS.jsearch.status;
+    BACKEND_PROVIDERS.jsearch.status = 'APPROVED';
+    process.env.SKILLBRIDGE_ENABLE_JSEARCH = 'true';
     let providerMode: 'ok' | 'down' = 'ok';
     const providerCalls: string[] = [];
     globalThis.fetch = (async (input: Parameters<typeof fetch>[0], init?: Parameters<typeof fetch>[1]) => {
@@ -186,6 +192,8 @@ export async function runOpportunityTrackingTests() {
     assert.match(down.providerHealth.message, /502/);
     globalThis.fetch = realFetch;
     envRecord.RAPIDAPI_KEY = originalKey;
+    BACKEND_PROVIDERS.jsearch.status = policyStatus;
+    delete process.env.SKILLBRIDGE_ENABLE_JSEARCH;
     console.log('  ✓ Live provider (stubbed): honest field mapping, source "live"; a failure returns "unavailable", not demo data');
 
     // --- Saving and tracking -------------------------------------------------------------------------------------------

@@ -9,6 +9,7 @@ import logging
 from typing import List, Optional, Dict, Any
 
 from google.antigravity import Agent, LocalAgentConfig
+from app.cost_policy import runtime_policy
 from app.career_agent.antigravity_schemas import (
     AutonomousCareerIntelligenceReport,
     RoleBenchmarkData,
@@ -151,6 +152,14 @@ class AutonomousCareerIntelligenceAgent:
         if not self.api_key:
             logger.info("No GEMINI_API_KEY detected. Executing deterministic Antigravity autonomous pipeline.")
             return self._build_deterministic_report(target_role, candidate_skills, timeline_months)
+
+        # The candidate's skills are profile data: the zero-cost policy decides whether Gemini may
+        # receive them (on the free tier it may not), and counts the call against the free quota.
+        decision = runtime_policy.check("gemini", contains_personal_data=True)
+        if not decision.allowed:
+            logger.info(f"Gemini not used for the career agent ({decision.reason.value}); executing the deterministic pipeline.")
+            return self._build_deterministic_report(target_role, candidate_skills, timeline_months)
+        runtime_policy.require("gemini", contains_personal_data=True)
 
         try:
             config = LocalAgentConfig(

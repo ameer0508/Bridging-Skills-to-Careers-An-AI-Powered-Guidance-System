@@ -10,6 +10,7 @@ except ImportError:
     genai = None
     types = None
     GENAI_AVAILABLE = False
+from app.cost_policy import ProviderBlockedError, runtime_policy
 from app.providers.base_provider import BaseAIProvider
 from app.schemas.ai_response import UnifiedAIResponse
 from app.prompts.prompt_manager import PromptManager
@@ -76,7 +77,9 @@ class GeminiProvider(BaseAIProvider):
         return metadata
 
     def is_available(self) -> bool:
-        return bool(GENAI_AVAILABLE and (self.api_key or os.getenv("GEMINI_API_KEY")))
+        # A key alone is not enough: the free tier must be enabled and attested (zero-cost policy)
+        has_key = bool(GENAI_AVAILABLE and (self.api_key or os.getenv("GEMINI_API_KEY")))
+        return has_key and runtime_policy.check(self.provider_name).allowed
 
     @staticmethod
     def _http_options() -> Dict[str, Any]:
@@ -88,6 +91,10 @@ class GeminiProvider(BaseAIProvider):
         return {"timeout": int(max(1.0, seconds) * 1000)}
 
     def _get_client(self) -> genai.Client:
+        # Checked on every call, also when a client already exists
+        decision = runtime_policy.check(self.provider_name)
+        if not decision.allowed:
+            raise ProviderBlockedError(decision)
         if not self.client:
             key = os.getenv("GEMINI_API_KEY")
             if not key:

@@ -1,5 +1,6 @@
 import hmac
 from fastapi import APIRouter, Request
+from app.cost_policy import runtime_policy
 from app.gateway.ai_gateway import ai_gateway
 from app.config.ai_config import ai_config
 from app.core.config import settings
@@ -26,9 +27,12 @@ async def health_check(request: Request):
 
     providers_status = {}
     for name, provider in ai_gateway.providers.items():
+        decision = runtime_policy.check(name)
         providers_status[name] = {
             "available": provider.is_available(),
-            "default_model": provider.default_model
+            "default_model": provider.default_model,
+            # Why a provider is not used, e.g. "blocked" or "not_attested"; never a secret value
+            "cost_policy": "allowed" if decision.allowed else decision.reason.value,
         }
 
     return {

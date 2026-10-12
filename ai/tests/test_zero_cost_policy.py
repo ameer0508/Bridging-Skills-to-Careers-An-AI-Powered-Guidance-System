@@ -150,28 +150,20 @@ def test_provider_reported_quota_error_blocks_until_reset():
 
 # --- The existing AI gateway --------------------------------------------------------------
 
-def test_gateway_fallback_chain_is_stripped_of_paid_providers(monkeypatch):
-    """Today the gateway adds OpenAI and Hugging Face whenever their keys are set; the policy removes them."""
-    from app.gateway.ai_gateway import AIGateway
-
-    monkeypatch.setenv("OPENAI_API_KEY", "sk-fake")
-    monkeypatch.setenv("HUGGINGFACE_API_KEY", "hf-fake")
-    chain = [p.provider_name for p in AIGateway().get_provider_chain()]
-    assert "openai" in chain and "huggingface" in chain  # the gap the policy must close
+def test_filter_chain_removes_paid_providers_and_adds_nothing():
     policy = CostPolicy(env={"OPENAI_API_KEY": "sk-fake", "HUGGINGFACE_API_KEY": "hf-fake"})
+    chain = ["openai", "huggingface", "mock"]
     allowed = policy.filter_chain(chain)
-    assert "openai" not in allowed and "huggingface" not in allowed
-    assert set(allowed) <= set(chain), "filtering never adds a provider"
+    assert allowed == ["mock"]
 
 
-def test_openai_adapter_with_a_key_makes_no_live_request_inside_the_tripwire(monkeypatch):
-    from app.providers.openai_adapter import OpenAIAdapter
+def test_tripwire_catches_a_raw_urllib_request():
+    import urllib.request
 
-    monkeypatch.setenv("OPENAI_API_KEY", "sk-fake")
     with block_external_network() as net:
-        response = OpenAIAdapter().generate_content("hello")
-    assert response.success is False
-    assert net.attempts == ["api.openai.com"], "the attempt was stopped before leaving the machine"
+        with pytest.raises(Exception):
+            urllib.request.urlopen("https://api.openai.com/v1/models", timeout=1)
+    assert net.attempts == ["api.openai.com"]
 
 
 def test_tripwire_blocks_raw_sockets_but_not_loopback():

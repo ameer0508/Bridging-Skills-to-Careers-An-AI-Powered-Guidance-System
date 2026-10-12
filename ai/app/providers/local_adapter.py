@@ -5,6 +5,7 @@ import logging
 import urllib.request
 import urllib.error
 from typing import Any, List, Dict, Optional
+from app.cost_policy import ProviderBlockedError, runtime_policy, validate_local_model_endpoint, validate_ollama_model
 from app.providers.base_provider import BaseAIProvider
 from app.schemas.ai_response import UnifiedAIResponse
 from app.prompts.prompt_manager import PromptManager
@@ -29,10 +30,28 @@ class LocalModelAdapter(BaseAIProvider):
     def default_model(self) -> str:
         return self._model_name
 
+    def _check_local_only(self) -> None:
+        """Raises unless the endpoint is on this machine and the model is a downloaded local one."""
+        validate_local_model_endpoint(self.endpoint)
+        validate_ollama_model(self._model_name)
+        if os.getenv("OLLAMA_API_KEY"):
+            raise ValueError("OLLAMA_API_KEY is set: Ollama cloud access is not allowed; unset it to use local models.")
+        decision = runtime_policy.check(self.provider_name)
+        if not decision.allowed:
+            raise ProviderBlockedError(decision)
+
     def is_available(self) -> bool:
-        return os.getenv("ENABLE_LOCAL_MODEL", "false").lower() == "true"
+        if os.getenv("ENABLE_LOCAL_MODEL", "false").lower() != "true":
+            return False
+        try:
+            self._check_local_only()
+        except (ValueError, ProviderBlockedError) as exc:
+            logger.warning(f"LocalModelAdapter disabled: {exc}")
+            return False
+        return True
 
     def _call_local_api(self, prompt: str) -> str:
+        self._check_local_only()
         payload = {
             "model": self._model_name,
             "prompt": prompt,

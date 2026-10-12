@@ -209,6 +209,10 @@ class CostPolicy:
         self.ledger.record(provider)
         return decision
 
+    def mark_exhausted(self, provider: str, retry_after_seconds: float = 86400) -> None:
+        """Records a provider-reported quota error under the provider's registry name."""
+        self.ledger.mark_exhausted(ALIASES.get(provider, provider), retry_after_seconds)
+
     def filter_chain(self, providers: Iterable[str], contains_personal_data: bool = False) -> List[str]:
         """The given fallback chain with every refused provider removed. Order is kept; nothing is added."""
         return [p for p in providers if self.check(p, contains_personal_data).allowed]
@@ -236,3 +240,21 @@ def validate_ollama_model(name: str) -> None:
     lowered = name.strip().lower()
     if lowered.endswith(":cloud") or lowered.endswith("-cloud"):
         raise ValueError(f"'{name}' is an Ollama cloud model; only locally downloaded models are allowed.")
+
+
+QUOTA_ERROR_MARKERS = ("429", "RESOURCE_EXHAUSTED", "quota", "rate limit")
+
+
+def is_quota_error(message: str) -> bool:
+    """True when a provider error says a free quota or rate limit was hit."""
+    lowered = (message or "").lower()
+    return any(marker.lower() in lowered for marker in QUOTA_ERROR_MARKERS)
+
+
+# The policy every runtime entry point consults. It reads os.environ at each check, so a
+# changed environment takes effect without a restart; its quota ledger lives for the process.
+runtime_policy = CostPolicy()
+
+from app.cost_policy.log_redaction import install_log_redaction  # noqa: E402
+
+install_log_redaction(runtime_policy)

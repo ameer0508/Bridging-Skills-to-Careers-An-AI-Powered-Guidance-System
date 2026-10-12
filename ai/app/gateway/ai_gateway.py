@@ -4,6 +4,7 @@ import logging
 from typing import Dict, List, Any, Optional, Type
 from pydantic import BaseModel
 from app.config.ai_config import ai_config
+from app.cost_policy import ProviderBlockedError, is_quota_error, runtime_policy
 from app.providers.base_provider import BaseAIProvider
 from app.providers.gemini_provider import GeminiProvider
 from app.providers.openai_adapter import OpenAIAdapter
@@ -17,6 +18,18 @@ from app.utils.retry_manager import RetryManager
 from app.utils.response_normalizer import ResponseNormalizer
 
 logger = logging.getLogger("skillbridge-ai")
+
+# Services whose payload holds no personal information. Every other service, including any not
+# listed here, is treated as carrying personal data and may only reach providers allowed to
+# receive it (docs/ZERO_COST_API_POLICY.md, rule 7).
+NON_PERSONAL_SERVICES = {"skill_normalization"}
+
+# How long a provider that reported an exhausted quota is left alone
+QUOTA_BACKOFF_SECONDS = 3600
+
+
+def carries_personal_data(service_name: str) -> bool:
+    return service_name not in NON_PERSONAL_SERVICES
 
 class AIGateway:
     """
@@ -40,21 +53,37 @@ class AIGateway:
 
         logger.info(f"AI Gateway initialized with registered providers: {list(self.providers.keys())}")
 
-    def get_provider_chain(self, requested_provider: Optional[str] = None) -> List[BaseAIProvider]:
+    def get_provider_chain(
+        self, requested_provider: Optional[str] = None, contains_personal_data: bool = True
+    ) -> List[BaseAIProvider]:
+        """
+        Providers to try, in order. Only providers the zero-cost policy clears for this kind of
+        data are included, so a configured key for a paid or unverified provider never puts it
+        in the chain, and no paid provider can follow a free one that failed.
+        """
         chain: List[BaseAIProvider] = []
-        
+
+        def usable(name: str) -> bool:
+            provider = self.providers.get(name)
+            return (
+                provider is not None
+                and provider not in chain
+                and provider.is_available()
+                and runtime_policy.check(name, contains_personal_data).allowed
+            )
+
         # 1. Primary choice
         target = requested_provider or ai_config.primary_provider
-        if target in self.providers and self.providers[target].is_available():
+        if usable(target):
             chain.append(self.providers[target])
 
         # 2. Fallbacks from config
         for p_name in ai_config.fallback_providers:
-            if p_name in self.providers and self.providers[p_name] not in chain and self.providers[p_name].is_available():
+            if usable(p_name):
                 chain.append(self.providers[p_name])
 
         # 3. Development mock fallback if nothing else is available
-        if not chain and "mock" in self.providers and self.providers["mock"].is_available():
+        if not chain and usable("mock"):
             chain.append(self.providers["mock"])
 
         if not chain:
@@ -82,13 +111,26 @@ class AIGateway:
                 return cached_resp
 
         # 2. Resolve Provider Fallback Chain
-        provider_chain = self.get_provider_chain(requested_provider)
+        personal = carries_personal_data(service_name)
+        if personal:
+            provider_chain = self.get_provider_chain(requested_provider)
+        else:
+            provider_chain = self.get_provider_chain(requested_provider, contains_personal_data=False)
         errors: List[str] = []
 
         for idx, provider in enumerate(provider_chain):
             provider_name = provider.provider_name
             cfg = ai_config.providers.get(provider_name)
             rpm = cfg.rate_limit_rpm if cfg else 60
+
+            # Cleared (and counted against its free quota) immediately before the call, whatever
+            # put the provider in the chain
+            try:
+                runtime_policy.require(provider_name, contains_personal_data=personal)
+            except ProviderBlockedError as blocked:
+                logger.warning(f"[AI Gateway] {blocked}")
+                errors.append(f"{provider_name}: refused by the zero-cost policy ({blocked.decision.reason.value})")
+                continue
 
             # 3. Rate Limit Check
             if not rate_limiter.check_rate_limit(provider_name, rpm):
@@ -136,14 +178,16 @@ class AIGateway:
 
                     return response
                 else:
-                    err = response.errors[0] if response and response.errors else "Unknown provider failure"
-                    logger.warn(f"[AI Gateway] Provider '{provider_name}' failed for service '{service_name}': {err}")
+                    err = runtime_policy.redact(response.errors[0] if response and response.errors else "Unknown provider failure")
+                    logger.warning(f"[AI Gateway] Provider '{provider_name}' failed for service '{service_name}': {err}")
                     errors.append(f"{provider_name}: {err}")
+                    self._note_quota_error(provider_name, err)
 
             except Exception as e:
-                err_msg = f"{provider_name} Exception: {str(e)}"
+                err_msg = runtime_policy.redact(f"{provider_name} Exception: {str(e)}")
                 logger.error(f"[AI Gateway] {err_msg}")
                 errors.append(err_msg)
+                self._note_quota_error(provider_name, err_msg)
 
         total_latency = (time.time() - start_total) * 1000
         logger.error(f"[AI Gateway] All providers failed for service '{service_name}'. Errors: {errors}")
@@ -155,5 +199,12 @@ class AIGateway:
             latency_ms=total_latency,
             metadata={"all_errors": errors}
         )
+
+    @staticmethod
+    def _note_quota_error(provider_name: str, message: str) -> None:
+        """A provider that reports an exhausted free quota is not called again until it resets."""
+        if is_quota_error(message):
+            runtime_policy.mark_exhausted(provider_name, QUOTA_BACKOFF_SECONDS)
+            logger.warning(f"[AI Gateway] '{provider_name}' reported an exhausted quota; paused for {QUOTA_BACKOFF_SECONDS}s, no fallback to paid providers.")
 
 ai_gateway = AIGateway()

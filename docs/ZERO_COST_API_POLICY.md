@@ -138,31 +138,38 @@ Other outbound references: Google Fonts (`fonts.googleapis.com`) appears only in
 
 The development machine has about 222 GB free on E:, where the repository lives. No model was downloaded while writing this policy. Check free RAM before pulling any model larger than 1 GB.
 
-## 7. Known functionality limits and integration changes for coordination
+## 7. Runtime enforcement (applied 2026-10-12)
 
-These shared files belong to active work, so this branch does **not** edit them. Apply the following changes during integration:
+Every known outbound entry point is guarded by the policy itself, not only by the policy's unit tests:
 
-1. **`ai/app/gateway/ai_gateway.py` `get_provider_chain`.** Today it appends OpenAI and Hugging Face whenever their keys are set: this is a **silent paid fallback**. Filter the chain:
-   ```python
-   from app.cost_policy import CostPolicy
-   allowed = set(CostPolicy().filter_chain([p.provider_name for p in chain]))
-   chain = [p for p in chain if p.provider_name in allowed]
-   ```
-   Do the same for the primary provider. Then call `policy.ledger.mark_exhausted(name)` when a response error contains `429` / `RESOURCE_EXHAUSTED`.
-   Gemini will then also need `SKILLBRIDGE_ENABLE_GEMINI` and `SKILLBRIDGE_GEMINI_NO_BILLING_ATTESTED`. Add both to `ai/.env.example`.
-2. **Resume parsing through Gemini.** Pass `contains_personal_data=True` so resume text never reaches the free tier. The deterministic extractor stays the default.
-3. **`ai/app/services/gemini.py`.** This file is unused. It builds `genai.Client()` with no key, which can select billed Vertex AI. Delete it.
-4. **`ai/app/providers/local_adapter.py`.** Call `validate_local_model_endpoint(self.endpoint)` and `validate_ollama_model(model)` before each request.
-5. **`ai/app/external_gateway/auth_manager.py`.** It defaults missing keys to placeholder strings (`"env-jsearch-key"`), which makes a provider look configured. Default to `None` instead.
-6. **`backend/src/services/opportunities/JSearchProvider.ts`.** Replace `fetch(url, …)` with `guardedFetch('jsearch', url, …)`. Have `healthCheck` report `checkLiveCall('jsearch')`, so a configured key shows "unverified, blocked" instead of `UP`. Until then, **do not set `RAPIDAPI_KEY`**.
-7. **`ai/tests/conftest.py`.** Wrap the whole session in `block_external_network()` with an autouse session fixture, so every test, not just the policy tests, proves it makes no live call.
-8. **`backend/src/tests/runAllTests.ts`.** Register `runCostPolicyTests`.
-9. **CI.** Add a step that runs `python -m app.cost_policy.audit` in `ai/`.
-10. **Invented data still shown as real:**
-    - `github_intelligence/github_client.py` returns fixed profile numbers for any username.
-    - `job_intelligence/providers.py MockJobProvider` returns fictional companies with US salaries.
+| Entry point | Guard |
+|---|---|
+| AI gateway chain (`ai/app/gateway/ai_gateway.py`) | `get_provider_chain` includes only providers that `runtime_policy` clears for the request's data class. A paid key never puts a provider in the chain. |
+| AI gateway call (`route_request`) | `runtime_policy.require` runs immediately before *each* provider call, so a provider injected into the chain is still refused. This step also counts the free quota. |
+| Quota errors | A `429` / `RESOURCE_EXHAUSTED` response pauses that provider for an hour. Paid providers are never in the chain, so nothing paid can follow. |
+| Personal data | Every service except `skill_normalization` is treated as personal, unknown services included. Personal services reach only providers with `allows_personal_data` (local ones). |
+| OpenAI / Hugging Face adapters | `is_available()` is false and the HTTP call raises before `urlopen`, even with a key and even when called directly. |
+| Gemini adapter | Checked on every call (`_get_client`), even when a client object already exists. `is_available()` needs the enable flag, the attestation and a key. |
+| Local adapter | Loopback endpoint only, no `:cloud` / `-cloud` models, no `OLLAMA_API_KEY`. Checked in `is_available()` and again before each request. |
+| Career agent (`google.antigravity`) | Previously called `gemini-2.5-pro` directly whenever a key was set. Now it runs the deterministic pipeline unless the policy clears Gemini for personal data, which it never does on the free tier. |
+| `ai/app/services/gemini.py` | Removed. It was unused and created `genai.Client()` with no key, which can select billed Vertex AI. |
+| `auth_manager.py` | Placeholder credentials removed; unset keys are `None`. |
+| Health report | Shows each provider's `cost_policy` status (`allowed`, `blocked`, `not_enabled`, …). Never shows key values. |
+| Logs | A process-wide log-record factory removes configured key values from every log record. |
+| JSearch (`backend/.../JSearchProvider.ts`) | A key only changes the health status to `BLOCKED_BY_POLICY`, never `UP`. Search returns the labelled demo listings. The live branch is reachable only through `guardedFetch`. |
+| Tests | Every AI test runs inside a session-wide network tripwire that fails the run on any live connection attempt. |
 
-    Both must be labelled as samples or removed before market and portfolio features rely on them.
+**Consequence:** with only a free Gemini key, chat, resume AI parsing, interview questions and interview scoring use a local model if one is enabled, and otherwise report themselves unavailable with their existing labelled fallbacks. The deterministic features are unchanged.
+
+**Remaining known gaps:**
+- Model weight downloads by `sentence-transformers` / `transformers` if those optional packages are installed. They are not installed today. Set `HF_HUB_OFFLINE=1` before installing them.
+- The browser's Web Speech API, once voice features exist (D1/D2).
+- The quota ledger is in memory only, so it resets on restart.
+
+### Still for coordination
+
+- `github_intelligence/github_client.py` and `job_intelligence/providers.py` `MockJobProvider` return invented data. They make no network calls, but must be labelled or removed before features rely on them.
+- Add a CI step that runs `python -m app.cost_policy.audit`.
 
 ## 8. Before any provider goes live
 

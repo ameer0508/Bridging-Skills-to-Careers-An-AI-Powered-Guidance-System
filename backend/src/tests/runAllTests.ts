@@ -25,6 +25,7 @@ import { runDiagnosticsAccessTests } from './diagnostics_access.test.js';
 import { runCareerLabTests } from './career_lab.test.js';
 import { runCostPolicyTests } from './cost_policy.test.js';
 import { runMarketIntelligenceTests } from './market_intelligence.test.js';
+import { runZeroCostRuntimeTests } from './zero_cost_runtime.test.js';
 
 async function runAll() {
   console.log('🚀 Starting Comprehensive SkillBridge Backend Test Suite...');
@@ -70,6 +71,7 @@ async function runAll() {
     await runCareerLabTests();
     await runCostPolicyTests();
     await runMarketIntelligenceTests();
+    await runZeroCostRuntimeTests();
     const after = fingerprint();
     const touched = before.filter((entry, i) => entry !== after[i]);
     if (touched.length > 0) {

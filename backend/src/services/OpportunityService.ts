@@ -183,7 +183,8 @@ class OpportunityService {
     }
 
     const sorted = this.sortOpportunities(results, query.sortBy);
-    const isSample = deduplicatedList.some((o) => o.isSample) || health.status === 'PENDING_CREDS';
+    const isSample =
+      deduplicatedList.some((o) => o.isSample) || health.status === 'PENDING_CREDS' || health.status === 'BLOCKED_BY_POLICY';
 
     return {
       opportunities: sorted.slice(0, limit),
