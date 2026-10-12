@@ -7,6 +7,7 @@ import SkillAssessmentService from '../services/SkillAssessmentService.js';
 import RecalculationService from '../services/RecalculationService.js';
 import { Career } from '../models/Career.js';
 import { AppError } from '../middlewares/errorHandler.js';
+import { marketEvidenceForCareers } from '../services/CareerMarketEvidence.js';
 
 const objectId = z.string().refine(value => mongoose.Types.ObjectId.isValid(value), { message: 'is not a valid id' });
 const skillName = z.string().trim().min(1).max(80);
@@ -77,6 +78,16 @@ class CareerLabController {
       throw new AppError('targetScore must be a number from 0 to 100.', 400, 'VALIDATION_ERROR');
     }
     res.status(200).json({ success: true, data: await CareerScenarioService.counterfactuals(userIdOf(req), careerId, targetScore) });
+  });
+
+  /** What may be shown about the job market for one career: a sourced count, or why there is none. */
+  marketEvidence = handle(async (req, res) => {
+    userIdOf(req);
+    const careerId = parse(objectId, req.params.careerId);
+    const career = await Career.findById(careerId).select('title');
+    if (!career) throw new AppError('Career not found.', 404, 'CAREER_NOT_FOUND');
+    const evidence = await marketEvidenceForCareers([{ id: careerId, title: career.title }]);
+    res.status(200).json({ success: true, data: evidence.get(careerId) });
   });
 
   createPlan = handle(async (req, res) => {

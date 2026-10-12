@@ -947,7 +947,8 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
             {matches.map((m: { _id?: string; careerId?: { _id?: string; title: string; industry?: string; salaryRange?: { min?: number; max?: number } }; matchScore?: number }, idx: number) => {
               const title = m.careerId?.title || 'Engineering Role';
               const industry = m.careerId?.industry || 'Technology';
-              const score = m.matchScore || 90;
+              // The stored score, or none: a missing score is never replaced by a made-up one
+              const score = typeof m.matchScore === 'number' ? m.matchScore : null;
 
               return (
                 <div key={m._id || idx} className="p-4 rounded-xl bg-slate-950/80 border border-white/10 flex items-center justify-between gap-3">
@@ -956,7 +957,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                     <p className="text-slate-400">{industry} Industry Pathway • Global Taxonomy</p>
                   </div>
                   <span className="text-purple-400 font-bold text-xs bg-purple-500/10 px-3 py-1 rounded-lg border border-purple-500/30">
-                    SkillBridge Match: {score}%
+                    {score === null ? 'Not scored' : `SkillBridge Match: ${score}%`}
                   </span>
                 </div>
               );

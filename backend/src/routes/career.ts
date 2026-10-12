@@ -18,5 +18,6 @@ router.get('/transition-plans', CareerLabController.listPlans);
 router.post('/transition-plans', CareerLabController.createPlan);
 router.delete('/transition-plans/:planId', CareerLabController.deletePlan);
 router.get('/:careerId/counterfactuals', CareerLabController.counterfactuals);
+router.get('/:careerId/market-evidence', CareerLabController.marketEvidence);
 
 export default router;

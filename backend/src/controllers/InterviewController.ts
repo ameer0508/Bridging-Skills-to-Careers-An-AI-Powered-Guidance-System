@@ -2,6 +2,11 @@ import { Request, Response, NextFunction } from 'express';
 import interviewService from '../services/InterviewService.js';
 import { AppError } from '../middlewares/errorHandler.js';
 import { z } from 'zod';
+import { resolveRubric, RUBRIC_IDS, RUBRICS, rubricById, type RubricId } from '../services/interview/InterviewRubrics.js';
+import InterviewProgressService from '../services/interview/InterviewProgressService.js';
+import VoiceSettingsService from '../services/interview/VoiceSettingsService.js';
+import VoiceRecordingService, { PENDING_DELETION_MESSAGE } from '../services/interview/VoiceRecordingService.js';
+import fs from 'fs';
 
 /** Longest interview answer accepted, in characters. */
 const MAX_ANSWER_LENGTH = 10000;
@@ -12,6 +17,8 @@ const startSessionSchema = z
     targetCareerTitle: z.string().trim().max(160).optional(),
     mode: z.enum(['technical', 'behavioral', 'project', 'resume', 'career', 'mixed']).optional(),
     questionCount: z.number().int().min(1).max(10).optional(),
+    rubricId: z.enum(RUBRIC_IDS as [RubricId, ...RubricId[]]).optional(),
+    adaptiveFollowUps: z.boolean().optional(),
     opportunityContext: z
       .object({
         title: z.string().trim().max(200).optional(),
@@ -49,6 +56,168 @@ export class InterviewController {
         data: session,
         message: 'Interview session started',
       });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /**
+   * GET /api/v1/interviews/rubrics
+   * The role rubrics and their weights, so the client can show how answers are scored
+   */
+  listRubrics = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      if (!req.user?.userId) throw new AppError('Authentication required', 401);
+      const parsed = z.object({ role: z.string().trim().max(160).optional() }).strict().safeParse(req.query ?? {});
+      if (!parsed.success) throw new AppError('Invalid request: only an optional role (up to 160 characters) is accepted', 400, 'VALIDATION_ERROR');
+      res.status(200).json({
+        success: true,
+        // `resolved` is the rubric a session for `role` would use when none is chosen
+        data: { rubrics: RUBRIC_IDS.map(id => RUBRICS[id]), resolved: resolveRubric(parsed.data.role).id },
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /** POST /api/v1/interviews/:id/recordings: one spoken answer (multipart field "audio"), with consent only */
+  uploadRecording = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication required', 401);
+      const file = req.file;
+      if (!file) throw new AppError('No recording was uploaded (field "audio").', 400, 'MISSING_FILE');
+      const questionIndex = Number(req.body?.questionIndex);
+      const durationSec = req.body?.durationSec === undefined ? undefined : Number(req.body.durationSec);
+      if (!Number.isInteger(questionIndex) || questionIndex < 0) throw new AppError('questionIndex must be a whole number', 400, 'VALIDATION_ERROR');
+      if (durationSec !== undefined && !Number.isFinite(durationSec)) throw new AppError('durationSec must be a number', 400, 'VALIDATION_ERROR');
+      const recording = await VoiceRecordingService.upload(userId, req.params.id, { questionIndex, durationSec, mimeType: file.mimetype, buffer: file.buffer });
+      res.status(201).json({ success: true, data: recording });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /** GET /api/v1/interviews/:id/recordings */
+  listRecordings = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication required', 401);
+      res.status(200).json({ success: true, data: { recordings: await VoiceRecordingService.list(userId, req.params.id) } });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /** GET /api/v1/interviews/:id/recordings/:questionId/audio: streamed to its owner only */
+  streamRecording = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication required', 401);
+      const file = await VoiceRecordingService.file(userId, req.params.id, req.params.questionId);
+      res.setHeader('Content-Type', file.mimeType);
+      res.setHeader('Content-Length', String(file.bytes));
+      res.setHeader('Cache-Control', 'private, no-store');
+      res.setHeader('Content-Disposition', 'inline');
+      fs.createReadStream(file.path).on('error', next).pipe(res);
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /** DELETE /api/v1/interviews/:id/recordings/:questionId */
+  deleteRecording = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication required', 401);
+      const result = await VoiceRecordingService.remove(userId, req.params.id, req.params.questionId);
+      // 202 when the recording is already inaccessible but its file is still to be removed
+      res.status(result.pending > 0 ? 202 : 200).json({
+        success: true,
+        data: { deleted: result.removed, pendingDeletion: result.pending, ...(result.pending > 0 ? { message: PENDING_DELETION_MESSAGE } : {}) }
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /** DELETE /api/v1/interviews/recordings: every recording of the caller */
+  deleteAllRecordings = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication required', 401);
+      const result = await VoiceRecordingService.removeAllForUser(userId);
+      res.status(result.pending > 0 ? 202 : 200).json({
+        success: true,
+        data: { deleted: result.removed, pendingDeletion: result.pending, ...(result.pending > 0 ? { message: PENDING_DELETION_MESSAGE } : {}) }
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /** GET /api/v1/interviews/voice-settings: dictation and recording consent (D1, D2) */
+  getVoiceSettings = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication required', 401);
+      res.status(200).json({ success: true, data: await VoiceSettingsService.get(userId) });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /** PUT /api/v1/interviews/voice-settings: every change is recorded in the settings history */
+  updateVoiceSettings = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication required', 401);
+      const parsed = z
+        .object({
+          dictationConsent: z.enum(['none', 'on_device_only', 'browser_service']).optional(),
+          recordingConsent: z.boolean().optional(),
+          retentionDays: z.union([z.literal(0), z.literal(7), z.literal(30)]).optional(),
+        })
+        .strict()
+        .refine((b) => Object.keys(b).length > 0, { message: 'nothing to change' })
+        .safeParse(req.body ?? {});
+      if (!parsed.success) {
+        throw new AppError(`Invalid request: ${parsed.error.issues.map((i) => `${i.path.join('.') || 'body'} ${i.message}`).join('; ')}`, 400, 'VALIDATION_ERROR');
+      }
+      const settings = await VoiceSettingsService.update(userId, parsed.data);
+      // D1: withdrawing consent deletes every recording; a shorter retention shortens kept ones
+      let recordingsDeleted = 0;
+      let recordingsPendingDeletion = 0;
+      if (parsed.data.recordingConsent === false) {
+        // All of them become inaccessible now; any file that resists is retried by the retention job
+        const result = await VoiceRecordingService.removeAllForUser(userId);
+        recordingsDeleted = result.removed;
+        recordingsPendingDeletion = result.pending;
+      }
+      if (parsed.data.retentionDays !== undefined) await VoiceRecordingService.applyRetention(userId, parsed.data.retentionDays);
+      res.status(200).json({
+        success: true,
+        data: { ...settings, recordingsDeleted, recordingsPendingDeletion, ...(recordingsPendingDeletion > 0 ? { message: PENDING_DELETION_MESSAGE } : {}) }
+      });
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  /**
+   * GET /api/v1/interviews/progress
+   * D6: per-dimension comparison across the caller's completed sessions
+   */
+  getProgress = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new AppError('Authentication required', 401);
+      const parsed = z
+        .object({ mode: z.enum(['technical', 'behavioral', 'project', 'resume', 'career', 'mixed']).optional() })
+        .strict()
+        .safeParse(req.query ?? {});
+      if (!parsed.success) throw new AppError('Invalid request: only an optional interview mode is accepted', 400, 'VALIDATION_ERROR');
+      res.status(200).json({ success: true, data: await InterviewProgressService.forUser(userId, parsed.data) });
     } catch (err) {
       next(err);
     }
@@ -105,7 +274,10 @@ export class InterviewController {
       if (!userId) throw new AppError('Authentication required', 401);
 
       const { id } = req.params;
-      const { questionIndex, candidateResponse } = req.body;
+      const { questionIndex, candidateResponse, inputMethod } = req.body;
+      if (inputMethod !== undefined && !['typed', 'dictated', 'mixed'].includes(inputMethod)) {
+        throw new AppError('inputMethod must be typed, dictated or mixed', 400, 'VALIDATION_ERROR');
+      }
 
       if (!Number.isInteger(questionIndex) || questionIndex < 0 || typeof candidateResponse !== 'string') {
         throw new AppError('questionIndex (a whole number) and candidateResponse (text) are required', 400, 'VALIDATION_ERROR');
@@ -117,7 +289,7 @@ export class InterviewController {
         throw new AppError(`An answer can be at most ${MAX_ANSWER_LENGTH} characters.`, 400, 'VALIDATION_ERROR');
       }
 
-      const session = await interviewService.respondToQuestion(userId, id, { questionIndex, candidateResponse });
+      const session = await interviewService.respondToQuestion(userId, id, { questionIndex, candidateResponse, inputMethod });
 
       res.status(200).json({
         success: true,
@@ -172,7 +344,11 @@ export class InterviewController {
           status: session.status,
           // Who wrote the questions and who scored the answers, so the client can label both honestly
           questionSource: session.questionSource ?? null,
+          adaptiveFollowUps: Boolean(session.adaptiveFollowUps),
+          followUpSummary: session.followUpSummary ?? null,
           evaluationSource: session.evaluationSource ?? null,
+          // The role rubric the answers were weighted with (older sessions: general)
+          rubric: rubricById(session.rubricId),
           opportunityContext: session.opportunityContext ?? null,
           answeredCount: session.answeredCount ?? 0,
           questionCount: session.questions.length,

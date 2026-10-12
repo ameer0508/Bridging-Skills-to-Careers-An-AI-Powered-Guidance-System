@@ -19,11 +19,23 @@ export interface IQuestionEvaluation {
   // Which evaluator produced this result, so the UI can label it honestly
   source?: 'ai' | 'heuristic';
   dimensions?: IEvaluationDimensions;
+  /** Role rubric (D5) whose weights produced the score; absent on evaluations from before rubrics, which used 'general'. */
+  rubricId?: string;
+  rubricVersion?: number;
   evaluatedAt: Date;
 }
 
-/** Who wrote a question: an AI provider, or the built-in question bank used when AI is unavailable. */
-export type InterviewQuestionSource = 'ai' | 'question_bank';
+/**
+ * Who wrote a question: an AI provider, the built-in question bank used when AI is unavailable,
+ * or the follow-up rules (D3) reacting to the previous answer.
+ */
+export type InterviewQuestionSource = 'ai' | 'question_bank' | 'follow_up';
+
+/** Why a follow-up was asked (D3). */
+export interface IFollowUpReason {
+  type: 'missing_concept' | 'low_specificity' | 'weak_structure';
+  concept?: string;
+}
 
 export interface IQuestionItem {
   questionId: string;
@@ -35,7 +47,12 @@ export interface IQuestionItem {
   /** The fact on record the question is based on, e.g. "Skill on your resume: React". */
   groundedIn?: string;
   candidateResponse?: string;
+  /** D2: typed, dictated (speech-to-text) or both. The text, not audio, is what is stored and scored. */
+  answerInputMethod?: 'typed' | 'dictated' | 'mixed';
   evaluation?: IQuestionEvaluation;
+  /** Set on follow-up questions (D3): the questionId they follow up. */
+  followUpOf?: string;
+  followUpReason?: IFollowUpReason;
 }
 
 export type InterviewStatus = 'active' | 'completed' | 'abandoned';
@@ -49,6 +66,13 @@ export interface IInterviewSession extends Document<Types.ObjectId> {
   questionCount: number;
   currentQuestionIndex: number;
   questions: IQuestionItem[];
+  /** Role rubric (D5) chosen at the start; absent on older sessions, which are scored with 'general'. */
+  rubricId?: string;
+  rubricVersion?: number;
+  /** D3: ask a follow-up when an answer misses something. Off unless the user turns it on. */
+  adaptiveFollowUps?: boolean;
+  /** D3: follow-ups asked and answered; kept out of the overall score. */
+  followUpSummary?: { asked: number; answered: number; recovered: number; averageScore: number | null };
   /** Where this session's questions came from. Absent on sessions created before this field existed. */
   questionSource?: InterviewQuestionSource;
   /** The job posting this session prepares for, when it was started from one. */
@@ -78,6 +102,8 @@ const QuestionEvaluationSchema = new Schema<IQuestionEvaluation>(
     feedback: { type: String, default: '' },
     source: { type: String, enum: ['ai', 'heuristic'], default: 'heuristic' },
     dimensions: { type: Schema.Types.Mixed },
+    rubricId: { type: String },
+    rubricVersion: { type: Number },
     evaluatedAt: { type: Date, default: Date.now }
   },
   { _id: false }
@@ -92,9 +118,12 @@ const QuestionItemSchema = new Schema<IQuestionItem>(
     category: { type: String, default: 'technical' },
     difficulty: { type: String, default: 'medium' },
     expectedConcepts: { type: [String], default: [] },
-    source: { type: String, enum: ['ai', 'question_bank'] },
+    source: { type: String, enum: ['ai', 'question_bank', 'follow_up'] },
     groundedIn: { type: String },
+    followUpOf: { type: String },
+    followUpReason: { type: new Schema({ type: { type: String }, concept: { type: String } }, { _id: false }) },
     candidateResponse: { type: String },
+    answerInputMethod: { type: String, enum: ['typed', 'dictated', 'mixed'] },
     evaluation: { type: QuestionEvaluationSchema }
   },
   { _id: false }
@@ -111,6 +140,10 @@ const InterviewSessionSchema = new Schema<IInterviewSession>(
     currentQuestionIndex: { type: Number, default: 0 },
     questions: { type: [QuestionItemSchema], default: [] },
     questionSource: { type: String, enum: ['ai', 'question_bank'] },
+    rubricId: { type: String },
+    rubricVersion: { type: Number },
+    adaptiveFollowUps: { type: Boolean, default: false },
+    followUpSummary: { type: Schema.Types.Mixed },
     opportunityContext: {
       type: new Schema({ title: { type: String }, company: { type: String } }, { _id: false }),
     },

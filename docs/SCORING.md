@@ -497,3 +497,14 @@ not affect the next-step ranking (section 18): its market weight is 0.
 
 **No licensed market source is registered at present**, so every comparison currently shows
 "Market data unavailable". The count path is exercised only by tests that register a test source.
+
+## 21. Market figures elsewhere in the app
+
+The Careers page, the pre-resume preview and the landing page used to show built-in demand
+scores, growth rates, salary bands and a generated job feed. They were removed at the second
+integration. Those places now show, for the user's best-matching career, the posting count from
+section 20 and advertised salaries from the market service, or "Market data unavailable" /
+"Salary data unavailable" with the reason, plus a link to the job search. The landing page quotes
+no market figure at all. The old panel components remain in the repository but nothing reaches
+them. Screens under an "Illustrative sample data" banner are demonstrations and are labelled as
+such on every page.

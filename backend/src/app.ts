@@ -68,9 +68,13 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Rate Limiting
+// 1000 requests per IP per 15 minutes unless API_RATE_LIMIT_MAX says otherwise. The automated
+// suites raise it: they send several thousand requests from one address in a few minutes.
+const configuredApiLimit = Number(process.env.API_RATE_LIMIT_MAX);
+export const API_RATE_LIMIT_MAX = Number.isInteger(configuredApiLimit) && configuredApiLimit > 0 ? configuredApiLimit : 1000;
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Limit each IP to 1000 requests per window
+  max: API_RATE_LIMIT_MAX,
   standardHeaders: true,
   legacyHeaders: false,
   message: { success: false, message: 'Too many requests from this IP, please try again after 15 minutes' },

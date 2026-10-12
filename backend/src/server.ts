@@ -71,6 +71,10 @@ const connectDatabase = async (): Promise<void> => {
     // Resume jobs run in memory; anything left in flight by the previous process is made recoverable.
     const { default: ResumeService } = await import('./services/ResumeService.js');
     await new ResumeService().recoverInterruptedJobs();
+
+    // Daily deletion of expired interview recordings, inside this process
+    const { startVoiceRetentionSchedule } = await import('./services/interview/voiceRetentionSchedule.js');
+    startVoiceRetentionSchedule();
   } catch (error) {
     logger.error(
       'Failed to establish MongoDB connection on startup. API will remain active but degraded:',

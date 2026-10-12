@@ -77,7 +77,7 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
         skillsTaught: ['Vector Indexing', 'Milvus', 'Pinecone', 'PyTorch'],
         providerUrl: 'https://coursera.org',
         whyRecommended: 'Highest semantic skill match with your target role gap in vector databases.',
-        careerImpact: 'Increases market salary benchmark by +$18,200/yr.',
+        careerImpact: 'Sample text: how a course relates to a target role would be described here.',
       },
       {
         id: 'edx-1',
@@ -124,7 +124,7 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
         skillsTaught: ['Azure AI', 'OpenAI API', 'Cognitive Search'],
         providerUrl: 'https://learn.microsoft.com',
         whyRecommended: 'Top free industry certification for enterprise AI engineering.',
-        careerImpact: '+15% average salary premium for certified cloud architects.',
+        careerImpact: 'Sample text: no salary effect is claimed for any course.',
       },
       {
         id: 'udemy-1',

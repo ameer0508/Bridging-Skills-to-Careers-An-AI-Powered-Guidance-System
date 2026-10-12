@@ -7,10 +7,13 @@
 |---|---|
 | **C1** sourced, dated job-demand records and history | **Implemented and tested** (see §5). Real-market history stays *unavailable*: no licensed source is registered yet. |
 | **C4** job-description skill trend mining | **Implemented and tested** on synthetic data (see §5a). On real data it stays *unavailable* until a licensed source is registered. |
-| C5 market signals contract | `MarketOpportunitySummary` contract and its unavailable form are defined and tested. The producer is not built yet. |
+| C5 summary producer | `MarketOpportunitySummary` v2 producer built and tested (§4). |
 | C6 application outcomes | Implemented and tested; see [`APPLICATION_OUTCOMES.md`](APPLICATION_OUTCOMES.md) |
 | **C3** salary insights | **Implemented and tested** on synthetic data (see §5b). Real salary insights answer *DATA UNAVAILABLE* until a licensed source is registered. |
-| C2, R4, X7, X8 | Not started |
+| **X8** application history | **Implemented and tested** on real user-recorded data; see [`APPLICATION_OUTCOMES.md`](APPLICATION_OUTCOMES.md#application-history-x8) |
+| **C2** cautious forecasting | **Implemented and tested** with a held-out synthetic evaluation (see §5c). Real forecasts are *FORECAST UNAVAILABLE*: no licensed source. |
+| **C5 / R4** market signals | **Implemented and tested** as contract v1 (see §4a); neutral without valid sourced evidence. **Integration with Agent A's R3 ranking pending.** |
+| X7 | Not started |
 
 ## 1. Principles
 
@@ -96,6 +99,59 @@ const s = await fetchMarketOpportunitySummary(careerId, { country: 'IN' });
 
 **Tests:** `backend/src/tests/market_opportunity_summary.test.ts` covers all four classes, staleness, an unmapped career, the matching-rule boundaries, observations vs distinct postings, and HTTP 401/400/404.
 
+## 4a. Market signals (C5) and market-aware adaptation (R4): contract v1 for Agent A
+
+- **Producer:** `MarketSignalService.signalsForCareer`, served at `GET /api/v1/market/careers/:careerId/signals?dataset&country&from&to&skills=a,b` (sign-in required; at most 10 skills; unknown parameters → 400).
+- **Types and helpers:** `backend/src/services/market/MarketSignalService.ts`.
+
+**What a response holds:**
+
+| Field | Contents |
+|---|---|
+| `demand` | Distinct postings; earlier-half vs recent-half counts; direction (`rising`, `falling`, `stable` or `null`); per-source directions |
+| `skills` | Per requested skill, share, mentions and C4 change, with `usable` |
+| `provenance` | Matching rule, sources, licences and links |
+| `dataAsOf` | The latest retrieval the signals rest on |
+| `generatedAt` | When the signals were computed |
+| `influence` | Whether consumers may use the signals, as below |
+| `separation` | States that readiness is a separate input |
+
+**Direction.** A two-period Poisson comparison, z = (recent − earlier) / √(recent + earlier), with |z| ≥ 1.96. It needs at least 15 postings in each half; otherwise the direction is `null`.
+
+**Influence:**
+- `{mode: 'evidence', demandDirection, distinctPostings, asOf}` only when the summary is `sourced_valid` **and** no two sources state opposite directions.
+- `{mode: 'neutral', reasons}` in every other case. The reasons are: `no_registered_source`, `synthetic_test_data`, `stale_data`, `too_few_postings`, `too_few_months_with_postings`, `career_not_mapped_to_postings` and `conflicting_sources`.
+
+**No score, weight or boost exists.** Signals describe postings, not the applicant. The service does not read readiness, and nothing combines the two.
+
+**How a ranking consumer (R3) may use it.** Only as the final tie-break:
+
+```ts
+import { compareWithMarketTieBreak } from '../market/MarketSignalService.js';
+items.sort((a, b) => ownOrder(a, b) || compareWithMarketTieBreak(a.marketInfluence, b.marketInfluence));
+```
+
+`compareWithMarketTieBreak` returns 0 unless both items carry evidence with a stated direction; then rising comes before stable, which comes before falling. So:
+- neutral, missing or undetermined signals never change an order;
+- a market signal can never move an item past one the consumer ranked differently.
+
+**Counterfactual tests** (`backend/src/tests/market_signals.test.ts`). The same career is evaluated under each evidence condition:
+
+| Evidence | Influence |
+|---|---|
+| No source | neutral |
+| Sourced and rising | **evidence, rising** |
+| The same records read 4 months later | neutral, `stale_data` |
+| Sparse | neutral, `too_few_postings` |
+| One source rising and one falling | neutral, `conflicting_sources` |
+| Flat | evidence, `stable` |
+| Postings only in the recent half | evidence, direction `null` |
+| The same rising counts, synthetic | neutral, `synthetic_test_data` |
+
+The contract test shows that only an exactly tied pair is reordered, that all-neutral signals leave the baseline order unchanged, and that the consumer's order is never overridden. The test also asserts that the response contains no score, boost or weight.
+
+**Status.** Implemented and tested here. It is **not yet integrated**: Agent A's R3 ranking, `RecommendationEngine` and Career Lab were not edited. C5/R4 stay pending until the merge wires the tie-break in and the combined regression passes.
+
 ## 5. C1 evidence
 
 | Layer | What | Where |
@@ -174,6 +230,62 @@ const s = await fetchMarketOpportunitySummary(careerId, { country: 'IN' });
     - one-bound figures, all four exclusions, every filter and re-import stability;
     - sign-in and 9 invalid queries.
   - `e2e/tests/salaries.mjs` covers 14 browser steps, including DATA UNAVAILABLE before and after a fixture import, the labelled demo, filters, exclusions, the error state, 390 px and the console.
+
+## 5c. C2 cautious demand forecasting
+
+`GET /api/v1/market/forecast?dataset&skill&country&to&horizon=1..3` (sign-in required). Service: `backend/src/services/market/MarketForecastService.ts`. Shown as "Postings forecast" on `/market`.
+
+**What is forecast.** It forecasts the number of distinct postings SkillBridge would hold per month from its sources. It does not forecast employment, hiring or anyone's chances. `to` must be a completed month (default: the last one), because a month in progress looks like a fall.
+
+**When a forecast is withheld.** Every reason that applies is returned, and no figure is produced:
+
+| Reason | Minimum |
+|---|---|
+| `no_registered_source` | A licensed source must exist. Without one, the production answer is `forecast_unavailable`, and the screen shows **FORECAST UNAVAILABLE**. |
+| `history_too_short` | 24 months from the first month with postings to `to` |
+| `too_few_postings_per_month` | A median of 10 postings a month |
+| `too_many_empty_months` | At most 2 months with no postings |
+| `latest_month_empty` | The last month has postings. An empty month more likely means collection stopped. |
+| `stale_data` | Latest retrieval within 60 days |
+| `mixed_countries` | One country. Without a country filter, postings from several countries are refused. |
+| `duplicate_heavy` | At most 50% of postings merged as cross-posts |
+| `too_few_backtest_origins` | At least 8 past origins to measure error |
+
+**Method.** Deterministic and explainable:
+- **Baseline:** naive, so next month equals last month.
+- **Model:** an ordinary least-squares line through the last 12 months, never below zero.
+- **Selection:** both are evaluated by rolling-origin backtesting on the history itself. At each origin, a method sees only earlier months. The one with the lower total mean absolute error over the horizon is used, and a tie keeps the baseline.
+- **Range:** the 80% range at each horizon is the point ± the 80th percentile of that method's backtest absolute errors at that horizon. It is empirical, with no distribution assumed.
+- **Output:** points and ranges are whole postings. Both methods' backtest errors are reported.
+
+**Held-out evaluation.** Synthetic series of 36 months with 40 seeds per shape. The last 3 months are held out, and the forecast is made from the 33 before them (`backend/src/tests/market_forecast.test.ts`). MAE is in postings per month.
+
+| Shape | Selected method MAE | Naive baseline MAE | Linear trend MAE | 80% range coverage | Trend selected |
+|---|---|---|---|---|---|
+| Rising trend | **2.1** | 4.0 | 2.1 | 0.93 | 40/40 |
+| Flat, noisy | **4.5** | 4.8 | 4.5 | 0.82 | 38/40 |
+| Seasonal (12-month cycle) | 2.6 | 2.6 | 11.1 | 1.00 | 0/40 |
+| Random walk | 3.6 | **3.4** | 4.3 | 0.81 | 4/40 |
+| Step change 3 months before the end | 2.8 | **2.1** | 3.1 | 0.74 | 32/40 |
+
+**Reading the evaluation honestly:**
+- The selection clearly beats the baseline on trending data and roughly matches it on noise.
+- It is slightly worse than the baseline on a random walk.
+- After a sudden level change, both the forecast and its range lag. Coverage falls to 0.74, which is the documented failure condition.
+- Seasonality is not modelled. The backtest correctly avoids the trend line there, but the ranges are wider than needed (coverage 1.00).
+- These are synthetic results. No evaluation on real postings exists, because there are none.
+
+**No leakage.** A spy method verifies that each backtest origin received exactly the months before it, and that changing later months never changes an earlier prediction or backtest error.
+
+**Tests:**
+- `market_forecast.test.ts` covers:
+  - methods, no leakage and the held-out table;
+  - `forecast_unavailable` without a source;
+  - the 12-month fixture (too short) and two countries (refused);
+  - 30 dense synthetic months (forecast given and labelled synthetic);
+  - sparse, stale, duplicate-heavy and gapped sourced data (each reason named);
+  - HTTP sign-in and 7 invalid queries, including an in-progress month.
+- `e2e/tests/market.mjs` adds 2 browser steps: FORECAST UNAVAILABLE with no source, and with 12 synthetic months.
 
 ## 6. Known limits
 

@@ -18,10 +18,7 @@ import { useAuthStore } from '../../store/authStore';
 // Feature Components
 import { CareerMatchCard, CareerMatchData } from '../../features/careers/components/CareerMatchCard';
 import { CareerComparisonModal } from '../../features/careers/components/CareerComparisonModal';
-import { JobIntelligenceFeed, JobItem } from '../../features/careers/components/JobIntelligenceFeed';
-import { JobMatchDetailModal } from '../../features/careers/components/JobMatchDetailModal';
-import { SalaryIntelligencePanel } from '../../features/careers/components/SalaryIntelligencePanel';
-import { MarketTrendsPanel } from '../../features/careers/components/MarketTrendsPanel';
+import { CareerDemandPanel, CareerSalaryPanel, JobListingsPointer } from '../../features/careers/components/CareerMarketFacts';
 import { CareerAlignmentLabView } from '../../features/careers/components/CareerAlignmentLabView';
 
 // Design System 2.0 Components
@@ -38,7 +35,6 @@ import {
   PremiumErrorState,
 } from '../../components/experience/workspace';
 import { AIThinkingAnimation } from '../../components/experience';
-import { IllustrativeNotice } from '../../components/common/IllustrativeNotice';
 
 interface MatchBreakdownRow {
   skillName: string;
@@ -67,10 +63,6 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
   const [sortBy] = useState<string>('matchScore-desc');
   const [comparedIds, setComparedIds] = useState<string[]>([]);
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
-
-  // Job Detail Modal State
-  const [selectedJobForDetail, setSelectedJobForDetail] = useState<JobItem | null>(null);
-  const [isJobDetailModalOpen, setIsJobDetailModalOpen] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -185,11 +177,6 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
   const selectedMatchesForCompare = useMemo(() => {
     return matches.filter((m) => comparedIds.includes(m.id));
   }, [matches, comparedIds]);
-
-  const handleOpenJobDetail = (job: JobItem) => {
-    setSelectedJobForDetail(job);
-    setIsJobDetailModalOpen(true);
-  };
 
   if (isLoading) {
     return (
@@ -383,36 +370,19 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
         </PremiumSection>
       )}
 
-      <WorkspaceDivider label="Live Job Intelligence Feed" />
+      <WorkspaceDivider label="Job Market Evidence" />
 
-      {/* SECTION 4 — LIVE JOB INTELLIGENCE FEED */}
+      {/* SECTION 4 — WHAT IS ACTUALLY KNOWN ABOUT THE MARKET: sourced records or "unavailable" */}
       <PremiumSection
-        title="Live Job Intelligence & Open Market Roles"
-        subtitle="Real-time job openings matched directly to your parsed skill vectors"
-        badge="Market Feed"
+        title="Job Market Evidence"
+        subtitle="Posting counts and advertised salaries from licensed sources only. Where none exist, this says so instead of showing a figure."
+        badge="Sourced Data Only"
       >
-        <IllustrativeNotice className="mb-4" />
-        <JobIntelligenceFeed
-          careerMatches={matches}
-          onSelectJobForDetail={handleOpenJobDetail}
-          onToggleCompareJob={toggleCompare}
-          comparedJobIds={comparedIds}
-        />
-      </PremiumSection>
-
-      <WorkspaceDivider label="Salary Intelligence & ROI Forecasting" />
-
-      {/* SECTION 4.5 — SALARY INTELLIGENCE ENGINE */}
-      <PremiumSection
-        title="Compensation Benchmarking & Career ROI"
-        subtitle="Real-time salary estimates, regional cost-of-living adjustments, and certification premiums"
-        badge="Salary Intelligence"
-      >
-        <IllustrativeNotice className="mb-4" />
-        <SalaryIntelligencePanel
-          jobTitle={topMatch?.careerId?.title || 'AI Systems Architect'}
-          onExploreRoadmap={() => navigate('/roadmap')}
-        />
+        <div className="space-y-4">
+          {topMatch?.careerId?._id && <CareerDemandPanel careerId={topMatch.careerId._id} careerTitle={topMatch.careerId.title} />}
+          <CareerSalaryPanel />
+          <JobListingsPointer />
+        </div>
       </PremiumSection>
 
       <WorkspaceDivider label="Career Comparison Studio" />
@@ -444,19 +414,6 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
             />
           ))}
         </div>
-      </PremiumSection>
-
-      {/* SECTION 6 — MARKET TRENDS INTELLIGENCE ENGINE */}
-      <PremiumSection
-        title="Market & Technology Trends Intelligence"
-        subtitle="Real-time labor market analytics, emerging technology forecasts, and skill demand velocity"
-        badge="Market Signals"
-      >
-        <IllustrativeNotice className="mb-4" />
-        <MarketTrendsPanel
-          initialCategory="all"
-          onExploreRoadmap={() => navigate('/roadmap')}
-        />
       </PremiumSection>
 
       {/* SECTION 7 — SKILL ALIGNMENT & GAP ANALYSIS */}
@@ -534,14 +491,14 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
         </div>
       </PremiumSection>
 
-      {/* SECTION 8 — OPPORTUNITY SPOTLIGHT */}
+      {/* SECTION 8 — STRONGEST MATCH: the stored score and where to explore it, nothing estimated */}
       <WorkspaceSpotlight
-        badge="Strongest Career Fit Opportunity"
-        title={topMatch?.careerId?.title || 'Senior AI Systems & Cloud Architect'}
-        description="Our AI model calculated a $185k/yr average base salary with 24% annual hiring growth. Closing your remaining vector database gap area will unlock top tier interview shortlists."
-        impactScore="$185k/yr Avg Salary"
-        actionLabel="Launch AI Strategy Studio"
-        onAction={() => navigate('/ai')}
+        badge="Your strongest match"
+        title={topMatch?.careerId?.title || 'No match yet'}
+        description={`This is the career your resume evidence covers best. ${topMatch?.missingSkills?.length ?? 0} of its skills are not on your profile yet. The Career Lab shows what would change the score; no salary or hiring figure is attached because none is sourced.`}
+        impactScore={`${topMatch?.matchScore ?? 0}% match`}
+        actionLabel="Open Career Lab"
+        onAction={() => navigate('/career-lab')}
       />
 
       {/* SECTION 9 — QUICK ACTIONS GRID */}
@@ -567,12 +524,6 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
         selectedMatches={selectedMatchesForCompare}
       />
 
-      {/* JOB MATCH DETAIL MODAL */}
-      <JobMatchDetailModal
-        job={selectedJobForDetail}
-        isOpen={isJobDetailModalOpen}
-        onClose={() => setIsJobDetailModalOpen(false)}
-      />
     </div>
   );
 };

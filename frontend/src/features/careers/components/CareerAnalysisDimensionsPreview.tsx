@@ -152,7 +152,7 @@ export const CareerAnalysisDimensionsPreview: React.FC = () => {
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-amber-400" />
-                Dimension 04 • Trajectory & Compensation
+                Dimension 04 • Market Evidence
               </span>
               <span className="text-[10px] font-mono text-slate-500 uppercase">
                 Market Alignment
@@ -160,32 +160,20 @@ export const CareerAnalysisDimensionsPreview: React.FC = () => {
             </div>
 
             <h4 className="font-display text-base font-bold text-white tracking-tight">
-              Real-Time Salary & Hiring Velocity Telemetry
+              Job-Market Evidence, When Sourced
             </h4>
             <p className="text-xs text-slate-400 leading-relaxed font-sans">
-              Matches your skills to real-world career trajectories with live salary compensation bands, industry growth velocity, and active market requisition volumes.
+              Posting counts and advertised salaries for a career are shown only from licensed, dated sources, with the source and collection date. Where none exist, the page says market data is unavailable.
             </p>
 
-            {/* Market Preview */}
-            <div className="grid grid-cols-3 gap-2 text-center font-mono text-xs">
-              <div className="p-2.5 rounded-xl bg-slate-900 border border-white/5 space-y-0.5">
-                <span className="text-[9px] text-slate-500 block uppercase">Median Base</span>
-                <span className="text-amber-400 font-bold block">$165,000</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-slate-900 border border-white/5 space-y-0.5">
-                <span className="text-[9px] text-slate-500 block uppercase">Hiring Trend</span>
-                <span className="text-emerald-400 font-bold block">+22% YoY</span>
-              </div>
-              <div className="p-2.5 rounded-xl bg-slate-900 border border-white/5 space-y-0.5">
-                <span className="text-[9px] text-slate-500 block uppercase">Remote Rate</span>
-                <span className="text-cyan-300 font-bold block">78% Roles</span>
-              </div>
-            </div>
+            <p className="p-2.5 rounded-xl bg-slate-900 border border-white/5 text-xs text-slate-300">
+              No salary, hiring-trend or remote-work figure is shown here: none is available from a licensed source.
+            </p>
           </div>
 
           <div className="pt-3 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-slate-400">
-            <span>Market Grounding:</span>
-            <span className="text-amber-400 font-bold">Synchronized Daily</span>
+            <span>Market data:</span>
+            <span className="text-amber-400 font-bold">Sourced or unavailable</span>
           </div>
         </div>
       </div>

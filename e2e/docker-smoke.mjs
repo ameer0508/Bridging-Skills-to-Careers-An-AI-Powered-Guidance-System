@@ -3,6 +3,7 @@
 //
 //   node e2e/docker-smoke.mjs            full run: readiness, connectivity, auth, resume-to-career
 //   node e2e/docker-smoke.mjs --verify   after a restart: the same account and its data still exist
+//   node e2e/docker-smoke.mjs --after-expiry   after recordings were expired and the retention job ran
 //
 // WEB_URL   where nginx serves the app   (default http://localhost:3000)
 // API_URL   where the backend is published (default http://localhost:5000)
@@ -17,6 +18,15 @@ const BACKEND = (process.env.API_URL || 'http://localhost:5000').replace(/\/$/, 
 const API = `${WEB}/api/v1`; // through nginx, the way a browser reaches the API
 const STATE_FILE = process.env.SMOKE_STATE || path.join(os.tmpdir(), 'skillbridge-docker-smoke.json');
 const verifyOnly = process.argv.includes('--verify');
+const afterExpiry = process.argv.includes('--after-expiry');
+
+// A few bytes with a WebM signature: enough for the server's format check, and no real audio
+const fakeWebm = (marker) => Buffer.concat([Buffer.from([0x1a, 0x45, 0xdf, 0xa3]), Buffer.from(`synthetic-recording-${marker}`)]);
+const audioUrl = (r) => `${API}/interviews/${r.sessionId}/recordings/${encodeURIComponent(r.questionId)}/audio`;
+async function fetchAudio(token, r) {
+  const res = await fetch(audioUrl(r), { headers: { Authorization: `Bearer ${token}` } });
+  return { status: res.status, bytes: Buffer.from(await res.arrayBuffer()) };
+}
 
 const results = [];
 async function check(name, fn) {
@@ -193,6 +203,31 @@ async function fullRun() {
     expect((await call('GET', `${API}/resumes/download`, { token: otherToken })).status === 404, 'the other user can download the file');
   });
 
+  await check('interview recordings: refused without consent, then stored privately and played back to their owner', async () => {
+    const session = (await call('POST', `${API}/interviews`, { token, json: { mode: 'mixed', questionCount: 3 } })).body.data;
+    const upload = (index) => {
+      const form = new FormData();
+      form.append('audio', new Blob([new Uint8Array(fakeWebm(index))], { type: 'audio/webm' }), 'answer.webm');
+      form.append('questionIndex', String(index));
+      return call('POST', `${API}/interviews/${session._id}/recordings`, { token, form });
+    };
+    expect((await upload(0)).status === 403, 'a recording was accepted without consent');
+    const consent = await call('PUT', `${API}/interviews/voice-settings`, { token, json: { recordingConsent: true, retentionDays: 7 } });
+    expect(consent.status === 200 && consent.body.data.recordingConsent === true, `consent ${consent.status}`);
+    for (const index of [0, 1]) {
+      const stored = await upload(index);
+      expect(stored.status === 201, `upload ${index}: ${stored.status}`);
+      expect(!JSON.stringify(stored.body).includes('/app/storage'), 'the storage path is returned to the client');
+    }
+    account.recordings = [0, 1].map((index) => ({ sessionId: session._id, questionId: session.questions[index].questionId, index }));
+    for (const r of account.recordings) {
+      const audio = await fetchAudio(token, r);
+      expect(audio.status === 200 && audio.bytes.equals(fakeWebm(r.index)), `playback ${audio.status}, ${audio.bytes.length} bytes`);
+    }
+    expect((await fetch(audioUrl(account.recordings[0]))).status === 401, 'a recording can be fetched without signing in');
+    return 'two recordings stored and played back';
+  });
+
   fs.writeFileSync(STATE_FILE, JSON.stringify(account));
 }
 
@@ -210,9 +245,37 @@ async function verifyRun() {
     expect(download.status === 200, `the stored file is gone (${download.status})`);
     return 'database volume and uploads volume both survived';
   });
+
+  await check('after a restart the recordings are still there; deleting one removes it', async () => {
+    const login = await call('POST', `${API}/auth/login`, { json: { email: account.email, password: account.password } });
+    const token = login.body.data.accessToken;
+    for (const r of account.recordings) {
+      const audio = await fetchAudio(token, r);
+      expect(audio.status === 200 && audio.bytes.equals(fakeWebm(r.index)), `recording ${r.index} after restart: ${audio.status}`);
+    }
+    const [first] = account.recordings;
+    const removed = await call('DELETE', `${API}/interviews/${first.sessionId}/recordings/${encodeURIComponent(first.questionId)}`, { token });
+    expect(removed.status === 200 && removed.body.data.deleted === 1 && removed.body.data.pendingDeletion === 0, `delete ${removed.status} ${JSON.stringify(removed.body?.data)}`);
+    expect((await fetchAudio(token, first)).status === 404, 'a deleted recording can still be played');
+    const left = (await call('GET', `${API}/interviews/${first.sessionId}/recordings`, { token })).body.data.recordings;
+    expect(left.length === 1, `${left.length} recordings listed after deleting one of two`);
+    return 'recordings persisted on the storage volume; one deleted, one kept';
+  });
 }
 
-await (verifyOnly ? verifyRun() : fullRun());
+async function afterExpiryRun() {
+  const account = JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
+  await check('after expiry and the retention job no recording can be listed or played', async () => {
+    const login = await call('POST', `${API}/auth/login`, { json: { email: account.email, password: account.password } });
+    const token = login.body.data.accessToken;
+    const kept = account.recordings[1];
+    const listed = (await call('GET', `${API}/interviews/${kept.sessionId}/recordings`, { token })).body.data.recordings;
+    expect(listed.length === 0, `${listed.length} recordings still listed`);
+    expect((await fetchAudio(token, kept)).status === 404, 'an expired recording can still be played');
+  });
+}
+
+await (afterExpiry ? afterExpiryRun() : verifyOnly ? verifyRun() : fullRun());
 const failed = results.filter((ok) => !ok).length;
 console.log(`\nSUMMARY ${results.length - failed}/${results.length} passed`);
 process.exit(failed ? 1 : 0);

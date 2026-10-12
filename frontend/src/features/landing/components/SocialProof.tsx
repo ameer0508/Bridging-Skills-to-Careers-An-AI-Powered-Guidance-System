@@ -23,7 +23,7 @@ export const SocialProof: React.FC = () => {
       company: 'NextGen Scale AI',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
       text: 'SkillBridge identified my exact missing skills in vector databases and CUDA optimization. The adaptive roadmap helped me land an AI Engineer role in under 6 weeks.',
-      metric: 'Transitioned to $165k AI Role',
+      metric: 'Scenario: closing skill gaps',
       stars: 5,
     },
     {
@@ -32,7 +32,7 @@ export const SocialProof: React.FC = () => {
       company: 'Vanguard SaaS',
       avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
       text: 'The resume parsing and ATS index scoring are remarkably accurate. It turned my generic resume into a highly targeted application asset.',
-      metric: '98/100 ATS Score Achieved',
+      metric: 'Scenario: sharpening a resume',
       stars: 5,
     },
     {
@@ -41,7 +41,7 @@ export const SocialProof: React.FC = () => {
       company: 'Apex Cloud Solutions',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
       text: 'SkillBridge eliminated the guesswork from my career advancement. The explainable AI breakdowns showed me exactly why certain skills mattered for promotion.',
-      metric: 'Promoted in 2 Months',
+      metric: 'Scenario: planning a promotion',
       stars: 5,
     },
   ];
@@ -52,17 +52,17 @@ export const SocialProof: React.FC = () => {
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 backdrop-blur-md">
           <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
           <span className="text-xs font-mono font-bold text-indigo-300 tracking-wider uppercase">
-            User Impact & Success
+            Illustrative Scenarios
           </span>
         </div>
         <h2 className="font-display text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-          Trusted By Ambitious <br />
+          How SkillBridge <br />
           <span className="bg-linear-to-r from-indigo-400 via-purple-300 to-cyan-400 bg-clip-text text-transparent">
-            Engineers & Leaders
+            Could Be Used
           </span>
         </h2>
         <p className="text-slate-300 text-base sm:text-lg">
-          Read how professionals leveraged SkillBridge to bridge skill gaps and accelerate their careers.
+          These are illustrative scenarios written for this demonstration. The people, companies and results are invented; SkillBridge has no user outcomes to report yet.
         </p>
       </div>
 

@@ -187,6 +187,20 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       expect(text.includes(String(matches[0].matchScore)), `score ${matches[0].matchScore} is not on the page`);
       return `${matches[0].careerId.title} ${matches[0].matchScore}%`;
     });
+    await t.step('careers page shows no invented market or salary figures', async () => {
+      await gotoAndSettle(page, `${webUrl}/careers`, 3500);
+      const demand = page.getByTestId('career-demand');
+      await demand.waitFor({ timeout: 15_000 });
+      await page.locator('[data-testid="career-demand"][data-state="no_source"]').waitFor({ timeout: 15_000 });
+      expect(/Market data unavailable/.test(await demand.innerText()) && /No licensed job-market source is connected/.test(await demand.innerText()), 'the demand section does not say that market data is unavailable');
+      const salary = page.getByTestId('career-salary');
+      await page.locator('[data-testid="career-salary"][data-status="data_unavailable"]').waitFor({ timeout: 15_000 });
+      expect(/Salary data unavailable/.test(await salary.innerText()), 'the salary section does not say that salary data is unavailable');
+      expect(await page.getByTestId('job-listings-pointer').isVisible(), 'the pointer to the job search is missing');
+      const text = await bodyText(page);
+      expect(!/\$\s?\d{2,3}[,kK]|\d+\s?LPA|% YoY|Demand Score:|Real-time salary|Real-time labor market|average base salary|hiring growth/i.test(text), 'the careers page still shows a salary, growth or demand figure that has no source');
+      return 'demand: no licensed source; salaries: unavailable; no invented figures';
+    });
     await t.step('readiness is the same figure on every page that shows it', async () => {
       readiness = (await snapshot()).readinessScore;
       expect(typeof readiness === 'number' && readiness > 0, `snapshot readiness is ${readiness}`);

@@ -10,7 +10,7 @@ An item is **Done** only when it has a working screen, an authenticated API, sto
 needed, validation and error states, documented limits, and passing service, HTTP and browser
 tests. Code that exists but is not verified earns nothing.
 
-Expansion total: 100 points. **Current: 43 / 100.**
+Expansion total: 100 points. **Current: 53 / 100.**
 
 ## Phase 1. Advanced career intelligence (15)
 
@@ -38,22 +38,22 @@ Expansion total: 100 points. **Current: 43 / 100.**
 | ID | Item | Points | Status | Evidence |
 |---|---|---|---|---|
 | C1 | Sourced, dated job-demand records and history | 3 | Pending | Not awarded. Storage, import with licence checks, de-duplication and history are built and tested by the market agent (suite `market_intelligence`, browser `market.mjs` 13/13), but no licensed source is registered: only a labelled synthetic fixture can be imported, so there are no sourced, dated records |
-| C2 | Demand forecasting only with sufficient dated data | 2 | Pending | Not started |
+| C2 | Demand forecasting only with sufficient dated data | 2 | Pending | Not awarded. Guarded forecasting with a backtested baseline is built and tested on synthetic months (suite `market_forecast`); with no licensed source every real request answers that a forecast is unavailable |
 | C3 | Salary insights by geography, currency, period and source | 3 | Pending | Not awarded. Built and tested by the market agent on synthetic and test-source data (suite `market_salaries`, browser `salaries.mjs` 14/14); with no licensed source every real query is unavailable |
 | C4 | Job-description trend mining | 2 | Pending | Not awarded. Built and tested by the market agent on synthetic and test-source data (suite `market_skill_trends`); with no licensed source there is nothing real to mine |
-| C5 | Market-aware recommendations | 2 | Pending | Not awarded. The producer contract exists and is consumed (A1, R3 factor at weight 0); recommendations are deliberately not market-aware without sourced data |
+| C5 | Market-aware recommendations | 2 | Pending | Not awarded. A market signal contract exists and is neutral unless evidence is valid and consistent (suite `market_signals`); the next-step ranking keeps market weight at 0. Nothing is market-aware for real users without sourced data |
 | C6 | Application outcome analytics with denominators and sample sizes | 3 | **Done** | Built by the market agent; verified in the integrated tree: suite `application_outcomes`, browser suite `e2e/tests/outcomes.mjs` (10/10). Rates from the user's own tracked applications with numerator, denominator and a minimum sample of 5; saved is not applied; demo listings excluded unless asked for; private per user. Rules in `docs/APPLICATION_OUTCOMES.md` |
 
 ## Phase 4. Advanced interview and coding assessment (15)
 
 | ID | Item | Points | Status | Evidence |
 |---|---|---|---|---|
-| D1 | Voice interviews with consent and retention controls | 3 | Pending |  |
-| D2 | Speech-to-text with unsupported-browser fallback | 2 | Pending |  |
-| D3 | Answer-adaptive follow-up questions | 3 | Pending |  |
-| D4 | Coding and technical assessments without server-side code execution | 3 | Pending |  |
-| D5 | Role-specific rubrics | 2 | Pending |  |
-| D6 | Historical performance comparison | 2 | Pending |  |
+| D1 | Voice interviews with consent and retention controls | 3 | Pending | Not awarded. Consent, upload validation, owner-only playback, retention and deletion are built and pass (suites `voice_interviews`, `voice_retention`; browser 21/21 with a stand-in recorder; Docker persistence and retention job). Deletion failures are now tracked and retried instead of forgotten. **Pending a manual test with a real microphone in real browsers**: the automated checks use a substitute for the browser's recorder |
+| D2 | Speech-to-text with unsupported-browser fallback | 2 | Pending | Not awarded. Consented dictation, the editable transcript and the typed fallback pass with a stand-in recogniser (browser 21/21). **Pending a manual test of real browser speech recognition**, which cannot be automated here |
+| D3 | Answer-adaptive follow-up questions | 3 | **Done** | Built by the interviews agent; verified in the integrated tree (browser suite `e2e/tests/interviews.mjs` 21/21; `docs/INTERVIEWS.md`): suite `interview_followups`. Opt-in follow-up generated from what an answer lacked (missing concept, specificity, structure), deterministic, one per question and at most three, asked at once, reported apart from and never added to the overall score; private per user |
+| D4 | Coding and technical assessments without server-side code execution | 3 | **Done** | Built by the interviews agent; verified in the integrated tree (browser suite `e2e/tests/interviews.mjs` 21/21; `docs/INTERVIEWS.md`): suites `technical_assessments` and `interview_integration`. 23 curated tasks of 4 kinds answered by choice, line or short text against a key; no user input is executed (audited: no eval, Function, vm or process spawning); keys and explanations withheld until a task is answered; one answer per task; a finished assessment changes no skill, verification, match, readiness, next step, recalculation or streak (asserted); other users 404 |
+| D5 | Role-specific rubrics | 2 | **Done** | Built by the interviews agent; verified in the integrated tree (browser suite `e2e/tests/interviews.mjs` 21/21; `docs/INTERVIEWS.md`): suite `interview_rubrics`. Six rubrics with stated weights, resolved from the role or chosen, stored per session and named in the report; the general rubric reproduces the earlier scoring and older sessions keep it, so past scores do not move; unknown rubric 400; other users 404 |
+| D6 | Historical performance comparison | 2 | **Done** | Built by the interviews agent; verified in the integrated tree (browser suite `e2e/tests/interviews.mjs` 21/21; `docs/INTERVIEWS.md`): suite `interview_progress`. Per-dimension trend over the user's own completed sessions, rule-based and AI-scored kept apart, a trend only from three sessions with a 10-point threshold; invalid queries rejected |
 
 ## Phase 5. Wider careers, exams and multilingual support (10)
 
@@ -79,10 +79,10 @@ One point each. An enhancement is counted here once, even when a feature above d
 | X6 | Time- and progress-aware roadmaps | 1 | **Done** | Delivered by B4: the roadmap is laid out in weeks from the user's own hours, moves with progress and is adjusted when evidence changes. Suite `learning_plan` |
 | X7 | Job freshness, deduplication and rate limits | 1 | Pending |  |
 | X8 | Application histories, reminders and outcomes | 1 | **Done** | Application history, notes and reminders (smoke journey) and outcome analytics (C6), both verified in the integrated tree |
-| X9 | Interview scoring quality | 1 | Pending |  |
+| X9 | Interview scoring quality | 1 | Pending | Not claimed. Role-specific rubrics with stable historical scores (D5) improve scoring quality; left for the final review to decide whether that satisfies this item |
 | X10 | Cross-module Command Center state | 1 | **Done** | Browser suite (47/47): the Command Center shows the study plan (roadmap and weekly hours), ranked next steps drawn from skill checks, practice projects and the portfolio, the learning streak, and the top bar shows real unread notifications. Each is asserted equal to the stored data |
 | X11 | AI observability, fallback and confidence calibration | 1 | Pending |  |
-| X12 | Security, privacy, retention and hardening | 1 | Pending | Partly done: zero-cost runtime guards from the market agent are integrated and pass (backend suites `cost_policy`, `zero_cost_runtime`; AI `test_runtime_cost_enforcement` 19, `test_zero_cost_policy` 31, `test_provider_integrity` 11), with paid-provider keys present and a network tripwire. Final security review belongs to phase 8 |
+| X12 | Security, privacy, retention and hardening | 1 | Pending | Partly done: zero-cost runtime guards pass with paid-provider keys present (backend `cost_policy`, `zero_cost_runtime`; AI `test_runtime_cost_enforcement` 19, `test_zero_cost_policy` 31, `test_provider_integrity` 11); voice recordings are owner-only with tracked deletion. Final security review belongs to phase 8 |
 
 ## Phase 7. Research contributions and evaluation (8)
 
@@ -91,13 +91,13 @@ One point each. An enhancement is counted here once, even when a feature above d
 | R1 | Continuously adaptive career intelligence | 2 | **Done** | `docs/NEXTGEN_RESEARCH.md` R1; suite `career_lab`: one run per event, only affected modules recomputed (match record ids unchanged on a role change), duplicates and a burst of ten collapse to one, audit record with before/after figures and versions; shown in the Career Lab Activity tab |
 | R2 | Explainable and counterfactual career matching | 2 | **Done** | `docs/NEXTGEN_RESEARCH.md` R2; suite `career_lab`: hypothetical evidence equals real evidence in 100 of 100 grid cases; end-to-end scores equal after really adding the evidence; path and plan consistent with what-if; isolation checked |
 | R3 | Adaptive next-best-action recommendations | 2 | **Done** | `docs/NEXTGEN_RESEARCH.md` R3; suite `next_best_action`; browser check on the dashboard (47/47): deterministic ranking of evidence-producing actions over published factors and chosen weights, market factor neutral; compared with a gap-importance baseline on 42 synthetic profiles (mean gain after three actions 32.1 vs 30.43 points; better in 16, equal in 25, worse in 1). Limits stated, including that the comparison is partly circular and nothing was tried with real users |
-| R4 | Market-aware career adaptation | 2 | Pending | Not awarded. Behaviour on missing, sparse, stale and synthetic data is tested; adaptation to real market data cannot be shown without sourced records |
+| R4 | Market-aware career adaptation | 2 | Pending | Not awarded. Behaviour on missing, sparse, stale, conflicting and synthetic data is tested (suites `market_signals`, `career_market`); adaptation to real market data cannot be shown without sourced records |
 
 ## Phase 8. Regression, security, UX, CI and release verification (10)
 
 | ID | Item | Points | Status | Evidence |
 |---|---|---|---|---|
-| V1 | Original regression baseline still passes (19 backend suites, 104 AI tests, 35 browser checks) | 2 | Pending | Passing on the integrated tree: 37 backend suites (19 original + 11 of this branch + 7 of the market agent), 154 AI tests (104 original + 50), browser 48 + 13 + 10 + 14. Awarded at the end of the expansion |
+| V1 | Original regression baseline still passes (19 backend suites, 104 AI tests, 35 browser checks) | 2 | Pending | Passing on the integrated tree: 47 backend suites, 154 AI tests, browser smoke 49/49, market 15/15, outcomes 10/10, salaries 14/14, applications 15/15, interviews 21/21. Awarded at the end of the expansion |
 | V2 | Cross-user isolation and input validation for every new endpoint | 2 | Pending |  |
 | V3 | Accessibility and failure states for every new screen | 2 | Pending |  |
 | V4 | Docker Compose workflow passes with the expansion | 2 | Pending |  |
@@ -108,3 +108,4 @@ One point each. An enhancement is counted here once, even when a feature above d
 - Google Gemini: no generation request has been made.
 - JSearch: never called. With a key present it is blocked by the zero-cost policy and labelled demo listings are served.
 - Job-market sources: none is registered. All market, salary and trend figures shown to users are "unavailable"; the analytics are tested on synthetic and test-source data only.
+- Real microphones and browser speech recognition: never exercised. Recording and dictation are tested with stand-ins only (D1, D2 pending a manual browser test).

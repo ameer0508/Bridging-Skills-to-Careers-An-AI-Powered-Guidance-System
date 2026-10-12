@@ -25,6 +25,9 @@ process.env.JWT_ACCESS_SECRET = 'test-only-access-secret';
 process.env.JWT_REFRESH_SECRET = 'test-only-refresh-secret';
 process.env.RAPIDAPI_KEY = '';
 process.env.JSEARCH_API_KEY = '';
+// The combined suites send more requests from one address than the general production limit
+// (1000 per 15 minutes) allows. The sign-in limiter is separate and is tested at its real value.
+process.env.API_RATE_LIMIT_MAX = '100000';
 
 export const TEST_SANDBOX_DIR = sandboxDir;
 

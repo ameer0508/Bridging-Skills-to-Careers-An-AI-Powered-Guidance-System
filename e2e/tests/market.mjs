@@ -50,6 +50,14 @@ export async function run({ webUrl, apiUrl, tmpDir }) {
       expect((await page.getByTestId('skill-trends-table').count()) === 0, 'a skill table is shown with no records');
     });
 
+    await t.step('without a licensed source the forecast says FORECAST UNAVAILABLE', async () => {
+      const panel = page.getByTestId('forecast-unavailable');
+      await panel.waitFor({ timeout: 15_000 });
+      const text = await panel.innerText();
+      expect(/FORECAST UNAVAILABLE/.test(text) && /No licensed market data source/.test(text), `forecast panel: ${text}`);
+      expect((await page.getByTestId('forecast-table').count()) === 0, 'a forecast table is shown with no source');
+    });
+
     await t.step('operator imports the synthetic fixture', async () => {
       const result = importFixture(tmpDir, email);
       counts = result.counts;
@@ -92,6 +100,17 @@ export async function run({ webUrl, apiUrl, tmpDir }) {
       expect(/2026-09 \(\d+\)/.test(await page.getByTestId('skill-trends-scope').innerText()), 'monthly periods are not listed');
     });
 
+    await t.step('twelve synthetic months are too few to forecast, and no number is shown', async () => {
+      await page.getByLabel('Country').selectOption('IN');
+      await page.getByRole('button', { name: 'Show history' }).click();
+      const panel = page.getByTestId('forecast-unavailable');
+      await panel.getByText('SYNTHETIC TEST DATA', { exact: true }).waitFor({ timeout: 15_000 });
+      const text = await panel.innerText();
+      expect(/FORECAST UNAVAILABLE/.test(text) && /at least 24 are needed/.test(text), `forecast panel: ${text}`);
+      expect((await page.getByTestId('forecast-table').count()) === 0, 'a forecast is shown from 12 months');
+      await page.getByLabel('Country').selectOption({ label: 'All countries' });
+    });
+
     await t.step('a skill with too few postings is reported as insufficient', async () => {
       await page.getByLabel('Skill', { exact: true }).fill('kubernetes');
       await page.getByRole('button', { name: 'Show history' }).click();
@@ -104,7 +123,7 @@ export async function run({ webUrl, apiUrl, tmpDir }) {
     await t.step('an unknown skill shows an error message', async () => {
       await page.getByLabel('Skill', { exact: true }).fill('NotARealSkill');
       await page.getByRole('button', { name: 'Show history' }).click();
-      await page.getByRole('alert').filter({ hasText: 'not a recognised skill' }).waitFor({ timeout: 15_000 });
+      await page.getByRole('alert').filter({ hasText: 'not a recognised skill' }).first().waitFor({ timeout: 15_000 });
     });
 
     await t.step('the page fits a phone screen', async () => {
@@ -117,7 +136,7 @@ export async function run({ webUrl, apiUrl, tmpDir }) {
     });
 
     await t.step('no unexpected API failures or console errors', async () => {
-      const failed = log.failed.filter((f) => !/^400 GET \/market\/(history\?.*skill|skill-trends\?.*skills)=NotARealSkill/.test(f));
+      const failed = log.failed.filter((f) => !/^400 GET \/market\/(history\?.*skill|skill-trends\?.*skills|forecast\?.*skill)=NotARealSkill/.test(f));
       // The unknown-skill step provokes one 400 on purpose; the browser and the app both log it
       const consoleErrors = log.console.filter((c) => !/status of 400 \(Bad Request\)|NotARealSkill/.test(c));
       expect(failed.length === 0, `API failures: ${failed.join(', ')}`);

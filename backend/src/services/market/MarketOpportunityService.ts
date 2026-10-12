@@ -19,6 +19,9 @@ export interface SummaryQuery {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/** The career-to-posting matching rule as a query: the career title as whole words, any case. */
+export const careerTitlePattern = (title: string) => new RegExp(`(^|[^A-Za-z0-9])${escapeRegExp(title.trim())}($|[^A-Za-z0-9])`, 'i');
+
 /**
  * Produces a MarketOpportunitySummary for one career (C5 producer). A posting is attributed to a
  * career when its title contains the career title as whole words, case-insensitively: the rule is
@@ -38,7 +41,7 @@ class MarketOpportunityService {
       return unavailableSummary(career, period, ['no_registered_source'], country);
     }
 
-    const titlePattern = new RegExp(`(^|[^A-Za-z0-9])${escapeRegExp(career.title.trim())}($|[^A-Za-z0-9])`, 'i');
+    const titlePattern = careerTitlePattern(career.title);
     const [ty, tm] = query.to.split('-').map(Number);
     const match: Record<string, unknown> = {
       dataset: query.dataset,

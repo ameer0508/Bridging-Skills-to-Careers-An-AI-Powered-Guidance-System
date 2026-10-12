@@ -7,6 +7,8 @@ import ParsedResume from '../models/ParsedResume.js';
 import Resume from '../models/Resume.js';
 import { User } from '../models/User.js';
 import { evaluateAnswer } from './InterviewEvaluator.js';
+import { resolveRubric, rubricById, RUBRICS, type RubricId } from './interview/InterviewRubrics.js';
+import { buildFollowUp, followUpReason, MAX_FOLLOW_UPS_PER_SESSION, recovered } from './interview/FollowUpService.js';
 import { generateInterviewQuestions, INTERVIEW_MODES, type InterviewMode } from './InterviewQuestionGenerator.js';
 import { extractSkills } from '../utils/skillLexicon.js';
 import logger from '../config/logger.js';
@@ -17,6 +19,10 @@ export interface StartInterviewDTO {
   targetCareerTitle?: string;
   mode?: InterviewMode;
   questionCount?: number;
+  /** Role rubric to score with; resolved from the role title when omitted. */
+  rubricId?: RubricId;
+  /** D3: ask a follow-up when an answer misses something. */
+  adaptiveFollowUps?: boolean;
   opportunityContext?: {
     title?: string;
     company?: string;
@@ -27,6 +33,8 @@ export interface StartInterviewDTO {
 export interface RespondQuestionDTO {
   questionIndex: number;
   candidateResponse: string;
+  /** D2: how the answer was entered; dictated text is always editable before it is sent. */
+  inputMethod?: 'typed' | 'dictated' | 'mixed';
 }
 
 export class InterviewService {
@@ -155,6 +163,7 @@ export class InterviewService {
       sessionOrdinal,
     });
     const questions = generated.questions;
+    const rubric = dto.rubricId ? RUBRICS[dto.rubricId] : resolveRubric(targetCareerTitle);
     if (questions.length === 0) {
       throw new AppError('No interview questions could be prepared. Please try again.', 503, 'QUESTIONS_UNAVAILABLE');
     }
@@ -171,6 +180,9 @@ export class InterviewService {
       currentQuestionIndex: 0,
       questions,
       questionSource: generated.source,
+      rubricId: rubric.id,
+      rubricVersion: rubric.version,
+      adaptiveFollowUps: Boolean(dto.adaptiveFollowUps),
       opportunityContext: hasJob ? { title: job?.title, company: job?.company } : undefined,
       strengths: [],
       weaknesses: [],
@@ -236,10 +248,23 @@ export class InterviewService {
 
     const q = session.questions[dto.questionIndex];
     q.candidateResponse = dto.candidateResponse;
+    q.answerInputMethod = dto.inputMethod ?? 'typed';
 
     // AI rubric when available, otherwise the labelled rule-based rubric
-    const evaluation = await evaluateAnswer(dto.candidateResponse, q, session.targetCareerTitle);
+    // The rubric stored with the session; sessions from before rubrics were scored with 'general'
+    const evaluation = await evaluateAnswer(dto.candidateResponse, q, session.targetCareerTitle, rubricById(session.rubricId));
     q.evaluation = evaluation;
+
+    // D3: one follow-up per question, asked right after it, when the answer missed something
+    if (session.adaptiveFollowUps) {
+      const asked = session.questions.filter((item) => item.followUpOf).length;
+      const already = session.questions.some((item) => item.followUpOf === q.questionId);
+      const reason = followUpReason(q, evaluation);
+      if (reason && !already && asked < MAX_FOLLOW_UPS_PER_SESSION) {
+        const number = session.questions.slice(0, dto.questionIndex + 1).filter((item) => !item.followUpOf).length;
+        session.questions.splice(dto.questionIndex + 1, 0, buildFollowUp(q, reason, number));
+      }
+    }
 
     // Advance question index if applicable
     if (session.currentQuestionIndex <= dto.questionIndex) {
@@ -258,8 +283,11 @@ export class InterviewService {
   public async completeSession(userId: string, sessionId: string): Promise<IInterviewSession> {
     const session = await this.getSession(userId, sessionId);
 
-    const evaluatedQuestions = session.questions.filter((q) => q.evaluation && typeof q.evaluation.score === 'number');
-    const totalQuestions = session.questions.length;
+    // Follow-ups (D3) are reported on their own and kept out of the overall score and dimensions
+    const primary = session.questions.filter((q) => !q.followUpOf);
+    const followUps = session.questions.filter((q) => q.followUpOf);
+    const evaluatedQuestions = primary.filter((q) => q.evaluation && typeof q.evaluation.score === 'number');
+    const totalQuestions = primary.length;
 
     // Unanswered questions count as zero: skipping most of an interview must not look like a pass
     const overallScore =
@@ -321,13 +349,36 @@ export class InterviewService {
     if (sources.has('heuristic')) {
       advice.push('Some answers were scored by the built-in rubric because AI evaluation was unavailable; technical correctness was not checked for those.');
     }
+    if (followUps.length > 0) {
+      const answeredFollowUps = followUps.filter((q) => q.evaluation && typeof q.evaluation.score === 'number');
+      const recoveredCount = answeredFollowUps.filter((q) => recovered(q) === true).length;
+      session.followUpSummary = {
+        asked: followUps.length,
+        answered: answeredFollowUps.length,
+        recovered: recoveredCount,
+        averageScore: answeredFollowUps.length
+          ? Math.round(answeredFollowUps.reduce((acc, q) => acc + (q.evaluation?.score || 0), 0) / answeredFollowUps.length)
+          : null,
+      };
+      advice.push(
+        `Follow-ups: you were asked ${followUps.length} and recovered the missing point in ${recoveredCount} of ${answeredFollowUps.length} answered. ` +
+          'Covering those points in your first answer is what moves the score.'
+      );
+    }
     session.preparationRecommendations = advice;
 
     if (mongoose.connection.readyState === 1 && typeof session.save === 'function') {
       await session.save();
+      // D1: with retention 0, this round's recordings are deleted now
+      const { default: VoiceRecordingService } = await import('./interview/VoiceRecordingService.js');
+      await VoiceRecordingService.onSessionCompleted(userId, sessionId);
       // Interview weaknesses feed recommendations; scores are unaffected, so only those are refreshed
       const { default: RecalculationService } = await import('./RecalculationService.js');
       await RecalculationService.run(userId, 'interview_completed', sessionId);
+      // A finished round is recorded learning activity (it counts for the streak, not for any score)
+      const { default: LearningActivityService } = await import('./LearningActivityService.js');
+      const { EventType } = await import('../models/ProgressEvent.js');
+      await LearningActivityService.recordActivity(userId, EventType.INTERVIEW_COMPLETED, { mode: session.mode, questions: session.questions.length }, sessionId);
     }
     return session;
   }

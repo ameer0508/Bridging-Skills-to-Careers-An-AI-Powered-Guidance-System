@@ -165,6 +165,13 @@ export async function runCareerMarketTests() {
     assert.match(none.marketData.reason, /^Market data unavailable/);
     const baselineScores = scores(none);
 
+    // The single-career endpoint behind the Careers page gives the same answer
+    const single = await h.api('GET', `/careers/${ids[0]}/market-evidence`, { token: alice.token });
+    assert.deepEqual([single.status, single.body.data.state, single.body.data.usable, single.body.data.evidence], [200, 'no_source', false, null]);
+    assert.equal((await h.api('GET', `/careers/${ids[0]}/market-evidence`)).status, 401);
+    assert.equal((await h.api('GET', '/careers/nope/market-evidence', { token: alice.token })).status, 400);
+    assert.equal((await h.api('GET', `/careers/${new mongoose.Types.ObjectId()}/market-evidence`, { token: alice.token })).status, 404);
+
     // 2. Generated fixture data is present, but a comparison never reads it
     await MarketIngestionService.importBatch(buildSyntheticMarketFixture({ endMonth: new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth() - 1, 1)).toISOString().slice(0, 7), retrievedAt: new Date().toISOString() }), importer);
     assert.ok((await MarketPosting.countDocuments({ dataset: 'synthetic_fixture' })) > 0);
@@ -190,6 +197,8 @@ export async function runCareerMarketTests() {
     assert.deepEqual([byTitle['DevOps Engineer'].state, byTitle['DevOps Engineer'].evidence], ['sparse', null], 'one posting is too few: unavailable, not "1 posting"');
     assert.deepEqual([byTitle['Data Analyst'].state, byTitle['Data Analyst'].evidence], ['sparse', null], 'no matching posting is unavailable, not zero');
     assert.deepEqual([sourced.marketData.available, sourced.marketData.careersWithEvidence], [true, 1]);
+    const singleValid = (await h.api('GET', `/careers/${idOf('Frontend Engineer')}/market-evidence`, { token: alice.token })).body.data;
+    assert.deepEqual([singleValid.state, singleValid.evidence.distinctPostings], ['sourced_valid', 36]);
     assert.match(sourced.marketData.reason, /unavailable, not zero/);
     assert.deepEqual(scores(sourced), baselineScores, 'market evidence changes no match score and no effort figure');
 

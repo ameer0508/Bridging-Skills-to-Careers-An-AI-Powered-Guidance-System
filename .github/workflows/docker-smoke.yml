@@ -106,6 +106,23 @@ jobs:
           docker compose up -d --wait --wait-timeout 300
           node e2e/docker-smoke.mjs --verify
 
+      - name: Interview recordings live on the private storage volume and the retention job removes expired ones
+        run: |
+          count() { docker compose exec -T backend sh -c 'find /app/storage/voice-recordings -type f 2>/dev/null | wc -l' | tr -d '[:space:]'; }
+          echo "recording files on the volume: $(count)"
+          test "$(count)" = "1"
+          # Only the service account may read them
+          docker compose exec -T backend sh -c 'find /app/storage/voice-recordings -type f -perm /077 | wc -l' | tr -d '[:space:]' | grep -qx 0
+          # Expire what is left, then run the retention job the way cron would
+          docker compose exec -T mongodb mongosh skillbridge --quiet --eval 'print(db.voicerecordings.updateMany({}, { $set: { expiresAt: new Date(0) } }).modifiedCount)' | tr -d '[:space:]' | grep -qx 1
+          docker compose exec -T backend node backend/dist/scripts/purgeVoiceRecordings.js | tee purge.json
+          grep -q '"removed":1' purge.json
+          grep -q '"pending":0' purge.json
+          test "$(count)" = "0"
+          node e2e/docker-smoke.mjs --after-expiry
+          # Running it again finds nothing to do
+          docker compose exec -T backend node backend/dist/scripts/purgeVoiceRecordings.js | grep -q '"removed":0'
+
       - name: 9. Check the logs for startup failures
         if: always()
         run: |
@@ -117,6 +134,12 @@ jobs:
             exit 1
           fi
           echo "no startup failures in the logs"
+          # The backend runs the retention job itself, 30 seconds after each start and then daily
+          if ! grep -q "Voice retention:" compose.log; then
+            echo "::error::the scheduled voice-retention job did not run in the backend container"
+            exit 1
+          fi
+          echo "scheduled voice-retention job ran"
 
       - name: Keep the logs
         if: always()

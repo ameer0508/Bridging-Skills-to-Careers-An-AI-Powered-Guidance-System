@@ -111,6 +111,32 @@ If a step fails, `docker compose logs <service>` shows why.
 - Run one backend instance. The in-process job queue, the 15-minute job-search cache and the rate
   limiter are per process and are not shared between instances.
 
+## Interview recordings: storage and retention
+
+Recorded interview answers are stored only if a user switches recording on. They are kept in
+`voice-recordings/` next to the upload directory. In the Compose stack that is
+`/app/storage/voice-recordings`, inside the existing private `backend-storage` volume, so
+recordings survive container restarts and no separate volume is needed. Files are written with
+owner-only permissions and are served only to their owner through the API; the directory is not
+published by nginx. Set `VOICE_RECORDING_DIR` to keep them elsewhere.
+
+Retention needs no setup: the backend runs the retention job itself 30 seconds after every start
+and then daily (see `docs/INTERVIEWS.md`). It costs nothing and uses no external service.
+
+Optional, for deployments that also want it in cron (for example to be alerted by exit code):
+
+```
+# every day at 03:15; exit code 2 means a file could not be removed and is still scheduled
+15 3 * * *  cd /path/to/skillbridge && docker compose exec -T backend node backend/dist/scripts/purgeVoiceRecordings.js
+```
+
+To check it: the backend log has a line starting `Voice retention:` after each run, with the
+numbers removed and pending. A `pending` above zero that does not clear means a file cannot be
+deleted (permissions or a read-only disk) and needs an operator.
+
+Backups of the `backend-storage` volume contain recordings. Keep such backups no longer than the
+longest retention offered (30 days), or exclude `voice-recordings/` from them.
+
 ## Before a release
 
 ```bash

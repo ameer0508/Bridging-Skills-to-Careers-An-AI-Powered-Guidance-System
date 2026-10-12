@@ -4,6 +4,7 @@ import logger from '../config/logger.js';
 import { IQuestionEvaluation, IQuestionItem, IEvaluationDimensions } from '../models/InterviewSession.js';
 import { extractSkills } from '../utils/skillLexicon.js';
 import { escapeRegExp } from '../utils/skillMatching.js';
+import { InterviewRubric, RUBRICS } from './interview/InterviewRubrics.js';
 
 /**
  * Interview answer evaluation.
@@ -65,7 +66,9 @@ const METRIC =
 const clamp01 = (n: number): number => Math.max(0, Math.min(1, n));
 const pct = (n: number): number => Math.round(clamp01(n) * 100);
 
-const emptyEvaluation = (): IQuestionEvaluation => ({
+const rubricStamp = (rubric: InterviewRubric) => ({ rubricId: rubric.id, rubricVersion: rubric.version });
+
+const emptyEvaluation = (rubric: InterviewRubric = RUBRICS.general): IQuestionEvaluation => ({
   score: 0,
   starFormatted: false,
   strengths: [],
@@ -74,11 +77,13 @@ const emptyEvaluation = (): IQuestionEvaluation => ({
   feedback: 'No answer was given, so nothing could be evaluated.',
   source: 'heuristic',
   dimensions: { relevance: 0, completeness: 0, specificity: 0, structure: 0, technicalAccuracy: null },
+  ...rubricStamp(rubric),
   evaluatedAt: new Date()
 });
 
 /**
- * Deterministic rule-based rubric (0-100):
+ * Deterministic rule-based rubric (0-100). Weights come from the role rubric (D5); the general
+ * rubric, used when none is given, has the weights below:
  *   relevance 35%  - topical overlap with the question and its expected concepts (full at 3 hits)
  *   completeness 25% - enough substance to judge (full marks from about 120 words)
  *   specificity 20% - concrete technologies and meaningful metrics, not generalities
@@ -86,10 +91,10 @@ const emptyEvaluation = (): IQuestionEvaluation => ({
  * Caps: under 15 words -> at most 25; under 40 words -> at most 50; off-topic -> at most 15;
  * never above HEURISTIC_MAX_SCORE.
  */
-export function evaluateHeuristically(answer: string, question: IQuestionItem): IQuestionEvaluation {
+export function evaluateHeuristically(answer: string, question: IQuestionItem, rubric: InterviewRubric = RUBRICS.general): IQuestionEvaluation {
   const text = (answer || '').trim();
   const words = wordsOf(text);
-  if (words.length < 3) return emptyEvaluation();
+  if (words.length < 3) return emptyEvaluation(rubric);
 
   // --- Relevance ---
   const expected = question.expectedConcepts || [];
@@ -120,7 +125,8 @@ export function evaluateHeuristically(answer: string, question: IQuestionItem): 
   const structure = isBehavioural ? starParts.length / 4 : clamp01(reasoningCount / 4);
   const starFormatted = isBehavioural && starParts.length === 4;
 
-  let score = Math.round((relevance * 0.35 + completeness * 0.25 + specificity * 0.2 + structure * 0.2) * 100);
+  const w = rubric.heuristic;
+  let score = Math.round((relevance * w.relevance + completeness * w.completeness + specificity * w.specificity + structure * w.structure) * 100);
 
   const caps: string[] = [];
   if (words.length < 15) {
@@ -161,7 +167,7 @@ export function evaluateHeuristically(answer: string, question: IQuestionItem): 
   }
 
   const feedback =
-    `Scored ${score}/100 by the built-in rubric because AI evaluation was unavailable. ` +
+    `Scored ${score}/100 by the built-in rule-based scoring (${rubric.label.toLowerCase()} weights) because AI evaluation was unavailable. ` +
     (caps.length ? `The score is limited because ${caps.join(' and ')}. ` : '') +
     'This rubric checks relevance, depth, specificity and structure; it cannot verify technical correctness.';
 
@@ -180,6 +186,7 @@ export function evaluateHeuristically(answer: string, question: IQuestionItem): 
       structure: pct(structure),
       technicalAccuracy: null
     },
+    ...rubricStamp(rubric),
     evaluatedAt: new Date()
   };
 }
@@ -187,20 +194,22 @@ export function evaluateHeuristically(answer: string, question: IQuestionItem): 
 /** Converts a validated AI rubric result into the stored evaluation. */
 export function evaluationFromRubric(
   rubric: z.infer<typeof AiEvaluationSchema>,
-  answer: string
+  answer: string,
+  roleRubric: InterviewRubric = RUBRICS.general
 ): IQuestionEvaluation {
   const hasAccuracy = typeof rubric.technical_accuracy === 'number';
-  // Weights: relevance 25, completeness 20, specificity 20, structure 15, technical accuracy 20.
-  // When accuracy cannot be judged its weight is shared proportionally among the others.
-  const weights = { relevance: 25, completeness: 20, specificity: 20, structure: 15 };
+  // Weights come from the role rubric; the general one is relevance 25, completeness 20,
+  // specificity 20, structure 15, technical accuracy 20. When accuracy cannot be judged its
+  // weight is shared proportionally among the others.
+  const weights = roleRubric.ai;
   const base =
     (rubric.relevance / 5) * weights.relevance +
     (rubric.completeness / 5) * weights.completeness +
     (rubric.specificity / 5) * weights.specificity +
     (rubric.structure / 5) * weights.structure;
   let score = hasAccuracy
-    ? Math.round(base + ((rubric.technical_accuracy as number) / 5) * 20)
-    : Math.round((base / 80) * 100);
+    ? Math.round(base + ((rubric.technical_accuracy as number) / 5) * weights.technicalAccuracy)
+    : Math.round((base / (100 - weights.technicalAccuracy)) * 100);
 
   // Guard rails applied regardless of what the model returned
   const wordCount = wordsOf(answer).length;
@@ -223,6 +232,7 @@ export function evaluationFromRubric(
       structure: rubric.structure * 20,
       technicalAccuracy: hasAccuracy ? (rubric.technical_accuracy as number) * 20 : null
     },
+    ...rubricStamp(roleRubric),
     evaluatedAt: new Date()
   };
 }
@@ -234,9 +244,10 @@ export function evaluationFromRubric(
 export async function evaluateAnswer(
   answer: string,
   question: IQuestionItem,
-  roleTitle: string
+  roleTitle: string,
+  rubric: InterviewRubric = RUBRICS.general
 ): Promise<IQuestionEvaluation> {
-  if (wordsOf(answer || '').length < 3) return emptyEvaluation();
+  if (wordsOf(answer || '').length < 3) return emptyEvaluation(rubric);
 
   try {
     const response = await aiHttp.post(
@@ -253,7 +264,7 @@ export async function evaluateAnswer(
 
     if (response.data?.success) {
       const parsed = AiEvaluationSchema.safeParse(response.data.data);
-      if (parsed.success) return evaluationFromRubric(parsed.data, answer);
+      if (parsed.success) return evaluationFromRubric(parsed.data, answer, rubric);
       logger.warn('AI interview evaluation returned output that failed validation; using the rule-based rubric.');
     }
   } catch (error: unknown) {
@@ -261,7 +272,7 @@ export async function evaluateAnswer(
     logger.info(`AI interview evaluation unavailable (${message}); using the rule-based rubric.`);
   }
 
-  return evaluateHeuristically(answer, question);
+  return evaluateHeuristically(answer, question, rubric);
 }
 
 export type { IEvaluationDimensions };

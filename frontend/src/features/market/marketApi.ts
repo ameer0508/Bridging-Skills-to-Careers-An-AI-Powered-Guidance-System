@@ -242,3 +242,77 @@ export const PERIOD_LABEL: Record<SalaryPeriod, string> = {
   DAY: 'per day',
   HOUR: 'per hour',
 };
+
+/** C2 guarded forecast. Mirrors backend/src/services/market/MarketForecastService.ts. */
+export type ForecastReason =
+  | 'no_registered_source'
+  | 'no_records'
+  | 'history_too_short'
+  | 'too_few_postings_per_month'
+  | 'too_many_empty_months'
+  | 'latest_month_empty'
+  | 'stale_data'
+  | 'mixed_countries'
+  | 'duplicate_heavy'
+  | 'too_few_backtest_origins';
+
+export type ForecastMethodName = 'naive_last_value' | 'linear_trend_12m';
+
+export interface MarketForecast {
+  dataset: MarketDataset;
+  isSynthetic: boolean;
+  status: 'forecast_unavailable' | 'insufficient_data' | 'available';
+  reasons: ForecastReason[];
+  query: { to: string; horizon: number; skill?: string; country?: string };
+  history: Array<{ month: string; postings: number }>;
+  checks: {
+    historyMonths: number;
+    medianMonthlyPostings: number | null;
+    emptyMonths: number;
+    countries: string[];
+    mergedDuplicateShare: number | null;
+    dataAgeDays: number | null;
+    backtestOrigins: number;
+  };
+  forecast: null | {
+    method: ForecastMethodName;
+    points: Array<{ month: string; point: number; low80: number; high80: number }>;
+    backtest: Record<ForecastMethodName, { mae: Array<number | null>; origins: number }>;
+  };
+  minimums: {
+    historyMonths: number;
+    medianMonthlyPostings: number;
+    maxEmptyMonths: number;
+    backtestOrigins: number;
+    maxDataAgeDays: number;
+    maxMergedDuplicateShare: number;
+  };
+  method: string[];
+  caveats: string[];
+}
+
+export async function fetchMarketForecast(filters: MarketHistoryFilters): Promise<MarketForecast> {
+  const params: Record<string, string> = { dataset: filters.dataset };
+  if (filters.skill?.trim()) params.skill = filters.skill.trim();
+  if (filters.country?.trim()) params.country = filters.country.trim();
+  const res = await apiClient.get('/market/forecast', { params });
+  return res.data.data as MarketForecast;
+}
+
+export const METHOD_LABEL: Record<ForecastMethodName, string> = {
+  naive_last_value: 'Naive baseline (same as last month)',
+  linear_trend_12m: 'Linear trend over the last 12 months',
+};
+
+export const FORECAST_REASON_TEXT: Record<ForecastReason, (f: MarketForecast) => string> = {
+  no_registered_source: () => 'No licensed market data source is registered, so there is no real history to forecast from.',
+  no_records: () => 'No dated postings match these filters.',
+  history_too_short: f => `${f.checks.historyMonths} month${f.checks.historyMonths === 1 ? '' : 's'} of history; at least ${f.minimums.historyMonths} are needed.`,
+  too_few_postings_per_month: f => `A median of ${f.checks.medianMonthlyPostings ?? 0} postings a month; at least ${f.minimums.medianMonthlyPostings} are needed.`,
+  too_many_empty_months: f => `${f.checks.emptyMonths} months have no postings; at most ${f.minimums.maxEmptyMonths} are allowed.`,
+  latest_month_empty: () => 'The latest complete month has no postings, which more likely means collection stopped than that demand fell.',
+  stale_data: f => (f.checks.dataAgeDays === null ? 'The retrieval date is unknown.' : `The latest data was retrieved ${f.checks.dataAgeDays} days ago; at most ${f.minimums.maxDataAgeDays} are allowed.`),
+  mixed_countries: f => `Postings come from ${f.checks.countries.join(', ')}. Choose one country: different markets are not forecast together.`,
+  duplicate_heavy: f => `${Math.round((f.checks.mergedDuplicateShare ?? 0) * 100)}% of postings were merged cross-posts, so the counts are not reliable enough.`,
+  too_few_backtest_origins: f => `Only ${f.checks.backtestOrigins} past months are available to test the method; ${f.minimums.backtestOrigins} are needed to estimate its error.`,
+};

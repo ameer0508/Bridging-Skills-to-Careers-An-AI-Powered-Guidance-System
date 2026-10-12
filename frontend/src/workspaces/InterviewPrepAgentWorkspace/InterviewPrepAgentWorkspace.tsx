@@ -1,6 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { RubricPicker } from '../../features/interview/components/RubricControls';
+import { InterviewProgressPanel } from '../../features/interview/components/InterviewProgressPanel';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import apiClient from '../../lib/axios';
 import { WorkspaceHero, AIStatusBar } from '../../components/experience/workspace';
 import { useToast } from '../../components/composite/Toast';
@@ -18,8 +20,10 @@ export interface QuestionItem {
   questionId: string;
   question: string;
   category: 'technical' | 'behavioral' | 'project' | 'resume' | 'career' | 'general';
-  /** Who wrote the question: an AI provider or the built-in question bank. */
-  source?: 'ai' | 'question_bank';
+  /** Who wrote the question: an AI provider, the built-in question bank, or a follow-up to the previous answer (D3). */
+  source?: 'ai' | 'question_bank' | 'follow_up';
+  /** Set on follow-up questions: the question they follow up. */
+  followUpOf?: string;
   /** The fact on record the question is based on. */
   groundedIn?: string;
   difficulty: 'easy' | 'medium' | 'hard';
@@ -53,6 +57,10 @@ export interface InterviewSession {
   dimensionScores?: EvaluationDimensions;
   answeredCount?: number;
   questionSource?: 'ai' | 'question_bank';
+  /** Role rubric the answers are weighted with (D5); absent on older sessions, which used General. */
+  rubricId?: string;
+  /** D3: follow-ups asked and answered, kept out of the overall score. */
+  followUpSummary?: { asked: number; answered: number; recovered: number; averageScore: number | null } | null;
   /** 'ai', 'heuristic' or 'mixed'. */
   evaluationSource?: string;
   /** The job posting this session prepared for, when it was started from one. */
@@ -109,6 +117,12 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
   const [candidateAnswer, setCandidateAnswer] = useState<string>('');
   const [isEvaluating, setIsEvaluating] = useState<boolean>(false);
   const [isStarting, setIsStarting] = useState<boolean>(false);
+  // '' keeps the rubric matched to the role
+  const [rubricChoice, setRubricChoice] = useState<string>('');
+  // D3 follow-ups are opt-in
+  const [adaptiveFollowUps, setAdaptiveFollowUps] = useState<boolean>(false);
+  // D2: typed, dictated or both, for the answer being written
+  const [inputMethod, setInputMethod] = useState<'typed' | 'dictated' | 'mixed'>('typed');
 
   // Query 1: Career Readiness Dimensions
   const {
@@ -226,6 +240,8 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
         targetCareerTitle: requestedRoleTitle,
         mode: selectedMode,
         questionCount: 5,
+        rubricId: rubricChoice || undefined,
+        adaptiveFollowUps,
         // Only a real posting or an employer the user typed makes this a job-specific session
         opportunityContext:
           targetCompany.trim() || opportunityContext?.description
@@ -277,6 +293,7 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
       const response = await apiClient.post(`/interviews/${activeSession._id}/respond`, {
         questionIndex: activeSession.currentQuestionIndex,
         candidateResponse: candidateAnswer,
+        inputMethod,
       }, { timeout: AI_BACKED_REQUEST_TIMEOUT_MS });
 
       const updated = response.data.data;
@@ -408,6 +425,25 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
           onStartSession={handleStartSession}
           isStarting={isStarting}
           onChangeRole={() => navigate('/careers')}
+          settingsSlot={
+            <>
+              <RubricPicker roleTitle={targetRoleTitle} value={rubricChoice} onChange={setRubricChoice} />
+              <label className="flex items-start gap-2 rounded-2xl border border-white/10 bg-slate-900/40 p-4 text-xs text-slate-300">
+                <input type="checkbox" className="mt-0.5" checked={adaptiveFollowUps} onChange={(e) => setAdaptiveFollowUps(e.target.checked)} />
+                <span>
+                  <span className="font-semibold text-slate-100">Ask follow-up questions</span> when an answer misses an expected point or lacks detail
+                  (at most one per question, three per round). Follow-ups are reported separately and do not change your overall score.
+                </span>
+              </label>
+              <Link
+                to="/interview-agent/assessments"
+                className="block rounded-2xl border border-white/10 bg-slate-900/40 p-4 text-xs text-slate-300 hover:border-indigo-400/40"
+              >
+                <span className="font-semibold text-slate-100">Technical assessment</span>: read code and answer trace, bug, complexity and SQL
+                tasks. Nothing you type is run as code.
+              </Link>
+            </>
+          }
         />
       )}
 
@@ -422,6 +458,7 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
           onEvaluate={handleEvaluateAnswer}
           onNextQuestion={handleNextQuestion}
           onCompleteSession={handleCompleteSession}
+          onInputMethodChange={setInputMethod}
         />
       )}
 
@@ -449,11 +486,14 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
 
       {/* HISTORICAL JOURNEY DRAWER */}
       {studioMode === 'HISTORY' && (
-        <InterviewJourneyHistory
-          history={historyData || []}
-          onSelectSession={handleSelectHistorySession}
-          onClose={() => setStudioMode('LOBBY')}
-        />
+        <>
+          <InterviewJourneyHistory
+            history={historyData || []}
+            onSelectSession={handleSelectHistorySession}
+            onClose={() => setStudioMode('LOBBY')}
+          />
+          <InterviewProgressPanel />
+        </>
       )}
     </div>
   );
