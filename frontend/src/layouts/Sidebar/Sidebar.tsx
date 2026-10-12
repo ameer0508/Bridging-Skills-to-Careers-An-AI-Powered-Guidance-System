@@ -23,6 +23,7 @@ import {
   Wallet,
   ClipboardList,
   GraduationCap,
+  Languages,
 } from 'lucide-react';
 import { SidebarItem } from './SidebarItem';
 import { useAuthStore } from '../../store/authStore';
@@ -144,6 +145,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           to: '/market/salaries',
           label: 'Salary Insights',
           icon: <Wallet className="w-4 h-4" />,
+        },
+        {
+          to: '/resume-language',
+          label: 'Resume Language Check',
+          icon: <Languages className="w-4 h-4" />,
         },
         {
           to: '/career-domains',

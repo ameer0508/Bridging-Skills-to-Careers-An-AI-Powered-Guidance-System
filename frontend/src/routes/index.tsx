@@ -44,6 +44,7 @@ const ApplicationHistoryPage = lazy(() => import('../features/applications/compo
 const TechnicalAssessmentPage = lazy(() => import('../features/interview/components/TechnicalAssessmentPage'));
 const ExamsHomePage = lazy(() => import('../features/exams/components/ExamsHomePage'));
 const ExamPage = lazy(() => import('../features/exams/components/ExamPage'));
+const ResumeLanguagePage = lazy(() => import('../features/languages/components/ResumeLanguagePage'));
 const CareerDomainsPreviewPage = lazy(() => import('../features/careerDomains/components/CareerDomainsPreviewPage'));
 const ApplicationOutcomesPage = lazy(() => import('../features/applications/components/ApplicationOutcomesPage'));
 const CareerIdentityWorkspace = lazy(() => import('../workspaces/CareerIdentityWorkspace/CareerIdentityWorkspace'));
@@ -394,6 +395,14 @@ export const router = createBrowserRouter([
             element: (
               <WorkspaceSuspense>
                 <SalaryInsightsPage />
+              </WorkspaceSuspense>
+            ),
+          },
+          {
+            path: '/resume-language',
+            element: (
+              <WorkspaceSuspense>
+                <ResumeLanguagePage />
               </WorkspaceSuspense>
             ),
           },

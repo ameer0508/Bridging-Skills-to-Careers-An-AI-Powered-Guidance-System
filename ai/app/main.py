@@ -19,6 +19,7 @@ from app.routers import (
     external_gateway, knowledge_graph, events,
     feature_store, ai_operations, interview_evaluation, github, linkedin, portfolio, coding, opensource, brand, professional_graph, agent, job_agent_router, learning_agent_router, resume_agent_router, interview_agent_router, networking_agent_router, opportunity_agent_router, orchestrator_router, memory_router
 )
+from app.routers import multilingual
 from app.career_os import dashboard_router
 
 SERVICE_START_TIME = time.time()
@@ -96,6 +97,7 @@ app.include_router(opportunity_agent_router.router, dependencies=internal_only)
 app.include_router(orchestrator_router.router, dependencies=internal_only)
 app.include_router(memory_router.router, dependencies=internal_only)
 app.include_router(dashboard_router.router, dependencies=internal_only)
+app.include_router(multilingual.router, dependencies=internal_only)
 
 def get_realtime_ai_telemetry() -> dict:
     current_time = datetime.now(timezone.utc).isoformat()
