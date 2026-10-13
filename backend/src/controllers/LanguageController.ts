@@ -6,6 +6,7 @@ import env from '../config/env.js';
 import MultilingualService, { SUPPORTED_RESUME_LANGUAGES } from '../services/languages/MultilingualService.js';
 import { UI_LANGUAGES } from '../models/LanguageSettings.js';
 import { AppError } from '../middlewares/errorHandler.js';
+import { decodeUploadName } from '../utils/uploadFileName.js';
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: env.UPLOAD_MAX_SIZE, files: 1 } }).single('file');
 const ALLOWED = new Set(['.pdf', '.docx', '.txt']);
@@ -14,13 +15,8 @@ const ALLOWED = new Set(['.pdf', '.docx', '.txt']);
 export const languageFileUpload = (req: Request, res: Response, next: NextFunction): void => {
   upload(req, res, (err: unknown) => {
     if (!err) {
-      // Multer reads multipart file names as Latin-1; names in Devanagari or with accents arrive
-      // as mojibake. Re-read the bytes as UTF-8 when they are valid UTF-8.
-      if (req.file) {
-        const bytes = Buffer.from(req.file.originalname, 'latin1');
-        const utf8 = bytes.toString('utf8');
-        if (!utf8.includes('�') && Buffer.from(utf8, 'utf8').equals(bytes)) req.file.originalname = utf8;
-      }
+      // Multer reads multipart file names as Latin-1 (see utils/uploadFileName.ts)
+      if (req.file) req.file.originalname = decodeUploadName(req.file.originalname);
       return next();
     }
     if ((err as { code?: string }).code === 'LIMIT_FILE_SIZE') return next(new AppError(`File is larger than ${env.UPLOAD_MAX_SIZE / (1024 * 1024)} MB.`, 400, 'FILE_TOO_LARGE'));

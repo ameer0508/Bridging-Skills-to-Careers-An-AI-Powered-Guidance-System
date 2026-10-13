@@ -104,6 +104,19 @@ export async function runResumeLifecycleTests() {
     assert.equal((await h.api('GET', '/resumes/download')).status, 401);
     console.log('  ✓ Download: returns the owner\'s file as an attachment; other users get 404, anonymous 401');
 
+    // --- File names in other scripts, and client-supplied paths --------------------------------
+    const carol = await h.registerUser('carol-names');
+    const C = (method: string, p: string, form?: FormData) => h.api(method, p, { token: carol.token, form });
+    assert.equal((await C('POST', '/resumes/upload', resumeForm(FRONTEND_RESUME, 'रिज़्यूमे.pdf'))).status, 201);
+    assert.equal((await C('GET', '/resumes/me')).body.data.resume.originalFileName, 'रिज़्यूमे.pdf', 'a Devanagari name is stored as typed, not as Latin-1 mojibake');
+    const named = await C('GET', '/resumes/download');
+    assert.equal(named.headers.get('content-disposition'), `attachment; filename*=UTF-8''${encodeURIComponent('रिज़्यूमे.pdf')}`);
+    assert.equal((await C('PUT', '/resumes/replace', resumeForm(BACKEND_RESUME, '../../uploads/Currículo José.pdf'))).status, 200);
+    assert.equal((await C('GET', '/resumes/me')).body.data.resume.originalFileName, 'Currículo José.pdf', 'accents kept; a client-supplied path is reduced to the base name');
+    assert.equal((await C('PUT', '/resumes/replace', resumeForm(BACKEND_RESUME, 'C:\\Users\\x\\plain-ascii.pdf'))).status, 200);
+    assert.equal((await C('GET', '/resumes/me')).body.data.resume.originalFileName, 'plain-ascii.pdf', 'ASCII names are unchanged apart from the path');
+    console.log('  ✓ File names: Devanagari and accented names stored and downloaded correctly; paths reduced to the base name; ASCII unchanged');
+
     // --- Replace --------------------------------------------------------------------
     const badReplace = new FormData();
     badReplace.append('resume', new Blob(['MZ not a pdf'], { type: 'application/pdf' }), 'resume.pdf');

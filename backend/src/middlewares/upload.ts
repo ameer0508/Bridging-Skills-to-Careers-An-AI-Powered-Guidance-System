@@ -2,6 +2,7 @@ import multer from 'multer';
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from './errorHandler.js';
 import env from '../config/env.js';
+import { displayFileName } from '../utils/uploadFileName.js';
 
 // Pre-configured Multer middleware with memory storage
 const uploadSingle = multer({
@@ -45,6 +46,9 @@ export const validateResumeUpload = (req: Request, _res: Response, next: NextFun
       error.code = 'EMPTY_FILE';
       return next(error);
     }
+
+    // Names in Devanagari or with accents arrive Latin-1-decoded; keep the decoded base name only
+    file.originalname = displayFileName(file.originalname);
 
     // Verify file extension
     const originalName = file.originalname;
