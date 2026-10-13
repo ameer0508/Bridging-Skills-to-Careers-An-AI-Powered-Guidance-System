@@ -26,6 +26,7 @@ import applicationsRouter from './routes/applications.js';
 import examsRouter from './routes/exams.js';
 import careerDomainsRouter from './routes/careerDomains.js';
 import languagesRouter from './routes/languages.js';
+import employerRouter from './routes/employer.js';
 import aiObservabilityRouter from './routes/aiObservability.js';
 import env from './config/env.js';
 import { diagnosticsAreOpen, requireDiagnosticsAccess } from './middlewares/diagnostics.js';
@@ -518,6 +519,7 @@ app.use('/api/v1/applications', applicationsRouter);
 app.use('/api/v1/exams', examsRouter);
 app.use('/api/v1/career-domains', careerDomainsRouter);
 app.use('/api/v1/languages', languagesRouter);
+app.use('/api/v1/employer', employerRouter);
 app.use('/api/v1/ai-observability', aiObservabilityRouter);
 
 // Error handling middleware

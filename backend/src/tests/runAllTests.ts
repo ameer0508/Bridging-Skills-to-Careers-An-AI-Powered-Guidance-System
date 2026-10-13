@@ -34,6 +34,7 @@ import { runReadinessBasisTests } from './readiness_basis.test.js';
 import { runPortfolioDedupTests } from './portfolio_dedup.test.js';
 import { runCareerMarketTests } from './career_market.test.js';
 import { runOnJobLiveListingsTests } from './onjob_live_listings.test.js';
+import { runEmployerPostingTests } from './employer_postings.test.js';
 import { runVoiceRetentionTests } from './voice_retention.test.js';
 import { runInterviewIntegrationTests } from './interview_integration.test.js';
 import { runJobFreshnessTests } from './job_freshness.test.js';
@@ -121,6 +122,7 @@ async function runAll() {
     await runPortfolioDedupTests();
     await runCareerMarketTests();
     await runOnJobLiveListingsTests();
+    await runEmployerPostingTests();
     await runApplicationHistoryTests();
     await runMarketForecastTests();
     await runMarketSignalTests();
