@@ -36,6 +36,8 @@ export interface IEvidence {
   label?: string;
   /** Set when the same project is already credited from another record, so this one earns nothing. */
   duplicateOf?: 'resume_project' | 'portfolio_entry';
+  /** How the duplicate was recognised: the same title, or a link to the same repository or page. */
+  duplicateReason?: 'same_title' | 'same_link';
 }
 
 export type ProficiencyLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
@@ -65,7 +67,8 @@ const EvidenceSchema = new Schema<IEvidence>(
     verification: { type: String, enum: ['stated', 'self_attested', 'assessed'] },
     recordedAt: { type: Date },
     label: { type: String },
-    duplicateOf: { type: String, enum: ['resume_project', 'portfolio_entry'] }
+    duplicateOf: { type: String, enum: ['resume_project', 'portfolio_entry'] },
+    duplicateReason: { type: String, enum: ['same_title', 'same_link'] }
   },
   { _id: false }
 );

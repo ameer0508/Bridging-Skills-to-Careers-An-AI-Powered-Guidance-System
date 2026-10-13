@@ -8,7 +8,9 @@ import EvidenceCalculator, { EVIDENCE_POINTS } from './EvidenceCalculator.js';
 import RecalculationService from './RecalculationService.js';
 import { findOrCreateCanonicalSkill, recogniseSkill } from '../utils/canonicalSkill.js';
 import { withUserLock } from '../utils/userLock.js';
-import { creditedProjectKeys, linkKey, projectKey } from '../utils/projectIdentity.js';
+import { creditedProjectKeys, linkIdentitiesIn, linkIdentity, projectKey, projectTitleOf } from '../utils/projectIdentity.js';
+import { Resume } from '../models/Resume.js';
+import { ParsedResume } from '../models/ParsedResume.js';
 import { AppError } from '../middlewares/errorHandler.js';
 import LearningActivityService from './LearningActivityService.js';
 import { EventType } from '../models/ProgressEvent.js';
@@ -180,6 +182,8 @@ class PortfolioService {
           points: evidence?.points ?? 0,
           // Set when the same project is already credited elsewhere, so this entry adds no points for the skill
           countedElsewhere: evidence?.duplicateOf ?? null,
+          // Why it was recognised as the same project: the same title, or a link to the same repository or page
+          countedElsewhereBecause: evidence?.duplicateReason ?? null,
           // Verified separately, by a skill check; never because of this entry
           verifiedBySkillCheck: Boolean(userSkill?.evidences.some(e => e.sourceType === 'assessment'))
         };
@@ -218,6 +222,10 @@ class PortfolioService {
       basePoints.set(doc._id.toString(), base);
     }
 
+    // Links written in the active resume's projects, by project title: a portfolio entry that links
+    // to the same repository or page is that resume project, whatever it is called
+    const resumeProjectLinks = await this.resumeProjectLinks(uid);
+
     const now = new Date();
     const creditedLinks = new Map<string, Set<string>>();
     for (const entry of entries) {
@@ -235,31 +243,35 @@ class PortfolioService {
         // The same project already credited for this skill, from the resume or an earlier entry,
         // is not credited again. The entry is kept and dated; it simply earns nothing here.
         const titleKey = projectKey(entry.title);
-        const urlKey = linkKey(entry.evidenceUrl);
+        const urlKey = linkIdentity(entry.evidenceUrl);
         const docLinks = creditedLinks.get(doc._id.toString()) ?? new Set<string>();
         creditedLinks.set(doc._id.toString(), docLinks);
-        const resumeKeys = creditedProjectKeys(doc.evidences.filter(e => e.sourceType === 'resume_projects'));
+        const resumeEvidence = doc.evidences.filter(e => e.sourceType === 'resume_projects');
+        const resumeKeys = creditedProjectKeys(resumeEvidence);
+        const resumeLinks = new Set(resumeEvidence.flatMap(e => resumeProjectLinks.get(projectKey(projectTitleOf(e)) ?? '') ?? []));
         const portfolioKeys = creditedProjectKeys(doc.evidences.filter(e => e.sourceType === PORTFOLIO_SOURCE));
-        const duplicateOf: IEvidence['duplicateOf'] = !entry.evidenceUrl
-          ? undefined
-          : titleKey && resumeKeys.has(titleKey)
-            ? 'resume_project'
-            : (titleKey && portfolioKeys.has(titleKey)) || (urlKey && docLinks.has(urlKey))
-              ? 'portfolio_entry'
-              : undefined;
+        let duplicateOf: IEvidence['duplicateOf'];
+        let duplicateReason: IEvidence['duplicateReason'];
+        if (entry.evidenceUrl) {
+          if (titleKey && resumeKeys.has(titleKey)) [duplicateOf, duplicateReason] = ['resume_project', 'same_title'];
+          else if (urlKey && resumeLinks.has(urlKey)) [duplicateOf, duplicateReason] = ['resume_project', 'same_link'];
+          else if (titleKey && portfolioKeys.has(titleKey)) [duplicateOf, duplicateReason] = ['portfolio_entry', 'same_title'];
+          else if (urlKey && docLinks.has(urlKey)) [duplicateOf, duplicateReason] = ['portfolio_entry', 'same_link'];
+        }
+        const why = duplicateReason === 'same_link' ? ' (it links to the same repository or page)' : '';
         const evidence: IEvidence = {
           sourceType: PORTFOLIO_SOURCE,
           sourceId: entry._id.toString(),
           description:
             `Portfolio project: ${entry.title}${entry.evidenceUrl ? '' : ' (no link given)'}. Your own record, not checked` +
-            (duplicateOf === 'resume_project' ? '. The same project is on your resume, so it is counted once' : duplicateOf === 'portfolio_entry' ? '. The same project is in another portfolio entry, so it is counted once' : ''),
+            (duplicateOf === 'resume_project' ? `. The same project is on your resume${why}, so it is counted once` : duplicateOf === 'portfolio_entry' ? `. The same project is in another portfolio entry${why}, so it is counted once` : ''),
           weight: 0.6,
           points: entry.evidenceUrl && !duplicateOf ? stepped(EVIDENCE_POINTS.projects, projectsSoFar) : 0,
           observedAt: entry.completedOn,
           verification: 'self_attested',
           recordedAt: now,
           label: entry.title,
-          ...(duplicateOf ? { duplicateOf } : {})
+          ...(duplicateOf ? { duplicateOf, duplicateReason } : {})
         };
         // A duplicate stands for a project that is credited, so its link identifies that project too
         if (urlKey && ((evidence.points || 0) > 0 || duplicateOf)) docLinks.add(urlKey);
@@ -282,6 +294,21 @@ class PortfolioService {
       await doc.save();
     }
     return changed;
+  }
+
+  /** Title key -> identities of the links written in that project of the active resume. */
+  private async resumeProjectLinks(uid: mongoose.Types.ObjectId): Promise<Map<string, string[]>> {
+    const active = await Resume.findOne({ userId: uid, isActive: true }).select('_id').lean();
+    const parsed = active ? await ParsedResume.findOne({ resumeId: active._id }).select('projects').lean() : null;
+    const links = new Map<string, string[]>();
+    for (const project of parsed?.projects ?? []) {
+      const key = projectKey(project.name?.value);
+      if (!key) continue;
+      const text = [project.name?.value, project.description?.value, ...(project.contributions ?? []).map(c => c?.value), ...(project.technologies ?? []).map(t => t?.value)].join(' ');
+      const found = linkIdentitiesIn(text);
+      if (found.length) links.set(key, [...(links.get(key) ?? []), ...found]);
+    }
+    return links;
   }
 
   private async syncAndRecalculate(userId: string, ref: string) {

@@ -360,14 +360,20 @@ check who made the work or judge its quality.
 - A project on a resume and a portfolio entry with a link are treated alike because both are
   unchecked statements by the user.
 - **One project, one credit.** For each skill, a portfolio entry earns nothing when the same
-  project is already credited: on the resume (equal title), or in an earlier portfolio entry
-  (equal title or equal link). Titles are compared after lower-casing and removing everything
-  that is not a letter or digit, and only when at least four characters remain; links are
-  compared by host and path. The entry is kept, dated and shown as "counted once"; no record is
-  deleted or changed. Where the resume project did not credit a skill that the entry names, the
-  entry still counts for that skill.
-- The match is conservative on purpose. The same work described with different titles and
-  different links is not recognised and is still counted twice. A link does not show that a
+  project is already credited: on the resume (equal title, or the entry links to a repository or
+  page written in that resume project), or in an earlier portfolio entry (equal title or a link
+  to the same repository or page). Titles are compared after lower-casing and removing
+  everything that is not a letter or digit, and only when at least four characters remain.
+  Links to GitHub, GitLab or Bitbucket are compared by repository: the repository page, branch
+  and file views, a ".git" clone URL and the project's GitHub Pages site are one project, while a
+  link into a sub-folder (a monorepo) is a different project. Other links are compared by host
+  and path. The entry is kept, dated and shown as "counted once" with the reason (same title or
+  same repository link); no record is deleted or changed. Where the resume project did not
+  credit a skill that the entry names, the entry still counts for that skill.
+- The match is conservative on purpose: titles are never compared loosely and no model decides.
+  The same work described with different titles and unrelated links is not recognised and is
+  still counted twice (asserted in suite `portfolio_dedup`). A user corrects a mistaken match
+  by editing the entry's title or link, which is re-evaluated at once. A link does not show that a
   project was finished or who made it; entries stay self-reported whatever they link to.
 - The what-if engine applies the same rule: a hypothetical project with the title of one that is
   already credited for a skill adds nothing for it.

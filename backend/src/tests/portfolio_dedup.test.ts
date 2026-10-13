@@ -7,7 +7,7 @@ import CareerService from '../services/CareerService.js';
 import PortfolioService from '../services/PortfolioService.js';
 import { PortfolioEntry } from '../models/PortfolioEntry.js';
 import { EVIDENCE_POINTS } from '../services/EvidenceCalculator.js';
-import { creditedProjectKeys, linkKey, projectKey } from '../utils/projectIdentity.js';
+import { creditedProjectKeys, linkIdentitiesIn, linkIdentity, linkKey, projectKey, repoKey } from '../utils/projectIdentity.js';
 import { ensureFakeAiService } from './helpers/fakeAiService.js';
 import { startHttpHarness, resumeForm, type HttpHarness } from './helpers/httpHarness.js';
 
@@ -71,7 +71,20 @@ export async function runPortfolioDedupTests() {
     ['legacytool', 'shopapi'],
     'only projects that earn points count, including records that carry the title only in their description'
   );
-  console.log('  ✓ Matching: equal titles after normalisation, or equal links; short titles and different wording are never merged');
+  // Repository identity: every way of linking one repository is one project; folders of a monorepo are not
+  for (const url of ['https://github.com/Sam/Shop-API', 'http://www.github.com/sam/shop-api/', 'https://github.com/sam/shop-api.git', 'https://github.com/sam/shop-api/tree/main', 'https://github.com/sam/shop-api/blob/main/README.md', 'https://sam.github.io/shop-api/']) {
+    assert.equal(repoKey(url), 'github.com/sam/shop-api', url);
+  }
+  assert.equal(repoKey('https://github.com/sam/mono/tree/main/app-a'), 'github.com/sam/mono/app-a');
+  assert.notEqual(repoKey('https://github.com/sam/mono/tree/main/app-a'), repoKey('https://github.com/sam/mono/tree/main/app-b'), 'two folders of a monorepo are two projects');
+  assert.notEqual(repoKey('https://github.com/sam/mono/tree/main/app-a'), repoKey('https://github.com/sam/mono'));
+  assert.notEqual(repoKey('https://github.com/sam/shop-api'), repoKey('https://github.com/alex/shop-api'), 'the same name under another owner is another project');
+  assert.equal(repoKey('https://sam.github.io'), 'github.com/sam/sam.github.io');
+  assert.equal(repoKey('https://github.com/sam'), null, 'a profile is not a project');
+  assert.equal(repoKey('https://example.com/sam/shop-api'), null);
+  assert.equal(linkIdentity('https://example.com/sam/shop-api'), 'example.com/sam/shop-api', 'other sites fall back to host and path');
+  assert.deepEqual(linkIdentitiesIn('Code at github.com/sam/shop-api, live at https://shop.example.com/app.').sort(), ['github.com/sam/shop-api', 'shop.example.com/app']);
+  console.log('  ✓ Matching: equal titles after normalisation, or links to the same repository or page; short titles, different wording, other owners and monorepo folders are never merged');
 
   await ensureFakeAiService();
   await CareerService.seedInitialTaxonomy();
@@ -106,7 +119,7 @@ export async function runPortfolioDedupTests() {
     // === A different project counts =================================================================
     const predictedOther = await whatIf('Deploy tool', ['Node.js']);
     const other = await add({ title: 'Deploy tool', skills: ['Node.js'], evidenceUrl: 'https://example.com/sam/deploy-tool' });
-    assert.deepEqual(skillOf(other.body.data.entry, 'Node.js'), { skill: 'Node.js', points: SECOND, countedElsewhere: null, verifiedBySkillCheck: false });
+    assert.deepEqual(skillOf(other.body.data.entry, 'Node.js'), { skill: 'Node.js', points: SECOND, countedElsewhere: null, countedElsewhereBecause: null, verifiedBySkillCheck: false });
     assert.equal(await score('Node.js'), LISTED + FIRST + SECOND);
     assert.equal(predictedOther['Node.js'], LISTED + FIRST + SECOND, 'what-if predicted exactly this');
 
@@ -158,6 +171,33 @@ export async function runPortfolioDedupTests() {
     assert.equal(await PortfolioEntry.countDocuments({ userId: alice.userId }), 4);
     assert.equal(await PortfolioService.syncEvidence(alice.userId), false);
     console.log('  ✓ Lifecycle: idempotent; replacing the resume moves the credit to whichever record is not a repeat; deleting the resume keeps every entry and credits each project once');
+
+    // === Adversarial: the same project renamed, linked differently ===============================
+    const bob = await h.registerUser('bob-dedup');
+    const bobResume = ['Bob Builder', 'Email: bob@example.com', '', 'Projects:', 'Inventory Service', 'Stock API in Node.js; code at github.com/bob/inventory-svc', '', 'Skills:', 'Node.js, Git'].join('\n');
+    assert.ok([200, 201].includes((await h.api('POST', '/resumes/upload', { token: bob.token, form: resumeForm(bobResume) })).status));
+    await waitForResume(h, bob.token);
+    const bobAdd = (json: Record<string, unknown>) => h.api('POST', '/portfolio', { token: bob.token, json: { completedOn: today, ...json } });
+    const bobScore = async () => ((await h.api('GET', '/skills/freshness', { token: bob.token })).body.data.skills as any[]).find(s => s.name === 'Node.js')?.evidenceScore;
+    const baseline = await bobScore();
+    // Renamed, and linked through its GitHub Pages site: still the resume's project
+    const renamed = await bobAdd({ title: 'Warehouse stock API', skills: ['Node.js'], evidenceUrl: 'https://bob.github.io/inventory-svc/' });
+    assert.deepEqual([skillOf(renamed.body.data.entry, 'Node.js').points, skillOf(renamed.body.data.entry, 'Node.js').countedElsewhere, skillOf(renamed.body.data.entry, 'Node.js').countedElsewhereBecause], [0, 'resume_project', 'same_link'], 'a renamed copy that links to the same repository earns nothing');
+    assert.equal(await bobScore(), baseline);
+    // A folder of that repository is a different project (monorepos hold several): credited
+    const folder = await bobAdd({ title: 'Stock dashboard', skills: ['Node.js'], evidenceUrl: 'https://github.com/bob/inventory-svc/tree/main/dashboard' });
+    assert.equal(skillOf(folder.body.data.entry, 'Node.js').countedElsewhere, null, 'not merged on a shared repository alone');
+    // The same repository written another way, under another title: one credit
+    const chat = await bobAdd({ title: 'Chat app', skills: ['Node.js'], evidenceUrl: 'https://github.com/bob/chat-app' });
+    const chatAgain = await bobAdd({ title: 'Realtime messenger', skills: ['Node.js'], evidenceUrl: 'https://www.github.com/Bob/Chat-App.git' });
+    assert.ok(skillOf(chat.body.data.entry, 'Node.js').points > 0);
+    assert.deepEqual([skillOf(chatAgain.body.data.entry, 'Node.js').points, skillOf(chatAgain.body.data.entry, 'Node.js').countedElsewhere, skillOf(chatAgain.body.data.entry, 'Node.js').countedElsewhereBecause], [0, 'portfolio_entry', 'same_link']);
+    // Different title and unrelated link: nothing says it is the same work, so it counts (known limit)
+    const unrelated = await bobAdd({ title: 'Payroll exporter', skills: ['Node.js'], evidenceUrl: 'https://gitlab.com/bob/payroll-exporter' });
+    assert.equal(skillOf(unrelated.body.data.entry, 'Node.js').countedElsewhere, null);
+    assert.equal((await h.api('GET', '/portfolio', { token: bob.token })).body.data.entries.length, 5, 'every record is kept');
+    assert.equal(await PortfolioService.syncEvidence(bob.userId), false, 'idempotent');
+    console.log('  ✓ Adversarial: a renamed copy linking the same repository (via its Pages site) and a re-cased .git link are counted once with the reason shown; a monorepo folder and unrelated work are credited; nothing deleted');
 
     console.log('✅ Project De-duplication Tests Passed\n');
   } finally {

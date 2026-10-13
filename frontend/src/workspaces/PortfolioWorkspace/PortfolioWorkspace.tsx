@@ -10,6 +10,7 @@ interface EntrySkill {
   skill: string;
   points: number;
   countedElsewhere: 'resume_project' | 'portfolio_entry' | null;
+  countedElsewhereBecause?: 'same_title' | 'same_link' | null;
   verifiedBySkillCheck: boolean;
 }
 interface Entry {
@@ -264,7 +265,7 @@ export const PortfolioWorkspace: React.FC = () => {
                   {entry.skills.map((s) => (
                     <li key={s.skill} className="px-2 py-0.5 rounded text-[11px] font-semibold border bg-slate-900 text-slate-200 border-white/10" data-testid="portfolio-skill" data-skill={s.skill} data-points={s.points} data-counted-elsewhere={s.countedElsewhere ?? ''}>
                       {s.skill}{s.points > 0 ? ` +${s.points}` : ''}
-                      {s.countedElsewhere === 'resume_project' ? ' (same project is on your resume: counted once)' : s.countedElsewhere === 'portfolio_entry' ? ' (same project is in another entry: counted once)' : ''}
+                      {s.countedElsewhere === 'resume_project' ? ` (same project is on your resume${s.countedElsewhereBecause === 'same_link' ? ', same repository link' : ''}: counted once)` : s.countedElsewhere === 'portfolio_entry' ? ` (same project is in another entry${s.countedElsewhereBecause === 'same_link' ? ', same repository link' : ''}: counted once)` : ''}
                       {s.verifiedBySkillCheck ? ' (also verified by skill check)' : ''}
                     </li>
                   ))}
