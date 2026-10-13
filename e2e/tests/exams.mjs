@@ -144,8 +144,14 @@ export async function run({ webUrl, apiUrl }) {
       const sscAttempt = (await api('GET', '/exams/ssc-cgl-2026-tier1/attempts')).data.attempts[0];
       const view = (await api('GET', `/exams/attempts/${sscAttempt.id}`)).data;
       const reasoning = view.questions.filter((q) => q.sectionId === 'reasoning').map((q) => q.questionId);
-      const shown = await page.getByTestId('exam-question').evaluateAll((els) => els.map((e) => e.dataset.question));
-      expect(shown.length === reasoning.length && shown.every((id) => reasoning.includes(id)), 'only the first section should be shown');
+      // The set renders after the timer: wait (at most 5 s) for exactly the first section's questions
+      let shown = [];
+      for (let i = 0; i < 25; i++) {
+        shown = await page.getByTestId('exam-question').evaluateAll((els) => els.map((e) => e.dataset.question));
+        if (shown.length === reasoning.length && shown.every((id) => reasoning.includes(id))) break;
+        await page.waitForTimeout(200);
+      }
+      expect(shown.length === reasoning.length && shown.every((id) => reasoning.includes(id)), `only the first section should be shown: shown ${JSON.stringify(shown)}, reasoning ${JSON.stringify(reasoning)}`);
       await answerVisible();
       await page.getByRole('button', { name: /Finish section, start Quantitative Aptitude/ }).click();
       await page.waitForTimeout(800);
