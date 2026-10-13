@@ -60,6 +60,7 @@ Rules that apply to every authenticated endpoint:
 |---|---|---|---|
 | `GET` | `/api/v1/users/me` | Yes | The signed-in user's profile. |
 | `PUT` | `/api/v1/users/me` | Yes | Update profile and onboarding fields. Unknown fields are rejected. |
+| `DELETE` | `/api/v1/users/me` | Yes | Delete the account and everything stored about it. Body `password` and `confirm: "DELETE"`; a wrong password `403`. Removes resume files, recordings and every record with the account id; the token is refused afterwards. See `docs/PRIVACY_AND_RETENTION.md`. |
 | `GET` | `/api/v1/users/me/career-snapshot` | Yes | One summary of resume, skills, readiness, roadmap, tracked jobs (with due reminders) and interviews. Feeds the Command Center. |
 
 ### Resume
@@ -93,6 +94,7 @@ Nothing in this group changes the user's skills or scores, except recording a co
 | `POST` | `/api/v1/careers/compare` | Yes | Body `careerIds` (2 to 4). Requirements, evidence and effort per career, plus `market` per career (state `sourced_valid`, `no_source`, `sparse`, `stale`, `synthetic` or `error`; a posting count with source, period and freshness only when `usable`) and `marketData`. Market evidence is read server-side from sourced records only; it cannot be supplied in the request. |
 | `POST` | `/api/v1/careers/what-if` | Yes | Body `changes` (1 to 10 of `add_skill`, `remove_skill`, `add_project`, `add_certification`, `add_experience`, `pass_assessment`) and optional `careerIds`. Scores before and after with requirement-level changes. `400 UNKNOWN_SKILL` for a skill that is not recognised. Nothing is saved. |
 | `GET` | `/api/v1/careers/:id/counterfactuals` | Yes | Ranked single changes and a path to `targetScore` (query, 0-100). |
+| `GET` | `/api/v1/careers/:id/market-evidence` | Yes | Market evidence for one career: a posting count only for valid, fresh, sourced data, otherwise "unavailable" with the reason. |
 | `GET` | `/api/v1/careers/transition-plans` | Yes | The caller's plans, each stage re-evaluated against current evidence. |
 | `POST` | `/api/v1/careers/transition-plans` | Yes | Body `targetCareerId`. Builds or replaces the plan. `409 NO_SKILL_PROFILE` without a resume. |
 | `DELETE` | `/api/v1/careers/transition-plans/:id` | Yes | Remove a plan. |
@@ -152,6 +154,14 @@ Nothing in this group changes the user's skills or scores, except recording a co
 | `DELETE` | `/api/v1/opportunities/saved/:id` | Yes | Remove a saved job. |
 | `DELETE` | `/api/v1/opportunities/:id/save` | Yes | Same as above. |
 | `GET` | `/api/v1/opportunities/telemetry` | Yes | Counts per status and `remindersDue`. |
+| `GET` | `/api/v1/applications` | Yes | The caller's applications (saved jobs marked applied and manual ones) with status and reminder. |
+| `POST` | `/api/v1/applications/manual` | Yes | Record an application made elsewhere. Body `title`, `company`, optional `applicationUrl` (https) and `appliedAt`. |
+| `GET` | `/api/v1/applications/:id/history` | Yes | Dated status events of one application. |
+| `POST` | `/api/v1/applications/:id/events` | Yes | Add a status event. Body `status`, `occurredAt`, optional `note`. |
+| `PATCH` | `/api/v1/applications/:id/events/:eventId` | Yes | Correct an event's date or note. |
+| `DELETE` | `/api/v1/applications/:id/events/:eventId` | Yes | Remove an event. |
+| `PUT` | `/api/v1/applications/:id/reminder` | Yes | Set or clear a follow-up reminder. |
+| `GET` | `/api/v1/applications/outcomes` | Yes | Outcome rates from the caller's own applications, with numerators, denominators and a minimum sample of 5. |
 
 ### Interviews
 
@@ -163,6 +173,84 @@ Nothing in this group changes the user's skills or scores, except recording a co
 | `POST` | `/api/v1/interviews/:id/respond` | Yes | Answer a question (10,000 characters at most). The evaluation records its `source` (ai or heuristic) and `dimensions`. |
 | `POST` | `/api/v1/interviews/:id/complete` | Yes | Finish and score the session. |
 | `GET` | `/api/v1/interviews/:id/report` | Yes | Report with `questionSource`, `evaluationSource`, `dimensionScores`, `answeredCount` and the job context. |
+| `GET` | `/api/v1/interviews/rubrics` | Yes | Role rubrics with their weights; `role` query resolves one. |
+| `GET` | `/api/v1/interviews/progress` | Yes | Per-dimension trend over the caller's completed sessions (a trend only from three sessions). |
+| `GET` | `/api/v1/interviews/assessments/catalog` | Yes | Skills and task kinds available for technical assessments. |
+| `GET` | `/api/v1/interviews/assessments` | Yes | The caller's technical assessments. |
+| `POST` | `/api/v1/interviews/assessments` | Yes | Start one. Body `skills`, `count`. Tasks come without answers. No submitted text is ever executed. |
+| `GET` | `/api/v1/interviews/assessments/:id` | Yes | One assessment; keys only for answered tasks. |
+| `POST` | `/api/v1/interviews/assessments/:id/answers` | Yes | Answer one task once. |
+| `POST` | `/api/v1/interviews/assessments/:id/finish` | Yes | Finish and score. Practice only: changes no skill, score or readiness. |
+| `GET` | `/api/v1/interviews/voice-settings` | Yes | Dictation consent, recording consent and retention. |
+| `PUT` | `/api/v1/interviews/voice-settings` | Yes | Change them. Withdrawing recording consent deletes every recording and reports how many. |
+| `POST` | `/api/v1/interviews/:id/recordings` | Yes | Upload one answer's audio (multipart `audio`, `questionIndex`, `durationSec`). Needs recording consent; content checked. |
+| `GET` | `/api/v1/interviews/:id/recordings` | Yes | Recordings of a session with their expiry. |
+| `GET` | `/api/v1/interviews/:id/recordings/:questionId/audio` | Yes | Play one recording (owner only). |
+| `DELETE` | `/api/v1/interviews/:id/recordings/:questionId` | Yes | Delete one (`202` when the file is still being removed). |
+| `DELETE` | `/api/v1/interviews/recordings` | Yes | Delete all of the caller's recordings. |
+
+### Market evidence
+
+With no licensed source registered, every figure answers "unavailable" with the reason (`docs/MARKET_DATA_SOURCES.md`).
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| `GET` | `/api/v1/market/sources` | Yes | Registered sources with licence and status. |
+| `GET` | `/api/v1/market/history` | Yes | Dated posting counts from registered sources. |
+| `GET` | `/api/v1/market/skill-trends` | Yes | Skill trends mined from sourced descriptions. |
+| `GET` | `/api/v1/market/salaries` | Yes | Advertised salaries by place, period, currency and source. |
+| `GET` | `/api/v1/market/forecast` | Yes | A demand forecast only with enough dated history (backtested), otherwise unavailable. |
+| `GET` | `/api/v1/market/careers/:id/summary` | Yes | One career's market summary. |
+| `GET` | `/api/v1/market/careers/:id/signals` | Yes | The market signal for a career; neutral unless evidence is valid. |
+| `POST` | `/api/v1/market/imports` | Admin | Import postings from a registered source (licence checked). |
+| `GET` | `/api/v1/market/imports` | Admin | Import batches. |
+
+### Exam practice
+
+Original practice questions on official patterns (GATE CS 2026, SSC CGL 2026 Tier-I); results never change career evidence (`docs/EXAM_PREP.md`).
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| `GET` | `/api/v1/exams` | Yes | Exams with their sources and versions. |
+| `GET` | `/api/v1/exams/:examId` | Yes | One exam: sections, topics, official pattern and practice rules. |
+| `POST` | `/api/v1/exams/:examId/attempts` | Yes | Start a set. Body `count`, `mode` (practice or timed), optional `sectionIds`. |
+| `GET` | `/api/v1/exams/:examId/attempts` | Yes | The caller's attempts. |
+| `GET` | `/api/v1/exams/attempts/:attemptId` | Yes | One attempt; answers and marks only after submission. |
+| `PUT` | `/api/v1/exams/attempts/:attemptId/answers` | Yes | Save one answer; refused after the server-side deadline or once submitted. |
+| `POST` | `/api/v1/exams/attempts/:attemptId/sections/:sectionId/start` | Yes | Start the next timed section (in order). |
+| `POST` | `/api/v1/exams/attempts/:attemptId/submit` | Yes | Submit and mark. |
+| `GET` | `/api/v1/exams/:examId/performance` | Yes | Per-topic progress (a status only after 3 answers) and recommendations. |
+| `GET` | `/api/v1/exams/:examId/plan` | Yes | The caller's study plan, or null. |
+| `PUT` | `/api/v1/exams/:examId/plan` | Yes | Build or rebuild it. Body `hoursPerWeek` (1-60), optional `startDate`; completed items are kept. |
+| `PATCH` | `/api/v1/exams/:examId/plan/items/:itemId` | Yes | Mark an item done or pending. |
+
+### Career domains (E1)
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| `GET` | `/api/v1/career-domains` | Yes | The six O*NET-informed careers with every requirement's basis, the attribution and the US-source note. |
+| `GET` | `/api/v1/career-domains/matches` | Yes | The caller's stored matches for those careers. |
+
+### Languages (E5, X1)
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| `GET` | `/api/v1/languages/supported` | Yes | Declared resume and interface languages (English, Hindi, Spanish). |
+| `GET` | `/api/v1/languages/settings` | Yes | The caller's interface language. |
+| `PUT` | `/api/v1/languages/settings` | Yes | Body `uiLanguage` (`en`, `hi`, `es`). |
+| `POST` | `/api/v1/languages/resume-analyses` | Yes | Analyse a PDF, DOCX or TXT resume (multipart `file`): language, layout, sections and fields with provenance; unsupported and scanned files are reported, not guessed. |
+| `POST` | `/api/v1/languages/resume-analyses/text` | Yes | The same for pasted text. Body `text`. |
+| `GET` | `/api/v1/languages/resume-analyses` | Yes | The caller's analyses (without their stored lines). |
+| `GET` | `/api/v1/languages/resume-analyses/:id` | Yes | One analysis with its original lines. |
+| `DELETE` | `/api/v1/languages/resume-analyses/:id` | Yes | Delete one with its stored text. |
+
+### AI observability (X11)
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| `GET` | `/api/v1/ai-observability/summary` | Admin | Provider and feature statistics for `windowHours`, with the scope they cover. |
+| `GET` | `/api/v1/ai-observability/events` | Admin | Recent gateway events (codes and timings only). Query `limit`, `windowHours`. |
+| `GET` | `/api/v1/ai-observability/providers` | Admin | Each provider's zero-cost policy status for personal and other data. |
 
 ### Assistant chat
 
