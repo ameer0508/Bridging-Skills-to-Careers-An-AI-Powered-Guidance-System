@@ -9,6 +9,8 @@ import CareerService from '../services/CareerService.js';
 import RecommendationService from '../services/RecommendationService.js';
 import Resume from '../models/Resume.js';
 import VoiceRecording from '../models/VoiceRecording.js';
+import MarketPosting from '../models/MarketPosting.js';
+import { activateEmployerSource } from '../config/marketSources.js';
 import { ensureFakeAiService } from './helpers/fakeAiService.js';
 import { startHttpHarness, resumeForm, type HttpHarness } from './helpers/httpHarness.js';
 
@@ -72,6 +74,11 @@ export async function runAccountDeletionTests() {
     await A('PUT', '/exams/gate-cs-2026/plan', { hoursPerWeek: 5 });
     await A('POST', '/languages/resume-analyses/text', { text: 'Habilidades\nPython, SQL y Docker en producción.' });
     await A('PUT', '/languages/settings', { uiLanguage: 'hi' });
+    // An employer posting, published under the contribution terms (mirrored into the market records)
+    await A('PUT', '/employer/organization', { organizationName: 'Alice Analytics (SYNTHETIC)' });
+    const job = (await A('POST', '/employer/postings', { title: 'Data Analyst', description: 'Weekly reporting in SQL and Excel for the sales team, with clear written summaries. SYNTHETIC TEST DATA.', city: 'Pune', state: 'Maharashtra', workMode: 'onsite', employmentType: 'full_time', skills: ['SQL'] })).body.data.posting;
+    assert.equal((await A('POST', `/employer/postings/${job.id}/publish`, { termsVersion: 'employer-contribution-v1', authorizedToPost: true, realOpening: true, grantsUses: true })).status, 200);
+    assert.equal(await MarketPosting.countDocuments({ sourceRecordId: job.id }), 1, 'the posting is in the market records before deletion');
     await A('POST', '/careers/transition-plans', { targetCareerId: careerId });
     await A('POST', '/skills/assessments', { skill: 'Git' });
     await A('POST', '/applications/manual', { title: 'Data Analyst', company: 'Example Ltd', appliedAt: '2026-09-02T00:00:00.000Z' });
@@ -118,9 +125,11 @@ export async function runAccountDeletionTests() {
     }
     assert.equal((await A('POST', '/portfolio', { title: 'After deletion', skills: ['Git'], completedOn: '2026-01-01' })).status, 401, 'and cannot create new data');
     assert.deepEqual(await documentsMentioning(bob.userId), bobBefore, "Bob's data is untouched");
+    assert.equal(await MarketPosting.countDocuments({ sourceRecordId: job.id }), 0, "Alice's employer posting left the market records");
     assert.equal((await h.api('GET', '/careers/matches', { token: bob.token })).status, 200);
     console.log(`  ✓ Deletion: ${Object.values(deleted.body.data.documentsDeleted as Record<string, number>).reduce((a, b) => a + b, 0)} documents in ${Object.keys(deleted.body.data.documentsDeleted).length} collections and every file removed; the token is refused; Bob unaffected`);
   } finally {
+    activateEmployerSource()(); // publishing registered the employer source; later suites expect none
     await h.close();
   }
   console.log('✅ Account Deletion (X12) Tests Passed\n');

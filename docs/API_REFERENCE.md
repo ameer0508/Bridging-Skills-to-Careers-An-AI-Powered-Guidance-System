@@ -244,6 +244,28 @@ Original practice questions on official patterns (GATE CS 2026, SSC CGL 2026 Tie
 | `GET` | `/api/v1/languages/resume-analyses/:id` | Yes | One analysis with its original lines. |
 | `DELETE` | `/api/v1/languages/resume-analyses/:id` | Yes | Delete one with its stored text. |
 
+### Employer postings (first-party, self-declared organizations)
+
+See `docs/EMPLOYER_POSTINGS.md`. Organizations are not verified; every listing says so.
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| `GET` | `/api/v1/employer/terms` | Yes | The contribution terms (version, the seven uses, withdrawal, no verification), limits, pay bounds and form options. |
+| `GET` | `/api/v1/employer/organization` | Yes | The caller's organization, or `null`. |
+| `PUT` | `/api/v1/employer/organization` | Yes | Body `organizationName`, optional https `website`. Records whether the sign-in e-mail domain matches the website (a signal, not verification). |
+| `GET` | `/api/v1/employer/postings` | Yes | Open postings from all organizations, newest first (at most 100), with the self-declared disclosure. Query `skill` (lexicon name) and `state` (Indian state or UT). |
+| `GET` | `/api/v1/employer/postings/mine` | Yes | The caller's postings in every state, with consent, report counts and whether each is in the market records. |
+| `POST` | `/api/v1/employer/postings` | Yes | Create a draft: `title`, `description` (80–8,000), `city`, `state`, `workMode`, `employmentType`, `skills` (at least one recognised), optional `salary` (`INR`, `YEAR` or `MONTH`, plausible bounds, max ≤ 10× min) and https `applyUrl`. `409 NO_ORGANIZATION`; `429` above 10 a day. |
+| `PATCH` | `/api/v1/employer/postings/:id` | Yes | Edit a draft (any field) or an open posting (description, pay, skills, mode, type, link; title and place are fixed). Owner only (404 otherwise). |
+| `DELETE` | `/api/v1/employer/postings/:id` | Yes | Delete a draft. |
+| `POST` | `/api/v1/employer/postings/:id/publish` | Yes | Body `termsVersion`, `authorizedToPost`, `realOpening`, `grantsUses` (all required). Opens it for 60 days and adds it to the market records. `409 DUPLICATE_POSTING` for the same role, place and day; `429` above 25 open. |
+| `POST` | `/api/v1/employer/postings/:id/close` | Yes | Close an open posting; it stays in the market history, as the terms allow. |
+| `POST` | `/api/v1/employer/postings/:id/withdraw` | Yes | Withdraw a published posting: removed from listings and from every market figure at once. |
+| `POST` | `/api/v1/employer/postings/:id/reports` | Yes | Body `reason` (`not_a_real_job`, `misleading`, `discriminatory`, `scam_or_fee`, `duplicate`, `other`), optional `note`. Once per user; not your own. Three reports hide the posting pending review. |
+| `GET` | `/api/v1/employer/admin/reports` | Admin | Reported postings with counts and reasons. |
+| `POST` | `/api/v1/employer/admin/postings/:id/hide` | Admin | Hide a published posting (removed from market figures). |
+| `POST` | `/api/v1/employer/admin/postings/:id/restore` | Admin | Restore a hidden posting; its reports are cleared. |
+
 ### AI observability (X11)
 
 | Method | Path | Auth | Purpose |

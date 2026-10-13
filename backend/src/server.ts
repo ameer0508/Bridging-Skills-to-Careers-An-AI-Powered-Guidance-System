@@ -75,6 +75,10 @@ const connectDatabase = async (): Promise<void> => {
     const { default: ResumeService } = await import('./services/ResumeService.js');
     await new ResumeService().recoverInterruptedJobs();
 
+    // Employer submissions are a market source once a posting has been published under the terms
+    const { default: EmployerPostingService } = await import('./services/employer/EmployerPostingService.js');
+    await EmployerPostingService.syncSourceRegistration();
+
     // Daily deletion of expired interview recordings, inside this process
     const { startVoiceRetentionSchedule } = await import('./services/interview/voiceRetentionSchedule.js');
     startVoiceRetentionSchedule();

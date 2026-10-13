@@ -34,7 +34,33 @@ export const SYNTHETIC_FIXTURE_SOURCE: MarketSource = {
   retentionDays: null,
 };
 
+/**
+ * Job postings submitted on SkillBridge by organizations, under the contribution terms they accept
+ * when publishing (docs/EMPLOYER_POSTINGS.md): display, retention after closing, counts, salary
+ * statistics, skill frequencies, forecasting and recommendations. Organizations are self-declared
+ * and not verified. Registered only once a posting has been published under those terms, so that
+ * an empty channel is never presented as a market source.
+ */
+export const EMPLOYER_SUBMISSIONS_SOURCE: MarketSource = {
+  id: 'skillbridge-employer-submissions',
+  name: 'Employer submissions on SkillBridge (organizations self-declared, not verified)',
+  url: 'https://github.com/ameer0508/Bridging-Skills-to-Careers-An-AI-Powered-Guidance-System/blob/work/skillbridge-opus55-nextgen-expansion/docs/EMPLOYER_POSTINGS.md',
+  licence: 'SkillBridge employer contribution terms v1: granted by each submitting organization',
+  attribution: 'Postings submitted directly by the organizations named on each posting.',
+  dataset: 'sourced',
+  verifiedOn: '2026-10-13',
+  retentionDays: null,
+};
+
 const sources = new Map<string, MarketSource>([[SYNTHETIC_FIXTURE_SOURCE.id, SYNTHETIC_FIXTURE_SOURCE]]);
+
+/** Registers the employer channel (idempotent). Returns a function that removes it, for tests. */
+export function activateEmployerSource(): () => void {
+  sources.set(EMPLOYER_SUBMISSIONS_SOURCE.id, EMPLOYER_SUBMISSIONS_SOURCE);
+  return () => {
+    sources.delete(EMPLOYER_SUBMISSIONS_SOURCE.id);
+  };
+}
 
 export const getMarketSource = (id: string): MarketSource | undefined => sources.get(id);
 

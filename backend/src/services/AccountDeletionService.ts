@@ -7,6 +7,7 @@ import ConversationMessage from '../models/ConversationMessage.js';
 import VoiceRecording from '../models/VoiceRecording.js';
 import StorageService from './StorageService.js';
 import VoiceRecordingService from './interview/VoiceRecordingService.js';
+import EmployerPostingService from './employer/EmployerPostingService.js';
 import { AppError } from '../middlewares/errorHandler.js';
 import logger from '../config/logger.js';
 import { revokeAccount } from '../utils/revokedAccounts.js';
@@ -22,6 +23,8 @@ import { revokeAccount } from '../utils/revokedAccounts.js';
  * - Chat messages are removed through their conversations.
  * - The account id is revoked in this process at once, so an access token issued before deletion
  *   cannot create new data while it is still valid.
+ * - Job postings the user published as an employer leave every market figure (their market
+ *   records and the reports about them are removed), as the contribution terms promise.
  * Kept on purpose: market import batches record which administrator imported a source (an id
  * only, needed for provenance).
  */
@@ -54,6 +57,8 @@ class AccountDeletionService {
     }
     const recordings = await VoiceRecordingService.removeAllForUser(userId);
     const pendingRecordings = await VoiceRecording.countDocuments({ userId: uid });
+
+    await EmployerPostingService.removeAllForUser(userId);
 
     const conversations = (await Conversation.find({ userId: uid }).select('_id').lean()).map(c => c._id);
     const documentsDeleted: Record<string, number> = {};

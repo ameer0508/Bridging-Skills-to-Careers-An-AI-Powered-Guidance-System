@@ -17,7 +17,7 @@ export const PUBLIC_PAGES = ['/', '/login', '/register'];
 export const APP_PAGES = [
   '/home', '/careers', '/career-lab', '/activity', '/portfolio', '/roadmap', '/recommendations', '/analytics', '/ai', '/profile',
   '/settings', '/readiness', '/skills', '/resume', '/job-agent', '/interview-agent', '/interview-agent/assessments', '/interviews',
-  '/market', '/market/salaries', '/resume-language', '/career-domains', '/exams', '/exams/gate-cs-2026', '/applications',
+  '/market', '/market/salaries', '/resume-language', '/employer-postings', '/career-domains', '/exams', '/exams/gate-cs-2026', '/applications',
   '/application-outcomes', '/opportunities', '/portfolio-demo', '/learning-agent', '/resume-agent', '/agent', '/orchestrator',
   '/diagnostics', '/graph', '/events', '/features', '/ops', '/github', '/linkedin', '/coding', '/opensource', '/brand',
   '/digital-twin', '/networking-agent', '/opportunity-agent', '/memory', '/career-os',
