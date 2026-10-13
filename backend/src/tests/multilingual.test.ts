@@ -50,6 +50,7 @@ export async function runMultilingualTests() {
     const first = r.body.data;
     assert.equal(first.fileName, 'रिज़्यूमे.txt', 'only the base name is kept');
     assert.deepEqual([first.status, first.language.language], ['extracted', 'hi']);
+    assert.deepEqual(first.textRecovery, { glyphsRecovered: 0, glyphsUnrecovered: 0 }, 'glyph recovery counts are stored and returned');
     assert.deepEqual(first.fields.skills.map((s: { name: string }) => s.name).sort(), ['Python', 'SQL']);
     for (const s of first.fields.skills) assert.equal(first.originalLines[s.source.line], s.source.text, 'provenance points at the stored original line');
 

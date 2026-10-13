@@ -16,6 +16,8 @@ export interface IResumeLanguageAnalysis extends Document<Types.ObjectId> {
   language: Record<string, unknown>;
   layout: Record<string, unknown>;
   textQuality: 'ok' | 'degraded';
+  /** Devanagari glyphs the PDF left without characters: recovered from its font, or not (absent before multilingual-rules-3). */
+  textRecovery?: { glyphsRecovered: number; glyphsUnrecovered: number };
   warnings: string[];
   sections: Array<Record<string, unknown>>;
   fields: Record<string, unknown>;
@@ -34,6 +36,7 @@ const ResumeLanguageAnalysisSchema = new Schema<IResumeLanguageAnalysis>(
     language: { type: Schema.Types.Mixed, default: {} },
     layout: { type: Schema.Types.Mixed, default: {} },
     textQuality: { type: String, enum: ['ok', 'degraded'], default: 'ok' },
+    textRecovery: { type: new Schema({ glyphsRecovered: Number, glyphsUnrecovered: Number }, { _id: false }), default: undefined },
     warnings: { type: [String], default: [] },
     sections: { type: Schema.Types.Mixed, default: () => [] },
     fields: { type: Schema.Types.Mixed, default: {} },

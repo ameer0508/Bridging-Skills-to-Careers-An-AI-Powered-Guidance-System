@@ -6,6 +6,7 @@ import ResumeLanguageAnalysis, { IResumeLanguageAnalysis } from '../../models/Re
 import LanguageSettings, { UiLanguage } from '../../models/LanguageSettings.js';
 import { AppError } from '../../middlewares/errorHandler.js';
 import logger from '../../config/logger.js';
+import { displayFileName } from '../../utils/uploadFileName.js';
 
 /**
  * Multilingual resume analysis and language settings (E5, X1). The analysis runs in the AI
@@ -27,6 +28,7 @@ type AnalysisPayload = {
   language: Record<string, unknown>;
   layout: Record<string, unknown>;
   textQuality: 'ok' | 'degraded';
+  textRecovery?: { glyphsRecovered: number; glyphsUnrecovered: number };
   warnings: string[];
   sections: Array<Record<string, unknown>>;
   fields: Record<string, unknown>;
@@ -34,7 +36,7 @@ type AnalysisPayload = {
   fileType: string;
 };
 
-const displayName = (name: string) => path.basename((name || '').replace(/\\/g, '/')).split('').filter(c => c.charCodeAt(0) >= 0x20).join('').slice(0, 120);
+const displayName = displayFileName;
 
 function view(doc: IResumeLanguageAnalysis, withLines = true) {
   return {
@@ -46,6 +48,7 @@ function view(doc: IResumeLanguageAnalysis, withLines = true) {
     language: doc.language,
     layout: doc.layout,
     textQuality: doc.textQuality,
+    textRecovery: doc.textRecovery ?? null,
     warnings: doc.warnings,
     sections: doc.sections,
     fields: doc.fields,
@@ -83,6 +86,7 @@ class MultilingualService {
       language: data.language,
       layout: data.layout,
       textQuality: data.textQuality,
+      ...(data.textRecovery ? { textRecovery: { glyphsRecovered: Number(data.textRecovery.glyphsRecovered) || 0, glyphsUnrecovered: Number(data.textRecovery.glyphsUnrecovered) || 0 } } : {}),
       warnings: data.warnings,
       sections: data.sections,
       fields: data.fields,

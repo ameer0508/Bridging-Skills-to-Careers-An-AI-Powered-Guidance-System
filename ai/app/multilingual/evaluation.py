@@ -29,15 +29,20 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 AI_ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 DATASET = os.path.join(AI_ROOT, "tests", "fixtures", "multilingual", "labelled_resumes.json")
 FONT = os.path.join(AI_ROOT, "tests", "fixtures", "fonts", "NotoSansDevanagari-Regular.ttf")
-LAYOUTS = ["pdf_single_column", "pdf_two_column", "docx_table"]
+# pdf_single_column_subset embeds subset fonts, as most PDF exporters do; subsetting drops the
+# font tables that Devanagari glyph recovery needs, so it measures that common case separately.
+# pdf_single_column_sans uses the bundled Noto Sans Devanagari (TrueType) instead of MuPDF's built-in
+# Noto Serif Devanagari (CFF), so glyph recovery is measured on two different fonts.
+LAYOUTS = ["pdf_single_column", "pdf_two_column", "pdf_single_column_subset", "pdf_single_column_sans", "docx_table"]
 
 
 def _html(lines: List[str]) -> str:
     return "".join(f"<p>{l}</p>" for l in lines)
 
 
-def _css() -> str:
-    return "@font-face {font-family: deva; src: url(NotoSansDevanagari-Regular.ttf);} body {font-family: sans-serif, deva; font-size: 10px;} p {margin: 0 0 4px 0;}"
+def _css(bundled_first: bool = False) -> str:
+    families = "deva, sans-serif" if bundled_first else "sans-serif, deva"
+    return "@font-face {font-family: deva; src: url(NotoSansDevanagari-Regular.ttf);} body {font-family: " + families + "; font-size: 10px;} p {margin: 0 0 4px 0;}"
 
 
 def render(resume: dict, layout: str, folder: str) -> str:
@@ -47,13 +52,15 @@ def render(resume: dict, layout: str, folder: str) -> str:
         doc = pymupdf.open()
         page = doc.new_page(width=595, height=842)
         archive = pymupdf.Archive(os.path.dirname(FONT))
-        if layout == "pdf_single_column":
-            page.insert_htmlbox(pymupdf.Rect(40, 40, 555, 800), _html(main[:1] + side + main[1:]), css=_css(), archive=archive)
+        if layout in ("pdf_single_column", "pdf_single_column_subset", "pdf_single_column_sans"):
+            page.insert_htmlbox(pymupdf.Rect(40, 40, 555, 800), _html(main[:1] + side + main[1:]), css=_css(layout == "pdf_single_column_sans"), archive=archive)
         else:
             page.insert_htmlbox(pymupdf.Rect(30, 40, 200, 800), _html(side), css=_css(), archive=archive)
             page.insert_htmlbox(pymupdf.Rect(260, 40, 565, 800), _html(main), css=_css(), archive=archive)
+        if layout == "pdf_single_column_subset":
+            doc.subset_fonts()
         path = os.path.join(folder, f"{resume['id']}-{layout}.pdf")
-        doc.save(path)
+        doc.save(path, garbage=3, deflate=True)
         return path
     d = docx.Document()
     table = d.add_table(rows=1, cols=2)

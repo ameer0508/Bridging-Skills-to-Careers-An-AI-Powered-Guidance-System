@@ -18,7 +18,7 @@ from .detect import detect_language
 from .document import DocumentText
 from .languages import DEVANAGARI_DIGITS, MONTHS, PRESENT_WORDS, SECTION_HEADINGS, SUPPORTED, TRANSLATED_SKILL_TERMS
 
-METHOD_VERSION = "multilingual-rules-2"
+METHOD_VERSION = "multilingual-rules-3"
 
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 PHONE = re.compile(r"(?<!\d)(\+?\d[\d\s().-]{7,16}\d)(?!\d)")
@@ -138,6 +138,8 @@ def extract(document: DocumentText) -> dict:
         "language": language,
         "layout": {"type": document.layout, "pages": document.pages, "scannedPages": document.scanned_pages},
         "textQuality": document.text_quality,
+        # Devanagari glyphs the PDF left without characters, recovered from its embedded font (or not)
+        "textRecovery": {"glyphsRecovered": document.glyphs_recovered, "glyphsUnrecovered": document.glyphs_unrecovered},
         "warnings": list(document.warnings),
         "sections": [],
         "fields": {"email": None, "phone": None, "experience": [], "education": [], "skills": []},

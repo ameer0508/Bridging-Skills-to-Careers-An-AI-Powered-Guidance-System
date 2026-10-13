@@ -102,17 +102,21 @@ def test_evaluation_is_reproducible_and_reported_per_language_and_layout():
     second = evaluate()
     assert first["summary"] == second["summary"], "the evaluation is deterministic"
     summary = first["summary"]
-    assert set(summary) == {f"{lang}/{layout}" for lang in ("en", "es", "hi") for layout in ("pdf_single_column", "pdf_two_column", "docx_table")}
-    for key, metrics in summary.items():
-        assert metrics["language"] == 1.0, f"{key}: language detected"
-    for key in ("en/pdf_single_column", "en/pdf_two_column", "en/docx_table", "es/pdf_single_column", "es/pdf_two_column", "es/docx_table", "hi/docx_table"):
+    layouts = ("pdf_single_column", "pdf_two_column", "pdf_single_column_subset", "pdf_single_column_sans", "docx_table")
+    assert set(summary) == {f"{lang}/{layout}" for lang in ("en", "es", "hi") for layout in layouts}
+    accurate = [f"{lang}/{layout}" for lang in ("en", "es") for layout in layouts] + ["hi/docx_table", "hi/pdf_single_column", "hi/pdf_two_column", "hi/pdf_single_column_sans"]
+    for key in accurate:
+        assert summary[key]["language"] == 1.0, f"{key}: language detected"
+        assert summary[key]["degradedTextLayer"] == 0, f"{key}: text layer read cleanly"
         for metric, value in summary[key].items():
             if metric in ("degradedTextLayer", "documents"):
                 continue
             assert value >= 0.95, f"{key} {metric} = {value}"
-    # Hindi PDFs with shaped text: the damage must always be detected and reported
-    for key in ("hi/pdf_single_column", "hi/pdf_two_column"):
-        assert summary[key]["degradedTextLayer"] == summary[key]["documents"]
+    # Hindi PDFs whose fonts are subset have lost the tables glyph recovery needs: the damage must
+    # always be detected and reported, never passed off as a clean extraction
+    hi_subset = summary["hi/pdf_single_column_subset"]
+    assert hi_subset["degradedTextLayer"] == hi_subset["documents"]
+    assert hi_subset["experience_recall"] < 0.95, "if this improves, update the documented accuracy"
     rows = {(r["id"], r["layout"]): r for r in first["rows"]}
     assert all(rows[(rid, "pdf_two_column")]["detectedLayout"] == "two_column" for rid in ("en-1", "es-1", "hi-1")), "two-column layout detected"
 
@@ -138,3 +142,17 @@ def test_endpoint_requires_internal_key_and_validates(raw_client, service_header
     assert text.json()["data"]["language"]["language"] == "es"
     langs = raw_client.get("/api/v1/multilingual/languages", headers=service_headers).json()["data"]["supported"]
     assert [l["code"] for l in langs] == ["en", "hi", "es"]
+
+
+def test_devanagari_glyphs_are_recovered_from_the_embedded_font(tmp_path):
+    """Shaped conjuncts, reph and half forms that the text layer leaves unmapped come back exactly."""
+    from app.multilingual.evaluation import render
+    resume = {"id": "glyphs", "side": ["संपर्क"], "main": ["राहुल वर्मा", "मैं रिपोर्ट तैयार करता हूँ", "कार्य अनुभव", "विश्वविद्यालय"]}
+    path = render(resume, "pdf_single_column", str(tmp_path))
+    plain = "\n".join(page.get_text() for page in pymupdf.open(path))
+    assert "वर्मा" not in plain, "PyMuPDF's own text is garbled for this PDF (otherwise this test proves nothing)"
+    document = read_document(path, ".pdf")
+    assert document.lines == ["राहुल वर्मा", "संपर्क", "मैं रिपोर्ट तैयार करता हूँ", "कार्य अनुभव", "विश्वविद्यालय"]
+    assert document.glyphs_recovered > 0 and document.glyphs_unrecovered == 0
+    assert document.text_quality == "ok"
+    assert any("recovered from the embedded font" in w for w in document.warnings), "the recovery is disclosed"

@@ -7,13 +7,17 @@ Reads a resume file into ordered lines, keeping track of layout, with no OCR and
 - DOCX (python-docx): paragraphs and table cells in document order.
 - TXT: as is.
 The text layer is also checked for damage that commonly affects Devanagari in PDFs (shaped glyphs
-mapped to the wrong characters), so a garbled extraction is reported instead of trusted.
+mapped to the wrong characters), so a garbled extraction is reported instead of trusted. Where a
+PDF leaves shaped Devanagari glyphs without characters but embeds its font, the characters are
+recovered from the font's own tables (pdf_glyphs.py) before that check.
 """
 from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import List
+from typing import Dict, List, Optional
+
+from app.multilingual.pdf_glyphs import glyph_text_map
 
 try:
     import pymupdf  # PyMuPDF
@@ -36,21 +40,122 @@ class DocumentText:
     scanned_pages: int = 0
     warnings: List[str] = field(default_factory=list)
     text_quality: str = "ok"  # ok | degraded
+    # Devanagari glyphs the PDF left without characters: recovered from the embedded font, or not
+    glyphs_recovered: int = 0
+    glyphs_unrecovered: int = 0
 
 
 def _lines(text: str) -> List[str]:
     return [l.strip() for l in text.splitlines() if l.strip()]
 
 
+_UNMAPPED = 0xFFFD
+
+
+def _font_key(name: str) -> str:
+    """'ABCDEF+Noto Serif Devanagari Regular' and 'NotoSerifDevanagari-Regular' compare equal."""
+    name = name.split("+", 1)[-1]
+    return re.sub(r"[^a-z0-9]", "", name.lower())
+
+
+class _GlyphRecovery:
+    """Per document: glyph -> characters for each embedded font that needs it."""
+
+    def __init__(self, doc):
+        self.doc = doc
+        self.maps: Dict[str, Optional[Dict[int, str]]] = {}
+        self.recovered = 0
+        self.unrecovered = 0
+
+    def _map_for(self, page, font_name: str) -> Optional[Dict[int, str]]:
+        key = _font_key(font_name)
+        if key not in self.maps:
+            self.maps[key] = None
+            for xref, _ext, _type, basefont, _name, _enc in page.get_fonts(full=False):
+                if _font_key(basefont) != key:
+                    continue
+                buffer = self.doc.extract_font(xref)[3]
+                if buffer:
+                    font = pymupdf.Font(fontbuffer=buffer)
+                    self.maps[key] = glyph_text_map(buffer, font.has_glyph)
+                break
+        return self.maps[key]
+
+    def page_chars(self, page):
+        """(text, x, baseline, font size) per character in content-stream order, or None when
+        the page has no unmapped glyph (then the ordinary extraction is used unchanged)."""
+        trace = page.get_texttrace()
+        if not any(c[0] == _UNMAPPED for span in trace for c in span["chars"]):
+            return None
+        chars = []
+        for span in trace:
+            mapping = None
+            for ucs, gid, origin, bbox in span["chars"]:
+                if ucs == _UNMAPPED:
+                    mapping = mapping if mapping is not None else (self._map_for(page, span["font"]) or {})
+                    text = mapping.get(gid)
+                    if text:
+                        self.recovered += 1
+                    else:
+                        self.unrecovered += 1
+                        text = "�"
+                else:
+                    text = chr(ucs) if ucs > 0 else ""
+                chars.append((text, origin[0], origin[1], span["size"], bbox[2]))
+        return chars
+
+
+def _blocks_text_from_chars(chars, blocks) -> List[str]:
+    """Each block's text rebuilt from the characters drawn inside it, in drawing order, one line
+    per baseline. Every character belongs to one block only: the first whose box holds its origin."""
+    texts: List[List[str]] = [[] for _ in blocks]
+    state = [("", None, None)] * len(blocks)  # (current line, its baseline, rightmost glyph edge so far) per block
+    for text, x, y, size, right in chars:
+        for i, b in enumerate(blocks):
+            if b[0] - 1 <= x <= b[2] + 1 and b[1] - 1 <= y <= b[3] + 1:
+                line, baseline, line_right = state[i]
+                if baseline is not None and abs(y - baseline) > max(2.0, size * 0.4):
+                    texts[i].append(line)
+                    line, line_right = "", None
+                elif line_right is not None and line and not line.endswith(" ") and text != " " and (x - line_right > size or x < line_right - 3 * size):
+                    # A gap of a font size or more, or a long jump back to the left (another column),
+                    # separates words. Shaped marks are drawn out of order (the short-i sign left of
+                    # its cluster, the reph right of it), so gaps are measured from the line's
+                    # rightmost edge and short jumps are normal.
+                    line += " "
+                state[i] = (line + text, y, right if line_right is None else max(line_right, right))
+                break
+    for i, (line, _baseline, _right) in enumerate(state):
+        texts[i].append(line)
+    return ["\n".join(_rejoin_vowel_signs(l) for l in t) for t in texts]
+
+
+# A vowel sign never follows an independent vowel in Hindi spelling. When a font draws a vowel as
+# another vowel plus a sign (ओ as आ + े), the text layer can hold that drawing instead of the letter.
+_VOWEL_DRAWINGS = {"अा": "आ", "आे": "ओ", "आै": "औ", "अो": "ओ", "अौ": "औ", "एे": "ऐ", "अॉ": "ऑ"}
+
+
+def _rejoin_vowel_signs(text: str) -> str:
+    for drawn, letter in _VOWEL_DRAWINGS.items():
+        text = text.replace(drawn, letter)
+    return text
+
+
 def _read_pdf(path: str) -> DocumentText:
     if pymupdf is None:
         raise ValueError("PDF support (PyMuPDF) is not installed on the AI service.")
     doc = pymupdf.open(path)
+    recovery = _GlyphRecovery(doc)
     lines: List[str] = []
     two_column_pages = 0
     scanned = 0
     for page in doc:
         blocks = [b for b in page.get_text("blocks") if b[6] == 0 and b[4].strip()]
+        chars = recovery.page_chars(page)
+        if chars is not None:
+            # The ordinary text of these blocks has unmapped glyphs and position-sorted characters
+            rebuilt = _blocks_text_from_chars(chars, blocks)
+            blocks = [(*b[:4], text, *b[5:]) for b, text in zip(blocks, rebuilt) if text.strip()]
         text_chars = sum(len(b[4].strip()) for b in blocks)
         if text_chars < SCANNED_PAGE_TEXT_CHARS and page.get_images(full=False):
             scanned += 1
@@ -81,8 +186,16 @@ def _read_pdf(path: str) -> DocumentText:
         warnings.append(
             f"{scanned} of {pages} page(s) look scanned (images without a text layer). SkillBridge has no OCR, so their text cannot be read."
         )
+    if recovery.recovered:
+        warnings.append(
+            f"{recovery.recovered} Devanagari glyph(s) had no character in the PDF's text layer and were recovered from the embedded font."
+            + (f" {recovery.unrecovered} could not be recovered." if recovery.unrecovered else "")
+        )
     layout = "two_column" if two_column_pages > 0 else "single_column"
-    return DocumentText(lines=lines, layout=layout, pages=pages, scanned_pages=scanned, warnings=warnings)
+    return DocumentText(
+        lines=lines, layout=layout, pages=pages, scanned_pages=scanned, warnings=warnings,
+        glyphs_recovered=recovery.recovered, glyphs_unrecovered=recovery.unrecovered,
+    )
 
 
 def _read_docx(path: str) -> DocumentText:
