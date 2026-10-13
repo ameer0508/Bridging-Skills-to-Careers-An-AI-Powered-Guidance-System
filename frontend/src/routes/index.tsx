@@ -49,7 +49,7 @@ const TechnicalAssessmentPage = lazy(() => import('../features/interview/compone
 const ExamsHomePage = lazy(() => import('../features/exams/components/ExamsHomePage'));
 const ExamPage = lazy(() => import('../features/exams/components/ExamPage'));
 const ResumeLanguagePage = lazy(() => import('../features/languages/components/ResumeLanguagePage'));
-const CareerDomainsPreviewPage = lazy(() => import('../features/careerDomains/components/CareerDomainsPreviewPage'));
+const CareerDomainsPage = lazy(() => import('../features/careerDomains/components/CareerDomainsPage'));
 const AiObservabilityPage = lazy(() => import('../features/aiObservability/components/AiObservabilityPage'));
 const ApplicationOutcomesPage = lazy(() => import('../features/applications/components/ApplicationOutcomesPage'));
 const CareerIdentityWorkspace = lazy(() => import('../workspaces/CareerIdentityWorkspace/CareerIdentityWorkspace'));
@@ -457,7 +457,7 @@ export const router = createBrowserRouter([
             path: '/career-domains',
             element: (
               <WorkspaceSuspense>
-                <CareerDomainsPreviewPage />
+                <CareerDomainsPage />
               </WorkspaceSuspense>
             ),
           },
