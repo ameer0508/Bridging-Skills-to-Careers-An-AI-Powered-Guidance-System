@@ -91,7 +91,10 @@ async function runChannel(t, channel, { webUrl, apiUrl, tmpDir }, wav) {
     await page.getByRole('button', { name: /^Record (answer|again)$/ }).click();
     await page.getByRole('button', { name: /Stop recording/ }).waitFor({ timeout: 10_000 });
     await page.waitForTimeout(ms);
+    // Wait for the upload itself: after a first take the Listen button is already there
+    const saved = page.waitForResponse((r) => /\/recordings$/.test(new URL(r.url()).pathname) && r.request().method() === 'POST', { timeout: 15_000 });
     await page.getByRole('button', { name: /Stop recording/ }).click();
+    expect((await saved).status() === 201 || (await saved).status() === 200, `upload answered ${(await saved).status()}`);
     await page.getByRole('button', { name: 'Listen' }).waitFor({ timeout: 15_000 });
   };
   const audioUrl = (session, questionId) => `/interviews/${session}/recordings/${encodeURIComponent(questionId)}/audio`;
