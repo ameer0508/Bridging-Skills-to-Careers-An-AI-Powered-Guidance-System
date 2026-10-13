@@ -50,7 +50,7 @@ All figures are from the tree `b033d61` (OCR, X1) on 2026-10-13; the docs-only c
 | Item | Points | Why open | What closes it |
 |---|---|---|---|
 | C1, C2, C3, C4, C5, R4 | 14 | No free source permits storing, counting, pricing or mining Indian job postings. OnJob.io's feed permits republishing live listings only (used for A1); its CC BY salary buckets fail a validity check (`MARKET_DATA_SOURCES.md`) | OnJob.io's written permission (request drafted in `MARKET_DATA_SOURCES.md` §5), Adzuna's written consent at ₹0, or another compliant source; C2 then needs months of history |
-| D1, D2 | 5 | A physical microphone and real speech recognition cannot be tested automatically. The real capture and codec path passes in Edge with the browser's fake device | The owner runs `MANUAL_VOICE_TEST_PLAN.md` in Chrome and Edge and sends the results sheet; any defects are fixed |
+| D1, D2 | 5 | The owner's manual test passed in **Microsoft Edge** (real microphone, Narrator): D1 A4–A12 and C1–C4; D2 B1–B5 and B8, with B4 at 4 of 5 terms and B7 N/A. The award rule also requires **Chrome** (no run of any kind) and **Firefox** for B6 (not installed). A C3 announcement inconsistency was investigated and the error regions hardened (`MANUAL_VOICE_EVIDENCE.md`) | The short set in `MANUAL_VOICE_EVIDENCE.md` §4: Chrome manual steps plus an automated Chrome run, Firefox B6, Edge A1–A3 |
 
 **Other limits, all documented:**
 - The labelled multilingual set is small and synthetic; no real scans were measured.

@@ -100,4 +100,6 @@ Reply with this table filled in (one row per step and browser). "Pass" or "Fail"
 
 A screenshot of the console helps for a failure; please do not send the audio itself.
 
+**Results so far:** see [`MANUAL_VOICE_EVIDENCE.md`](MANUAL_VOICE_EVIDENCE.md) (Edge done by the owner; Chrome and Firefox outstanding).
+
 **How the points will be decided.** D1 is awarded when A1–A12 and C1–C4 pass in both Chrome and Edge (after fixes, if any). D2 is awarded when B1–B6 and B8 pass in both, B4's accuracy is recorded whatever it is, and B7 is either passed or honestly reported as not offered.
