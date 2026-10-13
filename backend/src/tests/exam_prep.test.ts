@@ -278,9 +278,15 @@ export async function runExamPrepTests() {
     assert.equal(plan.startDate, '2026-10-19');
     assert.equal(plan.items[0].weekStarts, '2026-10-19');
     const doneItem = plan.items[0];
+    const weeksAt8 = plan.totals.weeks;
+    assert.ok(plan.items.every((i: { hours: number; week: number }) => i.hours <= 8), 'no week holds more than the chosen hours');
     plan = (await A('PATCH', `/exams/gate-cs-2026/plan/items/${doneItem.id}`, { status: 'done' })).body.data.plan;
     plan = (await A('PUT', '/exams/gate-cs-2026/plan', { hoursPerWeek: 4 })).body.data.plan;
     const kept = plan.items.find((i: { id: string }) => i.id === doneItem.id);
+    const perWeek = new Map<number, number>();
+    for (const i of plan.items.filter((x: { status: string }) => x.status === 'pending')) perWeek.set(i.week, (perWeek.get(i.week) ?? 0) + i.hours);
+    assert.ok([...perWeek.values()].every(h => h <= 4), 'halving the hours keeps every week within 4 hours');
+    assert.ok(plan.totals.weeks > weeksAt8 * 1.7, `halving the hours roughly doubles the plan: ${weeksAt8} weeks at 8 h, ${plan.totals.weeks} at 4 h`);
     assert.deepEqual([kept.status, kept.week, kept.hours], ['done', doneItem.week, doneItem.hours], 'completed work is preserved on regeneration');
     assert.ok(plan.items.filter((i: { status: string }) => i.status === 'pending').every((i: { week: number }) => i.week > doneItem.week), 'new work is planned after it');
     assert.equal(plan.regenerations, 1);

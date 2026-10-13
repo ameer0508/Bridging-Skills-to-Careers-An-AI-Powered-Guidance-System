@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import CareerService from '../services/CareerService.js';
 import RecalculationRun from '../models/RecalculationRun.js';
+import { QUESTIONS_BY_ID } from '../services/exams/ExamPracticeService.js';
 import { API_RATE_LIMIT_MAX } from '../app.js';
 import { ensureFakeAiService } from './helpers/fakeAiService.js';
 import { startHttpHarness, resumeForm, type HttpHarness } from './helpers/httpHarness.js';
@@ -89,6 +90,29 @@ export async function runInterviewIntegrationTests() {
     assert.equal((await h.api('GET', '/interviews/assessments', { token: bob.token })).body.data.assessments.length, 0);
     assert.equal((await h.api('GET', '/skills/assessments', { token: bob.token })).body.data.history.length, 0);
     console.log('  ✓ Technical assessment: no answer key before answering; a finished one leaves skills, scores, readiness, next steps, recalculations and the streak unchanged');
+
+    // === Exam practice, study plans and resume-language checks are not career evidence (E2-E5) =====
+    // SQL and databases overlap the resume on purpose: a perfect database score must still add nothing
+    for (const [examId, body] of [
+      ['gate-cs-2026', { count: 4, mode: 'practice', sectionIds: ['db'] }],
+      ['ssc-cgl-2026-tier1', { count: 4, mode: 'practice' }],
+    ] as const) {
+      const attempt = (await A('POST', `/exams/${examId}/attempts`, body)).body.data;
+      assert.ok(attempt?.id, `${examId} attempt started`);
+      for (const q of attempt.questions) {
+        const key = QUESTIONS_BY_ID.get(q.questionId)!.answer;
+        const response = 'index' in key ? key.index : 'indices' in key ? key.indices : key.value;
+        assert.equal((await A('PUT', `/exams/attempts/${attempt.id}/answers`, { questionId: q.questionId, response })).status, 200);
+      }
+      const submitted = (await A('POST', `/exams/attempts/${attempt.id}/submit`)).body.data;
+      assert.equal(submitted.score.marks, submitted.score.maxMarks, `${examId}: every answer correct`);
+    }
+    const plan = (await A('PUT', '/exams/gate-cs-2026/plan', { hoursPerWeek: 6 })).body.data.plan;
+    assert.equal((await A('PATCH', `/exams/gate-cs-2026/plan/items/${plan.items[0].id}`, { status: 'done' })).status, 200);
+    assert.equal((await A('POST', '/languages/resume-analyses/text', { text: 'Habilidades\nPython, SQL, Docker y Kubernetes en producción.' })).status, 201);
+    assert.equal(await state(), before, 'exam practice, a study plan and a language check change no skill, match, readiness, next step or recalculation');
+    assert.equal((await A('GET', '/activity')).body.data.streak.current, streakBefore, 'nor the learning streak');
+    console.log('  ✓ Exam attempts (GATE, SSC), a completed study-plan item and a Spanish resume check leave skills, scores, readiness, next steps, recalculations and the streak unchanged');
 
     // === A completed interview: recommendations may follow, evidence may not ========================
     const session = (await A('POST', '/interviews', { mode: 'mixed', questionCount: 3 })).body.data;
