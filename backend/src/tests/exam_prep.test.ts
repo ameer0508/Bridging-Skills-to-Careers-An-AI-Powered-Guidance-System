@@ -4,7 +4,7 @@ import { pathToFileURL } from 'node:url';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { EXAMS, GATE_CS_2026, SSC_CGL_2026_TIER1, topicsOf } from '../seed/exams/examDefinitions.js';
-import { QUESTIONS, QUESTIONS_BY_ID, questionsFor } from '../services/exams/ExamPracticeService.js';
+import ExamPracticeService, { QUESTIONS, QUESTIONS_BY_ID, questionsFor } from '../services/exams/ExamPracticeService.js';
 import { isCorrect, markQuestion, responseProblem } from '../services/exams/examScoring.js';
 import { buildPlan, recommend, topicStatus, aggregateTopics } from '../services/exams/ExamStudyService.js';
 import ExamAttempt from '../models/ExamAttempt.js';
@@ -252,6 +252,38 @@ export async function runExamPrepTests() {
     await ExamAttempt.updateOne({ _id: s1.id }, { 'sections.1.deadline': new Date(Date.now() - 60_000) });
     assert.equal((await A('GET', `/exams/attempts/${s1.id}`)).body.data.timedOut, true, 'the last section ending ends the attempt');
     console.log('  ✓ Timing: whole-paper deadline (GATE) and in-order sectional timers (SSC) enforced on the server');
+
+    // === Race: an answer whose read is slow must not land after the submission scored the attempt ===
+    // Delays the answer's read of the attempt so the submission runs in between, as it could on a
+    // loaded server. Without the per-attempt lock the answer would be written after scoring.
+    const dave = await h.registerUser('exam-race');
+    const racedAttempt = (await h.api('POST', '/exams/gate-cs-2026/attempts', { token: dave.token, json: { count: 2, mode: 'practice' } })).body.data;
+    const slowQuestion = racedAttempt.questions[0].questionId;
+    const originalFindOne = ExamAttempt.findOne.bind(ExamAttempt);
+    let delayNext = true;
+    (ExamAttempt as unknown as { findOne: typeof ExamAttempt.findOne }).findOne = ((...args: Parameters<typeof ExamAttempt.findOne>) => {
+      const query = originalFindOne(...args);
+      if (!delayNext) return query;
+      delayNext = false;
+      return query.then(doc => new Promise(resolve => setTimeout(() => resolve(doc), 150))) as unknown as ReturnType<typeof ExamAttempt.findOne>;
+    }) as typeof ExamAttempt.findOne;
+    try {
+      const slowAnswer = ExamPracticeService.answer(dave.userId, racedAttempt.id, slowQuestion, 0).then(() => 'stored', (e: { code?: string }) => e.code);
+      await new Promise(r => setTimeout(r, 20));
+      await ExamPracticeService.submit(dave.userId, racedAttempt.id);
+      const outcomeOfAnswer = await slowAnswer;
+      const stored = await ExamAttempt.findById(racedAttempt.id).lean();
+      const item = stored!.items.find(i => i.questionId === slowQuestion)!;
+      // Either the answer was stored before scoring (and scored), or it was refused: never stored unscored
+      assert.ok(
+        (outcomeOfAnswer === 'stored' && item.response !== null && item.outcome !== 'unanswered') ||
+          (outcomeOfAnswer === 'ATTEMPT_COMPLETED' && item.response === null && item.outcome === 'unanswered'),
+        `answer ${outcomeOfAnswer}; stored response ${JSON.stringify(item.response)} with outcome ${item.outcome}`
+      );
+    } finally {
+      (ExamAttempt as unknown as { findOne: typeof ExamAttempt.findOne }).findOne = originalFindOne as typeof ExamAttempt.findOne;
+    }
+    console.log('  ✓ Race: an answer delayed past a submission is either scored or refused, never stored unscored');
 
     for (const [label, body] of [
       ['too many', { count: 41, mode: 'practice' }],

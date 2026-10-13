@@ -1,0 +1,43 @@
+# Security, isolation and input review (V2), 2026-10-13
+
+This review covers every route the backend serves. The routes are read from the Express router itself (`backend/src/tests/helpers/routeInventory.ts`), not from a hand-kept list, so a route added later is checked automatically. Suite: `backend/src/tests/security_sweep.test.ts`, registered in `runAllTests.ts`.
+
+## What is tested
+
+| Area | Check | Result |
+|---|---|---|
+| Sign-in | All 149 routes without a token. The 141 non-public routes also with four bad tokens: malformed, signed with another secret, expired, and missing "Bearer" | Only 8 reviewed public routes answer without a token: `/`, `/health`, `/api/v1`, the four auth endpoints, and the public portfolio link. Every other route refuses all five cases with 401. A new public route fails the suite until it is reviewed and added |
+| Path parameters | 59 parameterised routes × 8 values (`not-an-id`, `../../etc/passwd`, an encoded traversal, 400 characters, an operator object, an unknown id, `0`, `-1`), signed in | 464 probes, no server error |
+| Bodies | An 11 MB JSON body, malformed JSON, and an operator object as a field | 413, 400, 400 |
+| Isolation | Alice makes 25 successful requests that cover skills, the roadmap, recommendations, the portfolio, projects, exams and study plans, language analyses, interviews, technical assessments, AI chat, applications and transition plans. The 21 that name her own objects (15 reads and writes, 6 deletions or completions) are replayed unchanged by Bob | All 21 answer 403 or 404. Bob's lists contain none of her ids. Alice's data is identical afterwards |
+| Races | Answers fired together with two submissions; six simultaneous starts of one skill check; six saves of one job; six identical portfolio entries | Stored answers are exactly the scored ones; one attempt is opened; one job is saved; the project is credited once |
+| Administrators | Market imports, the three AI-observability endpoints, and infrastructure diagnostics | A user gets 403. An administrator is admitted. After demotion, 403 at once. A correctly signed token that claims "admin" for a user is refused |
+| Exposure | The public portfolio link; error responses; an unexpected server error | No e-mail address or ids on the public link. No stack traces or file paths in errors. An unexpected error's message (for example a database connection string) goes to the log, and the client gets a generic message |
+
+## Defects found and fixed
+
+1. **Administrator role trusted from the token** (market imports). `authorize(['admin'])` read the role from the access token. A promotion therefore needed a new sign-in, and **a demoted administrator kept access until the token expired**. `authorize` now reads the role from the database on every request, like the diagnostics guard. The AI-observability routes use the same middleware, replacing a duplicate.
+2. **Internal error messages sent to clients.** An unexpected exception's own message was returned in the response, and it can carry database or file details. It is now logged only.
+3. **Client errors labelled as server errors.** A 4xx thrown without a code was reported as `INTERNAL_SERVER_ERROR`. It now gets a code matching its status (`BAD_REQUEST`, `NOT_FOUND`, and so on).
+4. **Exam answer racing the submission** (E2/E3).
+   - An answer whose read of the attempt was delayed past a submission was then written on a stale copy. Mongoose rejected it as a version conflict, so the user saw a server error and the answer was lost.
+   - Everything that reads or changes one attempt (answers, section starts, submission, deadline expiry) now runs one call at a time.
+   - `exam_prep.test.ts` reproduces the race deterministically by delaying the read. The test fails with the lock removed and passes with it. The HTTP-level race check in the sweep did not reproduce the race on its own, so it is not counted as evidence for this fix.
+5. **Non-English upload file names** stored as mojibake, and client-supplied paths kept in file names. Fixed earlier in this milestone (`dad01dc`).
+
+## Covered by other suites, re-run here
+
+- **Voice recordings** (`voice_interviews`, `voice_retention`):
+  - consent is required, playback is owner-only, and uploads are validated;
+  - withdrawing consent makes every recording inaccessible at once;
+  - failed deletions are tracked and retried;
+  - the daily retention job removes expired files.
+  - The Docker workflow also checks file permissions, restart persistence and the retention job.
+- **Zero-cost policy** (`cost_policy`, `zero_cost_runtime`, AI `test_runtime_cost_enforcement`): paid providers stay blocked with keys present.
+- **AI audit log** (`test_observability.py`): no prompts, resume text or keys reach the log.
+
+## Not covered
+
+- Only one backend process was tested. The per-user locks are in process, and the per-user search and AI limits are in memory, so several backend instances would need a shared store for both.
+- No penetration test, dependency audit or TLS configuration review was done. The Docker deployment exposes the API through the bundled proxy and has not been reviewed beyond the smoke test.
+- Brute-force protection is the existing authentication rate limit: 15 attempts per 15 minutes per address. There is no per-account lockout.

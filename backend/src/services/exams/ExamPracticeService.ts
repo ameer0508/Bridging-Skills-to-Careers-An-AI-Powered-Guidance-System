@@ -7,6 +7,13 @@ import { SSC_CGL_QUESTIONS } from '../../seed/exams/sscCglQuestions.js';
 import type { PracticeQuestion } from '../../seed/exams/questionTypes.js';
 import { markQuestion, penaltyFor, responseProblem, round2 } from './examScoring.js';
 import { AppError } from '../../middlewares/errorHandler.js';
+import { withUserLock } from '../../utils/userLock.js';
+
+/**
+ * Everything that reads or changes one attempt runs one call at a time (answers, section starts,
+ * submission and deadline expiry), so an answer can never be written after the attempt was scored.
+ */
+const attemptLock = <T>(attemptId: string, task: () => Promise<T>) => withUserLock(`exam-attempt:${attemptId}`, task);
 
 /**
  * Exam practice attempts (E2, E3); see docs/EXAM_PREP.md.
@@ -160,15 +167,27 @@ class ExamPracticeService {
   async list(userId: string, examId: string) {
     examOrThrow(examId);
     const attempts = await ExamAttempt.find({ userId, examId }).sort({ createdAt: -1 }).limit(50);
-    for (const a of attempts) await this.expireIfDue(a);
-    return attempts.map(a => this.summary(a));
+    const current = [];
+    for (const a of attempts) {
+      // Re-read under the attempt's lock, so an expiry cannot interleave with an answer
+      current.push(await attemptLock(String(a._id), async () => {
+        const fresh = (await ExamAttempt.findById(a._id)) ?? a;
+        await this.expireIfDue(fresh);
+        return fresh;
+      }));
+    }
+    return current.map(a => this.summary(a));
   }
 
   async get(userId: string, attemptId: string) {
-    return this.view(await this.owned(userId, attemptId));
+    return attemptLock(attemptId, async () => this.view(await this.owned(userId, attemptId)));
   }
 
-  async answer(userId: string, attemptId: string, questionId: string, response: unknown) {
+  answer(userId: string, attemptId: string, questionId: string, response: unknown) {
+    return attemptLock(attemptId, () => this.answerNow(userId, attemptId, questionId, response));
+  }
+
+  private async answerNow(userId: string, attemptId: string, questionId: string, response: unknown) {
     const attempt = await this.owned(userId, attemptId);
     if (attempt.status !== 'active') {
       throw new AppError(attempt.timedOut ? 'Time is up: this attempt has been submitted.' : 'This attempt has been submitted.', 409, attempt.timedOut ? 'TIME_UP' : 'ATTEMPT_COMPLETED');
@@ -201,7 +220,11 @@ class ExamPracticeService {
   }
 
   /** Sectional timing: start the next section, which closes the current one for good. */
-  async startSection(userId: string, attemptId: string, sectionId: string) {
+  startSection(userId: string, attemptId: string, sectionId: string) {
+    return attemptLock(attemptId, () => this.startSectionNow(userId, attemptId, sectionId));
+  }
+
+  private async startSectionNow(userId: string, attemptId: string, sectionId: string) {
     const attempt = await this.owned(userId, attemptId);
     const exam = examOrThrow(attempt.examId);
     if (attempt.status !== 'active') throw new AppError('This attempt has been submitted.', 409, 'ATTEMPT_COMPLETED');
@@ -223,7 +246,11 @@ class ExamPracticeService {
     return this.view(attempt);
   }
 
-  async submit(userId: string, attemptId: string) {
+  submit(userId: string, attemptId: string) {
+    return attemptLock(attemptId, () => this.submitNow(userId, attemptId));
+  }
+
+  private async submitNow(userId: string, attemptId: string) {
     const attempt = await this.owned(userId, attemptId);
     if (attempt.status === 'active') {
       this.finish(attempt);

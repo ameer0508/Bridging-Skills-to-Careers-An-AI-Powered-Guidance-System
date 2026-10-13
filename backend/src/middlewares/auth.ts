@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken } from '../utils/jwt.js';
+import { User } from '../models/User.js';
 
 /**
  * Middleware to authenticate requests via JWT Bearer tokens.
@@ -45,9 +46,14 @@ export const requireAuth = authenticate;
 /**
  * Middleware factory to authorize user actions based on roles (RBAC).
  */
+/**
+ * Allows only the given roles. The role is read from the database on every request, not from the
+ * token: a promotion takes effect at once, and a demoted account loses access immediately even
+ * while its token is still valid. Roles change only by a direct database update; no API sets them.
+ */
 export const authorize = (roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {
-    if (!req.user || !roles.includes(req.user.role)) {
+    const deny = () =>
       res.status(403).json({
         success: false,
         error: {
@@ -55,9 +61,15 @@ export const authorize = (roles: string[]) => {
           message: 'Access denied: insufficient permissions.',
         },
       });
+    if (!req.user?.userId) {
+      deny();
       return;
     }
-    next();
+    User.findById(req.user.userId)
+      .select('role')
+      .lean()
+      .then(user => (user?.role && roles.includes(user.role) ? next() : deny()))
+      .catch(next);
   };
 };
 

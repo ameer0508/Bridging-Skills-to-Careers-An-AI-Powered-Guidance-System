@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import AiObservabilityService from '../services/aiObservability/AiObservabilityService.js';
 import { AppError } from '../middlewares/errorHandler.js';
-import { User } from '../models/User.js';
 
 type Handler = (req: Request, res: Response) => Promise<void>;
 const handle = (fn: Handler) => (req: Request, res: Response, next: NextFunction): void => {
@@ -29,17 +28,6 @@ const readQuery = (req: Request, allowed: Record<string, { min: number; max: num
     out[key] = value;
   }
   return out;
-};
-
-/** Administrators only. The role is read from the database on each request, not from the token. */
-export const requireAdmin = (req: Request, res: Response, next: NextFunction): void => {
-  User.findById(req.user?.userId)
-    .select('role')
-    .then(user => {
-      if (user?.role === 'admin') return next();
-      res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Administrator access is required.' } });
-    })
-    .catch(next);
 };
 
 class AiObservabilityController {

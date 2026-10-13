@@ -17,6 +17,16 @@ export class AppError extends Error {
   }
 }
 
+const STATUS_CODES: Record<number, string> = {
+  400: 'BAD_REQUEST',
+  401: 'UNAUTHORIZED',
+  403: 'FORBIDDEN',
+  404: 'NOT_FOUND',
+  409: 'CONFLICT',
+  413: 'PAYLOAD_TOO_LARGE',
+  429: 'RATE_LIMITED',
+};
+
 export const errorHandler = (
   err: Error | AppError,
   req: Request,
@@ -61,8 +71,13 @@ export const errorHandler = (
   // Handle standard application or unexpected exceptions
   const appErr = err as AppError;
   const statusCode = appErr.statusCode || 500;
-  const errorCode = appErr.code || 'INTERNAL_SERVER_ERROR';
-  const errorMessage = appErr.message || 'An unexpected error occurred on the server.';
+  // A client error thrown without a code still gets one that matches its status
+  const errorCode = appErr.code || STATUS_CODES[statusCode] || (statusCode < 500 ? 'BAD_REQUEST' : 'INTERNAL_SERVER_ERROR');
+  // An unexpected server error's own message can carry internal details (database, file paths):
+  // it goes to the log only. Errors raised on purpose with a code keep their message.
+  const errorMessage = statusCode >= 500 && !appErr.code
+    ? 'An unexpected error occurred on the server.'
+    : appErr.message || 'An unexpected error occurred on the server.';
 
   logger.error(
     `[Error Trace] ${req.method} ${req.originalUrl} - ${statusCode} - ${appErr.stack || errorMessage}`
