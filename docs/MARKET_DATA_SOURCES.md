@@ -73,6 +73,43 @@ The operator must still set `SKILLBRIDGE_ONJOB_FEED_TERMS_ACCEPTED=true`, after 
 | Employer ATS feeds (Greenhouse, Lever and similar) | Per employer | Listings on each company's board | Not assumed redistributable; no employer has granted SkillBridge anything. Not used |
 | Adzuna | Aggregation "(including but not limited to vacancy counts, average salaries etc)" needs written consent | Indian listings | Unchanged: blocked until written consent at ₹0 |
 
+### 2a. Third search, focused on government and open datasets (2026-10-13)
+
+**What the items need, per their definitions** (`NEXTGEN_IMPLEMENTATION_MATRIX.md`):
+- C3: salary insights from **posting salaries**;
+- C4: skill frequency over time **from stored postings**;
+- C1: dated posting records;
+- C2, C5 and R4: built on C1.
+
+So a source must supply **Indian job postings** that may be stored and aggregated. Earnings surveys or national totals cannot meet these items without changing the criteria, and the criteria are not changed.
+
+| Source | Licence | Coverage | Verdict |
+|---|---|---|---|
+| NCS vacancy tables on [data.gov.in](https://www.data.gov.in/catalog/national-career-service-ncs) (Ministry of Labour and Employment) | NDSAP / GODL-India (reuse with attribution) | State-wise and year-wise counts of vacancies "mobilised" on the NCS portal, e.g. [as on 15-11-2024](https://www.data.gov.in/resource/state-wise-number-vacancies-mobilised-through-national-career-service-ncs-portal-15-11) and [2021-22 to 2023-24](https://www.data.gov.in/resource/stateut-wise-number-vacancies-mobilized-through-national-career-service-ncs-portal-2021-22), mostly drawn from answers to Parliament. Third-party mirrors list monthly series by sector and education level; no official machine-readable monthly series by occupation was found. data.gov.in refused automated reading (HTTP 403), so the pages were found through search | Permitted, but **no role, salary, skill or description data** and irregular dates: cannot feed C1–C5 or R4. National context only |
+| [India Tech Career Intelligence [1M]](https://data.mendeley.com/datasets/h2rmbfr68t) (Mendeley Data, v1, 22 June 2026) | CC BY 4.0 | 1,000,000 records, 33 features, including salary and skills. The page says only "aggregated from publicly available sources"; no source is named and no time coverage is given | **Rejected.** The upstream rights cannot be checked and the records cannot be verified as real postings: a CC BY label does not cure unknown upstream content |
+| [Indeed Hiring Lab job postings tracker](https://github.com/hiring-lab/job_postings_tracker) | CC BY 4.0 ("freely available for public use, as long as Indeed Hiring Lab is cited") | Daily posting indexes for AU, CA, DE, ES, FR, GB, IE, IT, NL, US and the euro area | **India is not covered.** Not usable |
+| Techmap (AWS Marketplace), TheirStack | Commercial | Indian postings | Paid: excluded by the ₹0 rule |
+| Official earnings statistics (PLFS via MoSPI, ILOSTAT) and developer salary surveys | Open licences (not re-verified, because the scope rules them out) | Earnings by broad occupation group, or self-reported pay | **Not posting salaries**: they cannot satisfy C3 as defined, and showing them as a career's advertised pay would conflate different measures |
+
+**Result.** No ₹0 source with a verified licence provides stored Indian job postings. The **most promising provider remains OnJob.io**. Its feed already carries dated India postings with listed skills and INR pay (480 India listings on 2026-10-13), so written permission for uses 2–8 would unblock the items in this order:
+- C1 and C4 at once;
+- C3 with role-validity checks;
+- C5 and R4 once the statistics are valid and stable;
+- C2 after enough dated months exist.
+
+The request in §5 asks for exactly those uses.
+
+### 2b. Exactly what each pending item lacks
+
+| Item | Missing permission or dataset |
+|---|---|
+| C1 | Written permission to keep dated India postings after they close and to count them per role and city (OnJob uses 2–4), or another licensed posting source |
+| C2 | C1's permission, then enough genuine dated history to backtest (the module's minimums); no free Indian history exists today |
+| C3 | Written permission to compute advertised-salary statistics from postings (OnJob use 5) |
+| C4 | Written permission to compute skill frequencies from stored postings (OnJob use 6) |
+| C5 | Valid, stable statistics from C1/C3 under a permission covering recommendations (OnJob use 8) |
+| R4 | Same as C5, plus recomputation on sourced updates |
+
 **Not used under any circumstances:** Naukri, LinkedIn, Indeed, Foundit and similar sites, whose terms forbid scraping.
 
 ## 3. Decision per item

@@ -1,12 +1,12 @@
 # Voice acceptance evidence (D1 recordings, D2 dictation)
 
-Review date: 2026-10-13. Procedure and award rule: [`MANUAL_VOICE_TEST_PLAN.md`](MANUAL_VOICE_TEST_PLAN.md).
+Review dates: 2026-10-13 (Edge results), updated the same day with the owner's follow-up results (Edge A1–A3, Firefox B6, Edge C3 on `b7c2e91`). Procedure and award rule: [`MANUAL_VOICE_TEST_PLAN.md`](MANUAL_VOICE_TEST_PLAN.md).
 
 **Award rule (unchanged):**
 - **D1** is awarded when A1–A12 and C1–C4 pass in both Chrome and Edge.
 - **D2** is awarded when B1–B6 and B8 pass in both, B4's accuracy is recorded, and B7 is passed or reported as not offered.
 
-**Decision: D1 pending, D2 pending.** Every step the owner ran in Microsoft Edge passed, but the rule also requires Chrome (not tested by hand or automatically) and Firefox for B6 (not installed). §4 lists the smallest set that would complete them.
+**Decision: D1 pending, D2 pending.** Every step required in Microsoft Edge now passes by the owner's hand, and Firefox B6 passes. **The only gap is Google Chrome**, which the award rule names and which the owner has explicitly chosen not to test. With no Chrome evidence of any kind, the rule is not met, and the points are not awarded. See §4.
 
 ## 1. Kinds of evidence
 
@@ -19,15 +19,15 @@ Review date: 2026-10-13. Procedure and award rule: [`MANUAL_VOICE_TEST_PLAN.md`]
 
 ## 2. Owner's results (as reported; Microsoft Edge on Windows, real microphone, Narrator)
 
-The owner did not repeat the procedure in Google Chrome (by choice). Firefox is not installed.
+All results below are **reported by the owner**, not produced by automation. The owner explicitly skipped Google Chrome. B6 was run in Firefox.
 
 ### D1: recording
 
 | Step | Owner (Edge) | Automated evidence | Status for Edge |
 |---|---|---|---|
-| A1 No microphone request before consent | Not documented | Real codec: `getUserMedia` called 0 times before consent and 0 after consent until "Record answer" | **Automated only** |
-| A2 Consent panel, focus and wording | Not documented as a step; the owner's C2 (Narrator read the consent panel) covers the text | Stand-in: focus moves into the panel; text states server storage, owner-only, no AI or third party, no transcription, no score effect, withdrawal deletes all | **Partly owner (C2), automated** |
-| A3 Choose retention; browser asks for permission | Not documented | Retention choice stored (7 days, and "until this round ends"); the permission prompt itself is not observed by automation (auto-accepted) | **Partly verified**: retention yes, permission prompt not observed |
+| A1 No microphone request before consent | **Pass** (follow-up): no microphone request before recording consent | Real codec: `getUserMedia` called 0 times before consent and 0 after consent until "Record answer" | Pass |
+| A2 Consent panel, focus and wording | **Pass** (follow-up): "the recording consent flow worked"; C2: Narrator read the panel | Stand-in: focus moves into the panel; text states server storage, owner-only, no AI or third party, no transcription, no score effect, withdrawal deletes all | Pass |
+| A3 Choose retention; browser asks for permission | **Pass** (follow-up): Edge asked for microphone permission only when the owner clicked "Record answer" | Retention choice stored (7 days, and "until this round ends") | Pass |
 | A4 Real recording; microphone released on stop | Pass ("actual microphone recording worked") | Real codec: track `ended` after stop | Pass |
 | A5 Audible playback | Pass | Real codec: decoded 3.00 s at 453 Hz (source 440 Hz), not silent | Pass |
 | A6 Survives reload | Pass | Real codec: byte-identical after reload | Pass |
@@ -47,7 +47,7 @@ The owner did not repeat the procedure in Google Chrome (by choice). Firefox is 
 | B3 Edited text is what is stored | Pass | Stand-in: stored as `mixed`, edited text stored and scored | Pass |
 | B4 Technical vocabulary | **4 of 5 right**: Redis, token bucket, rate limiter, Kubernetes; **PostgreSQL wrong** | — | Recorded (an accuracy figure, not a pass/fail; the text stays editable) |
 | B5 Blocked microphone: clear error, typing works | Pass | Real Edge recogniser with a refused microphone: message shown each time | Pass |
-| B6 Firefox: dictation unavailable, typing works | **Not tested** (Firefox not installed) | Stand-in: a browser without SpeechRecognition gets the typed fallback | **Not tested by hand** |
+| B6 Firefox: dictation unavailable, typing works | **Pass** (follow-up, Firefox): unsupported speech recognition handled clearly; typing and submitting the answer worked | Stand-in: a browser without SpeechRecognition gets the typed fallback | Pass |
 | B7 On-device, offline | **N/A**: Edge's consent panel showed on-device unavailable | Real Edge API: on-device "unavailable" | N/A (honestly reported as not offered) |
 | B8 Stop releases the microphone; turning off removes Dictate | Pass | Stand-in | Pass |
 
@@ -57,7 +57,7 @@ The owner did not repeat the procedure in Google Chrome (by choice). Firefox is 
 |---|---|---|
 | C1 Keyboard only, visible focus | Pass (dictation, recording, stop and playback) | Pass |
 | C2 Narrator reads both consent panels | Pass | Pass |
-| C3 Errors announced without moving focus | **First attempt: only one of the two permission errors was announced. Retest: both were announced** | Pass on retest; the first-attempt inconsistency is recorded, see §3 |
+| C3 Errors announced without moving focus | First attempt: only one of the two permission errors was announced. Retest: both. **Follow-up retest on `b7c2e91` (with the hardening in §3): Narrator announced both the recording and the dictation permission errors without moving focus** | Pass; the first-attempt inconsistency stays recorded, see §3 |
 | C4 Button names read (Record answer, Stop recording with duration, Listen) | Pass | Pass |
 
 ## 3. Investigation of the C3 inconsistency
@@ -71,26 +71,15 @@ The owner did not repeat the procedure in Google Chrome (by choice). Firefox is 
   - Both controls now keep an empty `role="alert"` region mounted from the start (`AnnouncedError.tsx`, `useAnnouncedError.ts`).
   - Every error is rendered as a new node in it, so even an identical repeated message is a fresh announcement.
 - **Regression check.** `voiceRealCodec.mjs` (denied-microphone step) asserts that both regions exist and are empty before any error, and that two refusals in a row add two nodes, for recording and for the real Edge recogniser. Edge: pass.
-- **Note.** The owner's C3 retest ran on the code before this hardening. A future manual check on the current code should confirm that it still announces both errors.
+- **Confirmed on the hardened code.** The owner retested C3 on `b7c2e91`, which includes this hardening: both errors were announced without moving focus.
 
-## 4. What remains, and the smallest set that completes it
+## 4. What remains
 
-| Requirement | Missing | Why it cannot be skipped |
+| Requirement | Status | Why it is still required |
 |---|---|---|
-| D1 in **Chrome** (A1–A12, C1–C4) | No manual run. No automated run either: Chrome is not installed | The award rule names Chrome. Capture, codec and playback depend on the browser |
-| D2 in **Chrome** (B1–B5, B8) | No manual run | Chrome's recognition is a different service (Google's) from Edge's |
-| B6 in **Firefox** | Not installed | The award rule names it; it is the real "no speech recognition" browser |
-| A1 and A3 in Edge, by hand | Not documented | A1 is covered by automation (no request before consent); A3's permission prompt was not observed |
+| D1 in **Chrome** (A1–A12, C1–C4) | **Not tested**, by the owner's explicit choice. No automated run either: Chrome is not installed on the development machine | The award rule names Chrome. Capture, codec and playback depend on the browser |
+| D2 in **Chrome** (B1–B5, B8) | **Not tested**, by the owner's explicit choice | Chrome's recognition is a different service (Google's) from Edge's |
 
-**Smallest set that satisfies the rule** (about 15 minutes, once Chrome and Firefox are installed; both are free):
-1. SkillBridge then runs the real-codec suite in Chrome (`E2E_CODEC_CHANNELS=chrome`). That covers A1, A2 and A6–A11 in real Chrome, because those steps check state the server holds and show nothing the owner would see differently.
-2. The owner, in **Chrome** with the microphone:
-   - **A3–A5**: first permission prompt, record, listen.
-   - **A12**: block the microphone.
-   - **B1–B5**: dictation consent, speak, edit and submit, technical sentence, block.
-   - **B8**: stop and turn off.
-   - **C1–C4** while doing the above: keyboard, Narrator reading the consent panels, errors announced, button names.
-3. The owner, in **Firefox**: **B6** only.
-4. The owner, in **Edge**: reset the site's microphone permission (lock icon → Reset permissions), then **A1–A3**, about a minute.
+Everything else in the rule is satisfied: Edge A1–A12, B1–B5, B8 and C1–C4 by the owner; B4 recorded (4 of 5); B6 in Firefox by the owner; B7 not offered in Edge.
 
-If the owner prefers a full manual Chrome run instead of step 1, that also satisfies the rule.
+**Consequence.** D1 (3 points) and D2 (2 points) stay pending for as long as there is no Chrome evidence. As instructed, no further Chrome testing is requested here, and the acceptance criteria are not changed.
