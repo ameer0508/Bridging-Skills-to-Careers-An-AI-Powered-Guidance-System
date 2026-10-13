@@ -254,3 +254,20 @@ All ran after the last code change (`91b73e5`):
 - **`ai_gateway.py`:** X11 adds audit calls and `metadata.observability`. Routing and policy are unchanged. If Agent A has edited the gateway, merge by hand.
 - **Lexicon and taxonomy:** E1 does not change Agent A's lexicon, taxonomy or scoring. The patch is documented for Agent A to apply.
 - **Reported to Agent A:** `middlewares/upload.ts` probably decodes UTF-8 file names as Latin-1. The language upload has its own fix; the shared file was not changed.
+
+## Single-agent milestones U1–U5 (2026-10-13)
+
+From 2026-10-13 this session is the only developer, working on `work/skillbridge-unified` and fast-forwarding `work/skillbridge-opus55-nextgen-expansion`. The checklist (`docs/NEXTGEN_CHECKLIST.md`) is the authority; this entry only records the path.
+
+| Milestone | Expansion head | Checklist | Content |
+|---|---|---|---|
+| U1 | `af0464a` | 54 | Merged the M3 snapshot `34b98f5` into the expansion branch at `5b58863`; conflicts kept both sides |
+| U2 | `d7a4655` | 66 | E1–E5, X9 and X11 accepted after fixes: contradiction cap, durable audit scope, E1 integration, Devanagari glyph recovery, upload file names |
+| U3 | `1db5f6e` | 66 | V2 sweep and fixes; V3 axe scan and fixes; X12 account deletion and log retention; landing-page claims; portfolio duplicate credit by repository |
+| U4 | (docs) | 66 | No free, compliant Indian market source; options in `MARKET_DATA_SOURCES.md` |
+| U5 | `d4264f6` + checklist | **77** | Final verification: 56 backend suites, 179 AI tests, 12 browser suites, Docker run 38377392127; V1–V5 and X12 awarded |
+
+**Open:**
+- Market items (17 points): need a licensed source.
+- D1 and D2 (5 points): need the owner's manual microphone test.
+- X1 (1 point): needs OCR approval.

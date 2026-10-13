@@ -25,16 +25,16 @@
 
 | Check | Result |
 |---|---|
-| Backend suites (`runAllTests.ts`) | All pass, including `security_sweep`, `account_deletion` and `api_reference` |
+| Backend suites (`runAllTests.ts`) | 56 of 56 pass, including `security_sweep`, `account_deletion` and `api_reference` |
 | AI service (`pytest`) | 179 passed |
-| Browser suites (12) | smoke, market, salaries, applications, outcomes, interviews, exams, careerDomains, languages, aiObservability, landing, accessibility |
+| Browser suites (12) | smoke 50/50, market 15/15, salaries 14/14, applications 15/15, outcomes 10/10, interviews 23/23, exams 12/12, careerDomains 8/8, languages 10/10, aiObservability 6/6, landing 6/6, accessibility 53/53 |
 | Typecheck, lint, production build | Pass (frontend and backend) |
-| Docker Compose (GitHub Actions) | Pass: build, health, auth, the resume-to-career workflow, persistence across restart, recording retention, AI audit file permissions and privacy |
+| Docker Compose (GitHub Actions) | Run 38377392127 on `d4264f6` passes: build, health, auth, the resume-to-career workflow, persistence across restart, recording retention, AI audit file permissions and privacy |
 | Security (V2) | `SECURITY_REVIEW.md`: 149 routes swept, isolation replay, races, admin role, exposure |
 | Accessibility (V3) | `ACCESSIBILITY.md`: axe on 50 pages, 0 serious or critical violations; keyboard sign-in |
 | API reference | Every route listed (enforced by `api_reference.test.ts`) |
 
-The exact counts and run ids are in the checklist's V rows and the ledger.
+All figures are from the final tree `d4264f6` on 2026-10-13. **Checklist: 77 / 100 verified; 23 open** (section 4).
 
 ## 3. Honesty rules applied
 
