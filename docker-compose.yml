@@ -36,6 +36,11 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY:-}
       - GEMINI_MODEL=${GEMINI_MODEL:-}
       - CORS_ALLOWED_ORIGINS=
+      # AI observability (X11): codes and timings only, owner-only files, purged after the retention period
+      - AI_AUDIT_DIR=/app/storage/ai-audit
+      - AI_AUDIT_RETENTION_DAYS=${AI_AUDIT_RETENTION_DAYS:-14}
+    volumes:
+      - ai-storage:/app/storage
     networks:
       - skillbridge-network
     healthcheck:
@@ -100,3 +105,4 @@ networks:
 volumes:
   mongo-data:
   backend-storage:
+  ai-storage:

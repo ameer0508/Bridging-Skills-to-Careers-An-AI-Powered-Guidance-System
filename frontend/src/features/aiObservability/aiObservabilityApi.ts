@@ -22,6 +22,14 @@ export interface ServiceStats {
   fallbacks: number;
 }
 
+export interface Scope {
+  source: 'memory' | 'files';
+  coverage: string;
+  instanceId: string;
+  processStartedAt: string;
+  writeFailures: number;
+}
+
 export interface Summary {
   windowHours: number;
   events: number;
@@ -29,6 +37,7 @@ export interface Summary {
   services: Record<string, ServiceStats>;
   retentionDays: number;
   persisted: boolean;
+  scope?: Scope;
 }
 
 export interface AuditEvent {

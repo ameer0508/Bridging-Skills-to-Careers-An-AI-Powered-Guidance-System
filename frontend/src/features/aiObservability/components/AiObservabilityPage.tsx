@@ -30,8 +30,19 @@ export const AiObservabilityPage: React.FC = () => {
         <p className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]">
           <ShieldCheck size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
           Decisions, failure categories and timings from the AI gateway. Prompts, resume text, error messages and keys are never recorded.
-          {summary.data && ` Events are kept for ${summary.data.retentionDays} days${summary.data.persisted ? ' (in memory and daily files)' : ' (in memory only; cleared when the AI service restarts)'}.`}
+          {summary.data && ` Events are kept for ${summary.data.retentionDays} days${summary.data.persisted ? ' in private daily files' : ' in memory only'}.`}
         </p>
+        {summary.data?.scope && (
+          <p
+            data-testid="observability-scope"
+            data-source={summary.data.scope.source}
+            className={`rounded-[var(--radius-md)] border p-3 text-sm ${summary.data.scope.source === 'memory' ? 'border-amber-500 bg-amber-50 text-amber-900' : 'border-[var(--color-border-default)] text-[var(--color-text-secondary)]'}`}
+          >
+            <strong>What these figures cover:</strong> {summary.data.scope.coverage}
+            {summary.data.scope.source === 'memory' && ` This process started ${summary.data.scope.processStartedAt.slice(0, 16).replace('T', ' ')} UTC. Set AI_AUDIT_DIR for a record that survives restarts and covers every process.`}
+            {summary.data.scope.writeFailures > 0 && ` ${summary.data.scope.writeFailures} event(s) could not be written to the files and are missing from these figures.`}
+          </p>
+        )}
         <label className="flex items-center gap-2 text-sm">
           Time window
           <select aria-label="Time window" value={windowHours} onChange={e => setWindowHours(Number(e.target.value))} className="rounded border border-[var(--color-border-default)] bg-transparent px-2 py-1">

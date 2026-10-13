@@ -55,6 +55,8 @@ export async function run({ webUrl, apiUrl, tmpDir }) {
       const stats = await page.getByTestId('provider-stats').innerText();
       expect(/mock/.test(stats) && /12 ms \/ 12 ms/.test(stats) && /chat_architect/.test(stats), `stats: ${stats}`);
       expect((await page.getByText(/kept for 14 days/).count()) === 1, 'the retention period is not stated');
+      const scope = page.getByTestId('observability-scope');
+      expect((await scope.getAttribute('data-source')) === 'memory' && /This AI-service process only/.test(await scope.innerText()), 'figures from one process are not labelled as such');
       expect(/success/.test(await page.getByTestId('audit-events').innerText()), 'events are not listed');
     });
 

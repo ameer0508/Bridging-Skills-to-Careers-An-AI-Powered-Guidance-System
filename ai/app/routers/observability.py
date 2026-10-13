@@ -18,7 +18,7 @@ async def summary(window_hours: float = Query(24, gt=0, le=24 * 90)):
 
 @router.get("/events")
 async def events(limit: int = Query(100, ge=1, le=500), window_hours: float = Query(24, gt=0, le=24 * 90)):
-    return {"success": True, "data": {"events": audit_log.events(limit=limit, window_hours=window_hours), "retentionDays": audit_log.retention_days}}
+    return {"success": True, "data": {"events": audit_log.events(limit=limit, window_hours=window_hours), "retentionDays": audit_log.retention_days, "scope": audit_log.scope()}}
 
 
 @router.get("/providers")

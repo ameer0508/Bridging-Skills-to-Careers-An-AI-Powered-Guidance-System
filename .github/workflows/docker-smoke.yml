@@ -100,11 +100,30 @@ jobs:
       - name: 5, 7, 8. Connectivity, authentication and the resume-to-career workflow
         run: node e2e/docker-smoke.mjs
 
+      - name: AI audit log is written to private files and holds no request content (X11)
+        run: |
+          # One gateway request with a recognisable prompt; no provider keys are set, so nothing leaves the stack
+          docker compose exec -T backend node -e "fetch('http://ai-service:8000/api/v1/chat',{method:'POST',headers:{'Content-Type':'application/json','X-Internal-Service-Key':process.env.INTERNAL_SERVICE_KEY},body:JSON.stringify({prompt:'AUDIT-CANARY Priya Sharma priya@example.com'})}).then(r=>console.log('chat:',r.status))"
+          summary() { docker compose exec -T ai-service python -c "import json,os,urllib.request as u; r=u.urlopen(u.Request('http://127.0.0.1:8000/api/v1/observability/summary?window_hours=24',headers={'X-Internal-Service-Key':os.environ['INTERNAL_SERVICE_KEY']})); d=json.load(r)['data']; print(d['events'], d['scope']['source'])"; }
+          read events source <<< "$(summary)"
+          echo "audit events: $events ($source)"
+          test "$source" = "files" && test "$events" -gt 0
+          echo "$events" > audit-before.txt
+          # Owner-only directory and files, and no prompt text or e-mail address in them
+          docker compose exec -T ai-service sh -c 'stat -c "%a" /app/storage/ai-audit' | tr -d '[:space:]' | grep -qx 700
+          docker compose exec -T ai-service sh -c 'ls /app/storage/ai-audit/*.jsonl | wc -l' | tr -d '[:space:]' | grep -vqx 0
+          docker compose exec -T ai-service sh -c 'find /app/storage/ai-audit -type f -perm /077 | wc -l' | tr -d '[:space:]' | grep -qx 0
+          ! docker compose exec -T ai-service sh -c 'cat /app/storage/ai-audit/*.jsonl' | grep -Eqi 'canary|priya|example\.com'
+
       - name: Data survives a restart of every container
         run: |
           docker compose restart
           docker compose up -d --wait --wait-timeout 300
           node e2e/docker-smoke.mjs --verify
+          # The restarted AI service still reports the audit events recorded before
+          after=$(docker compose exec -T ai-service python -c "import json,os,urllib.request as u; r=u.urlopen(u.Request('http://127.0.0.1:8000/api/v1/observability/summary?window_hours=24',headers={'X-Internal-Service-Key':os.environ['INTERNAL_SERVICE_KEY']})); print(json.load(r)['data']['events'])" | tr -d '[:space:]')
+          echo "audit events after restart: $after (before: $(cat audit-before.txt))"
+          test "$after" -ge "$(cat audit-before.txt)"
 
       - name: Interview recordings live on the private storage volume and the retention job removes expired ones
         run: |

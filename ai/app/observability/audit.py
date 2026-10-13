@@ -4,14 +4,20 @@ AI gateway observability (X11): what the gateway decided and why, with timing, a
 Privacy by construction: an event holds only the service name, the provider name, an event kind,
 a reason or failure *category* code, the attempt number, a latency and whether the service carries
 personal data. Prompts, payloads, responses, resume text, error messages and credentials are never
-passed in, so they cannot be stored. Events are kept in memory and, when AI_AUDIT_DIR is set, in
-daily JSON-lines files; both are purged after AI_AUDIT_RETENTION_DAYS (default 14, at most 90).
+passed in, so they cannot be stored. Both stores are purged after AI_AUDIT_RETENTION_DAYS (default
+14, at most 90).
+
+Scope. Without AI_AUDIT_DIR, events live in this process's memory only: they cover one AI-service
+process since it started and are lost on restart. With AI_AUDIT_DIR, every process appends to its
+own daily file (owner-only permissions) and reads merge all files in the directory, so figures
+survive restarts and include every process sharing the directory. Every summary states which.
 """
 from __future__ import annotations
 
 import json
 import os
 import re
+import secrets
 import threading
 import time
 from collections import deque
@@ -36,9 +42,12 @@ EVENT_KINDS = {
 FAILURE_CATEGORIES = ("quota", "timeout", "rate_limited", "auth", "network", "invalid_output", "server_error", "other")
 
 MAX_EVENTS = 5000
+MAX_FILE_EVENTS = 200_000
 DEFAULT_RETENTION_DAYS = 14
 MAX_RETENTION_DAYS = 90
 _SAFE = re.compile(r"^[a-z0-9_.:-]{1,64}$")
+# Daily files, one per process: ai-audit-YYYY-MM-DD-<instance>.jsonl (the older unsuffixed name is still read and purged)
+_FILE = re.compile(r"ai-audit-(\d{4}-\d{2}-\d{2})(?:-[0-9a-f]{8})?\.jsonl")
 
 
 def categorize_failure(message: str) -> str:
@@ -86,6 +95,28 @@ class AuditEvent:
         d["at"] = datetime.fromtimestamp(self.at, tz=timezone.utc).isoformat()
         return d
 
+    @classmethod
+    def from_dict(cls, d: dict) -> Optional["AuditEvent"]:
+        """Reads a stored line back; anything malformed or unexpected is skipped, not trusted."""
+        try:
+            kind = d["kind"]
+            if kind not in EVENT_KINDS:
+                return None
+            skipped = d.get("skipped") or {}
+            return cls(
+                at=datetime.fromisoformat(d["at"]).timestamp(),
+                kind=kind,
+                service=_code(d.get("service")) or "unspecified",
+                provider=_code(d.get("provider")),
+                reason=_code(d.get("reason")),
+                attempt=int(d["attempt"]) if d.get("attempt") is not None else None,
+                latency_ms=float(d["latency_ms"]) if d.get("latency_ms") is not None else None,
+                personal_data=bool(d.get("personal_data", True)),
+                skipped={_code(k) or "unspecified": _code(v) or "unspecified" for k, v in skipped.items()} if isinstance(skipped, dict) else {},
+            )
+        except (KeyError, TypeError, ValueError, AttributeError):
+            return None
+
 
 def _percentile(values: List[float], p: float) -> Optional[float]:
     if not values:
@@ -104,6 +135,10 @@ class AuditLog:
         self._clock = clock
         self._events: Deque[AuditEvent] = deque(maxlen=max_events)
         self._lock = threading.Lock()
+        # Names this process's files; random, so it reveals nothing about the host
+        self.instance_id = secrets.token_hex(4)
+        self.started_at = clock()
+        self.write_failures = 0
 
     # -- recording ------------------------------------------------------------------------------
     def record(self, kind: str, service: str, provider: Optional[str] = None, reason: Optional[str] = None,
@@ -130,14 +165,17 @@ class AuditLog:
 
     def _append_file(self, event: AuditEvent) -> None:
         try:
-            os.makedirs(self.directory, exist_ok=True)
+            os.makedirs(self.directory, mode=0o700, exist_ok=True)
             day = datetime.fromtimestamp(event.at, tz=timezone.utc).strftime("%Y-%m-%d")
-            with open(os.path.join(self.directory, f"ai-audit-{day}.jsonl"), "a", encoding="utf-8") as fh:
+            path = os.path.join(self.directory, f"ai-audit-{day}-{self.instance_id}.jsonl")
+            # Owner-only and append-only; one file per process, so writers never interleave
+            fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o600)
+            with os.fdopen(fd, "a", encoding="utf-8") as fh:
                 fh.write(json.dumps(event.to_dict()) + "\n")
             self._purge_files()
         except OSError:
-            # Observability must never break a request
-            pass
+            # Observability must never break a request; the gap is reported in the summary's scope
+            self.write_failures += 1
 
     # -- retention ------------------------------------------------------------------------------
     def _cutoff(self) -> float:
@@ -154,7 +192,7 @@ class AuditLog:
         removed = 0
         cutoff_day = datetime.fromtimestamp(self._cutoff(), tz=timezone.utc).strftime("%Y-%m-%d")
         for name in os.listdir(self.directory):
-            m = re.fullmatch(r"ai-audit-(\d{4}-\d{2}-\d{2})\.jsonl", name)
+            m = _FILE.fullmatch(name)
             if m and m.group(1) < cutoff_day:
                 os.remove(os.path.join(self.directory, name))
                 removed += 1
@@ -168,18 +206,63 @@ class AuditLog:
         return removed + self._purge_files()
 
     # -- reading --------------------------------------------------------------------------------
-    def events(self, limit: int = 200, window_hours: Optional[float] = None) -> List[dict]:
+    def _read_files(self, since: float) -> List[AuditEvent]:
+        """Every process's events in the directory from `since`, oldest first."""
+        since = max(since, self._cutoff())
+        since_day = datetime.fromtimestamp(since, tz=timezone.utc).strftime("%Y-%m-%d")
+        out: List[AuditEvent] = []
+        try:
+            names = sorted(n for n in os.listdir(self.directory) if (m := _FILE.fullmatch(n)) and m.group(1) >= since_day)
+        except OSError:
+            return out
+        for name in names:
+            try:
+                with open(os.path.join(self.directory, name), encoding="utf-8") as fh:
+                    for line in fh:
+                        try:
+                            event = AuditEvent.from_dict(json.loads(line))
+                        except ValueError:
+                            continue
+                        if event and event.at >= since:
+                            out.append(event)
+            except OSError:
+                continue
+        out.sort(key=lambda e: e.at)
+        return out[-MAX_FILE_EVENTS:]
+
+    def _window(self, window_hours: Optional[float]) -> List[AuditEvent]:
+        since = self._clock() - window_hours * 3600 if window_hours else 0
+        if self.directory:
+            return self._read_files(since)
         with self._lock:
             self._purge_locked()
-            since = self._clock() - window_hours * 3600 if window_hours else 0
-            items = [e for e in self._events if e.at >= since]
+            return [e for e in self._events if e.at >= since]
+
+    def scope(self) -> dict:
+        """What the figures cover, so one process's view is never presented as the whole platform's."""
+        started = datetime.fromtimestamp(self.started_at, tz=timezone.utc).isoformat()
+        if self.directory:
+            return {
+                "source": "files",
+                "coverage": "All AI-service processes that write to the shared audit directory, across restarts, within the retention period.",
+                "instanceId": self.instance_id,
+                "processStartedAt": started,
+                "writeFailures": self.write_failures,
+            }
+        return {
+            "source": "memory",
+            "coverage": "This AI-service process only, since it started. Events from other processes and from before the last restart are not included.",
+            "instanceId": self.instance_id,
+            "processStartedAt": started,
+            "writeFailures": 0,
+        }
+
+    def events(self, limit: int = 200, window_hours: Optional[float] = None) -> List[dict]:
+        items = self._window(window_hours)
         return [e.to_dict() for e in items[-limit:]][::-1]
 
     def summary(self, window_hours: float = 24) -> dict:
-        with self._lock:
-            self._purge_locked()
-            since = self._clock() - window_hours * 3600
-            items = [e for e in self._events if e.at >= since]
+        items = self._window(window_hours)
         providers: Dict[str, dict] = {}
         services: Dict[str, dict] = {}
 
@@ -233,6 +316,7 @@ class AuditLog:
             "services": services,
             "retentionDays": self.retention_days,
             "persisted": bool(self.directory),
+            "scope": self.scope(),
         }
 
 

@@ -34,10 +34,13 @@ async def generate_chat_response(request: ChatRequest):
     provider fails, this returns 503 and the backend shows its own clearly labelled fallback.
     """
     try:
-        real_providers = [p for p in ai_gateway.get_provider_chain() if p.provider_name != MOCK_PROVIDER]
+        chain = ai_gateway.get_provider_chain()
     except Exception:
-        real_providers = []
+        chain = []
+    real_providers = [p for p in chain if p.provider_name != MOCK_PROVIDER]
     if not real_providers:
+        # X11: recorded, so "chat unavailable" shows up in observability with the reasons
+        ai_gateway.record_unavailable("chat_architect", "only_test_provider" if chain else "no_allowed_provider", chain)
         return _unavailable()
 
     try:

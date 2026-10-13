@@ -222,6 +222,11 @@ class AIGateway:
             metadata={"all_errors": errors}
         )
 
+    def record_unavailable(self, service_name: str, reason: str, chain: Optional[List[BaseAIProvider]] = None) -> None:
+        """X11: a caller decided before routing that the feature cannot be served (e.g. only the test provider is allowed)."""
+        personal = carries_personal_data(service_name)
+        audit_log.record("no_provider", service_name, reason=reason, personal_data=personal, skipped=self._skip_reasons(chain or [], personal))
+
     def _skip_reasons(self, chain: List[BaseAIProvider], personal: bool) -> Dict[str, str]:
         """Why each registered provider is not in the chain: the policy's reason, or unavailable."""
         reasons: Dict[str, str] = {}

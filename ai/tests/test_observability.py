@@ -6,6 +6,7 @@ from the events, paid providers stay out of every chain, and the endpoints are i
 """
 import json
 import os
+import stat
 
 import pytest
 
@@ -136,6 +137,21 @@ def test_no_provider_is_recorded_with_reasons(log, monkeypatch):
     assert SECRET not in json.dumps(log.events())
 
 
+def test_chat_refusal_before_routing_is_recorded(log, client, service_headers, monkeypatch):
+    """Chat refuses the test provider before calling the gateway; that refusal must still be audited."""
+    import app.routers.chat as chat_router
+    from app.gateway.ai_gateway import ai_gateway as shared
+    monkeypatch.setattr(shared, "get_provider_chain", lambda requested_provider=None, contains_personal_data=True: [shared.providers["mock"]] if "mock" in shared.providers else [])
+    res = client.post("/api/v1/chat", json={"prompt": f"Review this: {RESUME_TEXT}"}, headers=service_headers)
+    assert res.status_code == 503
+    event = log.events()[0]
+    assert event["kind"] == "no_provider" and event["service"] == "chat_architect"
+    assert event["reason"] in ("only_test_provider", "no_allowed_provider")
+    assert "rahul" not in json.dumps(log.events()).lower()
+    assert log.summary()["services"]["chat_architect"]["noProvider"] == 1
+    assert chat_router.MOCK_PROVIDER == "mock"
+
+
 def test_statistics_and_retention(tmp_path):
     now = [1_000_000.0]
     log = AuditLog(retention_days=2, directory=str(tmp_path), clock=lambda: now[0])
@@ -152,8 +168,52 @@ def test_statistics_and_retention(tmp_path):
     log.record("chain_resolved", "svc")
     assert log.summary(24 * 90)["events"] == 1
     files = os.listdir(tmp_path)
-    assert files == ["ai-audit-1970-01-15.jsonl"], f"the expired daily file is purged: {files}"
+    assert files == [f"ai-audit-1970-01-15-{log.instance_id}.jsonl"], f"the expired daily file is purged: {files}"
     assert AuditLog(retention_days=365).retention_days == 90, "retention is capped"
+
+
+def test_durable_store_spans_processes_and_restarts(tmp_path):
+    now = [2_000_000.0]
+    clock = lambda: now[0]
+    first = AuditLog(retention_days=14, directory=str(tmp_path), clock=clock)
+    second = AuditLog(retention_days=14, directory=str(tmp_path), clock=clock)  # another worker
+    first.record("success", "svc", "fake_a", attempt=1, latency_ms=10)
+    second.record("provider_failed", "svc", "fake_a", reason="timeout", attempt=1)
+    second.record("success", "svc", "fake_b", attempt=2, latency_ms=30)
+    assert len(os.listdir(tmp_path)) == 2, "one file per process, so writers never interleave"
+    for log in (first, second):
+        summary = log.summary(24)
+        assert summary["events"] == 3, "each process reports every process's events"
+        assert summary["scope"]["source"] == "files" and "All AI-service processes" in summary["scope"]["coverage"]
+    # A restart: a new process with empty memory still sees what was recorded before
+    restarted = AuditLog(retention_days=14, directory=str(tmp_path), clock=clock)
+    assert restarted.summary(24)["providers"]["fake_a"]["failures"] == {"timeout": 1}
+    assert restarted.summary(24)["services"]["svc"]["fallbacks"] == 1
+    # Owner-only permissions where the platform supports them
+    if os.name == "posix":
+        assert stat.S_IMODE(os.stat(tmp_path / os.listdir(tmp_path)[0]).st_mode) == 0o600
+    # A tampered or corrupt line is skipped or reduced to codes, never trusted as free text
+    with open(tmp_path / f"ai-audit-1970-01-24-{first.instance_id}.jsonl", "a", encoding="utf-8") as fh:
+        fh.write("not json\n")
+        fh.write(json.dumps({"at": "1970-01-24T03:33:20+00:00", "kind": "prompt_text", "service": "svc"}) + "\n")
+        fh.write(json.dumps({"at": "1970-01-24T03:33:20+00:00", "kind": "provider_failed", "service": "svc", "provider": "fake_a", "reason": RESUME_TEXT}) + "\n")
+    events = restarted.events(limit=50, window_hours=24)
+    assert len(events) == 4 and RESUME_TEXT not in json.dumps(events)
+    assert any(e["reason"] == "unspecified" for e in events)
+
+
+def test_memory_scope_says_one_process():
+    scope = AuditLog(retention_days=1, directory=None).summary(1)["scope"]
+    assert scope["source"] == "memory"
+    assert "This AI-service process only" in scope["coverage"] and "last restart" in scope["coverage"]
+
+
+def test_unwritable_directory_is_counted_not_fatal(tmp_path):
+    blocker = tmp_path / "not-a-dir"
+    blocker.write_text("x")
+    log = AuditLog(retention_days=1, directory=str(blocker))
+    log.record("chain_resolved", "svc")
+    assert log.write_failures == 1 and log.scope()["writeFailures"] == 1
 
 
 def test_only_codes_are_stored():

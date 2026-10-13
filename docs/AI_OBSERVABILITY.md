@@ -30,9 +30,16 @@ One event per decision. Every event has the same fields: time, kind, service (th
 ## Retention
 
 - **Duration:** events are kept for `AI_AUDIT_RETENTION_DAYS` (default 14; values are clamped to 1–90).
-- **Storage:** by default events are kept in memory only, capped at 5,000, and are lost when the AI service restarts. If `AI_AUDIT_DIR` is set, they are also written to daily `ai-audit-YYYY-MM-DD.jsonl` files in that directory.
+- **Storage, two modes.**
+  - **Memory** (no `AI_AUDIT_DIR`; the default for local development). At most 5,000 events, for one AI-service process since it started, lost on restart.
+  - **Files** (`AI_AUDIT_DIR` set; **the Docker Compose default**, on the private `ai-storage` volume at `/app/storage/ai-audit`). Each process appends to its own daily file, `ai-audit-YYYY-MM-DD-<instance>.jsonl`, so concurrent writers never interleave. The directory is created with mode 0700 and each file with 0600, owned by the unprivileged service user. Reads merge every process's files, so the figures survive restarts and cover all processes that share the directory. A line that is malformed, or that holds an unknown event kind or free text, is skipped or reduced to codes when read back. A failed write never fails a request; it is counted and reported.
+- **Scope is always stated.** Every summary carries `scope`: the source (`memory` or `files`), what that covers, when this process started, and how many writes failed. The admin page shows it above the figures; in memory mode, in amber, it says the figures are for this process since its last start only. One process's figures are never presented as the whole platform's.
 - **Purging:** expired events are removed from memory on every write and read. Daily files older than the retention period are deleted on every write.
-- **Test:** `test_statistics_and_retention` covers retention in memory and in files.
+- **Tests:**
+  - `test_statistics_and_retention`: retention in memory and in files.
+  - `test_durable_store_spans_processes_and_restarts`: two processes and a restart; owner-only permissions on POSIX; tampered lines.
+  - `test_memory_scope_says_one_process` and `test_unwritable_directory_is_counted_not_fatal`.
+  - The Docker workflow checks the 0700 directory and 0600 files in the real Linux container, that a request with a recognisable name and e-mail address leaves neither in the files, and that the restarted service still reports the earlier events.
 
 ## Statistics
 
@@ -79,12 +86,19 @@ Frontend: `/ai-observability`. The sidebar entry appears for administrators only
 
 ## Tests
 
-- `ai/tests/test_observability.py`: 7 tests covering success and skip reasons, fallback with failure categories and no content, quota pause, policy refusal, rate limit and all-failed, no provider, statistics and retention, the code-only rule, and the endpoints being internal.
+- `ai/tests/test_observability.py`: 11 tests covering:
+  - success and skip reasons; fallback with failure categories and no content;
+  - quota pause, policy refusal, rate limit and all-failed; no provider;
+  - chat refusing the test provider before routing (recorded as `no_provider`, reason `only_test_provider`, which was previously not recorded at all);
+  - statistics and retention; the durable store across processes and restarts; scope; failed writes;
+  - the code-only rule; the endpoints being internal.
 - `backend/src/tests/ai_observability.test.ts`: admin-only access (401 and 403), forwarding, 7 invalid queries rejected, demotion, and 503.
-- `e2e/tests/aiObservability.mjs`: 6 steps covering user refusal, no sidebar entry for a user, the admin view of policy, statistics and events, window changes, the phone layout, and no console errors. The browser run uses the fake AI service; the real log is covered by the AI tests.
+- `e2e/tests/aiObservability.mjs`: 6 steps covering user refusal, no sidebar entry for a user, the admin view of policy, statistics, events and the scope notice, window changes, the phone layout, and no console errors. The browser run uses the fake AI service; the real log is covered by the AI tests.
 
 ## Limitations
 
-- The log is per process. With several AI-service workers, each worker keeps and reports its own events. `AI_AUDIT_DIR` keeps a durable on-disk record of all of them, but the endpoints read only the answering worker's memory.
+- In memory mode the figures cover one process since its last start, and the page says so. File mode covers every process only if they share one directory, which means one host or a shared volume; separate hosts each report their own.
+- File mode reads the files on each request. At most the newest 200,000 events in the window are summarised, which is far more than this deployment produces.
+- On Windows the 0600/0700 modes are not enforced by the operating system. The deployment target is the Linux container, where they are checked.
 - Failure categories come from matching keywords in the error message, so an unusual message can be counted as `other`.
 - Only calls routed through the gateway are recorded. Rule-based local modules, such as multilingual extraction and rule-based interview scoring, call no provider and are not recorded.
