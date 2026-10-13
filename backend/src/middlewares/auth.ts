@@ -63,7 +63,7 @@ export const authorize = (roles: string[]) => {
         success: false,
         error: {
           code: 'FORBIDDEN',
-          message: 'Access denied: insufficient permissions.',
+          message: roles.length === 1 && roles[0] === 'admin' ? 'Administrator access is required.' : 'Access denied: insufficient permissions.',
         },
       });
     if (!req.user?.userId) {
