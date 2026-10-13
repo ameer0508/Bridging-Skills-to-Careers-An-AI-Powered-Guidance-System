@@ -304,7 +304,7 @@ export const PlatformDiagnosticsWorkspace: React.FC = () => {
             </span>
           </div>
 
-          <div className="space-y-2 text-xs font-mono max-h-64 overflow-y-auto custom-scrollbar">
+          <div className="space-y-2 text-xs font-mono max-h-64 overflow-y-auto custom-scrollbar" role="region" aria-label="Gateway event log" tabIndex={0}>
             {gatewayLogs.map((log, idx) => (
               <div key={idx} className="p-2.5 rounded-xl bg-slate-950/80 border border-white/10 space-y-1">
                 <div className="flex items-center justify-between">

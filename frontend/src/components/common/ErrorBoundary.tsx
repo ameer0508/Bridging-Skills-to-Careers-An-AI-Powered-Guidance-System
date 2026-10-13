@@ -33,7 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-87.5 p-8 rounded-2xl border border-rose-500/30 bg-neutral-900/90 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 text-center">
+        <div role="alert" data-testid="error-boundary" className="min-h-87.5 p-8 rounded-2xl border border-rose-500/30 bg-neutral-900/90 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 text-center">
 
           <div className="p-3 rounded-full bg-rose-500/10 text-rose-400">
             <AlertTriangle className="w-8 h-8" />
@@ -46,8 +46,9 @@ export class ErrorBoundary extends Component<Props, State> {
             <p className="text-xs text-neutral-400">
               An unexpected runtime error occurred. Telemetry cache state remains secure.
             </p>
-            {this.state.error && (
-              <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-500/20 text-rose-300 text-xs text-left font-mono overflow-auto max-h-40">
+            {/* Technical details only while developing: users never see stack traces */}
+            {import.meta.env.DEV && this.state.error && (
+              <div role="region" aria-label="Error details" tabIndex={0} className="p-3 rounded-xl bg-rose-950/40 border border-rose-500/20 text-rose-300 text-xs text-left font-mono overflow-auto max-h-40">
                 <p className="font-bold">{this.state.error.name}: {this.state.error.message}</p>
                 {this.state.error.stack && (
                   <pre className="text-[10px] text-rose-400/80 mt-1 whitespace-pre-wrap">{this.state.error.stack.split('\n').slice(0, 4).join('\n')}</pre>

@@ -176,7 +176,7 @@ export const RegisterForm: React.FC = () => {
 
         {/* Country Selector */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+          <label htmlFor="register-country" className="text-xs font-semibold uppercase tracking-wider text-slate-300">
             Country / Region
           </label>
           <div className="relative">
@@ -184,6 +184,7 @@ export const RegisterForm: React.FC = () => {
               <Globe className="w-4 h-4" />
             </div>
             <select
+              id="register-country"
               value={country}
               onChange={(e) => setCountry(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-white/10 focus:border-indigo-400 rounded-xl text-slate-100 text-sm focus:outline-none transition-all"

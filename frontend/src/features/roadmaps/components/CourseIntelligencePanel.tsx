@@ -438,7 +438,6 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
                 className={`p-5 space-y-4 relative overflow-hidden transition-all duration-300 hover:border-indigo-500/50 hover:shadow-xl cursor-pointer flex flex-col justify-between h-full ${
                   isCompleted ? 'border-emerald-500/40 bg-emerald-950/10' : ''
                 }`}
-                onClick={() => handleOpenDetail(course)}
               >
                 {/* Top Rank Indicator Bar */}
                 <div
@@ -454,13 +453,17 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
                         {course.provider}
                       </span>
                       <h4 className="text-sm font-bold text-white leading-snug hover:text-indigo-300 transition-colors">
-                        {course.title}
+                        {/* The card opens on a click anywhere; the stretched title button is what keyboards and screen readers use */}
+                        <button type="button" onClick={() => handleOpenDetail(course)} className="text-left after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded">
+                          {course.title}
+                        </button>
                       </h4>
                     </div>
 
                     <button
+                      type="button"
                       onClick={(e) => toggleSaveCourse(course.id, e)}
-                      className={`p-2 rounded-xl transition-colors cursor-pointer shrink-0 ${
+                      className={`relative z-10 p-2 rounded-xl transition-colors cursor-pointer shrink-0 ${
                         isSaved
                           ? 'text-cyan-400 bg-cyan-500/10 border border-cyan-500/30'
                           : 'text-slate-500 hover:text-white hover:bg-white/10'
@@ -513,8 +516,9 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
                 </div>
 
                 {/* Card Bottom Actions */}
-                <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2 mt-3">
+                <div className="relative z-10 pt-3 border-t border-white/5 flex items-center justify-between gap-2 mt-3">
                   <button
+                    type="button"
                     onClick={(e) => toggleCompleteCourse(course.id, e)}
                     className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-colors cursor-pointer ${
                       isCompleted
@@ -526,6 +530,7 @@ export const CourseIntelligencePanel: React.FC<CourseIntelligencePanelProps> = (
                   </button>
 
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       window.open(course.providerUrl, '_blank', 'noopener,noreferrer');

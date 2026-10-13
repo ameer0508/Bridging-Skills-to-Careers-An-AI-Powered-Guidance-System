@@ -217,7 +217,7 @@ export const CareerOSDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="space-y-2.5 font-mono text-xs max-h-80 overflow-y-auto pr-1">
+          <div className="space-y-2.5 font-mono text-xs max-h-80 overflow-y-auto pr-1" role="region" aria-label="Agent activity" tabIndex={0}>
             {filteredAgentActivities.map((a) => (
               <div key={a.name} className="p-3 rounded-xl bg-slate-950/80 border border-white/10 flex items-center justify-between text-[11px]">
                 <div className="space-y-0.5">

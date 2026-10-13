@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useDisclosureFocus } from './useDisclosureFocus';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Mic, MicOff, ShieldAlert } from 'lucide-react';
 import {
@@ -26,6 +27,7 @@ export const DictationControl: React.FC<{ onTranscript: (text: string) => void; 
   const [listening, setListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [askingConsent, setAskingConsent] = useState(false);
+  const focus = useDisclosureFocus(askingConsent);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
   const transcriptRef = useRef(onTranscript);
   useEffect(() => {
@@ -92,15 +94,15 @@ export const DictationControl: React.FC<{ onTranscript: (text: string) => void; 
   };
 
   return (
-    <div className="space-y-2 text-[11px] text-slate-300" data-testid="dictation">
+    <div ref={focus.containerRef} tabIndex={-1} className="space-y-2 text-[11px] text-slate-300 outline-none" data-testid="dictation">
       {consent === 'none' && !askingConsent && (
-        <button type="button" className={`${button} border-white/10 bg-slate-800/80 text-slate-300`} disabled={disabled || settings.isPending} onClick={() => setAskingConsent(true)}>
+        <button ref={focus.triggerRef} type="button" className={`${button} border-white/10 bg-slate-800/80 text-slate-300`} disabled={disabled || settings.isPending} onClick={() => setAskingConsent(true)}>
           <MicOff className="h-3.5 w-3.5" aria-hidden="true" /> Enable voice dictation
         </button>
       )}
 
       {askingConsent && (
-        <div role="dialog" aria-labelledby="dictation-consent-title" className="space-y-2 rounded-xl border border-amber-400/40 bg-amber-500/5 p-3" data-testid="dictation-consent">
+        <div ref={focus.panelRef} tabIndex={-1} role="dialog" aria-labelledby="dictation-consent-title" className="space-y-2 rounded-xl border border-amber-400/40 bg-amber-500/5 p-3 outline-none focus-visible:ring-2 focus-visible:ring-amber-300" data-testid="dictation-consent">
           <p id="dictation-consent-title" className="flex items-center gap-1.5 font-bold text-amber-200">
             <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" /> Before you dictate
           </p>

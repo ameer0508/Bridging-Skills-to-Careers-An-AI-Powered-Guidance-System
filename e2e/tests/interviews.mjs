@@ -192,6 +192,7 @@ export async function run({ webUrl, apiUrl }) {
       expect((await page.evaluate(() => window.__speech.starts)) === 0, 'recognition started without consent');
       await enable.click();
       const dialog = page.getByTestId('dictation-consent');
+      expect(await page.evaluate(() => document.activeElement?.closest('[data-testid="dictation-consent"]') !== null), 'keyboard focus did not move into the consent panel');
       const text = await dialog.innerText();
       expect(/does not receive or store your voice/.test(text) && /browser vendor/.test(text), `consent text: ${text}`);
       expect(await dialog.getByRole('button', { name: 'Only on this device' }).isDisabled(), 'on-device offered though the browser cannot do it');
@@ -259,6 +260,7 @@ export async function run({ webUrl, apiUrl }) {
       await page.getByRole('button', { name: 'Record spoken answers' }).click();
       expect((await page.evaluate(() => window.__media.requests)) === 0, 'the microphone was opened before consent');
       const dialog = page.getByTestId('recording-consent');
+      expect(await page.evaluate(() => document.activeElement?.closest('[data-testid="recording-consent"]') !== null), 'keyboard focus did not move into the consent panel');
       const text = await dialog.innerText();
       expect(/not sent to\s+any AI/.test(text) && /do not change your score/.test(text) && /deletes all of them/.test(text), `consent text: ${text}`);
       await dialog.getByLabel('Keep recordings').selectOption('7');

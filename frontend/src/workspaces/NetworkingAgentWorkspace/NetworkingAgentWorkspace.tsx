@@ -219,6 +219,7 @@ export const NetworkingAgentWorkspace: React.FC = () => {
 
             <div className="space-y-3 font-mono text-xs">
               <textarea
+                aria-label="Outreach message draft"
                 rows={6}
                 value={outreachDraft}
                 onChange={(e) => setOutreachDraft(e.target.value)}

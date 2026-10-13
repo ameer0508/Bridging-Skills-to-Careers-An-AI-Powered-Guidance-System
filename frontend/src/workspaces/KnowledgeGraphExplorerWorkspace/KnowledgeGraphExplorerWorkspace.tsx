@@ -183,6 +183,7 @@ export const KnowledgeGraphExplorerWorkspace: React.FC = () => {
 
           <div className="flex flex-wrap items-center gap-2">
             <select
+              aria-label="Path start"
               value={startNodeId}
               onChange={(e) => setStartNodeId(e.target.value)}
               className="py-1.5 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
@@ -194,6 +195,7 @@ export const KnowledgeGraphExplorerWorkspace: React.FC = () => {
             <span className="text-slate-500 text-xs font-mono">➔</span>
 
             <select
+              aria-label="Path target"
               value={targetNodeId}
               onChange={(e) => setTargetNodeId(e.target.value)}
               className="py-1.5 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"

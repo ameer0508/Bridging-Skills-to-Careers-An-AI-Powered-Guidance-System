@@ -400,7 +400,6 @@ export const CertificationIntelligencePanel: React.FC<CertificationIntelligenceP
                 className={`p-5 space-y-4 relative overflow-hidden transition-all duration-300 hover:border-cyan-500/50 hover:shadow-xl cursor-pointer flex flex-col justify-between h-full ${
                   isEarned ? 'border-emerald-500/40 bg-emerald-950/10' : ''
                 }`}
-                onClick={() => handleOpenDetail(cert)}
               >
                 {/* Top Rank Accent Line */}
                 <div
@@ -419,13 +418,17 @@ export const CertificationIntelligencePanel: React.FC<CertificationIntelligenceP
                         <span className="text-[10px] text-slate-400 font-mono">{cert.examCode}</span>
                       </div>
                       <h4 className="text-sm font-bold text-white leading-snug hover:text-cyan-300 transition-colors">
-                        {cert.name}
+                        {/* The card opens on a click anywhere; the stretched title button is what keyboards and screen readers use */}
+                        <button type="button" onClick={() => handleOpenDetail(cert)} className="text-left after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 rounded">
+                          {cert.name}
+                        </button>
                       </h4>
                     </div>
 
                     <button
+                      type="button"
                       onClick={(e) => toggleSaveCert(cert.id, e)}
-                      className={`p-2 rounded-xl transition-colors cursor-pointer shrink-0 ${
+                      className={`relative z-10 p-2 rounded-xl transition-colors cursor-pointer shrink-0 ${
                         isSaved
                           ? 'text-cyan-400 bg-cyan-500/10 border border-cyan-500/30'
                           : 'text-slate-500 hover:text-white hover:bg-white/10'
@@ -472,8 +475,9 @@ export const CertificationIntelligencePanel: React.FC<CertificationIntelligenceP
                 </div>
 
                 {/* Card Bottom Actions */}
-                <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-2 mt-3">
+                <div className="relative z-10 pt-3 border-t border-white/5 flex items-center justify-between gap-2 mt-3">
                   <button
+                    type="button"
                     onClick={(e) => toggleEarnedCert(cert.id, e)}
                     className={`text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-colors cursor-pointer ${
                       isEarned
@@ -485,6 +489,7 @@ export const CertificationIntelligencePanel: React.FC<CertificationIntelligenceP
                   </button>
 
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
                       window.open(cert.officialUrl, '_blank', 'noopener,noreferrer');

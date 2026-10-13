@@ -217,7 +217,7 @@ export const CareerReadinessPage: React.FC = () => {
             Analyzed Career Profiles ({items.length})
           </span>
 
-          <div className="space-y-2 max-h-[500px] overflow-y-auto custom-scrollbar">
+          <div className="space-y-2 max-h-[500px] overflow-y-auto custom-scrollbar" role="region" aria-label="Analyzed career profiles" tabIndex={0}>
             {items.map((item) => {
               const isSelected = activeItem._id === item._id;
 

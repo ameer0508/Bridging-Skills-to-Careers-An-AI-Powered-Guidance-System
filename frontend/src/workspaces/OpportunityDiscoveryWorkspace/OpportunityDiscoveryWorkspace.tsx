@@ -450,6 +450,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
             <input
               type="text"
+              aria-label="Role or keyword"
               placeholder={`Role / Keyword (Default: ${targetRoleTitle})`}
               value={searchKeyword}
               onChange={(e) => { setSearchKeyword(e.target.value); setPage(1); }}
@@ -462,6 +463,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
             <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
             <input
               type="text"
+              aria-label="Location"
               placeholder="City, State, or Country"
               value={searchLocation}
               onChange={(e) => { setSearchLocation(e.target.value); setPage(1); }}
@@ -472,6 +474,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
           {/* Employment Type */}
           <div>
             <select
+              aria-label="Employment type"
               value={employmentType}
               onChange={(e) => { setEmploymentType(e.target.value); setPage(1); }}
               className="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-slate-300 focus:outline-none focus:border-indigo-500/50"
@@ -487,6 +490,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
           {/* Date Posted */}
           <div>
             <select
+              aria-label="Date posted"
               value={datePosted}
               onChange={(e) => { setDatePosted(e.target.value); setPage(1); }}
               className="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-slate-300 focus:outline-none focus:border-indigo-500/50"
@@ -519,6 +523,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
               <span className="text-slate-400">Min Match:</span>
               <input
                 type="range"
+                aria-label="Minimum match"
                 min="50"
                 max="95"
                 step="5"
@@ -534,6 +539,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
           <div className="flex items-center gap-2 shrink-0">
             <span className="text-slate-400">Sort By:</span>
             <select
+              aria-label="Sort by"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'match' | 'date' | 'salary' | 'relevance')}
               className="px-3 py-1.5 rounded-xl bg-slate-950/80 border border-white/10 text-white focus:outline-none focus:border-indigo-500/50"

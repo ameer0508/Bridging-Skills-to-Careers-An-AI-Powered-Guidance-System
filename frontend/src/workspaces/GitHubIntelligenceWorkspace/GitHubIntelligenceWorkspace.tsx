@@ -132,16 +132,22 @@ export const GitHubIntelligenceWorkspace: React.FC = () => {
   // Derived Repositories / Projects from Parsed Resume
   const extractedProjects: RepositoryRecord[] = useMemo(() => {
     if (resumeData?.projects?.length > 0) {
-      return resumeData.projects.map((p: { title?: string; name?: string; description?: string; technologies?: string[] }) => ({
-        name: p.title || p.name || 'engineering-project',
-        description: p.description || 'Verified production engineering project parsed from candidate resume.',
-        language: p.technologies?.[0] || 'TypeScript',
-        stars: 0,
-        forks: 0,
-        topics: p.technologies?.map((t: string | { value?: string }) => (typeof t === 'string' ? t : t.value || '').toLowerCase()) || ['engineering', 'software'],
-        hasDockerfile: p.technologies?.some((t: string) => /docker|k8s|container/i.test(t)) || false,
-        hasCi: false,
-      }));
+      // Parsed resume fields are extracted entities ({ value, confidence, source }), not strings
+      type Field = string | { value?: string } | null | undefined;
+      const text = (f: Field) => (typeof f === 'string' ? f : f?.value || '');
+      return resumeData.projects.map((p: { title?: Field; name?: Field; description?: Field; technologies?: Field[] }) => {
+        const technologies = (p.technologies || []).map(text).filter(Boolean);
+        return {
+          name: text(p.title) || text(p.name) || 'engineering-project',
+          description: text(p.description) || 'Project parsed from your resume.',
+          language: technologies[0] || 'Not stated',
+          stars: 0,
+          forks: 0,
+          topics: technologies.length ? technologies.map(t => t.toLowerCase()) : ['engineering', 'software'],
+          hasDockerfile: technologies.some(t => /docker|k8s|container/i.test(t)),
+          hasCi: false,
+        };
+      });
     }
     return [];
   }, [resumeData]);
@@ -312,7 +318,7 @@ export const GitHubIntelligenceWorkspace: React.FC = () => {
               </button>
             </div>
 
-            <div className="space-y-3 max-h-[440px] overflow-y-auto pr-1">
+            <div className="space-y-3 max-h-[440px] overflow-y-auto pr-1" role="region" aria-label="Verified skills" tabIndex={0}>
               {verifiedSkillsList.map((sk) => (
                 <div key={sk.skill} className="p-3.5 rounded-xl bg-slate-950/80 border border-white/10 space-y-2 text-xs font-mono">
                   <div className="flex items-center justify-between">

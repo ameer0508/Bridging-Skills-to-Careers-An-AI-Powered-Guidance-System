@@ -230,6 +230,7 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
           {/* Event Type Filter */}
           <div className="lg:col-span-6">
             <select
+              aria-label="Event type"
               value={selectedEventType}
               onChange={(e) => setSelectedEventType(e.target.value)}
               className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"

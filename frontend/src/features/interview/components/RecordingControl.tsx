@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useDisclosureFocus } from './useDisclosureFocus';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Circle, ShieldAlert, Square, Trash2 } from 'lucide-react';
 import { messageOf } from '../../../lib/collections';
@@ -25,6 +26,7 @@ export const RecordingControl: React.FC<{ sessionId: string; questionIndex: numb
 }) => {
   const queryClient = useQueryClient();
   const [asking, setAsking] = useState(false);
+  const focus = useDisclosureFocus(asking);
   const [retention, setRetention] = useState<0 | 7 | 30>(0);
   const [recording, setRecording] = useState(false);
   const [seconds, setSeconds] = useState(0);
@@ -127,13 +129,13 @@ export const RecordingControl: React.FC<{ sessionId: string; questionIndex: numb
 
   if (!settings.data?.recordingConsent) {
     return (
-      <div className="space-y-2 text-[11px] text-slate-300" data-testid="recording">
+      <div ref={focus.containerRef} tabIndex={-1} className="space-y-2 text-[11px] text-slate-300 outline-none" data-testid="recording">
         {!asking ? (
-          <button type="button" className={`${button} border-white/10 bg-slate-800/80 text-slate-300`} disabled={disabled || settings.isPending} onClick={() => setAsking(true)}>
+          <button ref={focus.triggerRef} type="button" className={`${button} border-white/10 bg-slate-800/80 text-slate-300`} disabled={disabled || settings.isPending} onClick={() => setAsking(true)}>
             <Circle className="h-3.5 w-3.5" aria-hidden="true" /> Record spoken answers
           </button>
         ) : (
-          <div role="dialog" aria-labelledby="recording-consent-title" className="space-y-2 rounded-xl border border-amber-400/40 bg-amber-500/5 p-3" data-testid="recording-consent">
+          <div ref={focus.panelRef} tabIndex={-1} role="dialog" aria-labelledby="recording-consent-title" className="space-y-2 rounded-xl border border-amber-400/40 bg-amber-500/5 p-3 outline-none focus-visible:ring-2 focus-visible:ring-amber-300" data-testid="recording-consent">
             <p id="recording-consent-title" className="flex items-center gap-1.5 font-bold text-amber-200">
               <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" /> Before you record
             </p>
