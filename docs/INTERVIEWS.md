@@ -373,10 +373,10 @@ deletion, not a secure erase of the storage medium.
 
 | Field | Meaning |
 |---|---|
-| `method` | A versioned method name. `rule-based-v2` is the built-in rubric; `ai-rubric-v1` is an AI score (only through the zero-cost policy); `no-answer-v1` is an empty answer; `language-check-v1` is an answer not in English. Together with `rubricId` and `rubricVersion` (D5), it makes every score reproducible. |
-| `factors` | The measured inputs behind each dimension. Rule-based: question words used, expected points covered and missed, word count, tools named, measured results found, STAR parts or reasoning phrases, the role weights and the caps applied. AI: the raw 0–5 rubric scores, the weights and the caps. |
+| `method` | A versioned method name. `rule-based-v3` is the built-in rubric; `ai-rubric-v2` is an AI score (only through the zero-cost policy); `no-answer-v1` is an empty answer; `language-check-v1` is an answer not in English. Together with `rubricId` and `rubricVersion` (D5), it makes every score reproducible. Stored evaluations keep the method they were scored with (`rule-based-v2` and `ai-rubric-v1` before the contradiction check); nothing is re-scored. |
+| `factors` | The measured inputs behind each dimension. Rule-based: question words used, expected points covered and missed, word count, tools named, measured results found, STAR parts or reasoning phrases, the role weights and the caps applied. AI: the raw 0–5 rubric scores, the weights and the caps. Both list any `contradictions` found. |
 | `uncertainty` | `low`, `medium` or `high`, with reasons. Rule-based scoring is never `low`, because it cannot confirm correctness, and an AI score is a single uncalibrated judgement. Short answers and applied caps raise uncertainty to `high`. |
-| `limitations` | Always shown. The score does not predict employer assessment or hiring; scoring is English only; contradictions are not detected; plus "the rubric cannot check correctness" and "relevance is lexical" (rule-based) or "single AI judgement" (AI). |
+| `limitations` | Always shown. The score does not predict employer assessment or hiring; scoring is English only; only explicit contradictions are detected; plus "the rubric cannot check correctness" and "relevance is lexical" (rule-based) or "single AI judgement" (AI). |
 
 The live room and the debrief show these as "How this answer was scored" and "Limits of this score".
 
@@ -398,10 +398,24 @@ The live room and the debrief show these as "How this answer was scored" and "Li
 |---|---|---|
 | Empty | 0 | low |
 | Generic, one sentence | 4 (capped) | high |
-| Contradictory (claims and their opposites, 70 words) | **70** | medium |
+| Contradictory (claims and their opposites, 70 words) | **40** (capped; was 70 before `rule-based-v3`) | high |
 | Excellent | 80 (the rule-based maximum) | medium |
 
-**The contradictory answer scores close to the excellent one.** The rubric counts topical words and structure; it does not read meaning. This is exactly why the "does not detect contradictions" and "cannot check correctness" limitations are stated on every rule-based score.
+**Contradiction check (`rule-based-v3`, `ai-rubric-v2`).** Under `rule-based-v2` the contradictory answer scored 70, close to the excellent answer's 80. That was a scoring defect, not just a limitation: the rubric counts topical words and structure, so stating every claim and its opposite collected credit for both. `backend/src/services/interview/contradictions.ts` now finds **explicit** self-contradictions, deterministically, without AI:
+
+- **A claim and its direct negation.** A negative clause whose content words are all asserted by a positive clause, for example "I would always use a token bucket algorithm" and "I would never use a token bucket". If the negative clause adds words of its own ("not for internal traffic"), it is a scoped exception and is not flagged.
+- **Opposite design terms** asserted for the same thing: "must fail open" with "must fail closed", and "is stateless" with "is stateful".
+- **Never compared:**
+  - conditional clauses ("if", "when", "unless", "depending");
+  - reported or contrasted views ("some people", "a common mistake", "rather than", "whereas"), because "use X when A; do not use X when B" is advice, not a contradiction.
+
+When one is found, the score is capped at **40** on both the rule-based and the AI path, whatever the model returned. The cap is named, uncertainty becomes `high`, the conflicting statements are listed in the factors and shown in "How this answer was scored", and the first improvement quotes them.
+
+**Tests.**
+- **Counterfactual:** adding one denying sentence to the excellent answer takes it from 80 to 40, and removing the sentence restores 80 exactly. Removing the three planted contradictions takes the contradictory answer to 55.
+- **Adversarial:** 12 legitimate answers are not flagged. They use conditional advice, someone else's view, a scoped exception, a rejected alternative, an opposite option discussed but not chosen, different subjects, negatives in a behavioural story, a repeated negative, "not only… also", fail open and fail closed under different conditions, and the excellent and medium answers.
+
+**What it still misses.** Contradictions spread across conditional clauses (the medium answer fails open "if Redis fails"; adding "must also fail closed" is not caught), paraphrased contradictions with different words, and factual errors. The "cannot check correctness" limitation still applies.
 
 **Stability across equivalent answers.** Each variant was scored against both an answer at the cap (80) and one below it (56):
 
@@ -418,6 +432,7 @@ The test allows at most 10, and requires exactly 0 for whitespace, order and bul
 **Tests:**
 - `interview_quality.test.ts` covers:
   - the four answer categories with their factors, methods and uncertainty;
+  - contradictions: the counterfactual pair, the resolved answer, 12 adversarial non-contradictions and the AI-path cap;
   - stability at and below the cap;
   - Hindi and Spanish answers not scored, and English with Indian names scored;
   - a session with an unscored answer excluded and explained;

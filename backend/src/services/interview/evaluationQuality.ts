@@ -4,8 +4,8 @@
  */
 
 export const EVALUATION_METHODS = {
-  heuristic: 'rule-based-v2',
-  ai: 'ai-rubric-v1',
+  heuristic: 'rule-based-v3',
+  ai: 'ai-rubric-v2',
   empty: 'no-answer-v1',
   language: 'language-check-v1',
 } as const;
@@ -15,7 +15,7 @@ export const LIMITATIONS = {
   notHiringPrediction: 'This score describes one practice answer. It does not predict how an employer would assess you or whether you would be hired.',
   englishOnly: 'Answers are scored in English only. The rubric looks for English words and structure, so answers in other languages cannot be scored fairly.',
   noFactCheck: 'The built-in rubric cannot check whether technical claims are correct.',
-  noContradictions: 'Automated scoring does not detect statements that contradict each other.',
+  noContradictions: 'Only explicit self-contradictions are detected (a claim and its direct negation, or fail open and fail closed); subtler inconsistencies are not.',
   lexical: 'Relevance is judged from words shared with the question and its expected concepts, so an accurate answer in unusual wording can score lower.',
   aiSingleJudge: 'An AI score is a single automated judgement; it has not been calibrated against human interviewers.',
 } as const;

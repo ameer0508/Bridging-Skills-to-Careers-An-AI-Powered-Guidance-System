@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { evaluateAnswer, evaluateHeuristically, HEURISTIC_MAX_SCORE } from '../services/InterviewEvaluator.js';
 import { answerLanguage, EVALUATION_METHODS, LIMITATIONS } from '../services/interview/evaluationQuality.js';
+import { CONTRADICTION_CAP, findContradictions } from '../services/interview/contradictions.js';
 import interviewService from '../services/InterviewService.js';
 import type { IQuestionItem } from '../models/InterviewSession.js';
 import { User } from '../models/User.js';
@@ -61,14 +62,67 @@ export async function runInterviewQualityTests() {
   assert.ok(factors.specificity.technologies.includes('Redis') && factors.specificity.metrics.length > 0, 'the tools and numbers that earned specificity are listed');
   assert.ok(factors.relevance.conceptsCovered.includes('Failure Handling'));
   assert.ok(empty.score < generic.score && generic.score < excellent.score, 'empty < generic < excellent');
-  // The rubric cannot see contradictions: it says so rather than pretending to
+  // Explicit contradictions are found and capped; subtler ones are still a stated limitation
   assert.ok(contradictory.limitations?.includes(LIMITATIONS.noContradictions));
-  assert.ok(contradictory.score <= HEURISTIC_MAX_SCORE);
+  assert.ok(contradictory.score <= CONTRADICTION_CAP, `the contradictory answer is capped (${contradictory.score})`);
+  assert.ok((contradictory.factors as { contradictions: unknown[] }).contradictions.length >= 2, 'the conflicting statements are listed');
+  assert.ok((contradictory.factors as { capsApplied: string[] }).capsApplied.includes('it contradicts itself'));
+  assert.equal(contradictory.uncertainty?.level, 'high');
+  assert.match(contradictory.improvements[0], /^Resolve the contradiction: "I would always use a token bucket/);
   for (const e of [generic, contradictory, excellent]) {
     assert.equal(e.method, EVALUATION_METHODS.heuristic);
     assert.ok(e.limitations?.includes(LIMITATIONS.notHiringPrediction) && e.limitations?.includes(LIMITATIONS.noFactCheck));
   }
   console.log(`  ✓ Categories: empty ${empty.score}, generic ${generic.score}, contradictory ${contradictory.score} (limitation stated), excellent ${excellent.score}; factors, method and uncertainty on each`);
+
+  // === Contradictions: counterfactual and adversarial ================================================
+  // Counterfactual: the same excellent answer with one sentence that denies its own claim
+  const withDenial = `${EXCELLENT} However, I would never use a token bucket algorithm.`;
+  const denied = evaluateHeuristically(withDenial, Q);
+  assert.ok(denied.score <= CONTRADICTION_CAP, `adding a self-denial caps the excellent answer (${excellent.score} -> ${denied.score})`);
+  assert.equal(evaluateHeuristically(withDenial.replace(' However, I would never use a token bucket algorithm.', ''), Q).score, excellent.score, 'removing it restores the score exactly');
+  const failBoth = `${EXCELLENT} The limiter must also fail closed so that nothing passes.`;
+  assert.ok(evaluateHeuristically(failBoth, Q).score <= CONTRADICTION_CAP, 'fail open and fail closed asserted together');
+  // A conditional claim is not compared: MEDIUM fails open only "if Redis fails" (a stated limitation)
+  assert.deepEqual(findContradictions(`${MEDIUM} The limiter must also fail closed so that nothing passes.`), []);
+  // Each planted contradiction on its own is enough, and removing all of them lifts the cap
+  const resolved = CONTRADICTORY
+    .replace(', and I would never use a token bucket because it cannot handle bursts', '')
+    .replace(', but each node would also keep its own separate limits with no shared state at all', '')
+    .replace(', and it must also fail closed so that no request passes when Redis is down', '');
+  const resolvedEval = evaluateHeuristically(resolved, Q);
+  assert.deepEqual(findContradictions(resolved), []);
+  assert.ok(resolvedEval.score > CONTRADICTION_CAP, `with the contradictions removed the answer is scored normally (${resolvedEval.score})`);
+  // Adversarial: wording that negates, contrasts or qualifies without contradicting must not be capped
+  const legitimate: Record<string, string> = {
+    'conditional advice': 'Use caching when data is read-heavy. Do not use caching when data changes constantly. I would measure hit rates.',
+    "someone else's view": 'Some people use a fixed window for rate limiting. I would not use a fixed window for rate limiting because bursts at the boundary double the rate.',
+    'scoped exception': 'I would use a token bucket for the public API. I would not use a token bucket for internal traffic between services.',
+    'rejected alternative': 'I would not use a fixed window counter. I would use a sliding log or a token bucket in Redis.',
+    'different conditions': 'If Redis is down the limiter should fail open. If the auth service is down the gateway should fail closed.',
+    'opposite option discussed': 'The limiter should fail open. Failing closed would reject all traffic, which is worse for availability.',
+    'different subjects': 'The API servers stay stateless and the state lives in Redis. Redis is not stateless, so it needs replication.',
+    'behavioural negatives': 'When our deploys kept failing I was responsible for the pipeline. I did not blame the team; I added tests and the failures dropped from 12 to 2 per month. We did not ship broken builds after that.',
+    'repeated negative': 'I would never store passwords in plain text. Passwords must never be stored in plain text, so I hash them with bcrypt.',
+    'not only, also': 'Rate limiting is not only about blocking abuse. Rate limiting is also about fairness between clients.',
+    'excellent': EXCELLENT,
+    'medium': MEDIUM,
+  };
+  for (const [label, text] of Object.entries(legitimate)) {
+    assert.deepEqual(findContradictions(text), [], `not a contradiction: ${label}`);
+  }
+  // The AI path gets the same guard rail, whatever the model returned
+  const aiFake = await ensureFakeAiService();
+  process.env.INTERVIEW_AI_TIMEOUT_MS = '400';
+  aiFake.interview.mode = 'ok';
+  aiFake.interview.rubric = { relevance: 5, completeness: 5, specificity: 5, structure: 5, technical_accuracy: 5, is_relevant: true, strengths: [], improvements: [], missing_concepts: [], feedback: 'ok' };
+  const aiContradictory = await evaluateAnswer(CONTRADICTORY, Q, 'Backend Engineer');
+  assert.equal(aiContradictory.method, EVALUATION_METHODS.ai);
+  assert.ok(aiContradictory.score <= CONTRADICTION_CAP, `an AI score of 100 is capped for a contradictory answer (${aiContradictory.score})`);
+  assert.equal((await evaluateAnswer(EXCELLENT, Q, 'Backend Engineer')).score, 100, 'and left alone otherwise');
+  aiFake.interview.mode = 'unavailable';
+  delete process.env.INTERVIEW_AI_TIMEOUT_MS;
+  console.log(`  ✓ Contradictions: one planted denial caps ${excellent.score} -> ${denied.score} and removing it restores ${excellent.score}; resolved answer ${resolvedEval.score}; ${Object.keys(legitimate).length} legitimate negations and contrasts not flagged; AI path capped too`);
 
   // === Stability across equivalent answers ===========================================================
   const variantsOf = (base: string): Record<string, string> => {
@@ -134,7 +188,7 @@ export async function runInterviewQualityTests() {
   assert.equal(ai.uncertainty?.level, 'medium');
   assert.ok(ai.limitations?.includes(LIMITATIONS.aiSingleJudge) && ai.limitations?.includes(LIMITATIONS.notHiringPrediction));
   delete process.env.INTERVIEW_AI_TIMEOUT_MS;
-  console.log('  ✓ AI path: method ai-rubric-v1, raw rubric scores as factors, uncertainty and limitations stated');
+  console.log(`  ✓ AI path: method ${EVALUATION_METHODS.ai}, raw rubric scores as factors, uncertainty and limitations stated`);
   console.log('✅ Interview Scoring Quality (X9) Tests Passed\n');
 }
 

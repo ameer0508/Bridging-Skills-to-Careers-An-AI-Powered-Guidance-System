@@ -6,6 +6,7 @@ import { extractSkills } from '../utils/skillLexicon.js';
 import { escapeRegExp } from '../utils/skillMatching.js';
 import { InterviewRubric, RUBRICS } from './interview/InterviewRubrics.js';
 import { answerLanguage, EVALUATION_METHODS, LIMITATIONS, limitationsFor, uncertaintyFor } from './interview/evaluationQuality.js';
+import { CONTRADICTION_CAP, findContradictions, type Contradiction } from './interview/contradictions.js';
 
 /**
  * Interview answer evaluation.
@@ -172,10 +173,15 @@ export function evaluateHeuristically(answer: string, question: IQuestionItem, r
     score = Math.min(score, 15);
     caps.push('it does not address the question');
   }
+  const contradictions = findContradictions(text);
+  if (contradictions.length) {
+    score = Math.min(score, CONTRADICTION_CAP);
+    caps.push('it contradicts itself');
+  }
   score = Math.min(score, HEURISTIC_MAX_SCORE);
 
   const strengths: string[] = [];
-  const improvements: string[] = [];
+  const improvements: string[] = contradictionAdvice(contradictions);
 
   if (relevance >= 0.6) strengths.push('Addresses the question directly.');
   else if (relevance < 0.3) improvements.push('Answer the question that was asked: refer to its specific subject.');
@@ -227,6 +233,7 @@ export function evaluateHeuristically(answer: string, question: IQuestionItem, r
       specificity: { technologies: technologyNames.slice(0, 10), metrics: metricMatches.slice(0, 5).map(m => m.trim()) },
       structure: isBehavioural ? { kind: 'STAR', partsFound: starParts } : { kind: 'reasoning', reasoningMarkers: reasoningCount, fullCreditAt: 4 },
       weights: rubric.heuristic,
+      contradictions,
       capsApplied: caps,
     },
     uncertainty: uncertaintyFor('heuristic', words.length, caps),
@@ -234,6 +241,10 @@ export function evaluateHeuristically(answer: string, question: IQuestionItem, r
     evaluatedAt: new Date()
   };
 }
+
+/** X9: the first contradiction found, quoted, so the user can see exactly what was counted against the answer. */
+const contradictionAdvice = (found: Contradiction[]): string[] =>
+  found.length ? [`Resolve the contradiction: "${found[0].first}" conflicts with "${found[0].second}". State one position and the reason for it.`] : [];
 
 /** Converts a validated AI rubric result into the stored evaluation. */
 export function evaluationFromRubric(
@@ -262,6 +273,11 @@ export function evaluationFromRubric(
     score = Math.min(score, 20);
     caps.push('it does not address the question');
   }
+  const contradictions = findContradictions(answer);
+  if (contradictions.length) {
+    score = Math.min(score, CONTRADICTION_CAP);
+    caps.push('it contradicts itself');
+  }
   if (wordCount < 15) {
     score = Math.min(score, 30);
     caps.push('the answer is only a sentence long');
@@ -274,7 +290,7 @@ export function evaluationFromRubric(
     score,
     starFormatted: rubric.structure >= 4,
     strengths: rubric.strengths.slice(0, 3),
-    improvements: rubric.improvements.slice(0, 3),
+    improvements: [...contradictionAdvice(contradictions), ...rubric.improvements].slice(0, 3),
     missingConcepts: rubric.missing_concepts.slice(0, 6),
     feedback: rubric.feedback,
     source: 'ai',
@@ -291,6 +307,7 @@ export function evaluationFromRubric(
       rubricScoresOutOf5: { relevance: rubric.relevance, completeness: rubric.completeness, specificity: rubric.specificity, structure: rubric.structure, technicalAccuracy: rubric.technical_accuracy ?? null },
       weights: roleRubric.ai,
       words: wordCount,
+      contradictions,
       capsApplied: caps,
     },
     uncertainty: uncertaintyFor('ai', wordCount, caps),

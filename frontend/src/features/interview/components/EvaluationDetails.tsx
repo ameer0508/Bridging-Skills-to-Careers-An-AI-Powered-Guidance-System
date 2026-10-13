@@ -26,6 +26,8 @@ function factorLines(f: Record<string, unknown>): string[] {
   if (struct) lines.push(struct.kind === 'STAR' ? `Structure (STAR): parts found: ${list(struct.partsFound)}.` : `Structure: ${struct.reasoningMarkers} reasoning phrase(s) such as "because" or "trade-off".`);
   const ai = f.rubricScoresOutOf5 as Record<string, number | null> | undefined;
   if (ai) lines.push(`AI rubric (0–5): ${Object.entries(ai).map(([k, v]) => `${k} ${v ?? 'not judged'}`).join(', ')}.`);
+  const conflicts = f.contradictions as Array<{ first: string; second: string }> | undefined;
+  for (const c of conflicts ?? []) lines.push(`Contradiction: "${c.first}" conflicts with "${c.second}".`);
   const caps = f.capsApplied as string[] | undefined;
   if (caps?.length) lines.push(`Limits applied: ${caps.join('; ')}.`);
   return lines;

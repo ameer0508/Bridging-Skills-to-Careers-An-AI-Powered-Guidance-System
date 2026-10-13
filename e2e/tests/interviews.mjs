@@ -317,7 +317,7 @@ export async function run({ webUrl, apiUrl }) {
       await details.getByText(/How this answer was scored/).click();
       await details.getByText('Limits of this score').click();
       const text = await details.innerText();
-      expect(/rule-based-v2/.test(text) && /Completeness: \d+ words/.test(text), `factors: ${text.slice(0, 200)}`);
+      expect(/rule-based-v3/.test(text) && /Completeness: \d+ words/.test(text), `factors: ${text.slice(0, 200)}`);
       expect(/does not predict how an employer would assess you/.test(text), 'the hiring disclaimer is missing');
     });
 
