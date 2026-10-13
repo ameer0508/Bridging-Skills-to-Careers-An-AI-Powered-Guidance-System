@@ -6,12 +6,12 @@ import { chromium } from 'playwright-core';
  * Launches an installed browser. No browser download is needed: the first channel that is
  * present on the machine is used. Set E2E_BROWSER_CHANNEL to force one (msedge, chrome, chromium).
  */
-export async function launchBrowser() {
-  const channels = [process.env.E2E_BROWSER_CHANNEL, 'msedge', 'chrome', 'chromium'].filter(Boolean);
+export async function launchBrowser({ channel: only, args } = {}) {
+  const channels = only ? [only] : [process.env.E2E_BROWSER_CHANNEL, 'msedge', 'chrome', 'chromium'].filter(Boolean);
   const errors = [];
   for (const channel of channels) {
     try {
-      const browser = await chromium.launch({ channel, headless: process.env.E2E_HEADED !== '1' });
+      const browser = await chromium.launch({ channel, args, headless: process.env.E2E_HEADED !== '1' });
       return { browser, channel };
     } catch (error) {
       errors.push(`${channel}: ${String(error.message).split('\n')[0]}`);

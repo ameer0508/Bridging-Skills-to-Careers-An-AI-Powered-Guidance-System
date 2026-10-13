@@ -222,13 +222,9 @@ class VoiceRecordingService {
       lastDeleteError: null,
     };
     try {
-      // Same file as before: the existing record now describes the new audio
-      const current = await VoiceRecording.findOne({ userId, sessionId: session._id, questionId: question.questionId });
-      if (current) {
-        current.set({ ...fields, createdAt: now });
-        await current.save();
-        return view(current);
-      }
+      // Same file as before: the old record is replaced by a new one. (createdAt cannot be moved on
+      // the old record: timestamps make it immutable, and retention is counted from it.)
+      await VoiceRecording.deleteOne({ userId, sessionId: session._id, questionId: question.questionId });
       return view(await VoiceRecording.create({ userId, sessionId: session._id, questionId: question.questionId, ...fields }));
     } catch (error) {
       // No record means nothing would ever delete this file, so it must not stay

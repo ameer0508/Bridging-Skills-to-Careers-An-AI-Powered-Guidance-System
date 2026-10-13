@@ -1,59 +1,103 @@
 # Manual voice test plan (D1 recordings, D2 dictation)
 
-The automated suites test voice features with a stand-in recorder and recogniser. Physical microphones, real codecs and real browser speech recognition can only be checked by a person. D1 (3 points) and D2 (2 points) are awarded only after this plan has been run and any defects fixed.
+D1 (3 points) and D2 (2 points) are awarded only after **you** run this plan on real hardware and send the results sheet, and any failures are fixed. Automated tests cannot stand in for a physical microphone or a real speech service, so nothing below is self-awarded.
+
+## What is already verified automatically (2026-10-13)
+
+| Check | Suite | Result | What it does not prove |
+|---|---|---|---|
+| Consent, retention, owner-only playback, replace, isolation, deletion, withdrawal, end-of-round deletion, failed-deletion retry | backend `voice_interviews`, `voice_retention` | Pass | Real devices |
+| The same flows in the browser, with a stand-in recorder and recogniser | `e2e/tests/interviews.mjs` (23/23) | Pass | Any real capture or codec |
+| **Real capture and codec path in Microsoft Edge 155**: the browser's own fake capture device plays a generated 440 Hz tone; real `getUserMedia`, `MediaStream` track, `MediaRecorder` (WebM/Opus), upload, storage and the browser's decoder | `e2e/tests/voiceRealCodec.mjs` (10/10) | Pass: no microphone request before consent; 48,596-byte WebM/Opus; track `ended` after stop; decoded 3.00 s at 453 Hz (source 440 Hz), not silent; byte-identical after reload; second account 404 on list, play and delete; replacement dated as the new take; deletion final after reload; "until this round ends" deletes on conclusion; a **really refused** permission shows the message and typing still works | A physical microphone, real voices, other devices, and Chrome |
+| Real speech API in Edge 155 | probe | `SpeechRecognition` present; service recognition "available"; on-device recognition (en-US) "unavailable" | Whether recognition is accurate |
+
+**Defect found by the real-codec suite and fixed:** re-recording an answer kept the first take's date, because the database timestamps make `createdAt` immutable. The replacement is now a new record dated when it was made, which is what its retention counts from (regression check in `voice_interviews`).
+
+**Google Chrome is not installed on the development machine**, so Chrome has had no automated run. Please test it by hand (or install it and run `E2E_CODEC_CHANNELS=chrome E2E_TEST_FILE=./tests/voiceRealCodec.mjs node run.mjs` in `e2e/`).
 
 ## Setup
 
-- **Browsers:** Google Chrome and Microsoft Edge, current stable versions, on the machine you will use. Firefox as a third check if you can: it has no speech recognition.
-- **Microphone:** a working one (built-in is fine) and a quiet room.
-- **App:** the app running locally (`pnpm dev`) or the Docker stack, opened at `http://localhost` (a secure context; microphones are blocked on plain http from other hosts).
-- **Account:** a fresh test account. Do not use real personal data. Speak only sample answers.
-- Note the browser and version, the operating system and the date on the results sheet.
+- **App:** your Docker stack at `http://localhost:3000`. `localhost` is a secure context, so browsers allow the microphone there. Rebuild first so it includes the fix above: `docker compose up -d --build`.
+- **Browsers:** Google Chrome and Microsoft Edge, current stable versions. Firefox as a third check if you have it: it has no speech recognition.
+- **Microphone:** a working one (built-in is fine) and a quiet room. Headphones avoid echo during playback.
+- **Account:** two fresh test accounts (A and B). Do not use real personal data; speak only sample answers.
+- **Screen reader:** Narrator (Windows + Ctrl + Enter) or NVDA.
+- Note the browser and version (`edge://version`, `chrome://version`), Windows version and the date.
 
 ## A. Recording (D1)
 
+Do A1–A12 in **Chrome**, then again in **Edge**.
+
 | # | Step | Expected |
 |---|---|---|
-| A1 | Start an interview round in the Interview room. Before recording, look at the browser's address bar | No microphone indicator is shown; nothing has been requested |
-| A2 | Click "Record spoken answers" | A consent panel appears and keyboard focus moves into it. It says recordings stay on SkillBridge's server, only you can play them, they are not sent to any AI or other company, are not transcribed, do not change the score, and turning recording off deletes them all |
-| A3 | Choose "for 7 days" and accept | The browser asks for microphone permission (first time only) |
-| A4 | Allow, record a 10–20 second answer, stop | A recording appears for the question with its duration. The browser's microphone indicator turns off after stopping |
-| A5 | Play it back | Your own voice, audible and complete, with no clipping at the start or end |
-| A6 | Reload the page and open the round again | The recording is still listed and still plays |
-| A7 | Record the same question again | The new recording replaces the old one; only one is listed |
-| A8 | Delete the recording | It disappears and no longer plays. Reloading does not bring it back |
-| A9 | Record again, then turn recording off in the voice settings | You are told how many recordings were deleted; none can be played |
-| A10 | Sign in as a second test account and try to open the first account's recording URL (copy it from the browser's network panel) | Refused (404); nothing plays |
-| A11 | Set retention to "until this round ends", record, then finish the round | The recording is deleted when the round ends |
-| A12 | Block the microphone in the site settings, then try to record | A clear message explains that the microphone is blocked and how to allow it; typing answers still works |
+| A1 | Sign in as A. Interview room → Enter Interview Studio. Look at the address bar | No microphone icon; nothing has been requested |
+| A2 | Click "Record spoken answers" | A consent panel appears and focus moves into it. It says recordings stay on SkillBridge's server, only you can play them, they are not sent to any AI or other company, are not transcribed, do not change the score, and turning recording off deletes them all. Still no microphone request |
+| A3 | Choose "for 7 days" and click "Allow recording" | Recording is switched on. The microphone is still not requested until you press "Record answer" |
+| A4 | Click "Record answer", allow the browser prompt, speak for 10–20 seconds, click "Stop recording" | "Recording saved (N s)…" appears. The browser's microphone indicator **turns off** after stopping |
+| A5 | Click "Listen" and play | Your own voice, audible and complete, with no clipping at the start or end |
+| A6 | Reload the page and reopen the round | The recording is still listed and still plays |
+| A7 | Click "Record again" and record a different sentence | The new take replaces the old; only one is listed, and it plays the new sentence |
+| A8 | Click "Delete recording", then reload | It is gone and does not come back |
+| A9 | Record again, then click "Turn off recording" and confirm | All recordings are deleted; nothing can be played |
+| A10 | Record again. Open the developer tools (F12) → Network, click "Listen", copy the `/audio` request URL. Sign in as B in a private window and paste that URL into B's address bar | Refused (401, because a pasted URL carries no sign-in, or 404); nothing plays. The automated suites also check that B's signed-in requests get 404 |
+| A11 | As A: turn recording off, turn it on with "until this round ends", record, answer, then "Conclude Round" | The recording is deleted when the round ends |
+| A12 | Site settings (lock icon) → Microphone → Block. Reload and click "Record answer" | "The microphone could not be used…" is shown; typing and submitting an answer still works |
 
 ## B. Dictation (D2)
 
+Do B1–B8 in **Chrome** and **Edge**; B6 in Firefox.
+
 | # | Step | Expected |
 |---|---|---|
-| B1 | Click "Enable voice dictation" | A consent panel appears, with focus in it. It says SkillBridge does not receive or store your voice and that the browser vendor's service may process it; "Only on this device" is offered only if the browser supports on-device recognition |
-| B2 | Allow the browser service, click "Dictate" and speak two sentences | Words appear in the answer box while you speak or shortly after |
+| B1 | Click "Enable voice dictation" | A consent panel with focus in it. It says SkillBridge does not receive or store your voice and the browser vendor's service may process it. "Only on this device" is offered only if the browser supports on-device recognition (Edge 155 reported it does not, for English) |
+| B2 | Choose "Allow my browser…", click "Dictate", speak two sentences | Words appear in the answer box while you speak or shortly after |
 | B3 | Edit the dictated text by hand, then submit | Your edited text is what is stored and scored. The answer is labelled as dictated or mixed input |
-| B4 | Say a technical phrase ("I used Redis and PostgreSQL with a token bucket") | Note the accuracy. Mistakes are expected; the text stays editable |
-| B5 | Deny the microphone, then click "Dictate" | A clear error; typing still works |
-| B6 | In Firefox (no speech recognition) | Dictation is shown as unavailable with an explanation; typing works |
-| B7 | If offered, choose "Only on this device" and dictate with the network disconnected | Recognition still works offline. If it does not, record that |
-| B8 | Turn dictation off | The Dictate button disappears; nothing listens |
+| B4 | Say: "I used Redis and PostgreSQL with a token bucket rate limiter in Kubernetes" | Note how many technical words were right. Mistakes are expected; the text stays editable |
+| B5 | Block the microphone, then click "Dictate" | "Microphone access was refused…" is announced; typing still works |
+| B6 | In Firefox | Dictation is shown as unavailable with an explanation; typing works |
+| B7 | Only if "Only on this device" is offered: choose it, disconnect the network, dictate | Recognition still works offline. If it does not, write that down |
+| B8 | Click "Dictate", then click "Listening…" to stop; then "Turn off dictation" | Listening stops at once (the browser's microphone indicator turns off); after turning dictation off the Dictate button is gone |
 
-## C. Accessibility while using voice
+## C. Keyboard and screen reader
 
 | # | Step | Expected |
 |---|---|---|
-| C1 | Do A2–A4 and B1–B2 with the keyboard only (Tab, Enter, Space) | Every control can be reached and used; focus is visible |
-| C2 | With a screen reader (NVDA or Narrator on Windows), open each consent panel | The panel title and text are read; errors are announced |
+| C1 | Do A2–A5 and B1–B3 with the keyboard only (Tab, Shift+Tab, Enter, Space) | Every control can be reached and used, in a sensible order; focus is always visible |
+| C2 | With Narrator or NVDA, open each consent panel | The panel title and its text are read |
+| C3 | With the screen reader on, trigger A12 and B5 | The error messages are announced without moving focus by hand |
+| C4 | With the screen reader on, record and stop | The button names ("Record answer", "Stop recording (N s / 180 s)", "Listen") are read |
 
 ## Results sheet
 
-Copy this table into an issue or reply, one row per step:
+Reply with this table filled in (one row per step and browser). "Pass" or "Fail", and for a failure say what happened.
 
-| Step | Browser/version | Pass/Fail | Notes (what happened, if different) |
+| Step | Chrome (version) | Edge (version) | Notes |
 |---|---|---|---|
 | A1 | | | |
-| … | | | |
+| A2 | | | |
+| A3 | | | |
+| A4 | | | |
+| A5 | | | |
+| A6 | | | |
+| A7 | | | |
+| A8 | | | |
+| A9 | | | |
+| A10 | | | |
+| A11 | | | |
+| A12 | | | |
+| B1 | | | |
+| B2 | | | |
+| B3 | | | |
+| B4 (words right / total) | | | |
+| B5 | | | |
+| B6 (Firefox) | | | |
+| B7 | | | |
+| B8 | | | |
+| C1 | | | |
+| C2 | | | |
+| C3 | | | |
+| C4 | | | |
 
-Report any failure with the step number, the browser and what you saw. A screenshot of the console helps; please do not send the audio itself.
+A screenshot of the console helps for a failure; please do not send the audio itself.
+
+**How the points will be decided.** D1 is awarded when A1–A12 and C1–C4 pass in both Chrome and Edge (after fixes, if any). D2 is awarded when B1–B6 and B8 pass in both, B4's accuracy is recorded whatever it is, and B7 is either passed or honestly reported as not offered.

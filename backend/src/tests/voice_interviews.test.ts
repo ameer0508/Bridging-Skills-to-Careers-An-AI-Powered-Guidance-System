@@ -104,10 +104,14 @@ export async function runVoiceInterviewTests() {
       assert.equal((await upload(alice.token, round, body as never)).status, 400, label);
     }
 
-    // Re-recording replaces; isolation
+    // Re-recording replaces, and the new recording is dated now (its retention counts from it); isolation
+    const firstTake = (await A('GET', `/interviews/${round}/recordings`)).body.data.recordings[0];
+    await new Promise(resolve => setTimeout(resolve, 20));
     await upload(alice.token, round, { buffer: webm('again') });
     let list = (await A('GET', `/interviews/${round}/recordings`)).body.data.recordings;
     assert.equal(list.length, 1, 'one recording per question');
+    assert.ok(new Date(list[0].createdAt) > new Date(firstTake.createdAt), `the replacement keeps the first take's date (${list[0].createdAt})`);
+    assert.equal(list[0].bytes, webm('again').length, 'the replacement describes the new audio');
     await B('PUT', '/interviews/voice-settings', { recordingConsent: true });
     const qid = encodeURIComponent(list[0].questionId);
     for (const [label, status] of [
