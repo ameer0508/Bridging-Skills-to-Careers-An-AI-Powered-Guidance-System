@@ -26,7 +26,7 @@ export const CinematicCTA: React.FC = () => {
           </h2>
 
           <p className="text-slate-300 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-            Join thousands of ambitious professionals using SkillBridge to unlock targeted skill insights and land high-impact roles.
+            Upload your resume to see evidence-based career matches, the gaps that matter and a plan paced to your time.
           </p>
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">

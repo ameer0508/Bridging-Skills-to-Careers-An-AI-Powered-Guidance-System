@@ -51,7 +51,7 @@ export const IntelligenceHero: React.FC = () => {
           transition={{ delay: 0.4, duration: 0.7 }}
           className="text-base sm:text-lg md:text-xl text-slate-300 font-normal leading-relaxed max-w-2xl"
         >
-          SkillBridge transforms resumes, project evidence, and skill vectors into an explainable, adaptive career intelligence roadmap.
+          SkillBridge turns your resume and project evidence into explainable career matches, the gaps that matter, and a learning plan paced to your time.
         </motion.p>
 
         {/* Magnetic Primary & Secondary CTAs */}
@@ -90,11 +90,11 @@ export const IntelligenceHero: React.FC = () => {
         >
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-            <span>Production Grade AI</span>
+            <span>No paid AI required</span>
           </div>
           <div className="flex items-center gap-2">
             <Brain className="w-4 h-4 text-cyan-400" />
-            <span>Vector Skill Graph</span>
+            <span>Evidence-linked skills</span>
           </div>
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400" />

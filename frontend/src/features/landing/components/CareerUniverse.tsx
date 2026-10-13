@@ -5,12 +5,12 @@ import { FileText, Cpu, Code2, Briefcase, Target, BookOpen, TrendingUp, Sparkles
 export const CareerUniverse: React.FC = () => {
   const elements = [
     { name: 'Raw Resume', desc: 'Fragmented PDF bullet points', icon: FileText, color: 'text-slate-400', border: 'border-slate-700' },
-    { name: 'Skill Vectors', desc: 'spaCy NLP extracted entities', icon: Cpu, color: 'text-indigo-400', border: 'border-indigo-500/30' },
-    { name: 'Project Proof', desc: 'GitHub repos & code metrics', icon: Code2, color: 'text-cyan-400', border: 'border-cyan-500/30' },
-    { name: 'Domain Experience', desc: 'Year equivalent proficiency', icon: Briefcase, color: 'text-purple-400', border: 'border-purple-500/30' },
+    { name: 'Skill Vectors', desc: 'Skills found in your resume', icon: Cpu, color: 'text-indigo-400', border: 'border-indigo-500/30' },
+    { name: 'Project Proof', desc: 'Portfolio entries with links', icon: Code2, color: 'text-cyan-400', border: 'border-cyan-500/30' },
+    { name: 'Domain Experience', desc: 'Dated role periods', icon: Briefcase, color: 'text-purple-400', border: 'border-purple-500/30' },
     { name: 'Career Aspirations', desc: 'Target role benchmarks', icon: Target, color: 'text-rose-400', border: 'border-rose-500/30' },
     { name: 'Adaptive Learning', desc: 'Targeted capstone roadmaps', icon: BookOpen, color: 'text-emerald-400', border: 'border-emerald-500/30' },
-    { name: 'Market Demand', desc: 'Live industry skill trends', icon: TrendingUp, color: 'text-amber-400', border: 'border-amber-500/30' },
+    { name: 'Market Demand', desc: 'Shown only from licensed, dated sources', icon: TrendingUp, color: 'text-amber-400', border: 'border-amber-500/30' },
   ];
 
   return (
@@ -86,7 +86,7 @@ export const CareerUniverse: React.FC = () => {
           </div>
           <div className="pt-4 mt-4 border-t border-white/10 flex items-center justify-between text-xs text-cyan-300 font-mono">
             <span>Status: Active</span>
-            <span className="px-2 py-0.5 rounded bg-cyan-500/20 border border-cyan-500/40 text-[10px]">100% Grounding</span>
+            <span className="px-2 py-0.5 rounded bg-cyan-500/20 border border-cyan-500/40 text-[10px]">Evidence-linked</span>
           </div>
         </motion.div>
       </div>

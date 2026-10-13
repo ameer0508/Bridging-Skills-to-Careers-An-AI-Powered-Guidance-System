@@ -16,31 +16,31 @@ export const IntelligenceFAQ: React.FC = () => {
     {
       question: 'How does SkillBridge analyze my skills and resume?',
       answer:
-        'SkillBridge uses pdfplumber and PyMuPDF to extract text from your PDF/DOCX resume, then runs spaCy NLP and specialized transformers to extract hard skills, frameworks, and experience metrics into a structured JSON taxonomy.',
+        'SkillBridge reads the text of your PDF or DOCX resume with PyMuPDF and pdfplumber, finds the skills it names from a curated list of skills and their aliases, and reads roles, dates and education. Each value is linked to the line it came from, and scanned pages are reported rather than guessed.',
       category: 'ai',
     },
     {
       question: 'Is SkillBridge free to use for students and job seekers?',
       answer:
-        'Yes! SkillBridge offers full access to career assessment, skill gap detection, and adaptive roadmap generation for students and job seekers looking to land their dream role.',
+        'Yes. Career matching, gap analysis, roadmaps, exam practice and interview practice are free to use. SkillBridge itself runs without paid AI services.',
       category: 'access',
     },
     {
       question: 'How does SkillBridge calculate my Career Match Score?',
       answer:
-        'We convert your skill vector and experience profile into high-dimensional embeddings and compare them against thousands of standardized role requirements using vector cosine distance.',
+        'Each of the 20 careers has a list of requirements with an importance and a weight. Your score is the weighted share of those requirements your evidence covers, and skills you have applied in roles or projects count more than skills only listed. The breakdown shows every requirement.',
       category: 'ai',
     },
     {
       question: 'What happens after I get my skill gap report?',
       answer:
-        'SkillBridge dynamically constructs a personalized, step-by-step learning roadmap complete with recommended open-source projects, courses, and readiness milestones to track your progress.',
+        'SkillBridge builds a roadmap for your gaps, paced to the hours you set each week, with free official documentation links and practice project briefs. Completing items and adding evidence updates it.',
       category: 'roadmaps',
     },
     {
-      question: 'Can I upload multiple versions of my resume for different target roles?',
+      question: 'Can I try changes to my resume before uploading a new version?',
       answer:
-        'Absolutely. You can maintain multiple career targets and upload tailored resume versions to evaluate alignment across different specialization tracks.',
+        'Yes. You keep one current resume, and replacing it rebuilds your skills and lists what changed. The Career Lab what-if lets you test added skills, projects or certifications without uploading anything.',
       category: 'access',
     },
   ];

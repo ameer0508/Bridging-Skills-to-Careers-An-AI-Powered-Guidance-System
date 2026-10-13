@@ -6,7 +6,7 @@ export const DigitalTwinSection: React.FC = () => {
   const [activeNode, setActiveNode] = useState<string>('twin');
 
   const nodes = [
-    { id: 'resume', label: 'Resume Parser', icon: FileText, value: '98/100 ATS Score', color: 'text-indigo-400', border: 'border-indigo-500/30' },
+    { id: 'resume', label: 'Resume Parser', icon: FileText, value: 'Sample: 24 skills found', color: 'text-indigo-400', border: 'border-indigo-500/30' },
     { id: 'skills', label: 'Skill Vectors', icon: Cpu, value: '24 Entities Extracted', color: 'text-cyan-400', border: 'border-cyan-500/30' },
     { id: 'projects', label: 'GitHub Projects', icon: Code2, value: '14 Repos Ingested', color: 'text-purple-400', border: 'border-purple-500/30' },
     { id: 'certifications', label: 'Verified Badges', icon: Award, value: '3 Active Credentials', color: 'text-emerald-400', border: 'border-emerald-500/30' },
@@ -32,7 +32,7 @@ export const DigitalTwinSection: React.FC = () => {
         </h2>
 
         <p className="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
-          SkillBridge unifies all your career telemetry into a dynamic, living AI representation that continuously simulates market fit and interview readiness.
+          SkillBridge brings your resume, skills, projects, goals and learning into one profile, and recalculates your matches and readiness whenever that evidence changes. The panel below is an illustration with sample data.
         </p>
       </div>
 
@@ -96,12 +96,12 @@ export const DigitalTwinSection: React.FC = () => {
                   <Sparkles className="w-4 h-4 text-cyan-400" />
                   Twin Synergy Status
                 </span>
-                <span className="text-emerald-400 font-mono">94.8% Career Match Readiness</span>
+                <span className="text-emerald-400 font-mono">Sample: 94.8% match</span>
               </div>
 
               <p className="text-xs text-slate-300 leading-relaxed">
-                {activeNode === 'twin' && 'All 5 telemetry sources synchronized. Digital Twin indicates high compatibility with Tier 1 AI Engineer roles.'}
-                {activeNode === 'resume' && 'Resume Parser Node: Extracted 24 verified tech keywords with 98/100 ATS formatting density.'}
+                {activeNode === 'twin' && 'Sample data: five sources combined into one profile; matches and readiness are recalculated from them.'}
+                {activeNode === 'resume' && 'Sample data: 24 skills found in the resume, each linked to the line it came from.'}
                 {activeNode === 'skills' && 'Skill Vector Node: High proficiency detected in PyTorch, FastAPI, and TypeScript; gap flagged in Vector Databases.'}
                 {activeNode === 'projects' && 'GitHub Node: Analyzed 14 open-source repositories verifying hands-on microservice deployment capability.'}
                 {activeNode === 'certifications' && 'Certifications Node: Verified 3 AWS & Docker technical credentials.'}

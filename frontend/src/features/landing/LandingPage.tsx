@@ -12,7 +12,7 @@ import { MarketIntelligence } from './components/MarketIntelligence';
 import { CareerOSReveal } from './components/CareerOSReveal';
 import { IntelligenceTrust } from './components/IntelligenceTrust';
 import { InteractiveComparison } from './components/InteractiveComparison';
-import { SocialProof } from './components/SocialProof';
+import { ExampleScenarios } from './components/ExampleScenarios';
 import { IntelligenceFAQ } from './components/IntelligenceFAQ';
 import { CinematicCTA } from './components/CinematicCTA';
 import { ImmersiveFooter } from './components/ImmersiveFooter';
@@ -59,7 +59,7 @@ export const LandingPage: React.FC = () => {
         <InteractiveComparison />
 
         {/* 13. Social Proof & User Outcomes */}
-        <SocialProof />
+        <ExampleScenarios />
 
         {/* 14. Intelligence Knowledge Base (FAQ) */}
         <IntelligenceFAQ />

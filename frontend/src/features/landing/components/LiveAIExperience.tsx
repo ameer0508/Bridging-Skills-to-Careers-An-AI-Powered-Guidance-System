@@ -138,15 +138,11 @@ export const LiveAIExperience: React.FC = () => {
                   Online
                 </span>
               </h3>
-              <p className="text-xs text-slate-400 font-mono">Powered by Gemini 1.5 & Custom Skill Embeddings</p>
+              <p className="text-xs text-slate-400 font-mono">Simulation with sample data, not your results</p>
             </div>
           </div>
 
           <div className="hidden sm:flex items-center gap-4 text-xs font-mono">
-            <div className="flex items-center gap-1.5 text-slate-400">
-              <span>Confidence:</span>
-              <span className="text-emerald-400 font-bold">{selectedPrompt.confidenceScore}%</span>
-            </div>
             <div className="flex items-center gap-1.5 text-slate-400">
               <span>Match:</span>
               <span className="text-indigo-400 font-bold">{selectedPrompt.matchScore}%</span>

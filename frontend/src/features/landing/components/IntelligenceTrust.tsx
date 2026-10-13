@@ -7,25 +7,25 @@ export const IntelligenceTrust: React.FC = () => {
   const pillars = [
     {
       title: 'Explainable AI Architecture',
-      desc: 'Every career match score and skill gap warning is accompanied by transparent reasoning breakdown and confidence metrics.',
+      desc: 'Every career match score and skill gap comes with a requirement-by-requirement breakdown of the evidence behind it.',
       icon: Brain,
       color: 'text-cyan-400',
     },
     {
-      title: 'High-Dimensional Vector Search',
-      desc: 'Converts skills and role descriptions into dense vector embeddings using Sentence Transformers for mathematical similarity ranking.',
+      title: 'Weighted Requirement Scoring',
+      desc: 'Each career lists its requirements with an importance and a weight; your score is the evidence-weighted share you cover.',
       icon: Cpu,
       color: 'text-indigo-400',
     },
     {
-      title: 'spaCy NLP Document Parsing',
-      desc: 'Ingests complex multi-page PDF and DOCX files using custom entity recognition trained on technical software engineering taxonomies.',
+      title: 'Resume Reading You Can Check',
+      desc: 'PDF, DOCX and text resumes are read on SkillBridge servers; every extracted value points to the line it came from.',
       icon: Code2,
       color: 'text-purple-400',
     },
     {
       title: 'Deterministic Skill Matrix',
-      desc: 'Replaces black-box AI guessing with verified skill comparison matrices against standardized industry role definitions.',
+      desc: 'Compares your evidence with each career\'s published requirements, the same way every time.',
       icon: ShieldCheck,
       color: 'text-emerald-400',
     },
