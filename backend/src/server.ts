@@ -66,6 +66,9 @@ const connectDatabase = async (): Promise<void> => {
     await mongoose.connect(mongoUri);
     logger.info('Successfully established MongoDB connection pool.');
     await CareerService.seedInitialTaxonomy();
+    // Users whose matches predate the current career list are recomputed once, in the background
+    const { scheduleTaxonomyRefreshOnStart } = await import('./services/careers/TaxonomyRefreshService.js');
+    scheduleTaxonomyRefreshOnStart();
     const RecommendationService = (await import('./services/RecommendationService.js')).default;
     await RecommendationService.seedInitialResources();
     // Resume jobs run in memory; anything left in flight by the previous process is made recoverable.

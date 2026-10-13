@@ -58,8 +58,10 @@ score           = 100 x sum(earned) / sum(possible) x (1 - 0.3 x required missin
 - Each requirement is reported as `applied`, `listed`, `inferred` or `missing`, with the points it earned.
 - `confidence` is the share of matched requirements backed by directly applied evidence.
 
-Career requirements are an editorial baseline curated for this project (14 careers, 109
-requirements). They are not derived from labour-market data.
+Career requirements are an editorial baseline curated for this project: 14 careers with 109
+requirements, plus six careers added in E1 (65 requirements) whose requirements are informed by
+O*NET 31.0 occupational data from the United States (`docs/E1_CAREER_DOMAINS.md`). None are
+derived from Indian labour-market data.
 
 ### Worked example
 

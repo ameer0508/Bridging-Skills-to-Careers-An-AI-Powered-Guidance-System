@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import CareerService from '../services/CareerService.js';
+import { CAREER_TAXONOMY } from '../seed/careerTaxonomy.js';
 import RecalculationRun from '../models/RecalculationRun.js';
 import { AFFECTED_MODULES } from '../services/RecalculationService.js';
 import { FRESHNESS_POLICY, freshnessOf } from '../services/SkillFreshnessService.js';
@@ -200,7 +201,7 @@ export async function runCareerLabTests() {
     console.log('  ✓ R1 recalculation: one run per event, only affected modules recomputed, duplicates and bursts collapse to one');
 
     const careers = (await h.api('GET', '/careers/catalog', { token: alice.token })).body.data.careers as Array<{ id: string; title: string }>;
-    assert.equal(careers.length, 14);
+    assert.equal(careers.length, CAREER_TAXONOMY.length, 'every career in the taxonomy is in the catalogue');
     const idOf = (title: string) => careers.find(c => c.title === title)!.id;
     const frontend = idOf('Frontend Engineer');
     const devops = idOf('DevOps Engineer');
@@ -231,7 +232,7 @@ export async function runCareerLabTests() {
     const skillsBefore = JSON.stringify((await h.api('GET', '/skills/me', { token: alice.token })).body.data);
     const runsBefore = await RecalculationRun.countDocuments({ userId: alice.userId });
     const whatIf = (await h.api('POST', '/careers/what-if', { token: alice.token, json: { changes: [{ type: 'add_project', skills: ['Docker'], name: 'Deploy tool' }] } })).body.data;
-    assert.equal(whatIf.careers.length, 14);
+    assert.equal(whatIf.careers.length, CAREER_TAXONOMY.length);
     assert.deepEqual(whatIf.hypotheticalSkills, [{ name: 'Docker', evidenceScore: 35 }], 'listed (10) plus a first project (25), as real evidence would earn');
     const opsIf = whatIf.careers.find((c: any) => c.careerId === devops);
     assert.ok(opsIf.scoreDelta > 0 && opsIf.scoreAfter === opsIf.scoreBefore + opsIf.scoreDelta);

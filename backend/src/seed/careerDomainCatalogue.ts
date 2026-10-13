@@ -1,11 +1,10 @@
 import type { RequirementImportance } from '../models/CareerRequirement.js';
-import type { LexiconSkill } from './skillLexicon.js';
 
 /**
- * Additional career domains and roles (E1), proposed for the shared career taxonomy; see
- * docs/E1_CAREER_DOMAINS.md. This file is isolated: it is NOT read by matching, readiness,
- * recommendations or roadmaps until Agent A applies the documented patch. Until then it powers a
- * clearly labelled preview only.
+ * Additional career domains and roles (E1); see docs/E1_CAREER_DOMAINS.md. These careers are part of
+ * the shared taxonomy (seed/careerTaxonomy.ts appends them), so matching, readiness,
+ * recommendations and roadmaps use them like any other career. This file is their provenance
+ * record: the O*NET occupation behind each role and the basis of every requirement.
  *
  * Sources: each requirement names its basis. Most come from the O*NET 31.0 Database:
  *  - 'onet_software': the occupation's software examples, with O*NET's own "Hot Technology" and
@@ -209,29 +208,12 @@ export const CAREER_DOMAIN_CATALOGUE: CatalogueCareer[] = [
 ];
 
 /**
- * Skills the catalogue needs that the shared lexicon (backend/src/seed/skillLexicon.ts and its
- * mirror ai/app/resources/skill_lexicon.json) does not have yet. Proposed for Agent A's patch;
- * until then resumes cannot evidence these skills.
+ * The skills added to the shared lexicon for these careers (lexicon version 2). Their definitions,
+ * aliases and casing live in backend/src/seed/skillLexicon.ts and its AI mirror; this list only
+ * records which ones came with E1.
  */
-export const PROPOSED_LEXICON_SKILLS: LexiconSkill[] = [
-  { name: 'Playwright', category: 'Testing', aliases: ['microsoft playwright'], exactAliases: [], implies: ['Testing'], caseSensitive: false },
-  { name: 'Appium', category: 'Testing', aliases: [], exactAliases: [], implies: ['Testing'], caseSensitive: false },
-  { name: 'JMeter', category: 'Testing', aliases: ['apache jmeter'], exactAliases: [], implies: ['Testing'], caseSensitive: false },
-  { name: 'ETL', category: 'Data Engineering', aliases: ['extract transform load', 'extract, transform, load', 'informatica', 'talend'], exactAliases: [], implies: [], caseSensitive: false },
-  { name: 'Data Warehousing', category: 'Data Engineering', aliases: ['data warehouse', 'data warehouses', 'dwh'], exactAliases: [], implies: [], caseSensitive: false },
-  { name: 'Microcontrollers', category: 'Embedded Systems', aliases: ['microcontroller', 'mcu', 'arm cortex-m', 'stm32', 'avr'], exactAliases: [], implies: [], caseSensitive: false },
-  { name: 'RTOS', category: 'Embedded Systems', aliases: ['real-time operating system', 'real time operating system', 'freertos'], exactAliases: [], implies: [], caseSensitive: false },
-  { name: 'Verilog', category: 'Hardware Description', aliases: ['systemverilog'], exactAliases: [], implies: [], caseSensitive: false },
-  { name: 'VHDL', category: 'Hardware Description', aliases: [], exactAliases: [], implies: [], caseSensitive: false },
-  { name: 'Google Analytics', category: 'Marketing', aliases: ['ga4', 'universal analytics'], exactAliases: [], implies: [], caseSensitive: false },
-  { name: 'SEO', category: 'Marketing', aliases: ['search engine optimization', 'search engine optimisation'], exactAliases: [], implies: [], caseSensitive: true },
-  { name: 'Google Ads', category: 'Marketing', aliases: ['adwords', 'google adwords'], exactAliases: [], implies: [], caseSensitive: false },
-  { name: 'Google Tag Manager', category: 'Marketing', aliases: [], exactAliases: ['GTM'], implies: [], caseSensitive: false },
-  { name: 'WordPress', category: 'Web', aliases: [], exactAliases: [], implies: [], caseSensitive: false },
-  { name: 'Financial Modeling', category: 'Finance', aliases: ['financial modelling', 'financial models', 'financial model'], exactAliases: [], implies: [], caseSensitive: false },
-  { name: 'VBA', category: 'Programming Languages', aliases: ['visual basic for applications', 'excel vba'], exactAliases: [], implies: ['Excel'], caseSensitive: true },
-  { name: 'SAP', category: 'Enterprise Software', aliases: ['sap erp', 'sap s/4hana', 'sap fico'], exactAliases: [], implies: [], caseSensitive: true },
-  { name: 'SAS', category: 'Analytics', aliases: ['sas programming', 'sas base'], exactAliases: [], implies: [], caseSensitive: true },
-  { name: 'EHR Systems', category: 'Healthcare IT', aliases: ['electronic health records', 'electronic health record', 'electronic medical records', 'epic systems', 'meditech', 'eclinicalworks'], exactAliases: ['EHR', 'EMR'], implies: [], caseSensitive: false },
-  { name: 'Healthcare Data Standards', category: 'Healthcare IT', aliases: ['hl7', 'fhir', 'hl7 fhir', 'icd-10', 'snomed ct'], exactAliases: [], implies: [], caseSensitive: false },
+export const E1_LEXICON_SKILLS: string[] = [
+  'Playwright', 'Appium', 'JMeter', 'ETL', 'Data Warehousing', 'Microcontrollers', 'RTOS', 'Verilog', 'VHDL',
+  'Google Analytics', 'SEO', 'Google Ads', 'Google Tag Manager', 'WordPress', 'Financial Modeling', 'VBA', 'SAP', 'SAS',
+  'EHR Systems', 'Healthcare Data Standards',
 ];

@@ -60,5 +60,36 @@ export const LEARNING_RESOURCES: SeedResource[] = [
   doc('Network Security', 'OWASP Top Ten', 'OWASP', 'https://owasp.org/www-project-top-ten/', 'Guide', 'Intermediate'),
   doc('Penetration Testing', 'OWASP Web Security Testing Guide', 'OWASP', 'https://owasp.org/www-project-web-security-testing-guide/', 'Guide', 'Intermediate'),
   doc('Figma', 'Figma Learn', 'Figma', 'https://help.figma.com/hc/en-us', 'Guide'),
-  doc('Agile', 'The Agile Coach', 'Atlassian', 'https://www.atlassian.com/agile', 'Guide')
+  doc('Agile', 'The Agile Coach', 'Atlassian', 'https://www.atlassian.com/agile', 'Guide'),
+
+  // E1 careers (QA, data engineering, embedded, marketing, finance, health informatics).
+  // Each URL resolved with HTTP 200 and the expected page title on 2026-10-13. Verilog, VHDL,
+  // Communication, Data Analysis, Financial Modeling, SAS and EHR Systems have no free first-party
+  // starting point that fits these rules, so those gaps are named without a resource.
+  doc('Selenium', 'Getting started with WebDriver', 'Selenium', 'https://www.selenium.dev/documentation/webdriver/getting_started/', 'Tutorial'),
+  doc('Playwright', 'Playwright: Installation and first test', 'Playwright', 'https://playwright.dev/docs/intro', 'Tutorial'),
+  doc('Postman', 'Get started in Postman', 'Postman', 'https://learning.postman.com/docs/getting-started/overview/', 'Tutorial'),
+  doc('Jenkins', 'Jenkins tutorials', 'Jenkins', 'https://www.jenkins.io/doc/tutorials/', 'Tutorial', 'Intermediate'),
+  doc('Jira', 'Get started with Jira', 'Atlassian', 'https://www.atlassian.com/software/jira/guides/getting-started/introduction', 'Guide'),
+  doc('Appium', 'Appium quickstart', 'Appium', 'https://appium.io/docs/en/latest/quickstart/', 'Tutorial', 'Intermediate'),
+  doc('JMeter', 'JMeter user manual: Getting started', 'Apache JMeter', 'https://jmeter.apache.org/usermanual/get-started.html', 'Guide', 'Intermediate'),
+  doc('Data Warehousing', 'What is a data warehouse?', 'Google Cloud', 'https://cloud.google.com/learn/what-is-a-data-warehouse', 'Guide'),
+  doc('ETL', 'Extract, transform, load (ETL)', 'Microsoft Learn (Azure Architecture Center)', 'https://learn.microsoft.com/en-us/azure/architecture/data-guide/relational-data/etl', 'Guide', 'Intermediate'),
+  doc('Apache Spark', 'Spark quick start', 'Apache Spark', 'https://spark.apache.org/docs/latest/quick-start.html', 'Tutorial', 'Intermediate'),
+  doc('Kafka', 'Apache Kafka quickstart', 'Apache Kafka', 'https://kafka.apache.org/quickstart/', 'Tutorial', 'Intermediate'),
+  doc('Hadoop', 'Hadoop: Setting up a single node cluster', 'Apache Hadoop', 'https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html', 'Tutorial', 'Intermediate'),
+  doc('C', 'GNU C Language Intro and Reference Manual', 'GNU Project', 'https://www.gnu.org/software/c-intro-and-ref/manual/', 'Guide'),
+  doc('C++', 'Get started with C++', 'Standard C++ Foundation (isocpp.org)', 'https://isocpp.org/get-started', 'Guide'),
+  doc('Microcontrollers', 'Arduino documentation: Learn', 'Arduino', 'https://docs.arduino.cc/learn/', 'Tutorial'),
+  doc('RTOS', 'FreeRTOS documentation', 'FreeRTOS', 'https://www.freertos.org/Documentation/00-Overview', 'Documentation', 'Intermediate'),
+  doc('MATLAB', 'MATLAB Onramp', 'MathWorks', 'https://matlabacademy.mathworks.com/details/matlab-onramp/gettingstarted', 'Tutorial'),
+  doc('Google Analytics', 'Set up Analytics for a website and/or app', 'Google Analytics Help', 'https://support.google.com/analytics/answer/9304153', 'Guide'),
+  doc('SEO', 'SEO Starter Guide', 'Google Search Central', 'https://developers.google.com/search/docs/fundamentals/seo-starter-guide', 'Guide'),
+  doc('Google Ads', 'Your guide to Google Ads', 'Google Ads Help', 'https://support.google.com/google-ads/answer/6146252', 'Guide'),
+  doc('Google Tag Manager', 'Create an account and container', 'Tag Manager Help', 'https://support.google.com/tagmanager/answer/14842164', 'Guide'),
+  doc('WordPress', 'Learn WordPress', 'WordPress.org', 'https://learn.wordpress.org/', 'Tutorial'),
+  doc('VBA', 'Getting started with VBA in Office', 'Microsoft Learn', 'https://learn.microsoft.com/en-us/office/vba/library-reference/concepts/getting-started-with-vba-in-office', 'Guide'),
+  doc('SAP', 'SAP Learning', 'SAP', 'https://learning.sap.com/', 'Tutorial'),
+  doc('R', 'An Introduction to R', 'The R Project (CRAN)', 'https://cran.r-project.org/doc/manuals/r-release/R-intro.html', 'Guide'),
+  doc('Healthcare Data Standards', 'FHIR overview', 'HL7', 'https://www.hl7.org/fhir/overview.html', 'Documentation', 'Intermediate')
 ];

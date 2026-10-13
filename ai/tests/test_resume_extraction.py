@@ -278,3 +278,36 @@ def test_response_does_not_claim_a_transformer_model(client):
     body = res.json()
     assert body["provider"] == "rule_based_parser"
     assert "transformer" not in body["model"]
+
+
+# --- E1 careers (lexicon version 2) -------------------------------------------------------------
+
+E1_RESUME = """Meera Iyer
+meera.iyer@example.com
+
+Experience
+Health Data Analyst, Example Hospital (2022 - 2025)
+- Built HL7 FHIR feeds from the EHR into a SQL data warehouse with an ETL job.
+- Reported on Google Analytics traffic for the patient portal and fixed SEO issues.
+
+Skills
+Playwright, JMeter, FreeRTOS, Verilog, Financial Modeling, VBA, SAS
+"""
+
+
+def test_e1_skills_are_extracted_from_a_resume(client):
+    names = set(_names(_txt(client, E1_RESUME)))
+    for expected in ("Healthcare Data Standards", "EHR Systems", "SQL", "Data Warehousing", "ETL", "Google Analytics",
+                     "SEO", "Playwright", "JMeter", "RTOS", "Verilog", "Financial Modeling", "VBA", "SAS"):
+        assert expected in names, f"{expected} not extracted: {sorted(names)}"
+
+
+@pytest.mark.parametrize("text", [
+    "Led the go-to-market (GTM) plan for the launch",
+    "Account manager at Informatica, then at Talend",
+    "Serviced the AVR (automatic voltage regulator) on generators",
+    "the mcu in lower case is not read",
+])
+def test_e1_reviewed_aliases_do_not_misfire(text):
+    names = {s.name for s in get_lexicon().find_skills(text)}
+    assert not names & {"Google Tag Manager", "ETL", "Microcontrollers"}, names

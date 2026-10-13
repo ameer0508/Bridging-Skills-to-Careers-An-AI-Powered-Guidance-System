@@ -12,6 +12,9 @@ export const CAREER_DOMAINS = [
   { id: 'business-consulting', name: 'Business & Consulting', desc: 'Strategy consulting, process optimization, and operations management' },
   { id: 'finance-fintech', name: 'Finance & Fintech', desc: 'Quantitative finance, trading platforms, and financial intelligence' },
   { id: 'research-academia', name: 'Research & Academia', desc: 'Applied scientific research, paper publishing, and R&D' },
+  { id: 'digital-marketing', name: 'Digital Marketing & Analytics', desc: 'Web analytics, search optimisation, paid search and campaign reporting' },
+  { id: 'embedded-electronics', name: 'Electronics & Embedded Systems', desc: 'Firmware, microcontrollers, real-time systems and hardware description' },
+  { id: 'healthcare-informatics', name: 'Healthcare Informatics', desc: 'Electronic health records, health data standards and clinical data analysis' },
 ];
 
 export const SECONDARY_INTEREST_TAGS: Record<string, string[]> = {
@@ -27,4 +30,7 @@ export const SECONDARY_INTEREST_TAGS: Record<string, string[]> = {
   'business-consulting': ['Business Strategy', 'Financial Modeling', 'Process Automation', 'Stakeholder Management'],
   'finance-fintech': ['Algorithmic Trading', 'Risk Analytics', 'Payment Gateways', 'Blockchain & Smart Contracts'],
   'research-academia': ['Deep Learning Papers', 'Algorithm Complexity', 'Experimental Design', 'Data Visualization'],
+  'digital-marketing': ['Google Analytics', 'SEO', 'Google Ads', 'Google Tag Manager', 'Campaign Reporting'],
+  'embedded-electronics': ['C & C++ Firmware', 'Microcontrollers', 'RTOS', 'Verilog / VHDL'],
+  'healthcare-informatics': ['EHR Systems', 'HL7 & FHIR', 'Clinical Data Analysis', 'Health Data Privacy'],
 };

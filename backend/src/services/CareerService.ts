@@ -13,7 +13,7 @@ class CareerService {
   public async getUserMatches(userId: string) {
     const matches = await CareerMatch.find({ userId: new mongoose.Types.ObjectId(userId) })
       .sort({ matchScore: -1, confidence: -1, _id: 1 })
-      .populate('careerId', 'title category description')
+      .populate('careerId', 'title category description source')
       .limit(10); // Top 10
 
     // Fetch related careers for the top 3 matches
@@ -57,7 +57,8 @@ class CareerService {
             title: entry.title,
             category: entry.category,
             domain: entry.domain,
-            description: entry.description
+            description: entry.description,
+            ...(entry.source ? { source: entry.source } : {})
           });
           createdCareers++;
         }

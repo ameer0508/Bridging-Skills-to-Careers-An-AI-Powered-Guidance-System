@@ -14,6 +14,8 @@ export interface CareerMatchData {
     title: string;
     category: string;
     description: string;
+    /** E1: requirements informed by an external occupational source (O*NET). */
+    source?: { kind: string; code: string; title: string };
   };
   matchScore: number;
   matchingSkills: string[];
@@ -97,6 +99,11 @@ export const CareerMatchCard: React.FC<CareerMatchCardProps> = ({
             <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed mt-1 max-w-2xl line-clamp-2">
               {careerId.description}
             </p>
+            {careerId.source?.kind === 'onet' && (
+              <p className="text-[11px] text-[var(--color-text-secondary)] mt-1" data-testid="career-source-note">
+                Requirements informed by O*NET-SOC {careerId.source.code} (United States occupational data, CC BY 4.0); a skills baseline, not a measure of hiring demand in India.
+              </p>
+            )}
           </div>
         </div>
 

@@ -26,7 +26,13 @@ const KNOWN_SKILLS: Array<[string, string]> = [
   ['Git', 'Tools'],
   ['SQL', 'Databases'],
   ['HTML', 'Web'],
-  ['CSS', 'Web']
+  ['CSS', 'Web'],
+  // E1 careers (lexicon version 2); the real service reads them from the shared lexicon
+  ['Playwright', 'Testing'], ['Appium', 'Testing'], ['JMeter', 'Testing'], ['ETL', 'Data Engineering'], ['Data Warehousing', 'Data Engineering'],
+  ['Microcontrollers', 'Embedded Systems'], ['RTOS', 'Embedded Systems'], ['Verilog', 'Hardware Description'], ['VHDL', 'Hardware Description'],
+  ['Google Analytics', 'Marketing'], ['SEO', 'Marketing'], ['Google Ads', 'Marketing'], ['Google Tag Manager', 'Marketing'], ['WordPress', 'Web'],
+  ['Financial Modeling', 'Finance'], ['VBA', 'Programming Languages'], ['SAP', 'Enterprise Software'], ['SAS', 'Analytics'],
+  ['EHR Systems', 'Healthcare IT'], ['Healthcare Data Standards', 'Healthcare IT']
 ];
 
 const entity = (value: string) => ({ value, confidence: 0.9, source: 'fake_ai_service' });

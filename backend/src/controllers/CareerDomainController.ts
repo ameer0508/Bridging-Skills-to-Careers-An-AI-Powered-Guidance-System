@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import CareerDomainPreviewService, { catalogueView } from '../services/careers/CareerDomainPreviewService.js';
+import CareerDomainService, { catalogueView } from '../services/careers/CareerDomainService.js';
 import { AppError } from '../middlewares/errorHandler.js';
 
 type Handler = (req: Request, res: Response) => Promise<void>;
@@ -15,7 +15,7 @@ const noQuery = (req: Request) => {
   if (Object.keys(req.query ?? {}).length) throw new AppError('Invalid request: this endpoint takes no parameters', 400, 'VALIDATION_ERROR');
 };
 
-/** E1 preview: proposed career domains and a read-only match preview for the caller. */
+/** E1: the careers added from O*NET, their provenance, and the caller's stored matches for them. */
 class CareerDomainController {
   catalogue = handle(async (req, res) => {
     userIdOf(req);
@@ -23,10 +23,10 @@ class CareerDomainController {
     res.status(200).json({ success: true, data: catalogueView() });
   });
 
-  preview = handle(async (req, res) => {
+  matches = handle(async (req, res) => {
     const userId = userIdOf(req);
     noQuery(req);
-    res.status(200).json({ success: true, data: await CareerDomainPreviewService.previewForUser(userId) });
+    res.status(200).json({ success: true, data: await CareerDomainService.matchesForUser(userId) });
   });
 }
 

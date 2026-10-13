@@ -12,7 +12,7 @@ A-J checklist, which stays at 100/100.
 | Career match score as a pure function of requirements and skills | `CareerScoringEngine.calculateScore` | Career comparison, what-if, counterfactual search, transition plans. **No second scoring engine is created.** |
 | Evidence points per kind of evidence | `EvidenceCalculator.EVIDENCE_POINTS` | Computing what a hypothetical project or certification would add |
 | Skill lexicon, aliases, implied skills | `utils/skillLexicon`, `utils/skillMatching` | Every feature that names a skill; job-description mining |
-| Career taxonomy (14 careers, 109 requirements) and similarity | `seed/careerTaxonomy`, `CareerSimilarity` | Transition paths; new domains are added to the same seed |
+| Career taxonomy (20 careers, 174 requirements; 6 added in E1 from O*NET) and similarity | `seed/careerTaxonomy`, `CareerSimilarity` | Transition paths; new domains are added to the same seed |
 | Readiness, gaps, recommendations, roadmap chain | `CareerReadinessService`, `GapPrioritizer`, `RecommendationEngine`, `RoadmapEngine` | Next-best-action ranking; time-aware roadmaps |
 | Per-user serialisation | `utils/userLock` | Recalculation without duplicate updates |
 | Job search with result metadata and saved-job history | `OpportunityService`, `SavedOpportunity` | Market records, outcome analytics |

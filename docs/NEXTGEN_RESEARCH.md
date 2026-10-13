@@ -157,7 +157,7 @@ hiring outcomes.
   (certification, a job) are available in the what-if form but are not searched automatically.
 - No effort or time is attached to a change, because the system holds no data about how long
   skills take to learn. Two changes with equal score gain are not distinguished by difficulty.
-- The career taxonomy (14 careers, 109 requirements) is curated by hand. Explanations are only
+- The career taxonomy (20 careers, 174 requirements; six of them informed by O*NET, US data) is curated by hand. Explanations are only
   as good as those requirement lists.
 
 ---
@@ -218,7 +218,7 @@ evidence, prerequisite or capacity information.
 
 ### Evaluation
 
-Test suite `next_best_action`. 42 synthetic profiles: for each of the 14 careers, a starter (two
+Test suite `next_best_action`. 60 synthetic profiles: for each of the 20 careers, a starter (two
 requirements listed only, 5 hours a week), someone half-way (every other requirement used in a
 project, 10 hours a week) and an experienced person with gaps (most requirements used at work, no
 hours stated). For each profile both orderings are followed step by step: take the first action,
@@ -226,11 +226,15 @@ add its evidence, rank again.
 
 | Measure | Adaptive ranking | Baseline | Profiles better / equal / worse |
 |---|---|---|---|
-| Mean match-score gain after three actions | 32.1 points | 30.43 points | 16 / 25 / 1 |
-| Mean gain within 40 assumed hours | 6.36 points | 5.57 points | 8 / 33 / 1 |
-| Mean assumed hours for the three actions | 99.44 | 111.99 | |
+| Mean match-score gain after three actions | 31.22 points | 28.87 points | 25 / 35 / 0 |
+| Mean gain within 40 assumed hours | 5.8 points | 5.03 points | 13 / 46 / 1 |
+| Mean assumed hours for the three actions | 107.67 | 119.03 | |
 
-Properties asserted on all 42 profiles (399 ranked actions): the same input gives the same order;
+These figures are from the 20-career taxonomy (E1 added six careers, 2026-10-13). With the original
+14 careers (42 profiles) they were 32.1 vs 30.43 points (16 / 25 / 1) after three actions and 6.36 vs
+5.57 points (8 / 33 / 1) within 40 hours. The method did not change; the profile set grew.
+
+Properties asserted on all 60 profiles (702 ranked actions): the same input gives the same order;
 every score can be recomputed from the published factors and weights; every action has a positive
 impact; the market factor is null with weight 0; no capacity claim is made without weekly hours;
 learning time is always labelled an assumption; a verified skill is not offered for verification
@@ -246,8 +250,8 @@ score the action predicted.
   evaluation measures score gain, so the ranking is expected to do at least as well as a baseline
   that ignores impact. The result shows the formula behaves as designed; it does not show that
   users who follow it learn more or get hired.
-- The differences are small: equal in 25 of 42 profiles over three actions, and worse in one.
-  The cause of that one case was not investigated.
+- The differences are small: equal in 35 of 60 profiles over three actions, and worse in one of 60
+  within 40 hours. The cause of that case was not investigated.
 - Everything is synthetic. No real user has followed these rankings and no outcome was observed.
 - The weights (4, 3, 2) are chosen, not estimated. Different weights give different orders.
 - Effort for projects and learning is an assumption; the "within 40 hours" row inherits it.

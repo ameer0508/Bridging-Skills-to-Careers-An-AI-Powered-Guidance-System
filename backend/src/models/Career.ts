@@ -7,6 +7,8 @@ export interface ICareer extends Document<Types.ObjectId> {
   domain: string;
   description: string;
   isActive: boolean;
+  /** Set when the requirements are informed by an external occupational source (E1: O*NET). */
+  source?: { kind: string; code: string; title: string };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -20,7 +22,11 @@ const CareerSchema = new Schema<ICareer>(
     // Broad onboarding domain the career belongs to (e.g. "Software Engineering")
     domain: { type: String, default: 'Technology' },
     description: { type: String, default: '' },
-    isActive: { type: Boolean, default: true }
+    isActive: { type: Boolean, default: true },
+    source: {
+      type: new Schema({ kind: String, code: String, title: String }, { _id: false }),
+      default: undefined
+    }
   },
   { timestamps: true }
 );

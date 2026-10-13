@@ -1,30 +1,10 @@
-# E1: additional career domains (proposal, catalogue and integration patch)
+# E1: additional career domains
 
-**Branch:** `work/skillbridge-parallel-features` (Agent B). **Status:** the catalogue, preview API, preview screen and tests are implemented here.
+**Status:** integrated on 2026-10-13. Six careers, four of them in new domains, are part of the shared taxonomy and lexicon. Matching, readiness, recommendations, roadmaps, learning resources, practice projects and the Career Lab use them like any other career.
 
-**Not integrated:** Agent A owns the shared career taxonomy, the skill lexicon, matching, scoring, readiness, recommendations and roadmaps. None of them is edited on this branch. Under the plan's rule, these roles earn checklist credit only once they work across recommendations, readiness and roadmaps, which needs the patch in §5.
+## 1. The careers
 
-## 1. What exists today (read-only inspection)
-
-- **Taxonomy.** `backend/src/seed/careerTaxonomy.ts` holds **14 careers** in 7 domains:
-  - Software Engineering (5);
-  - Data & Analytics (2);
-  - Cloud & DevOps (2);
-  - Business & Management (2);
-  - Artificial Intelligence;
-  - Cybersecurity;
-  - Design.
-
-  Requirements are editorial, with no stated source.
-- **Seeding.** `CareerService.seedInitialTaxonomy` is idempotent per career: it inserts missing careers and their requirements, but **does not update requirements of careers that already have some**.
-- **Versioning.** `utils/versions.ts` hashes `CAREER_TAXONOMY` into the taxonomy version (F2). Any change re-versions career scores.
-- **Lexicon.** Skills are recognised only if they are in the shared lexicon (`backend/src/seed/skillLexicon.ts`, mirrored in `ai/app/resources/skill_lexicon.json` and protected by a drift test).
-
-## 2. Proposed roles and domains
-
-Six roles: two new roles in existing domains, and four in **new domains**.
-
-| Role | Domain | O*NET-SOC basis | New domain |
+| Career | Domain | O*NET-SOC basis | New domain |
 |---|---|---|---|
 | QA Automation Engineer | Software Engineering | 15-1253.00 Software Quality Assurance Analysts and Testers | no |
 | Data Engineer | Data & Analytics | 15-1243.01 Data Warehousing Specialists (O*NET has no separate "Data Engineer") | no |
@@ -33,102 +13,128 @@ Six roles: two new roles in existing domains, and four in **new domains**.
 | Financial Analyst | Finance | 13-2051.00 Financial and Investment Analysts (O*NET 31.0 has no knowledge ratings for it) | **yes** |
 | Health Informatics Specialist | Healthcare Informatics | 15-1211.01 Health Informatics Specialists | **yes** |
 
-The full requirements are in `backend/src/seed/careerDomainCatalogue.ts`, and on the `/career-domains` preview screen.
+The taxonomy now has **20 careers with 174 requirements**: the original 14 with 109, plus these 6 with 65.
 
-### Sources and how requirements were chosen
+## 2. Sources and how requirements were chosen
 
-**Source.** The O*NET 31.0 Database, CC BY 4.0, by USDOL/ETA. The CSV files `occupation_data`, `software_skills`, `knowledge` and `related_occupations` were read on 2026-10-12 from `https://www.onetcenter.org/dl_files/database/db_31_0_csv/`. The attribution required by the licence is shown on the screen and stored as `ONET_ATTRIBUTION`, including the statement that SkillBridge modified the information.
+**Source.** The O*NET 31.0 Database by USDOL/ETA, under CC BY 4.0. The CSV files `occupation_data`, `software_skills`, `knowledge` and `related_occupations` were read on 2026-10-12 from `https://www.onetcenter.org/dl_files/database/db_31_0_csv/`. The attribution the licence requires, including the statement that SkillBridge modified the information, is stored as `ONET_ATTRIBUTION` and shown on `/career-domains`.
 
-Every requirement records its basis:
-- **`onet_software`** names the exact O*NET "Workplace Example" strings for the occupation, with O*NET's own Hot Technology and In Demand flags. Every cited example was checked programmatically against `software_skills.csv`.
-- Two first drafts failed that check and were changed:
-  - "Apache Airflow" is not listed for 15-1243.01, so it was **dropped**.
-  - O*NET has no generic "ETL software" entry, so **ETL is cited through the ETL tools O*NET does list**: Informatica PowerCenter, Talend Open Studio and Adeptia ETL Suite.
-- **`onet_knowledge`** names a knowledge area and its O*NET importance (1–5). For example, Communication for Digital Marketing Analyst rests on English Language, importance 4.27.
-- **`editorial`** is used where O*NET has no direct example, and says so:
-  - Microcontrollers and RTOS (embedded);
-  - Financial Modeling and Statistics (finance);
-  - Healthcare Data Standards and Data Analysis (health);
-  - Testing (QA).
+**Provenance per requirement.** `backend/src/seed/careerDomainCatalogue.ts` records a basis for every requirement:
+- **`onet_software`** names the exact O*NET "Workplace Example" strings, with O*NET's Hot Technology and In Demand flags. Each was checked against `software_skills.csv`.
+  - "Apache Airflow" is not listed for 15-1243.01, so it was dropped.
+  - O*NET has no generic ETL entry, so ETL is cited through the ETL tools it does list.
+- **`onet_knowledge`** names a knowledge area and its O*NET importance (1–5).
+- **`editorial`** marks a choice O*NET does not make directly, with the reason.
 
-**Editorial.** Which skills are included, and their importance and weight, are SkillBridge editorial choices informed by O*NET. They are not O*NET ratings. Most In Demand software is required or preferred; Hot-only or unflagged tools are preferred or supporting.
+Which skills are included, and their importance and weight, are SkillBridge editorial choices informed by O*NET. They are not O*NET ratings.
 
-## 3. Mapping strategy
+**United States, not India.** O*NET describes occupations in the United States. The requirements are a skills baseline. They are not a measure of hiring demand, pay or job availability in India, and the app says so in two places:
+- in `catalogueView().scopeNote` on `/career-domains`;
+- on every match card for these careers (`career-source-note`).
 
-- **Skills.** Each requirement uses a SkillBridge skill name. 44 of 65 requirement slots use skills **already in the lexicon**, including Selenium, Postman, Jenkins, Jira, Kafka, Apache Spark, Hadoop, Tableau, Power BI, Excel, MATLAB, C, R, Statistics and Communication.
-- **New skills.** 20 skills are **proposed** for the lexicon (`PROPOSED_LEXICON_SKILLS`), each with a category, aliases and any implied skill:
+No demand, pay or hiring figure is attached to them.
 
-  | Area | Proposed skills |
-  |---|---|
-  | Testing | Playwright, Appium, JMeter |
-  | Data engineering | ETL, Data Warehousing |
-  | Embedded and hardware | Microcontrollers, RTOS, Verilog, VHDL |
-  | Marketing and web | Google Analytics, SEO, Google Ads, Google Tag Manager, WordPress |
-  | Finance and analytics | Financial Modeling, VBA, SAP, SAS |
-  | Healthcare IT | EHR Systems, Healthcare Data Standards (HL7, FHIR, ICD-10, SNOMED CT as aliases) |
+## 3. How it is wired in
 
-- **Clashes.** The tests check that no proposed name or alias collides with an existing lexicon entry. Short or ambiguous names (SEO, SAP, SAS, VBA) are case-sensitive, and EHR, EMR and GTM are exact-case aliases.
-- **Before the patch.** Until the patch, a resume **cannot evidence** those 20 skills. The preview lists them as "not yet recognised" and counts them as missing.
-- **Similarity.** Similar-career links point only at existing titles or at other proposed titles.
+- **Taxonomy.**
+  - `seed/careerTaxonomy.ts` appends the six careers, derived from the catalogue, with `source: { kind: 'onet', code, title }`.
+  - The original 14 entries are **byte-for-byte unchanged**: the test pins their hash, `f893cd3244e27676`.
+  - Career scores depend only on a career's own requirements, so existing careers score exactly as before for the same evidence.
+- **Seeding.**
+  - `CareerService.seedInitialTaxonomy` inserts the missing careers and their requirements on start, and stores `source` on the new `Career` documents.
+  - Existing careers and their requirements are not touched.
+  - Similarity links are inserted with `$setOnInsert`.
+- **Lexicon v2.**
+  - `SKILL_LEXICON_VERSION` is now 2, with 148 skills.
+  - The 20 new skills are in `backend/src/seed/skillLexicon.ts` and its mirror `ai/app/resources/skill_lexicon.json`, which the drift test keeps identical.
+  - The aliases were reviewed for false positives in real resumes before acceptance:
 
-## 4. Compatibility with the 14 careers (tested)
+    | Proposed alias | Decision |
+    |---|---|
+    | `informatica`, `talend` | Replaced by the product names `informatica powercenter` and `talend open studio`, because the bare names are employers |
+    | `avr` | Dropped: also "automatic voltage regulator" |
+    | `GTM` | Dropped: usually "go-to-market" in marketing resumes |
+    | `mcu` | Became the exact-case `MCU` |
 
-- No proposed title collides with an existing career, and `CAREER_TAXONOMY` still has 14 entries on this branch.
-- `CareerMatchingEngine`, `CareerService`, `RecommendationEngine`, `RoadmapEngine`, `CareerReadinessService`, `careerTaxonomy.ts` and `versions.ts` do **not** import the catalogue, so live matches, readiness, recommendations, roadmaps and the taxonomy version are unchanged.
-- The preview uses the **same** `CareerScoringEngine.calculateScore`, called and never modified, on the user's own `UserSkill` evidence. It stores nothing.
+  - Remaining risk: `SAP` (case-sensitive) also matches "SAP Labs" as an employer.
+- **Learning content.**
+  - 26 official, free starting points were added to `seed/learningResources.ts`. Each returned HTTP 200 with the expected page title on 2026-10-13, and has no tracking parameters.
+  - Redirects were followed to the canonical URL. One candidate (a HealthIT.gov EHR FAQ) redirected to a home page and was not used.
+  - Of the 47 skills these careers use, **40** have a resource.
+  - No resource is given for Verilog, VHDL (standards are paywalled), Communication, Data Analysis, Financial Modeling, SAS and EHR Systems, because no free first-party starting point fits the catalogue's rules. These gaps are named without a link, as for every other career.
+  - Six practice briefs were added to `seed/projectBriefs.ts`, one per career, each exercising its required skills with free tools and public or synthetic data.
+- **Onboarding.** Three preference domains were added: Digital Marketing & Analytics, Electronics & Embedded Systems, and Healthcare Informatics. Finance was already offered. The domain is a label; it does not change any score.
 
-## 5. Integration patch for Agent A (exact)
+## 4. Existing users: recomputation
 
-Apply after the second integration settles, in one reviewed change:
+Stored matches, readiness and recommendations were computed against 14 careers.
 
-1. **Lexicon.** Append the 20 entries of `PROPOSED_LEXICON_SKILLS` to `SKILL_LEXICON` in `backend/src/seed/skillLexicon.ts`, and the same JSON objects to `ai/app/resources/skill_lexicon.json`. Bump `SKILL_LEXICON_VERSION` to 2. The existing drift test then guards the copies.
-2. **Taxonomy.** Append each catalogue role to `CAREER_TAXONOMY`:
-   ```ts
-   { title, category, domain, description, requirements: c.requirements.map(r => req(r.skill, r.importance, r.weight)), similar: c.similar }
-   ```
-   Keep `careerDomainCatalogue.ts` as the provenance record, or add an optional `source` field to `TaxonomyCareer`. Optionally add reverse `similar` links on existing careers; seeding upserts links with `$setOnInsert`, so existing scores are untouched.
-3. **Seeding.** No migration is needed. `seedInitialTaxonomy` inserts the 6 careers, their requirements and their similarity links on next start, and existing careers and their requirements are not touched.
-4. **Versions and recalculation.** The taxonomy hash and lexicon version change, so new `IntelligenceSnapshot` and `RecalculationRun` rows carry new versions. Users' matches gain the 6 careers on their next recalculation; scores for existing careers do not change, because their requirements do not. Decide whether to trigger one recalculation per active user or let the next evidence change do it.
-5. **Recommendations, readiness and roadmaps.** These modules work on any career with requirements. For useful roadmaps, add learning resources (B1 catalogue) and project templates for the new skills. Without them, roadmap items for those skills have no linked resources. This is the remaining dependency for credit.
-6. **Tests to run after the patch:**
-   - `career_domains.test.ts`, with its isolation assertions inverted so the catalogue is now in the taxonomy;
-   - `scoring_accuracy`, `core_pipeline`, `career_lab`, `api_integration`, and the lexicon drift test;
-   - AI `pytest`, for the lexicon mirror;
-   - the smoke browser suite.
+**What runs.** `services/careers/TaxonomyRefreshService.ts` recomputes each affected user once, through the ordinary recalculation with trigger `taxonomy_changed`.
 
-   Add a matching test per new role: a profile with that role's skills ranks it first among all careers.
+**Who is affected.** Users with skill evidence whose last completed match recalculation carries another taxonomy version.
 
-**Risks.**
-- The new careers can enter users' top matches and change the "top career" shown in places. Expected, but worth a release note.
-- Aliases such as "informatica", "talend" (mapped to ETL) or "stm32" and "avr" (mapped to Microcontrollers) could create false positives in resume extraction. Review them against real resumes before release.
-- O*NET describes the US labour market. The requirements are a reasonable skills baseline, not an Indian market measurement, and nothing here claims demand or pay.
+**When.**
+- The backend runs the refresh in the background 10 seconds after start, one user at a time.
+- Set `TAXONOMY_REFRESH_ON_START=false` to switch it off.
+- `src/scripts/refreshCareerMatches.ts [--dry-run]` runs it on demand. With `--dry-run` it only counts.
 
-## 6. API and screen (implemented here)
+**What changes, and what does not.**
+- Only derived records are rebuilt: matches, readiness and recommendations. Skill evidence, resumes, portfolios, plans and progress are not touched.
+- Each run is a `RecalculationRun` with before and after figures, shown in the Career Lab activity as "Career data updated".
+- Running it again finds nothing to do.
+- The result counts `refreshed`, `unchanged` (same inputs as the last run) and `failed`.
+
+**Matches below the threshold.** As for every career, a match is stored only above 10 points, so a user sees the new careers they have some evidence for.
+
+## 5. API and screen
 
 | Method and path | Purpose |
 |---|---|
-| `GET /api/v1/career-domains` | Catalogue with each requirement's basis and lexicon status (`present` or `proposed`), plus the O*NET attribution and licence links. Sign-in required; parameters → 400. |
-| `GET /api/v1/career-domains/preview` | Read-only coverage of the 6 roles for the caller's own skills, with "not yet recognised" skills listed |
+| `GET /api/v1/career-domains` | The six careers with every requirement's basis, `status: 'integrated'`, the US-source note, the O*NET attribution and licence links. Sign-in required; any parameter gives 400. |
+| `GET /api/v1/career-domains/matches` | The caller's **stored** matches for the six careers: the same records as `/careers/matches`, or `null` when there is none. The old `/preview` endpoint is removed. |
 
-The screen is `/career-domains`, "More Career Domains" in the sidebar. It has:
-- a dashed preview banner saying the roles are not yet part of matches, readiness, recommendations or roadmaps;
-- a coverage table;
-- a role card per role with a requirements table showing each basis;
-- the attribution footer.
+**Screen.** `/career-domains`, "More Career Domains" in the sidebar, shows:
+- the US-source note;
+- the user's matches;
+- a card per career with its requirement bases;
+- the attribution.
 
-## 7. Tests
+Career match cards in Career Intelligence show the O*NET code and the US-source note for these careers.
 
-- `backend/src/tests/career_domains.test.ts` covers:
-  - **Catalogue:** integrity, and compatibility with the 14 careers.
-  - **Lexicon:** consistency, with 20 proposed skills and aliases clashing with nothing.
-  - **Matching:** the four profiles each rank their role first with the shared scoring, and unrecognisable skills stay missing.
-  - **Isolation:** live modules do not import the catalogue.
-  - **HTTP:** sign-in required, attribution served, parameters refused, own-skills-only preview, and nothing stored.
-- `e2e/tests/careerDomains.mjs`, 7 browser steps:
+## 6. Tests
+
+- **`backend/src/tests/career_domains.test.ts`**
+  - **Taxonomy:** 20 careers; the original 14 pinned by hash; sources; four new domains.
+  - **Lexicon:** every requirement of the 20 careers resolves; new skills and aliases are read correctly; GTM, Informatica, AVR and lower-case "mcu" are not false positives.
+  - **Learning content:** resources for 40 of 47 skills; a brief per career for its required skills; no tracking parameters.
+  - **Pipeline:** a profile per career ranks that career first in the ordinary matches, with readiness, a roadmap, resources and project suggestions. A QA profile gets the official Playwright and JMeter links.
+  - **Resume:** Playwright, Appium and JMeter in an uploaded resume become evidence and a QA Automation Engineer match.
+  - **Refresh:**
+    - a stale user is found, and a dry run changes nothing;
+    - one `taxonomy_changed` run adds exactly the new careers the scoring engine says they qualify for;
+    - evidence is unchanged, and a second run does nothing.
+  - **HTTP:**
+    - the integrated catalogue, with the US note and attribution;
+    - own stored matches only;
+    - 400 on parameters, and 404 for the removed preview.
+- **`backend/src/tests/interview_integration.test.ts`:** exam practice does not change career evidence (E2–E4).
+- **`ai/tests/test_resume_extraction.py`:** the real AI extractor reads 14 E1 skills from a resume, and the reviewed aliases do not misfire.
+- **`e2e/tests/careerDomains.mjs`:** 8 browser steps.
   - sign-in required;
-  - the preview banner;
-  - basis and not-yet-recognised badges;
-  - attribution and licence link;
-  - the empty profile;
-  - 390 px;
+  - a QA resume upload, with QA Automation Engineer in the ordinary matches and the US note on its card;
+  - the stored score shown on `/career-domains`, with no preview banner;
+  - O*NET bases and the attribution;
+  - an official resource link;
+  - the 390 px layout;
   - a clean console.
+- **Other suites:**
+  - `career_lab` now expects the catalogue and what-if to cover all taxonomy careers (20).
+  - The R3 evaluation, whose profiles are built from the taxonomy, now runs on 60 profiles; its figures are updated in `docs/NEXTGEN_RESEARCH.md`.
+
+## 7. Limits
+
+- O*NET is US data. Requirements are a baseline, not Indian market evidence.
+- Importance and weights are editorial. No requirement was validated against Indian job postings, because no licensed source is registered.
+- The aliases were reviewed by reading them, not against a corpus of real resumes. `SAP` can still match an employer name.
+- Seven skills have no learning resource.
+- The fake AI service used in backend tests recognises the E1 skills from a fixed list. The real service reads them from the shared lexicon, which the AI tests cover.

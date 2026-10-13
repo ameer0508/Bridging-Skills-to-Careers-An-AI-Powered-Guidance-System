@@ -281,6 +281,109 @@ export const PROJECT_BRIEFS: ProjectBrief[] = [
     ['A one-page product brief', 'A first-release scope with what is excluded', 'Notes from the critique and what you changed'],
     10,
     25
+  ),
+
+  // E1 careers: one brief each for the skills that define the role. All use free tools and
+  // public or synthetic data; none needs a paid account or real personal data.
+  brief(
+    'automated-test-suite',
+    'Automated test suite for a web app and its API',
+    'UI, API and load tests for an app you run locally, wired into a pipeline that blocks a broken build.',
+    ['Testing', 'Selenium', 'Playwright', 'Postman', 'JMeter', 'Jenkins', 'Git', 'Python'],
+    [
+      'Run an open-source web app with an API on your machine and write down five user journeys worth protecting.',
+      'Automate three of the journeys as browser tests with stable selectors and no fixed sleeps.',
+      'Write an API test collection that checks status codes, response shape and one error case per endpoint.',
+      'Write a small load test and record the response time at which errors start.',
+      'Run everything in a pipeline on each commit and make a failing test stop the build.'
+    ],
+    ['A repository with the browser, API and load tests', 'A pipeline run that fails on a deliberately broken commit and passes after the fix', 'A short test report: what is covered, what is not, and the load result'],
+    20,
+    40,
+    [['Selenium', 'Playwright']]
+  ),
+  brief(
+    'batch-etl-warehouse',
+    'Batch ETL pipeline into a small warehouse',
+    'Load a public dataset into a star schema with a repeatable, tested pipeline and report from it.',
+    ['ETL', 'Data Warehousing', 'SQL', 'Python', 'Apache Spark', 'Power BI', 'Tableau'],
+    [
+      'Choose an openly licensed public dataset that is updated over time and note its licence.',
+      'Design a star schema: one fact table and the dimensions it needs, with keys and grain written down.',
+      'Write the extract, transform and load steps so that running them twice gives the same result.',
+      'Add checks for row counts, nulls in keys and duplicate facts, and make the pipeline stop when one fails.',
+      'Answer three business questions with SQL against the warehouse and show them in a dashboard.'
+    ],
+    ['A repository with the pipeline, schema and data checks', 'A schema diagram with the grain of each table', 'A dashboard and the three SQL queries behind it'],
+    20,
+    40,
+    [['Power BI', 'Tableau']]
+  ),
+  brief(
+    'sensor-logger-firmware',
+    'Sensor logger firmware on a microcontroller',
+    'Firmware that samples a sensor on a schedule, buffers readings and reports them, with a host script to read them.',
+    ['C', 'Microcontrollers', 'RTOS', 'Git', 'Python'],
+    [
+      'Pick a development board you have, or a free simulator, and one sensor; read its datasheet for timing and ranges.',
+      'Write a C driver for the sensor and check its readings against the datasheet ranges.',
+      'Split sampling, buffering and reporting into RTOS tasks and justify each priority.',
+      'Handle a sensor that stops responding without freezing the other tasks.',
+      'Write a Python script on the host that reads the serial output and plots it.'
+    ],
+    ['A repository with the firmware and the host script', 'A task diagram with priorities and timing', 'A log showing recovery from a disconnected sensor'],
+    20,
+    45
+  ),
+  brief(
+    'site-analytics-audit',
+    'Analytics and search audit of a small website',
+    'Measure a site you control, find what stops visitors converting and recommend fixes with evidence.',
+    ['Google Analytics', 'Google Tag Manager', 'SEO', 'WordPress', 'Excel', 'Data Analysis', 'Communication'],
+    [
+      'Set up a small site you control and define two conversions worth measuring.',
+      'Install analytics through a tag manager and verify each event fires once, in preview mode.',
+      'Audit the site against a public SEO guide: titles, headings, links, page speed and mobile use.',
+      'Collect a few weeks of your own traffic and analyse it in a spreadsheet, stating how small the sample is.',
+      'Write recommendations ranked by expected effect and effort, each tied to a finding.'
+    ],
+    ['A measurement plan listing events and conversions', 'An SEO audit with screenshots', 'A short report with ranked recommendations and the data behind them'],
+    15,
+    30
+  ),
+  brief(
+    'company-financial-model',
+    'Three-statement model of a listed company',
+    "A linked income statement, balance sheet and cash-flow model built from a company's published annual report, with scenarios.",
+    ['Financial Modeling', 'Excel', 'VBA', 'Statistics', 'Power BI'],
+    [
+      "Pick a listed company and take three years of figures from its published annual reports, citing each page.",
+      'Build the three statements in a spreadsheet so that the balance sheet balances in every year.',
+      'Forecast two years with stated assumptions, and test each assumption against the historical range.',
+      'Add base, downside and upside scenarios, switched by a small macro or a single input cell.',
+      'Summarise the result and the three assumptions it is most sensitive to.'
+    ],
+    ['The model workbook with sources cited', 'A one-page assumptions sheet', 'A sensitivity table and a short written summary'],
+    20,
+    40
+  ),
+  brief(
+    'synthetic-fhir-analysis',
+    'Analysis of synthetic patient records from an EHR',
+    'Run an open-source EHR with demo data, export its records in FHIR format and report on them, without any real patient data.',
+    ['EHR Systems', 'Healthcare Data Standards', 'SQL', 'Python', 'Data Analysis', 'Tableau', 'Power BI', 'Communication'],
+    [
+      'Run an open-source EHR such as OpenEMR locally with demo or synthetic patients, and record where the data came from.',
+      'Export Patient, Encounter and Condition records through its FHIR interface.',
+      'Map those FHIR resources to relational tables, with the coding systems kept.',
+      'Load them with a script and check for missing codes, impossible dates and duplicate patients.',
+      'Answer three questions a clinic manager might ask, such as encounters per month by condition.',
+      'Present the results with the data-quality caveats stated next to each chart.'
+    ],
+    ['A repository with the loader and the quality checks', 'A table mapping each FHIR field to a column', 'A dashboard with caveats'],
+    15,
+    35,
+    [['Tableau', 'Power BI']]
   )
 ];
 

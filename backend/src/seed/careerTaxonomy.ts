@@ -1,4 +1,5 @@
 import { RequirementImportance } from '../models/CareerRequirement.js';
+import { CAREER_DOMAIN_CATALOGUE } from './careerDomainCatalogue.js';
 
 export interface TaxonomyRequirement {
   skill: string;
@@ -14,6 +15,8 @@ export interface TaxonomyCareer {
   requirements: TaxonomyRequirement[];
   // Titles of adjacent careers with a hand-assigned similarity (0-100)
   similar: Array<{ title: string; score: number }>;
+  /** Where the requirements come from, when it is more than SkillBridge's own editorial choice (E1). */
+  source?: { kind: 'onet'; code: string; title: string };
 }
 
 const req = (
@@ -308,5 +311,18 @@ export const CAREER_TAXONOMY: TaxonomyCareer[] = [
       { title: 'Business Analyst', score: 60 },
       { title: 'UI/UX Designer', score: 45 }
     ]
-  }
+  },
+
+  // E1: six careers whose requirements are informed by the O*NET 31.0 Database (CC BY 4.0). The
+  // catalogue keeps each requirement's basis and the attribution; see docs/E1_CAREER_DOMAINS.md.
+  // The fourteen careers above are unchanged, so their scores do not move.
+  ...CAREER_DOMAIN_CATALOGUE.map(c => ({
+    title: c.title,
+    category: c.category,
+    domain: c.domain,
+    description: c.description,
+    requirements: c.requirements.map(r => req(r.skill, r.importance, r.weight)),
+    similar: c.similar,
+    source: { kind: 'onet' as const, code: c.onet.code, title: c.onet.title }
+  }))
 ];

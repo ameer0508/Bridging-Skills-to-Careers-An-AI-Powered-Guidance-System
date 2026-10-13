@@ -14,7 +14,7 @@ export interface LexiconSkill {
   caseSensitive: boolean;
 }
 
-export const SKILL_LEXICON_VERSION = 1;
+export const SKILL_LEXICON_VERSION = 2;
 
 export const SKILL_LEXICON: LexiconSkill[] = [
   {
@@ -1340,6 +1340,238 @@ export const SKILL_LEXICON: LexiconSkill[] = [
     "category": "Soft Skills",
     "aliases": [
       "collaboration"
+    ],
+    "exactAliases": [],
+    "implies": [],
+    "caseSensitive": false
+  },
+  {
+    "name": "Playwright",
+    "category": "Testing",
+    "aliases": [
+      "microsoft playwright"
+    ],
+    "exactAliases": [],
+    "implies": [
+      "Testing"
+    ],
+    "caseSensitive": false
+  },
+  {
+    "name": "Appium",
+    "category": "Testing",
+    "aliases": [],
+    "exactAliases": [],
+    "implies": [
+      "Testing"
+    ],
+    "caseSensitive": false
+  },
+  {
+    "name": "JMeter",
+    "category": "Testing",
+    "aliases": [
+      "apache jmeter"
+    ],
+    "exactAliases": [],
+    "implies": [
+      "Testing"
+    ],
+    "caseSensitive": false
+  },
+  {
+    "name": "ETL",
+    "category": "Data Engineering",
+    "aliases": [
+      "extract transform load",
+      "extract, transform, load",
+      "informatica powercenter",
+      "talend open studio"
+    ],
+    "exactAliases": [],
+    "implies": [],
+    "caseSensitive": false
+  },
+  {
+    "name": "Data Warehousing",
+    "category": "Data Engineering",
+    "aliases": [
+      "data warehouse",
+      "data warehouses",
+      "dwh"
+    ],
+    "exactAliases": [],
+    "implies": [],
+    "caseSensitive": false
+  },
+  {
+    "name": "Microcontrollers",
+    "category": "Embedded Systems",
+    "aliases": [
+      "microcontroller",
+      "arm cortex-m",
+      "stm32"
+    ],
+    "exactAliases": [
+      "MCU"
+    ],
+    "implies": [],
+    "caseSensitive": false
+  },
+  {
+    "name": "RTOS",
+    "category": "Embedded Systems",
+    "aliases": [
+      "real-time operating system",
+      "real time operating system",
+      "freertos"
+    ],
+    "exactAliases": [],
+    "implies": [],
+    "caseSensitive": false
+  },
+  {
+    "name": "Verilog",
+    "category": "Hardware Description",
+    "aliases": [
+      "systemverilog"
+    ],
+    "exactAliases": [],
+    "implies": [],
+    "caseSensitive": false
+  },
+  {
+    "name": "VHDL",
+    "category": "Hardware Description",
+    "aliases": [],
+    "exactAliases": [],
+    "implies": [],
+    "caseSensitive": false
+  },
+  {
+    "name": "Google Analytics",
+    "category": "Marketing",
+    "aliases": [
+      "ga4",
+      "universal analytics"
+    ],
+    "exactAliases": [],
+    "implies": [],
+    "caseSensitive": false
+  },
+  {
+    "name": "SEO",
+    "category": "Marketing",
+    "aliases": [
+      "search engine optimization",
+      "search engine optimisation"
+    ],
+    "exactAliases": [],
+    "implies": [],
+    "caseSensitive": true
+  },
+  {
+    "name": "Google Ads",
+    "category": "Marketing",
+    "aliases": [
+      "adwords",
+      "google adwords"
+    ],
+    "exactAliases": [],
+    "implies": [],
+    "caseSensitive": false
+  },
+  {
+    "name": "Google Tag Manager",
+    "category": "Marketing",
+    "aliases": [],
+    "exactAliases": [],
+    "implies": [],
+    "caseSensitive": false
+  },
+  {
+    "name": "WordPress",
+    "category": "Web",
+    "aliases": [],
+    "exactAliases": [],
+    "implies": [],
+    "caseSensitive": false
+  },
+  {
+    "name": "Financial Modeling",
+    "category": "Finance",
+    "aliases": [
+      "financial modelling",
+      "financial models",
+      "financial model"
+    ],
+    "exactAliases": [],
+    "implies": [],
+    "caseSensitive": false
+  },
+  {
+    "name": "VBA",
+    "category": "Programming Languages",
+    "aliases": [
+      "visual basic for applications",
+      "excel vba"
+    ],
+    "exactAliases": [],
+    "implies": [
+      "Excel"
+    ],
+    "caseSensitive": true
+  },
+  {
+    "name": "SAP",
+    "category": "Enterprise Software",
+    "aliases": [
+      "sap erp",
+      "sap s/4hana",
+      "sap fico"
+    ],
+    "exactAliases": [],
+    "implies": [],
+    "caseSensitive": true
+  },
+  {
+    "name": "SAS",
+    "category": "Analytics",
+    "aliases": [
+      "sas programming",
+      "sas base"
+    ],
+    "exactAliases": [],
+    "implies": [],
+    "caseSensitive": true
+  },
+  {
+    "name": "EHR Systems",
+    "category": "Healthcare IT",
+    "aliases": [
+      "electronic health records",
+      "electronic health record",
+      "electronic medical records",
+      "epic systems",
+      "meditech",
+      "eclinicalworks"
+    ],
+    "exactAliases": [
+      "EHR",
+      "EMR"
+    ],
+    "implies": [],
+    "caseSensitive": false
+  },
+  {
+    "name": "Healthcare Data Standards",
+    "category": "Healthcare IT",
+    "aliases": [
+      "hl7",
+      "fhir",
+      "hl7 fhir",
+      "icd-10",
+      "snomed ct"
     ],
     "exactAliases": [],
     "implies": [],
