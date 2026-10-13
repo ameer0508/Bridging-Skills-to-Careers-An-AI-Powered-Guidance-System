@@ -107,7 +107,10 @@ async function runChannel(t, channel, { webUrl, apiUrl, tmpDir }, wav) {
       await page.getByRole('button', { name: /ENTER INTERVIEW STUDIO/ }).click();
       await page.locator('textarea').first().waitFor({ timeout: 20_000 });
       round = (await latestSession())._id;
-      return `browser ${browser.version()}`;
+      const brands = await page.evaluate(() => navigator.userAgentData?.brands?.map((b) => b.brand) ?? []);
+      const expected = channel === 'chrome' ? 'Google Chrome' : channel === 'msedge' ? 'Microsoft Edge' : null;
+      expect(!expected || brands.includes(expected), `expected ${expected}, the browser reports ${brands.join(', ')}`);
+      return `${brands.filter((b) => !/Not.A.Brand/.test(b)).join(' / ')} ${browser.version()}`;
     });
 
     await t.step(tag('the microphone is not requested before consent'), async () => {
@@ -290,12 +293,150 @@ async function runChannel(t, channel, { webUrl, apiUrl, tmpDir }, wav) {
   });
 }
 
+/**
+ * Dictation through the browser's REAL recogniser, with the fake device playing the synthetic
+ * tone. A tone is not speech, so this proves consent, start, the failure message and the typed
+ * fallback with the real API; it says nothing about recognition accuracy.
+ */
+async function realRecogniser(t, channel, { webUrl, apiUrl }, wav) {
+  const tag = (name) => `[${channel}] ${name}`;
+  await t.step(tag('real speech recogniser: consent, start, a "no speech" failure explained, typing still works'), async () => {
+    const { browser } = await launchBrowser({ channel, args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', `--use-file-for-fake-audio-capture=${wav}`] });
+    try {
+      const ctx = await browser.newContext({ viewport: { width: 1366, height: 900 } });
+      const p = await ctx.newPage();
+      const papi = apiClient(p, apiUrl);
+      await register(p, webUrl, 'Recogniser Check', `recogniser.${Date.now()}.${channel}@example.com`, PASSWORD);
+      await completeOnboarding(p, 'Data Analyst');
+      await gotoAndSettle(p, `${webUrl}/interview-agent`, 2000);
+      await p.getByRole('button', { name: /ENTER INTERVIEW STUDIO/ }).click();
+      await p.locator('textarea').first().waitFor({ timeout: 20_000 });
+      const api = await p.evaluate(() => ({ standard: 'SpeechRecognition' in window, prefixed: 'webkitSpeechRecognition' in window }));
+      expect(api.standard || api.prefixed, 'no speech recognition API in this browser');
+      await p.getByRole('button', { name: 'Enable voice dictation' }).click();
+      const dialog = p.getByTestId('dictation-consent');
+      const onDevice = !(await dialog.getByRole('button', { name: 'Only on this device' }).isDisabled());
+      await dialog.getByRole('button', { name: /Allow my browser/ }).click();
+      await p.getByTestId('dictation-status').waitFor({ timeout: 10_000 });
+      await p.getByRole('button', { name: 'Dictate' }).click();
+      await p.getByRole('button', { name: /Listening/ }).waitFor({ timeout: 10_000 });
+      // The recogniser decides when to give up; wait for its own message (or stop after 20 s)
+      const outcome = await Promise.race([
+        p.getByTestId('dictation-errors').locator('p').waitFor({ timeout: 25_000 }).then(async () => `error: ${await p.getByTestId('dictation-errors').innerText()}`),
+        p.waitForTimeout(20_000).then(() => 'still listening after 20 s'),
+      ]);
+      if (await p.getByRole('button', { name: /Listening/ }).count()) await p.getByRole('button', { name: /Listening/ }).click();
+      const dictated = await p.getByLabel('Your answer').inputValue();
+      await p.getByLabel('Your answer').fill(`${dictated} ${ANSWER}`.trim());
+      await p.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+      await p.waitForTimeout(1500);
+      const stored = (await papi('GET', '/interviews/history')).data.history[0];
+      expect(stored.questions[0].candidateResponse.includes('definitions'), 'the typed answer was not stored');
+      expect(/^error: /.test(outcome) || outcome.startsWith('still'), outcome);
+      return `API ${api.standard ? 'SpeechRecognition' : 'webkitSpeechRecognition'}; on-device offered: ${onDevice}; ${outcome.replace(/\s+/g, ' ')}; text from the tone: "${dictated}"; stored as ${stored.questions[0].answerInputMethod}`;
+    } finally {
+      await browser.close();
+    }
+  });
+}
+
+/**
+ * C1 and the parts of C2-C4 that automation can check: the whole recording and dictation flow
+ * with the keyboard only (Tab, Enter, Space), visible focus at every stop, focus moving into each
+ * consent panel, and the roles and accessible names a screen reader reads. A screen reader itself
+ * (Narrator) is not run here.
+ */
+async function keyboardAndNames(t, channel, { webUrl }, wav) {
+  const tag = (name) => `[${channel}] ${name}`;
+  await t.step(tag('keyboard only: consent, record, stop, listen and dictate, with visible focus and readable names'), async () => {
+    const { browser } = await launchBrowser({ channel, args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', `--use-file-for-fake-audio-capture=${wav}`] });
+    try {
+      const p = await (await browser.newContext({ viewport: { width: 1366, height: 900 } })).newPage();
+      await register(p, webUrl, 'Keyboard Check', `keyboard.${Date.now()}.${channel}@example.com`, PASSWORD);
+      await completeOnboarding(p, 'Data Analyst');
+      await gotoAndSettle(p, `${webUrl}/interview-agent`, 2000);
+      await p.getByRole('button', { name: /ENTER INTERVIEW STUDIO/ }).click();
+      await p.locator('textarea').first().waitFor({ timeout: 20_000 });
+      await p.locator('textarea').first().focus();
+      const focused = () => p.evaluate(() => {
+        const el = document.activeElement;
+        const style = el ? getComputedStyle(el) : null;
+        return {
+          name: (el?.getAttribute('aria-label') || el?.textContent || '').replace(/\s+/g, ' ').trim(),
+          visible: Boolean(el && el.matches(':focus-visible') && (style.outlineStyle !== 'none' || style.boxShadow !== 'none')),
+          inDialog: el?.closest('[role="dialog"]')?.getAttribute('data-testid') ?? null,
+        };
+      });
+      const tabTo = async (pattern, key = 'Tab') => {
+        for (let i = 0; i < 120; i += 1) {
+          await p.keyboard.press(key);
+          const f = await focused();
+          if (pattern.test(f.name)) {
+            expect(f.visible, `focus on "${f.name}" is not visible`);
+            return f;
+          }
+        }
+        throw new Error(`could not reach ${pattern} with the keyboard`);
+      };
+      const stops = [];
+      // Recording
+      await tabTo(/^Record spoken answers$/);
+      await p.keyboard.press('Enter');
+      await p.getByTestId('recording-consent').waitFor({ timeout: 10_000 });
+      await p.waitForTimeout(300);
+      expect((await focused()).inDialog === 'recording-consent', 'focus did not move into the recording consent panel');
+      const consentTree = await p.getByTestId('recording-consent').ariaSnapshot();
+      expect(/dialog "Before you record"/.test(consentTree) && /combobox "Keep recordings"/.test(consentTree), `consent panel as read: ${consentTree}`);
+      stops.push((await tabTo(/^Allow recording$/)).name);
+      await p.keyboard.press('Enter');
+      await p.getByTestId('recording-status').waitFor({ timeout: 10_000 });
+      stops.push((await tabTo(/^Record answer$/)).name);
+      await p.keyboard.press('Space');
+      await p.getByRole('button', { name: /Stop recording \(\d+s \/ 180s\)/ }).waitFor({ timeout: 10_000 });
+      await p.waitForTimeout(1500);
+      const stop = await focused();
+      expect(/^Stop recording \(\d+s \/ 180s\)$/.test(stop.name) && stop.visible, `after Space, focus is on "${stop.name}"`);
+      stops.push(stop.name);
+      await p.keyboard.press('Enter');
+      await p.getByRole('button', { name: 'Listen' }).waitFor({ timeout: 15_000 });
+      stops.push((await tabTo(/^Listen$/, 'Shift+Tab').catch(() => tabTo(/^Listen$/))).name);
+      await p.keyboard.press('Enter');
+      await p.getByTestId('recording-player').waitFor({ timeout: 10_000 });
+      // Dictation
+      stops.push((await tabTo(/^Enable voice dictation$/)).name);
+      await p.keyboard.press('Enter');
+      await p.getByTestId('dictation-consent').waitFor({ timeout: 10_000 });
+      await p.waitForTimeout(300);
+      expect((await focused()).inDialog === 'dictation-consent', 'focus did not move into the dictation consent panel');
+      const dictationTree = await p.getByTestId('dictation-consent').ariaSnapshot();
+      expect(/dialog/.test(dictationTree) && /button "Allow my browser/.test(dictationTree), `dictation panel as read: ${dictationTree}`);
+      stops.push((await tabTo(/^Allow my browser/)).name);
+      await p.keyboard.press('Enter');
+      await p.getByTestId('dictation-status').waitFor({ timeout: 10_000 });
+      stops.push((await tabTo(/^Dictate$/)).name);
+      await p.keyboard.press('Enter');
+      await p.getByRole('button', { name: /Listening/ }).waitFor({ timeout: 10_000 });
+      const listening = await focused();
+      expect(/Listening/.test(listening.name), `after Enter, focus is on "${listening.name}"`);
+      await p.keyboard.press('Enter');
+      await p.getByRole('button', { name: 'Dictate' }).waitFor({ timeout: 10_000 });
+      return `keyboard stops: ${stops.join(' → ')}`;
+    } finally {
+      await browser.close();
+    }
+  });
+}
+
 export async function run(env) {
   const t = new Reporter();
   const wav = path.join(env.tmpDir, 'synthetic-tone-440hz.wav');
   toneWav(wav);
   const channels = (process.env.E2E_CODEC_CHANNELS || 'msedge,chrome').split(',').map((c) => c.trim()).filter(Boolean);
-  for (const channel of channels) await runChannel(t, channel, env, wav);
+  for (const channel of channels) {
+    await runChannel(t, channel, env, wav);
+    await realRecogniser(t, channel, env, wav);
+    await keyboardAndNames(t, channel, env, wav);
+  }
   const failures = t.results.filter((r) => !r.ok).length;
   console.log(`\nSUMMARY ${t.results.length - failures}/${t.results.length} passed`);
   return failures;

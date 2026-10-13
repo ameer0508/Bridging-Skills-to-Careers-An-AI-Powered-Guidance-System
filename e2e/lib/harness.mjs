@@ -11,7 +11,10 @@ export async function launchBrowser({ channel: only, args } = {}) {
   const errors = [];
   for (const channel of channels) {
     try {
-      const browser = await chromium.launch({ channel, args, headless: process.env.E2E_HEADED !== '1' });
+      // E2E_CHROME_PATH runs a Google Chrome that is not installed system-wide (e.g. extracted
+      // from Google's signed installer); the brand is checked by the suites that rely on it
+      const portable = channel === 'chrome' && process.env.E2E_CHROME_PATH ? { executablePath: process.env.E2E_CHROME_PATH } : { channel };
+      const browser = await chromium.launch({ ...portable, args, headless: process.env.E2E_HEADED !== '1' });
       return { browser, channel };
     } catch (error) {
       errors.push(`${channel}: ${String(error.message).split('\n')[0]}`);
