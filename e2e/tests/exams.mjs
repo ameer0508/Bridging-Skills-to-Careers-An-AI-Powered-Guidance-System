@@ -88,7 +88,9 @@ export async function run({ webUrl, apiUrl }) {
 
     await t.step('progress shows the topic with its counts and a status only after enough answers', async () => {
       await page.getByRole('button', { name: 'Back' }).click();
-      expect((await page.getByTestId('attempt-history').innerText()).includes('marks'), 'the attempt is not listed');
+      // The list first shows the cached row ("in progress") and refetches after the submission
+      const listed = await page.getByTestId('attempt-history').getByText(/marks/).first().waitFor({ timeout: 10_000 }).then(() => true, () => false);
+      expect(listed, 'the submitted attempt is not listed with its marks');
       await tab('Progress').click();
       const row = page.locator('tr[data-topic="db-core"]');
       await row.waitFor({ timeout: 15_000 });
