@@ -1022,6 +1022,14 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       let last = null;
       for (let i = 0; i < 31; i++) last = await api('GET', '/opportunities?search=Developer');
       expect(last.status === 429 && last.json?.error?.code === 'JOB_SEARCH_RATE_LIMITED', `search 31 answered ${last.status}`);
+      // The limit counts fixed one-minute windows. If this one ends before the page has loaded,
+      // the page's own search would rightly be allowed: wait for the next window and use it up.
+      const resetSeconds = Number(last.headers.get('ratelimit-reset'));
+      if (Number.isFinite(resetSeconds) && resetSeconds <= 10) {
+        await page.waitForTimeout((resetSeconds + 1) * 1000);
+        for (let i = 0; i < 31; i++) last = await api('GET', '/opportunities?search=Developer');
+        expect(last.status === 429, `search 31 of the next window answered ${last.status}`);
+      }
       expect((await api('GET', '/opportunities/saved')).status === 200, 'saved jobs are blocked by the search limit');
       await gotoAndSettle(page, `${webUrl}/job-agent`, 4000);
       expect(/You can search for jobs 30 times a minute/.test(await bodyText(page)), 'the page does not explain that searching is limited');

@@ -83,7 +83,7 @@ export function apiClient(page, apiUrl) {
     } catch {
       // not JSON (e.g. a file download)
     }
-    return { status: res.status, json, data: json?.data };
+    return { status: res.status, json, data: json?.data, headers: res.headers };
   };
 }
 
