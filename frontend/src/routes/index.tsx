@@ -46,6 +46,11 @@ const MarketEvidencePage = lazy(() => import('../features/market/components/Mark
 const SalaryInsightsPage = lazy(() => import('../features/market/components/SalaryInsightsPage'));
 const ApplicationHistoryPage = lazy(() => import('../features/applications/components/ApplicationHistoryPage'));
 const TechnicalAssessmentPage = lazy(() => import('../features/interview/components/TechnicalAssessmentPage'));
+const ExamsHomePage = lazy(() => import('../features/exams/components/ExamsHomePage'));
+const ExamPage = lazy(() => import('../features/exams/components/ExamPage'));
+const ResumeLanguagePage = lazy(() => import('../features/languages/components/ResumeLanguagePage'));
+const CareerDomainsPreviewPage = lazy(() => import('../features/careerDomains/components/CareerDomainsPreviewPage'));
+const AiObservabilityPage = lazy(() => import('../features/aiObservability/components/AiObservabilityPage'));
 const ApplicationOutcomesPage = lazy(() => import('../features/applications/components/ApplicationOutcomesPage'));
 const CareerIdentityWorkspace = lazy(() => import('../workspaces/CareerIdentityWorkspace/CareerIdentityWorkspace'));
 
@@ -429,6 +434,46 @@ export const router = createBrowserRouter([
             element: (
               <WorkspaceSuspense>
                 <SalaryInsightsPage />
+              </WorkspaceSuspense>
+            ),
+          },
+          {
+            path: '/resume-language',
+            element: (
+              <WorkspaceSuspense>
+                <ResumeLanguagePage />
+              </WorkspaceSuspense>
+            ),
+          },
+          {
+            path: '/ai-observability',
+            element: (
+              <WorkspaceSuspense>
+                <AiObservabilityPage />
+              </WorkspaceSuspense>
+            ),
+          },
+          {
+            path: '/career-domains',
+            element: (
+              <WorkspaceSuspense>
+                <CareerDomainsPreviewPage />
+              </WorkspaceSuspense>
+            ),
+          },
+          {
+            path: '/exams',
+            element: (
+              <WorkspaceSuspense>
+                <ExamsHomePage />
+              </WorkspaceSuspense>
+            ),
+          },
+          {
+            path: '/exams/:examId',
+            element: (
+              <WorkspaceSuspense>
+                <ExamPage />
               </WorkspaceSuspense>
             ),
           },

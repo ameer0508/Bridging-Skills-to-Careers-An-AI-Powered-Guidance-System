@@ -25,6 +25,9 @@ import {
   FolderGit2,
   Wallet,
   ClipboardList,
+  GraduationCap,
+  Languages,
+  Activity,
 } from 'lucide-react';
 import { SidebarItem } from './SidebarItem';
 import { useAuthStore } from '../../store/authStore';
@@ -163,6 +166,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
           icon: <Wallet className="w-4 h-4" />,
         },
         {
+          to: '/resume-language',
+          label: 'Resume Language Check',
+          icon: <Languages className="w-4 h-4" />,
+        },
+        {
+          to: '/career-domains',
+          label: 'More Career Domains',
+          icon: <Compass className="w-4 h-4" />,
+        },
+        {
+          to: '/exams',
+          label: 'Exam Practice',
+          icon: <GraduationCap className="w-4 h-4" />,
+        },
+        {
           to: '/applications',
           label: 'Applications',
           icon: <ClipboardList className="w-4 h-4" />,
@@ -172,6 +190,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
           label: 'Application Outcomes',
           icon: <Target className="w-4 h-4" />,
         },
+        ...(user?.role === 'admin'
+          ? [{ to: '/ai-observability', label: 'AI Observability', icon: <Activity className="w-4 h-4" /> }]
+          : []),
       ],
     },
     {

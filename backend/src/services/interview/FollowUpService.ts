@@ -24,7 +24,7 @@ const BEHAVIOURAL = new Set(['behavioral', 'behavioural', 'resume', 'career']);
 
 /** Why a follow-up is warranted, or null when the answer does not need one. */
 export function followUpReason(question: IQuestionItem, evaluation: IQuestionEvaluation): FollowUpReason | null {
-  if (question.followUpOf) return null;
+  if (question.followUpOf || evaluation.notScored) return null;
   if (!question.candidateResponse?.trim() || evaluation.score === 0) return null;
   const missing = (evaluation.missingConcepts || []).filter(c => c.trim());
   if (missing.length > 0) return { type: 'missing_concept', concept: missing[0] };

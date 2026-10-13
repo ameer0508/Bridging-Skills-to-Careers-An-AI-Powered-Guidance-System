@@ -297,6 +297,39 @@ export async function run({ webUrl, apiUrl }) {
       await page.waitForTimeout(2500);
     });
 
+    // ---- X9 scoring quality ----------------------------------------------------------------------------------
+    await t.step('each scored answer shows its method, uncertainty, factors and limits', async () => {
+      await gotoAndSettle(page, `${webUrl}/interview-agent`, 2000);
+      await page.getByRole('button', { name: /ENTER INTERVIEW STUDIO/ }).click();
+      const box = page.locator('textarea').first();
+      await box.waitFor({ timeout: 20_000 });
+      await box.fill(ANSWER);
+      await page.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+      // The room moves on to question 2: answer it in Hindi
+      await page.waitForFunction(() => document.body.innerText.includes('QUESTION 2 OF'), null, { timeout: 20_000 });
+      await page.locator('textarea').first().fill('मैंने इस समस्या पर टीम के साथ काम किया और एक भरोसेमंद समाधान बनाया जो भारी ट्रैफ़िक में भी चलता रहा।');
+      await page.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+      await page.waitForTimeout(1500);
+      await page.getByRole('button', { name: /Conclude Round/ }).click();
+      const details = page.getByTestId('evaluation-details').first();
+      await details.waitFor({ timeout: 20_000 });
+      expect(['medium', 'high'].includes(await details.getAttribute('data-uncertainty')), 'rule-based scoring shows at least medium uncertainty');
+      await details.getByText(/How this answer was scored/).click();
+      await details.getByText('Limits of this score').click();
+      const text = await details.innerText();
+      expect(/rule-based-v2/.test(text) && /Completeness: \d+ words/.test(text), `factors: ${text.slice(0, 200)}`);
+      expect(/does not predict how an employer would assess you/.test(text), 'the hiring disclaimer is missing');
+    });
+
+    await t.step('an answer in Hindi is not scored, rather than marked down', async () => {
+      await page.getByRole('button', { name: /^Q2/ }).click();
+      await page.getByTestId('not-scored').waitFor({ timeout: 10_000 });
+      expect(/not scored/i.test(await page.getByRole('button', { name: /^Q2/ }).innerText()), 'the question list shows a score');
+      const session = await latestSession();
+      expect(session.notScoredCount === 1 && session.questions[1].evaluation.notScored === true, `stored: ${session.notScoredCount}`);
+      expect(session.preparationRecommendations.some((a) => /not in English/.test(a)), 'the debrief does not explain it');
+    });
+
     // ---- D4 technical assessments --------------------------------------------------------------------------
     const SQL_KEYS = { 'sql-group-count': '2', 'sql-offset': 'Dina', 'sql-avg': '70', 'sql-left-join-zero': '3', 'sql-count-distinct': '3' };
     await t.step('the lobby links to a technical assessment that runs nothing', async () => {

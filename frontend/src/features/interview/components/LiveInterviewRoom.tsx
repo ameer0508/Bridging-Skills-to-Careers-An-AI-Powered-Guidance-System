@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { QuestionItem, InterviewSession } from '../../../workspaces/InterviewPrepAgentWorkspace/InterviewPrepAgentWorkspace';
 import { DictationControl } from './DictationControl';
+import { EvaluationDetails } from './EvaluationDetails';
 import { RecordingControl } from './RecordingControl';
 import { ReadAloudButton } from './ReadAloudButton';
 
@@ -343,7 +344,7 @@ export const LiveInterviewRoom: React.FC<LiveInterviewRoomProps> = ({
                           {currentQuestion.evaluation.starFormatted ? 'STAR Formatted' : 'Action / Metrics Required'}
                         </span>
                         <span className="px-3 py-1 rounded-xl bg-slate-900 text-emerald-400 font-bold text-sm border border-emerald-500/40">
-                          {currentQuestion.evaluation.score} / 100
+                          {currentQuestion.evaluation.notScored ? 'Not scored' : `${currentQuestion.evaluation.score} / 100`}
                         </span>
                       </div>
                     </div>
@@ -351,6 +352,7 @@ export const LiveInterviewRoom: React.FC<LiveInterviewRoomProps> = ({
                     <p className="text-slate-200 leading-relaxed italic bg-slate-950/60 p-3 rounded-xl border border-white/5">
                       "{currentQuestion.evaluation.feedback}"
                     </p>
+                    <EvaluationDetails evaluation={currentQuestion.evaluation} />
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                       {/* Strengths */}

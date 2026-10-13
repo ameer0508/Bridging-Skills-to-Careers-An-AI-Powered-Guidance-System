@@ -366,3 +366,60 @@ is stopped for longer than a retention period, recordings are deleted at its nex
 is harmless but redundant. A file that can never be removed (for example a read-only disk) stays
 pending and is reported at every run until an operator intervenes. Removal is an ordinary file
 deletion, not a secure erase of the storage medium.
+
+## X9. Interview scoring quality
+
+**Every evaluation now states how it was produced and how far to trust it** (`backend/src/services/interview/evaluationQuality.ts`):
+
+| Field | Meaning |
+|---|---|
+| `method` | A versioned method name. `rule-based-v2` is the built-in rubric; `ai-rubric-v1` is an AI score (only through the zero-cost policy); `no-answer-v1` is an empty answer; `language-check-v1` is an answer not in English. Together with `rubricId` and `rubricVersion` (D5), it makes every score reproducible. |
+| `factors` | The measured inputs behind each dimension. Rule-based: question words used, expected points covered and missed, word count, tools named, measured results found, STAR parts or reasoning phrases, the role weights and the caps applied. AI: the raw 0–5 rubric scores, the weights and the caps. |
+| `uncertainty` | `low`, `medium` or `high`, with reasons. Rule-based scoring is never `low`, because it cannot confirm correctness, and an AI score is a single uncalibrated judgement. Short answers and applied caps raise uncertainty to `high`. |
+| `limitations` | Always shown. The score does not predict employer assessment or hiring; scoring is English only; contradictions are not detected; plus "the rubric cannot check correctness" and "relevance is lexical" (rule-based) or "single AI judgement" (AI). |
+
+The live room and the debrief show these as "How this answer was scored" and "Limits of this score".
+
+**Fairness fix: answers not in English.**
+- **What was wrong.**
+  - The rubric is English-lexical, so an answer in Hindi or Spanish was capped as "off-topic" (15 or less).
+  - A Hindi answer was even reported as "No answer was given", because the word counter saw no Latin words.
+- **What happens now.**
+  - Such answers are detected: mostly non-Latin script, or the function words of another language. They are **not scored**, with the reason stated, and neither scored by AI nor marked down.
+  - They are saved, kept out of both the overall score and its denominator, explained in the debrief (`notScoredCount` plus a line of advice), and not followed up (D3).
+  - English answers that mention Indian names or places are scored normally.
+  - Hinglish written in Latin script is not detected as another language. It is scored by the English rubric and will usually score low: a stated limitation.
+
+**Stability fix.** Multi-word markers ("so that", "as a result") were matched only with single spaces, so an answer with double spaces lost structure credit: a measured 5-point drop from 56 to 51. Whitespace is now normalised before scoring.
+
+**Measured behaviour** (`backend/src/tests/interview_quality.test.ts`, rate-limiter question):
+
+| Answer | Rule-based score | Uncertainty |
+|---|---|---|
+| Empty | 0 | low |
+| Generic, one sentence | 4 (capped) | high |
+| Contradictory (claims and their opposites, 70 words) | **70** | medium |
+| Excellent | 80 (the rule-based maximum) | medium |
+
+**The contradictory answer scores close to the excellent one.** The rubric counts topical words and structure; it does not read meaning. This is exactly why the "does not detect contradictions" and "cannot check correctness" limitations are stated on every rule-based score.
+
+**Stability across equivalent answers.** Each variant was scored against both an answer at the cap (80) and one below it (56):
+
+| Variant | Spread |
+|---|---|
+| Extra spaces and line breaks | 0 |
+| Upper case | 0 |
+| Changed punctuation | 0 |
+| Sentences reordered | 0 |
+| Bulleted | 0 |
+
+The test allows at most 10, and requires exactly 0 for whitespace, order and bullets. Paraphrases that use different words were **not** tested for stability, and lexical relevance means they can move the score.
+
+**Tests:**
+- `interview_quality.test.ts` covers:
+  - the four answer categories with their factors, methods and uncertainty;
+  - stability at and below the cap;
+  - Hindi and Spanish answers not scored, and English with Indian names scored;
+  - a session with an unscored answer excluded and explained;
+  - the AI path's method, factors and labels.
+- `e2e/tests/interviews.mjs` adds 2 browser steps: details on a scored answer (method, words, the hiring disclaimer), and a Hindi answer shown as not scored and stored with `notScoredCount`.
