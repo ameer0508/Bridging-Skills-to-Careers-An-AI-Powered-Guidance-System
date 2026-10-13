@@ -18,6 +18,7 @@ from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
 from app.multilingual.pdf_glyphs import glyph_text_map
+from app.multilingual import ocr
 
 try:
     import pymupdf  # PyMuPDF
@@ -43,6 +44,14 @@ class DocumentText:
     # Devanagari glyphs the PDF left without characters: recovered from the embedded font, or not
     glyphs_recovered: int = 0
     glyphs_unrecovered: int = 0
+    # Where the text came from: the PDF's text layer, local OCR, or both (X1)
+    text_source: str = "text_layer"  # text_layer | ocr | mixed
+    ocr: Optional[dict] = None
+    # Lines read by OCR: index -> mean word confidence (0-100). Absent lines came from the text layer.
+    ocr_lines: Dict[int, float] = field(default_factory=dict)
+    # Internal: the lines of each PDF page, and which pages had no usable text layer
+    page_lines: List[List[str]] = field(default_factory=list)
+    scanned_page_numbers: List[int] = field(default_factory=list)
 
 
 def _lines(text: str) -> List[str]:
@@ -147,6 +156,8 @@ def _read_pdf(path: str) -> DocumentText:
     doc = pymupdf.open(path)
     recovery = _GlyphRecovery(doc)
     lines: List[str] = []
+    page_lines: List[List[str]] = []
+    scanned_numbers: List[int] = []
     two_column_pages = 0
     scanned = 0
     for page in doc:
@@ -159,6 +170,8 @@ def _read_pdf(path: str) -> DocumentText:
         text_chars = sum(len(b[4].strip()) for b in blocks)
         if text_chars < SCANNED_PAGE_TEXT_CHARS and page.get_images(full=False):
             scanned += 1
+            scanned_numbers.append(page.number)
+            page_lines.append([])
             continue
         width = page.rect.width
         # Each block belongs to the column it starts in
@@ -178,14 +191,13 @@ def _read_pdf(path: str) -> DocumentText:
             ordered = sorted(left, key=lambda b: (b[1], b[0])) + sorted(right, key=lambda b: (b[1], b[0]))
         else:
             ordered = sorted(blocks, key=lambda b: (round(b[1], 1), b[0]))
+        this_page: List[str] = []
         for b in ordered:
-            lines.extend(_lines(b[4]))
+            this_page.extend(_lines(b[4]))
+        page_lines.append(this_page)
+        lines.extend(this_page)
     pages = doc.page_count
     warnings = []
-    if scanned:
-        warnings.append(
-            f"{scanned} of {pages} page(s) look scanned (images without a text layer). SkillBridge has no OCR, so their text cannot be read."
-        )
     if recovery.recovered:
         warnings.append(
             f"{recovery.recovered} Devanagari glyph(s) had no character in the PDF's text layer and were recovered from the embedded font."
@@ -195,6 +207,87 @@ def _read_pdf(path: str) -> DocumentText:
     return DocumentText(
         lines=lines, layout=layout, pages=pages, scanned_pages=scanned, warnings=warnings,
         glyphs_recovered=recovery.recovered, glyphs_unrecovered=recovery.unrecovered,
+        page_lines=page_lines, scanned_page_numbers=scanned_numbers,
+    )
+
+
+LOW_CONFIDENCE = 60.0
+
+
+def _apply_ocr(path: str, result: DocumentText) -> None:
+    """OCR fallback (X1): only scanned pages, or every page when the text layer is damaged.
+    Clean PDFs never get here. OCR text replaces damaged text only when it reads cleanly itself."""
+    damaged = result.text_quality == "degraded"
+    targets = list(range(result.pages)) if damaged else list(result.scanned_page_numbers)
+    if not targets:
+        return
+    reason = "degraded_text" if damaged else "scanned"
+    doc = pymupdf.open(path)
+    try:
+        run = ocr.ocr_pages(doc, targets)
+    finally:
+        doc.close()
+    meta = {
+        "used": run.pages > 0,
+        "reason": reason,
+        "engine": run.engine,
+        "languages": run.languages,
+        "pagesRequested": len(targets),
+        "pagesRead": run.pages,
+        "pagesSkipped": run.pages_skipped,
+        "failures": sorted(set(run.failures)),
+        "meanConfidence": run.mean_confidence,
+        "seconds": run.seconds,
+        "limits": ocr.limits(),
+    }
+    result.ocr = meta
+    if run.pages == 0:
+        if reason == "scanned":
+            why = "OCR is not available on this server" if "not_available" in run.failures else "OCR could not read them"
+            result.warnings.append(
+                f"{result.scanned_pages} of {result.pages} page(s) look scanned (images without a text layer) and {why}, so their text cannot be read."
+            )
+        return
+
+    ocr_lines = [l for l in run.lines if l.text.strip()]
+    ocr_text = [l.text.strip() for l in ocr_lines]
+    if not ocr_lines:
+        meta["used"] = False
+        if reason == "scanned":
+            result.warnings.append(
+                f"{result.scanned_pages} of {result.pages} page(s) look scanned and OCR found no readable text on them."
+            )
+        return
+    if damaged:
+        quality, _ = assess_text_quality(ocr_text)
+        if quality != "ok" or not ocr_text:
+            meta["used"] = False
+            meta["rejected"] = "ocr_text_also_damaged"
+            return
+        result.lines = ocr_text
+        result.ocr_lines = {i: l.confidence for i, l in enumerate(ocr_lines)}
+        result.text_source = "ocr"
+        result.text_quality = "ok"
+        result.warnings = [w for w in result.warnings if "garbles" not in w]
+    else:
+        # Scanned pages get their OCR text in page order; the other pages keep their text layer
+        merged: List[str] = []
+        origins: Dict[int, float] = {}
+        for number, text_lines in enumerate(result.page_lines):
+            for l in run.page_lines.get(number, []):
+                if l.text.strip():
+                    origins[len(merged)] = l.confidence
+                    merged.append(l.text.strip())
+            merged.extend(text_lines)
+        result.lines = merged
+        result.ocr_lines = origins
+        result.text_source = "ocr" if all(not t for t in result.page_lines) else "mixed"
+    low = sum(1 for c in result.ocr_lines.values() if c < LOW_CONFIDENCE)
+    result.warnings.append(
+        f"Text on {run.pages} page(s) was read by OCR (Tesseract, languages: {', '.join(run.languages)}), mean confidence {run.mean_confidence}%. "
+        "OCR can misread letters and numbers: check the extracted values before relying on them."
+        + (f" {low} line(s) were read with low confidence." if low else "")
+        + (f" {run.pages_skipped} page(s) were not read because of the OCR page or time limit." if run.pages_skipped else "")
     )
 
 
@@ -260,6 +353,8 @@ def read_document(path: str, ext: str) -> DocumentText:
     quality, warnings = assess_text_quality(result.lines)
     result.text_quality = quality
     result.warnings.extend(warnings)
+    if ext == ".pdf":
+        _apply_ocr(path, result)
     return result
 
 

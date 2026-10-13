@@ -1,0 +1,26 @@
+{
+  "note": "SYNTHETIC TEST DATA. One short resume per script that SkillBridge can OCR but does not extract (Telugu, Tamil, Kannada, Malayalam). Used to measure that such resumes are refused as unsupported, never misread as English, and to report OCR character accuracy for information only.",
+  "version": 1,
+  "samples": [
+    {
+      "id": "te-1",
+      "script": "telugu",
+      "lines": ["రవి కుమార్", "ravi.kumar@example.com", "నేను డేటా విశ్లేషణలో మూడు సంవత్సరాల అనుభవం ఉన్న విశ్లేషకుడిని", "నైపుణ్యాలు", "Python, SQL, Excel", "పని అనుభవం", "డేటా విశ్లేషకుడు, ఉదాహరణ సంస్థ", "జనవరి 2021 నుండి ఇప్పటి వరకు"]
+    },
+    {
+      "id": "ta-1",
+      "script": "tamil",
+      "lines": ["ரவி குமார்", "ravi.kumar@example.com", "நான் தரவு பகுப்பாய்வில் மூன்று ஆண்டுகள் அனுபவம் உள்ள ஆய்வாளர்", "திறன்கள்", "Python, SQL, Excel", "பணி அனுபவம்", "தரவு ஆய்வாளர், உதாரண நிறுவனம்", "ஜனவரி 2021 முதல் தற்போது வரை"]
+    },
+    {
+      "id": "kn-1",
+      "script": "kannada",
+      "lines": ["ರವಿ ಕುಮಾರ್", "ravi.kumar@example.com", "ನಾನು ದತ್ತಾಂಶ ವಿಶ್ಲೇಷಣೆಯಲ್ಲಿ ಮೂರು ವರ್ಷಗಳ ಅನುಭವ ಹೊಂದಿರುವ ವಿಶ್ಲೇಷಕ", "ಕೌಶಲ್ಯಗಳು", "Python, SQL, Excel", "ಕೆಲಸದ ಅನುಭವ", "ದತ್ತಾಂಶ ವಿಶ್ಲೇಷಕ, ಉದಾಹರಣೆ ಸಂಸ್ಥೆ", "ಜನವರಿ 2021 ರಿಂದ ಇಲ್ಲಿಯವರೆಗೆ"]
+    },
+    {
+      "id": "ml-1",
+      "script": "malayalam",
+      "lines": ["രവി കുമാർ", "ravi.kumar@example.com", "ഞാൻ ഡാറ്റ വിശകലനത്തിൽ മൂന്ന് വർഷത്തെ പരിചയമുള്ള അനലിസ്റ്റ് ആണ്", "കഴിവുകൾ", "Python, SQL, Excel", "പ്രവൃത്തി പരിചയം", "ഡാറ്റ അനലിസ്റ്റ്, ഉദാഹരണ സ്ഥാപനം", "ജനുവരി 2021 മുതൽ ഇപ്പോൾ വരെ"]
+    }
+  ]
+}

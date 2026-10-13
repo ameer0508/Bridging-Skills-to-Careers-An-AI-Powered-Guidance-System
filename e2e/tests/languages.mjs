@@ -75,13 +75,23 @@ export async function run({ webUrl, apiUrl }) {
       expect(/OCR/.test(await page.getByTestId('analysis-warnings').innerText()), 'no OCR explanation');
     });
 
+    await t.step('a scan read by OCR says so, with its confidence, on the page and on every value', async () => {
+      await page.locator('input[type=file]').setInputFiles({ name: 'scan-ocr.txt', mimeType: 'text/plain', buffer: Buffer.from('OCRSCAN page') });
+      await page.getByRole('button', { name: 'जाँचें', exact: true }).click();
+      await page.getByTestId('ocr-notice').waitFor({ timeout: 15_000 });
+      const notice = await page.getByTestId('ocr-notice').innerText();
+      expect(/OCR/.test(notice) && /88\.5%/.test(notice) && /tesseract/i.test(notice), `notice: ${notice}`);
+      expect((await page.getByTestId('ocr-mark').count()) >= 3, 'the e-mail and both skills are not marked as OCR');
+    });
+
     await t.step('a check can be deleted with its stored text, and another account sees none', async () => {
       const before = (await api('GET', '/languages/resume-analyses')).data.analyses;
-      expect(before.length === 3, `${before.length} checks stored`);
+      expect(before.length === 4, `${before.length} checks stored`); // Hindi, French, scanned, OCR-read scan
       await page.getByRole('button', { name: /हटाएँ: scan\.txt/ }).click();
       await page.waitForTimeout(800);
       const after = (await api('GET', '/languages/resume-analyses')).data.analyses;
-      expect(after.length === 2 && (await api('GET', `/languages/resume-analyses/${before[0].id}`)).status === 404, 'the check was not deleted');
+      const deleted = before.find((x) => x.fileName === 'scan.txt');
+      expect(after.length === 3 && (await api('GET', `/languages/resume-analyses/${deleted.id}`)).status === 404, 'the check was not deleted');
       const other = await browser.newContext();
       const otherPage = await other.newPage();
       const otherApi = apiClient(otherPage, apiUrl);

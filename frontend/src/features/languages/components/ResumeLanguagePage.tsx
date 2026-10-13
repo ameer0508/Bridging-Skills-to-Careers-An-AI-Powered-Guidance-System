@@ -127,8 +127,11 @@ export const ResumeLanguagePage: React.FC = () => {
   );
 };
 
-const Source: React.FC<{ line: number; text: string; label: string }> = ({ line, text, label }) => (
-  <span className="block text-xs text-[var(--color-text-secondary)]">{label} {line + 1}: <q>{text}</q></span>
+const Source: React.FC<{ line: number; text: string; label: string; origin?: 'ocr'; ocrConfidence?: number; ocrMark?: string }> = ({ line, text, label, origin, ocrConfidence, ocrMark }) => (
+  <span className="block text-xs text-[var(--color-text-secondary)]">
+    {label} {line + 1}: <q>{text}</q>
+    {origin === 'ocr' && <span className="ml-1 rounded border border-amber-500 px-1 text-amber-800" data-testid="ocr-mark">{ocrMark} {ocrConfidence}%</span>}
+  </span>
 );
 
 const AnalysisView: React.FC<{ id: string; labels: Record<string, string> }> = ({ id, labels }) => {
@@ -148,6 +151,11 @@ const AnalysisView: React.FC<{ id: string; labels: Record<string, string> }> = (
         {labels.detected}: <strong>{a.language.supported ? a.language.name : a.language.language ?? '—'}</strong>
         {a.language.mixed ? ' (with English terms)' : ''} · {labels.layout}: {a.layout.type.replace('_', ' ')} · method {a.method}
       </p>
+      {a.textSource && a.textSource !== 'text_layer' && a.ocr?.used && (
+        <p role="note" data-testid="ocr-notice" className="rounded-[var(--radius-md)] border border-amber-500 p-3 text-sm">
+          <strong>{labels.ocrNotice}</strong>{a.ocr.engine ? ` (${a.ocr.engine}; ${(a.ocr.languages ?? []).join(', ')})` : ''} · {labels.ocrConfidence} {a.ocr.meanConfidence ?? '—'}%. {labels.ocrCheck}
+        </p>
+      )}
       {a.warnings.length > 0 && (
         <ul role="alert" className="list-disc space-y-1 rounded-[var(--radius-md)] border border-amber-500 bg-amber-50 p-3 pl-7 text-sm text-amber-900" data-testid="analysis-warnings">
           {a.warnings.map(w => <li key={w}>{w}</li>)}
@@ -169,15 +177,15 @@ const AnalysisView: React.FC<{ id: string; labels: Record<string, string> }> = (
             </div>
           )}
           <dl className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-            <div><dt className="font-semibold">{labels.email}</dt><dd>{a.fields.email ? <>{a.fields.email.value}<Source {...a.fields.email.source} label={labels.fromLine} /></> : '—'}</dd></div>
-            <div><dt className="font-semibold">{labels.phone}</dt><dd>{a.fields.phone ? <>{a.fields.phone.value}<Source {...a.fields.phone.source} label={labels.fromLine} /></> : '—'}</dd></div>
+            <div><dt className="font-semibold">{labels.email}</dt><dd>{a.fields.email ? <>{a.fields.email.value}<Source {...a.fields.email.source} label={labels.fromLine} ocrMark={labels.ocrMark} /></> : '—'}</dd></div>
+            <div><dt className="font-semibold">{labels.phone}</dt><dd>{a.fields.phone ? <>{a.fields.phone.value}<Source {...a.fields.phone.source} label={labels.fromLine} ocrMark={labels.ocrMark} /></> : '—'}</dd></div>
           </dl>
           <div>
             <h3 className="text-sm font-semibold">{labels.experienceDates}</h3>
             {a.fields.experience.length === 0 ? <p className="text-sm text-[var(--color-text-secondary)]">—</p> : (
               <ul className="text-sm" data-testid="experience-list">
                 {a.fields.experience.map(e => (
-                  <li key={`${e.source.line}`}>{e.start} → {e.end}{e.context ? ` · ${e.context}` : ''}{e.inferred ? ' (inferred: heading not readable)' : ''}<Source {...e.source} label={labels.fromLine} /></li>
+                  <li key={`${e.source.line}`}>{e.start} → {e.end}{e.context ? ` · ${e.context}` : ''}{e.inferred ? ' (inferred: heading not readable)' : ''}<Source {...e.source} label={labels.fromLine} ocrMark={labels.ocrMark} /></li>
                 ))}
               </ul>
             )}
@@ -188,7 +196,7 @@ const AnalysisView: React.FC<{ id: string; labels: Record<string, string> }> = (
               <ul className="flex flex-wrap gap-2 text-sm" data-testid="skill-list">
                 {a.fields.skills.map(s => (
                   <li key={s.name} className="rounded border border-[var(--color-border-default)] px-2 py-0.5" title={`${labels.fromLine} ${s.source.line + 1}: ${s.source.text}`}>
-                    {s.name}{s.matched !== s.name ? ` (“${s.matched}”)` : ''}
+                    {s.name}{s.matched !== s.name ? ` (“${s.matched}”)` : ''}{s.source.origin === 'ocr' ? <span className="ml-1 text-xs text-amber-800" data-testid="ocr-mark">· OCR {s.source.ocrConfidence}%</span> : null}
                   </li>
                 ))}
               </ul>

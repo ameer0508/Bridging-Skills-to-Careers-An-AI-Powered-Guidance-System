@@ -6,6 +6,9 @@ export type UiLanguage = 'en' | 'hi' | 'es';
 export interface FieldSource {
   line: number;
   text: string;
+  /** Set when the line was read by OCR: the value is a guess with this confidence (0-100). */
+  origin?: 'ocr';
+  ocrConfidence?: number;
 }
 
 export interface Analysis {
@@ -17,6 +20,8 @@ export interface Analysis {
   language: { language: string | null; name?: string; supported: boolean; status: string; message?: string; mixed?: boolean; scripts?: Record<string, number> };
   layout: { type: string; pages: number; scannedPages: number };
   textQuality: 'ok' | 'degraded';
+  textSource?: 'text_layer' | 'ocr' | 'mixed';
+  ocr?: { used?: boolean; reason?: string; engine?: string | null; languages?: string[]; pagesRead?: number; pagesSkipped?: number; meanConfidence?: number | null; failures?: string[] } | null;
   warnings: string[];
   sections: Array<{ key: string; heading: string; headingLanguage: string | null; startLine: number; endLine: number; matchedLoosely?: boolean }>;
   fields: {

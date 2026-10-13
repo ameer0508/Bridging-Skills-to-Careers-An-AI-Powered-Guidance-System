@@ -18,7 +18,7 @@ from .detect import detect_language
 from .document import DocumentText
 from .languages import DEVANAGARI_DIGITS, MONTHS, PRESENT_WORDS, SECTION_HEADINGS, SUPPORTED, TRANSLATED_SKILL_TERMS
 
-METHOD_VERSION = "multilingual-rules-3"
+METHOD_VERSION = "multilingual-rules-4"
 
 EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 PHONE = re.compile(r"(?<!\d)(\+?\d[\d\s().-]{7,16}\d)(?!\d)")
@@ -140,6 +140,9 @@ def extract(document: DocumentText) -> dict:
         "textQuality": document.text_quality,
         # Devanagari glyphs the PDF left without characters, recovered from its embedded font (or not)
         "textRecovery": {"glyphsRecovered": document.glyphs_recovered, "glyphsUnrecovered": document.glyphs_unrecovered},
+        # Where the text came from (X1): the PDF text layer, local OCR, or both; OCR details when used
+        "textSource": document.text_source,
+        "ocr": document.ocr,
         "warnings": list(document.warnings),
         "sections": [],
         "fields": {"email": None, "phone": None, "experience": [], "education": [], "skills": []},
@@ -216,7 +219,25 @@ def extract(document: DocumentText) -> dict:
                 result["fields"]["skills"].append({"name": name, "matched": term, "source": _source(i, line)})
         if not heading_of(line):
             previous_text = line
+    _mark_ocr_sources(result["fields"], document.ocr_lines)
     return result
+
+
+def _mark_ocr_sources(node, ocr_lines: Dict[int, float]) -> None:
+    """Every value read from an OCR line says so, with that line's confidence: it is a guess."""
+    if not ocr_lines:
+        return
+    if isinstance(node, dict):
+        source = node.get("source")
+        if isinstance(source, dict) and source.get("line") in ocr_lines:
+            source["origin"] = "ocr"
+            source["ocrConfidence"] = ocr_lines[source["line"]]
+        for value in node.values():
+            if isinstance(value, (dict, list)):
+                _mark_ocr_sources(value, ocr_lines)
+    elif isinstance(node, list):
+        for item in node:
+            _mark_ocr_sources(item, ocr_lines)
 
 
 def supported_languages() -> List[dict]:

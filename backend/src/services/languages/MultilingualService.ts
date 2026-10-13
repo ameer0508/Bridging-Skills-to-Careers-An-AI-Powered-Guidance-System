@@ -29,6 +29,8 @@ type AnalysisPayload = {
   layout: Record<string, unknown>;
   textQuality: 'ok' | 'degraded';
   textRecovery?: { glyphsRecovered: number; glyphsUnrecovered: number };
+  textSource?: 'text_layer' | 'ocr' | 'mixed';
+  ocr?: Record<string, unknown> | null;
   warnings: string[];
   sections: Array<Record<string, unknown>>;
   fields: Record<string, unknown>;
@@ -37,6 +39,13 @@ type AnalysisPayload = {
 };
 
 const displayName = displayFileName;
+
+/** Only the known OCR metadata fields are stored (codes and numbers, no text). */
+function ocrSummary(ocr: Record<string, unknown> | null | undefined) {
+  if (!ocr || typeof ocr !== 'object') return null;
+  const keep = ['used', 'reason', 'engine', 'languages', 'pagesRequested', 'pagesRead', 'pagesSkipped', 'failures', 'meanConfidence', 'seconds', 'rejected'];
+  return Object.fromEntries(keep.filter(k => k in ocr).map(k => [k, ocr[k]]));
+}
 
 function view(doc: IResumeLanguageAnalysis, withLines = true) {
   return {
@@ -49,6 +58,8 @@ function view(doc: IResumeLanguageAnalysis, withLines = true) {
     layout: doc.layout,
     textQuality: doc.textQuality,
     textRecovery: doc.textRecovery ?? null,
+    textSource: doc.textSource ?? 'text_layer',
+    ocr: doc.ocr ?? null,
     warnings: doc.warnings,
     sections: doc.sections,
     fields: doc.fields,
@@ -87,6 +98,8 @@ class MultilingualService {
       layout: data.layout,
       textQuality: data.textQuality,
       ...(data.textRecovery ? { textRecovery: { glyphsRecovered: Number(data.textRecovery.glyphsRecovered) || 0, glyphsUnrecovered: Number(data.textRecovery.glyphsUnrecovered) || 0 } } : {}),
+      textSource: ['text_layer', 'ocr', 'mixed'].includes(data.textSource as string) ? data.textSource : 'text_layer',
+      ocr: ocrSummary(data.ocr),
       warnings: data.warnings,
       sections: data.sections,
       fields: data.fields,

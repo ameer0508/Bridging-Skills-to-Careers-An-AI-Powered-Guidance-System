@@ -6,6 +6,8 @@ reproducible per-language, per-layout evaluation on the labelled set.
 import io
 
 import pymupdf
+
+from app.multilingual import ocr
 import pytest
 from fastapi.testclient import TestClient
 
@@ -93,30 +95,57 @@ def test_scanned_pdf_is_reported_not_read(tmp_path):
     path = tmp_path / "scan.pdf"
     doc.save(str(path))
     document = read_document(str(path), ".pdf")
-    assert document.scanned_pages == 1 and "no OCR" in document.warnings[0]
+    # A blank image has nothing to read: with OCR it says so, without OCR it says OCR is missing
+    expected = "OCR found no readable text" if ocr.status()["available"] else "OCR is not available"
+    assert document.scanned_pages == 1 and expected in document.warnings[0], document.warnings
     assert extract(document)["status"] == "scanned_unreadable"
 
 
 def test_evaluation_is_reproducible_and_reported_per_language_and_layout():
+    ocr_available = ocr.status()["available"]
     first = evaluate()
     second = evaluate()
     assert first["summary"] == second["summary"], "the evaluation is deterministic"
     summary = first["summary"]
-    layouts = ("pdf_single_column", "pdf_two_column", "pdf_single_column_subset", "pdf_single_column_sans", "docx_table")
+    layouts = ("pdf_single_column", "pdf_two_column", "pdf_single_column_subset", "pdf_single_column_sans", "pdf_scanned", "pdf_scanned_noisy", "docx_table")
     assert set(summary) == {f"{lang}/{layout}" for lang in ("en", "es", "hi") for layout in layouts}
-    accurate = [f"{lang}/{layout}" for lang in ("en", "es") for layout in layouts] + ["hi/docx_table", "hi/pdf_single_column", "hi/pdf_two_column", "hi/pdf_single_column_sans"]
-    for key in accurate:
-        assert summary[key]["language"] == 1.0, f"{key}: language detected"
-        assert summary[key]["degradedTextLayer"] == 0, f"{key}: text layer read cleanly"
+    text_layer = ("pdf_single_column", "pdf_two_column", "pdf_single_column_sans", "docx_table")
+
+    def at_least(key, threshold, skip=()):
         for metric, value in summary[key].items():
-            if metric in ("degradedTextLayer", "documents"):
+            if metric in ("degradedTextLayer", "documents", "readByOcr") or metric in skip:
                 continue
-            assert value >= 0.95, f"{key} {metric} = {value}"
-    # Hindi PDFs whose fonts are subset have lost the tables glyph recovery needs: the damage must
-    # always be detected and reported, never passed off as a clean extraction
-    hi_subset = summary["hi/pdf_single_column_subset"]
-    assert hi_subset["degradedTextLayer"] == hi_subset["documents"]
-    assert hi_subset["experience_recall"] < 0.95, "if this improves, update the documented accuracy"
+            assert value >= threshold, f"{key} {metric} = {value}"
+
+    # Clean text layers: read directly, never by OCR, in all three languages
+    for lang in ("en", "es", "hi"):
+        for layout in text_layer:
+            key = f"{lang}/{layout}"
+            assert summary[key]["degradedTextLayer"] == 0 and summary[key]["readByOcr"] == 0, f"{key}: clean text, no OCR"
+            at_least(key, 0.95)
+    for lang in ("en", "es"):
+        assert summary[f"{lang}/pdf_single_column_subset"]["readByOcr"] == 0, "Latin subset fonts keep their text layer"
+        at_least(f"{lang}/pdf_single_column_subset", 0.95)
+
+    if ocr_available:
+        # Hindi subset fonts: the damaged text layer falls back to OCR and reads correctly
+        assert summary["hi/pdf_single_column_subset"]["readByOcr"] == summary["hi/pdf_single_column_subset"]["documents"]
+        at_least("hi/pdf_single_column_subset", 0.95)
+        # Scans of English and Hindi resumes; the noisy scan loses a little skill recall in Hindi
+        for lang in ("en", "hi"):
+            assert summary[f"{lang}/pdf_scanned"]["readByOcr"] == summary[f"{lang}/pdf_scanned"]["documents"]
+            at_least(f"{lang}/pdf_scanned", 0.95)
+            at_least(f"{lang}/pdf_scanned_noisy", 0.85)
+        # Spanish scans: no Spanish OCR data is installed, so accented headings are misread.
+        # Language, contact details and skills hold; sections and education are measured, not promised.
+        es = summary["es/pdf_scanned"]
+        assert es["language"] == 1.0 and es["email"] == 1.0 and es["phone"] == 1.0 and es["skills_recall"] >= 0.95
+        assert es["education_recall"] < 0.95, "if Spanish scans improve, update the documented accuracy"
+    else:
+        # Without OCR the damage and the scans are reported, never passed off as clean
+        hi_subset = summary["hi/pdf_single_column_subset"]
+        assert hi_subset["degradedTextLayer"] == hi_subset["documents"]
+        assert all(r["status"] == "scanned_unreadable" for r in first["rows"] if r["layout"].startswith("pdf_scanned"))
     rows = {(r["id"], r["layout"]): r for r in first["rows"]}
     assert all(rows[(rid, "pdf_two_column")]["detectedLayout"] == "two_column" for rid in ("en-1", "es-1", "hi-1")), "two-column layout detected"
 

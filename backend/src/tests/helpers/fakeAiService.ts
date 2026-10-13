@@ -221,11 +221,17 @@ export async function startFakeAiService(serviceKey: string, listenPort = 0): Pr
           ? (JSON.parse(raw.toString('utf8') || '{}') as { text?: string }).text || ''
           : extractUploadedText(raw);
         const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        // A scan read by local OCR (X1): every value says it came from OCR, with a confidence
+        if (text.includes('OCRSCAN')) {
+          const ocrLines = ['Sam Candidate', 'sam@example.com', 'Skills', 'Python, SQL'];
+          const src = (line: number) => ({ line, text: ocrLines[line], origin: 'ocr', ocrConfidence: 88.5 });
+          return send(200, { success: true, data: { method: 'multilingual-rules-4', status: 'extracted', language: { language: 'en', name: 'English', supported: true, status: 'detected' }, layout: { type: 'single_column', pages: 1, scannedPages: 1 }, textQuality: 'ok', textSource: 'ocr', ocr: { used: true, reason: 'scanned', engine: 'tesseract 5.4.0', languages: ['eng', 'hin'], pagesRequested: 1, pagesRead: 1, pagesSkipped: 0, failures: [], meanConfidence: 88.5, seconds: 1.2, limits: { maxPages: 5 }, rawText: 'never stored' }, warnings: ['Text on 1 page(s) was read by OCR (Tesseract, languages: eng, hin), mean confidence 88.5%. OCR can misread letters and numbers: check the extracted values before relying on them.'], sections: [{ key: 'skills', heading: 'Skills', headingLanguage: 'en', startLine: 2, endLine: 3 }], fields: { email: { value: 'sam@example.com', source: src(1) }, phone: null, experience: [], education: [], skills: [{ name: 'Python', matched: 'Python', source: src(3) }, { name: 'SQL', matched: 'SQL', source: src(3) }] }, lineCount: ocrLines.length, originalLines: ocrLines, fileType: 'pdf' } });
+        }
         if (text.includes('SCANNED')) {
-          return send(200, { success: true, data: { method: 'multilingual-rules-3', status: 'scanned_unreadable', language: { language: null, supported: false, status: 'too_little_text', message: 'Only 0 words.' }, layout: { type: 'single_column', pages: 1, scannedPages: 1 }, textQuality: 'ok', warnings: ['1 of 1 page(s) look scanned (images without a text layer). SkillBridge has no OCR, so their text cannot be read.'], sections: [], fields: { email: null, phone: null, experience: [], education: [], skills: [] }, lineCount: 0, originalLines: [], fileType: 'pdf' } });
+          return send(200, { success: true, data: { method: 'multilingual-rules-4', status: 'scanned_unreadable', language: { language: null, supported: false, status: 'too_little_text', message: 'Only 0 words.' }, layout: { type: 'single_column', pages: 1, scannedPages: 1 }, textQuality: 'ok', textSource: 'text_layer', ocr: { used: false, reason: 'scanned', failures: ['not_available'], pagesRead: 0 }, warnings: ['1 of 1 page(s) look scanned (images without a text layer) and OCR is not available on this server, so their text cannot be read.'], sections: [], fields: { email: null, phone: null, experience: [], education: [], skills: [] }, lineCount: 0, originalLines: [], fileType: 'pdf' } });
         }
         if (text.includes('Compétences')) {
-          return send(200, { success: true, data: { method: 'multilingual-rules-3', status: 'unsupported', language: { language: 'fr', supported: false, status: 'unsupported_language', message: 'This resume looks like French. Supported: English, Hindi, Spanish.' }, layout: { type: 'plain_text', pages: 1, scannedPages: 0 }, textQuality: 'ok', warnings: ['This resume looks like French. Supported: English, Hindi, Spanish.'], sections: [], fields: { email: null, phone: null, experience: [], education: [], skills: [] }, lineCount: lines.length, originalLines: lines, fileType: 'text' } });
+          return send(200, { success: true, data: { method: 'multilingual-rules-4', status: 'unsupported', language: { language: 'fr', supported: false, status: 'unsupported_language', message: 'This resume looks like French. Supported: English, Hindi, Spanish.' }, layout: { type: 'plain_text', pages: 1, scannedPages: 0 }, textQuality: 'ok', warnings: ['This resume looks like French. Supported: English, Hindi, Spanish.'], sections: [], fields: { email: null, phone: null, experience: [], education: [], skills: [] }, lineCount: lines.length, originalLines: lines, fileType: 'text' } });
         }
         const hindi = /[ऀ-ॿ]/.test(text);
         const emailLine = lines.findIndex(l => /@/.test(l));
@@ -233,7 +239,7 @@ export async function startFakeAiService(serviceKey: string, listenPort = 0): Pr
         return send(200, {
           success: true,
           data: {
-            method: 'multilingual-rules-3',
+            method: 'multilingual-rules-4',
             status: 'extracted',
             language: { language: hindi ? 'hi' : 'en', name: hindi ? 'Hindi' : 'English', supported: true, status: 'detected', mixed: hindi && /[A-Za-z]/.test(text), scripts: {}, words: lines.join(' ').split(/\s+/).length },
             layout: { type: 'plain_text', pages: 1, scannedPages: 0 },

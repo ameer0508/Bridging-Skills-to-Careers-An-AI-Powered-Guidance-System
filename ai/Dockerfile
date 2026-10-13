@@ -5,6 +5,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# Local OCR (X1): Tesseract with only the approved languages (English, Hindi, Telugu, Tamil, Kannada,
+# Malayalam), from the Debian archive. No Spanish data, on the owner's instruction. Free and offline;
+# python -m app.multilingual.ocr_selfcheck verifies it in the Docker workflow.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+       tesseract-ocr tesseract-ocr-eng tesseract-ocr-hin tesseract-ocr-tel tesseract-ocr-tam tesseract-ocr-kan tesseract-ocr-mal \
+    && rm -rf /var/lib/apt/lists/*
+
 # Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

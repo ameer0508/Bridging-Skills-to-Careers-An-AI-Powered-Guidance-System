@@ -58,6 +58,16 @@ export async function runMultilingualTests() {
     assert.deepEqual([r.status, r.body.data.status, r.body.data.language.language], [201, 'unsupported', 'fr'], 'unsupported languages are stored as refused, not guessed');
     r = await upload(alice.token, 'scan.txt', 'SCANNED page');
     assert.equal(r.body.data.status, 'scanned_unreadable');
+    assert.equal(r.body.data.textSource, 'text_layer');
+    // A scan read by OCR (X1): stored with its source and only the known OCR metadata
+    const ocrRead = (await upload(alice.token, 'scan-ocr.txt', 'OCRSCAN page')).body.data;
+    assert.deepEqual([ocrRead.status, ocrRead.textSource, ocrRead.ocr.engine, ocrRead.ocr.meanConfidence], ['extracted', 'ocr', 'tesseract 5.4.0', 88.5]);
+    assert.equal(ocrRead.ocr.rawText, undefined, 'unknown OCR fields are not stored');
+    assert.equal(ocrRead.ocr.limits, undefined);
+    assert.deepEqual([ocrRead.fields.skills[0].source.origin, ocrRead.fields.skills[0].source.ocrConfidence], ['ocr', 88.5], 'each value keeps its OCR provenance');
+    assert.equal((await A('GET', `/languages/resume-analyses/${ocrRead.id}`)).body.data.textSource, 'ocr');
+    assert.equal(await UserSkill.countDocuments({ userId: alice.userId }), 0, 'OCR guesses never become skill evidence');
+    assert.equal((await A('DELETE', `/languages/resume-analyses/${ocrRead.id}`)).status, 200);
 
     for (const [label, call] of [
       ['executable', () => upload(alice.token, 'cv.exe', 'MZ')],

@@ -100,6 +100,17 @@ jobs:
       - name: 5, 7, 8. Connectivity, authentication and the resume-to-career workflow
         run: node e2e/docker-smoke.mjs
 
+      - name: Local OCR works in the AI container with every approved language (X1)
+        run: |
+          docker compose images ai-service
+          docker compose exec -T ai-service tesseract --version | head -1
+          docker compose exec -T ai-service tesseract --list-langs
+          for lang in eng hin tel tam kan mal; do
+            docker compose exec -T ai-service tesseract --list-langs | tr -d '\r' | grep -qx "$lang" || { echo "::error::OCR language $lang missing"; exit 1; }
+          done
+          # A scanned English and a scanned Hindi page are read through the real pipeline
+          docker compose exec -T ai-service python -m app.multilingual.ocr_selfcheck
+
       - name: AI audit log is written to private files and holds no request content (X11)
         run: |
           # One gateway request with a recognisable prompt; no provider keys are set, so nothing leaves the stack
