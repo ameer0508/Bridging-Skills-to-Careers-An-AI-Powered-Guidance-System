@@ -67,6 +67,9 @@ export function classifyMarketSummary(summary: MarketOpportunitySummary | null |
   if (reasons.includes('stale_data')) {
     return unavailable('stale', 'The sourced postings were collected too long ago to describe the market now.', version);
   }
+  if (reasons.includes('too_few_employers') || reasons.includes('one_employer_dominates')) {
+    return unavailable('sparse', 'The matching postings come from too few employers, or mostly from one, to describe this career.', version);
+  }
   const valid =
     summary.evidenceClass === 'sourced_valid' && summary.usableForRecommendations === true && summary.available === true && summary.distinctPostings > 0 && summary.demand !== null && reasons.length === 0;
   if (!valid) {

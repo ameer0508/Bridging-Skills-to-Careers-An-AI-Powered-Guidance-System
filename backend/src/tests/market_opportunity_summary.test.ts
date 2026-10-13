@@ -70,7 +70,7 @@ export async function runMarketOpportunitySummaryTests() {
     assert.equal(sparse.evidenceClass, 'sourced_sparse');
     assert.equal(sparse.distinctPostings, 1, 'only whole-word title matches count ("Data Analysts", "Data Analytics" do not)');
     assert.match(sparse.matchingRule ?? '', /whole words/);
-    assert.deepEqual(sparse.insufficientDataReasons, ['too_few_postings', 'too_few_months_with_postings']);
+    assert.deepEqual(sparse.insufficientDataReasons, ['too_few_postings', 'too_few_months_with_postings', 'too_few_employers']);
     assert.equal(sparse.demand, null);
 
     // Valid sourced history: 40 postings over 4 months, retrieved recently
@@ -100,9 +100,26 @@ export async function runMarketOpportunitySummaryTests() {
     assert.deepEqual(stale.insufficientDataReasons, ['stale_data']);
     assert.equal(stale.usableForRecommendations, false);
 
+    // One employer then adds 60 postings for the same role: it now supplies most of the evidence,
+    // which describes that employer, not the role, so the summary is no longer usable
+    const flood = Array.from({ length: 60 }, (_, i) => ({
+      sourceRecordId: `flood-${i}`,
+      title: 'Data Analyst',
+      company: 'Single Big Employer',
+      location: `Office ${i}`,
+      postedAt: `2026-0${5 + (i % 4)}-${String(1 + (i % 20)).padStart(2, '0')}T00:00:00Z`,
+    }));
+    await MarketIngestionService.importBatch({ sourceId: 'test-summary-source', retrievedAt: '2026-10-05T00:00:00Z', postings: flood }, importer);
+    const dominated = await summary('sourced');
+    assert.equal(dominated.evidenceClass, 'sourced_sparse');
+    assert.deepEqual(dominated.insufficientDataReasons, ['one_employer_dominates']);
+    assert.equal(dominated.usableForRecommendations, false);
+    assert.equal(dominated.demand, null);
+    await MarketPosting.deleteMany({ sourceRecordId: /^flood-/ });
+
     const unmapped = await summary('sourced', NOW, { id: wizard._id.toString(), title: wizard.title });
     assert.deepEqual(unmapped.insufficientDataReasons, ['career_not_mapped_to_postings']);
-    console.log('  ✓ Sourced history: sparse, valid (usable, with demand), stale and unmapped are each reported as such');
+    console.log('  ✓ Sourced history: sparse, valid (usable, with demand), stale and unmapped are each reported as such; one dominant employer makes it unusable');
 
     // HTTP
     const h = await startHttpHarness();

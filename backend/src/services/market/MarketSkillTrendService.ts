@@ -1,4 +1,5 @@
 import { getMarketSource, listMarketSources, MarketDataset } from '../../config/marketSources.js';
+import { employerDiversity, groupByEmployerStage, type EmployerDiversityReason } from './employerDiversity.js';
 import MarketPosting from '../../models/MarketPosting.js';
 import { monthRange } from './MarketHistoryService.js';
 
@@ -32,7 +33,8 @@ export type TrendReason =
   | 'no_records'
   | 'too_few_months_with_postings'
   | 'too_few_postings_per_half'
-  | 'too_few_skill_mentions';
+  | 'too_few_skill_mentions'
+  | EmployerDiversityReason;
 
 export type Granularity = 'month' | 'quarter';
 
@@ -116,7 +118,7 @@ class MarketSkillTrendService {
     const dated = { ...base, postedAt: { $gte: start, $lt: end } };
     const monthExpr = { $dateToString: { format: '%Y-%m', date: '$postedAt' } };
 
-    const [postingsByMonth, mentionsByMonth, undatedExcluded, withoutSkills, bySource] = await Promise.all([
+    const [postingsByMonth, mentionsByMonth, undatedExcluded, withoutSkills, bySource, byEmployer] = await Promise.all([
       MarketPosting.aggregate<{ _id: string; postings: number }>([
         { $match: dated },
         { $group: { _id: monthExpr, postings: { $sum: 1 } } },
@@ -134,7 +136,9 @@ class MarketSkillTrendService {
         { $match: dated },
         { $group: { _id: '$sourceId', postings: { $sum: 1 } } },
       ]),
+      MarketPosting.aggregate<{ _id: string; postings: number }>([{ $match: dated }, groupByEmployerStage]),
     ]);
+    const employers = employerDiversity(new Map(byEmployer.map(e => [e._id, e.postings])));
 
     const postingsIn = new Map(postingsByMonth.map(p => [p._id, p.postings]));
     const sumPostings = (ms: string[]) => ms.reduce((s, m) => s + (postingsIn.get(m) ?? 0), 0);
@@ -163,6 +167,7 @@ class MarketSkillTrendService {
       if (sumPostings(earlierMonths) < TREND_MINIMUMS.postingsPerHalf || sumPostings(recentMonths) < TREND_MINIMUMS.postingsPerHalf) {
         reasons.push('too_few_postings_per_half');
       }
+      reasons.push(...employers.reasons);
     }
 
     const ranked = query.skills?.length

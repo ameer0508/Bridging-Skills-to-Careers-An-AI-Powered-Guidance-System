@@ -119,7 +119,7 @@ export async function runMarketSalaryTests() {
   try {
     const postings: Record<string, unknown>[] = [];
     const add = (id: string, extra: Record<string, unknown>) =>
-      postings.push({ sourceRecordId: id, title: `Python Developer ${id}`, company: 'Example Ltd', location: 'Pune', country: 'IN', postedAt: '2026-08-10T00:00:00Z', ...extra });
+      postings.push({ sourceRecordId: id, title: `Python Developer ${id}`, company: `Example Employer ${id}`, location: 'Pune', country: 'IN', postedAt: '2026-08-10T00:00:00Z', ...extra });
     // Ten yearly INR ranges: minimums 10k..100k, maximums twice that
     for (let i = 1; i <= 10; i++) add(`y${i}`, { salary: { min: i * 10000, max: i * 20000, currency: 'INR', period: 'year' } });
     // Monthly INR pay is another market, even in the same country and currency
@@ -169,7 +169,8 @@ export async function runMarketSalaryTests() {
     const monthly = real.groups[1];
     assert.equal(monthly.sufficient, false);
     assert.deepEqual([monthly.completeRanges.midpoint, monthly.completeRanges.lower], [null, null], 'three ranges give no median');
-    assert.deepEqual(monthly.reasons, ['too_few_complete_ranges']);
+    assert.deepEqual(monthly.reasons, ['too_few_complete_ranges', 'too_few_employers']);
+    assert.deepEqual(yearly.employers, { distinct: 12, largestShare: 0.083, sufficient: true });
     console.log('  ✓ Sourced: exact medians, periods and currencies never mixed, one-bound kept apart, 4 exclusions counted, provenance kept');
 
     // Filters
@@ -178,7 +179,7 @@ export async function runMarketSalaryTests() {
     assert.deepEqual(usd.groups.map(g => g.key), ['US|USD|YEAR']);
     assert.equal(usd.totals.outsideCurrencyOrPeriodFilter, 15);
     assert.equal(usd.status, 'insufficient_data', 'two US postings give no median');
-    assert.deepEqual(usd.reasons, ['too_few_complete_ranges']);
+    assert.deepEqual(usd.reasons, ['too_few_complete_ranges', 'too_few_employers']);
     assert.deepEqual(usd.available.currencies, ['INR', 'USD'], 'filter menus list what exists before filtering');
     assert.deepEqual((await MarketSalaryService.insights({ dataset: 'sourced', period: 'MONTH', ...PERIOD })).groups.map(g => g.key), ['IN|INR|MONTH']);
     assert.deepEqual((await MarketSalaryService.insights({ dataset: 'sourced', country: 'US', ...PERIOD })).groups.map(g => g.key), ['US|USD|YEAR']);
@@ -194,6 +195,23 @@ export async function runMarketSalaryTests() {
     const demoAfter = await MarketSalaryService.insights({ dataset: 'synthetic_fixture', ...PERIOD });
     assert.equal(demoAfter.totals.postingsConsidered, demo.totals.postingsConsidered);
     console.log('  ✓ Sourced and synthetic salaries never mix');
+
+    // Employer concentration: 12 complete ranges, all from one employer (plus one from another),
+    // are counted but give no figure at all
+    const solo: Record<string, unknown>[] = [];
+    for (let i = 1; i <= 12; i++) solo.push({ sourceRecordId: `solo-${i}`, title: `Analyst ${i}`, company: 'Solo Holdings', location: 'London', country: 'GB', postedAt: '2026-08-11T00:00:00Z', salary: { min: 30000 + i * 1000, max: 40000 + i * 1000, currency: 'GBP', period: 'YEAR' } });
+    solo.push({ sourceRecordId: 'solo-other', title: 'Analyst X', company: 'Other Co', location: 'Leeds', country: 'GB', postedAt: '2026-08-11T00:00:00Z', salary: { min: 30000, max: 40000, currency: 'GBP', period: 'YEAR' } });
+    await MarketIngestionService.importBatch({ sourceId: 'test-salary-source', retrievedAt: RETRIEVED, postings: solo }, importer);
+    const concentrated = (await MarketSalaryService.insights({ dataset: 'sourced', country: 'GB', ...PERIOD })).groups[0];
+    assert.equal(concentrated.completeRanges.count, 13, 'every range is still counted');
+    assert.deepEqual(
+      [concentrated.sufficient, concentrated.completeRanges.midpoint, concentrated.completeRanges.lower, concentrated.minimumOnly.medianMinimum],
+      [false, null, null, null],
+      'no figure from one employer'
+    );
+    assert.deepEqual(concentrated.reasons, ['too_few_employers', 'one_employer_dominates']);
+    assert.deepEqual(concentrated.employers, { distinct: 2, largestShare: 0.923, sufficient: false });
+    console.log('  ✓ Employer concentration: 13 ranges, 12 from one employer, give counts but no salary figure');
 
     // === HTTP ===================================================================================
     const h = await startHttpHarness();

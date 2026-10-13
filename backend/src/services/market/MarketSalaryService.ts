@@ -1,4 +1,5 @@
 import { getMarketSource, listMarketSources, MarketDataset } from '../../config/marketSources.js';
+import { countEmployers, employerDiversity, type EmployerDiversityReason } from './employerDiversity.js';
 import MarketPosting, { SalaryPeriod } from '../../models/MarketPosting.js';
 
 /**
@@ -36,7 +37,8 @@ export type SalaryReason =
   | 'no_registered_source'
   | 'no_records'
   | 'no_salary_records'
-  | 'too_few_complete_ranges';
+  | 'too_few_complete_ranges'
+  | EmployerDiversityReason;
 
 export type ExclusionReason = 'no_salary_stated' | 'country_not_stated' | 'implausible_range' | 'invalid_amount';
 
@@ -83,6 +85,8 @@ export interface SalaryGroup {
   maximumOnly: { count: number; medianMaximum: number | null };
   sufficient: boolean;
   reasons: SalaryReason[];
+  /** Employers behind the group: no figure is given when they are too few or one dominates. */
+  employers: { distinct: number; largestShare: number | null; sufficient: boolean };
   remotePostings: number;
   sources: Array<{ id: string; name: string; licence: string; url: string; attribution: string; postings: number }>;
   collection: { firstRetrievedAt: string; latestRetrievedAt: string };
@@ -169,6 +173,7 @@ const PERIOD_ORDER: SalaryPeriod[] = ['YEAR', 'MONTH', 'WEEK', 'DAY', 'HOUR'];
 
 interface ScannedPosting {
   sourceId: string;
+  company: string;
   country: string;
   remote: boolean | null;
   postedAt: Date;
@@ -228,7 +233,7 @@ class MarketSalaryService {
 
     const [scanned, undatedExcluded] = await Promise.all([
       MarketPosting.find(dated)
-        .select('sourceId country remote postedAt firstSeenAt lastSeenAt salary')
+        .select('sourceId company country remote postedAt firstSeenAt lastSeenAt salary')
         .sort({ postedAt: 1, _id: 1 })
         .limit(MAX_POSTINGS_SCANNED + 1)
         .lean<ScannedPosting[]>(),
@@ -281,7 +286,10 @@ class MarketSalaryService {
 
     if (postings.length === 0) result.reasons = ['no_records'];
     else if (result.groups.length === 0) result.reasons = ['no_salary_records'];
-    else if (!result.groups.some(g => g.sufficient)) result.reasons = ['too_few_complete_ranges'];
+    else if (!result.groups.some(g => g.sufficient)) {
+      const best = result.groups[0];
+      result.reasons = best.reasons.length > 0 ? best.reasons : ['too_few_complete_ranges'];
+    }
     result.status = result.reasons.length === 0 ? 'available' : 'insufficient_data';
     return result;
   }
@@ -293,8 +301,10 @@ class MarketSalaryService {
     const maxOnly = members.filter(m => m.shape === 'maximum_only').map(m => m.salary!.max!);
     const round = (v: number) => roundAmount(v, period);
 
-    const enoughForMedian = complete.length >= SALARY_MINIMUMS.forMedian;
-    const enoughForDistribution = complete.length >= SALARY_MINIMUMS.forDistribution;
+    // A figure drawn mostly from one employer describes that employer, not the market
+    const employers = employerDiversity(countEmployers(members.map(m => m.company)));
+    const enoughForMedian = complete.length >= SALARY_MINIMUMS.forMedian && employers.sufficient;
+    const enoughForDistribution = complete.length >= SALARY_MINIMUMS.forDistribution && employers.sufficient;
     const midpoints = complete.map(m => (m.salary!.min! + m.salary!.max!) / 2).sort((a, b) => a - b);
 
     const bySource = new Map<string, number>();
@@ -321,14 +331,15 @@ class MarketSalaryService {
       },
       minimumOnly: {
         count: minOnly.length,
-        medianMinimum: minOnly.length >= SALARY_MINIMUMS.forOneBoundMedian ? round(median(minOnly)) : null,
+        medianMinimum: minOnly.length >= SALARY_MINIMUMS.forOneBoundMedian && employers.sufficient ? round(median(minOnly)) : null,
       },
       maximumOnly: {
         count: maxOnly.length,
-        medianMaximum: maxOnly.length >= SALARY_MINIMUMS.forOneBoundMedian ? round(median(maxOnly)) : null,
+        medianMaximum: maxOnly.length >= SALARY_MINIMUMS.forOneBoundMedian && employers.sufficient ? round(median(maxOnly)) : null,
       },
       sufficient: enoughForMedian,
-      reasons: enoughForMedian ? [] : ['too_few_complete_ranges'],
+      reasons: [...(complete.length >= SALARY_MINIMUMS.forMedian ? [] : (['too_few_complete_ranges'] as SalaryReason[])), ...employers.reasons],
+      employers: { distinct: employers.distinctEmployers, largestShare: employers.largestEmployerShare, sufficient: employers.sufficient },
       remotePostings: members.filter(m => m.remote === true).length,
       sources: [...bySource.entries()]
         .map(([id, count]) => {

@@ -142,7 +142,8 @@ export async function runMarketIntelligenceTests() {
     );
     const sourced = await MarketHistoryService.history({ dataset: 'sourced', ...PERIOD });
     assert.equal(sourced.totals.distinctPostings, 4);
-    assert.deepEqual(sourced.sufficiency.reasons, ['too_few_postings', 'too_few_months_with_postings']);
+    assert.deepEqual(sourced.sufficiency.reasons, ['too_few_postings', 'too_few_months_with_postings', 'too_few_employers'], 'unnamed employers never count as employers');
+    assert.deepEqual([sourced.totals.distinctEmployers, sourced.totals.largestEmployerShare], [0, null]);
     assert.equal(sourced.sources[0].licence, 'CC BY 4.0 (test)');
     assert.ok(sourced.caveats.some(c => /single source/.test(c)));
     assert.equal((await MarketHistoryService.history({ dataset: 'sourced', country: 'IN', ...PERIOD })).totals.distinctPostings, 4, 'country codes are stored upper case');

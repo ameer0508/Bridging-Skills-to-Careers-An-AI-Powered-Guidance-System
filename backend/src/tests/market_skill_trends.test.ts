@@ -102,7 +102,7 @@ export async function runMarketSkillTrendTests() {
     assert.equal(pg?.mentions, 2, 'two aliases in one posting count once');
     assert.equal(pg?.share, 2 / 3, 'the posting without any known skill stays in the denominator');
     assert.equal(sparse.totals.postingsWithoutRecognisedSkills, 1);
-    assert.deepEqual(pg?.change.reasons, ['too_few_months_with_postings', 'too_few_postings_per_half', 'too_few_skill_mentions']);
+    assert.deepEqual(pg?.change.reasons, ['too_few_months_with_postings', 'too_few_postings_per_half', 'too_few_employers', 'too_few_skill_mentions']);
     const rust = sparse.skills.find(s => s.skill === 'Rust');
     assert.deepEqual([rust?.mentions, rust?.share], [0, 0], 'zero observations are a measured zero, not missing');
     assert.equal(sparse.sources[0].licence, 'CC BY 4.0 (test)');

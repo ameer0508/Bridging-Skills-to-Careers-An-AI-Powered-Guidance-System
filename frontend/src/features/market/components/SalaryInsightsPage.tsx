@@ -255,7 +255,8 @@ const GroupCard: React.FC<{ group: SalaryGroup; minimums: SalaryInsights['minimu
       <CardHeader>
         <h2 className="text-base font-bold font-display text-[var(--color-text-primary)]" data-testid="salary-group-title">{groupTitle(g)}</h2>
         <p className="text-xs text-[var(--color-text-secondary)]">
-          {g.postings} posting{g.postings === 1 ? '' : 's'} with a salary · {g.remotePostings} remote · published {formatDate(g.postedBetween.earliest)} to {formatDate(g.postedBetween.latest)}
+          {g.postings} posting{g.postings === 1 ? '' : 's'} with a salary from {g.employers.distinct} employer{g.employers.distinct === 1 ? '' : 's'}
+          {!g.employers.sufficient && <span data-testid="salary-employer-limit"> (too few employers, or one dominates: no figure given)</span>} · {g.remotePostings} remote · published {formatDate(g.postedBetween.earliest)} to {formatDate(g.postedBetween.latest)}
         </p>
       </CardHeader>
       <CardBody>

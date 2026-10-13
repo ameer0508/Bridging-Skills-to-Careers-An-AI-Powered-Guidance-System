@@ -3,18 +3,26 @@ import apiClient from '../../lib/axios';
 /** Mirrors backend/src/services/market/MarketHistoryService.ts. */
 export type MarketDataset = 'sourced' | 'synthetic_fixture';
 
+/** Mirrors backend/src/services/market/employerDiversity.ts. */
+export type EmployerDiversityReason = 'too_few_employers' | 'one_employer_dominates';
+export const EMPLOYER_REASON_TEXT: Record<EmployerDiversityReason, string> = {
+  too_few_employers: 'The postings come from fewer than 5 employers, so they describe those employers, not the market.',
+  one_employer_dominates: 'One employer supplies more than half of the postings, so no figure is given.',
+};
+
 export type InsufficiencyReason =
   | 'no_registered_source'
   | 'no_records'
   | 'too_few_postings'
-  | 'too_few_months_with_postings';
+  | 'too_few_months_with_postings'
+  | EmployerDiversityReason;
 
 export interface MarketHistory {
   dataset: MarketDataset;
   isSynthetic: boolean;
   query: { dataset: MarketDataset; skill?: string; country?: string; from: string; to: string };
   buckets: Array<{ month: string; postings: number; sources: string[] }>;
-  totals: { distinctPostings: number; monthsWithPostings: number; undatedExcluded: number };
+  totals: { distinctPostings: number; monthsWithPostings: number; undatedExcluded: number; distinctEmployers: number; largestEmployerShare: number | null };
   sources: Array<{ id: string; name: string; url: string; licence: string; attribution: string; postings: number }>;
   freshness: { latestPostedAt: string | null; latestRetrievedAt: string | null };
   sufficiency: {
@@ -51,6 +59,8 @@ export const REASON_TEXT: Record<InsufficiencyReason, (h: MarketHistory) => stri
     `Only ${h.totals.distinctPostings} distinct posting${h.totals.distinctPostings === 1 ? '' : 's'} match; at least ${h.sufficiency.minimums.distinctPostings} are needed before a trend can be read.`,
   too_few_months_with_postings: h =>
     `Postings fall in ${h.totals.monthsWithPostings} month${h.totals.monthsWithPostings === 1 ? '' : 's'}; at least ${h.sufficiency.minimums.monthsWithPostings} are needed.`,
+  too_few_employers: () => EMPLOYER_REASON_TEXT.too_few_employers,
+  one_employer_dominates: () => EMPLOYER_REASON_TEXT.one_employer_dominates,
 };
 
 /** Mirrors backend/src/services/market/MarketSkillTrendService.ts. */
@@ -59,7 +69,8 @@ export type TrendReason =
   | 'no_records'
   | 'too_few_months_with_postings'
   | 'too_few_postings_per_half'
-  | 'too_few_skill_mentions';
+  | 'too_few_skill_mentions'
+  | EmployerDiversityReason;
 
 export interface WindowShare {
   months: string[];
@@ -111,6 +122,8 @@ export const TREND_REASON_TEXT: Record<TrendReason, (t: SkillTrends) => string> 
     `Postings fall in ${t.totals.monthsWithPostings} month${t.totals.monthsWithPostings === 1 ? '' : 's'}; at least ${t.minimums.monthsWithPostings} are needed to compare halves of the period.`,
   too_few_postings_per_half: t => `Each half of the period needs at least ${t.minimums.postingsPerHalf} dated postings.`,
   too_few_skill_mentions: t => `Fewer than ${t.minimums.skillMentions} postings mention it.`,
+  too_few_employers: () => EMPLOYER_REASON_TEXT.too_few_employers,
+  one_employer_dominates: () => EMPLOYER_REASON_TEXT.one_employer_dominates,
 };
 
 /**
@@ -151,7 +164,7 @@ export async function fetchMarketOpportunitySummary(
 
 /** C3 salary insights. Mirrors backend/src/services/market/MarketSalaryService.ts. */
 export type SalaryPeriod = 'HOUR' | 'DAY' | 'WEEK' | 'MONTH' | 'YEAR';
-export type SalaryReason = 'no_registered_source' | 'no_records' | 'no_salary_records' | 'too_few_complete_ranges';
+export type SalaryReason = 'no_registered_source' | 'no_records' | 'no_salary_records' | 'too_few_complete_ranges' | EmployerDiversityReason;
 export type SalaryExclusion = 'no_salary_stated' | 'country_not_stated' | 'implausible_range' | 'invalid_amount';
 
 export interface SalaryGroup {
@@ -172,6 +185,7 @@ export interface SalaryGroup {
   maximumOnly: { count: number; medianMaximum: number | null };
   sufficient: boolean;
   reasons: SalaryReason[];
+  employers: { distinct: number; largestShare: number | null; sufficient: boolean };
   remotePostings: number;
   sources: Array<{ id: string; name: string; licence: string; url: string; attribution: string; postings: number }>;
   collection: { firstRetrievedAt: string; latestRetrievedAt: string };
@@ -226,6 +240,8 @@ export const SALARY_REASON_TEXT: Record<SalaryReason, (s: SalaryInsights) => str
   no_salary_records: () => 'Postings match, but none states a usable salary.',
   too_few_complete_ranges: s =>
     `No group has the ${s.minimums.forMedian} complete salary ranges needed before a median is given. Counts are shown instead.`,
+  too_few_employers: () => EMPLOYER_REASON_TEXT.too_few_employers,
+  one_employer_dominates: () => EMPLOYER_REASON_TEXT.one_employer_dominates,
 };
 
 export const EXCLUSION_TEXT: Record<SalaryExclusion, string> = {

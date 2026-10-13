@@ -1,5 +1,6 @@
 import { getMarketSource, listMarketSources, MarketDataset } from '../../config/marketSources.js';
 import MarketPosting from '../../models/MarketPosting.js';
+import { employerDiversity, groupByEmployerStage } from './employerDiversity.js';
 import { escapeRegExp } from '../../utils/skillLexicon.js';
 import { HISTORY_MINIMUMS, monthRange } from './MarketHistoryService.js';
 import {
@@ -50,7 +51,7 @@ class MarketOpportunityService {
     };
     if (country) match.country = country;
 
-    const [byMonth, bySource, totals] = await Promise.all([
+    const [byMonth, bySource, totals, byEmployer] = await Promise.all([
       MarketPosting.aggregate<{ _id: string; postings: number }>([
         { $match: match },
         { $group: { _id: { $dateToString: { format: '%Y-%m', date: '$postedAt' } }, postings: { $sum: 1 } } },
@@ -70,7 +71,9 @@ class MarketOpportunityService {
           },
         },
       ]),
+      MarketPosting.aggregate<{ _id: string; postings: number }>([{ $match: match }, groupByEmployerStage]),
     ]);
+    const employers = employerDiversity(new Map(byEmployer.map(e => [e._id, e.postings])));
 
     const counts = new Map(byMonth.map(m => [m._id, m.postings]));
     const monthly = monthRange(query.from, query.to).map(month => ({ month, postings: counts.get(month) ?? 0 }));
@@ -86,6 +89,7 @@ class MarketOpportunityService {
       if (distinctPostings < HISTORY_MINIMUMS.distinctPostings) reasons.push('too_few_postings');
       if (monthsWithPostings < HISTORY_MINIMUMS.monthsWithPostings) reasons.push('too_few_months_with_postings');
       if (ageDays !== null && ageDays > STALE_AFTER_DAYS) reasons.push('stale_data');
+      reasons.push(...employers.reasons);
     }
 
     const evidenceClass =

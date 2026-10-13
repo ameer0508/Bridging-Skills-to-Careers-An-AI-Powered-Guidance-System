@@ -1,5 +1,6 @@
 import { getMarketSource, listMarketSources, MarketDataset } from '../../config/marketSources.js';
 import MarketPosting from '../../models/MarketPosting.js';
+import { EMPLOYER_MINIMUMS, employerDiversity, groupByEmployerStage, type EmployerDiversityReason } from './employerDiversity.js';
 
 /**
  * Dated posting history (C1). Every figure is a count of distinct postings actually held from a
@@ -18,7 +19,8 @@ export type InsufficiencyReason =
   | 'no_registered_source'
   | 'no_records'
   | 'too_few_postings'
-  | 'too_few_months_with_postings';
+  | 'too_few_months_with_postings'
+  | EmployerDiversityReason;
 
 export interface HistoryQuery {
   dataset: MarketDataset;
@@ -57,6 +59,9 @@ export interface MarketHistory {
     monthsWithPostings: number;
     /** Postings matching the filters whose publication date is unknown; not in any bucket. */
     undatedExcluded: number;
+    /** Distinct named employers behind the dated postings, and the largest one's share. */
+    distinctEmployers: number;
+    largestEmployerShare: number | null;
   };
   sources: HistorySource[];
   freshness: { latestPostedAt: string | null; latestRetrievedAt: string | null };
@@ -64,6 +69,7 @@ export interface MarketHistory {
     sufficient: boolean;
     reasons: InsufficiencyReason[];
     minimums: typeof HISTORY_MINIMUMS;
+    employerMinimums: typeof EMPLOYER_MINIMUMS;
   };
   caveats: string[];
 }
@@ -94,7 +100,7 @@ class MarketHistoryService {
 
     const dated = { ...base, postedAt: { $gte: monthStart(query.from), $lt: nextMonthStart(query.to) } };
 
-    const [grouped, bySource, undatedExcluded, latest] = await Promise.all([
+    const [grouped, bySource, undatedExcluded, latest, byEmployer] = await Promise.all([
       MarketPosting.aggregate<{ _id: string; postings: number; sources: string[] }>([
         { $match: dated },
         {
@@ -114,7 +120,9 @@ class MarketHistoryService {
         { $match: dated },
         { $group: { _id: null, latestPostedAt: { $max: '$postedAt' }, latestRetrievedAt: { $max: '$lastSeenAt' } } },
       ]),
+      MarketPosting.aggregate<{ _id: string; postings: number }>([{ $match: dated }, groupByEmployerStage]),
     ]);
+    const employers = employerDiversity(new Map(byEmployer.map(e => [e._id, e.postings])));
 
     const byMonth = new Map(grouped.map(g => [g._id, g]));
     const buckets = months.map(month => ({
@@ -131,6 +139,7 @@ class MarketHistoryService {
     else {
       if (distinctPostings < HISTORY_MINIMUMS.distinctPostings) reasons.push('too_few_postings');
       if (monthsWithPostings < HISTORY_MINIMUMS.monthsWithPostings) reasons.push('too_few_months_with_postings');
+      reasons.push(...employers.reasons);
     }
 
     const sources = bySource
@@ -159,13 +168,13 @@ class MarketHistoryService {
       isSynthetic: query.dataset === 'synthetic_fixture',
       query,
       buckets,
-      totals: { distinctPostings, monthsWithPostings, undatedExcluded },
+      totals: { distinctPostings, monthsWithPostings, undatedExcluded, distinctEmployers: employers.distinctEmployers, largestEmployerShare: employers.largestEmployerShare },
       sources,
       freshness: {
         latestPostedAt: latest[0]?.latestPostedAt ? new Date(latest[0].latestPostedAt).toISOString() : null,
         latestRetrievedAt: latest[0]?.latestRetrievedAt ? new Date(latest[0].latestRetrievedAt).toISOString() : null,
       },
-      sufficiency: { sufficient: reasons.length === 0, reasons, minimums: HISTORY_MINIMUMS },
+      sufficiency: { sufficient: reasons.length === 0, reasons, minimums: HISTORY_MINIMUMS, employerMinimums: EMPLOYER_MINIMUMS },
       caveats,
     };
   }
