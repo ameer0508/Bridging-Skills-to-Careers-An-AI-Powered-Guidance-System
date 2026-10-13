@@ -30,6 +30,18 @@ export interface ComparedCareer {
   };
   sharedWithOthers: string[];
   market: CareerMarketEvidence;
+  liveListings: CareerLiveListings;
+}
+
+/** Live listings republished from OnJob.io's jobs feed (A1). Listings with links, never a count. */
+export interface CareerLiveListings {
+  state: 'listings' | 'none' | 'off' | 'unavailable';
+  detail: string;
+  listings: Array<{ title: string; employer: string; location: string; postedAt: string | null; ageDays: number | null; url: string }>;
+  source: { name: string; url: string; terms: string; licence: string };
+  scope: string;
+  matchingRule: string | null;
+  retrievedAt: string | null;
 }
 
 export interface CareerMarketEvidence {
@@ -54,6 +66,7 @@ export interface CompareResult {
   careers: ComparedCareer[];
   effortNote: string;
   marketData: { available: boolean; careersWithEvidence: number; reason: string; note: string };
+  liveListings: { scope: string; note: string };
 }
 
 export type ScenarioChangeType = 'add_skill' | 'add_project' | 'add_certification' | 'add_experience' | 'remove_skill';

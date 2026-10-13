@@ -190,6 +190,37 @@
         "Do not use the Remote OK logo."
       ]
     },
+    "onjob_feed": {
+      "display_name": "OnJob.io public jobs feed (republishing live listings only)",
+      "kind": "external",
+      "status": "CONDITIONAL",
+      "free_access_verified": true,
+      "verified_on": "2026-10-13",
+      "sources": [
+        "https://onjob.io/for-job-boards/",
+        "https://onjob.io/terms/",
+        "https://onjob.io/feeds/jobs.json"
+      ],
+      "credential_env": [],
+      "enable_env": "SKILLBRIDGE_ENABLE_ONJOB",
+      "attestation_env": [
+        "SKILLBRIDGE_ONJOB_FEED_TERMS_ACCEPTED"
+      ],
+      "allows_personal_data": false,
+      "billing_risk": "none: no key, no account and no fee ('no API key, no quota, no commercial fee').",
+      "rate_limits": {
+        "published": "none; the feed asks for a daily re-crawl",
+        "self_imposed": {
+          "per_day": 8,
+          "refresh_hours": 6
+        }
+      },
+      "conditions": [
+        "Use is limited to what the feed licence grants: crawl, cache and republish live listings, each linking to its OnJob.io url to apply.",
+        "No history after a listing closes, no vacancy counts, salary statistics, skill mining or forecasting from the feed: those need OnJob's written permission (docs/MARKET_DATA_SOURCES.md).",
+        "The general terms forbid automated access without written permission; the feed page is OnJob's published permission for the feed URLs only. No other OnJob page is fetched automatically."
+      ]
+    },
     "jsearch": {
       "display_name": "JSearch on RapidAPI / OpenWeb Ninja",
       "kind": "external",

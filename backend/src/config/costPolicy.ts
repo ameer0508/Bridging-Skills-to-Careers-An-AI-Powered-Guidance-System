@@ -29,6 +29,13 @@ export const BACKEND_PROVIDERS: Record<string, ProviderEntry> = {
     credentialEnv: ['RAPIDAPI_KEY', 'JSEARCH_API_KEY'],
     enableEnv: 'SKILLBRIDGE_ENABLE_JSEARCH',
   },
+  // Live listings only, republished with a link back (docs/MARKET_DATA_SOURCES.md). No key exists.
+  onjob_feed: {
+    status: 'CONDITIONAL',
+    credentialEnv: [],
+    enableEnv: 'SKILLBRIDGE_ENABLE_ONJOB',
+    attestationEnv: ['SKILLBRIDGE_ONJOB_FEED_TERMS_ACCEPTED'],
+  },
 };
 
 export interface CostDecision {

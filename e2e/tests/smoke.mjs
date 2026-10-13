@@ -247,6 +247,10 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       expect(/No licensed job-market source is connected/.test(await cells.first().innerText()) && !/\d+ postings/.test(await market.innerText()), 'a posting count is shown although no sourced data exists');
       expect(/separate from your match and readiness/.test(await page.getByTestId('compare-market-note').innerText()), 'the note does not keep opportunities apart from readiness');
       expect((await market.getAttribute('data-available')) === 'false' && /Market data unavailable/.test(await market.innerText()), 'the opportunities row does not say that market data is unavailable');
+      // OnJob.io live listings are off by default: said so, and no request is made (A1)
+      const live = page.getByTestId('compare-live-cell');
+      expect((await live.count()) === 2 && (await live.first().getAttribute('data-state')) === 'off' && /not enabled the OnJob.io feed/.test(await live.first().innerText()), 'live listings are not reported as off');
+      expect(/not the Indian job market/.test(await page.getByTestId('compare-live-note').innerText()), 'the live listings note does not state its scope');
       return `Frontend Engineer ${shown}`;
     });
     await t.step('Career Lab: counterfactuals and a what-if scenario that changes nothing real', async () => {

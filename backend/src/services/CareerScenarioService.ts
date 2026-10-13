@@ -11,6 +11,7 @@ import { skillKeys } from '../utils/skillMatching.js';
 import { SCORING_VERSION, taxonomyVersion } from '../utils/versions.js';
 import { AppError } from '../middlewares/errorHandler.js';
 import { marketEvidenceForCareers } from './CareerMarketEvidence.js';
+import OnJobLiveListings, { LIVE_LISTINGS_SCOPE } from './market/OnJobLiveListings.js';
 import { creditedProjectKeys, projectKey } from '../utils/projectIdentity.js';
 
 /**
@@ -350,8 +351,11 @@ class CareerScenarioService {
     // Opportunities: market evidence per career, read through the market module's contract. It is
     // shown beside the scores and never enters them. Where no valid sourced evidence exists the
     // career is reported as unavailable, never as zero openings.
-    const market = await marketEvidenceForCareers(rows.map(r => ({ id: r.careerId, title: r.careerTitle })));
-    const withMarket = rows.map(r => ({ ...r, market: market.get(r.careerId)! }));
+    const compared = rows.map(r => ({ id: r.careerId, title: r.careerTitle }));
+    // Live listings are republished from OnJob.io's feed with links to apply; they are listings,
+    // not a count or a demand figure, and never enter any score.
+    const [market, live] = await Promise.all([marketEvidenceForCareers(compared), OnJobLiveListings.forCareers(compared)]);
+    const withMarket = rows.map(r => ({ ...r, market: market.get(r.careerId)!, liveListings: live.get(r.careerId)! }));
     const usable = withMarket.filter(r => r.market.usable).length;
 
     return {
@@ -368,6 +372,10 @@ class CareerScenarioService {
               ? 'Posting counts are shown only for careers with enough recent sourced postings; the others are unavailable, not zero.'
               : 'Market data unavailable: no valid, recent, sourced job-market records exist for these careers.',
         note: 'Opportunities describe job postings. They are separate from your match and readiness, which describe your evidence, and do not change them.'
+      },
+      liveListings: {
+        scope: LIVE_LISTINGS_SCOPE,
+        note: 'Listings are republished from OnJob.io under its jobs-feed licence; each opens on OnJob.io to apply. They are not compared as numbers and do not change any score.'
       },
       scoringVersion: SCORING_VERSION,
       taxonomyVersion: taxonomyVersion()

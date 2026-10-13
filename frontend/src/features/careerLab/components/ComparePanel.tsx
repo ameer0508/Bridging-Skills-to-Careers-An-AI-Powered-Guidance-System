@@ -159,11 +159,48 @@ export const ComparePanel: React.FC<ComparePanelProps> = ({ careers }) => {
                     </td>
                   ))}
                 </tr>
+                <tr data-testid="compare-live-row">
+                  <th scope="row" className="py-2 pr-3 font-semibold text-slate-300">
+                    Live listings
+                    <span className="block text-[10px] font-normal text-slate-500">from OnJob.io</span>
+                  </th>
+                  {result.careers.map((c) => (
+                    <td key={c.careerId} className="py-2 px-3 align-top" data-testid="compare-live-cell" data-state={c.liveListings.state}>
+                      {c.liveListings.state === 'listings' ? (
+                        <div className="space-y-2">
+                          <ul className="space-y-1.5">
+                            {c.liveListings.listings.map((l) => (
+                              <li key={l.url} className="text-[11px]">
+                                <a href={l.url} target="_blank" rel="noopener noreferrer nofollow" className="font-semibold text-cyan-300 underline" data-testid="live-listing-link">
+                                  {l.title}
+                                  <span className="sr-only"> (opens OnJob.io in a new tab)</span>
+                                </a>
+                                <span className="block text-slate-400">
+                                  {l.employer} · {l.location}
+                                  {l.postedAt ? ` · posted ${formatDate(l.postedAt)}${l.ageDays !== null ? ` (${l.ageDays} days ago)` : ''}` : ' · posting date not given'}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                          <p className="text-[10px] text-slate-500">
+                            {c.liveListings.matchingRule}. Read from OnJob.io{c.liveListings.retrievedAt ? ` at ${formatDate(c.liveListings.retrievedAt)}` : ''}; apply on OnJob.io.
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-[11px] text-slate-400">{c.liveListings.detail}</p>
+                      )}
+                    </td>
+                  ))}
+                </tr>
               </tbody>
             </table>
           </div>
           <Note testId="compare-effort-note">{result.effortNote}</Note>
           <Note testId="compare-market-note">{result.marketData.reason} {result.marketData.note}</Note>
+          <Note testId="compare-live-note">
+            {result.liveListings.scope} {result.liveListings.note} Source:{' '}
+            <a href="https://onjob.io/for-job-boards/" target="_blank" rel="noopener noreferrer" className="underline">OnJob.io jobs feed licence</a>.
+          </Note>
         </div>
       )}
     </section>

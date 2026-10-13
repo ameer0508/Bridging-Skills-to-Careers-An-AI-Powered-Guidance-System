@@ -69,6 +69,9 @@ services:
       - JWT_REFRESH_EXPIRATION=${JWT_REFRESH_EXPIRATION:-7d}
       - INTERNAL_SERVICE_KEY=${INTERNAL_SERVICE_KEY:?Set INTERNAL_SERVICE_KEY in .env}
       - RAPIDAPI_KEY=${RAPIDAPI_KEY:-}
+      # OnJob.io live listings in the Career Lab comparison (A1): off unless both are true
+      - SKILLBRIDGE_ENABLE_ONJOB=${SKILLBRIDGE_ENABLE_ONJOB:-false}
+      - SKILLBRIDGE_ONJOB_FEED_TERMS_ACCEPTED=${SKILLBRIDGE_ONJOB_FEED_TERMS_ACCEPTED:-false}
       - UPLOAD_DIR=/app/storage/uploads
       - LOG_DIR=/app/storage/logs
     volumes:
