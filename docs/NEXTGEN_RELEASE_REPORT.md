@@ -15,7 +15,7 @@
 | Exams (E2–E4) | GATE CS 2026 and SSC CGL 2026 Tier-I practice: original questions, official patterns, server-side timing, topic progress and study plans. Kept apart from career evidence | `EXAM_PREP.md` |
 | Interviews | Role rubrics, adaptive follow-ups, technical assessments (no code execution), progress and explained scoring that caps explicit contradictions | `INTERVIEWS.md` |
 | Voice (D1, D2) | Consent-gated recordings with retention and deletion; dictation with a typed fallback | `INTERVIEWS.md`, `MANUAL_VOICE_TEST_PLAN.md` |
-| Languages (E5) | Resume checks in English, Hindi and Spanish, with provenance and measured accuracy; guidance in all three; other languages refused | `MULTILINGUAL.md` |
+| Languages (E5, X1) | Resume checks in English, Hindi and Spanish, with provenance and measured accuracy; scanned and damaged PDFs read by local Tesseract OCR, marked as OCR guesses with confidence; guidance in all three; other languages refused, including Telugu, Tamil, Kannada and Malayalam | `MULTILINGUAL.md` |
 | Jobs | Search with truthful freshness, cross-source duplicates and limits; application history, reminders and outcome rates from the user's own data | `APPLICATION_OUTCOMES.md`, `SCORING.md` §22 |
 | Market | The infrastructure for sourced, dated market evidence. **Shown as unavailable**: no licensed source exists | `MARKET_INTELLIGENCE.md`, `MARKET_DATA_SOURCES.md` |
 | AI | One zero-cost gateway (paid providers blocked even with keys present); an audited, privacy-safe observability log for administrators | `ZERO_COST_API_POLICY.md`, `AI_OBSERVABILITY.md` |
@@ -26,15 +26,15 @@
 | Check | Result |
 |---|---|
 | Backend suites (`runAllTests.ts`) | 56 of 56 pass, including `security_sweep`, `account_deletion` and `api_reference` |
-| AI service (`pytest`) | 179 passed |
-| Browser suites (12) | smoke 50/50, market 15/15, salaries 14/14, applications 15/15, outcomes 10/10, interviews 23/23, exams 12/12, careerDomains 8/8, languages 10/10, aiObservability 6/6, landing 6/6, accessibility 53/53 |
+| AI service (`pytest`) | 189 passed (with Tesseract installed) |
+| Browser suites (12) | smoke 50/50, market 15/15, salaries 14/14, applications 15/15, outcomes 10/10, interviews 23/23, exams 12/12, careerDomains 8/8, languages 11/11, aiObservability 6/6, landing 6/6, accessibility 53/53 |
 | Typecheck, lint, production build | Pass (frontend and backend) |
-| Docker Compose (GitHub Actions) | Run 38377392127 on `d4264f6` passes: build, health, auth, the resume-to-career workflow, persistence across restart, recording retention, AI audit file permissions and privacy |
+| Docker Compose (GitHub Actions) | Run 38382438611 on `b033d61` passes: build, health, auth, the resume-to-career workflow, local OCR with the six approved languages (Tesseract 5.5.0; scanned English and Hindi pages read 4/4), persistence across restart, recording retention, AI audit file permissions and privacy. Earlier run 38377392127 on `d4264f6` |
 | Security (V2) | `SECURITY_REVIEW.md`: 149 routes swept, isolation replay, races, admin role, exposure |
 | Accessibility (V3) | `ACCESSIBILITY.md`: axe on 50 pages, 0 serious or critical violations; keyboard sign-in |
 | API reference | Every route listed (enforced by `api_reference.test.ts`) |
 
-All figures are from the final tree `d4264f6` on 2026-10-13. **Checklist: 77 / 100 verified; 23 open** (section 4).
+All figures are from the tree `b033d61` (OCR, X1) on 2026-10-13; the docs-only commits after it change no code. **Checklist: 78 / 100 verified; 22 open** (section 4).
 
 ## 3. Honesty rules applied
 
@@ -50,10 +50,10 @@ All figures are from the final tree `d4264f6` on 2026-10-13. **Checklist: 77 / 1
 |---|---|---|---|
 | A1, C1, C2, C3, C4, C5, R4 | 17 | No free source permits storing and aggregating Indian job postings (`MARKET_DATA_SOURCES.md`) | Adzuna's written consent or licence at ₹0, or another compliant source |
 | D1, D2 | 5 | Real microphones and browser speech recognition cannot be tested automatically | The owner runs `MANUAL_VOICE_TEST_PLAN.md` and any defects are fixed |
-| X1 | 1 | Hindi PDFs with subset fonts (most exporters) are not read reliably; they are flagged | Approval to install local OCR (Tesseract; proposal in `MULTILINGUAL.md`) |
 
 **Other limits, all documented:**
-- The labelled multilingual set is small and synthetic.
+- The labelled multilingual set is small and synthetic; no real scans were measured.
+- OCR: Spanish scans are partial (no Spanish OCR data, the owner's choice); OCR reads at most 5 pages per document by default; Telugu, Tamil, Kannada and Malayalam are refused, not supported.
 - R3's evaluation is synthetic and partly circular.
 - Contradiction detection catches explicit contradictions only.
 - Token revocation and per-user limits are per process.
