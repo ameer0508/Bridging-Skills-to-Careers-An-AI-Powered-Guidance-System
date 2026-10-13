@@ -35,6 +35,15 @@ This review covers every route the backend serves. The routes are read from the 
    - Feed content is untrusted. Every field is schema-checked, markup, control and bidirectional characters are stripped, lengths are capped, descriptions are never read, and only `https://onjob.io/...` links are rendered (with `rel="noopener noreferrer nofollow"`). No feed text reaches any AI prompt.
    - Failures are logged as a code only (`timeout` or `fetch_failed`). The comparison still answers, showing "unavailable"; this was checked in Docker with onjob.io made unreachable.
 
+8. **New first-party channel: employer postings** (`/api/v1/employer`, 15 routes).
+   - Owner-only actions answer 404 to anyone else; administrator review reads the role from the database.
+   - Inputs are validated strictly (unknown fields refused; pay bounds and range ratio; 36 states or UTs; https links only).
+   - Descriptions are plain text with markup and control characters removed, rendered as text, and never sent to an AI.
+   - Limits: 10 new postings a day, 25 open.
+   - Abuse controls: reports (3 hide a posting and remove it from market figures); administrators can hide it.
+   - Market-wide, the employer-diversity rule: no figure unless postings come from at least 5 employers and none supplies over half.
+   - The security sweep covers its sign-in, parameter and exposure checks (165 routes); `employer_postings` covers isolation and abuse.
+
 ## Covered by other suites, re-run here
 
 - **Voice recordings** (`voice_interviews`, `voice_retention`):

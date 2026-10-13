@@ -6,14 +6,14 @@ Review dates: 2026-10-13 (Edge results), updated the same day with the owner's f
 - **D1** is awarded when A1–A12 and C1–C4 pass in both Chrome and Edge.
 - **D2** is awarded when B1–B6 and B8 pass in both, B4's accuracy is recorded, and B7 is passed or reported as not offered.
 
-**Decision: D1 pending, D2 pending.** Every step required in Microsoft Edge now passes by the owner's hand, and Firefox B6 passes. **The only gap is Google Chrome**, which the award rule names and which the owner has explicitly chosen not to test. With no Chrome evidence of any kind, the rule is not met, and the points are not awarded. See §4.
+**Decision: D1 pending, D2 pending.** Every step required in Microsoft Edge passes by the owner's hand, and Firefox B6 passes. Google Chrome, which the award rule names, has now been exercised **automatically in real Google Chrome Stable 155** (§2a), but automation cannot perform the steps the plan defines with a physical microphone, a human voice and a screen reader (§4). The owner has chosen not to test Chrome by hand, so the rule is not met and the points are not awarded.
 
 ## 1. Kinds of evidence
 
 | Kind | What it proves | What it does not |
 |---|---|---|
 | **Owner, physical** | The owner, on Windows with a real microphone, Microsoft Edge and Windows Narrator | Other browsers |
-| **Automated, real codec** | `e2e/tests/voiceRealCodec.mjs` in real Edge 155: real `getUserMedia`, capture track, MediaRecorder WebM/Opus, upload, storage and decoding, fed by the browser's **fake device** playing a synthetic 440 Hz tone; really refused permission; Edge's own speech recogniser on a refused microphone | A physical microphone, real voices, recognition accuracy |
+| **Automated, real codec** | `e2e/tests/voiceRealCodec.mjs` in real Edge 155 and real Google Chrome 155 (§2a): real `getUserMedia`, capture track, MediaRecorder WebM/Opus, upload, storage and decoding, fed by the browser's **fake device** playing a synthetic 440 Hz tone; really refused permission; Edge's own speech recogniser on a refused microphone | A physical microphone, real voices, recognition accuracy |
 | **Automated, stand-in** | `e2e/tests/interviews.mjs`: the same screens with a stand-in recorder and recogniser | Any real capture, codec or recognition |
 | **Automated, server** | Backend suites `voice_interviews`, `voice_retention`, `security_sweep`; Docker smoke | Anything in the browser |
 
@@ -60,6 +60,63 @@ All results below are **reported by the owner**, not produced by automation. The
 | C3 Errors announced without moving focus | First attempt: only one of the two permission errors was announced. Retest: both. **Follow-up retest on `b7c2e91` (with the hardening in §3): Narrator announced both the recording and the dictation permission errors without moving focus** | Pass; the first-attempt inconsistency stays recorded, see §3 |
 | C4 Button names read (Record answer, Stop recording with duration, Listen) | Pass | Pass |
 
+## 2a. Automated runs in real Google Chrome (2026-10-13)
+
+**The browser.**
+- Google Chrome Stable 155.0.8059.40, as served by Google's update service for Windows x64.
+- Obtained from Google's signed full installer:
+  - SHA-256 `c43d400e…1d97f06`, matching the hash Google published;
+  - Authenticode signature valid, signer "Google LLC".
+- Extracted into a scratch folder and run from there, so nothing was installed system-wide and the owner's Docker stack was not touched.
+- The suites check that the browser reports the brand **"Google Chrome"** (Edge reports "Microsoft Edge").
+- Harness option: `E2E_CHROME_PATH`.
+
+| Suite (Chrome 155) | Result |
+|---|---|
+| `voiceRealCodec.mjs` | **12/12**. Each step listed below. Edge 155: 12/12 as well |
+| `interviews.mjs` (stand-in recorder and recogniser; consent focus and wording, dictation flows, typed fallback) | **23/23** |
+| `accessibility.mjs` (axe WCAG 2.0/2.1 A+AA on every page) | **53/53** (now 54 with the employer page) |
+
+The 12 `voiceRealCodec.mjs` steps:
+- brand check;
+- no microphone request before consent;
+- real capture track (41,834-byte WebM/Opus) released on stop;
+- playback decoded at 456 Hz (source 440 Hz), 2.58 s, not silent;
+- byte-identical after reload;
+- second account 404 on list, play and delete;
+- re-recording replaces, and deletion is final after reload;
+- "until this round ends" deletes at the end of the round;
+- clean console;
+- a **really refused** permission, with errors announced again on retry and typing still working;
+- the real Chrome recogniser: consent, start, its own "No speech was heard" for the synthetic tone, then the typed fallback stored;
+- keyboard only: consent, record, stop, listen and dictate with Tab, Enter and Space, visible focus at each stop, focus moved into both consent panels, roles and names read from the accessibility tree.
+
+**Synthetic speech does not reach the recognisers.**
+- A sentence spoken by Windows' built-in text-to-speech ("Microsoft David") was fed through the fake device.
+- Chrome's recogniser started, received audio and ended with `no-speech`.
+- Edge's detected speech but returned empty results.
+- No transcript, and therefore no accuracy, can be produced by automation here.
+
+### What automation satisfies in Chrome, step by step
+
+| Step | In real Chrome, automatically | Meets the plan's step? |
+|---|---|---|
+| A1 | No `getUserMedia` before consent or before "Record answer" | Yes (the indicator cannot show without a request) |
+| A2 | Panel, focus, wording (stand-in suite and keyboard step in Chrome) | Yes |
+| A3 | Retention stored; the request happens only on "Record answer" | Partly: the permission prompt itself is auto-accepted by the test flag and not observed |
+| A4 | Real capture and encoder; track released on stop | **No**: the plan requires speaking into a physical microphone |
+| A5 | Decoded audio has the source pitch | **No**: the plan requires hearing your own voice |
+| A6–A11 | All pass | Yes |
+| A12 | A really refused permission: message, no track, typing works | Yes |
+| B1 | Consent panel; on-device not offered (Chrome reports it unavailable) | Yes |
+| B2 | Recognition starts; nothing is transcribed from synthetic audio | **No** |
+| B3 | Stand-in: edited text stored as mixed input | Partly: not with real recognised words |
+| B4 | — | **No**: needs a human voice |
+| B5 | Real recogniser with a refused microphone: message, typing works | Yes |
+| B8 | Stop and turn off (stand-in and real "Listening" stop) | Yes |
+| C1 | Keyboard only, visible focus | Yes |
+| C2–C4 | Roles, names and live regions in the accessibility tree | **No**: the plan requires a screen reader reading them |
+
 ## 3. Investigation of the C3 inconsistency
 
 - **Hypothesis.** Both controls created their `role="alert"` element only when an error occurred. Screen readers announce changes to a live region that already exists more reliably than a region inserted together with its text. A repeated identical error could also, in principle, be merged by React into no DOM change at all.
@@ -75,11 +132,11 @@ All results below are **reported by the owner**, not produced by automation. The
 
 ## 4. What remains
 
-| Requirement | Status | Why it is still required |
-|---|---|---|
-| D1 in **Chrome** (A1–A12, C1–C4) | **Not tested**, by the owner's explicit choice. No automated run either: Chrome is not installed on the development machine | The award rule names Chrome. Capture, codec and playback depend on the browser |
-| D2 in **Chrome** (B1–B5, B8) | **Not tested**, by the owner's explicit choice | Chrome's recognition is a different service (Google's) from Edge's |
+| Requirement | Status |
+|---|---|
+| D1 in Chrome: A4 and A5 with a physical microphone and a listener; C2–C4 with a screen reader | Not done. Automation covers every other D1 step in real Chrome (§2a) |
+| D2 in Chrome: B2 and B4 with a human voice, B3 with real recognised text | Not done. Synthetic speech is not recognised in Chrome under automation |
 
-Everything else in the rule is satisfied: Edge A1–A12, B1–B5, B8 and C1–C4 by the owner; B4 recorded (4 of 5); B6 in Firefox by the owner; B7 not offered in Edge.
+Edge and Firefox are complete by the owner's hand.
 
-**Consequence.** D1 (3 points) and D2 (2 points) stay pending for as long as there is no Chrome evidence. As instructed, no further Chrome testing is requested here, and the acceptance criteria are not changed.
+**Consequence.** D1 (3 points) and D2 (2 points) stay pending. The award rule is unchanged, and no further manual testing is requested. Only a person in Chrome can close these steps: a physical microphone for A4 and A5, a human voice for B2 to B4, and a screen reader for C2 to C4.

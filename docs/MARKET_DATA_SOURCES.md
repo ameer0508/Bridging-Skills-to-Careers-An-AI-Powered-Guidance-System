@@ -99,6 +99,26 @@ So a source must supply **Indian job postings** that may be stored and aggregate
 
 The request in §5 asks for exactly those uses.
 
+### 2c. Fourth search, and a first-party channel (2026-10-13)
+
+**Posting-level open datasets.**
+- Hugging Face `naukri-jobs-dataset`: CC BY-NC 4.0, non-commercial, copied from Naukri.
+- Kaggle Naukri scrapes: licence "Unknown", collected with Selenium.
+- Both come from a site whose terms forbid scraping, so both are rejected.
+- The awesomedata proposal for JobTether's data offers the same aggregate tables assessed in §2.
+- No government portal publishes posting-level vacancy data with a reuse licence.
+
+**What was built instead (no provider permission needed).**
+- The one lawful ₹0 way to obtain records SkillBridge may store and analyse is for organizations to submit them and grant the uses themselves.
+- `docs/EMPLOYER_POSTINGS.md` describes the employer-submission channel. Each publication records the organization's grant of every use C1–C5 and R4 need (contribution terms v1).
+- Postings enter the market records through the existing ingestion path.
+- The channel becomes a registered source only once something is published.
+- **It holds no real postings, so it changes no figure and earns no point.** It describes only the organizations that use it, which are self-declared and not verified.
+
+**Source-independent safeguard added.**
+- Every market figure now also needs postings from at least 5 named employers, none supplying more than half.
+- This applies to history, career summaries, salaries and skill trends.
+
 ### 2b. Exactly what each pending item lacks
 
 | Item | Missing permission or dataset |
