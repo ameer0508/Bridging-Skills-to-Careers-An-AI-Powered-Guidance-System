@@ -267,7 +267,8 @@ From 2026-10-13 this session is the only developer, working on `work/skillbridge
 | U4 | (docs) | 66 | No free, compliant Indian market source; options in `MARKET_DATA_SOURCES.md` |
 | U5 | `d4264f6` + checklist | **77** | Final verification: 56 backend suites, 179 AI tests, 12 browser suites, Docker run 38377392127; V1–V5 and X12 awarded |
 | U6 | `b033d61` + docs | **78** | Local Tesseract OCR approved by the owner: X1 awarded. 56 backend suites, 189 AI tests, 12 browser suites, Docker run 38382438611 |
+| U7 | final 22-point pass | **81** | A1 awarded (OnJob.io live listings under the feed licence, verified on real data in local Docker). Real-codec voice suite (Edge 10/10) found and fixed a re-recording defect; D1/D2 await the owner's manual results. Market sources re-assessed: C1–C5 and R4 blocked on written permission. 57 backend suites, 189 AI tests, 13 browser suites, local Docker |
 
 **Open:**
-- Market items (17 points): need a licensed source.
+- Market items C1–C5 and R4 (14 points): need written permission for stored, counted or mined data (OnJob request drafted in docs/MARKET_DATA_SOURCES.md §5).
 - D1 and D2 (5 points): need the owner's manual microphone test.

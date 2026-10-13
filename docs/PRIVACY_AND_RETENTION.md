@@ -19,6 +19,7 @@ What SkillBridge stores about a person, where, for how long, and how it is remov
 | AI response cache | AI service memory | 1 hour; never written to disk; lost on restart |
 | Server logs (request path, status, client IP, account ids in paths, error traces) | backend volume `logs/` | **bounded**: each file rotates at 10 MB (`LOG_MAX_FILE_MB`) and 5 files are kept (`LOG_MAX_FILES`). Logs hold no resume text, answers or passwords. An unexpected error's message is logged, not returned to the client |
 | Market import batches | MongoDB | kept as provenance. They hold the importing administrator's account id |
+| OnJob.io live listings (only when the operator enables the feed) | backend memory | replaced on each refresh (every 6 hours by default) and never shown when older than 24 hours; never written to disk or the database; lost on restart. They are public job listings; no user data is sent to OnJob.io |
 
 ## Deleting an account
 

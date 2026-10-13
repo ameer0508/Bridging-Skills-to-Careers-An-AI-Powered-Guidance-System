@@ -25,6 +25,16 @@ This review covers every route the backend serves. The routes are read from the 
    - `exam_prep.test.ts` reproduces the race deterministically by delaying the read. The test fails with the lock removed and passes with it. The HTTP-level race check in the sweep did not reproduce the race on its own, so it is not counted as evidence for this fix.
 5. **Non-English upload file names** stored as mojibake, and client-supplied paths kept in file names. Fixed earlier in this milestone (`dad01dc`).
 
+### Added 2026-10-13 (final 22-point pass)
+
+6. **Re-recorded answers kept the first take's date** (D1), found by the real-codec browser suite. Timestamps make `createdAt` immutable, so a replacement kept the old date, and a later retention change counted from it. The record is now updated in one atomic operation with the new date (`voice_interviews` checks it; `voiceRealCodec.mjs` checks that the answer is never missing in between).
+7. **New outbound source: OnJob.io jobs feed** (A1, `services/market/OnJobLiveListings.ts`). Threat review:
+   - Off unless the operator sets both the enable flag and the terms attestation; a refused call never reaches the network (`onjob_live_listings`).
+   - The URL is fixed. Pagination is followed only to https links on onjob.io; redirects are refused; 20 s timeout; at most 25 MiB per page and 5 pages; at most 8 fetches a day.
+   - No user data is sent: one anonymous GET with no cookies or keys.
+   - Feed content is untrusted. Every field is schema-checked, markup, control and bidirectional characters are stripped, lengths are capped, descriptions are never read, and only `https://onjob.io/...` links are rendered (with `rel="noopener noreferrer nofollow"`). No feed text reaches any AI prompt.
+   - Failures are logged as a code only (`timeout` or `fetch_failed`). The comparison still answers, showing "unavailable"; this was checked in Docker with onjob.io made unreachable.
+
 ## Covered by other suites, re-run here
 
 - **Voice recordings** (`voice_interviews`, `voice_retention`):

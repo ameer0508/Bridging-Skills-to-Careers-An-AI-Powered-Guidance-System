@@ -289,7 +289,8 @@ The contract test shows that only an exactly tied pair is reordered, that all-ne
 
 ## 6. Known limits
 
-- No real market data: no free, licensed job-posting source has been verified (see the zero-cost policy). All non-empty screens show synthetic data, labelled as such.
+- No real market data: no free source licenses storing and aggregating postings (`docs/MARKET_DATA_SOURCES.md`). All non-empty screens show synthetic data, labelled as such.
+- OnJob.io's feed is used only to republish live listings in the Career Lab comparison (`services/market/OnJobLiveListings.ts`, off by default). It is deliberately **not** a registered market source: its licence grants republication, not storage after closing, counts, salary statistics, description mining or forecasting.
 - Fixture months and the default window: the CLI fixture ends at the last complete month.
 - Country is whatever the source states; locations are not geocoded.
 - Fingerprints treat a repost on a later day as a new posting. Two different jobs with the same title, employer, location and day would be merged.
