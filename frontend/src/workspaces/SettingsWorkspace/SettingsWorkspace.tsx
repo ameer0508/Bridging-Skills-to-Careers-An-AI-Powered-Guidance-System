@@ -29,6 +29,7 @@ import { AppearanceSettings } from '../../features/user/components/AppearanceSet
 import { NotificationPreferences } from '../../features/user/components/NotificationPreferences';
 import { SecuritySettings } from '../../features/user/components/SecuritySettings';
 import { DangerZoneCard } from '../../features/user/components/DangerZoneCard';
+import { DeleteAccountCard } from '../../features/user/components/DeleteAccountCard';
 
 // Design System 2.0 Components
 import {
@@ -690,6 +691,7 @@ export const SettingsWorkspace: React.FC = () => {
         </PremiumSection>
 
         <DangerZoneCard onConfirmLogout={() => logoutMutation.mutate()} />
+        <DeleteAccountCard />
       </div>
 
       {/* SECTION 7 — ACCOUNT SPOTLIGHT */}

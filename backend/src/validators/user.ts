@@ -27,3 +27,11 @@ export const updateProfileSchema = z
   .strict('Unexpected properties detected in profile updates');
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+
+/** Deleting an account needs the password and an explicit confirmation word. */
+export const deleteAccountSchema = z
+  .object({
+    password: z.string().min(1, 'Your password is required').max(200),
+    confirm: z.literal('DELETE', { errorMap: () => ({ message: 'Type DELETE to confirm' }) }),
+  })
+  .strict();

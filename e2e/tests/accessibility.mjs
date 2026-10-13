@@ -115,6 +115,24 @@ export async function run({ webUrl, apiUrl }) {
       await fresh.context().close();
     });
 
+    await t.step('the account can be deleted from settings, with its password, and then cannot sign in', async () => {
+      await gotoAndSettle(page, `${webUrl}/settings`, 2000);
+      const card = page.getByTestId('delete-account');
+      await card.scrollIntoViewIfNeeded();
+      const submit = card.getByRole('button', { name: 'Delete my account' });
+      await card.getByLabel('Your password').fill('wrong-password');
+      expect(await submit.isDisabled(), 'deletion offered before DELETE is typed');
+      await card.getByLabel('Type DELETE to confirm').fill('DELETE');
+      await submit.click();
+      await card.getByRole('alert').waitFor({ timeout: 10_000 });
+      expect(/password is not correct/i.test(await card.getByRole('alert').innerText()), 'a wrong password is not explained');
+      await card.getByLabel('Your password').fill(PASSWORD);
+      await submit.click();
+      await page.waitForURL('**/login', { timeout: 15_000 });
+      const res = await fetch(`${apiUrl}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: PASSWORD }) });
+      expect(res.status === 401 || res.status === 400, `signing in after deletion answered ${res.status}`);
+    });
+
     if (report) {
       const byRule = {};
       for (const f of findings) for (const v of f.serious) byRule[v.id] = (byRule[v.id] || 0) + 1;

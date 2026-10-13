@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken } from '../utils/jwt.js';
 import { User } from '../models/User.js';
+import { isRevokedAccount } from '../utils/revokedAccounts.js';
 
 /**
  * Middleware to authenticate requests via JWT Bearer tokens.
@@ -24,6 +25,10 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
 
   try {
     const payload = verifyAccessToken(token);
+    if (isRevokedAccount(payload.userId)) {
+      res.status(401).json({ success: false, error: { code: 'ACCOUNT_DELETED', message: 'This account has been deleted.' } });
+      return;
+    }
     req.user = {
       userId: payload.userId,
       role: payload.role,

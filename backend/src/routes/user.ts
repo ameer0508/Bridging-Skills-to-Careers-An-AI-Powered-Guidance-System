@@ -3,7 +3,7 @@ import CareerLabController from '../controllers/CareerLabController.js';
 import LearningPlanController from '../controllers/LearningPlanController.js';
 import UserController from '../controllers/UserController.js';
 import validate from '../middlewares/validate.js';
-import { updateProfileSchema } from '../validators/user.js';
+import { deleteAccountSchema, updateProfileSchema } from '../validators/user.js';
 import authenticate from '../middlewares/auth.js';
 
 const router = Router();
@@ -18,5 +18,8 @@ router.put('/me/learning-preferences', authenticate, LearningPlanController.upda
 
 // Update profile details - Requires JWT Auth and validates the schema fields
 router.put('/me', authenticate, validate(updateProfileSchema), controller.updateMe);
+
+// Deletes the account and everything stored about it (X12)
+router.delete('/me', authenticate, validate(deleteAccountSchema), controller.deleteMe);
 
 export default router;

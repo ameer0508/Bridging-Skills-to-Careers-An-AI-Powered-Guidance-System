@@ -48,6 +48,16 @@ export class UserController {
   /**
    * Updates the current user's profile information.
    */
+  deleteMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { default: AccountDeletionService } = await import('../services/AccountDeletionService.js');
+      const result = await AccountDeletionService.deleteAccount(req.user!.userId, req.body.password);
+      res.status(200).json({ success: true, data: { deleted: true, ...result } });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   updateMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = req.user!.userId;
