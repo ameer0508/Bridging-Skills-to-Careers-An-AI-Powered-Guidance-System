@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { ErrorRegion } from './AnnouncedError';
+import { useAnnouncedError } from './useAnnouncedError';
 import { useDisclosureFocus } from './useDisclosureFocus';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Mic, MicOff, ShieldAlert } from 'lucide-react';
@@ -25,7 +27,7 @@ export const DictationControl: React.FC<{ onTranscript: (text: string) => void; 
   const [ctor] = useState(() => recognitionConstructor());
   const [onDevice, setOnDevice] = useState<'available' | 'unavailable' | 'unknown'>('unknown');
   const [listening, setListening] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { error, errorId, setError } = useAnnouncedError();
   const [askingConsent, setAskingConsent] = useState(false);
   const focus = useDisclosureFocus(askingConsent);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
@@ -168,7 +170,7 @@ export const DictationControl: React.FC<{ onTranscript: (text: string) => void; 
         </div>
       )}
 
-      {error && <p role="alert" className="text-rose-300">{error}</p>}
+      <ErrorRegion error={error} errorId={errorId} testId="dictation-errors" />
       {setConsent.isError && <p role="alert" className="text-rose-300">Your dictation choice could not be saved. Dictation stays off.</p>}
     </div>
   );

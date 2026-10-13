@@ -233,7 +233,7 @@ async function runChannel(t, channel, { webUrl, apiUrl, tmpDir }, wav) {
 
   // A denied microphone: the same browser WITHOUT the auto-accept flag, so the real permission
   // check refuses. Typing must still work.
-  await t.step(tag('a denied microphone is explained and typing still works'), async () => {
+  await t.step(tag('a denied microphone is explained (announced again on retry) and typing still works'), async () => {
     const { browser: strict } = await launchBrowser({ channel, args: ['--use-fake-device-for-media-stream', `--use-file-for-fake-audio-capture=${wav}`] });
     try {
       const ctx = await strict.newContext({ viewport: { width: 1366, height: 900 } });
@@ -249,9 +249,35 @@ async function runChannel(t, channel, { webUrl, apiUrl, tmpDir }, wav) {
       const dialog = p.getByTestId('recording-consent');
       await dialog.getByRole('button', { name: 'Allow recording' }).click();
       await p.getByTestId('recording-status').waitFor({ timeout: 10_000 });
-      await p.getByRole('button', { name: 'Record answer' }).click();
-      await p.getByText('The microphone could not be used').waitFor({ timeout: 10_000 });
+      // C3: the error regions exist before any error, and a repeated error is a new node, so a
+      // screen reader announces it again (real refusal; dictation uses the browser's own recogniser)
+      const watchRegion = (testId) => p.evaluate((id) => {
+        const region = document.querySelector(`[data-testid="${id}"]`);
+        if (!region) return false;
+        window.__added = window.__added || {};
+        window.__added[id] = 0;
+        new MutationObserver((records) => { window.__added[id] += records.reduce((n, r) => n + r.addedNodes.length, 0); }).observe(region, { childList: true, subtree: true });
+        return region.getAttribute('role') === 'alert' && region.textContent === '';
+      }, testId);
+      expect(await watchRegion('recording-errors'), 'the recording error region is not mounted, empty, before an error');
+      for (let i = 0; i < 2; i += 1) {
+        await p.getByRole('button', { name: 'Record answer' }).click();
+        await p.getByText('The microphone could not be used').waitFor({ timeout: 10_000 });
+        await p.waitForTimeout(500);
+      }
+      const recordingAnnouncements = await p.evaluate(() => window.__added['recording-errors']);
       const tracks = await p.evaluate(() => window.__mic.tracks.length);
+      await p.getByRole('button', { name: 'Enable voice dictation' }).click();
+      await p.getByTestId('dictation-consent').getByRole('button', { name: /Allow my browser/ }).click();
+      await p.getByTestId('dictation-status').waitFor({ timeout: 10_000 });
+      expect(await watchRegion('dictation-errors'), 'the dictation error region is not mounted, empty, before an error');
+      for (let i = 0; i < 2; i += 1) {
+        await p.getByRole('button', { name: /^(Dictate|Listening)/ }).click();
+        await p.getByText('Microphone access was refused').waitFor({ timeout: 10_000 });
+        await p.waitForTimeout(1500);
+      }
+      const dictationAnnouncements = await p.evaluate(() => window.__added['dictation-errors']);
+      expect(recordingAnnouncements >= 2 && dictationAnnouncements >= 2, `repeated errors added ${recordingAnnouncements} recording and ${dictationAnnouncements} dictation nodes; each needs 2`);
       await p.getByLabel('Your answer').fill(ANSWER);
       await p.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
       await p.waitForTimeout(1500);

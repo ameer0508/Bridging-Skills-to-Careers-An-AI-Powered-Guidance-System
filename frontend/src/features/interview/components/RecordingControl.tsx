@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { ErrorRegion } from './AnnouncedError';
+import { useAnnouncedError } from './useAnnouncedError';
 import { useDisclosureFocus } from './useDisclosureFocus';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Circle, ShieldAlert, Square, Trash2 } from 'lucide-react';
@@ -31,7 +33,7 @@ export const RecordingControl: React.FC<{ sessionId: string; questionIndex: numb
   const [recording, setRecording] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [playUrl, setPlayUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { error, errorId, setError } = useAnnouncedError();
   const recorderRef = useRef<MediaRecorder | null>(null);
   const startedRef = useRef(0);
 
@@ -69,7 +71,7 @@ export const RecordingControl: React.FC<{ sessionId: string; questionIndex: numb
   useEffect(() => {
     setPlayUrl(null);
     setError(null);
-  }, [questionId]);
+  }, [questionId, setError]);
   useEffect(() => () => {
     if (playUrl) URL.revokeObjectURL(playUrl);
   }, [playUrl]);
@@ -204,7 +206,7 @@ export const RecordingControl: React.FC<{ sessionId: string; questionIndex: numb
             : `Recording is on. Recordings are kept ${RETENTION_LABEL[settings.data.retentionDays] ?? `${settings.data.retentionDays} days`} and only you can play them.`}
       </p>
       {playUrl && <audio controls src={playUrl} data-testid="recording-player" className="w-full max-w-sm" />}
-      {error && <p role="alert" className="text-rose-300">{error}</p>}
+      <ErrorRegion error={error} errorId={errorId} testId="recording-errors" />
     </div>
   );
 };
