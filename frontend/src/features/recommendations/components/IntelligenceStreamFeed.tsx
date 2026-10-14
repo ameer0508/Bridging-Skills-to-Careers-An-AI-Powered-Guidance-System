@@ -102,9 +102,12 @@ export const IntelligenceStreamFeed: React.FC<IntelligenceStreamFeedProps> = ({
                 : 'bg-aurora-canvas/60 border-aurora-line hover:border-aurora-violet/25 shadow-xl'
             }`}
           >
-            {/* Ambient subtle glow for highest items */}
+            {/* Ambient subtle glow for highest items, clipped to the card: unclipped, it made the
+                page 17 px wider than a phone */}
             {isHighest && (
-              <div className="pointer-events-none absolute -top-12 -right-12 w-64 h-64 rounded-full bg-amber-50 blur-3xl opacity-75 group-hover:opacity-100 transition-opacity" />
+              <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
+                <div className="absolute -top-12 -right-12 w-64 h-64 rounded-full bg-amber-50 blur-3xl opacity-75 group-hover:opacity-100 transition-opacity" />
+              </div>
             )}
 
             <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
@@ -167,10 +170,10 @@ export const IntelligenceStreamFeed: React.FC<IntelligenceStreamFeedProps> = ({
                     </p>
                   </div>
 
-                  {/* Grounded AI Rationale Ribbon */}
+                  {/* Why this action: written by fixed rules from the user's gaps, not by an AI model */}
                   {rec.reason && (
                     <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-violet/25 text-xs text-aurora-indigo/90 flex items-start gap-2 max-w-3xl">
-                      <span className="text-amber-700 font-bold shrink-0">💡 AI Rationale:</span>
+                      <span className="text-amber-700 font-bold shrink-0">💡 Why:</span>
                       <span className="leading-relaxed">{rec.reason}</span>
                     </div>
                   )}

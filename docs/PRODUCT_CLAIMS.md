@@ -217,6 +217,19 @@ Every signed-in route, the sign-in and registration pages and the onboarding dia
 
 `e2e/tests/polish.mjs` (11 browser steps) checks the sign-in and registration copy and the absence of browser pop-ups; 30 forbidden claim patterns on all 46 signed-in routes; the assistant's stated source; the Settings figures and the command palette; dialog keyboard behaviour; plain error states; the tablet drawer; and that no looping animation runs under reduced motion.
 
+## Stage F: release audit corrections (2026-10-14)
+
+Found by the release audit ([`AURORA_ELITE_RELEASE_AUDIT.md`](AURORA_ELITE_RELEASE_AUDIT.md) §3):
+
+| Where | Before | Now |
+|---|---|---|
+| Recommendations, each action | "AI Rationale:" over a fixed sentence written by rules from the user's gaps | "Why:" |
+| Recommendations, list heading | "Strategic Intelligence Stream: Chronologically ordered by impact leverage and career readiness delta" (the list is not chronological) | "Your actions: In the order chosen above; by default the action that closes the largest gap comes first" |
+| Recommendations, related pages | "Downstream Execution Hubs: Pivot seamlessly into roadmap execution and neural guidance" | "Related pages: Continue in your roadmap or ask the assistant" |
+| AI observability opened by a non-administrator | Refused requests and "Some of your data could not be loaded … Try again" | "Administrator access is required", with no request sent |
+
+`e2e/tests/polish.mjs` now also forbids "AI Rationale", "neural guidance" and "Chronologically ordered".
+
 ## Pages inside the app
 
 Pages whose content is built-in sample content are wrapped in `DemoWorkspace`, which shows the "Illustrative sample data" notice:

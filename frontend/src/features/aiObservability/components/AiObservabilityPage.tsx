@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, ShieldCheck } from 'lucide-react';
 import { messageOf } from '../../../lib/collections';
+import { useAuthStore } from '../../../store/authStore';
 import { fetchEvents, fetchProviders, fetchSummary } from '../aiObservabilityApi';
 
 const card = 'rounded-2xl border border-aurora-line p-4';
@@ -18,10 +19,27 @@ const ms = (v: number | null) => (v === null ? '—' : `${Math.round(v)} ms`);
 /** X11 (administrators): AI provider selection, fallbacks, failure categories, latency and policy status. */
 export const AiObservabilityPage: React.FC = () => {
   const [windowHours, setWindowHours] = useState(24);
-  const summary = useQuery({ queryKey: ['ai-obs-summary', windowHours], queryFn: () => fetchSummary(windowHours), retry: false });
-  const events = useQuery({ queryKey: ['ai-obs-events', windowHours], queryFn: () => fetchEvents(windowHours), retry: false });
-  const providers = useQuery({ queryKey: ['ai-obs-providers'], queryFn: fetchProviders, retry: false });
+  // Only administrators may read this data, and the server refuses everyone else. A signed-in
+  // non-administrator who opens the address directly is told so without sending requests that
+  // can only fail: a refused request would also raise the page-wide "could not be loaded, try
+  // again" notice, and trying again cannot help. The role shown here arrives with sign-in.
+  const isAdmin = useAuthStore(state => state.user?.role === 'admin');
+  const summary = useQuery({ queryKey: ['ai-obs-summary', windowHours], queryFn: () => fetchSummary(windowHours), retry: false, enabled: isAdmin });
+  const events = useQuery({ queryKey: ['ai-obs-events', windowHours], queryFn: () => fetchEvents(windowHours), retry: false, enabled: isAdmin });
+  const providers = useQuery({ queryKey: ['ai-obs-providers'], queryFn: fetchProviders, retry: false, enabled: isAdmin });
   const error = summary.error ?? events.error ?? providers.error;
+
+  if (!isAdmin) {
+    return (
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6">
+        <h1 className="text-2xl font-bold font-display text-aurora-ink">AI observability</h1>
+        <div role="alert" data-testid="observability-error" className="flex items-start gap-2 rounded-2xl border border-rose-300 p-3 text-sm">
+          <AlertTriangle size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
+          <span>Administrator access is required. This page is for SkillBridge administrators; your account does not have that role.</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6">

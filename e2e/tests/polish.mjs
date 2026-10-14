@@ -23,7 +23,7 @@ const FORBIDDEN = [
   /AI Gateway Connected/, /Predictive AI/, /Ranked by ROI/, /Telemetry Synced/, /hiring probability/i, /guaranteed (placement|job|hire|interview|offer)/i,
   /placement rate/i, /Live Synced/i, /Vector Match/i, /256-Bit/i, /Production Hardened/i, /Security & Safety Index/,
   /Connected Vault & SSO/, /Mathematical Convergence/, /status code \d{3}/, /Live Sync/i, /Single sign-on/i, /Encrypted file/i,
-  /recruiter callback/i, /skill vector/i, /Identity Verification/i,
+  /recruiter callback/i, /skill vector/i, /Identity Verification/i, /AI Rationale/i, /neural guidance/i, /Chronologically ordered/i,
 ];
 
 async function serious(page) {

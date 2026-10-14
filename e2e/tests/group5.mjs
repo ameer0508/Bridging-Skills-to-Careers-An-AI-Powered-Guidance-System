@@ -143,6 +143,8 @@ export async function run({ webUrl, apiUrl, tmpDir }) {
       await gotoAndSettle(page, `${webUrl}/ai-observability`, 2500);
       expect((await page.getByTestId('observability-error').innerText()).includes('Administrator access is required'), 'the page does not say access is refused');
       expect((await page.getByTestId('provider-stats').count()) === 0, 'data shown to a non-administrator');
+      expect(!log.failed.some((p) => p.includes('/ai-observability/')), `refused requests sent: ${log.failed.join(', ')}`);
+      expect((await page.getByTestId('load-error-banner').count()) === 0, 'a "could not be loaded, try again" notice is shown for a refusal');
       await scan('ai observability refused');
     });
 

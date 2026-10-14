@@ -31,6 +31,10 @@ export async function run({ webUrl, apiUrl, tmpDir }) {
       await gotoAndSettle(page, `${webUrl}/ai-observability`, 1500);
       expect((await page.getByTestId('observability-error').innerText()).includes('Administrator access is required'), 'the page does not say access is refused');
       expect((await page.getByTestId('provider-stats').count()) === 0, 'data shown to a non-administrator');
+      // The page knows the role, so it asks for nothing that can only be refused, and does not
+      // offer "try again" for a refusal
+      expect(!log.failed.some(p => p.includes('/ai-observability/')), `refused requests sent: ${log.failed.join(', ')}`);
+      expect((await page.getByTestId('load-error-banner').count()) === 0, 'a "could not be loaded, try again" notice is shown for a refusal');
     });
 
     await t.step('an administrator sees the sidebar entry, policy, statistics and events', async () => {

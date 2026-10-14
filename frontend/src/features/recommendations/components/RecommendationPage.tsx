@@ -270,8 +270,8 @@ export const RecommendationPage: React.FC = () => {
         />
 
         <PremiumSection
-          title="Strategic Intelligence Stream"
-          subtitle="Chronologically ordered by impact leverage and career readiness delta"
+          title="Your actions"
+          subtitle="In the order chosen above; by default the action that closes the largest gap comes first"
           badge="Personal Stream"
         >
           <IntelligenceStreamFeed
@@ -286,8 +286,8 @@ export const RecommendationPage: React.FC = () => {
 
       {/* SECTION 4 — COMMAND CENTER SHORTCUTS */}
       <PremiumSection
-        title="Downstream Execution Hubs"
-        subtitle="Pivot seamlessly into roadmap execution and neural guidance"
+        title="Related pages"
+        subtitle="Continue in your roadmap or ask the assistant"
         badge="Command Center"
       >
         <QuickActionGrid actions={quickActions} columns={3} />
