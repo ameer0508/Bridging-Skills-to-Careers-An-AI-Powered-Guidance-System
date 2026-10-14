@@ -6,12 +6,19 @@ decided, and refuses what SkillBridge does not support instead of guessing.
 from __future__ import annotations
 
 import re
+import unicodedata
 from typing import Dict
 
 from .languages import RECOGNISED_UNSUPPORTED, SCRIPT_NAMES, SCRIPTS, STOPWORDS, SUPPORTED
 
 MIN_WORDS = 15
-WORD = re.compile(r"[^\W\d_]+", re.UNICODE)
+# A word is a letter followed by letters or combining marks. Vowel signs, viramas and nuktas in
+# Indic scripts are combining marks (not letters), so without them "वर्मा" would split into "वर" +
+# "म", Hindi function words would go uncounted and fragments would match Marathi markers.
+_COMBINING_MARKS = "".join(
+    re.escape(chr(c)) for c in range(0x0300, 0x0E00) if unicodedata.category(chr(c)) in ("Mn", "Mc")
+)
+WORD = re.compile(rf"[^\W\d_](?:[^\W\d_]|[{_COMBINING_MARKS}‌‍])*", re.UNICODE)
 
 
 def script_counts(text: str) -> Dict[str, int]:

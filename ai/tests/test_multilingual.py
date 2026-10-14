@@ -40,6 +40,27 @@ def test_detection_supported_and_refused():
     assert short["status"] == "too_little_text" and short["supported"] is False
 
 
+def test_devanagari_words_keep_their_vowel_signs():
+    # Vowel signs and the virama are combining marks; splitting words at them turned "वर्मा" into
+    # "वर" + "म" and "से" into "स", so Hindi function words went uncounted and fragments such as
+    # "व" were counted as Marathi markers. This SYNTHETIC Hindi resume was refused as Marathi.
+    from app.multilingual.detect import WORD
+    assert WORD.findall("रिया वर्मा से वर्तमान कौशल") == ["रिया", "वर्मा", "से", "वर्तमान", "कौशल"]
+    text = chr(10).join([
+        "रिया वर्मा",
+        "कार्य अनुभव",
+        "डेटा विश्लेषक, उदाहरण एनालिटिक्स — जून 2023 से वर्तमान",
+        "बिक्री डैशबोर्ड बनाए और SQL तथा Excel से रिपोर्ट तैयार कीं।",
+        "शिक्षा",
+        "बी.एससी. सांख्यिकी, उदाहरण विश्वविद्यालय, 2022",
+        "कौशल",
+        "SQL, Excel, Python, Power BI, सांख्यिकी",
+    ])
+    result = detect_language(text)
+    assert result["language"] == "hi" and result["supported"], result
+    assert result["evidence"]["hi"] > result["evidence"]["mr"]
+
+
 def test_headings_dates_and_contacts_normalised():
     assert heading_of("कार्य अनुभव")[:2] == ("experience", "hi")
     assert heading_of("Formación académica")[:2] == ("education", "es")
