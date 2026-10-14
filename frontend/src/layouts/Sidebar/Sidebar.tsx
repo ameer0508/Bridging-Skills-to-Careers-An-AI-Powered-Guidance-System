@@ -165,7 +165,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse,
             {collapsed ? (
               <div aria-hidden="true" className="mx-auto mb-2 mt-1 h-px w-8 bg-aurora-line" />
             ) : (
-              <p className="px-3 pb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-aurora-muted/80">{group.title}</p>
+              <p className="px-3 pb-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-aurora-muted">{group.title}</p>
             )}
             <ul className="space-y-0.5">
               {group.items.map(item => (
