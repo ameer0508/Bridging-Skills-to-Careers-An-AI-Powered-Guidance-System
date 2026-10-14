@@ -5,6 +5,7 @@ import apiClient from '../../../lib/axios';
 import { useAuthStore } from '../../../store/authStore';
 import { useToast } from '../../../components/composite/Toast';
 import { GlassPanel } from '../../../components/experience/workspace';
+import { Portal } from '../../../components/primitives/Portal/Portal';
 import { CAREER_DOMAINS, SECONDARY_INTEREST_TAGS } from '../careerDomains';
 
 export interface CareerDomainOnboardingModalProps {
@@ -99,13 +100,16 @@ export const CareerDomainOnboardingModal: React.FC<CareerDomainOnboardingModalPr
     }
   };
 
+  // Rendered outside the Aurora shell, in the dark portal layer, so it keeps its own design
   return (
+    <Portal>
     <div
       role="dialog"
       aria-modal="true"
       aria-label="Career Domain Onboarding Wizard"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xl animate-fade-in"
     >
+      <div className="w-full max-w-3xl">
       <GlassPanel className="max-w-3xl w-full p-6 sm:p-8 space-y-6 border-indigo-500/50 shadow-2xl relative overflow-hidden font-mono text-xs max-h-[90vh] overflow-y-auto">
         {/* TOP STEP INDICATOR */}
         <div className="flex items-center justify-between pb-4 border-b border-white/10">
@@ -318,7 +322,9 @@ export const CareerDomainOnboardingModal: React.FC<CareerDomainOnboardingModalPr
           </div>
         )}
       </GlassPanel>
+      </div>
     </div>
+    </Portal>
   );
 };
 

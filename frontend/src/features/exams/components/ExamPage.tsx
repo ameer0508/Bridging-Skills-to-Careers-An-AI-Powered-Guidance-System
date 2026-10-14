@@ -110,7 +110,7 @@ const SyllabusTab: React.FC<{ exam: ExamSummary }> = ({ exam }) => (
               <span className="text-xs text-[var(--color-text-secondary)]">
                 · {t.questionCount} question{t.questionCount === 1 ? '' : 's'} · about {t.estimatedHours} h (SkillBridge estimate)
               </span>
-              {t.limitedContent && <span className="ml-2 rounded border border-dashed border-amber-500 px-1.5 text-xs text-amber-700" data-testid="limited-content">Limited practice content</span>}
+              {t.limitedContent && <span className="ml-2 rounded border border-dashed border-amber-500 px-1.5 text-xs text-amber-300" data-testid="limited-content">Limited practice content</span>}
               <p className="text-xs text-[var(--color-text-secondary)]">Official syllabus: {t.officialText}</p>
             </li>
           ))}

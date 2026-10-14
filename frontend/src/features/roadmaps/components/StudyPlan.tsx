@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarClock } from 'lucide-react';
 import apiClient from '../../../lib/axios';
+import { rangeText, type Range } from './scheduleText';
 import { ErrorNote, Loading, Note } from '../../careerLab/components/labUi';
 import { errorText, fieldClass, formatDate, formatDateTime, labelClass, panelClass, primaryButton, quietButton } from '../../careerLab/components/labStyles';
 
@@ -9,10 +10,6 @@ import { errorText, fieldClass, formatDate, formatDateTime, labelClass, panelCla
 interface WeekWindow {
   earliestWeek: number;
   latestWeek: number;
-}
-interface Range {
-  low: number;
-  high: number;
 }
 export interface RoadmapSchedule {
   hoursPerWeek: number | null;
@@ -33,9 +30,6 @@ interface ScheduleResponse {
   lastUpdate: { at: string; action: string; details: string } | null;
 }
 
-/** "about 7 weeks" or "7 to 18 weeks"; hours likewise. */
-const rangeText = (range: Range, unit: string): string =>
-  range.low === range.high ? `about ${range.low} ${unit}${range.low === 1 ? '' : 's'}` : `${range.low} to ${range.high} ${unit}s`;
 
 const weekText = (window: WeekWindow): string =>
   window.earliestWeek === window.latestWeek ? `week ${window.earliestWeek}` : `between week ${window.earliestWeek} and week ${window.latestWeek}`;
@@ -207,25 +201,14 @@ export const StudyPlanPanel: React.FC<{ careerId: string }> = ({ careerId }) => 
   );
 };
 
-/** One line for the dashboard: the same figures as the roadmap page, from the career snapshot. */
-export const StudyPlanSummary: React.FC<{
-  schedule: { hoursPerWeek: number | null; remainingItems: number; remainingHours: Range; weeksRemaining: Range | null; finishBetween: { earliest: string; latest: string } | null; nextItemTitle: string | null };
-  onOpen: () => void;
-}> = ({ schedule, onOpen }) => (
-  <section className={`${panelClass} !space-y-2`} aria-labelledby="home-study-plan-heading" data-testid="home-study-plan">
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <h2 id="home-study-plan-heading" className="text-sm font-bold text-white">Study plan</h2>
-      <button type="button" className={quietButton} onClick={onOpen}>Open roadmap</button>
-    </div>
-    <p className="text-xs text-slate-300">
-      {schedule.remainingItems === 0
-        ? 'Every roadmap item is done.'
-        : schedule.weeksRemaining
-          ? `${schedule.remainingItems} items left: ${rangeText(schedule.weeksRemaining, 'week')} at ${schedule.hoursPerWeek} hours a week.`
-          : `${schedule.remainingItems} items left (${rangeText(schedule.remainingHours, 'hour')}). Set your weekly hours on the roadmap page to see this in weeks.`}
-      {schedule.remainingItems > 0 && schedule.nextItemTitle ? ` Next: ${schedule.nextItemTitle}.` : ''}
-    </p>
-  </section>
-);
+/** The schedule as the career snapshot carries it to the dashboard (features/home/aurora/StudyPlanCard.tsx). */
+export interface StudyPlanSchedule {
+  hoursPerWeek: number | null;
+  remainingItems: number;
+  remainingHours: Range;
+  weeksRemaining: Range | null;
+  finishBetween: { earliest: string; latest: string } | null;
+  nextItemTitle: string | null;
+}
 
 export default StudyPlanPanel;

@@ -18,6 +18,8 @@ export const Portal: React.FC<PortalProps> = ({ children, containerId = 'portal-
     if (!el) {
       el = document.createElement('div');
       el.id = containerId;
+      // Portal content keeps its own (dark) design inside the Aurora shell: see main.css
+      el.className = 'sb-legacy-dark';
       document.body.appendChild(el);
       created = true;
     }

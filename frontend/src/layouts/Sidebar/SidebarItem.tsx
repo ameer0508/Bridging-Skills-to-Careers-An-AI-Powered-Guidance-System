@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Tooltip } from '../../components/base/Tooltip';
 
 export interface SidebarItemProps {
@@ -9,79 +9,38 @@ export interface SidebarItemProps {
   label: string;
   isCollapsed?: boolean;
   badge?: React.ReactNode;
-  isAi?: boolean;
-  shortcut?: string;
   onClick?: () => void;
 }
 
-export const SidebarItem: React.FC<SidebarItemProps> = ({
-  to,
-  icon,
-  label,
-  isCollapsed = false,
-  badge,
-  isAi = false,
-  shortcut,
-  onClick,
-}) => {
+/** One navigation link: porcelain when active, with a violet indicator that glides between items. */
+export const SidebarItem: React.FC<SidebarItemProps> = ({ to, icon, label, isCollapsed = false, badge, onClick }) => {
+  const reduce = useReducedMotion();
   const content = (
     <NavLink
       to={to}
+      end={to === '/market'}
       onClick={onClick}
       aria-label={label}
-      className={({ isActive }) => `
-        relative flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold select-none cursor-pointer transition-all duration-200 group
-        ${
-          isActive
-            ? 'bg-gradient-to-r from-indigo-500/20 via-purple-500/10 to-transparent border border-indigo-500/30 text-white font-bold shadow-[0_0_15px_rgba(99,102,241,0.15)]'
-            : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-100 hover:border-white/5 border border-transparent'
-        }
-        ${isAi && !isCollapsed ? 'ring-1 ring-cyan-500/30 bg-cyan-500/5' : ''}
-        ${isCollapsed ? 'justify-center px-0 py-2.5' : ''}
-      `}
+      className={({ isActive }) =>
+        `group relative flex items-center gap-3 rounded-2xl text-[13px] font-semibold transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora-violet ${
+          isCollapsed ? 'h-11 justify-center' : 'px-3 py-2.5'
+        } ${isActive ? 'text-aurora-indigo' : 'text-aurora-muted hover:bg-white/70 hover:text-aurora-ink'}`
+      }
     >
       {({ isActive }) => (
         <>
-          {/* Active Accent Bar */}
           {isActive && (
             <motion.span
-              layoutId="activeSidebarIndicator"
-              className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-gradient-to-b from-indigo-400 to-cyan-400 rounded-r-full shadow-[0_0_8px_rgba(99,102,241,0.8)]"
-              transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+              layoutId="aurora-nav-active"
+              aria-hidden="true"
+              className="absolute inset-0 rounded-2xl border border-aurora-line bg-white shadow-aurora-sm"
+              transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 36 }}
             />
           )}
-
-          {/* Icon */}
-          <span
-            className={`shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-              isActive
-                ? isAi
-                  ? 'text-cyan-400'
-                  : 'text-indigo-400'
-                : isAi
-                ? 'text-cyan-400/80 group-hover:text-cyan-300'
-                : 'text-slate-400 group-hover:text-slate-200'
-            }`}
-          >
-            {icon}
-          </span>
-
-          {/* Label */}
-          {!isCollapsed && (
-            <span className="truncate tracking-wide text-xs">{label}</span>
-          )}
-
-          {/* Shortcut / Badge */}
-          {!isCollapsed && (badge || shortcut) && (
-            <div className="ml-auto flex items-center gap-1 shrink-0">
-              {badge}
-              {shortcut && (
-                <span className="px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-[9px] font-mono text-slate-400 group-hover:text-slate-300">
-                  {shortcut}
-                </span>
-              )}
-            </div>
-          )}
+          {isActive && <span aria-hidden="true" className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full [background:var(--aurora-gradient-action)]" />}
+          <span className={`relative shrink-0 transition-transform duration-200 group-hover:scale-105 ${isActive ? 'text-aurora-violet' : ''}`}>{icon}</span>
+          {!isCollapsed && <span className="relative truncate">{label}</span>}
+          {!isCollapsed && badge && <span className="relative ml-auto">{badge}</span>}
         </>
       )}
     </NavLink>
@@ -94,7 +53,6 @@ export const SidebarItem: React.FC<SidebarItemProps> = ({
       </Tooltip>
     );
   }
-
   return content;
 };
 

@@ -850,8 +850,8 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       const snap = await snapshot();
       const text = await bodyText(page);
       expect(text.includes(`${snap.readinessScore}%`), `readiness ${snap.readinessScore}% is not on Home`);
-      expect(new RegExp(`${snap.totalSkills} Verified Skills`, 'i').test(text), `skill count ${snap.totalSkills} is not on Home`);
-      expect(/1 Opportunities/i.test(text), 'the tracked job is not counted on Home');
+      expect(new RegExp(`${snap.totalSkills} skills? identified`, 'i').test(text), `skill count ${snap.totalSkills} is not on Home`);
+      expect(/\b1 tracked job\b/i.test(text), 'the tracked job is not counted on Home');
       expect(text.includes(`${snap.roadmap.progress}%`), `roadmap progress ${snap.roadmap.progress}% is not on Home`);
       expect(snap.opportunities.applied === 1 && snap.opportunities.total === 1, `snapshot pipeline ${JSON.stringify(snap.opportunities)}`);
       return `readiness ${snap.readinessScore}%, ${snap.totalSkills} skills, 1 tracked job, roadmap ${snap.roadmap.progress}%`;

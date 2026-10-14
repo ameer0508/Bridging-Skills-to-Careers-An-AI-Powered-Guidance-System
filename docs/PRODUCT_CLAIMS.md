@@ -46,6 +46,25 @@ The landing page was rebuilt in the Aurora Elite visual language (`frontend/src/
 - **The signature scene** (`JourneyScene`, an original inline SVG of a path through mountains at sunrise) has an accessible name listing the five stages. Its motion stops under reduced motion.
 - **Removed.** The sixteen previous landing components were removed with the page that used them (`AgentConstellation`, `CareerOSReveal`, `CareerTransformation`, `CareerUniverse`, `CinematicCTA`, `DigitalTwinSection`, `ExampleScenarios`, `ImmersiveFooter`, `ImmersiveNavbar`, `IntelligenceFAQ`, `IntelligenceHero`, `IntelligencePipeline`, `IntelligenceTrust`, `InteractiveComparison`, `LiveAIExperience`, `MarketIntelligence`). The shared `effects/` helpers stay.
 
+## Aurora Elite app shell and Command Center (2026-10-14)
+
+The signed-in shell (sidebar, top bar, account menu, phone drawer) and the Command Center (`/home`) were rebuilt in Aurora Elite (`frontend/src/layouts/`, `frontend/src/features/home/aurora/`). Pages not yet migrated keep their earlier dark design inside one dark container (`.sb-legacy-dark`, listed in `frontend/src/design/aurora/routes.ts`). That container goes away once every group is migrated.
+
+- **Removed claims:**
+  - the sidebar's "OS v2.0" and "AI Engine Online" badges;
+  - the account menu's invented "AI Systems Architect Track". It now shows the student's own goal, when one is set.
+  - the boot overlay that ran a fixed 1.9-second sequence ("Verifying Security Tokens", "Establishing encrypted session", "Initializing AI Models", "SkillBridge OS v1.0"). None of these steps happened. It was a timer.
+  - the old home copy ("Awaken your profile intelligence", "Priority Activation", "Market Radar") and the 67 Spatial and orbital component files behind it.
+- **Every figure on the Command Center comes from stored data:**
+  - Career match, readiness, the skills count, roadmap progress, the study plan, the ranked next steps and the streak;
+  - skill gaps and skills by area;
+  - the tracked-job pipeline, practice interviews, the resume summary and recent activity (`/activity`).
+  
+  A figure that has not been measured reads "Not measured yet" or "No roadmap yet", never 0%.
+- **Match and readiness are measured against the closest catalogue career.** When that career differs from the student's stated goal, the hero says so ("measured against your closest catalogue career, …").
+- **The assistant card states the AI status.** It says whether a language model is reachable. When none is, it says that answers come from the built-in rules and are labelled.
+- **The next best action follows the server's rule** (resume → skills → goal → gap → practice → jobs), worded plainly.
+
 ## Pages inside the app
 
 Pages whose content is built-in sample content are wrapped in `DemoWorkspace`, which shows the "Illustrative sample data" notice:
@@ -53,7 +72,7 @@ Pages whose content is built-in sample content are wrapped in `DemoWorkspace`, w
 - coding, open source and brand;
 - planning agent, personal memory and Career OS.
 
-The home, analytics, learning and AI architect pages draw on the user's own data and mark estimates with `IllustrativeNotice kind="heuristic"`. The production bundle was checked for every component with hard-coded figures. Each one shipped either sits behind one of these notices or renders the user's data.
+The analytics, learning and AI architect pages draw on the user's own data and mark estimates with `IllustrativeNotice kind="heuristic"`. The production bundle was checked for every component with hard-coded figures. Each one shipped either sits behind one of these notices or renders the user's data.
 
 ## Test
 

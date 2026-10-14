@@ -1,22 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Search,
-  Bell,
-  Sun,
-  Moon,
-  Monitor,
-  Menu,
-  ChevronRight,
-  User,
-  LogOut,
-  Sparkles,
-} from 'lucide-react';
-import { useTheme } from '../../theme/ThemeContext';
+import React, { useEffect, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { Bell, LogOut, Menu, Search, Sparkles, Target, User } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/authStore';
 import { Avatar } from '../../components/base/Avatar';
-import { useQuery } from '@tanstack/react-query';
 import apiClient from '../../lib/axios';
 
 export interface TopBarProps {
@@ -24,34 +12,53 @@ export interface TopBarProps {
   onOpenCommandPalette?: () => void;
 }
 
-const routeTitleMap: Record<string, { title: string; category: string }> = {
-  '/home': { title: 'Home Command Center', category: 'Mission Control' },
-  '/profile': { title: 'Profile & Settings', category: 'Identity' },
-  '/activity': { title: 'Learning Activity', category: 'Progress' },
-  '/portfolio': { title: 'Portfolio', category: 'Evidence' },
-  '/careers': { title: 'Career Intelligence', category: 'Analytics' },
-  '/readiness': { title: 'Career Readiness', category: 'Assessment' },
-  '/skills': { title: 'Skill Intelligence', category: 'Taxonomy' },
-  '/recommendations': { title: 'AI Recommendations', category: 'Action Center' },
-  '/roadmap': { title: 'Learning Roadmap', category: 'Execution' },
-  '/analytics': { title: 'Progress Analytics', category: 'Intelligence' },
-  '/ai': { title: 'AI Career Architect', category: 'AI Advisory' },
-  '/resume': { title: 'Resume Intelligence', category: 'Document Studio' },
-  '/job-agent': { title: 'Job Search Agent', category: 'Intelligent Agents' },
-  '/interview-agent': { title: 'Interview Prep Agent', category: 'Intelligent Agents' },
-  '/orchestrator': { title: 'Agent Orchestrator', category: 'Intelligent Agents' },
-  '/github': { title: 'GitHub Intelligence', category: 'Intelligent Agents' },
+/** Page names, grouped as in the sidebar. */
+const ROUTE_TITLES: Record<string, { title: string; group: string }> = {
+  '/home': { title: 'Command Center', group: 'Overview' },
+  '/ai': { title: 'AI Command Center', group: 'Overview' },
+  '/recommendations': { title: 'Recommendations', group: 'Overview' },
+  '/resume': { title: 'Resume Intelligence', group: 'Discover' },
+  '/skills': { title: 'Skill Intelligence', group: 'Discover' },
+  '/careers': { title: 'Career Intelligence', group: 'Discover' },
+  '/readiness': { title: 'Career Readiness', group: 'Discover' },
+  '/career-lab': { title: 'Career Lab', group: 'Discover' },
+  '/career-domains': { title: 'More Career Domains', group: 'Discover' },
+  '/resume-language': { title: 'Resume Language Check', group: 'Discover' },
+  '/roadmap': { title: 'Learning Roadmap', group: 'Learn & build' },
+  '/activity': { title: 'Learning Activity', group: 'Learn & build' },
+  '/portfolio': { title: 'Portfolio', group: 'Learn & build' },
+  '/exams': { title: 'Exam Practice', group: 'Learn & build' },
+  '/analytics': { title: 'Progress Analytics', group: 'Learn & build' },
+  '/interview-agent': { title: 'Interview Prep', group: 'Practice & apply' },
+  '/interviews': { title: 'Interviews', group: 'Practice & apply' },
+  '/job-agent': { title: 'Job Search', group: 'Practice & apply' },
+  '/opportunities': { title: 'Job Search', group: 'Practice & apply' },
+  '/applications': { title: 'Applications', group: 'Practice & apply' },
+  '/application-outcomes': { title: 'Application Outcomes', group: 'Practice & apply' },
+  '/employer-postings': { title: 'Employer Postings', group: 'Practice & apply' },
+  '/orchestrator': { title: 'Agent Orchestrator', group: 'Practice & apply' },
+  '/market': { title: 'Market Evidence', group: 'Market' },
+  '/market/salaries': { title: 'Salary Insights', group: 'Market' },
+  '/ai-observability': { title: 'AI Observability', group: 'Administration' },
+  '/profile': { title: 'Profile & Settings', group: 'Account' },
+  '/settings': { title: 'Settings', group: 'Account' },
 };
 
-export const TopBar: React.FC<TopBarProps> = ({
-  onOpenMobileSidebar,
-  onOpenCommandPalette,
-}) => {
+const titleFor = (path: string) =>
+  ROUTE_TITLES[path] ?? Object.entries(ROUTE_TITLES).find(([route]) => route !== '/' && path.startsWith(`${route}/`))?.[1] ?? { title: 'SkillBridge', group: 'Workspace' };
+
+const iconButton =
+  'relative inline-flex h-10 w-10 items-center justify-center rounded-full text-aurora-muted transition-colors hover:bg-white hover:text-aurora-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora-violet';
+
+export const TopBar: React.FC<TopBarProps> = ({ onOpenMobileSidebar, onOpenCommandPalette }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { theme, setTheme } = useTheme();
-  const clearSession = useAuthStore((state) => state.clearSession);
-  const user = useAuthStore((state) => state.user);
+  const reduce = useReducedMotion();
+  const clearSession = useAuthStore(state => state.clearSession);
+  const user = useAuthStore(state => state.user);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const current = titleFor(location.pathname);
 
   // Real unread notifications; refreshed with the activity page and when the tab regains focus
   const unread = useQuery<number>({
@@ -61,160 +68,117 @@ export const TopBar: React.FC<TopBarProps> = ({
   });
   const unreadCount = unread.data ?? 0;
 
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const profileMenuRef = useRef<HTMLDivElement>(null);
-
-  const currentRoute = routeTitleMap[location.pathname] || {
-    title: 'Adaptive Workspace',
-    category: 'SkillBridge',
-  };
-
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
-        setIsProfileMenuOpen(false);
-      }
+    if (!menuOpen) return;
+    const onDown = (e: MouseEvent) => menuRef.current && !menuRef.current.contains(e.target as Node) && setMenuOpen(false);
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setMenuOpen(false);
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
     };
-    if (isProfileMenuOpen) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isProfileMenuOpen]);
-
-  const toggleTheme = () => {
-    if (theme === 'dark') setTheme('light');
-    else if (theme === 'light') setTheme('system');
-    else setTheme('dark');
-  };
+  }, [menuOpen]);
 
   return (
-    <header className="h-16 px-4 md:px-6 bg-slate-950/80 border-b border-white/10 backdrop-blur-xl flex items-center justify-between sticky top-0 z-30 shadow-lg">
-      {/* LEFT: MOBILE TOGGLE & BREADCRUMBS */}
-      <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={onOpenMobileSidebar}
-          aria-label="Open mobile navigation"
-          className="md:hidden p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-        >
-          <Menu className="w-5 h-5" />
+    <header className="sb-aurora sticky top-0 z-30 flex h-[72px] shrink-0 items-center justify-between gap-3 border-b border-aurora-line/70 bg-aurora-canvas/80 px-4 backdrop-blur-xl md:px-6">
+      <div className="flex min-w-0 items-center gap-2">
+        <button type="button" onClick={onOpenMobileSidebar} aria-label="Open navigation" className={`${iconButton} md:hidden`}>
+          <Menu className="h-5 w-5" aria-hidden />
         </button>
-
-        {/* BREADCRUMBS */}
-        <nav aria-label="Breadcrumb" className="hidden sm:flex items-center gap-2 text-xs font-semibold">
-          <span className="text-slate-500 font-mono">SkillBridge</span>
-          <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
-          <span className="text-indigo-400 font-mono">{currentRoute.category}</span>
-          <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
-          <span className="text-white font-bold tracking-tight">{currentRoute.title}</span>
-        </nav>
-        <div className="sm:hidden font-bold text-sm text-white">
-          {currentRoute.title}
+        <div className="min-w-0">
+          <p className="hidden text-[11px] font-bold uppercase tracking-[0.14em] text-aurora-muted sm:block">{current.group}</p>
+          <p className="truncate font-heading text-lg font-extrabold tracking-tight text-aurora-ink sm:text-xl">{current.title}</p>
         </div>
       </div>
 
-      {/* RIGHT: SEARCH, THEME, NOTIFICATIONS & USER DROPDOWN */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        {/* GLOBAL COMMAND PALETTE SEARCH TRIGGER */}
+      <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
         <button
           type="button"
           onClick={onOpenCommandPalette}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-white/10 text-xs text-slate-400 hover:text-white hover:border-indigo-500/40 hover:bg-slate-900 transition-all cursor-pointer shadow-inner"
+          aria-label="Search pages"
+          className="hidden h-10 items-center gap-2 rounded-full border border-aurora-line bg-white px-4 text-sm text-aurora-muted shadow-aurora-sm transition-colors hover:border-aurora-lavender hover:text-aurora-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora-violet md:inline-flex"
         >
-          <Search className="w-3.5 h-3.5 text-indigo-400" />
-          <span className="hidden md:inline font-mono">Search platform...</span>
-          <kbd className="hidden md:inline-block px-1.5 py-0.5 text-[9px] font-mono bg-white/5 border border-white/10 rounded text-slate-300">
-            ⌘K
-          </kbd>
+          <Search className="h-4 w-4" aria-hidden />
+          <span>Search</span>
+          <kbd className="rounded-md border border-aurora-line bg-aurora-canvas px-1.5 py-0.5 font-sans text-[10px] font-semibold text-aurora-muted">Ctrl K</kbd>
         </button>
-
-        {/* THEME TOGGLE */}
-        <button
-          type="button"
-          onClick={toggleTheme}
-          aria-label={`Current theme ${theme}. Click to change.`}
-          className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+        <button type="button" onClick={onOpenCommandPalette} aria-label="Search pages" className={`${iconButton} md:hidden`}>
+          <Search className="h-[18px] w-[18px]" aria-hidden />
+        </button>
+        <Link
+          to="/ai"
+          className="hidden h-10 items-center gap-2 rounded-full px-4 text-sm font-semibold text-white shadow-aurora-md transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora-violet focus-visible:ring-offset-2 [background:var(--aurora-gradient-action)] sm:inline-flex"
         >
-          {theme === 'dark' ? (
-            <Moon className="w-4 h-4 text-cyan-400" />
-          ) : theme === 'light' ? (
-            <Sun className="w-4 h-4 text-amber-400" />
-          ) : (
-            <Monitor className="w-4 h-4 text-indigo-400" />
-          )}
-        </button>
-
-        {/* NOTIFICATIONS BUTTON */}
+          <Sparkles className="h-4 w-4" aria-hidden /> Ask the assistant
+        </Link>
+        <Link to="/ai" aria-label="Ask the assistant" className={`${iconButton} sm:hidden`}>
+          <Sparkles className="h-[18px] w-[18px] text-aurora-violet" aria-hidden />
+        </Link>
         <button
           type="button"
           aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
           data-testid="notification-bell"
           data-unread={unreadCount}
           onClick={() => navigate('/activity')}
-          className="relative p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+          className={iconButton}
         >
-          <Bell className="w-4 h-4" />
+          <Bell className="h-[18px] w-[18px]" aria-hidden />
           {/* Shown only when there really is something unread */}
-          {unreadCount > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-cyan-400" />}
+          {unreadCount > 0 && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-aurora-violet ring-2 ring-aurora-canvas" />}
         </button>
-
-        {/* USER PROFILE DROPDOWN */}
-        <div className="relative" ref={profileMenuRef}>
+        <div className="relative" ref={menuRef}>
           <button
             type="button"
-            onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-            aria-expanded={isProfileMenuOpen}
-            aria-haspopup="true"
-            className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-indigo-500/50 transition-all cursor-pointer"
+            onClick={() => setMenuOpen(o => !o)}
+            aria-expanded={menuOpen}
+            aria-haspopup="menu"
+            aria-label="Account menu"
+            className="rounded-full p-0.5 transition-shadow hover:ring-2 hover:ring-aurora-lavender focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora-violet"
           >
             <Avatar name={user?.fullName || user?.email} size="sm" />
           </button>
-
           <AnimatePresence>
-            {isProfileMenuOpen && (
+            {menuOpen && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                role="menu"
+                initial={reduce ? undefined : { opacity: 0, y: 6, scale: 0.98 }}
+                animate={reduce ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                exit={reduce ? undefined : { opacity: 0, y: 6, scale: 0.98 }}
                 transition={{ duration: 0.15 }}
-                className="absolute right-0 top-12 w-60 bg-slate-900/95 border border-white/10 rounded-2xl shadow-2xl backdrop-blur-xl py-2 z-50 space-y-1"
+                className="absolute right-0 top-12 z-50 w-64 origin-top-right rounded-3xl border border-aurora-line bg-white p-2 shadow-aurora-lg"
               >
-                <div className="px-4 py-2.5 border-b border-white/10 space-y-0.5">
-                  <p className="text-xs font-bold text-white truncate">
-                    {user?.fullName || 'User'}
-                  </p>
-                  <p className="text-[10px] text-slate-400 font-mono truncate">
-                    {user?.email}
-                  </p>
-                  <div className="flex items-center gap-1 text-[9px] text-cyan-400 font-mono pt-1">
-                    <Sparkles className="w-3 h-3" />
-                    <span>AI Systems Architect Track</span>
-                  </div>
+                <div className="border-b border-aurora-line px-3 pb-3 pt-2">
+                  <p className="truncate text-sm font-semibold text-aurora-ink">{user?.fullName || 'Your account'}</p>
+                  <p className="truncate text-xs text-aurora-muted">{user?.email}</p>
+                  {user?.targetRole && (
+                    <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-aurora-violet/[0.08] px-2.5 py-1 text-xs font-semibold text-aurora-indigo">
+                      <Target className="h-3.5 w-3.5" aria-hidden /> Goal: {user.targetRole}
+                    </p>
+                  )}
                 </div>
-
                 <button
                   type="button"
+                  role="menuitem"
                   onClick={() => {
-                    setIsProfileMenuOpen(false);
+                    setMenuOpen(false);
                     navigate('/profile');
                   }}
-                  className="w-full px-4 py-2 text-xs font-semibold text-left text-slate-200 hover:bg-white/10 flex items-center gap-2 transition-colors cursor-pointer"
+                  className="mt-1 flex w-full items-center gap-2.5 rounded-2xl px-3 py-2.5 text-left text-sm font-medium text-aurora-ink hover:bg-aurora-canvas"
                 >
-                  <User className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Profile & Settings</span>
+                  <User className="h-4 w-4 text-aurora-violet" aria-hidden /> Profile & Settings
                 </button>
-
-                <div className="my-1 border-t border-white/5" />
-
                 <button
                   type="button"
+                  role="menuitem"
                   onClick={() => {
-                    setIsProfileMenuOpen(false);
+                    setMenuOpen(false);
                     clearSession();
                     navigate('/login');
                   }}
-                  className="w-full px-4 py-2 text-xs font-semibold text-left text-rose-400 hover:bg-rose-500/10 flex items-center gap-2 transition-colors cursor-pointer"
+                  className="flex w-full items-center gap-2.5 rounded-2xl px-3 py-2.5 text-left text-sm font-medium text-rose-600 hover:bg-rose-50"
                 >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>Sign Out</span>
+                  <LogOut className="h-4 w-4" aria-hidden /> Sign Out
                 </button>
               </motion.div>
             )}

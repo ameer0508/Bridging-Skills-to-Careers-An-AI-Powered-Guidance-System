@@ -155,8 +155,11 @@
    All component tokens reference these. Never reference
    primitive tokens directly in component code.
    ────────────────────────────────────────────────────────── */
+/* `.sb-legacy-dark` is the theme boundary for screens not yet moved to Aurora Elite: it
+   re-declares these dark tokens so everything inside stays dark whatever the page theme. */
 :root,
-html.dark {
+html.dark,
+.sb-legacy-dark {
   /* ── Background Tokens ── */
   --color-bg-app:             var(--primitive-neutral-950);   /* Root application background */
   --color-bg-surface:         var(--primitive-neutral-900);   /* Cards, panels */
@@ -811,4 +814,36 @@ button:active {
   transition: transform 0.1s ease;
 }
 
+/* ──────────────────────────────────────────────────────────
+   AURORA ELITE MIGRATION BOUNDARY
+   Redesigned screens render on the light Aurora canvas. Screens not yet migrated render inside
+   one dark container with their original colours; portals (dialogs, menus, tooltips, toasts)
+   share that dark scope because their components are still dark-designed.
+   ────────────────────────────────────────────────────────── */
+.sb-legacy-dark {
+  background-color: var(--color-bg-app);
+  color: var(--primitive-neutral-100);
+  color-scheme: dark;
+}
+/* Small captions in the dark screens used slate-500 and the primary-500 link colour, which fall
+   below 4.5:1 on this background (about 4.2:1 and 3.8:1). Inside the boundary they are lifted one
+   step; the rules go away with the boundary. */
+.sb-legacy-dark .text-slate-500,
+.sb-legacy-dark .placeholder\:text-slate-500::placeholder {
+  color: var(--color-slate-400);
+}
+.sb-legacy-dark .text-\[var\(--color-interactive-primary\)\] {
+  color: var(--primitive-primary-300);
+}
+.sb-aurora {
+  color-scheme: light;
+}
 
+/* Thin, quiet scrollbars for the Aurora shell */
+.aurora-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #d9def0 transparent;
+}
+.aurora-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+.aurora-scroll::-webkit-scrollbar-thumb { background: #d9def0; border-radius: 999px; border: 3px solid transparent; background-clip: content-box; }
+.aurora-scroll::-webkit-scrollbar-track { background: transparent; }

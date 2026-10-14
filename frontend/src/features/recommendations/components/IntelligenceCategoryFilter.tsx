@@ -65,7 +65,7 @@ export const IntelligenceCategoryFilter: React.FC<IntelligenceCategoryFilterProp
                 <span>{tab.label}</span>
                 <span
                   className={`px-1.5 py-0.5 rounded-md text-[10px] ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'
+                    isActive ? 'bg-indigo-900 text-white' : 'bg-slate-800 text-slate-400'
                   }`}
                 >
                   {tab.count}

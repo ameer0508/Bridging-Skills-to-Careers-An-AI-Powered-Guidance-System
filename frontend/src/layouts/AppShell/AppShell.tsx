@@ -6,9 +6,7 @@ import { WorkspaceContainer } from '../WorkspaceContainer';
 import { CommandPalette, CommandItem } from '../../components/composite/CommandPalette';
 import { ToastProvider } from '../../components/composite/Toast';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
-import { useTheme } from '../../theme/ThemeContext';
 import { useAuthStore } from '../../store/authStore';
-import { AIInitializationOverlay } from '../../components/experience';
 import { CareerDomainOnboardingModal } from '../../features/onboarding/components/CareerDomainOnboardingModal';
 
 export interface AppShellProps {
@@ -18,7 +16,6 @@ export interface AppShellProps {
 export const AppShellContent: React.FC<AppShellProps> = ({ children }) => {
   const navigate = useNavigate();
   const { isLaptop, isMobile } = useBreakpoint();
-  const { theme, setTheme } = useTheme();
   const { user, isHydrated, fetchCurrentUser, accessToken } = useAuthStore();
 
   useEffect(() => {
@@ -136,20 +133,16 @@ export const AppShellContent: React.FC<AppShellProps> = ({ children }) => {
       category: 'Profile & Identity',
       onSelect: () => navigate('/profile'),
     },
-    {
-      id: 'theme-toggle',
-      label: `Switch Theme (Current: ${theme})`,
-      category: 'Preferences',
-      onSelect: () => {
-        if (theme === 'dark') setTheme('light');
-        else if (theme === 'light') setTheme('system');
-        else setTheme('dark');
-      },
-    },
   ];
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 font-sans antialiased select-none">
+    <div className="sb-aurora flex h-screen w-screen overflow-hidden bg-aurora-canvas font-sans text-aurora-ink antialiased">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-aurora-indigo focus:shadow-aurora-lg focus:outline-none focus:ring-2 focus:ring-aurora-violet"
+      >
+        Skip to content
+      </a>
       {/* PERSISTENT AI SIDEBAR */}
       <Sidebar
         isCollapsed={isMobile ? false : isCollapsed}
@@ -179,8 +172,6 @@ export const AppShellContent: React.FC<AppShellProps> = ({ children }) => {
         isOpen={Boolean(isHydrated && user && !user.onboardingCompleted)}
       />
 
-      {/* AI INITIALIZATION OVERLAY */}
-      <AIInitializationOverlay />
     </div>
   );
 };
