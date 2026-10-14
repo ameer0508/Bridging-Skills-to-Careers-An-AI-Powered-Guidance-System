@@ -166,7 +166,8 @@ export const DISCLOSURE =
 export interface PublicPostingView {
   id: string;
   organizationName: string;
-  organization: { website: string | null; emailDomainMatchesWebsite: boolean; selfDeclared: true };
+  /** Market review is an administrator's check of the claim, not independent verification. */
+  organization: { website: string | null; emailDomainMatchesWebsite: boolean; selfDeclared: true; includedInMarketFigures: boolean };
   title: string;
   description: string;
   city: string;
@@ -185,7 +186,12 @@ export interface PublicPostingView {
 const publicView = (p: IEmployerPosting, profile: IEmployerProfile | null): PublicPostingView => ({
   id: p._id.toString(),
   organizationName: p.organizationName,
-  organization: { website: profile?.website ?? null, emailDomainMatchesWebsite: profile?.emailDomainMatchesWebsite ?? false, selfDeclared: true },
+  organization: {
+    website: profile?.website ?? null,
+    emailDomainMatchesWebsite: profile?.emailDomainMatchesWebsite ?? false,
+    selfDeclared: true,
+    includedInMarketFigures: profile?.marketReview?.status === 'approved',
+  },
   title: p.title,
   description: p.description,
   city: p.city,
@@ -201,8 +207,8 @@ const publicView = (p: IEmployerPosting, profile: IEmployerProfile | null): Publ
   disclosure: DISCLOSURE,
 });
 
-const ownerView = (p: IEmployerPosting, reports = 0) => ({
-  ...publicView(p, null),
+const ownerView = (p: IEmployerPosting, reports = 0, profile: IEmployerProfile | null = null) => ({
+  ...publicView(p, profile),
   status: p.status,
   unrecognisedSkills: p.unrecognisedSkills,
   consent: p.consent ? { termsVersion: p.consent.termsVersion, uses: p.consent.uses, grantedAt: p.consent.grantedAt.toISOString() } : null,
@@ -210,13 +216,21 @@ const ownerView = (p: IEmployerPosting, reports = 0) => ({
   withdrawnAt: p.withdrawnAt?.toISOString() ?? null,
   hiddenReason: p.hiddenReason,
   reports,
-  inMarketData: ['open', 'closed'].includes(p.status),
+  inMarketData: ['open', 'closed'].includes(p.status) && profile?.marketReview?.status === 'approved',
+  /** Why a published posting is not in the market records, if it is not. */
+  marketExclusion: !['open', 'closed'].includes(p.status)
+    ? 'not_published'
+    : profile?.marketReview?.status === 'approved'
+      ? null
+      : profile?.marketReview?.status === 'rejected'
+        ? 'organization_not_accepted_for_market_figures'
+        : 'organization_awaiting_review',
 });
 
 class EmployerPostingService {
   /** At startup: if any posting was ever published under the terms, the channel is a source. */
   async syncSourceRegistration(): Promise<boolean> {
-    const any = await EmployerPosting.exists({ status: { $in: ['open', 'closed'] } });
+    const any = await MarketPosting.exists({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id });
     if (any) activateEmployerSource();
     return Boolean(any);
   }
@@ -224,7 +238,15 @@ class EmployerPostingService {
   // ---------------------------------------------------------------- organization
   async getProfile(userId: string) {
     const profile = await EmployerProfile.findOne({ userId: oid(userId, 'user') });
-    return profile ? { organizationName: profile.organizationName, website: profile.website, emailDomainMatchesWebsite: profile.emailDomainMatchesWebsite, selfDeclared: true as const } : null;
+    return profile
+      ? {
+          organizationName: profile.organizationName,
+          website: profile.website,
+          emailDomainMatchesWebsite: profile.emailDomainMatchesWebsite,
+          selfDeclared: true as const,
+          marketReview: { status: profile.marketReview?.status ?? 'pending', reviewedAt: profile.marketReview?.reviewedAt?.toISOString() ?? null, note: profile.marketReview?.note ?? '' },
+        }
+      : null;
   }
 
   async saveProfile(userId: string, body: unknown) {
@@ -234,11 +256,22 @@ class EmployerPostingService {
     const emailDomain = user.email.split('@')[1]?.toLowerCase() ?? '';
     const site = hostOf(input.website ?? null);
     const emailDomainMatchesWebsite = Boolean(site && (emailDomain === site || emailDomain.endsWith(`.${site}`)));
+    const previous = await EmployerProfile.findOne({ userId: oid(userId, 'user') });
+    const claimChanged = !previous || previous.organizationName !== input.organizationName || (previous.website ?? null) !== (input.website ?? null);
     await EmployerProfile.updateOne(
       { userId: oid(userId, 'user') },
-      { $set: { organizationName: input.organizationName, website: input.website ?? null, emailDomainMatchesWebsite } },
+      {
+        $set: {
+          organizationName: input.organizationName,
+          website: input.website ?? null,
+          emailDomainMatchesWebsite,
+          // A changed name or website is a new claim: it is reviewed again before counting
+          ...(claimChanged ? { marketReview: { status: 'pending', reviewedAt: null, reviewedBy: null, note: '' } } : {}),
+        },
+      },
       { upsert: true }
     );
+    if (previous && claimChanged) await this.removeMarketRecords(await this.publishedIds(userId));
     // Open and draft postings carry the organization's current name
     await EmployerPosting.updateMany({ userId: oid(userId, 'user'), status: { $in: ['draft'] } }, { $set: { organizationName: input.organizationName } });
     return this.getProfile(userId);
@@ -259,7 +292,8 @@ class EmployerPostingService {
       { $group: { _id: '$postingId', n: { $sum: 1 } } },
     ]);
     const byId = new Map(counts.map(c => [c._id.toString(), c.n]));
-    return postings.map(p => ownerView(p, byId.get(p._id.toString()) ?? 0));
+    const profile = await EmployerProfile.findOne({ userId: oid(userId, 'user') });
+    return postings.map(p => ownerView(p, byId.get(p._id.toString()) ?? 0, profile));
   }
 
   async create(userId: string, body: unknown) {
@@ -333,7 +367,6 @@ class EmployerPostingService {
     posting.expiresAt = new Date(now.getTime() + LIMITS.openDays * DAY_MS);
     posting.consent = { termsVersion: CONTRIBUTION_TERMS_VERSION, uses: [...CONTRIBUTION_USES], authorizedToPost: true, realOpening: true, grantedAt: now };
     await posting.save();
-    activateEmployerSource();
     await this.syncMarketRecord(posting);
     return ownerView(posting);
   }
@@ -410,9 +443,60 @@ class EmployerPostingService {
     ]);
     const postings = await EmployerPosting.find({ _id: { $in: grouped.map(g => g._id) } });
     const byId = new Map(postings.map(p => [p._id.toString(), p]));
+    const profiles = new Map((await EmployerProfile.find({ userId: { $in: postings.map(p => p.userId) } })).map(p => [p.userId.toString(), p]));
     return grouped
       .filter(g => byId.has(g._id.toString()))
-      .map(g => ({ ...ownerView(byId.get(g._id.toString())!, g.reports), reasons: g.reasons }));
+      .map(g => {
+        const posting = byId.get(g._id.toString())!;
+        return { ...ownerView(posting, g.reports, profiles.get(posting.userId.toString()) ?? null), reasons: g.reasons };
+      });
+  }
+
+  /**
+   * Organizations for market review, pending first. Shows what a reviewer needs: the claim, the
+   * e-mail domain signal, how many other accounts claim the same name, and published postings.
+   */
+  async listOrganizations(status?: string) {
+    const filter: Record<string, unknown> = {};
+    if (status !== undefined) {
+      if (!['pending', 'approved', 'rejected'].includes(status)) throw new AppError('Unknown review status.', 400, 'VALIDATION_ERROR');
+      filter['marketReview.status'] = status;
+    }
+    const profiles = await EmployerProfile.find(filter).sort({ updatedAt: -1 }).limit(200);
+    const names = await EmployerProfile.aggregate<{ _id: string; accounts: number }>([{ $group: { _id: { $toLower: '$organizationName' }, accounts: { $sum: 1 } } }]);
+    const sameName = new Map(names.map(n => [n._id, n.accounts]));
+    const published = await EmployerPosting.aggregate<{ _id: Types.ObjectId; n: number }>([
+      { $match: { userId: { $in: profiles.map(p => p.userId) }, status: { $in: ['open', 'closed'] } } },
+      { $group: { _id: '$userId', n: { $sum: 1 } } },
+    ]);
+    const postingsBy = new Map(published.map(p => [p._id.toString(), p.n]));
+    return profiles.map(p => ({
+      organizationId: p.userId.toString(),
+      organizationName: p.organizationName,
+      website: p.website,
+      emailDomainMatchesWebsite: p.emailDomainMatchesWebsite,
+      otherAccountsWithSameName: (sameName.get(p.organizationName.toLowerCase()) ?? 1) - 1,
+      publishedPostings: postingsBy.get(p.userId.toString()) ?? 0,
+      marketReview: { status: p.marketReview?.status ?? 'pending', reviewedAt: p.marketReview?.reviewedAt?.toISOString() ?? null, note: p.marketReview?.note ?? '' },
+    }));
+  }
+
+  /** Approving adds the organization's published postings to the market records; rejecting removes them. */
+  async reviewOrganization(adminId: string, organizationId: string, body: unknown) {
+    const input = parse(z.object({ decision: z.enum(['approve', 'reject']), note: text(0, 500).optional() }).strict(), body);
+    const profile = await EmployerProfile.findOne({ userId: oid(organizationId, 'organization') });
+    if (!profile) throw new AppError('Organization not found.', 404, 'NOT_FOUND');
+    profile.marketReview = {
+      status: input.decision === 'approve' ? 'approved' : 'rejected',
+      reviewedAt: new Date(),
+      reviewedBy: oid(adminId, 'user'),
+      note: input.note ?? '',
+    };
+    await profile.save();
+    const postings = await EmployerPosting.find({ userId: profile.userId, status: { $in: ['open', 'closed'] } });
+    if (input.decision === 'approve') for (const posting of postings) await this.syncMarketRecord(posting);
+    else await this.removeMarketRecords(postings.map(p => p._id));
+    return (await this.listOrganizations()).find(o => o.organizationId === profile.userId.toString());
   }
 
   async moderate(id: string, action: 'hide' | 'restore') {
@@ -451,7 +535,11 @@ class EmployerPostingService {
   }
 
   /** Mirrors one published posting into the market records through the normal ingestion path. */
-  private async syncMarketRecord(posting: IEmployerPosting) {
+  private async syncMarketRecord(posting: IEmployerPosting): Promise<boolean> {
+    // Only organizations an administrator has reviewed contribute to market records
+    const profile = await EmployerProfile.findOne({ userId: posting.userId }).select('marketReview');
+    if (profile?.marketReview?.status !== 'approved') return false;
+    activateEmployerSource();
     const recordId = posting._id.toString();
     const existing = await MarketPosting.findOne({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id, sourceRecordId: recordId });
     const salary = posting.salary ? { min: posting.salary.min ?? undefined, max: posting.salary.max ?? undefined, currency: 'INR', period: posting.salary.period } : undefined;
@@ -467,7 +555,7 @@ class EmployerPostingService {
           },
         }
       );
-      return;
+      return true;
     }
     const batch = await MarketIngestionService.importBatch(
       {
@@ -491,6 +579,11 @@ class EmployerPostingService {
       posting.userId.toString()
     );
     if (batch.counts.rejected > 0) logger.warn(`Employer posting ${recordId} was not added to market records: ${batch.rejections.map(r => r.reason).join('; ')}`);
+    return batch.counts.rejected === 0;
+  }
+
+  private async publishedIds(userId: string) {
+    return (await EmployerPosting.find({ userId: oid(userId, 'user'), status: { $in: ['open', 'closed'] } }).select('_id').lean()).map(p => p._id);
   }
 
   private async removeMarketRecords(ids: Types.ObjectId[]) {

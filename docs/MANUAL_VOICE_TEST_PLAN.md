@@ -2,18 +2,18 @@
 
 D1 (3 points) and D2 (2 points) are awarded only after **you** run this plan on real hardware and send the results sheet, and any failures are fixed. Automated tests cannot stand in for a physical microphone or a real speech service, so nothing below is self-awarded.
 
-## What is already verified automatically (2026-10-13)
+## What is already verified automatically (2026-10-13, updated for Chrome)
 
 | Check | Suite | Result | What it does not prove |
 |---|---|---|---|
 | Consent, retention, owner-only playback, replace, isolation, deletion, withdrawal, end-of-round deletion, failed-deletion retry | backend `voice_interviews`, `voice_retention` | Pass | Real devices |
 | The same flows in the browser, with a stand-in recorder and recogniser | `e2e/tests/interviews.mjs` (23/23) | Pass | Any real capture or codec |
-| **Real capture and codec path in Microsoft Edge 155**: the browser's own fake capture device plays a generated 440 Hz tone; real `getUserMedia`, `MediaStream` track, `MediaRecorder` (WebM/Opus), upload, storage and the browser's decoder | `e2e/tests/voiceRealCodec.mjs` (10/10) | Pass: no microphone request before consent; 48,596-byte WebM/Opus; track `ended` after stop; decoded 3.00 s at 453 Hz (source 440 Hz), not silent; byte-identical after reload; second account 404 on list, play and delete; replacement dated as the new take; deletion final after reload; "until this round ends" deletes on conclusion; a **really refused** permission shows the message and typing still works | A physical microphone, real voices, other devices, and Chrome |
-| Real speech API in Edge 155 | probe | `SpeechRecognition` present; service recognition "available"; on-device recognition (en-US) "unavailable" | Whether recognition is accurate |
+| **Real capture and codec path in Microsoft Edge 155 and Google Chrome Stable 155**: the browser's own fake capture device plays a generated 440 Hz tone; real `getUserMedia`, `MediaStream` track, `MediaRecorder` (WebM/Opus), upload, storage and the browser's decoder | `e2e/tests/voiceRealCodec.mjs` (12/12 in each browser, with a real-recogniser step and a keyboard-only step) | Pass in both: no microphone request before consent; 48,596-byte WebM/Opus; track `ended` after stop; decoded 3.00 s at 453 Hz (source 440 Hz), not silent; byte-identical after reload; second account 404 on list, play and delete; replacement dated as the new take; deletion final after reload; "until this round ends" deletes on conclusion; a **really refused** permission shows the message and typing still works | A physical microphone, real voices, a screen reader, other devices |
+| Real speech API in Edge 155 and Chrome 155 | probe and suite | `SpeechRecognition` present in both; on-device recognition (en-US) unavailable in both; synthetic speech from Windows text-to-speech is not transcribed by either under automation | Whether recognition of a human voice is accurate |
 
 **Defect found by the real-codec suite and fixed:** re-recording an answer kept the first take's date, because the database timestamps make `createdAt` immutable. The replacement is now a new record dated when it was made, which is what its retention counts from (regression check in `voice_interviews`).
 
-**Google Chrome is not installed on the development machine**, so Chrome has had no automated run. Please test it by hand (or install it and run `E2E_CODEC_CHANNELS=chrome E2E_TEST_FILE=./tests/voiceRealCodec.mjs node run.mjs` in `e2e/`).
+**Chrome has been run automatically** (2026-10-13). Google Chrome Stable 155.0.8059.40 was extracted from Google's signed installer and run without a system install (`E2E_CHROME_PATH=<path to chrome.exe> E2E_CODEC_CHANNELS=chrome E2E_TEST_FILE=./tests/voiceRealCodec.mjs node run.mjs` in `e2e/`). The steps that still need a person in Chrome (A4, A5, B2–B4, C2–C4) are listed in [`MANUAL_VOICE_EVIDENCE.md`](MANUAL_VOICE_EVIDENCE.md) §2a and §4. The owner has chosen not to run them.
 
 ## Setup
 

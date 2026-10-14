@@ -45,7 +45,8 @@ The grant is stored with the posting (version, the seven uses, time).
 | Skills | Normalised to the shared lexicon (`excel` → `Excel`). Unknown names are kept apart, shown to the owner as "not recognised, so not analysed", and never counted. At least one recognised skill is required |
 | Pay | Optional. INR only, per year (₹50,000–₹5 crore) or per month (₹5,000–₹50 lakh). Minimum ≤ maximum ≤ 10 × minimum. At least one bound |
 | Publish | Needs the three confirmations. Opens for 60 days. Refused as a duplicate if the same organization already published the same role in the same place the same day, or already has it open |
-| Market records | On publishing, the posting goes through the normal ingestion path (`MarketIngestionService`). That covers registered source, fingerprint de-duplication across sources, and lexicon skills read from title, description and list; the description itself is not stored there. The source is "Employer submissions on SkillBridge (organizations self-declared, not verified)" |
+| Market review | A posting enters the market records only after an administrator has reviewed the **organization's claim** (Review tab: website, e-mail domain signal, other accounts claiming the same name, published postings). Until then it is listed for job seekers ("not counted in market figures") but in no statistic. Changing the organization's name or website sends it back to review and removes its postings from the figures. Rejecting removes them too. Review is a check of the claim, **not independent verification**: listings stay labelled self-declared |
+| Market records | Once reviewed, published postings go through the normal ingestion path (`MarketIngestionService`). That covers registered source, fingerprint de-duplication across sources, and lexicon skills read from title, description and list; the description itself is not stored there. The source is "Employer submissions on SkillBridge (organizations self-declared, not verified)" |
 | Edit | Drafts: any field. Open postings: description, pay, skills, mode, type, link. Pay and skills edits update the market record. Title and place are fixed once published: close it and post again |
 | Close | By the owner, or automatically after 60 days. Stays in the market records as history, last advertised on the closing date |
 | Withdraw | Removed from listings and market records at once |
@@ -54,10 +55,24 @@ The grant is stored with the posting (version, the seven uses, time).
 
 ## The market source and its safeguards
 
-- **Registration.** The channel becomes a registered market source only after a posting has been published under the terms. It is checked at start-up and on each publish. Before that, every market screen keeps saying that no licensed source is connected; an empty channel is never presented as a source.
+- **Registration.** The channel becomes a registered market source only once a reviewed organization's posting is held in the market records. It is checked at start-up and whenever a posting is added. Before that, every market screen keeps saying that no licensed source is connected; an empty channel is never presented as a source.
 - **Minimums.** Every existing minimum still applies: postings, months, freshness, salary sample sizes and trend thresholds.
 - **Employer diversity** (new, applied to every source; `services/market/employerDiversity.ts`). No count trend, salary figure, skill trend or usable career summary is given unless postings come from at least **5 named employers** and **no employer supplies more than half**. Below that, counts are shown with the reason "too few employers" or "one employer dominates". This stops one organization, or one account, from manufacturing a market figure.
 - **Synthetic data stays apart.** Synthetic fixtures stay in their own dataset and never mix with these records.
+
+## Abuse audit (2026-10-14)
+
+| Risk | Control | Evidence |
+|---|---|---|
+| Spam | 10 new postings a day and 25 open per account; 60-day expiry; reports (3 hide a posting); administrator hide | `employer_postings` |
+| Duplicate submissions | Same role, place and day from one organization refused; the same role already open refused. The same posting submitted by two accounts is merged by the ingestion fingerprint, so it is counted once | `employer_postings`; `market_intelligence` (fingerprints) |
+| Forged organization claims | Labelled self-declared everywhere. E-mail domain signal shown. Accounts claiming the same name are shown to the reviewer. **No market figure from an unreviewed organization.** A rename needs a new review | `employer_postings` (review, rename, rejection); browser `employer.mjs` |
+| Misleading statistics | Review gate, the employer-diversity rule (at least 5 employers, none above half) and every existing minimum. One person with several accounts and invented names cannot reach a figure without an administrator accepting each claim | market suites; `employer_postings` |
+| Consent withdrawal | Withdraw per posting, or delete the account: removed from listings and every figure at once | `employer_postings`; `account_deletion` |
+| Cross-account isolation | Owner-only actions answer 404 to anyone else; administrator routes check the role in the database | `employer_postings`; `security_sweep` |
+| Report abuse (three accounts hiding a genuine posting) | Hidden postings go to the administrator, who can restore them (reports are then cleared) | `employer_postings` |
+
+**Residual risk.** Administrator review is human judgement, not verification. A determined person with a matching domain could still pass it. Until real organizations use the channel there is no data to mislead with.
 
 ## Privacy and security
 

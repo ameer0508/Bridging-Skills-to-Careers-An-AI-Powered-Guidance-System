@@ -50,7 +50,7 @@ All code figures above are from the final tree of the 2026-10-13 completion pass
 | Item | Points | Why open | What closes it |
 |---|---|---|---|
 | C1, C2, C3, C4, C5, R4 | 14 | No free source permits storing, counting, pricing or mining Indian job postings. OnJob.io's feed permits republishing live listings only (used for A1); its CC BY salary buckets fail a validity check (`MARKET_DATA_SOURCES.md`) | OnJob.io's written permission (request drafted in `MARKET_DATA_SOURCES.md` §5), Adzuna's written consent at ₹0, or another compliant source; C2 then needs months of history |
-| D1, D2 | 5 | Every required step passes by the owner's hand in **Microsoft Edge** (real microphone, Narrator), and B6 in **Firefox**; B4 4 of 5 terms; B7 N/A. The award rule also requires **Google Chrome**, which the owner has chosen not to test and which has had no automated run | Chrome evidence for A1–A12, B1–B5, B8 and C1–C4 (`MANUAL_VOICE_EVIDENCE.md` §4). Not requested further, at the owner's instruction |
+| D1, D2 | 5 | Every required step passes by the owner's hand in **Microsoft Edge** (real microphone, Narrator), and B6 in **Firefox**; B4 4 of 5 terms; B7 N/A. The award rule also requires **Google Chrome**. Real Chrome Stable 155 passes every automatable step (voice suite 12/12; A1, A2, A6–A12, B1, B5, B8, C1), but A4–A5 (physical microphone), B2–B4 (human voice) and C2–C4 (screen reader) need a person, and the owner has chosen not to test Chrome by hand | A manual Chrome run of A4, A5, B2–B4 and C2–C4 (`MANUAL_VOICE_EVIDENCE.md` §4). Not requested, at the owner's instruction |
 
 **Other limits, all documented:**
 - The labelled multilingual set is small and synthetic; no real scans were measured.

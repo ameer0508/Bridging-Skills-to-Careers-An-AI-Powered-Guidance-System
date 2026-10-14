@@ -2,12 +2,13 @@
 // and posting is SYNTHETIC TEST DATA. Run with
 //   E2E_TEST_FILE=./tests/employer.mjs node run.mjs
 import { Reporter, apiClient, completeOnboarding, expect, gotoAndSettle, launchBrowser, register, watch } from '../lib/harness.mjs';
+import { setRole } from '../lib/admin.mjs';
 
 const PASSWORD = 'Password123!';
 const DESCRIPTION =
   'Build weekly sales dashboards in Excel and Power BI, write SQL against the warehouse and explain results to the sales team. SYNTHETIC TEST DATA.';
 
-export async function run({ webUrl, apiUrl }) {
+export async function run({ webUrl, apiUrl, tmpDir }) {
   const t = new Reporter();
   const stamp = Date.now();
   const { browser, channel } = await launchBrowser();
@@ -66,7 +67,8 @@ export async function run({ webUrl, apiUrl }) {
       await terms.getByLabel('I grant the uses listed above.').check();
       await publish.click();
       await page.waitForFunction(() => document.querySelector('[data-testid="own-posting"]')?.getAttribute('data-status') === 'open', null, { timeout: 10_000 });
-      expect(/included in market data/.test(await page.getByTestId('own-posting').first().innerText()), 'not shown as included in market data');
+      expect(/until an administrator reviews your organization/.test(await page.getByTestId('own-posting').first().innerText()), 'the owner is not told it awaits review');
+      expect(/Awaiting review/.test(await page.getByTestId('organization-review').innerText()), 'the organization review state is not shown');
       const mine = (await api('GET', '/employer/postings/mine')).data.postings;
       expect(mine[0].consent?.uses.length === 7, 'consent not stored');
     });
@@ -80,6 +82,7 @@ export async function run({ webUrl, apiUrl }) {
       const text = await opening.first().innerText();
       expect(/Data Analyst/.test(text) && /Example Analytics/.test(text) && /₹4,00,000 – ₹7,00,000 a year/.test(text), `opening: ${text.slice(0, 300)}`);
       expect((await seeker.getByTestId('self-declared').count()) === 1, 'no self-declared label');
+      expect(/not counted in market figures/.test(await seeker.getByTestId('market-inclusion').innerText()), 'an unreviewed organization is presented as counted');
       await seeker.getByLabel('Skill', { exact: true }).fill('Kubernetes');
       await seeker.getByRole('button', { name: 'Filter' }).click();
       await seeker.getByTestId('openings-empty').waitFor({ timeout: 10_000 });
@@ -91,6 +94,40 @@ export async function run({ webUrl, apiUrl }) {
       await seeker.getByRole('button', { name: 'Send report' }).click();
       await seeker.getByText('The report was recorded').waitFor({ timeout: 10_000 });
       expect((await seekerApi('POST', `/employer/postings/${(await seekerApi('GET', '/employer/postings')).data.postings[0].id}/reports`, { reason: 'other' })).status === 409, 'a second report by the same user was accepted');
+    });
+
+    await t.step('an administrator reviews the organization; only then does the posting count, still labelled self-declared', async () => {
+      const adminEmail = `employer.admin.${stamp}@example.com`;
+      const adminPage = await (await browser.newContext({ viewport: { width: 1366, height: 900 } })).newPage();
+      await register(adminPage, webUrl, 'Admin Tester', adminEmail, PASSWORD);
+      await completeOnboarding(adminPage, 'Data Analyst');
+      await adminPage.context().close();
+      setRole(tmpDir, adminEmail, 'admin');
+      const admin = await (await browser.newContext({ viewport: { width: 1366, height: 900 } })).newPage();
+      const adminLog = watch(admin, apiUrl);
+      await admin.goto(`${webUrl}/login`);
+      await admin.fill('input[type="email"]', adminEmail);
+      await admin.fill('input[type="password"]', PASSWORD);
+      await admin.click('button[type="submit"]');
+      await admin.waitForURL('**/home', { timeout: 30_000 });
+      await gotoAndSettle(admin, `${webUrl}/employer-postings`, 1500);
+      await admin.getByRole('tab', { name: 'Review reports' }).click();
+      const card = admin.getByTestId('organization-for-review').filter({ hasText: 'Example Analytics' });
+      await card.waitFor({ timeout: 10_000 });
+      expect(/e-mail domain matches · 1 published · Awaiting review/.test(await card.innerText()), `review card: ${await card.innerText()}`);
+      await card.getByLabel('Note').fill('Website and e-mail domain match');
+      await card.getByRole('button', { name: 'Accept for market figures' }).click();
+      await admin.waitForFunction(() => [...document.querySelectorAll('[data-testid="organization-for-review"]')].some((e) => e.getAttribute('data-status') === 'approved'), null, { timeout: 10_000 });
+      expect(adminLog.failed.length === 0 && adminLog.console.length === 0, `admin problems: ${[...adminLog.failed, ...adminLog.console].join(' | ')}`);
+      await admin.context().close();
+      await page.reload();
+      await page.getByRole('tab', { name: 'Post a job' }).click();
+      await page.getByTestId('own-posting').first().waitFor({ timeout: 10_000 });
+      expect(/included in market data/.test(await page.getByTestId('own-posting').first().innerText()), 'not included after review');
+      await gotoAndSettle(seeker, `${webUrl}/employer-postings`, 1500);
+      await seeker.getByTestId('opening').first().waitFor({ timeout: 10_000 });
+      expect(/counted in market figures after an administrator review/.test(await seeker.getByTestId('market-inclusion').innerText()), 'the listing does not say it is counted after review');
+      expect((await seeker.getByTestId('self-declared').count()) === 1, 'the self-declared label is gone after review');
     });
 
     await t.step('closing and withdrawing take the posting off the list', async () => {

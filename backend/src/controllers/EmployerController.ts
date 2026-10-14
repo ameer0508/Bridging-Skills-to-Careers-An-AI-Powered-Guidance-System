@@ -20,7 +20,8 @@ export const CONTRIBUTION_TERMS = {
   } satisfies Record<(typeof CONTRIBUTION_USES)[number], string>,
   withdrawal:
     'You can withdraw a posting at any time: it disappears at once from listings and from every market figure. Deleting your account withdraws all your postings.',
-  verification: 'SkillBridge does not verify organizations. Postings are labelled as self-declared.',
+  verification:
+    "SkillBridge does not verify organizations. Postings are labelled as self-declared. A posting counts in market figures only after a SkillBridge administrator has reviewed your organization's claim; that review is not independent verification.",
 };
 
 const userIdOf = (req: Request): string => {
@@ -78,6 +79,14 @@ class EmployerController {
   report = handle(async (req, res) => ok(res, await EmployerPostingService.report(userIdOf(req), req.params.id, req.body), 201));
 
   listReported = handle(async (_req, res) => ok(res, { postings: await EmployerPostingService.listReported() }));
+  listOrganizations = handle(async (req, res) => {
+    const extra = Object.keys(req.query).filter(k => k !== 'status');
+    if (extra.length) throw new AppError(`Unknown query parameter: ${extra.join(', ')}`, 400, 'VALIDATION_ERROR');
+    ok(res, { organizations: await EmployerPostingService.listOrganizations(queryString(req.query.status)) });
+  });
+  reviewOrganization = handle(async (req, res) =>
+    ok(res, { organization: await EmployerPostingService.reviewOrganization(userIdOf(req), req.params.id, req.body) })
+  );
   hide = handle(async (req, res) => ok(res, { posting: await EmployerPostingService.moderate(req.params.id, 'hide') }));
   restore = handle(async (req, res) => ok(res, { posting: await EmployerPostingService.moderate(req.params.id, 'restore') }));
 }

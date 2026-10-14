@@ -9,6 +9,7 @@ import {
   fetchMyPostings,
   fetchOpenPostings,
   fetchOrganization,
+  fetchOrganizationsForReview,
   fetchReported,
   fetchTerms,
   LABEL,
@@ -19,6 +20,7 @@ import {
   PublicPosting,
   publishPosting,
   reportPosting,
+  reviewOrganization,
   salaryText,
   saveOrganization,
   Terms,
@@ -154,6 +156,7 @@ const OpeningCard: React.FC<{ posting: PublicPosting; reasons: string[] }> = ({ 
           </a>
         )}
         {p.organization.website && <span className="text-[11px]">{p.organization.emailDomainMatchesWebsite ? "poster's e-mail domain matches the website" : "poster's e-mail domain does not match the website"}</span>}
+        <span className="text-[11px]" data-testid="market-inclusion">{p.organization.includedInMarketFigures ? 'counted in market figures after an administrator review' : 'not counted in market figures'}</span>
       </p>
       <p className="text-sm text-[var(--color-text-secondary)]">
         {p.city}, {p.state} · {LABEL[p.workMode]} · {LABEL[p.employmentType]} · {salaryText(p.salary)} · posted {formatDate(p.publishedAt)}, open until {formatDate(p.expiresAt)}
@@ -286,7 +289,9 @@ const PostJobs: React.FC<{ terms: Terms }> = ({ terms }) => {
             <p className="text-sm text-[var(--color-text-primary)]" data-testid="organization-summary">
               {org.data.organizationName}
               {org.data.website ? ` · ${org.data.website}` : ''} · self-declared ·{' '}
-              {org.data.emailDomainMatchesWebsite ? 'your sign-in e-mail domain matches the website' : 'your sign-in e-mail domain does not match a website'}{' '}
+              {org.data.emailDomainMatchesWebsite ? 'your sign-in e-mail domain matches the website' : 'your sign-in e-mail domain does not match a website'} ·{' '}
+              <span data-testid="organization-review">{LABEL[org.data.marketReview.status]}</span>
+              {org.data.marketReview.note ? ` (${org.data.marketReview.note})` : ''}{' '}
               <button type="button" className="underline" onClick={() => setOrgForm({ organizationName: org.data!.organizationName, website: org.data!.website ?? '' })}>Change</button>
             </p>
           )
@@ -416,7 +421,7 @@ const OwnPostingCard: React.FC<{ posting: OwnPosting; terms: Terms }> = ({ posti
         {p.closedAt ? ` · closed ${formatDate(p.closedAt)}` : ''}
         {p.status === 'open' ? ` · open until ${formatDate(p.expiresAt)}` : ''}
         {' · '}
-        {p.inMarketData ? 'included in market data' : 'not in market data'}
+        {p.inMarketData ? 'included in market data' : p.marketExclusion && p.marketExclusion !== 'not_published' ? LABEL[p.marketExclusion] : 'not in market data'}
         {p.reports > 0 ? ` · ${p.reports} report${p.reports === 1 ? '' : 's'}` : ''}
         {p.hiddenReason ? ` · ${p.hiddenReason}` : ''}
       </p>
@@ -472,7 +477,10 @@ const Review: React.FC = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['employer-reported'] }),
   });
   return (
-    <div className="flex flex-col gap-3" data-testid="review">
+    <div className="flex flex-col gap-6">
+      <OrganizationReview />
+      <div className="flex flex-col gap-3" data-testid="review">
+        <h2 className="text-base font-bold text-[var(--color-text-primary)]">Reported postings</h2>
       {list.isPending && <p role="status" className="text-sm">Loading…</p>}
       {list.isError && <ErrorText error={list.error} fallback="Reports could not be loaded." />}
       {list.isSuccess && list.data.length === 0 && <p className="text-sm text-[var(--color-text-secondary)]">No reported postings.</p>}
@@ -487,7 +495,49 @@ const Review: React.FC = () => {
         </article>
       ))}
       {moderate.isError && <ErrorText error={moderate.error} fallback="The posting could not be changed." />}
+      </div>
     </div>
+  );
+};
+
+/** Organizations' claims, reviewed before their postings count in any market figure. */
+const OrganizationReview: React.FC = () => {
+  const queryClient = useQueryClient();
+  const list = useQuery({ queryKey: ['employer-organizations'], queryFn: fetchOrganizationsForReview, retry: false });
+  const [notes, setNotes] = useState<Record<string, string>>({});
+  const review = useMutation({
+    mutationFn: ({ id, decision }: { id: string; decision: 'approve' | 'reject' }) => reviewOrganization(id, decision, notes[id] ?? ''),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['employer-organizations'] }),
+  });
+  return (
+    <section aria-labelledby="org-review-heading" className="flex flex-col gap-3" data-testid="organization-review-list">
+      <h2 id="org-review-heading" className="text-base font-bold text-[var(--color-text-primary)]">Organizations for market review</h2>
+      <p className="text-xs text-[var(--color-text-secondary)]">
+        A posting counts in market figures only after its organization is reviewed here. Review is your check of the claim, not independent
+        verification: listings keep saying the organization is self-declared.
+      </p>
+      {list.isPending && <p role="status" className="text-sm">Loading…</p>}
+      {list.isError && <ErrorText error={list.error} fallback="Organizations could not be loaded." />}
+      {list.isSuccess && list.data.length === 0 && <p className="text-sm text-[var(--color-text-secondary)]">No organizations yet.</p>}
+      {list.data?.map(o => (
+        <article key={o.organizationId} className={card} data-testid="organization-for-review" data-status={o.marketReview.status}>
+          <h3 className="font-bold">{o.organizationName}</h3>
+          <p className="text-sm">
+            {o.website ?? 'no website'} · e-mail domain {o.emailDomainMatchesWebsite ? 'matches' : 'does not match'} · {o.publishedPostings} published · {LABEL[o.marketReview.status]}
+            {o.otherAccountsWithSameName > 0 && <strong> · {o.otherAccountsWithSameName} other account{o.otherAccountsWithSameName === 1 ? '' : 's'} claim this name</strong>}
+          </p>
+          <div className="mt-2 flex flex-wrap items-end gap-2">
+            <label className={labelClass}>
+              Note
+              <input className={inputClass} value={notes[o.organizationId] ?? ''} maxLength={500} onChange={e => setNotes({ ...notes, [o.organizationId]: e.target.value })} />
+            </label>
+            <button type="button" className={secondaryButton} onClick={() => review.mutate({ id: o.organizationId, decision: 'approve' })}>Accept for market figures</button>
+            <button type="button" className={secondaryButton} onClick={() => review.mutate({ id: o.organizationId, decision: 'reject' })}>Reject</button>
+          </div>
+        </article>
+      ))}
+      {review.isError && <ErrorText error={review.error} fallback="The review could not be saved." />}
+    </section>
   );
 };
 

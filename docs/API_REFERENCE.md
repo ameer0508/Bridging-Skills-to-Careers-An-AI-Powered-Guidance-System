@@ -258,11 +258,13 @@ See `docs/EMPLOYER_POSTINGS.md`. Organizations are not verified; every listing s
 | `POST` | `/api/v1/employer/postings` | Yes | Create a draft: `title`, `description` (80–8,000), `city`, `state`, `workMode`, `employmentType`, `skills` (at least one recognised), optional `salary` (`INR`, `YEAR` or `MONTH`, plausible bounds, max ≤ 10× min) and https `applyUrl`. `409 NO_ORGANIZATION`; `429` above 10 a day. |
 | `PATCH` | `/api/v1/employer/postings/:id` | Yes | Edit a draft (any field) or an open posting (description, pay, skills, mode, type, link; title and place are fixed). Owner only (404 otherwise). |
 | `DELETE` | `/api/v1/employer/postings/:id` | Yes | Delete a draft. |
-| `POST` | `/api/v1/employer/postings/:id/publish` | Yes | Body `termsVersion`, `authorizedToPost`, `realOpening`, `grantsUses` (all required). Opens it for 60 days and adds it to the market records. `409 DUPLICATE_POSTING` for the same role, place and day; `429` above 25 open. |
+| `POST` | `/api/v1/employer/postings/:id/publish` | Yes | Body `termsVersion`, `authorizedToPost`, `realOpening`, `grantsUses` (all required). Opens it for 60 days; it enters the market records only once an administrator has reviewed the organization. `409 DUPLICATE_POSTING` for the same role, place and day; `429` above 25 open. |
 | `POST` | `/api/v1/employer/postings/:id/close` | Yes | Close an open posting; it stays in the market history, as the terms allow. |
 | `POST` | `/api/v1/employer/postings/:id/withdraw` | Yes | Withdraw a published posting: removed from listings and from every market figure at once. |
 | `POST` | `/api/v1/employer/postings/:id/reports` | Yes | Body `reason` (`not_a_real_job`, `misleading`, `discriminatory`, `scam_or_fee`, `duplicate`, `other`), optional `note`. Once per user; not your own. Three reports hide the posting pending review. |
 | `GET` | `/api/v1/employer/admin/reports` | Admin | Reported postings with counts and reasons. |
+| `GET` | `/api/v1/employer/admin/organizations` | Admin | Organizations for market review (query `status`: `pending`, `approved`, `rejected`), with the e-mail domain signal, how many other accounts claim the same name and how many postings are published. |
+| `POST` | `/api/v1/employer/admin/organizations/:id/review` | Admin | Body `decision` (`approve` or `reject`), optional `note`. Approving adds the organization's published postings to the market records; rejecting removes them. Not identity verification. |
 | `POST` | `/api/v1/employer/admin/postings/:id/hide` | Admin | Hide a published posting (removed from market figures). |
 | `POST` | `/api/v1/employer/admin/postings/:id/restore` | Admin | Restore a hidden posting; its reports are cleared. |
 

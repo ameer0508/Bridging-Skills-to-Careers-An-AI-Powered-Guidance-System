@@ -23,6 +23,8 @@ router.post('/postings/:id/reports', EmployerController.report);
 
 // Moderation; the role is read from the database on each request
 router.get('/admin/reports', authorize(['admin']), EmployerController.listReported);
+router.get('/admin/organizations', authorize(['admin']), EmployerController.listOrganizations);
+router.post('/admin/organizations/:id/review', authorize(['admin']), EmployerController.reviewOrganization);
 router.post('/admin/postings/:id/hide', authorize(['admin']), EmployerController.hide);
 router.post('/admin/postings/:id/restore', authorize(['admin']), EmployerController.restore);
 

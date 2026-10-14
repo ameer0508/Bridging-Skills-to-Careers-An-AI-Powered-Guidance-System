@@ -95,7 +95,12 @@ export async function runEmployerPostingTests() {
     assert.equal((await A('POST', '/employer/postings/not-an-id/publish', CONSENT)).status, 400);
     console.log("  ✓ Another account cannot see, edit, publish, close, withdraw or delete someone's posting (404)");
 
-    // 4. Publishing needs every consent; then it is listed and mirrored into the market records
+    const admin = await h.registerUser('employer-admin');
+    await User.updateOne({ _id: admin.userId }, { $set: { role: 'admin' } });
+    const ADMIN = (method: string, path: string, json?: unknown) => h.api(method, path, { token: admin.token, json });
+
+    // 4. Publishing needs every consent; the posting is listed at once, but enters the market
+    //    records only after an administrator has reviewed the organization's claim
     assert.equal(getMarketSource(EMPLOYER_SUBMISSIONS_SOURCE.id), undefined, 'no source before anything is published');
     for (const partial of [{}, { ...CONSENT, grantsUses: false }, { ...CONSENT, realOpening: false }, { ...CONSENT, termsVersion: 'v0' }]) {
       assert.equal((await A('POST', `/employer/postings/${draft.id}/publish`, partial)).status, 400, JSON.stringify(partial));
@@ -104,7 +109,21 @@ export async function runEmployerPostingTests() {
     assert.equal(open.status, 'open');
     assert.equal(open.consent.uses.length, 7);
     assert.ok(open.publishedAt && open.expiresAt);
-    assert.ok(getMarketSource(EMPLOYER_SUBMISSIONS_SOURCE.id), 'the channel is a source once something is published');
+    assert.deepEqual([open.inMarketData, open.marketExclusion], [false, 'organization_awaiting_review']);
+    assert.equal(await MarketPosting.countDocuments({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id }), 0, 'nothing counts before review');
+    assert.equal(getMarketSource(EMPLOYER_SUBMISSIONS_SOURCE.id), undefined, 'no source while nothing has been reviewed');
+    assert.equal((await B('GET', '/employer/admin/organizations')).status, 403, 'administrators only');
+    // A second account claiming the same name is shown to the reviewer
+    await B('PUT', '/employer/organization', { organizationName: 'example analytics pvt ltd' });
+    const pending = (await ADMIN('GET', '/employer/admin/organizations?status=pending')).body.data.organizations;
+    const aliceOrg = pending.find((o: any) => o.organizationId === alice.userId);
+    assert.deepEqual([aliceOrg.otherAccountsWithSameName, aliceOrg.publishedPostings, aliceOrg.emailDomainMatchesWebsite], [1, 1, true]);
+    assert.equal((await ADMIN('GET', '/employer/admin/organizations?status=maybe')).status, 400);
+    assert.equal((await ADMIN('POST', `/employer/admin/organizations/${alice.userId}/review`, { decision: 'yes' })).status, 400);
+    assert.equal((await ADMIN('POST', `/employer/admin/organizations/${new mongoose.Types.ObjectId()}/review`, { decision: 'approve' })).status, 404);
+    const reviewed = (await ADMIN('POST', `/employer/admin/organizations/${alice.userId}/review`, { decision: 'approve', note: 'Website and e-mail domain match' })).body.data.organization;
+    assert.equal(reviewed.marketReview.status, 'approved');
+    assert.ok(getMarketSource(EMPLOYER_SUBMISSIONS_SOURCE.id), 'the channel is a source once a reviewed posting is held');
     const record = await MarketPosting.findOne({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id, sourceRecordId: draft.id }).lean();
     assert.ok(record, 'mirrored into the market records');
     assert.deepEqual(
@@ -115,7 +134,8 @@ export async function runEmployerPostingTests() {
     assert.ok(!('description' in record!), 'no description in the market records');
     const listed = (await B('GET', '/employer/postings')).body.data;
     assert.equal(listed.postings.length, 1);
-    assert.equal(listed.postings[0].organization.selfDeclared, true);
+    assert.equal(listed.postings[0].organization.selfDeclared, true, 'still self-declared after review');
+    assert.equal(listed.postings[0].organization.includedInMarketFigures, true);
     assert.match(listed.disclosure, /self-declared; SkillBridge has not verified/);
     assert.equal((await B('GET', '/employer/postings?skill=SQL')).body.data.postings.length, 1);
     assert.equal((await B('GET', '/employer/postings?skill=Kubernetes')).body.data.postings.length, 0);
@@ -148,8 +168,6 @@ export async function runEmployerPostingTests() {
     assert.equal(last.hidden, true, 'hidden after three reports');
     assert.equal((await B('GET', '/employer/postings')).body.data.postings.length, 0);
     assert.equal(await MarketPosting.countDocuments({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id }), 0, 'removed from market figures while hidden');
-    const admin = await h.registerUser('employer-admin');
-    await User.updateOne({ _id: admin.userId }, { $set: { role: 'admin' } });
     const queue = (await h.api('GET', '/employer/admin/reports', { token: admin.token })).body.data.postings;
     assert.equal(queue.length, 1);
     assert.equal(queue[0].reports, 3);
@@ -174,20 +192,33 @@ export async function runEmployerPostingTests() {
     console.log('  ✓ Closing keeps the record as history; withdrawing removes it everywhere; postings close after 60 days');
 
     // 8. Into the market figures, with provenance and every minimum still applied
+    const orgUsers: Array<{ token: string; userId: string }> = [];
     for (let i = 1; i <= 6; i++) {
       const u = await h.registerUser(`org${i}`);
+      orgUsers.push(u);
       await h.api('PUT', '/employer/organization', { token: u.token, json: { organizationName: `Synthetic Employer ${i}` } });
       const p = (await h.api('POST', '/employer/postings', { token: u.token, json: posting({ city: `City ${i}` }) })).body.data.posting;
       await h.api('POST', `/employer/postings/${p.id}/publish`, { token: u.token, json: CONSENT });
+      if (i <= 5) await ADMIN('POST', `/employer/admin/organizations/${u.userId}/review`, { decision: 'approve' });
     }
     const month = new Date().toISOString().slice(0, 7);
     const career = { id: new mongoose.Types.ObjectId().toString(), title: 'Data Analyst' };
     const summary = await MarketOpportunityService.summaryForCareer(career, { dataset: 'sourced', from: month, to: month });
-    assert.equal(summary.distinctPostings, 6);
+    assert.equal(summary.distinctPostings, 5, 'the sixth organization has not been reviewed, so it does not count');
     assert.equal(summary.sources[0].name, EMPLOYER_SUBMISSIONS_SOURCE.name);
     assert.equal(summary.evidenceClass, 'sourced_sparse', 'six postings in one month are still too few');
     assert.deepEqual(summary.insufficientDataReasons, ['too_few_postings', 'too_few_months_with_postings']);
-    console.log('  ✓ Published postings reach market summaries named as employer submissions; the usual minimums still apply');
+    // Changing a reviewed name is a new claim: out of the figures until reviewed again
+    const counted = await MarketPosting.countDocuments({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id });
+    await h.api('PUT', '/employer/organization', { token: orgUsers[0].token, json: { organizationName: 'Renamed Employer' } });
+    assert.equal(await MarketPosting.countDocuments({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id }), counted - 1, 'a renamed organization leaves the figures');
+    assert.equal((await h.api('GET', '/employer/organization', { token: orgUsers[0].token })).body.data.organization.marketReview.status, 'pending');
+    // Rejecting a reviewed organization removes its postings from the figures; the listing stays, labelled
+    await ADMIN('POST', `/employer/admin/organizations/${orgUsers[1].userId}/review`, { decision: 'reject', note: 'Website does not exist' });
+    assert.equal(await MarketPosting.countDocuments({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id }), counted - 2);
+    const org2Listing = (await B('GET', '/employer/postings')).body.data.postings.find((x: any) => x.organizationName === 'Synthetic Employer 2');
+    assert.equal(org2Listing.organization.includedInMarketFigures, false);
+    console.log('  ✓ Only reviewed organizations reach market summaries (named as employer submissions, usual minimums apply); renaming needs a new review; rejection removes them');
 
     // 9. Daily limit
     const already = await EmployerPosting.countDocuments({ userId: alice.userId });
@@ -197,7 +228,7 @@ export async function runEmployerPostingTests() {
 
     // 10. Account deletion removes the user's postings from the market records
     const before = await MarketPosting.countDocuments({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id });
-    const someone = await User.findOne({ email: /^org1\./ });
+    const someone = await User.findOne({ email: /^org3\./ }); // still reviewed and counted
     await EmployerPostingService.removeAllForUser(someone!._id.toString());
     assert.equal(await MarketPosting.countDocuments({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id }), before - 1);
     console.log('  ✓ Deleting an account removes its postings from the market records');

@@ -12,7 +12,7 @@ export interface Salary {
 export interface PublicPosting {
   id: string;
   organizationName: string;
-  organization: { website: string | null; emailDomainMatchesWebsite: boolean; selfDeclared: true };
+  organization: { website: string | null; emailDomainMatchesWebsite: boolean; selfDeclared: true; includedInMarketFigures: boolean };
   title: string;
   description: string;
   city: string;
@@ -37,6 +37,7 @@ export interface OwnPosting extends PublicPosting {
   hiddenReason: string | null;
   reports: number;
   inMarketData: boolean;
+  marketExclusion: null | 'not_published' | 'organization_awaiting_review' | 'organization_not_accepted_for_market_figures';
   reasons?: string[];
 }
 
@@ -48,11 +49,23 @@ export interface Terms {
   options: { states: string[]; workModes: string[]; employmentTypes: string[]; reportReasons: string[] };
 }
 
+export type ReviewStatus = 'pending' | 'approved' | 'rejected';
 export interface Organization {
   organizationName: string;
   website: string | null;
   emailDomainMatchesWebsite: boolean;
   selfDeclared: true;
+  marketReview: { status: ReviewStatus; reviewedAt: string | null; note: string };
+}
+
+export interface OrganizationForReview {
+  organizationId: string;
+  organizationName: string;
+  website: string | null;
+  emailDomainMatchesWebsite: boolean;
+  otherAccountsWithSameName: number;
+  publishedPostings: number;
+  marketReview: { status: ReviewStatus; reviewedAt: string | null; note: string };
 }
 
 export interface PostingInput {
@@ -88,6 +101,10 @@ export const deleteDraft = async (id: string) => apiClient.delete(`/employer/pos
 export const reportPosting = async (id: string, reason: string, note: string) =>
   data<{ reported: boolean; hidden: boolean }>(await apiClient.post(`/employer/postings/${id}/reports`, { reason, ...(note.trim() ? { note } : {}) }));
 export const fetchReported = async () => data<{ postings: OwnPosting[] }>(await apiClient.get('/employer/admin/reports')).postings;
+export const fetchOrganizationsForReview = async () =>
+  data<{ organizations: OrganizationForReview[] }>(await apiClient.get('/employer/admin/organizations')).organizations;
+export const reviewOrganization = async (id: string, decision: 'approve' | 'reject', note: string) =>
+  data<{ organization: OrganizationForReview }>(await apiClient.post(`/employer/admin/organizations/${id}/review`, { decision, ...(note.trim() ? { note } : {}) })).organization;
 export const moderatePosting = async (id: string, action: 'hide' | 'restore') =>
   data<{ posting: OwnPosting }>(await apiClient.post(`/employer/admin/postings/${id}/${action}`)).posting;
 
@@ -111,6 +128,11 @@ export const LABEL: Record<string, string> = {
   closed: 'Closed',
   withdrawn: 'Withdrawn',
   hidden: 'Hidden',
+  pending: 'Awaiting review',
+  approved: 'Reviewed: counts in market figures',
+  rejected: 'Not accepted for market figures',
+  organization_awaiting_review: 'not in market data until an administrator reviews your organization',
+  organization_not_accepted_for_market_figures: 'not in market data: your organization was not accepted for market figures',
 };
 
 const rupees = (n: number) => `₹${n.toLocaleString('en-IN')}`;

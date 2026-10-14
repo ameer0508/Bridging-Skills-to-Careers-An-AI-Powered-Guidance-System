@@ -11,6 +11,7 @@ import Resume from '../models/Resume.js';
 import VoiceRecording from '../models/VoiceRecording.js';
 import MarketPosting from '../models/MarketPosting.js';
 import { activateEmployerSource } from '../config/marketSources.js';
+import EmployerPostingService from '../services/employer/EmployerPostingService.js';
 import { ensureFakeAiService } from './helpers/fakeAiService.js';
 import { startHttpHarness, resumeForm, type HttpHarness } from './helpers/httpHarness.js';
 
@@ -78,6 +79,8 @@ export async function runAccountDeletionTests() {
     await A('PUT', '/employer/organization', { organizationName: 'Alice Analytics (SYNTHETIC)' });
     const job = (await A('POST', '/employer/postings', { title: 'Data Analyst', description: 'Weekly reporting in SQL and Excel for the sales team, with clear written summaries. SYNTHETIC TEST DATA.', city: 'Pune', state: 'Maharashtra', workMode: 'onsite', employmentType: 'full_time', skills: ['SQL'] })).body.data.posting;
     assert.equal((await A('POST', `/employer/postings/${job.id}/publish`, { termsVersion: 'employer-contribution-v1', authorizedToPost: true, realOpening: true, grantsUses: true })).status, 200);
+    // An administrator reviews the organization, so its posting counts in the market records
+    await EmployerPostingService.reviewOrganization(new mongoose.Types.ObjectId().toString(), alice.userId, { decision: 'approve' });
     assert.equal(await MarketPosting.countDocuments({ sourceRecordId: job.id }), 1, 'the posting is in the market records before deletion');
     await A('POST', '/careers/transition-plans', { targetCareerId: careerId });
     await A('POST', '/skills/assessments', { skill: 'Git' });
