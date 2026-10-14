@@ -1,6 +1,7 @@
 import { listMarketSources, MarketDataset } from '../../config/marketSources.js';
 import MarketPosting from '../../models/MarketPosting.js';
 import MarketHistoryService from './MarketHistoryService.js';
+import type { EmployerDiversityReason } from './employerDiversity.js';
 
 /**
  * Cautious demand forecasting (C2) on top of the C1 monthly counts (docs/MARKET_INTELLIGENCE.md §5c).
@@ -43,7 +44,8 @@ export type ForecastReason =
   | 'stale_data'
   | 'mixed_countries'
   | 'duplicate_heavy'
-  | 'too_few_backtest_origins';
+  | 'too_few_backtest_origins'
+  | EmployerDiversityReason;
 
 export type ForecastMethodName = 'naive_last_value' | 'linear_trend_12m';
 
@@ -252,6 +254,11 @@ class MarketForecastService {
     if (!query.country && countries.length > 1) reasons.push('mixed_countries');
     if ((checks.mergedDuplicateShare ?? 0) > FORECAST_MINIMUMS.maxMergedDuplicateShare) reasons.push('duplicate_heavy');
     if (checks.backtestOrigins < FORECAST_MINIMUMS.backtestOrigins) reasons.push('too_few_backtest_origins');
+    // The same employer-diversity rule as every other market figure: a series drawn mostly from
+    // one employer forecasts that employer, not demand
+    for (const reason of history.sufficiency.reasons) {
+      if ((reason === 'too_few_employers' || reason === 'one_employer_dominates') && !reasons.includes(reason)) reasons.push(reason);
+    }
     result.reasons = reasons;
     if (reasons.length > 0) return result;
 

@@ -270,7 +270,8 @@ export type ForecastReason =
   | 'stale_data'
   | 'mixed_countries'
   | 'duplicate_heavy'
-  | 'too_few_backtest_origins';
+  | 'too_few_backtest_origins'
+  | EmployerDiversityReason;
 
 export type ForecastMethodName = 'naive_last_value' | 'linear_trend_12m';
 
@@ -331,4 +332,6 @@ export const FORECAST_REASON_TEXT: Record<ForecastReason, (f: MarketForecast) =>
   mixed_countries: f => `Postings come from ${f.checks.countries.join(', ')}. Choose one country: different markets are not forecast together.`,
   duplicate_heavy: f => `${Math.round((f.checks.mergedDuplicateShare ?? 0) * 100)}% of postings were merged cross-posts, so the counts are not reliable enough.`,
   too_few_backtest_origins: f => `Only ${f.checks.backtestOrigins} past months are available to test the method; ${f.minimums.backtestOrigins} are needed to estimate its error.`,
+  too_few_employers: () => EMPLOYER_REASON_TEXT.too_few_employers,
+  one_employer_dominates: () => EMPLOYER_REASON_TEXT.one_employer_dominates,
 };

@@ -13,6 +13,7 @@ import { buildSyntheticMarketFixture } from '../seed/marketFixture.js';
 import { unavailableSummary, MARKET_SUMMARY_CONTRACT_VERSION } from '../services/market/MarketOpportunitySummary.js';
 import { signAccessToken } from '../utils/jwt.js';
 import { startHttpHarness } from './helpers/httpHarness.js';
+import { EMPLOYER_MINIMUMS, countEmployers, employerDiversity } from '../services/market/employerDiversity.js';
 
 /**
  * C1 sourced market history: provenance-checked import, duplicate control, skill extraction with
@@ -26,6 +27,39 @@ const PERIOD = { from: '2025-10', to: FIXTURE_END };
 
 export async function runMarketIntelligenceTests() {
   console.log('🧪 Running Market Intelligence (C1) Tests...');
+
+  // Property test of the employer-diversity rule over 2,000 random employer mixes (seeded, so a
+  // failure reproduces): it holds exactly when at least 5 named employers supply the postings and
+  // none supplies more than half; unnamed postings count in the denominator but never as employers
+  {
+    let seed = 20261014;
+    const rand = (n: number) => {
+      seed = (seed * 1103515245 + 12345) % 2147483648;
+      return seed % n;
+    };
+    for (let trial = 0; trial < 2000; trial++) {
+      const companies: string[] = [];
+      const employers = 1 + rand(9);
+      const total = 1 + rand(60);
+      for (let i = 0; i < total; i++) {
+        const pick = rand(employers + 2);
+        companies.push(pick >= employers ? (pick % 2 ? '' : '   ') : `  Employer   ${pick % employers} `.replace(/^ +/, i % 3 ? '' : ' '));
+      }
+      const counts = countEmployers(companies);
+      const d = employerDiversity(counts);
+      const named = [...counts.entries()].filter(([k]) => k !== '');
+      const largest = Math.max(0, ...named.map(([, n]) => n));
+      const expected = named.length >= EMPLOYER_MINIMUMS.distinct && largest / total <= EMPLOYER_MINIMUMS.maxShare;
+      assert.equal(d.sufficient, expected, `trial ${trial}: ${JSON.stringify([...counts])}`);
+      assert.equal(d.distinctEmployers, named.length);
+      assert.equal(d.unnamed, counts.get('') ?? 0);
+      assert.ok(d.largestEmployerShare === null || (d.largestEmployerShare > 0 && d.largestEmployerShare <= 1));
+    }
+    // Case and spacing never turn one employer into several
+    assert.equal(employerDiversity(countEmployers(['Acme Ltd', ' acme ltd', 'ACME LTD  '])).distinctEmployers, 1);
+    console.log('  ✓ Employer diversity: 2,000 random mixes match the rule exactly; case and spacing never multiply an employer');
+  }
+
   await MarketPosting.deleteMany({});
   await MarketImportBatch.deleteMany({});
   const importer = new mongoose.Types.ObjectId().toString();

@@ -182,7 +182,15 @@ export async function runMarketForecastTests() {
   assert.equal(one.forecast!.points.length, 1);
   const kotlin = await MarketForecastService.forecast({ dataset: 'synthetic_fixture', to, horizon: 3, skill: 'Kotlin' });
   assert.deepEqual(kotlin.reasons, ['no_records']);
-  console.log(`  ✓ 30 dense synthetic months: forecast given with method ${ok.forecast!.method}, error-based ranges and both backtests`);
+  // The same dense series, but every posting from one employer: no forecast
+  await MarketPosting.updateMany({ dataset: 'synthetic_fixture' }, { $set: { company: 'One Big Employer' } });
+  const concentrated = await MarketForecastService.forecast({ dataset: 'synthetic_fixture', to, horizon: 3 });
+  assert.notEqual(concentrated.status, 'available');
+  assert.equal(concentrated.forecast, null);
+  assert.ok(concentrated.reasons.includes('too_few_employers') && concentrated.reasons.includes('one_employer_dominates'), concentrated.reasons.join(', '));
+  await MarketPosting.updateMany({ dataset: 'synthetic_fixture' }, [{ $set: { company: { $concat: ['Synthetic Employer ', '$sourceRecordId'] } } }]);
+  assert.equal((await MarketForecastService.forecast({ dataset: 'synthetic_fixture', to, horizon: 3 })).status, 'available', 'diverse employers again: forecast given');
+  console.log(`  ✓ 30 dense synthetic months: forecast given with method ${ok.forecast!.method}, error-based ranges and both backtests; refused when one employer supplies them all`);
 
   // A licensed source whose data is sparse, stale and duplicate-heavy
   const unregister = registerMarketSource({
