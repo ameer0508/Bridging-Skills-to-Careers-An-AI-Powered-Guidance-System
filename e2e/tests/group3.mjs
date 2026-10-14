@@ -172,7 +172,11 @@ export async function run({ webUrl, apiUrl }) {
       const first = page.getByTestId('exam-question').first();
       const choice = first.getByRole('radio');
       if (await choice.count()) await choice.first().check();
-      else await first.getByRole('checkbox').first().check();
+      else if (await first.getByRole('checkbox').count()) await first.getByRole('checkbox').first().check();
+      else {
+        await first.getByLabel('Numerical answer').fill('12');
+        await first.getByRole('button', { name: 'Save answer' }).click();
+      }
       await page.waitForTimeout(1200);
       expect(/, answered/.test(await nav.getByRole('link').first().getAttribute('aria-label')), 'the navigator did not follow the answer');
       await scan('exam attempt');
@@ -183,7 +187,7 @@ export async function run({ webUrl, apiUrl }) {
       expect(asked, 'submitting did not ask first');
       expect((await page.getByTestId('question-result').count()) === 4, 'results per question missing');
       const text = await bodyText(page);
-      expect(!(/percentile|rank \d|cut-?off|pass probability/i.test(text) || /AIR/.test(text)), 'the result claims a rank, percentile or cutoff');
+      expect(!(/percentile|\brank \d|cut-?off|pass probability/i.test(text) || /\bAIR\b/.test(text)), 'the result claims a rank, percentile or cutoff');
       await scan('exam result');
     });
 
