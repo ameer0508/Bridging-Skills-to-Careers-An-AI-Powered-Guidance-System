@@ -18,7 +18,7 @@ This is the final engineering regression and release audit of the Aurora Elite r
 | Responsive layout (52 routes, 5 widths, 328 captures) | 7 findings; both causes fixed (§3) |
 | Performance (production build, 4× CPU slowdown) | Initial JS 767 kB on `/` and `/login`; no slow frames while scrolling (§4) |
 | Dependency advisories (production) | 42 (2 critical, 20 high) reduced to 2 moderate, neither reachable (§3.3) |
-| Docker | Not installed on this machine; verified by the GitHub Actions Compose workflow on the pushed Stage F head (§2.5) |
+| Docker | Not installed on this machine. GitHub Actions Compose workflow on the Stage F head `84f4467`: run 38605483410, every step passed, smoke 14/14 (§2.5) |
 | Defects found and fixed | 3 product defects, 1 dependency set (§3) |
 
 **Release readiness:** the redesigned product is ready as a release candidate on the evidence below, with the limitations in §5 and the open requirements in §6. Readiness for production use additionally depends on the deployment items in [`DEPLOYMENT.md`](DEPLOYMENT.md) and [`SECURITY.md`](SECURITY.md) (hosting, secrets, backups, monitoring), which this audit does not change.
@@ -78,7 +78,7 @@ Integrated journeys covered: registration, onboarding, resume upload and replace
 
 Docker is not installed on this machine, so no local container was started and no local Docker volume was touched. The Compose stack is verified by the GitHub Actions workflow `docker-smoke.yml` (manual dispatch, synthetic secrets, no provider keys): Compose validation, refusal without secrets, image builds, unprivileged users, AI service not published, connectivity, authentication and the resume-to-career workflow, OCR in the container, the private AI audit log, **data surviving a restart of every container**, recording retention, startup logs, and teardown of the runner's own volumes.
 
-The last run before this stage tested `472acf1`, which predates the redesign. The run on the Stage F head is recorded in §7.
+The last run before this stage tested `472acf1`, which predates the redesign. **Run 38605483410 on the Stage F commit `84f4467` (2026-10-14) passed every step**, including the image builds with bcrypt 6 on Alpine, the HTTP smoke (14/14 checks), OCR in the container and data surviving a restart of every container.
 
 ## 3. Defects found and fixed
 
@@ -168,4 +168,5 @@ None of these was met in Stage F, so the expansion stays at 81 / 100.
 
 ## 7. Commits and branches
 
-Filled in at commit time; see the Stage F commit message and the final report for SHAs and the Docker workflow run.
+- Stage E: `66a0c74`. Stage F: `84f4467` (fixes, upgrades and this audit), then this record of the Docker run.
+- `work/skillbridge-unified` and `work/skillbridge-opus55-nextgen-expansion` were fast-forwarded from `d5c294e` to the Stage F commits after checking that the remote heads were ancestors; nothing was force-pushed. `main`, the finalization branch and PR #6 were not touched.
