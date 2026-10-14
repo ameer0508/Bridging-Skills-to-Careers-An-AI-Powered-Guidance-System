@@ -25,9 +25,9 @@
 
 | Check | Result |
 |---|---|
-| Backend suites (`runAllTests.ts`) | 58 of 58 pass, including `security_sweep` (165 routes), `account_deletion`, `api_reference`, `onjob_live_listings` and the new `employer_postings` |
-| AI service (`pytest`) | 189 passed (with Tesseract installed) |
-| Browser suites (14) | voiceRealCodec 24/24 (12 steps each in **real Google Chrome Stable 155**, extracted from Google's signed installer, and in Edge 155), smoke 50/50, market 15/15, salaries 14/14, applications 15/15, outcomes 10/10, interviews 23/23, exams 12/12, careerDomains 8/8, languages 11/11, aiObservability 6/6, landing 6/6, accessibility 54/54, employer 7/7. In Chrome, interviews 23/23 and accessibility 53/53 were also run |
+| Backend suites (`runAllTests.ts`) | 58 of 58 pass (308 checks), including `security_sweep` and `api_reference` (167 routes), `account_deletion`, `onjob_live_listings` and `employer_postings` |
+| AI service (`pytest`) | 190 passed (with Tesseract installed), including the Devanagari tokenizer regression |
+| Browser suites (15) | voiceRealCodec 24/24 (12 steps each in real Google Chrome Stable 155 and Edge 155), smoke 50/50, navigation 27/27 (all 24 sidebar entries), employer 8/8, accessibility 54/54, interviews 23/23, market 15/15, applications 15/15, salaries 14/14, exams 12/12, languages 11/11, outcomes 10/10, careerDomains 8/8, aiObservability 6/6, landing 6/6 |
 | Typecheck, lint, production build | Pass (frontend and backend) |
 | Docker Compose, local (Docker Desktop 29.8.2) | On the final code: all four images built; all services healthy; backend and AI run unprivileged; OCR self-check in the container (six languages, English and Hindi scans 4/4); `docker-smoke.mjs` 11/11 (health, nginx, auth, AI parsing, resume-to-career, isolation, recordings); restart persistence 2/2; no startup failures in the logs; with the OnJob feed on, `live/onjobCompareLive.mjs` 3/3 on real data; with onjob.io unreachable, the comparison answered 200 with "unavailable" |
 | Docker Compose (GitHub Actions) | Run 38442538822 on `7a8ce13` (this pass's final code) passes: build, health, auth, the resume-to-career workflow, local OCR with the six approved languages, AI audit privacy, persistence across restart and recording retention. Earlier: 38382438611 on `b033d61`, 38377392127 on `d4264f6` |
@@ -35,7 +35,7 @@
 | Accessibility (V3) | `ACCESSIBILITY.md`: axe on 50 pages, 0 serious or critical violations; keyboard sign-in |
 | API reference | Every route listed (enforced by `api_reference.test.ts`) |
 
-All code figures above are from the final tree of the 2026-10-13 completion pass (real-Chrome voice runs, the employer-diversity rule, employer postings); the GitHub Actions row names its own commit. **Checklist: 81 / 100 verified; 19 open** (section 4).
+All code figures above are from the final tree of 2026-10-14 (release readiness: employer review gate, Hindi tokenizer fix, navigation suite, demo material); the GitHub Actions row names its own commit. **Checklist: 81 / 100 verified; 19 open** (section 4). Demonstration: `DEMO_SCRIPT.md`; overview: `PROJECT_HANDBOOK.md`.
 
 ## 3. Honesty rules applied
 

@@ -8,6 +8,13 @@ This is a college major project. It runs locally and is covered by automated tes
 been deployed to a server or load-tested, and the two external integrations (Google Gemini and
 JSearch) have not been exercised live; see [Verification status](#verification-status).
 
+**Start here:** [`docs/PROJECT_HANDBOOK.md`](docs/PROJECT_HANDBOOK.md) gives the feature inventory, architecture,
+installation, testing summary, known limitations and viva questions for the current tree. The
+next-generation expansion stands at **81/100 verified** ([`docs/NEXTGEN_RELEASE_REPORT.md`](docs/NEXTGEN_RELEASE_REPORT.md)).
+For a live walk-through with synthetic demo accounts and documents, see [`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md).
+The tables below describe the original release; the expansion added 20 careers in total, 148 skills,
+the Career Lab, multilingual resumes with OCR, exams, voice, application outcomes and more.
+
 ## Contents
 
 - [What it does](#what-it-does)
@@ -131,9 +138,9 @@ browser chat request 40 s.
 | `pnpm typecheck` | TypeScript type-check of frontend and backend. |
 | `pnpm lint` | ESLint on frontend and backend; any warning fails. |
 | `pnpm build` | Frontend type-check and production build, then backend build. |
-| `pnpm test` | 20 backend suites on an in-memory database with a stub AI service. |
-| `cd ai && python -m pytest` | 104 AI service tests; provider calls are mocked. |
-| `pnpm test:e2e` | 40 browser checks against an isolated copy of the whole stack. See [`e2e/README.md`](e2e/README.md). |
+| `pnpm test` | 58 backend suites on an in-memory database with a stub AI service. |
+| `cd ai && python -m pytest` | 190 AI service tests; provider calls are mocked. |
+| `cd e2e && E2E_TEST_FILE=./tests/<suite>.mjs node run.mjs` | 15 browser suites against an isolated copy of the whole stack (`pnpm test:e2e` runs the main one). See [`e2e/README.md`](e2e/README.md). |
 | `gh workflow run docker-smoke.yml --ref <branch>` | Builds and starts the Docker Compose stack on GitHub Actions and runs 11 checks against it. |
 
 None of these contacts Gemini or JSearch, and none reads or writes the development database or
