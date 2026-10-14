@@ -28,35 +28,35 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({
   return (
     <Card variant="default">
       <CardHeader>
-        <h3 className="text-base font-bold font-display text-[var(--color-text-primary)]">
+        <h3 className="text-base font-bold font-display text-aurora-ink">
           Account Security & Active Session
         </h3>
       </CardHeader>
 
       <CardBody className="space-y-4">
-        <div className="p-4 bg-[var(--color-bg-surface-sunken)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] space-y-2.5 text-xs">
+        <div className="p-4 bg-[var(--color-bg-surface-sunken)] border border-aurora-line rounded-2xl space-y-2.5 text-xs">
           <div className="flex justify-between items-center">
-            <span className="text-[var(--color-text-tertiary)]">Account ID</span>
-            <span className="font-mono text-[var(--color-text-primary)]">{userId}</span>
+            <span className="text-aurora-muted">Account ID</span>
+            <span className="text-aurora-ink">{userId}</span>
           </div>
-          <div className="flex justify-between items-center border-t border-[var(--color-border-subtle)] pt-2">
-            <span className="text-[var(--color-text-tertiary)]">Email Address</span>
-            <span className="font-semibold text-[var(--color-text-primary)]">{email}</span>
+          <div className="flex justify-between items-center border-t border-aurora-line pt-2">
+            <span className="text-aurora-muted">Email Address</span>
+            <span className="font-semibold text-aurora-ink">{email}</span>
           </div>
-          <div className="flex justify-between items-center border-t border-[var(--color-border-subtle)] pt-2">
-            <span className="text-[var(--color-text-tertiary)]">Authentication Provider</span>
+          <div className="flex justify-between items-center border-t border-aurora-line pt-2">
+            <span className="text-aurora-muted">Authentication Provider</span>
             <Badge variant="subtle" color="primary" size="sm">
               {providerLabel}
             </Badge>
           </div>
-          <div className="flex justify-between items-center border-t border-[var(--color-border-subtle)] pt-2">
-            <span className="text-[var(--color-text-tertiary)]">Security Role</span>
+          <div className="flex justify-between items-center border-t border-aurora-line pt-2">
+            <span className="text-aurora-muted">Security Role</span>
             <Badge variant="subtle" color="primary" size="sm">
               {role}
             </Badge>
           </div>
-          <div className="flex justify-between items-center border-t border-[var(--color-border-subtle)] pt-2">
-            <span className="text-[var(--color-text-tertiary)]">Account Status</span>
+          <div className="flex justify-between items-center border-t border-aurora-line pt-2">
+            <span className="text-aurora-muted">Account Status</span>
             <Badge variant="subtle" color="success" size="sm">
               {accountStatus}
             </Badge>
@@ -65,10 +65,10 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({
 
         <div className="flex items-center justify-between pt-2">
           <div>
-            <span className="text-xs font-bold text-[var(--color-text-primary)] block">
+            <span className="text-xs font-bold text-aurora-ink block">
               Active Session Token
             </span>
-            <span className="text-[10px] text-[var(--color-text-tertiary)] block">
+            <span className="text-[10px] text-aurora-muted block">
               JWT Bearer with automated refresh token rotation
             </span>
           </div>

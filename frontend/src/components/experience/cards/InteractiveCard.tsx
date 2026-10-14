@@ -32,7 +32,7 @@ export const InteractiveCard = React.forwardRef<HTMLDivElement, InteractiveCardP
         transition={{ type: 'spring', stiffness: 400, damping: 25 }}
         className={`rounded-xl p-6 cursor-pointer outline-none transition-colors border ${
           active
-            ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20 shadow-md shadow-indigo-500/10'
+            ? 'border-indigo-500 bg-indigo-50/50 dark:bg-violet-50 shadow-md shadow-indigo-500/10'
             : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:border-indigo-300 dark:hover:border-indigo-700'
         } focus-visible:ring-2 focus-visible:ring-indigo-500 ${className}`}
         {...props}

@@ -37,34 +37,34 @@ export const NeuralInspectorBlade: React.FC<NeuralInspectorBladeProps> = ({
       transition={{ type: 'spring', stiffness: 350, damping: 28 }}
       className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-xl px-4 pointer-events-auto"
     >
-      <div className="neural-glass-blade p-5 sm:p-6 border-cyan-400/40 shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_30px_rgba(6,182,212,0.2)]">
+      <div className="neural-glass-blade p-5 sm:p-6 border-cyan-400/40 shadow-[0_20px_50px_rgba(16,21,59,0.15),0_0_30px_rgba(6,182,212,0.2)]">
         {/* Header with Title, Badge, and Close button */}
-        <div className="flex items-center justify-between gap-4 pb-3 border-b border-white/10">
+        <div className="flex items-center justify-between gap-4 pb-3 border-b border-aurora-line">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-cyan-500 to-indigo-600 p-[1px] shadow-md">
-              <div className="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center text-cyan-300">
+              <div className="w-full h-full bg-aurora-canvas rounded-[11px] flex items-center justify-center text-aurora-violet">
                 <Bot className="w-5 h-5" />
               </div>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold font-display text-white">{agent.name}</h3>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                <h3 className="text-base font-bold font-display text-aurora-ink">{agent.name}</h3>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-aurora-violet/[0.06] text-aurora-violet border border-aurora-violet/25">
                   v{agent.version}
                 </span>
               </div>
-              <span className="text-xs text-slate-400 font-mono">{agent.category}</span>
+              <span className="text-xs text-aurora-muted font-mono">{agent.category}</span>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span>{agent.status}</span>
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+              className="p-1.5 rounded-lg text-aurora-muted hover:text-aurora-indigo hover:bg-aurora-canvas transition-colors"
               title="Close Inspector"
             >
               <X className="w-4 h-4" />
@@ -74,33 +74,33 @@ export const NeuralInspectorBlade: React.FC<NeuralInspectorBladeProps> = ({
 
         {/* Content Body */}
         <div className="py-3.5 space-y-3">
-          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+          <p className="text-xs sm:text-sm text-aurora-muted leading-relaxed">
             {agent.description}
           </p>
 
           <div className="grid grid-cols-2 gap-3 pt-1">
-            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
+            <div className="p-3 rounded-xl bg-white/[0.03] border border-aurora-line flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Activity className="w-4 h-4 text-cyan-400" />
-                <span className="text-xs text-slate-400 font-medium">{agent.metricLabel}</span>
+                <Activity className="w-4 h-4 text-aurora-violet" />
+                <span className="text-xs text-aurora-muted font-medium">{agent.metricLabel}</span>
               </div>
-              <span className="text-xs font-mono font-bold text-white">{agent.metricValue}</span>
+              <span className="text-xs font-bold text-aurora-ink">{agent.metricValue}</span>
             </div>
 
-            <div className="p-3 rounded-xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
+            <div className="p-3 rounded-xl bg-white/[0.03] border border-aurora-line flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-purple-400" />
-                <span className="text-xs text-slate-400 font-medium">Pipeline Phase</span>
+                <Zap className="w-4 h-4 text-aurora-violet" />
+                <span className="text-xs text-aurora-muted font-medium">Pipeline Phase</span>
               </div>
-              <span className="text-xs font-mono font-bold text-purple-300">Phase {agent.dagStep} DAG</span>
+              <span className="text-xs font-bold text-aurora-violet">Phase {agent.dagStep} DAG</span>
             </div>
           </div>
         </div>
 
         {/* Action Blade Footer */}
-        <div className="flex items-center justify-between gap-3 pt-3 border-t border-white/10">
-          <div className="flex items-center gap-2 text-[11px] text-slate-400">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+        <div className="flex items-center justify-between gap-3 pt-3 border-t border-aurora-line">
+          <div className="flex items-center gap-2 text-[11px] text-aurora-muted">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
             <span>Telemetry Synchronized with AI Orchestrator</span>
           </div>
 

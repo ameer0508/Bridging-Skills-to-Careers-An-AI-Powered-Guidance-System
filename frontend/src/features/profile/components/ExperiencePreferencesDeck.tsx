@@ -73,15 +73,15 @@ export const ExperiencePreferencesDeck: React.FC = () => {
 
   return (
     <div className="w-full font-mono">
-      <GlassPanel className="p-6 sm:p-8 space-y-8 border-indigo-500/30">
+      <GlassPanel className="p-6 sm:p-8 space-y-8 border-aurora-violet/25">
         {/* Header */}
-        <div className="flex items-center justify-between flex-wrap gap-4 pb-4 border-b border-white/10">
+        <div className="flex items-center justify-between flex-wrap gap-4 pb-4 border-b border-aurora-line">
           <div className="space-y-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold uppercase tracking-wider text-aurora-indigo flex items-center gap-2">
+              <Sliders className="w-4 h-4 text-aurora-indigo" />
               Workspace Preferences & Environment
             </span>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-aurora-muted">
               Customize visual ergonomics and system communication channels for your SkillBridge session.
             </p>
           </div>
@@ -89,7 +89,7 @@ export const ExperiencePreferencesDeck: React.FC = () => {
 
         {/* Section 1: Visual Theme Selection */}
         <div className="space-y-3">
-          <label className="text-[11px] font-bold text-slate-300 uppercase block">
+          <label className="text-[11px] font-bold text-aurora-muted uppercase block">
             Visual Appearance
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -103,22 +103,22 @@ export const ExperiencePreferencesDeck: React.FC = () => {
                   onClick={() => setTheme(t.id)}
                   className={`p-4 rounded-2xl border text-left transition cursor-pointer flex flex-col justify-between gap-3 ${
                     isSelected
-                      ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-lg'
-                      : 'bg-slate-950/60 border-white/5 text-slate-400 hover:border-white/20'
+                      ? 'bg-violet-50 border-indigo-500 text-aurora-ink shadow-lg'
+                      : 'bg-aurora-canvas/60 border-aurora-line text-aurora-muted hover:border-aurora-line'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div
                       className={`w-8 h-8 rounded-xl flex items-center justify-center ${
                         isSelected
-                          ? 'bg-indigo-600 text-white'
-                          : 'bg-slate-900 text-slate-400'
+                          ? 'text-white [background:var(--aurora-gradient-action)]'
+                          : 'bg-aurora-canvas text-aurora-muted'
                       }`}
                     >
                       <Icon className="w-4 h-4" />
                     </div>
                     {isSelected && (
-                      <span className="text-[10px] font-bold text-indigo-300 flex items-center gap-1">
+                      <span className="text-[10px] font-bold text-aurora-indigo flex items-center gap-1">
                         <Check className="w-3 h-3" />
                         ACTIVE
                       </span>
@@ -126,8 +126,8 @@ export const ExperiencePreferencesDeck: React.FC = () => {
                   </div>
 
                   <div>
-                    <strong className="text-xs text-white block">{t.label}</strong>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">{t.desc}</span>
+                    <strong className="text-xs text-aurora-ink block">{t.label}</strong>
+                    <span className="text-[10px] text-aurora-muted block mt-0.5">{t.desc}</span>
                   </div>
                 </button>
               );
@@ -136,9 +136,9 @@ export const ExperiencePreferencesDeck: React.FC = () => {
         </div>
 
         {/* Section 2: Notifications */}
-        <div className="space-y-3 pt-4 border-t border-white/5">
-          <label className="text-[11px] font-bold text-slate-300 uppercase block flex items-center gap-1.5">
-            <Bell className="w-3.5 h-3.5 text-indigo-400" />
+        <div className="space-y-3 pt-4 border-t border-aurora-line">
+          <label className="text-[11px] font-bold text-aurora-muted uppercase block flex items-center gap-1.5">
+            <Bell className="w-3.5 h-3.5 text-aurora-indigo" />
             Communication & Advisory Alerts
           </label>
 
@@ -170,18 +170,18 @@ export const ExperiencePreferencesDeck: React.FC = () => {
                 <div
                   key={item.key}
                   onClick={() => toggleNotification(item.key)}
-                  className="p-3.5 rounded-2xl bg-slate-950/70 hover:bg-slate-900 border border-white/5 hover:border-white/10 transition cursor-pointer flex items-center justify-between gap-4"
+                  className="p-3.5 rounded-2xl bg-aurora-canvas/60 hover:bg-aurora-canvas border border-aurora-line hover:border-aurora-line transition cursor-pointer flex items-center justify-between gap-4"
                 >
                   <div className="space-y-0.5">
-                    <strong className="text-xs text-white block">{item.title}</strong>
-                    <span className="text-[10px] text-slate-400 block">{item.description}</span>
+                    <strong className="text-xs text-aurora-ink block">{item.title}</strong>
+                    <span className="text-[10px] text-aurora-muted block">{item.description}</span>
                   </div>
 
                   <button
                     type="button"
                     aria-label={`Toggle ${item.title}`}
                     className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${
-                      isChecked ? 'bg-indigo-600' : 'bg-slate-800'
+                      isChecked ? 'bg-indigo-600' : 'bg-aurora-canvas'
                     }`}
                   >
                     <span

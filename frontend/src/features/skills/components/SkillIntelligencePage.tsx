@@ -172,7 +172,7 @@ export const SkillIntelligencePage: React.FC = () => {
   if (skillsLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[280px]">
+        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[280px]">
           <AIThinkingAnimation statusText="Constructing Verified Skill Taxonomy & Living Capability Map..." />
         </div>
       </div>
@@ -206,7 +206,7 @@ export const SkillIntelligencePage: React.FC = () => {
       subtitle: 'Analyze skill capability gaps',
       icon: Brain,
       shortcut: '⌘1',
-      color: 'text-cyan-400',
+      color: 'text-aurora-violet',
       onClick: () => navigate('/ai'),
     },
     {
@@ -215,7 +215,7 @@ export const SkillIntelligencePage: React.FC = () => {
       subtitle: 'Bridge identified skill gaps',
       icon: Layers,
       shortcut: '⌘2',
-      color: 'text-indigo-400',
+      color: 'text-aurora-indigo',
       onClick: () => navigate('/roadmap'),
     },
     {
@@ -224,7 +224,7 @@ export const SkillIntelligencePage: React.FC = () => {
       subtitle: 'Role match alignment',
       icon: Compass,
       shortcut: '⌘3',
-      color: 'text-emerald-400',
+      color: 'text-emerald-700',
       onClick: () => navigate('/careers'),
     },
     {
@@ -233,7 +233,7 @@ export const SkillIntelligencePage: React.FC = () => {
       subtitle: 'Update evidence sources',
       icon: FileText,
       shortcut: '⌘4',
-      color: 'text-purple-400',
+      color: 'text-aurora-violet',
       onClick: () => navigate('/resume'),
     },
   ];
@@ -255,31 +255,31 @@ export const SkillIntelligencePage: React.FC = () => {
       />
 
       {/* SECTION 2 — INTELLIGENT COMMAND & FILTER STRIP */}
-      <div className="p-4 rounded-2xl border border-white/10 bg-slate-950/70 backdrop-blur-xl space-y-3">
+      <div className="p-4 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl space-y-3">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           {/* Search Box */}
           <div className="relative w-full sm:w-80">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+            <Search className="w-4 h-4 text-aurora-muted absolute left-3.5 top-3" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search competencies or aliases..."
-              className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 outline-none focus:border-indigo-500/50 transition-colors"
+              className="w-full pl-10 pr-4 py-2 rounded-xl bg-aurora-canvas border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 outline-none focus:border-aurora-violet/25 transition-colors"
             />
           </div>
 
           {/* Strength Level Dropdown Filter */}
           <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-            <span className="text-xs font-mono text-slate-400 flex items-center gap-1">
-              <Filter className="w-3.5 h-3.5 text-indigo-400" />
+            <span className="text-xs text-aurora-muted flex items-center gap-1">
+              <Filter className="w-3.5 h-3.5 text-aurora-indigo" />
               Strength:
             </span>
             <select
               aria-label="Filter by evidence strength"
               value={selectedStrength}
               onChange={(e) => setSelectedStrength(e.target.value)}
-              className="px-3 py-1.5 rounded-xl bg-slate-900 border border-white/10 text-xs text-white font-mono outline-none focus:border-indigo-500/50 cursor-pointer"
+              className="px-3 py-1.5 rounded-xl bg-aurora-canvas border border-aurora-line text-xs text-aurora-ink outline-none focus:border-aurora-violet/25 cursor-pointer"
             >
               <option value="all">All Levels</option>
               <option value="expert">Expert (≥90%)</option>
@@ -299,10 +299,10 @@ export const SkillIntelligencePage: React.FC = () => {
                 key={cat}
                 type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl font-mono text-xs transition-all shrink-0 cursor-pointer border ${
+                className={`px-3 py-1.5 rounded-xl text-xs transition-all shrink-0 cursor-pointer border ${
                   isSelected
                     ? 'bg-indigo-600 border-indigo-400 text-white font-bold shadow-md shadow-indigo-600/30'
-                    : 'bg-slate-900/80 border-white/5 text-slate-400 hover:text-white hover:border-white/20'
+                    : 'bg-aurora-canvas/60 border-aurora-line text-aurora-muted hover:text-aurora-indigo hover:border-aurora-line'
                 }`}
               >
                 {cat === 'all' ? 'All Domains' : cat}

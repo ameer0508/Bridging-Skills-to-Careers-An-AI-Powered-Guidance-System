@@ -43,7 +43,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
     return (
       <div
         ref={ref}
-        className={`relative inline-flex items-center justify-center rounded-full bg-[var(--primitive-neutral-800)] text-[var(--color-text-primary)] font-semibold select-none shrink-0 border border-[var(--color-border-subtle)] ${sizeClasses[size]} ${className}`}
+        className={`relative inline-flex items-center justify-center rounded-full bg-aurora-violet/[0.1] text-aurora-indigo font-semibold select-none shrink-0 border border-aurora-line ${sizeClasses[size]} ${className}`}
         {...props}
       >
         {hasImage ? (

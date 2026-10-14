@@ -21,7 +21,7 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
       <button
         type="button"
         onClick={onClear}
-        className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] focus:outline-none cursor-pointer"
+        className="text-aurora-muted hover:text-aurora-ink focus:outline-none cursor-pointer"
         aria-label="Clear search"
       >
         <Icon size="sm">

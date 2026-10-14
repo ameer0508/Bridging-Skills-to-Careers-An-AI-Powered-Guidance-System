@@ -3,8 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Flame } from 'lucide-react';
 import apiClient from '../../lib/axios';
-import { EmptyState, ErrorNote, Loading, Note } from '../../features/careerLab/components/labUi';
-import { errorText, formatDate, formatDateTime, labelClass, panelClass, quietButton } from '../../features/careerLab/components/labStyles';
+import { EmptyState, ErrorNote, Loading, Note } from '../../design/aurora/labUi';
+import { errorText, formatDate, formatDateTime, labelClass, panelClass, quietButton } from '../../design/aurora/labStyles';
 
 /** Shapes mirror backend/src/services/LearningActivityService.ts. */
 interface Activity {
@@ -37,13 +37,13 @@ export const ActivityWorkspace: React.FC = () => {
   });
 
   const header = (
-    <header className="flex items-start gap-4 p-6 rounded-3xl border border-white/15 bg-slate-950/80">
-      <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-white/10 flex items-center justify-center text-amber-300 shrink-0">
+    <header className="flex items-start gap-4 p-6 rounded-3xl border border-aurora-line bg-aurora-canvas/60">
+      <div className="w-12 h-12 rounded-2xl bg-aurora-canvas border border-aurora-line flex items-center justify-center text-amber-700 shrink-0">
         <Flame className="w-6 h-6" aria-hidden="true" />
       </div>
       <div className="space-y-1">
-        <h1 className="font-display text-xl sm:text-2xl font-extrabold text-white tracking-tight">Learning activity</h1>
-        <p className="text-xs text-slate-400 max-w-2xl">Your streak from what SkillBridge has recorded you doing, and notifications you can switch on. Nothing is sent outside the app.</p>
+        <h1 className="font-display text-xl sm:text-2xl font-extrabold text-aurora-ink tracking-tight">Learning activity</h1>
+        <p className="text-xs text-aurora-muted max-w-2xl">Your streak from what SkillBridge has recorded you doing, and notifications you can switch on. Nothing is sent outside the app.</p>
       </div>
     </header>
   );
@@ -71,22 +71,22 @@ export const ActivityWorkspace: React.FC = () => {
       {header}
 
       <section className={panelClass} aria-labelledby="streak-heading" data-testid="streak" data-current={streak.current}>
-        <h2 id="streak-heading" className="text-base font-bold text-white">Streak</h2>
+        <h2 id="streak-heading" className="text-base font-bold text-aurora-ink">Streak</h2>
         <dl className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="p-3 rounded-2xl bg-slate-900/60 border border-white/10">
+          <div className="p-3 rounded-2xl bg-aurora-canvas/60 border border-aurora-line">
             <dt className={labelClass}>Current streak</dt>
-            <dd className="text-xl font-extrabold text-white">{days(streak.current)}</dd>
+            <dd className="text-xl font-extrabold text-aurora-ink">{days(streak.current)}</dd>
           </div>
-          <div className="p-3 rounded-2xl bg-slate-900/60 border border-white/10">
+          <div className="p-3 rounded-2xl bg-aurora-canvas/60 border border-aurora-line">
             <dt className={labelClass}>Longest streak</dt>
-            <dd className="text-xl font-extrabold text-white">{days(streak.longest)}</dd>
+            <dd className="text-xl font-extrabold text-aurora-ink">{days(streak.longest)}</dd>
           </div>
-          <div className="p-3 rounded-2xl bg-slate-900/60 border border-white/10">
+          <div className="p-3 rounded-2xl bg-aurora-canvas/60 border border-aurora-line">
             <dt className={labelClass}>Active in the last 30 days</dt>
-            <dd className="text-xl font-extrabold text-white">{days(streak.activeDaysLast30)}</dd>
+            <dd className="text-xl font-extrabold text-aurora-ink">{days(streak.activeDaysLast30)}</dd>
           </div>
         </dl>
-        <p className="text-xs text-slate-300">
+        <p className="text-xs text-aurora-muted">
           {streak.lastActiveOn === null
             ? 'No learning activity has been recorded yet.'
             : streak.activeToday
@@ -98,12 +98,12 @@ export const ActivityWorkspace: React.FC = () => {
         <div className="space-y-2">
           <h3 className={labelClass}>Recent activity</h3>
           {recent.length === 0 ? (
-            <p className="text-xs text-slate-400">Nothing yet. Finishing a roadmap item or taking a skill check counts.</p>
+            <p className="text-xs text-aurora-muted">Nothing yet. Finishing a roadmap item or taking a skill check counts.</p>
           ) : (
             <ul className="space-y-1" data-testid="recent-activity">
               {recent.map((event) => (
-                <li key={`${event.at}-${event.type}`} className="text-xs text-slate-300 flex flex-wrap gap-x-3">
-                  <span className="text-slate-400">{formatDateTime(event.at)}</span>
+                <li key={`${event.at}-${event.type}`} className="text-xs text-aurora-muted flex flex-wrap gap-x-3">
+                  <span className="text-aurora-muted">{formatDateTime(event.at)}</span>
                   <span>{event.label}</span>
                 </li>
               ))}
@@ -114,15 +114,15 @@ export const ActivityWorkspace: React.FC = () => {
       </section>
 
       <section className={panelClass} aria-labelledby="notification-settings-heading">
-        <h2 id="notification-settings-heading" className="text-base font-bold text-white">Notification settings</h2>
-        <p className="text-xs text-slate-400">Both are off until you switch them on. They appear only on this page and on the bell at the top; no e-mail, SMS or push message is ever sent.</p>
+        <h2 id="notification-settings-heading" className="text-base font-bold text-aurora-ink">Notification settings</h2>
+        <p className="text-xs text-aurora-muted">Both are off until you switch them on. They appear only on this page and on the bell at the top; no e-mail, SMS or push message is ever sent.</p>
         <div className="space-y-2">
-          <label className="flex items-start gap-2 text-xs text-slate-200 cursor-pointer">
-            <input type="checkbox" className="mt-0.5 accent-indigo-500" checked={preferences.milestoneNotifications} disabled={setPreference.isPending} onChange={(e) => setPreference.mutate({ milestoneNotifications: e.target.checked })} />
+          <label className="flex items-start gap-2 text-xs text-aurora-ink cursor-pointer">
+            <input type="checkbox" className="mt-0.5 accent-[#5540f5]" checked={preferences.milestoneNotifications} disabled={setPreference.isPending} onChange={(e) => setPreference.mutate({ milestoneNotifications: e.target.checked })} />
             <span>Milestones: a passed skill check, a finished roadmap phase, a completed practice project, a streak of {policy.streakMilestones.join(', ')} days</span>
           </label>
-          <label className="flex items-start gap-2 text-xs text-slate-200 cursor-pointer">
-            <input type="checkbox" className="mt-0.5 accent-indigo-500" checked={preferences.reminders} disabled={setPreference.isPending} onChange={(e) => setPreference.mutate({ reminders: e.target.checked })} />
+          <label className="flex items-start gap-2 text-xs text-aurora-ink cursor-pointer">
+            <input type="checkbox" className="mt-0.5 accent-[#5540f5]" checked={preferences.reminders} disabled={setPreference.isPending} onChange={(e) => setPreference.mutate({ reminders: e.target.checked })} />
             <span>Reminders: after {policy.inactiveDays} days without recorded activity, or when a roadmap item has been in progress for {policy.stalledDays} days</span>
           </label>
         </div>
@@ -130,7 +130,7 @@ export const ActivityWorkspace: React.FC = () => {
 
       <section className={panelClass} aria-labelledby="notifications-heading" data-testid="notifications" data-unread={unreadCount}>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 id="notifications-heading" className="text-base font-bold text-white">Notifications{unreadCount > 0 ? ` (${unreadCount} unread)` : ''}</h2>
+          <h2 id="notifications-heading" className="text-base font-bold text-aurora-ink">Notifications{unreadCount > 0 ? ` (${unreadCount} unread)` : ''}</h2>
           {notifications.length > 0 && (
             <div className="flex flex-wrap gap-2">
               <button type="button" className={quietButton} disabled={act.isPending || unreadCount === 0} onClick={() => act.mutate({ method: 'post', path: '/activity/notifications/read-all' })}>Mark all read</button>
@@ -146,12 +146,12 @@ export const ActivityWorkspace: React.FC = () => {
         ) : (
           <ul className="space-y-2">
             {notifications.map((n) => (
-              <li key={n.id} className={`p-3 rounded-2xl border space-y-1 ${n.read ? 'bg-slate-900/40 border-white/10' : 'bg-indigo-500/10 border-indigo-500/30'}`} data-testid="notification" data-kind={n.kind} data-read={n.read}>
+              <li key={n.id} className={`p-3 rounded-2xl border space-y-1 ${n.read ? 'bg-aurora-canvas/60 border-aurora-line' : 'bg-aurora-violet/[0.06] border-aurora-violet/25'}`} data-testid="notification" data-kind={n.kind} data-read={n.read}>
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-sm font-bold text-white">{n.title}{n.read ? '' : ' (unread)'}</span>
-                  <span className="text-[11px] text-slate-400">{n.kind === 'milestone' ? 'Milestone' : 'Reminder'}, {formatDateTime(n.at)}</span>
+                  <span className="text-sm font-bold text-aurora-ink">{n.title}{n.read ? '' : ' (unread)'}</span>
+                  <span className="text-[11px] text-aurora-muted">{n.kind === 'milestone' ? 'Milestone' : 'Reminder'}, {formatDateTime(n.at)}</span>
                 </div>
-                <p className="text-xs text-slate-300">{n.body}</p>
+                <p className="text-xs text-aurora-muted">{n.body}</p>
                 <div className="flex flex-wrap gap-2">
                   {n.link && <Link to={n.link} className={quietButton}>Open</Link>}
                   {!n.read && <button type="button" className={quietButton} disabled={act.isPending} aria-label={`Mark read: ${n.title}`} onClick={() => act.mutate({ method: 'post', path: `/activity/notifications/${n.id}/read` })}>Mark read</button>}

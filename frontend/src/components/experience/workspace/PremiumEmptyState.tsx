@@ -32,14 +32,14 @@ export const PremiumEmptyState: React.FC<PremiumEmptyStateProps> = ({
       <motion.div
         animate={{ y: [0, -6, 0] }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        className="w-16 h-16 rounded-2xl bg-slate-950 border border-white/10 flex items-center justify-center text-indigo-400 shadow-xl shadow-indigo-950/50 mb-5"
+        className="w-16 h-16 rounded-2xl bg-aurora-canvas border border-aurora-line flex items-center justify-center text-aurora-indigo shadow-xl shadow-aurora-violet/10 mb-5"
       >
         <Icon className="w-8 h-8" />
       </motion.div>
 
       <div className="max-w-md space-y-2 mb-6">
-        <h3 className="font-display text-xl font-bold text-white tracking-tight">{title}</h3>
-        <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{description}</p>
+        <h3 className="font-display text-xl font-bold text-aurora-ink tracking-tight">{title}</h3>
+        <p className="text-xs sm:text-sm text-aurora-muted leading-relaxed">{description}</p>
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-3">
@@ -58,7 +58,7 @@ export const PremiumEmptyState: React.FC<PremiumEmptyStateProps> = ({
         {secondaryAction && (
           <button
             onClick={secondaryAction.onClick}
-            className="py-2.5 px-4 rounded-xl bg-slate-950/80 border border-white/10 hover:border-white/20 text-xs font-semibold text-slate-300 hover:text-white transition-all cursor-pointer"
+            className="py-2.5 px-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line hover:border-aurora-line text-xs font-semibold text-aurora-muted hover:text-aurora-indigo transition-all cursor-pointer"
           >
             {secondaryAction.label}
           </button>

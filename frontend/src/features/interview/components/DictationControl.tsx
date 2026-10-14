@@ -141,7 +141,7 @@ export const DictationControl: React.FC<{ onTranscript: (text: string) => void; 
       {consent !== 'none' && (
         <div className="flex flex-wrap items-center gap-2">
           {listening ? (
-            <button type="button" className={`${button} animate-pulse border-rose-500 bg-rose-600/30 text-rose-700`} onClick={stop}>
+            <button type="button" className={`${button} animate-pulse border-rose-500 bg-rose-50 text-rose-700`} onClick={stop}>
               <Mic className="h-3.5 w-3.5" aria-hidden="true" /> Listening… stop
             </button>
           ) : (

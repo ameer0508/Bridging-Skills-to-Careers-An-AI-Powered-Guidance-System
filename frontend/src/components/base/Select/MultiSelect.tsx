@@ -53,7 +53,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
 
   return (
     <div ref={containerRef} className={`relative w-full ${className}`}>
-      {label && <label className="block text-xs font-semibold text-[var(--color-text-secondary)] mb-1.5">{label}</label>}
+      {label && <label className="block text-xs font-semibold text-aurora-muted mb-1.5">{label}</label>}
       <div
         tabIndex={disabled ? -1 : 0}
         onClick={() => {
@@ -65,7 +65,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
             if (!disabled) setIsOpen(!isOpen);
           }
         }}
-        className={`min-h-[40px] px-3 py-1.5 bg-[var(--input-bg)] border rounded-[var(--radius-md)] flex flex-wrap items-center gap-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--input-border-focus)] ${
+        className={`min-h-[40px] px-3 py-1.5 bg-[var(--input-bg)] border rounded-2xl flex flex-wrap items-center gap-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[var(--input-border-focus)] ${
           error ? 'border-[var(--color-border-error)]' : 'border-[var(--input-border)] hover:border-[var(--input-border-hover)]'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
@@ -75,13 +75,13 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
         {selectedLabels.map(opt => (
           <span
             key={opt.value}
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-[var(--radius-sm)] text-xs bg-[var(--color-interactive-secondary)] text-[var(--color-text-primary)]"
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs bg-[var(--color-interactive-secondary)] text-aurora-ink"
           >
             {opt.label}
             <button
               type="button"
               onClick={e => removeOption(opt.value, e)}
-              className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] focus:outline-none"
+              className="text-aurora-muted hover:text-aurora-ink focus:outline-none"
             >
               <Icon size={12}>
                 <line x1="18" y1="6" x2="6" y2="18" />
@@ -90,7 +90,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
             </button>
           </span>
         ))}
-        <div className="ml-auto pointer-events-none text-[var(--color-text-tertiary)]">
+        <div className="ml-auto pointer-events-none text-aurora-muted">
           <Icon size="sm">
             <polyline points="6 9 12 15 18 9" />
           </Icon>
@@ -98,7 +98,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
       </div>
 
       {isOpen && (
-        <div className="absolute z-[var(--z-dropdown)] w-full mt-1 max-h-60 overflow-y-auto bg-[var(--color-bg-surface-raised)] border border-[var(--color-border-default)] rounded-[var(--radius-md)] shadow-[var(--shadow-md)] py-1">
+        <div className="absolute z-[var(--z-dropdown)] w-full mt-1 max-h-60 overflow-y-auto bg-white border border-aurora-line rounded-2xl shadow-[var(--shadow-md)] py-1">
           {options.map(opt => {
             const isSelected = value.includes(opt.value);
             return (
@@ -106,12 +106,12 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
                 key={opt.value}
                 onClick={() => toggleOption(opt.value)}
                 className={`px-3 py-2 text-sm flex items-center justify-between cursor-pointer hover:bg-[var(--color-interactive-secondary)] ${
-                  isSelected ? 'text-[var(--color-interactive-primary)] font-semibold' : 'text-[var(--color-text-primary)]'
+                  isSelected ? 'text-aurora-violet font-semibold' : 'text-aurora-ink'
                 }`}
               >
                 <span>{opt.label}</span>
                 {isSelected && (
-                  <Icon size="sm" color="var(--color-interactive-primary)">
+                  <Icon size="sm" color="#5540f5">
                     <polyline points="20 6 9 17 4 12" />
                   </Icon>
                 )}

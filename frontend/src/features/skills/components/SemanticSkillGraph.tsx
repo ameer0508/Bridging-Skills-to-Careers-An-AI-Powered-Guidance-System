@@ -56,27 +56,27 @@ export const SemanticSkillGraph: React.FC<SemanticSkillGraphProps> = ({
   const relatedEdges = edges.filter(e => e.source === activeNode || e.target === activeNode);
 
   return (
-    <GlassPanel className="p-6 space-y-6 border-cyan-500/30">
-      <div className="flex items-center justify-between border-b border-white/10 pb-4">
+    <GlassPanel className="p-6 space-y-6 border-aurora-violet/25">
+      <div className="flex items-center justify-between border-b border-aurora-line pb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-cyan-500/10 text-cyan-400 rounded-xl">
+          <div className="p-2.5 bg-aurora-violet/[0.06] text-aurora-violet rounded-xl">
             <GitBranch className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">Semantic Directed Skill Graph</h3>
-            <p className="text-xs text-slate-400">Multi-directional relationship traversal & prerequisite dependency graph</p>
+            <h3 className="text-base font-bold text-aurora-ink">Semantic Directed Skill Graph</h3>
+            <p className="text-xs text-aurora-muted">Multi-directional relationship traversal & prerequisite dependency graph</p>
           </div>
         </div>
-        <span className="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold">
+        <span className="px-3 py-1 rounded-full bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-violet text-xs font-bold">
           Ontology Graph v2.1
         </span>
       </div>
 
       {/* GRAPH NODE CANVAS */}
-      <div className="p-6 bg-slate-950/80 border border-white/5 rounded-2xl space-y-6">
-        <div className="flex items-center justify-between text-xs text-slate-400 font-mono">
+      <div className="p-6 bg-aurora-canvas/60 border border-aurora-line rounded-2xl space-y-6">
+        <div className="flex items-center justify-between text-xs text-aurora-muted font-mono">
           <span>SELECT SKILL NODE TO EXPLORE PATH:</span>
-          <span className="text-cyan-400 font-bold">Active: {activeNode}</span>
+          <span className="text-aurora-violet font-bold">Active: {activeNode}</span>
         </div>
 
         {/* NODE CHIPS */}
@@ -85,10 +85,10 @@ export const SemanticSkillGraph: React.FC<SemanticSkillGraphProps> = ({
             <button
               key={node.id}
               onClick={() => setActiveNode(node.name)}
-              className={`px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-2 cursor-pointer ${
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
                 activeNode === node.name
-                  ? 'bg-cyan-500 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.4)] scale-105'
-                  : 'bg-slate-900 border border-white/10 text-slate-300 hover:border-cyan-500/40 hover:text-white'
+                  ? 'bg-cyan-500 text-aurora-ink shadow-[0_0_15px_rgba(6,182,212,0.4)] scale-105'
+                  : 'bg-aurora-canvas border border-aurora-line text-aurora-muted hover:border-aurora-violet/25 hover:text-aurora-indigo'
               }`}
             >
               <span className={`w-2 h-2 rounded-full ${
@@ -100,23 +100,23 @@ export const SemanticSkillGraph: React.FC<SemanticSkillGraphProps> = ({
         </div>
 
         {/* ACTIVE TRAVERSAL PATH */}
-        <div className="p-4 bg-slate-900/60 border border-cyan-500/20 rounded-xl space-y-3">
-          <span className="text-xs font-bold text-cyan-300 uppercase font-mono tracking-wider">
+        <div className="p-4 bg-aurora-canvas/60 border border-aurora-violet/25 rounded-xl space-y-3">
+          <span className="text-xs font-bold text-aurora-violet uppercase tracking-wider">
             Directed Paths & Ancestor Equivalences for {activeNode}:
           </span>
 
           {relatedEdges.length === 0 ? (
-            <p className="text-xs text-slate-400 italic">No directed edges registered for this node.</p>
+            <p className="text-xs text-aurora-muted italic">No directed edges registered for this node.</p>
           ) : (
             <div className="space-y-2">
               {relatedEdges.map((edge, idx) => (
-                <div key={idx} className="flex items-center gap-3 text-xs font-mono p-2.5 bg-slate-950 border border-white/5 rounded-lg">
-                  <span className="font-bold text-white">{edge.source}</span>
-                  <div className="flex items-center gap-1 text-cyan-400 font-bold px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20 text-[10px]">
+                <div key={idx} className="flex items-center gap-3 text-xs p-2.5 bg-aurora-canvas border border-aurora-line rounded-lg">
+                  <span className="font-bold text-aurora-ink">{edge.source}</span>
+                  <div className="flex items-center gap-1 text-aurora-violet font-bold px-2 py-0.5 rounded bg-aurora-violet/[0.06] border border-aurora-violet/25 text-[10px]">
                     <span>{edge.relationship.toUpperCase()}</span>
                     <ArrowRight className="w-3 h-3" />
                   </div>
-                  <span className="font-bold text-indigo-300">{edge.target}</span>
+                  <span className="font-bold text-aurora-indigo">{edge.target}</span>
                 </div>
               ))}
             </div>

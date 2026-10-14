@@ -234,7 +234,7 @@ export const SettingsWorkspace: React.FC = () => {
       subtitle: 'Update identity & details',
       icon: User,
       shortcut: '⌘1',
-      color: 'text-indigo-400',
+      color: 'text-aurora-indigo',
       onClick: () => {
         const el = document.getElementById('profile-section');
         el?.scrollIntoView({ behavior: 'smooth' });
@@ -246,7 +246,7 @@ export const SettingsWorkspace: React.FC = () => {
       subtitle: 'Execute milestone tasks',
       icon: Layers,
       shortcut: '⌘2',
-      color: 'text-purple-400',
+      color: 'text-aurora-violet',
       onClick: () => navigate('/roadmap'),
     },
     {
@@ -255,7 +255,7 @@ export const SettingsWorkspace: React.FC = () => {
       subtitle: resumeData ? `ATS Score: ${resumeData.atsScore || 85}/100` : 'Upload resume for ATS audit',
       icon: FileText,
       shortcut: '⌘3',
-      color: 'text-amber-400',
+      color: 'text-amber-700',
       onClick: () => navigate('/resume'),
     },
     {
@@ -264,7 +264,7 @@ export const SettingsWorkspace: React.FC = () => {
       subtitle: topMatch ? `${topMatch.matchScore}% Match Fit` : 'Target role match fit',
       icon: Compass,
       shortcut: '⌘4',
-      color: 'text-emerald-400',
+      color: 'text-emerald-700',
       onClick: () => navigate('/careers'),
     },
     {
@@ -273,7 +273,7 @@ export const SettingsWorkspace: React.FC = () => {
       subtitle: 'Password & session audit',
       icon: Lock,
       shortcut: '⌘5',
-      color: 'text-cyan-400',
+      color: 'text-aurora-violet',
       onClick: () => {
         const el = document.getElementById('security-section');
         el?.scrollIntoView({ behavior: 'smooth' });
@@ -285,7 +285,7 @@ export const SettingsWorkspace: React.FC = () => {
       subtitle: 'Terminate current session',
       icon: LogOut,
       shortcut: '⌘6',
-      color: 'text-rose-400',
+      color: 'text-rose-700',
       onClick: () => logoutMutation.mutate(),
     },
   ];
@@ -293,7 +293,7 @@ export const SettingsWorkspace: React.FC = () => {
   if (isProfileLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
+        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
           <AIThinkingAnimation statusText="Connecting to Personal AI Control Center..." />
         </div>
       </div>
@@ -475,17 +475,17 @@ export const SettingsWorkspace: React.FC = () => {
           badge="AI Preferences"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <GlassPanel className="p-6 space-y-4 border-indigo-500/30">
+            <GlassPanel className="p-6 space-y-4 border-aurora-violet/25">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-bold text-white flex items-center gap-2">
-                  <Compass className="w-4 h-4 text-cyan-400" />
+                <span className="text-sm font-bold text-aurora-ink flex items-center gap-2">
+                  <Compass className="w-4 h-4 text-aurora-violet" />
                   Target Career Domain & Specific Role
                 </span>
                 {!isEditingDomain && (
                   <button
                     type="button"
                     onClick={startEditingDomain}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 border border-cyan-500/30 transition-colors cursor-pointer"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-aurora-violet hover:text-aurora-violet hover:bg-aurora-violet/[0.06] border border-aurora-violet/25 transition-colors cursor-pointer"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
                     <span>Edit Preferences</span>
@@ -494,21 +494,21 @@ export const SettingsWorkspace: React.FC = () => {
               </div>
 
               {!isEditingDomain ? (
-                <div className="space-y-3 font-mono text-xs">
-                  <div className="flex justify-between items-center p-3 bg-slate-950/80 rounded-xl border border-white/10">
-                    <span className="text-slate-400">Primary Domain:</span>
-                    <strong className="text-cyan-300">{profile?.primaryCareerDomain || 'Not Selected'}</strong>
+                <div className="space-y-3 text-xs">
+                  <div className="flex justify-between items-center p-3 bg-aurora-canvas/60 rounded-xl border border-aurora-line">
+                    <span className="text-aurora-muted">Primary Domain:</span>
+                    <strong className="text-aurora-violet">{profile?.primaryCareerDomain || 'Not Selected'}</strong>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-slate-950/80 rounded-xl border border-white/10">
-                    <span className="text-slate-400">Target Role Title:</span>
-                    <strong className="text-emerald-300">{profile?.targetRole || 'Not Specified'}</strong>
+                  <div className="flex justify-between items-center p-3 bg-aurora-canvas/60 rounded-xl border border-aurora-line">
+                    <span className="text-aurora-muted">Target Role Title:</span>
+                    <strong className="text-emerald-700">{profile?.targetRole || 'Not Specified'}</strong>
                   </div>
                   {profile?.secondaryCareerDomains && profile.secondaryCareerDomains.length > 0 && (
-                    <div className="p-3 bg-slate-950/80 rounded-xl border border-white/10 space-y-1">
-                      <span className="text-slate-400 block text-[10px]">Specializations:</span>
+                    <div className="p-3 bg-aurora-canvas/60 rounded-xl border border-aurora-line space-y-1">
+                      <span className="text-aurora-muted block text-[10px]">Specializations:</span>
                       <div className="flex flex-wrap gap-1">
                         {profile.secondaryCareerDomains.map((tag: string) => (
-                          <span key={tag} className="px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 text-[10px] font-bold border border-purple-500/30">
+                          <span key={tag} className="px-2 py-0.5 rounded bg-purple-500/10 text-aurora-violet text-[10px] font-bold border border-purple-500/30">
                             {tag}
                           </span>
                         ))}
@@ -517,9 +517,9 @@ export const SettingsWorkspace: React.FC = () => {
                   )}
                 </div>
               ) : (
-                <div className="space-y-4 pt-1 font-mono text-xs">
+                <div className="space-y-4 pt-1 text-xs">
                   <div className="space-y-1.5">
-                    <label className="text-slate-400 block text-[11px]">Primary Career Domain:</label>
+                    <label className="text-aurora-muted block text-[11px]">Primary Career Domain:</label>
                     <select
                       aria-label="Career domain"
                       value={editDomainId}
@@ -530,10 +530,10 @@ export const SettingsWorkspace: React.FC = () => {
                         if (found) setEditRole(found.name);
                         setEditInterests([]);
                       }}
-                      className="w-full bg-slate-900/90 border border-white/20 rounded-xl p-2.5 text-white text-xs focus:outline-none focus:border-cyan-500"
+                      className="w-full bg-aurora-canvas/60 border border-aurora-line rounded-xl p-2.5 text-aurora-ink text-xs focus:outline-none focus:border-cyan-500"
                     >
                       {CAREER_DOMAINS.map(d => (
-                        <option key={d.id} value={d.id} className="bg-slate-950 text-white">
+                        <option key={d.id} value={d.id} className="bg-aurora-canvas text-aurora-ink">
                           {d.name}
                         </option>
                       ))}
@@ -541,19 +541,19 @@ export const SettingsWorkspace: React.FC = () => {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-slate-400 block text-[11px]">Target Role Title:</label>
+                    <label className="text-aurora-muted block text-[11px]">Target Role Title:</label>
                     <input
                       type="text"
                       value={editRole}
                       onChange={(e) => setEditRole(e.target.value)}
                       placeholder="e.g. Lead Security Architect"
-                      className="w-full bg-slate-900/90 border border-white/20 rounded-xl p-2.5 text-white text-xs focus:outline-none focus:border-cyan-500"
+                      className="w-full bg-aurora-canvas/60 border border-aurora-line rounded-xl p-2.5 text-aurora-ink text-xs focus:outline-none focus:border-cyan-500"
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-slate-400 block text-[11px]">Specializations (Select up to 5):</label>
-                    <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 bg-slate-900/40 rounded-xl border border-white/5">
+                    <label className="text-aurora-muted block text-[11px]">Specializations (Select up to 5):</label>
+                    <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 bg-aurora-canvas/60 rounded-xl border border-aurora-line">
                       {(SECONDARY_INTEREST_TAGS[editDomainId] || SECONDARY_INTEREST_TAGS['software-engineering'] || []).map(tag => {
                         const isSelected = editInterests.includes(tag);
                         return (
@@ -570,7 +570,7 @@ export const SettingsWorkspace: React.FC = () => {
                             className={`px-2 py-1 rounded text-[10px] font-semibold transition-all cursor-pointer ${
                               isSelected
                                 ? 'bg-cyan-500 text-black font-bold'
-                                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                                : 'bg-aurora-canvas text-aurora-muted hover:bg-aurora-line'
                             }`}
                           >
                             {tag}
@@ -596,7 +596,7 @@ export const SettingsWorkspace: React.FC = () => {
                     >
                       {domainSaveSuccess ? (
                         <>
-                          <Check className="w-3.5 h-3.5 text-emerald-300" />
+                          <Check className="w-3.5 h-3.5 text-emerald-700" />
                           <span>Saved!</span>
                         </>
                       ) : domainMutation.isPending ? (
@@ -611,7 +611,7 @@ export const SettingsWorkspace: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setIsEditingDomain(false)}
-                      className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                      className="px-3 py-1.5 rounded-xl text-xs font-semibold text-aurora-muted hover:text-aurora-indigo hover:bg-aurora-canvas transition-colors cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -619,18 +619,18 @@ export const SettingsWorkspace: React.FC = () => {
                 </div>
               )}
 
-              <p className="text-[11px] text-slate-400 leading-relaxed pt-2 border-t border-white/5">
+              <p className="text-[11px] text-aurora-muted leading-relaxed pt-2 border-t border-aurora-line">
                 Updating your target career domain recalculates taxonomy matches, readiness scores, recommendations, and live job search context across all 12 workspaces.
               </p>
             </GlassPanel>
 
-            <GlassPanel className="p-6 space-y-4 border-indigo-500/30">
-              <span className="text-sm font-bold text-white flex items-center gap-2">
-                <Cpu className="w-4 h-4 text-cyan-400" />
+            <GlassPanel className="p-6 space-y-4 border-aurora-violet/25">
+              <span className="text-sm font-bold text-aurora-ink flex items-center gap-2">
+                <Cpu className="w-4 h-4 text-aurora-violet" />
                 Target Tech Stack & Verified Skills ({userSkillList.length})
               </span>
               {userSkillList.length === 0 ? (
-                <div className="p-4 text-center text-xs text-slate-400 italic bg-slate-950/60 rounded-lg">
+                <div className="p-4 text-center text-xs text-aurora-muted italic bg-aurora-canvas/60 rounded-lg">
                   No verified skills recorded yet. Upload a resume or add skills in Skill Intelligence to ground your tech stack.
                 </div>
               ) : (
@@ -638,24 +638,24 @@ export const SettingsWorkspace: React.FC = () => {
                   {userSkillList.slice(0, 10).map((skill: { name: string }, idx: number) => (
                     <span
                       key={idx}
-                      className="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-mono text-xs font-semibold"
+                      className="px-2.5 py-1 rounded-lg bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo text-xs font-semibold"
                     >
                       {skill.name}
                     </span>
                   ))}
                 </div>
               )}
-              <p className="text-xs text-slate-400 leading-relaxed pt-2 border-t border-white/5">
+              <p className="text-xs text-aurora-muted leading-relaxed pt-2 border-t border-aurora-line">
                 AI continuously weights job market postings using your verified tech stack.
               </p>
             </GlassPanel>
 
             <GlassPanel className="p-6 space-y-4 border-purple-500/30">
-              <span className="text-sm font-bold text-white flex items-center gap-2">
-                <Bell className="w-4 h-4 text-purple-400" />
+              <span className="text-sm font-bold text-aurora-ink flex items-center gap-2">
+                <Bell className="w-4 h-4 text-aurora-violet" />
                 Recommendation & Notification Rules
               </span>
-              <p className="text-xs text-slate-400 leading-relaxed">
+              <p className="text-xs text-aurora-muted leading-relaxed">
                 Prioritize high-ROI action items, milestone roadmaps, and instant ATS resume optimization alerts.
               </p>
               <div className="pt-2">
@@ -730,12 +730,12 @@ export const SettingsWorkspace: React.FC = () => {
           ].map((srv, idx) => (
             <GlassPanel key={idx} className="p-5 space-y-2">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-bold text-white">{srv.name}</h4>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${srv.status === 'Connected' || srv.status === 'Active' ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400' : 'bg-amber-500/10 border border-amber-500/30 text-amber-300'}`}>
+                <h4 className="text-xs font-bold text-aurora-ink">{srv.name}</h4>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${srv.status === 'Connected' || srv.status === 'Active' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-amber-50 border border-amber-200 text-amber-700'}`}>
                   {srv.status}
                 </span>
               </div>
-              <p className="text-xs text-slate-400">{srv.desc}</p>
+              <p className="text-xs text-aurora-muted">{srv.desc}</p>
             </GlassPanel>
           ))}
         </div>
@@ -751,23 +751,23 @@ export const SettingsWorkspace: React.FC = () => {
           {recentEvents.length === 0 ? (
             <GlassPanel className="p-4 flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className="font-bold text-white">Authenticated Session Established</span>
+                <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+                <span className="font-bold text-aurora-ink">Authenticated Session Established</span>
               </div>
-              <span className="text-[10px] text-slate-500 font-mono">Active</span>
+              <span className="text-[10px] text-aurora-muted font-mono">Active</span>
             </GlassPanel>
           ) : (
             recentEvents.slice(0, 5).map((evt: { _id: string; eventType: string; createdAt: string | number | Date; details?: { fileName?: string; skillName?: string } }) => (
               <GlassPanel key={evt._id} className="p-4 flex items-center justify-between text-xs">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    <span className="font-bold text-white">{evt.eventType.replace(/_/g, ' ')}</span>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+                    <span className="font-bold text-aurora-ink">{evt.eventType.replace(/_/g, ' ')}</span>
                   </div>
-                  {evt.details?.fileName && <p className="text-slate-400 pl-6 text-xs">File: {evt.details.fileName}</p>}
-                  {evt.details?.skillName && <p className="text-slate-400 pl-6 text-xs">Skill: {evt.details.skillName}</p>}
+                  {evt.details?.fileName && <p className="text-aurora-muted pl-6 text-xs">File: {evt.details.fileName}</p>}
+                  {evt.details?.skillName && <p className="text-aurora-muted pl-6 text-xs">Skill: {evt.details.skillName}</p>}
                 </div>
-                <span className="text-[10px] text-slate-500 font-mono shrink-0 ml-4">
+                <span className="text-[10px] text-aurora-muted shrink-0 ml-4">
                   {new Date(evt.createdAt).toLocaleString()}
                 </span>
               </GlassPanel>

@@ -18,9 +18,9 @@ export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectE
 }
 
 const sizeClasses = {
-  sm: 'h-8 px-2.5 pr-8 text-xs rounded-[var(--radius-sm)]',
-  md: 'h-10 px-3.5 pr-9 text-sm rounded-[var(--radius-md)]',
-  lg: 'h-12 px-4 pr-10 text-base rounded-[var(--radius-lg)]',
+  sm: 'h-8 px-2.5 pr-8 text-xs rounded-lg',
+  md: 'h-10 px-3.5 pr-9 text-sm rounded-2xl',
+  lg: 'h-12 px-4 pr-10 text-base rounded-2xl',
 };
 
 export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
@@ -56,7 +56,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
         {label && (
           <label
             htmlFor={selectId}
-            className="block text-xs font-semibold text-[var(--color-text-secondary)] mb-1.5"
+            className="block text-xs font-semibold text-aurora-muted mb-1.5"
           >
             {label}
             {required && <span className="text-[var(--color-status-error-text)] ml-1" aria-hidden="true">*</span>}
@@ -79,7 +79,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
               </option>
             ))}
           </select>
-          <div className="absolute right-3 pointer-events-none text-[var(--color-text-tertiary)] flex items-center">
+          <div className="absolute right-3 pointer-events-none text-aurora-muted flex items-center">
             <Icon size="sm">
               <polyline points="6 9 12 15 18 9" />
             </Icon>
@@ -89,7 +89,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           <p
             id={helperId}
             className={`mt-1 text-xs ${
-              error ? 'text-[var(--color-status-error-text)] font-medium' : 'text-[var(--color-text-tertiary)]'
+              error ? 'text-[var(--color-status-error-text)] font-medium' : 'text-aurora-muted'
             }`}
           >
             {error || helperText}

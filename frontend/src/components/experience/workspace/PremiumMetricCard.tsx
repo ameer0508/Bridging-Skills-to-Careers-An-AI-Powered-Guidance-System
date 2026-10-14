@@ -46,16 +46,16 @@ export const PremiumMetricCard: React.FC<PremiumMetricCardProps> = ({
   return (
     <TiltCard glowColor="rgba(99, 102, 241, 0.2)" className={`p-5 ${className}`}>
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-semibold text-slate-400">{title}</span>
+        <span className="text-xs font-semibold text-aurora-muted">{title}</span>
         {Icon && (
-          <div className="p-2 rounded-xl bg-slate-950/80 border border-white/10 text-indigo-400">
+          <div className="p-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-aurora-indigo">
             <Icon className="w-4 h-4" />
           </div>
         )}
       </div>
 
       <div className="flex items-baseline justify-between">
-        <div className="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+        <div className="font-display text-2xl sm:text-3xl font-extrabold text-aurora-ink tracking-tight">
           <Counter from={0} to={value} prefix={prefix} suffix={suffix} duration={1.8} />
         </div>
 
@@ -81,11 +81,11 @@ export const PremiumMetricCard: React.FC<PremiumMetricCardProps> = ({
       </div>
 
       {/* Footer metadata */}
-      <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-[11px]">
+      <div className="mt-3 pt-3 border-t border-aurora-line flex items-center justify-between text-[11px]">
         {trend && (
           <span
             className={`flex items-center gap-1 font-semibold ${
-              isPositive ? 'text-emerald-400' : 'text-rose-400'
+              isPositive ? 'text-emerald-700' : 'text-rose-700'
             }`}
           >
             {isPositive ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}

@@ -130,7 +130,7 @@ export const LiveInterviewRoom: React.FC<LiveInterviewRoomProps> = ({
             </div>
 
             {/* Question Progress Pill */}
-            <div className="px-3 py-1 rounded-xl bg-indigo-600/20 border border-indigo-400/40 text-xs text-aurora-indigo font-bold">
+            <div className="px-3 py-1 rounded-xl bg-violet-50 border border-indigo-400/40 text-xs text-aurora-indigo font-bold">
               QUESTION {qIndex + 1} OF {totalQuestions}
             </div>
 
@@ -157,7 +157,7 @@ export const LiveInterviewRoom: React.FC<LiveInterviewRoomProps> = ({
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25 uppercase">
                       PROMPTER 0{qIndex + 1}
                     </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-aurora-violet border border-purple-500/40 uppercase">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-aurora-violet border border-purple-500/40 uppercase">
                       {currentQuestion.category} Track
                     </span>
                     <span

@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { AlertTriangle, Info, Loader2 } from 'lucide-react';
 
-/** Aurora Elite versions of the Career Lab presentational pieces (features/careerLab/components/labUi.tsx). */
+/** Small presentational pieces shared by the Career Lab panels and the other lab-style screens (Aurora Elite). */
 
 export const Note: React.FC<{ children: React.ReactNode; testId?: string }> = ({ children, testId }) => (
   <p className="flex items-start gap-2 text-xs leading-relaxed text-aurora-muted" data-testid={testId}>

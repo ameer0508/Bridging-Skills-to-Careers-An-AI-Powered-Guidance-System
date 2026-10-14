@@ -68,10 +68,10 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
 
 
   const certBoosts = [
-    { name: 'AWS Solutions Architect', boost: 15000, color: 'text-amber-400' },
-    { name: 'Kubernetes CKA', boost: 14500, color: 'text-cyan-400' },
-    { name: 'TensorFlow / PyTorch Certified', boost: 18200, color: 'text-indigo-400' },
-    { name: 'CISSP Security Professional', boost: 16000, color: 'text-emerald-400' },
+    { name: 'AWS Solutions Architect', boost: 15000, color: 'text-amber-700' },
+    { name: 'Kubernetes CKA', boost: 14500, color: 'text-aurora-violet' },
+    { name: 'TensorFlow / PyTorch Certified', boost: 18200, color: 'text-aurora-indigo' },
+    { name: 'CISSP Security Professional', boost: 16000, color: 'text-emerald-700' },
   ];
 
   const skillBoosts = [
@@ -146,21 +146,21 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
   return (
     <div className="space-y-8">
       {/* SECTION 1 — HEADER & AI INSIGHT BANNER */}
-      <GlassPanel className="p-6 space-y-4 border-indigo-500/30 bg-slate-950/80">
+      <GlassPanel className="p-6 space-y-4 border-aurora-violet/25 bg-aurora-canvas/60">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+              <span className="p-2 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
                 <DollarSign className="w-5 h-5" />
               </span>
-              <h3 className="text-xl font-bold text-white tracking-tight">
+              <h3 className="text-xl font-bold text-aurora-ink tracking-tight">
                 Real-Time Salary Intelligence & Forecasting
               </h3>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-mono text-[11px] font-bold">
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold">
                 Multi-Provider Synced
               </span>
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-aurora-muted">
               Live compensation telemetry normalized across Adzuna, JSearch, Levels.fyi, and US Labor Statistics.
             </p>
           </div>
@@ -169,15 +169,15 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleSaveScenario}
-              className="py-2 px-3.5 rounded-xl bg-slate-900 border border-white/10 hover:border-indigo-500/40 text-xs font-bold text-slate-200 hover:text-white flex items-center gap-2 transition-all cursor-pointer shadow-md"
+              className="py-2 px-3.5 rounded-xl bg-aurora-canvas border border-aurora-line hover:border-aurora-violet/25 text-xs font-bold text-aurora-ink hover:text-aurora-indigo flex items-center gap-2 transition-all cursor-pointer shadow-md"
             >
-              <Sliders className="w-3.5 h-3.5 text-indigo-400" />
+              <Sliders className="w-3.5 h-3.5 text-aurora-indigo" />
               <span>Save Scenario</span>
             </button>
             {onExploreRoadmap && (
               <button
                 onClick={onExploreRoadmap}
-                className="py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center gap-1.5 transition-all cursor-pointer"
+                className="py-2 px-4 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center gap-1.5 transition-all cursor-pointer"
               >
                 <span>Maximize ROI Pathway</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
@@ -187,14 +187,14 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
         </div>
 
         {/* AI ESTIMATE GROUNDING EXPLANATION */}
-        <div className="p-4 rounded-xl bg-slate-900/90 border border-white/10 flex items-start gap-3 text-xs">
-          <Sparkles className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+        <div className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-start gap-3 text-xs">
+          <Sparkles className="w-4 h-4 text-aurora-violet shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <span className="font-bold text-white block">
+            <span className="font-bold text-aurora-ink block">
               About these figures ({jobTitle})
             </span>
-            <p className="text-slate-300 leading-relaxed">
-              These salary ranges for <strong className="text-cyan-300">{currentRegion.name}</strong> are built-in example values. They are not calculated from your profile and do not come from a live compensation source.
+            <p className="text-aurora-muted leading-relaxed">
+              These salary ranges for <strong className="text-aurora-violet">{currentRegion.name}</strong> are built-in example values. They are not calculated from your profile and do not come from a live compensation source.
             </p>
           </div>
         </div>
@@ -203,39 +203,39 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
       {/* SECTION 2 — SALARY OVERVIEW & PERCENTILES RANGE */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* CURRENT ESTIMATED SALARY CARD (7 COLS) */}
-        <GlassPanel className="lg:col-span-7 p-6 space-y-6 border-indigo-500/30 relative overflow-hidden flex flex-col justify-between">
+        <GlassPanel className="lg:col-span-7 p-6 space-y-6 border-aurora-violet/25 relative overflow-hidden flex flex-col justify-between">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">
+              <span className="text-xs font-bold text-aurora-muted uppercase tracking-wider font-mono">
                 Simulated Market Value Benchmark
               </span>
-              <span className="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold">
+              <span className="px-2.5 py-1 rounded-lg bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo text-xs font-bold">
                 {experienceLevel} Level • {currentRegion.name.split(',')[0]}
               </span>
             </div>
 
             <div className="flex items-baseline gap-3">
-              <span className="text-4xl sm:text-5xl font-extrabold text-white font-mono tracking-tight">
+              <span className="text-4xl sm:text-5xl font-extrabold text-aurora-ink tracking-tight">
                 ${calculatedSalary.toLocaleString()}
               </span>
-              <span className="text-sm font-bold text-emerald-400 font-mono">
+              <span className="text-sm font-bold text-emerald-700 font-mono">
                 USD / year
               </span>
             </div>
 
             {/* PERCENTILES RANGE BAR */}
             <div className="space-y-2 pt-2">
-              <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
+              <div className="flex items-center justify-between text-[11px] text-aurora-muted">
                 <span>P10: ${Math.round(calculatedSalary * 0.72).toLocaleString()}</span>
                 <span>P25: ${Math.round(calculatedSalary * 0.85).toLocaleString()}</span>
-                <span className="text-cyan-400 font-bold">P50 (Median): ${calculatedSalary.toLocaleString()}</span>
+                <span className="text-aurora-violet font-bold">P50 (Median): ${calculatedSalary.toLocaleString()}</span>
                 <span>P75: ${Math.round(calculatedSalary * 1.18).toLocaleString()}</span>
                 <span>P90: ${Math.round(calculatedSalary * 1.35).toLocaleString()}</span>
               </div>
 
               {/* Visual Multi-Segment Range Bar */}
-              <div className="h-3 w-full bg-slate-950 rounded-full border border-white/10 p-0.5 flex gap-1 relative overflow-hidden">
-                <div className="h-full bg-slate-800 rounded-l-full" style={{ width: '20%' }} />
+              <div className="h-3 w-full bg-aurora-canvas rounded-full border border-aurora-line p-0.5 flex gap-1 relative overflow-hidden">
+                <div className="h-full bg-aurora-canvas rounded-l-full" style={{ width: '20%' }} />
                 <div className="h-full bg-indigo-600/50" style={{ width: '30%' }} />
                 <div className="h-full bg-indigo-500" style={{ width: '30%' }} />
                 <div className="h-full bg-cyan-400 rounded-r-full" style={{ width: '20%' }} />
@@ -244,19 +244,19 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
           </div>
 
           {/* SIMULATION CONTROLS */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-4 border-t border-white/10">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-4 border-t border-aurora-line">
             <div>
-              <span className="text-[10px] text-slate-400 font-mono uppercase block mb-1">
+              <span className="text-[10px] text-aurora-muted uppercase block mb-1">
                 Target Region
               </span>
               <select
                 aria-label="Region"
                 value={selectedRegion}
                 onChange={(e) => setSelectedRegion(e.target.value)}
-                className="w-full py-1.5 px-2.5 rounded-lg bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                className="w-full py-1.5 px-2.5 rounded-lg bg-aurora-canvas border border-aurora-line text-xs text-aurora-ink focus:outline-none focus:border-indigo-500 cursor-pointer"
               >
                 {regions.map((r) => (
-                  <option key={r.name} value={r.name} className="bg-slate-900 text-white">
+                  <option key={r.name} value={r.name} className="bg-aurora-canvas text-aurora-ink">
                     {r.name}
                   </option>
                 ))}
@@ -264,14 +264,14 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
             </div>
 
             <div>
-              <span className="text-[10px] text-slate-400 font-mono uppercase block mb-1">
+              <span className="text-[10px] text-aurora-muted uppercase block mb-1">
                 Experience Level
               </span>
               <select
                 aria-label="Experience level"
                 value={experienceLevel}
                 onChange={(e) => setExperienceLevel(e.target.value as typeof experienceLevel)}
-                className="w-full py-1.5 px-2.5 rounded-lg bg-slate-950 border border-white/10 text-xs text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
+                className="w-full py-1.5 px-2.5 rounded-lg bg-aurora-canvas border border-aurora-line text-xs text-aurora-ink focus:outline-none focus:border-indigo-500 cursor-pointer"
               >
                 <option value="Junior">Junior</option>
                 <option value="Mid">Mid</option>
@@ -282,10 +282,10 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
             </div>
 
             <div className="col-span-2 sm:col-span-1 flex flex-col justify-end">
-              <span className="text-[10px] text-slate-400 font-mono uppercase block mb-1">
+              <span className="text-[10px] text-aurora-muted uppercase block mb-1">
                 Active Cert Boost
               </span>
-              <span className="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 py-1.5 px-2.5 rounded-lg border border-amber-500/20 text-center block">
+              <span className="text-xs font-bold text-amber-700 bg-amber-50 py-1.5 px-2.5 rounded-lg border border-amber-200 text-center block">
                 +${totalCertBoost.toLocaleString()}/yr
               </span>
             </div>
@@ -293,45 +293,45 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
         </GlassPanel>
 
         {/* CAREER ROI PANEL (5 COLS) */}
-        <GlassPanel className="lg:col-span-5 p-6 space-y-5 border-emerald-500/30 flex flex-col justify-between">
+        <GlassPanel className="lg:col-span-5 p-6 space-y-5 border-emerald-200 flex flex-col justify-between">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                <Calculator className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-1.5">
+                <Calculator className="w-4 h-4 text-emerald-700" />
                 Post-Roadmap Earning Potential & ROI
               </span>
-              <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">
+              <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
                 +18% Projected
               </span>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-950/80 border border-white/10 space-y-2">
+            <div className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2">
               <div className="flex justify-between items-center text-xs">
-                <span className="text-slate-400">Post-Roadmap Target:</span>
-                <span className="font-mono font-bold text-emerald-400 text-lg">
+                <span className="text-aurora-muted">Post-Roadmap Target:</span>
+                <span className="font-bold text-emerald-700 text-lg">
                   ${postRoadmapSalary.toLocaleString()} / yr
                 </span>
               </div>
-              <div className="flex justify-between items-center text-xs pt-2 border-t border-white/5">
-                <span className="text-slate-400">Annual Gain:</span>
-                <span className="font-mono font-bold text-cyan-300">
+              <div className="flex justify-between items-center text-xs pt-2 border-t border-aurora-line">
+                <span className="text-aurora-muted">Annual Gain:</span>
+                <span className="font-bold text-aurora-violet">
                   +${(postRoadmapSalary - calculatedSalary).toLocaleString()} / yr
                 </span>
               </div>
             </div>
 
             {/* ROI GAUGE */}
-            <div className="p-3 rounded-xl bg-slate-950/60 border border-white/5 flex items-center justify-between text-xs font-mono">
-              <span className="text-slate-400 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-indigo-400" />
+            <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between text-xs font-mono">
+              <span className="text-aurora-muted flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-aurora-indigo" />
                 Estimated Payback Timeline:
               </span>
-              <strong className="text-white font-bold">{roiMonths} Months</strong>
+              <strong className="text-aurora-ink font-bold">{roiMonths} Months</strong>
             </div>
           </div>
 
-          <p className="text-[11px] text-slate-400 leading-relaxed pt-2 border-t border-white/5">
-            Completing recommended target roadmap modules will pay back learning investments within <strong className="text-emerald-300">{roiMonths} months</strong> based on live market salary premiums.
+          <p className="text-[11px] text-aurora-muted leading-relaxed pt-2 border-t border-aurora-line">
+            Completing recommended target roadmap modules will pay back learning investments within <strong className="text-emerald-700">{roiMonths} months</strong> based on live market salary premiums.
           </p>
         </GlassPanel>
       </div>
@@ -341,11 +341,11 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
         {/* SALARY FORECAST CHART (7 COLS) */}
         <GlassPanel className="lg:col-span-7 p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-cyan-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-aurora-violet" />
               4-Year Compensation Forecast Projection
             </span>
-            <span className="text-[10px] font-mono text-slate-400">USD / Year</span>
+            <span className="text-[10px] text-aurora-muted">USD / Year</span>
           </div>
 
           <div className="h-64 w-full pt-2">
@@ -365,7 +365,7 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
                 <XAxis dataKey="year" stroke="#94a3b8" fontSize={11} tickLine={false} />
                 <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={(v) => `$${v / 1000}k`} tickLine={false} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
+                  contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e6eaf6', color: '#10153b', borderRadius: '12px', fontSize: '12px' }}
                   formatter={(value) => [`$${Number(value).toLocaleString()}`, 'Compensation']}
                 />
                 <Area type="monotone" dataKey="targetSalary" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#colorTarget)" name="SkillBridge Optimized Target" />
@@ -378,11 +378,11 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
         {/* EXPERIENCE TRAJECTORY CHART (5 COLS) */}
         <GlassPanel className="lg:col-span-5 p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Layers className="w-4 h-4 text-purple-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Layers className="w-4 h-4 text-aurora-violet" />
               Compensation Trajectory by Experience Level
             </span>
-            <span className="text-[10px] font-mono text-slate-400">Junior ➔ Principal</span>
+            <span className="text-[10px] text-aurora-muted">Junior ➔ Principal</span>
           </div>
 
           <div className="h-64 w-full pt-2">
@@ -392,7 +392,7 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
                 <XAxis dataKey="level" stroke="#94a3b8" fontSize={11} tickLine={false} />
                 <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={(v) => `$${v / 1000}k`} tickLine={false} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
+                  contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e6eaf6', color: '#10153b', borderRadius: '12px', fontSize: '12px' }}
                   formatter={(val) => [`$${Number(val).toLocaleString()}`, 'Average Salary']}
                 />
                 <Bar dataKey="avgSalary" radius={[6, 6, 0, 0]}>
@@ -414,11 +414,11 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
         {/* REGIONAL COST-OF-LIVING COMPARISON */}
         <GlassPanel className="p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Globe className="w-4 h-4 text-cyan-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Globe className="w-4 h-4 text-aurora-violet" />
               Geographic Region & Cost-of-Living Benchmarks
             </span>
-            <span className="text-[10px] font-mono text-slate-500">Live Index</span>
+            <span className="text-[10px] text-aurora-muted">Live Index</span>
           </div>
 
           <div className="space-y-2.5">
@@ -430,21 +430,21 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
                   onClick={() => setSelectedRegion(reg.name)}
                   className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
                     isSelected
-                      ? 'bg-indigo-600/20 border-indigo-500/50 shadow-md'
-                      : 'bg-slate-950/60 border-white/5 hover:border-white/20'
+                      ? 'bg-violet-50 border-aurora-violet/25 shadow-md'
+                      : 'bg-aurora-canvas/60 border-aurora-line hover:border-aurora-line'
                   }`}
                 >
                   <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-white block">{reg.name}</span>
-                    <span className="text-[10px] font-mono text-slate-400">
+                    <span className="text-xs font-bold text-aurora-ink block">{reg.name}</span>
+                    <span className="text-[10px] text-aurora-muted">
                       COL Index: {reg.col}x • {reg.tier}
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="text-xs font-mono font-bold text-emerald-400 block">
+                    <span className="text-xs font-bold text-emerald-700 block">
                       ${reg.baseMedian.toLocaleString()}
                     </span>
-                    <span className="text-[10px] font-mono text-slate-400">
+                    <span className="text-[10px] text-aurora-muted">
                       PPP: ${reg.ppp.toLocaleString()}
                     </span>
                   </div>
@@ -455,17 +455,17 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
         </GlassPanel>
 
         {/* CERTIFICATION & SKILL SALARY IMPACT SIMULATOR */}
-        <GlassPanel className="p-6 space-y-4 border-amber-500/30">
+        <GlassPanel className="p-6 space-y-4 border-amber-200">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Award className="w-4 h-4 text-amber-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Award className="w-4 h-4 text-amber-700" />
               Certification & Skill Premium Simulator
             </span>
-            <span className="text-[10px] font-mono text-amber-400 font-bold">Interactive</span>
+            <span className="text-[10px] text-amber-700 font-bold">Interactive</span>
           </div>
 
           <div className="space-y-3">
-            <span className="text-[10px] text-slate-400 font-mono uppercase tracking-wider block">
+            <span className="text-[10px] text-aurora-muted uppercase tracking-wider block">
               Toggle Active Certifications for Earning Boost:
             </span>
 
@@ -478,18 +478,18 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
                     onClick={() => toggleCertification(cert.name)}
                     className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
                       isActive
-                        ? 'bg-amber-500/10 border-amber-500/40 text-amber-300'
-                        : 'bg-slate-950/60 border-white/5 text-slate-400 hover:border-white/20'
+                        ? 'bg-amber-50 border-amber-200 text-amber-700'
+                        : 'bg-aurora-canvas/60 border-aurora-line text-aurora-muted hover:border-aurora-line'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <span className={`w-4 h-4 rounded-full border flex items-center justify-center text-[10px] font-bold ${isActive ? 'bg-amber-500 border-amber-400 text-slate-950' : 'border-slate-600'}`}>
+                      <span className={`w-4 h-4 rounded-full border flex items-center justify-center text-[10px] font-bold ${isActive ? 'bg-amber-500 border-amber-400 text-aurora-ink' : 'border-aurora-line'}`}>
                         {isActive ? '✓' : ''}
                       </span>
                       <span className="text-xs font-semibold">{cert.name}</span>
                     </div>
 
-                    <span className="text-xs font-mono font-bold text-emerald-400">
+                    <span className="text-xs font-bold text-emerald-700">
                       +${cert.boost.toLocaleString()} / yr
                     </span>
                   </div>
@@ -498,18 +498,18 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
             </div>
 
             {/* TOP SKILL IMPACT BREAKDOWN */}
-            <div className="pt-3 border-t border-white/10 space-y-2">
-              <span className="text-[10px] text-slate-400 font-mono uppercase tracking-wider block">
+            <div className="pt-3 border-t border-aurora-line space-y-2">
+              <span className="text-[10px] text-aurora-muted uppercase tracking-wider block">
                 Highest Earning Skill Vector Premiums:
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {skillBoosts.map((s, i) => (
                   <span
                     key={i}
-                    className="px-2.5 py-1 rounded-lg bg-slate-950 border border-white/10 text-[11px] font-mono text-slate-200 flex items-center gap-1.5"
+                    className="px-2.5 py-1 rounded-lg bg-aurora-canvas border border-aurora-line text-[11px] text-aurora-ink flex items-center gap-1.5"
                   >
                     <span>{s.skill}</span>
-                    <span className="text-emerald-400 font-bold">
+                    <span className="text-emerald-700 font-bold">
                       +${(s.gain / 1000).toFixed(1)}k
                     </span>
                   </span>
@@ -522,16 +522,16 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
 
       {/* SAVED SCENARIOS SUMMARY */}
       {savedScenarios.length > 0 && (
-        <GlassPanel className="p-4 space-y-3 border-indigo-500/30">
-          <span className="text-xs font-bold text-white flex items-center gap-2">
-            <Compass className="w-4 h-4 text-indigo-400" />
+        <GlassPanel className="p-4 space-y-3 border-aurora-violet/25">
+          <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+            <Compass className="w-4 h-4 text-aurora-indigo" />
             Saved Compensation Scenario Comparison
           </span>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {savedScenarios.map((sc, i) => (
-              <div key={i} className="p-3 rounded-xl bg-slate-950 border border-white/10 text-xs flex justify-between items-center">
-                <span className="text-slate-300 font-semibold truncate">{sc.name}</span>
-                <span className="font-mono font-bold text-emerald-400">${sc.targetSalary.toLocaleString()}</span>
+              <div key={i} className="p-3 rounded-xl bg-aurora-canvas border border-aurora-line text-xs flex justify-between items-center">
+                <span className="text-aurora-muted font-semibold truncate">{sc.name}</span>
+                <span className="font-bold text-emerald-700">${sc.targetSalary.toLocaleString()}</span>
               </div>
             ))}
           </div>

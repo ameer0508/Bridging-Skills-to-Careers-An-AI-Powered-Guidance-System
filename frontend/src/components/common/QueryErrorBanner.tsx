@@ -52,13 +52,13 @@ export const QueryErrorBanner: React.FC = () => {
     <div
       role="alert"
       data-testid="load-error-banner"
-      className="mb-6 p-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+      className="mb-6 p-4 rounded-2xl border border-rose-200 bg-rose-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
     >
       <div className="flex items-start gap-3">
-        <AlertTriangle className="w-4 h-4 text-rose-300 shrink-0 mt-0.5" aria-hidden="true" />
+        <AlertTriangle className="w-4 h-4 text-rose-700 shrink-0 mt-0.5" aria-hidden="true" />
         <div className="space-y-1">
-          <p className="text-xs font-bold text-white">Some of your data could not be loaded.</p>
-          <p className="text-xs text-slate-300">
+          <p className="text-xs font-bold text-aurora-ink">Some of your data could not be loaded.</p>
+          <p className="text-xs text-aurora-muted">
             Figures on this page may be missing or show zero until it loads. Your saved data is not affected.
           </p>
         </div>
@@ -67,7 +67,7 @@ export const QueryErrorBanner: React.FC = () => {
         type="button"
         onClick={retry}
         disabled={isRetrying}
-        className="py-2 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-100 text-xs font-bold flex items-center gap-2 cursor-pointer disabled:opacity-50 shrink-0"
+        className="py-2 px-4 rounded-xl bg-aurora-canvas hover:bg-aurora-canvas border border-aurora-line text-aurora-ink text-xs font-bold flex items-center gap-2 cursor-pointer disabled:opacity-50 shrink-0"
       >
         <RotateCw className={`w-3.5 h-3.5 ${isRetrying ? 'animate-spin' : ''}`} aria-hidden="true" />
         <span>{isRetrying ? 'Loading...' : 'Try again'}</span>

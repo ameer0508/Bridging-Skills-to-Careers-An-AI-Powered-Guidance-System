@@ -107,23 +107,23 @@ export const CareerDomainOnboardingModal: React.FC<CareerDomainOnboardingModalPr
       role="dialog"
       aria-modal="true"
       aria-label="Career Domain Onboarding Wizard"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-xl animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-aurora-canvas/60 backdrop-blur-xl animate-fade-in"
     >
       <div className="w-full max-w-3xl">
-      <GlassPanel className="max-w-3xl w-full p-6 sm:p-8 space-y-6 border-indigo-500/50 shadow-2xl relative overflow-hidden font-mono text-xs max-h-[90vh] overflow-y-auto">
+      <GlassPanel className="max-w-3xl w-full p-6 sm:p-8 space-y-6 border-aurora-violet/25 shadow-2xl relative overflow-hidden text-xs max-h-[90vh] overflow-y-auto">
         {/* TOP STEP INDICATOR */}
-        <div className="flex items-center justify-between pb-4 border-b border-white/10">
+        <div className="flex items-center justify-between pb-4 border-b border-aurora-line">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-indigo-600 via-purple-600 to-cyan-400 p-[1px] shadow-lg shrink-0 flex items-center justify-center">
-              <div className="w-full h-full bg-slate-950 rounded-[11px] flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-cyan-400" />
+              <div className="w-full h-full bg-aurora-canvas rounded-[11px] flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-aurora-violet" />
               </div>
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
+              <h2 className="text-base sm:text-lg font-bold text-aurora-ink tracking-tight">
                 SkillBridge Intelligence Activation
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-aurora-muted">
                 Personalized Career Domain Onboarding • Step {step} of 3
               </p>
             </div>
@@ -135,10 +135,10 @@ export const CareerDomainOnboardingModal: React.FC<CareerDomainOnboardingModalPr
                 key={s}
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${
                   step === s
-                    ? 'bg-indigo-600 text-white border border-indigo-400/50 shadow-md'
+                    ? 'text-white [background:var(--aurora-gradient-action)] border border-indigo-400/50 shadow-aurora-sm'
                     : step > s
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                    : 'bg-slate-900 text-slate-500 border border-white/10'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-aurora-canvas text-aurora-muted border border-aurora-line'
                 }`}
               >
                 {step > s ? '✓' : s}
@@ -151,11 +151,11 @@ export const CareerDomainOnboardingModal: React.FC<CareerDomainOnboardingModalPr
         {step === 1 && (
           <div className="space-y-4">
             <div className="space-y-1">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Compass className="w-4 h-4 text-cyan-400" />
+              <h3 className="text-sm font-bold text-aurora-ink flex items-center gap-2">
+                <Compass className="w-4 h-4 text-aurora-violet" />
                 What primary career domain do you want to pursue?
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-aurora-muted">
                 Select one primary domain. This choice grounds your initial career matches, readiness evaluation, recommendations, and live job search.
               </p>
             </div>
@@ -169,24 +169,24 @@ export const CareerDomainOnboardingModal: React.FC<CareerDomainOnboardingModalPr
                     onClick={() => handleSelectDomain(domain.id, domain.name)}
                     className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer space-y-1 ${
                       isSelected
-                        ? 'bg-indigo-950/70 border-indigo-500 text-white shadow-lg shadow-indigo-600/20 ring-1 ring-indigo-500/50'
-                        : 'bg-slate-950/60 border-white/10 text-slate-300 hover:border-indigo-500/30 hover:text-white'
+                        ? 'bg-violet-50 border-indigo-500 text-aurora-ink shadow-lg shadow-indigo-600/20 ring-1 ring-indigo-500/50'
+                        : 'bg-aurora-canvas/60 border-aurora-line text-aurora-muted hover:border-aurora-violet/25 hover:text-aurora-indigo'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <strong className="text-xs text-white block">{domain.name}</strong>
-                      {isSelected && <CheckCircle2 className="w-4 h-4 text-cyan-400 shrink-0" />}
+                      <strong className="text-xs text-aurora-ink block">{domain.name}</strong>
+                      {isSelected && <CheckCircle2 className="w-4 h-4 text-aurora-violet shrink-0" />}
                     </div>
-                    <p className="text-[10px] text-slate-400 leading-tight">{domain.desc}</p>
+                    <p className="text-[10px] text-aurora-muted leading-tight">{domain.desc}</p>
                   </button>
                 );
               })}
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-white/10">
+            <div className="flex justify-end pt-4 border-t border-aurora-line">
               <button
                 onClick={() => setStep(2)}
-                className="py-2.5 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/30 transition-all"
+                className="py-2.5 px-5 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-white font-bold text-xs flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/30 transition-all"
               >
                 <span>Continue to Specializations</span>
                 <ArrowRight className="w-4 h-4" />
@@ -199,19 +199,19 @@ export const CareerDomainOnboardingModal: React.FC<CareerDomainOnboardingModalPr
         {step === 2 && (
           <div className="space-y-5">
             <div className="space-y-1">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <Cpu className="w-4 h-4 text-purple-400" />
+              <h3 className="text-sm font-bold text-aurora-ink flex items-center gap-2">
+                <Cpu className="w-4 h-4 text-aurora-violet" />
                 Select Secondary Specializations for [{activeDomainObj.name}]
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-aurora-muted">
                 Choose up to 5 secondary interest areas to fine-tune your skill gap prioritized roadmap.
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-950/80 border border-white/10 space-y-3">
-              <div className="flex items-center justify-between text-slate-400 text-[11px]">
+            <div className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-3">
+              <div className="flex items-center justify-between text-aurora-muted text-[11px]">
                 <span>Available Specializations:</span>
-                <span className="text-indigo-400 font-bold">{selectedInterests.length} / 5 Selected</span>
+                <span className="text-aurora-indigo font-bold">{selectedInterests.length} / 5 Selected</span>
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -223,8 +223,8 @@ export const CareerDomainOnboardingModal: React.FC<CareerDomainOnboardingModalPr
                       onClick={() => handleToggleInterest(tag)}
                       className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-purple-600/30 border-purple-500 text-purple-200 shadow-md'
-                          : 'bg-slate-900 border-white/10 text-slate-400 hover:text-slate-200'
+                          ? 'bg-violet-50 border-purple-500 text-aurora-violet shadow-md'
+                          : 'bg-aurora-canvas border-aurora-line text-aurora-muted hover:text-aurora-ink'
                       }`}
                     >
                       {isSelected ? '✓ ' : '+ '} {tag}
@@ -234,17 +234,17 @@ export const CareerDomainOnboardingModal: React.FC<CareerDomainOnboardingModalPr
               </div>
             </div>
 
-            <div className="flex justify-between pt-4 border-t border-white/10">
+            <div className="flex justify-between pt-4 border-t border-aurora-line">
               <button
                 onClick={() => setStep(1)}
-                className="py-2.5 px-4 rounded-xl bg-slate-900 border border-white/10 text-slate-300 hover:text-white font-bold text-xs cursor-pointer"
+                className="py-2.5 px-4 rounded-xl bg-aurora-canvas border border-aurora-line text-aurora-muted hover:text-aurora-indigo font-bold text-xs cursor-pointer"
               >
                 ← Back
               </button>
 
               <button
                 onClick={() => setStep(3)}
-                className="py-2.5 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/30 transition-all"
+                className="py-2.5 px-5 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-white font-bold text-xs flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/30 transition-all"
               >
                 <span>Define Target Role</span>
                 <ArrowRight className="w-4 h-4" />
@@ -257,55 +257,55 @@ export const CareerDomainOnboardingModal: React.FC<CareerDomainOnboardingModalPr
         {step === 3 && (
           <div className="space-y-5">
             <div className="space-y-1">
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <h3 className="text-sm font-bold text-aurora-ink flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-700" />
                 Define Your Specific Target Role Title
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-aurora-muted">
                 Specify your exact target job title (e.g. Senior Security Engineer, Backend Architect, Data Scientist).
               </p>
             </div>
 
-            <div className="space-y-4 p-5 rounded-xl bg-slate-950/80 border border-indigo-500/40">
+            <div className="space-y-4 p-5 rounded-xl bg-aurora-canvas/60 border border-aurora-violet/25">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-300 block">Target Role Title:</label>
+                <label className="text-xs font-bold text-aurora-muted block">Target Role Title:</label>
                 <input
                   type="text"
                   value={targetRole}
                   onChange={(e) => setTargetRole(e.target.value)}
                   placeholder={`e.g. ${activeDomainObj.name} Lead...`}
-                  className="w-full p-3 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono font-bold"
+                  className="w-full p-3 rounded-xl bg-aurora-canvas border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-bold"
                 />
               </div>
 
-              <div className="p-3.5 rounded-xl bg-indigo-950/40 border border-indigo-500/30 space-y-2 font-mono text-[11px]">
-                <span className="text-[10px] text-cyan-300 font-bold uppercase block tracking-wider">
+              <div className="p-3.5 rounded-xl bg-violet-50 border border-aurora-violet/25 space-y-2 text-[11px]">
+                <span className="text-[10px] text-aurora-violet font-bold uppercase block tracking-wider">
                   YOUR CAREER DIRECTION SUMMARY
                 </span>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">PRIMARY DOMAIN:</span>
-                  <strong className="text-cyan-300">{activeDomainObj.name}</strong>
+                  <span className="text-aurora-muted">PRIMARY DOMAIN:</span>
+                  <strong className="text-aurora-violet">{activeDomainObj.name}</strong>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">TARGET ROLE:</span>
-                  <strong className="text-emerald-300">{targetRole || activeDomainObj.name}</strong>
+                  <span className="text-aurora-muted">TARGET ROLE:</span>
+                  <strong className="text-emerald-700">{targetRole || activeDomainObj.name}</strong>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">SPECIALIZATIONS:</span>
-                  <strong className="text-purple-300">
+                  <span className="text-aurora-muted">SPECIALIZATIONS:</span>
+                  <strong className="text-aurora-violet">
                     {selectedInterests.length > 0 ? selectedInterests.join(', ') : 'General Pathway'}
                   </strong>
                 </div>
-                <p className="text-[10px] text-slate-400 leading-tight pt-1 border-t border-white/5">
+                <p className="text-[10px] text-aurora-muted leading-tight pt-1 border-t border-aurora-line">
                   SkillBridge will now personalize your career matching, skill gap prioritization, readiness scoring, learning roadmap, live JSearch discovery, and STAR interview evaluation around this direction.
                 </p>
               </div>
             </div>
 
-            <div className="flex justify-between pt-4 border-t border-white/10">
+            <div className="flex justify-between pt-4 border-t border-aurora-line">
               <button
                 onClick={() => setStep(2)}
-                className="py-2.5 px-4 rounded-xl bg-slate-900 border border-white/10 text-slate-300 hover:text-white font-bold text-xs cursor-pointer"
+                className="py-2.5 px-4 rounded-xl bg-aurora-canvas border border-aurora-line text-aurora-muted hover:text-aurora-indigo font-bold text-xs cursor-pointer"
               >
                 ← Back
               </button>
@@ -313,7 +313,7 @@ export const CareerDomainOnboardingModal: React.FC<CareerDomainOnboardingModalPr
               <button
                 onClick={handleSubmitOnboarding}
                 disabled={isSubmitting || !targetRole.trim()}
-                className="py-2.5 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-2 cursor-pointer shadow-lg shadow-emerald-600/30 transition-all"
+                className="py-2.5 px-6 rounded-xl bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-2 cursor-pointer shadow-lg shadow-emerald-600/30 transition-all"
               >
                 <Sparkles className="w-4 h-4" />
                 <span>{isSubmitting ? 'Activating Intelligence...' : 'ACTIVATE CAREER INTELLIGENCE'}</span>

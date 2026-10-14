@@ -63,18 +63,18 @@ export const Drawer: React.FC<DrawerProps> = ({
           aria-label={typeof title === 'string' ? title : 'Drawer'}
           style={style}
           onClick={e => e.stopPropagation()}
-          className={`fixed bg-[var(--color-bg-surface-raised)] border-[var(--color-border-default)] shadow-[var(--shadow-xl)] flex flex-col overflow-hidden ${
+          className={`fixed bg-white border-aurora-line shadow-[var(--shadow-xl)] flex flex-col overflow-hidden ${
             position === 'right' ? 'border-l' : position === 'left' ? 'border-r' : 'border-t'
           } ${positionClasses[position]} ${className}`}
         >
           {title && (
-            <div className="px-6 py-4 border-b border-[var(--color-border-subtle)] flex items-center justify-between">
-              <h2 className="text-base font-bold text-[var(--color-text-primary)]">{title}</h2>
+            <div className="px-6 py-4 border-b border-aurora-line flex items-center justify-between">
+              <h2 className="text-base font-bold text-aurora-ink">{title}</h2>
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close drawer"
-                className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] p-1 rounded-full hover:bg-[var(--color-interactive-secondary-hover)] transition-colors"
+                className="text-aurora-muted hover:text-aurora-ink p-1 rounded-full hover:bg-[var(--color-interactive-secondary-hover)] transition-colors"
               >
                 <Icon size="md">
                   <line x1="18" y1="6" x2="6" y2="18" />

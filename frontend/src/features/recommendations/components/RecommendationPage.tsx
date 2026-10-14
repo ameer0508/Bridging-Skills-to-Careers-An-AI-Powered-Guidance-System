@@ -166,7 +166,7 @@ export const RecommendationPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-16 rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[300px]">
+        <div className="p-16 rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[300px]">
           <AIThinkingAnimation statusText="Synthesizing High-Leverage Strategic Action Feeds..." />
         </div>
       </div>
@@ -205,7 +205,7 @@ export const RecommendationPage: React.FC = () => {
       subtitle: 'Recommendation strategy consultation',
       icon: Brain,
       shortcut: '⌘1',
-      color: 'text-cyan-400',
+      color: 'text-aurora-violet',
       onClick: () => navigate('/ai'),
     },
     {
@@ -214,7 +214,7 @@ export const RecommendationPage: React.FC = () => {
       subtitle: 'Dimensional gap scoring & audit',
       icon: Compass,
       shortcut: '⌘2',
-      color: 'text-emerald-400',
+      color: 'text-emerald-700',
       onClick: () => navigate('/readiness'),
     },
     {
@@ -223,7 +223,7 @@ export const RecommendationPage: React.FC = () => {
       subtitle: 'Phased competency milestone tracker',
       icon: Target,
       shortcut: '⌘3',
-      color: 'text-indigo-400',
+      color: 'text-aurora-indigo',
       onClick: () => navigate('/roadmap'),
     },
   ];

@@ -5,7 +5,7 @@ import { AlertTriangle, Info } from 'lucide-react';
 import { messageOf } from '../../../lib/collections';
 import { CatalogueCareer, fetchCatalogue, fetchDomainMatches, RequirementBasis } from '../careerDomainsApi';
 
-const card = 'rounded-[var(--radius-md)] border border-[var(--color-border-default)] p-4';
+const card = 'rounded-2xl border border-aurora-line p-4';
 
 const basisText = (b: RequirementBasis) =>
   b.type === 'onet_software'
@@ -22,27 +22,27 @@ export const CareerDomainsPage: React.FC = () => {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6">
       <header className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold font-display text-[var(--color-text-primary)]">More career domains</h1>
+        <h1 className="text-2xl font-bold font-display text-aurora-ink">More career domains</h1>
         {catalogue.data && (
           <>
-            <p className="text-sm text-[var(--color-text-secondary)]">{catalogue.data.statusText}</p>
-            <p role="note" data-testid="source-scope" className="flex items-start gap-2 rounded-[var(--radius-md)] border border-amber-500 bg-amber-50 p-3 text-sm text-amber-900">
+            <p className="text-sm text-aurora-muted">{catalogue.data.statusText}</p>
+            <p role="note" data-testid="source-scope" className="flex items-start gap-2 rounded-2xl border border-amber-500 bg-amber-50 p-3 text-sm text-amber-900">
               <Info size={16} aria-hidden="true" className="mt-0.5 shrink-0" /> {catalogue.data.scopeNote}
             </p>
           </>
         )}
       </header>
 
-      {(catalogue.isPending || matches.isPending) && <p role="status" className="text-sm text-[var(--color-text-secondary)]">Loading…</p>}
+      {(catalogue.isPending || matches.isPending) && <p role="status" className="text-sm text-aurora-muted">Loading…</p>}
       {(catalogue.isError || matches.isError) && (
-        <div role="alert" className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-status-error,#dc2626)] p-3 text-sm">
+        <div role="alert" className="flex items-center gap-2 rounded-2xl border border-rose-300 p-3 text-sm">
           <AlertTriangle size={16} aria-hidden="true" /> This page could not be loaded: {messageOf(catalogue.error ?? matches.error, 'the server did not respond.')}
         </div>
       )}
 
       {matches.data && (
         <section className={card} aria-labelledby="matches-heading" data-testid="domain-matches">
-          <h2 id="matches-heading" className="mb-2 text-base font-bold text-[var(--color-text-primary)]">Your matches for these careers</h2>
+          <h2 id="matches-heading" className="mb-2 text-base font-bold text-aurora-ink">Your matches for these careers</h2>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[520px] text-left text-sm">
               <caption className="sr-only">Your stored career matches for the careers on this page</caption>
@@ -50,7 +50,7 @@ export const CareerDomainsPage: React.FC = () => {
               <tbody>
                 {matches.data.careers.map(c => (
                   <tr key={c.careerId} data-role={c.title}>
-                    <th scope="row" className="py-1 pr-3 font-normal">{c.title} <span className="text-xs text-[var(--color-text-secondary)]">· {c.domain}</span></th>
+                    <th scope="row" className="py-1 pr-3 font-normal">{c.title} <span className="text-xs text-aurora-muted">· {c.domain}</span></th>
                     <td className="py-1 pr-3 font-semibold">{c.matchScore === null ? 'No match yet' : `${c.matchScore}/100`}</td>
                     <td className="py-1">{c.matchingSkills.length ? c.matchingSkills.join(', ') : '—'}</td>
                   </tr>
@@ -58,7 +58,7 @@ export const CareerDomainsPage: React.FC = () => {
               </tbody>
             </table>
           </div>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-[var(--color-text-secondary)]">{matches.data.notes.map(n => <li key={n}>{n}</li>)}</ul>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-xs text-aurora-muted">{matches.data.notes.map(n => <li key={n}>{n}</li>)}</ul>
           <p className="mt-2 text-sm">
             <Link to="/careers" className="underline">See all your career matches in Career Intelligence</Link>
           </p>
@@ -68,7 +68,7 @@ export const CareerDomainsPage: React.FC = () => {
       {catalogue.data?.careers.map(c => <RoleCard key={c.title} career={c} />)}
 
       {catalogue.data && (
-        <footer className="text-xs text-[var(--color-text-secondary)]" data-testid="onet-attribution">
+        <footer className="text-xs text-aurora-muted" data-testid="onet-attribution">
           <p>{catalogue.data.source.attribution}</p>
           <p className="mt-1">
             <a href={catalogue.data.source.licenseUrl} target="_blank" rel="noreferrer noopener" className="underline">CC BY 4.0 licence</a> ·{' '}
@@ -82,11 +82,11 @@ export const CareerDomainsPage: React.FC = () => {
 
 const RoleCard: React.FC<{ career: CatalogueCareer }> = ({ career: c }) => (
   <section className={card} aria-labelledby={`role-${c.onet.code}`} data-testid="domain-role">
-    <h2 id={`role-${c.onet.code}`} className="text-base font-bold text-[var(--color-text-primary)]">
-      {c.title} <span className="text-sm font-normal text-[var(--color-text-secondary)]">· {c.domain}{c.newDomain ? ' (new domain)' : ''}</span>
+    <h2 id={`role-${c.onet.code}`} className="text-base font-bold text-aurora-ink">
+      {c.title} <span className="text-sm font-normal text-aurora-muted">· {c.domain}{c.newDomain ? ' (new domain)' : ''}</span>
     </h2>
-    <p className="text-sm text-[var(--color-text-secondary)]">{c.description}</p>
-    <p className="text-xs text-[var(--color-text-secondary)]">Based on O*NET-SOC {c.onet.code}, {c.onet.title}.{c.onet.note ? ` ${c.onet.note}` : ''}</p>
+    <p className="text-sm text-aurora-muted">{c.description}</p>
+    <p className="text-xs text-aurora-muted">Based on O*NET-SOC {c.onet.code}, {c.onet.title}.{c.onet.note ? ` ${c.onet.note}` : ''}</p>
     <div className="mt-2 overflow-x-auto">
       <table className="w-full min-w-[560px] text-left text-sm">
         <caption className="sr-only">Requirements for {c.title}</caption>
@@ -96,7 +96,7 @@ const RoleCard: React.FC<{ career: CatalogueCareer }> = ({ career: c }) => (
             <tr key={r.skill}>
               <th scope="row" className="py-1 pr-3 font-normal">{r.skill}</th>
               <td className="py-1 pr-3">{r.importance} · weight {r.weight}</td>
-              <td className="py-1 text-xs text-[var(--color-text-secondary)]">{basisText(r.basis)}</td>
+              <td className="py-1 text-xs text-aurora-muted">{basisText(r.basis)}</td>
             </tr>
           ))}
         </tbody>

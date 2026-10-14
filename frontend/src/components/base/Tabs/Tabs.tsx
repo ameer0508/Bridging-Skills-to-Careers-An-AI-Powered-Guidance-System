@@ -48,20 +48,20 @@ export const Tabs: React.FC<TabsProps> = ({
         aria-label="Tabs"
         className={`flex items-center gap-1 overflow-x-auto custom-scrollbar ${
           isUnderline
-            ? 'border-b border-[var(--color-border-subtle)] pb-px'
-            : 'bg-[var(--color-bg-surface-sunken)] p-1 rounded-[var(--radius-md)] border border-[var(--color-border-subtle)]'
+            ? 'border-b border-aurora-line pb-px'
+            : 'bg-[var(--color-bg-surface-sunken)] p-1 rounded-2xl border border-aurora-line'
         }`}
       >
         {tabs.map(tab => {
           const isActive = tab.id === currentActiveId;
 
           const underlineClasses = isActive
-            ? 'border-b-2 border-[var(--color-interactive-primary)] text-[var(--color-interactive-primary)] font-semibold'
-            : 'border-b-2 border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] font-medium';
+            ? 'border-b-2 border-aurora-violet text-aurora-violet font-semibold'
+            : 'border-b-2 border-transparent text-aurora-muted hover:text-aurora-ink font-medium';
 
           const pillClasses = isActive
-            ? 'bg-[var(--color-bg-surface-raised)] text-[var(--color-text-primary)] shadow-sm font-semibold'
-            : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] font-medium';
+            ? 'bg-white text-aurora-ink shadow-sm font-semibold'
+            : 'text-aurora-muted hover:text-aurora-ink font-medium';
 
           return (
             <button

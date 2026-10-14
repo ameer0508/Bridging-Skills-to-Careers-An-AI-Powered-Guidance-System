@@ -18,25 +18,25 @@ export const GrowthStoryPanel: React.FC<GrowthStoryPanelProps> = ({
   className = '',
 }) => {
   return (
-    <GlassCard className={`p-6 border-indigo-500/20 bg-indigo-950/20 space-y-4 ${className}`}>
-      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+    <GlassCard className={`p-6 border-aurora-violet/25 bg-violet-50 space-y-4 ${className}`}>
+      <div className="flex items-center justify-between pb-3 border-b border-aurora-line">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+          <div className="p-2 rounded-lg bg-aurora-violet/[0.06] text-aurora-indigo">
             <BookOpen className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">Synthesized Growth Story</h3>
-            <p className="text-xs text-neutral-400">
+            <h3 className="text-base font-bold text-aurora-ink">Synthesized Growth Story</h3>
+            <p className="text-xs text-aurora-muted">
               Natural language summary derived strictly from verified telemetry
             </p>
           </div>
         </div>
-        <Sparkles className="w-4 h-4 text-purple-400" />
+        <Sparkles className="w-4 h-4 text-aurora-violet" />
       </div>
 
       <div className="space-y-3">
-        <h4 className="text-sm font-bold text-white">{growthStory.headline}</h4>
-        <p className="text-xs text-neutral-200 leading-relaxed bg-black/40 p-4 rounded-xl border border-white/5">
+        <h4 className="text-sm font-bold text-aurora-ink">{growthStory.headline}</h4>
+        <p className="text-xs text-aurora-ink leading-relaxed bg-aurora-canvas/60 p-4 rounded-xl border border-aurora-line">
           {growthStory.narrativeParagraph}
         </p>
 
@@ -44,9 +44,9 @@ export const GrowthStoryPanel: React.FC<GrowthStoryPanelProps> = ({
           {growthStory.evidenceChips.map((chip, idx) => (
             <span
               key={idx}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-semibold bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+              <ShieldCheck className="w-3.5 h-3.5 text-aurora-indigo" />
               {chip}
             </span>
           ))}

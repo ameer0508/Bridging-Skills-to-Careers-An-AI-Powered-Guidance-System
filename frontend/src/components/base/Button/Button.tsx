@@ -25,13 +25,13 @@ const variantClasses: Record<ButtonVariant, string> = {
   destructive:
     'bg-[var(--button-bg-destructive)] text-[var(--button-text-destructive)] hover:bg-[var(--button-bg-destructive-hover)] focus-visible:outline-[var(--color-border-error)]',
   outline:
-    'bg-transparent border border-[var(--color-border-default)] text-[var(--color-text-primary)] hover:bg-[var(--color-interactive-secondary-hover)] focus-visible:outline-[var(--color-border-focus)]',
+    'bg-transparent border border-aurora-line text-aurora-ink hover:bg-[var(--color-interactive-secondary-hover)] focus-visible:outline-[var(--color-border-focus)]',
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: 'h-8 px-3 text-xs gap-1.5 rounded-[var(--radius-sm)]',
-  md: 'h-10 px-4 text-sm gap-2 rounded-[var(--radius-md)]',
-  lg: 'h-12 px-6 text-base gap-2.5 rounded-[var(--radius-lg)]',
+  sm: 'h-8 px-3 text-xs gap-1.5 rounded-lg',
+  md: 'h-10 px-4 text-sm gap-2 rounded-2xl',
+  lg: 'h-12 px-6 text-base gap-2.5 rounded-2xl',
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(

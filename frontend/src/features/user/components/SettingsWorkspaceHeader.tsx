@@ -5,7 +5,7 @@ import { Icon } from '../../../components/primitives/Icon';
 
 export const SettingsWorkspaceHeader: React.FC = () => {
   return (
-    <Card variant="elevated" className="p-6 md:p-8 bg-gradient-to-r from-[var(--color-bg-surface-raised)] to-[var(--color-bg-surface)] border-[var(--color-border-default)]">
+    <Card variant="elevated" className="p-6 md:p-8 bg-gradient-to-r from-[var(--color-bg-surface-raised)] to-[var(--color-bg-surface)] border-aurora-line">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2 max-w-xl">
           <div className="flex items-center gap-2">
@@ -22,11 +22,11 @@ export const SettingsWorkspaceHeader: React.FC = () => {
             </Badge>
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-bold font-display text-[var(--color-text-primary)] tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-bold font-display text-aurora-ink tracking-tight">
             Settings & Preferences
           </h1>
 
-          <p className="text-xs md:text-sm text-[var(--color-text-secondary)] leading-relaxed">
+          <p className="text-xs md:text-sm text-aurora-muted leading-relaxed">
             Manage your personal profile, workspace appearance, notification preferences, and session security.
           </p>
         </div>

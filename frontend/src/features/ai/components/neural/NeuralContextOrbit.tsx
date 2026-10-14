@@ -39,7 +39,7 @@ export const NeuralContextOrbit: React.FC<NeuralContextOrbitProps> = ({
       label: 'Skills Matrix',
       value: `${telemetry.totalSkills} Verified`,
       sublabel: 'Evidence Grounded',
-      icon: <Cpu className="w-4 h-4 text-cyan-400" />,
+      icon: <Cpu className="w-4 h-4 text-aurora-violet" />,
       angleDeg: -60,
       color: 'cyan',
     },
@@ -48,7 +48,7 @@ export const NeuralContextOrbit: React.FC<NeuralContextOrbitProps> = ({
       label: 'Readiness Rating',
       value: telemetry.readinessScore !== null ? `${Math.round(telemetry.readinessScore)}%` : 'Pending',
       sublabel: '5 Competency Vectors',
-      icon: <ShieldCheck className="w-4 h-4 text-emerald-400" />,
+      icon: <ShieldCheck className="w-4 h-4 text-emerald-700" />,
       angleDeg: 0,
       color: 'emerald',
     },
@@ -57,7 +57,7 @@ export const NeuralContextOrbit: React.FC<NeuralContextOrbitProps> = ({
       label: 'Resume ATS Index',
       value: telemetry.atsScore !== null && telemetry.atsScore > 0 ? `${telemetry.atsScore}/100` : 'Sync Pending',
       sublabel: 'Parser Telemetry',
-      icon: <FileText className="w-4 h-4 text-indigo-400" />,
+      icon: <FileText className="w-4 h-4 text-aurora-indigo" />,
       angleDeg: 60,
       color: 'indigo',
     },
@@ -66,7 +66,7 @@ export const NeuralContextOrbit: React.FC<NeuralContextOrbitProps> = ({
       label: 'Active Learning',
       value: telemetry.activePhaseTitle || `${telemetry.roadmapProgress ?? 0}% Complete`,
       sublabel: 'Curriculum Milestone',
-      icon: <Layers className="w-4 h-4 text-purple-400" />,
+      icon: <Layers className="w-4 h-4 text-aurora-violet" />,
       angleDeg: 120,
       color: 'purple',
     },
@@ -75,7 +75,7 @@ export const NeuralContextOrbit: React.FC<NeuralContextOrbitProps> = ({
       label: 'Market Pipeline',
       value: `${telemetry.opportunityCount} Active`,
       sublabel: 'Live Role Alignment',
-      icon: <Briefcase className="w-4 h-4 text-amber-400" />,
+      icon: <Briefcase className="w-4 h-4 text-amber-700" />,
       angleDeg: 180,
       color: 'amber',
     },
@@ -84,7 +84,7 @@ export const NeuralContextOrbit: React.FC<NeuralContextOrbitProps> = ({
       label: 'Domain Context',
       value: telemetry.userDomain || 'Cross-Domain',
       sublabel: 'Target Career Vector',
-      icon: <UserCheck className="w-4 h-4 text-cyan-400" />,
+      icon: <UserCheck className="w-4 h-4 text-aurora-violet" />,
       angleDeg: 240,
       color: 'cyan',
     },
@@ -135,16 +135,16 @@ export const NeuralContextOrbit: React.FC<NeuralContextOrbitProps> = ({
               whileTap={{ scale: 0.92 }}
               className={`flex items-center gap-2.5 px-3 py-1.5 rounded-full border transition-all duration-300 cursor-pointer shadow-lg backdrop-blur-md ${
                 isHovered
-                  ? 'bg-slate-900/95 border-cyan-400 text-white shadow-[0_0_20px_rgba(6,182,212,0.4)] ring-1 ring-cyan-400/50'
-                  : 'bg-slate-950/75 border-white/10 text-slate-300 hover:border-white/30'
+                  ? 'bg-aurora-canvas/60 border-cyan-400 text-aurora-ink shadow-[0_0_20px_rgba(6,182,212,0.4)] ring-1 ring-cyan-400/50'
+                  : 'bg-aurora-canvas/60 border-aurora-line text-aurora-muted hover:border-aurora-line'
               }`}
             >
               <div className="p-1 rounded-full bg-white/[0.05] shrink-0">{node.icon}</div>
               <div className="flex flex-col text-left leading-none">
-                <span className="text-[9px] font-mono uppercase tracking-wider text-slate-400">
+                <span className="text-[9px] uppercase tracking-wider text-aurora-muted">
                   {node.label}
                 </span>
-                <span className="text-xs font-display font-semibold text-white truncate max-w-[110px]">
+                <span className="text-xs font-display font-semibold text-aurora-ink truncate max-w-[110px]">
                   {node.value}
                 </span>
               </div>
@@ -158,10 +158,10 @@ export const NeuralContextOrbit: React.FC<NeuralContextOrbitProps> = ({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 4, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 rounded-xl bg-slate-950/95 border border-cyan-400/40 backdrop-blur-xl shadow-2xl text-center whitespace-nowrap z-30"
+                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 rounded-xl bg-aurora-canvas/60 border border-cyan-400/40 backdrop-blur-xl shadow-2xl text-center whitespace-nowrap z-30"
                 >
-                  <span className="text-[10px] font-mono text-cyan-300 block">{node.sublabel}</span>
-                  <span className="text-[9px] text-slate-400">Telemetry Feed Grounded</span>
+                  <span className="text-[10px] text-aurora-violet block">{node.sublabel}</span>
+                  <span className="text-[9px] text-aurora-muted">Telemetry Feed Grounded</span>
                 </motion.div>
               )}
             </AnimatePresence>

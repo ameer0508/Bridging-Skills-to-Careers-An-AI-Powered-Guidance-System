@@ -27,16 +27,16 @@ export const RecommendationComparisonModal: React.FC<ComparisonModalProps> = ({
   if (!isOpen || items.length === 0) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-indigo-500/30 rounded-2xl max-w-4xl w-full p-6 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center border-b border-white/10 pb-4">
+    <div className="fixed inset-0 z-50 bg-aurora-canvas/60 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="bg-aurora-canvas border border-aurora-violet/25 rounded-2xl max-w-4xl w-full p-6 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center border-b border-aurora-line pb-4">
           <div>
-            <h3 className="text-lg font-bold text-white">Side-by-Side Recommendation Comparison</h3>
-            <p className="text-xs text-slate-400">Evaluate impact, effort, and ROI tradeoffs between options</p>
+            <h3 className="text-lg font-bold text-aurora-ink">Side-by-Side Recommendation Comparison</h3>
+            <p className="text-xs text-aurora-muted">Evaluate impact, effort, and ROI tradeoffs between options</p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer"
+            className="p-2 hover:bg-aurora-canvas rounded-lg text-aurora-muted hover:text-aurora-indigo transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -44,34 +44,34 @@ export const RecommendationComparisonModal: React.FC<ComparisonModalProps> = ({
 
         <div className={`grid grid-cols-1 md:grid-cols-${Math.min(items.length, 3)} gap-4`}>
           {items.map(item => (
-            <GlassPanel key={item.id} className="p-5 space-y-4 border-indigo-500/20">
+            <GlassPanel key={item.id} className="p-5 space-y-4 border-aurora-violet/25">
               <div className="space-y-1">
-                <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 font-bold border border-indigo-500/20">
+                <span className="text-[10px] uppercase px-2 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-indigo font-bold border border-aurora-violet/25">
                   {item.type.replace(/_/g, ' ')}
                 </span>
-                <h4 className="font-bold text-sm text-white pt-1">{item.title}</h4>
+                <h4 className="font-bold text-sm text-aurora-ink pt-1">{item.title}</h4>
               </div>
 
-              <div className="space-y-2 text-xs font-mono pt-2 border-t border-white/5">
+              <div className="space-y-2 text-xs pt-2 border-t border-aurora-line">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Gap impact:</span>
-                  <span className="font-bold text-emerald-400">{item.readinessGain}/100</span>
+                  <span className="text-aurora-muted">Gap impact:</span>
+                  <span className="font-bold text-emerald-700">{item.readinessGain}/100</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Match Gain:</span>
-                  <span className="font-bold text-cyan-400">+{item.matchGain}%</span>
+                  <span className="text-aurora-muted">Match Gain:</span>
+                  <span className="font-bold text-aurora-violet">+{item.matchGain}%</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Learning Time:</span>
-                  <span className="font-bold text-slate-200">{item.learningTime}</span>
+                  <span className="text-aurora-muted">Learning Time:</span>
+                  <span className="font-bold text-aurora-ink">{item.learningTime}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Difficulty:</span>
-                  <span className="font-bold text-purple-300">{item.difficulty}</span>
+                  <span className="text-aurora-muted">Difficulty:</span>
+                  <span className="font-bold text-aurora-violet">{item.difficulty}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Learning ROI:</span>
-                  <span className="font-bold text-amber-300">{item.learningRoi}</span>
+                  <span className="text-aurora-muted">Learning ROI:</span>
+                  <span className="font-bold text-amber-700">{item.learningRoi}</span>
                 </div>
               </div>
             </GlassPanel>

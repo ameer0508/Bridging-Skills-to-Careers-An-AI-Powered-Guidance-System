@@ -48,7 +48,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ items, children, class
             ref={menuRef}
             style={{ top: coords.y, left: coords.x }}
             role="menu"
-            className="fixed z-[var(--z-dropdown)] min-w-[180px] bg-[var(--color-bg-surface-raised)] border border-[var(--color-border-default)] rounded-[var(--radius-md)] shadow-[var(--shadow-md)] py-1 animate-scale-in"
+            className="fixed z-[var(--z-dropdown)] min-w-[180px] bg-white border border-aurora-line rounded-2xl shadow-[var(--shadow-md)] py-1 animate-scale-in"
           >
             {items.map(item => (
               <button
@@ -64,7 +64,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ items, children, class
                 className={`w-full px-3 py-2 text-xs font-medium text-left flex items-center justify-between gap-3 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                   item.danger
                     ? 'text-[var(--color-status-error-text)] hover:bg-[var(--color-status-error-bg)]'
-                    : 'text-[var(--color-text-primary)] hover:bg-[var(--color-interactive-secondary-hover)]'
+                    : 'text-aurora-ink hover:bg-[var(--color-interactive-secondary-hover)]'
                 }`}
               >
                 <span className="flex items-center gap-2">
@@ -72,7 +72,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ items, children, class
                   <span>{item.label}</span>
                 </span>
                 {item.shortcut && (
-                  <span className="text-[10px] font-mono text-[var(--color-text-tertiary)]">
+                  <span className="text-[10px] text-aurora-muted">
                     {item.shortcut}
                   </span>
                 )}

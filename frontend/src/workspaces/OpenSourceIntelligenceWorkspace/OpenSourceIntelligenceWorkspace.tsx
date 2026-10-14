@@ -77,9 +77,9 @@ export const OpenSourceIntelligenceWorkspace: React.FC = () => {
       />
 
       {/* TOP USERNAME SEARCH BAR */}
-      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-indigo-500/30">
+      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-aurora-violet/25">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <span className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+          <span className="p-2 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
             <GitPullRequest className="w-5 h-5" />
           </span>
           <div className="relative w-full sm:w-72">
@@ -88,9 +88,9 @@ export const OpenSourceIntelligenceWorkspace: React.FC = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter open-source handle..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
             />
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
         </div>
 
@@ -98,7 +98,7 @@ export const OpenSourceIntelligenceWorkspace: React.FC = () => {
           <button
             onClick={handleAnalyzeContributor}
             disabled={isAnalyzing}
-            className="w-full sm:w-auto py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+            className="w-full sm:w-auto py-2 px-4 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
             <span>{isAnalyzing ? 'Analyzing Ecosystem...' : 'Analyze Open Source Profile'}</span>
@@ -108,40 +108,40 @@ export const OpenSourceIntelligenceWorkspace: React.FC = () => {
 
       {/* 4 SUMMARY METRIC CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <GlassPanel className="p-4 space-y-2 border-indigo-500/30">
+        <GlassPanel className="p-4 space-y-2 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Commits Past Year</span>
-            <GitPullRequest className="w-4 h-4 text-indigo-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Commits Past Year</span>
+            <GitPullRequest className="w-4 h-4 text-aurora-indigo" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">940 Commits</span>
-          <span className="text-xs font-mono text-indigo-300">64 Merged PRs</span>
+          <span className="text-xl font-bold text-aurora-ink block">940 Commits</span>
+          <span className="text-xs text-aurora-indigo">64 Merged PRs</span>
         </GlassPanel>
 
-        <GlassPanel className="p-4 space-y-2 border-emerald-500/30">
+        <GlassPanel className="p-4 space-y-2 border-emerald-200">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Repository Impact</span>
-            <Star className="w-4 h-4 text-emerald-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Repository Impact</span>
+            <Star className="w-4 h-4 text-emerald-700" />
           </div>
-          <span className="text-xl font-bold text-emerald-400 font-mono block">1,420 Stars</span>
-          <span className="text-xs font-mono text-emerald-300">310 Forks Earned</span>
+          <span className="text-xl font-bold text-emerald-700 block">1,420 Stars</span>
+          <span className="text-xs text-emerald-700">310 Forks Earned</span>
         </GlassPanel>
 
         <GlassPanel className="p-4 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Code Reviews</span>
-            <Eye className="w-4 h-4 text-cyan-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Code Reviews</span>
+            <Eye className="w-4 h-4 text-aurora-violet" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">84 Reviews</span>
-          <span className="text-xs font-mono text-cyan-300">Senior Reviewer</span>
+          <span className="text-xl font-bold text-aurora-ink block">84 Reviews</span>
+          <span className="text-xs text-aurora-violet">Senior Reviewer</span>
         </GlassPanel>
 
         <GlassPanel className="p-4 space-y-2 border-purple-500/30">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Core Maintainer Status</span>
-            <Award className="w-4 h-4 text-purple-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Core Maintainer Status</span>
+            <Award className="w-4 h-4 text-aurora-violet" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">Core Maintainer</span>
-          <span className="text-xs font-mono text-purple-300">14 Releases Published</span>
+          <span className="text-xl font-bold text-aurora-ink block">Core Maintainer</span>
+          <span className="text-xs text-aurora-violet">14 Releases Published</span>
         </GlassPanel>
       </div>
 
@@ -149,29 +149,29 @@ export const OpenSourceIntelligenceWorkspace: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* SKILL EVIDENCE VERIFICATION (5 COLS) */}
         <div className="lg:col-span-5 space-y-6">
-          <GlassPanel className="p-6 space-y-4 border-emerald-500/30">
+          <GlassPanel className="p-6 space-y-4 border-emerald-200">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-700" />
                 Open Source Skill Evidence Verification
               </span>
             </div>
 
             <div className="space-y-3">
               {verifiedSkills.map((sk) => (
-                <div key={sk.skill} className="p-3.5 rounded-xl bg-slate-950/80 border border-white/10 space-y-2 text-xs font-mono">
+                <div key={sk.skill} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2 text-xs font-mono">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                      <span className="font-bold text-white">{sk.skill}</span>
+                      <CheckCircle2 className="w-4 h-4 text-emerald-700" />
+                      <span className="font-bold text-aurora-ink">{sk.skill}</span>
                     </div>
-                    <span className="text-emerald-400 font-bold text-[11px]">
+                    <span className="text-emerald-700 font-bold text-[11px]">
                       {sk.confidence}% Confidence
                     </span>
                   </div>
 
-                  <div className="text-[11px] text-slate-400">
-                    Org: <strong className="text-indigo-300">{sk.org}</strong> (Merged PRs)
+                  <div className="text-[11px] text-aurora-muted">
+                    Org: <strong className="text-aurora-indigo">{sk.org}</strong> (Merged PRs)
                   </div>
                 </div>
               ))}
@@ -180,19 +180,19 @@ export const OpenSourceIntelligenceWorkspace: React.FC = () => {
         </div>
 
         {/* ORGANIZATIONS & REPOSITORY IMPACT (7 COLS) */}
-        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-indigo-500/30">
+        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Building className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Building className="w-4 h-4 text-aurora-indigo" />
               Contributed Open Source Organizations ({openSourceMetrics.organizations.length})
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 font-mono text-xs">
+          <div className="grid grid-cols-2 gap-3 text-xs">
             {openSourceMetrics.organizations.map((org) => (
-              <div key={org} className="p-4 rounded-xl bg-slate-950/80 border border-white/10 space-y-1">
-                <span className="text-indigo-300 font-bold text-sm block">@{org}</span>
-                <span className="text-[10px] text-slate-400">Active Contributor / Maintainer</span>
+              <div key={org} className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1">
+                <span className="text-aurora-indigo font-bold text-sm block">@{org}</span>
+                <span className="text-[10px] text-aurora-muted">Active Contributor / Maintainer</span>
               </div>
             ))}
           </div>

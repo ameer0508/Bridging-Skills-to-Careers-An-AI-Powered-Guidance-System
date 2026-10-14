@@ -74,13 +74,13 @@ export const Modal: React.FC<ModalProps> = ({
           className={`bg-[var(--modal-bg)] border border-[var(--modal-border)] rounded-[var(--modal-radius)] shadow-[var(--modal-shadow)] flex flex-col overflow-hidden animate-scale-in ${sizeClasses[size]} ${className}`}
         >
           {title && (
-            <div className="px-6 py-4 border-b border-[var(--color-border-subtle)] flex items-center justify-between">
-              <h2 className="text-lg font-bold text-[var(--color-text-primary)]">{title}</h2>
+            <div className="px-6 py-4 border-b border-aurora-line flex items-center justify-between">
+              <h2 className="text-lg font-bold text-aurora-ink">{title}</h2>
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close dialog"
-                className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] p-1 rounded-full hover:bg-[var(--color-interactive-secondary-hover)] transition-colors"
+                className="text-aurora-muted hover:text-aurora-ink p-1 rounded-full hover:bg-[var(--color-interactive-secondary-hover)] transition-colors"
               >
                 <Icon size="md">
                   <line x1="18" y1="6" x2="6" y2="18" />
@@ -91,7 +91,7 @@ export const Modal: React.FC<ModalProps> = ({
           )}
           <div className="p-6 overflow-y-auto flex-1 custom-scrollbar">{children}</div>
           {footer && (
-            <div className="px-6 py-3 border-t border-[var(--color-border-subtle)] bg-[var(--color-bg-surface)] flex items-center justify-end gap-3">
+            <div className="px-6 py-3 border-t border-aurora-line bg-white flex items-center justify-end gap-3">
               {footer}
             </div>
           )}

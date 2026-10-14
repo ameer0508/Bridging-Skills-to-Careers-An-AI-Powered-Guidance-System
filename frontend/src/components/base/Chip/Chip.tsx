@@ -29,10 +29,10 @@ export const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
     const isRemovable = variant === 'removable' || !!onRemove;
 
     const baseClasses =
-      'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-[var(--radius-full)] bg-[var(--color-interactive-secondary)] text-[var(--color-text-primary)] border border-[var(--color-border-subtle)] select-none transition-colors duration-[var(--duration-fast)]';
+      'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-[var(--radius-full)] bg-[var(--color-interactive-secondary)] text-aurora-ink border border-aurora-line select-none transition-colors duration-[var(--duration-fast)]';
 
     const interactiveClasses = isInteractive
-      ? 'hover:bg-[var(--color-interactive-secondary-hover)] hover:border-[var(--color-border-strong)] cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-border-focus)]'
+      ? 'hover:bg-[var(--color-interactive-secondary-hover)] hover:border-aurora-line cursor-pointer focus-visible:ring-2 focus-visible:ring-[var(--color-border-focus)]'
       : '';
 
     const disabledClasses = disabled ? 'opacity-50 pointer-events-none cursor-not-allowed' : '';
@@ -63,7 +63,7 @@ export const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
             }}
             disabled={disabled}
             aria-label="Remove chip"
-            className="shrink-0 text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] focus:outline-none rounded-full p-0.5"
+            className="shrink-0 text-aurora-muted hover:text-aurora-ink focus:outline-none rounded-full p-0.5"
           >
             <Icon size={12}>
               <line x1="18" y1="6" x2="6" y2="18" />

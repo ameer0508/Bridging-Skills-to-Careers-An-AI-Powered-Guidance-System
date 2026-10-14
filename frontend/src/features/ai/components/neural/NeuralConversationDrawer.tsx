@@ -65,39 +65,39 @@ export const NeuralConversationDrawer: React.FC<NeuralConversationDrawerProps> =
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xl flex justify-end"
+      className="fixed inset-0 z-50 bg-aurora-canvas/60 backdrop-blur-xl flex justify-end"
     >
       <motion.div
         initial={{ x: '100%' }}
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="w-full max-w-2xl h-full bg-slate-950/95 border-l border-white/10 shadow-2xl flex flex-col overflow-hidden"
+        className="w-full max-w-2xl h-full bg-aurora-canvas/60 border-l border-aurora-line shadow-2xl flex flex-col overflow-hidden"
       >
         {/* Drawer Header */}
-        <div className="h-16 px-6 border-b border-white/10 flex items-center justify-between gap-4 bg-slate-900/50 shrink-0">
+        <div className="h-16 px-6 border-b border-aurora-line flex items-center justify-between gap-4 bg-aurora-canvas/60 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-300">
+            <div className="w-8 h-8 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 flex items-center justify-center text-aurora-violet">
               <Sparkles className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold font-display text-white">AI Advisory Stream</h2>
-              <span className="text-[11px] font-mono text-slate-400">Grounded Multi-Agent History</span>
+              <h2 className="text-sm font-bold font-display text-aurora-ink">AI Advisory Stream</h2>
+              <span className="text-[11px] text-aurora-muted">Grounded Multi-Agent History</span>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={onNewChat}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.05] border border-white/10 hover:bg-white/10 text-slate-200 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/[0.05] border border-aurora-line hover:bg-aurora-canvas text-aurora-ink transition-colors cursor-pointer"
             >
-              <MessageSquarePlus className="w-3.5 h-3.5 text-cyan-400" />
+              <MessageSquarePlus className="w-3.5 h-3.5 text-aurora-violet" />
               <span>New Stream</span>
             </button>
 
             <button
               onClick={onClose}
-              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+              className="p-2 rounded-lg text-aurora-muted hover:text-aurora-indigo hover:bg-aurora-canvas transition-colors cursor-pointer"
               title="Close Drawer"
             >
               <X className="w-5 h-5" />
@@ -107,18 +107,18 @@ export const NeuralConversationDrawer: React.FC<NeuralConversationDrawerProps> =
 
         {/* Thread History Quick Bar */}
         {conversations.length > 1 && (
-          <div className="px-6 py-2.5 border-b border-white/5 bg-black/20 flex items-center gap-2 overflow-x-auto custom-scrollbar shrink-0">
-            <History className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+          <div className="px-6 py-2.5 border-b border-aurora-line bg-aurora-canvas/60 flex items-center gap-2 overflow-x-auto custom-scrollbar shrink-0">
+            <History className="w-3.5 h-3.5 text-aurora-muted shrink-0" />
             {conversations.slice(0, 5).map((c) => {
               const isSelected = c._id === activeConversationId;
               return (
                 <button
                   key={c._id}
                   onClick={() => onSelectConversation(c._id)}
-                  className={`px-2.5 py-1 rounded-full text-[11px] font-mono whitespace-nowrap transition-colors ${
+                  className={`px-2.5 py-1 rounded-full text-[11px] whitespace-nowrap transition-colors ${
                     isSelected
-                      ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-semibold'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                      ? 'bg-aurora-violet/[0.06] text-aurora-violet border border-aurora-violet/25 font-semibold'
+                      : 'text-aurora-muted hover:text-aurora-ink hover:bg-aurora-canvas'
                   }`}
                 >
                   {c.title.length > 20 ? c.title.slice(0, 18) + '...' : c.title}
@@ -131,17 +131,17 @@ export const NeuralConversationDrawer: React.FC<NeuralConversationDrawerProps> =
         {/* Message Thread Scrollable List */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
           {isLoadingHistory ? (
-            <div className="h-full flex flex-col items-center justify-center gap-3 text-slate-400">
-              <RefreshCw className="w-6 h-6 animate-spin text-cyan-400" />
+            <div className="h-full flex flex-col items-center justify-center gap-3 text-aurora-muted">
+              <RefreshCw className="w-6 h-6 animate-spin text-aurora-violet" />
               <span className="text-xs font-mono">Loading conversation...</span>
             </div>
           ) : messages.length === 0 && !isSending && !sendError ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-3">
-              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 text-cyan-300">
+              <div className="p-3 rounded-2xl bg-white/[0.03] border border-aurora-line text-aurora-violet">
                 <MessageSquare className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-bold text-white">No messages yet</h3>
-              <p className="text-xs text-slate-400 max-w-xs">
+              <h3 className="text-sm font-bold text-aurora-ink">No messages yet</h3>
+              <p className="text-xs text-aurora-muted max-w-xs">
                 Ask a question about your skills, readiness or roadmap to start this conversation.
               </p>
             </div>
@@ -159,16 +159,16 @@ export const NeuralConversationDrawer: React.FC<NeuralConversationDrawerProps> =
                 />
               ))}
               {(isSending || isRetryingReply) && (
-                <div className="flex items-center gap-2 text-xs text-slate-300" role="status" aria-live="polite" data-testid="chat-pending">
-                  <RefreshCw className="w-4 h-4 animate-spin text-cyan-400" />
+                <div className="flex items-center gap-2 text-xs text-aurora-muted" role="status" aria-live="polite" data-testid="chat-pending">
+                  <RefreshCw className="w-4 h-4 animate-spin text-aurora-violet" />
                   <span>Waiting for the assistant. This can take up to 40 seconds.</span>
                 </div>
               )}
               {sendError && !isSending && (
-                <div role="alert" className="p-3 rounded-xl border border-rose-500/30 bg-rose-500/10 flex flex-wrap items-center justify-between gap-2" data-testid="chat-send-error">
-                  <span className="text-xs text-rose-100">Your message was not sent: {sendError}</span>
+                <div role="alert" className="p-3 rounded-xl border border-rose-200 bg-rose-50 flex flex-wrap items-center justify-between gap-2" data-testid="chat-send-error">
+                  <span className="text-xs text-rose-700">Your message was not sent: {sendError}</span>
                   {onRetrySend && (
-                    <button type="button" onClick={onRetrySend} className="py-1.5 px-3 rounded-lg bg-slate-900 border border-white/10 text-slate-100 text-xs font-bold cursor-pointer">
+                    <button type="button" onClick={onRetrySend} className="py-1.5 px-3 rounded-lg bg-aurora-canvas border border-aurora-line text-aurora-ink text-xs font-bold cursor-pointer">
                       Send again
                     </button>
                   )}

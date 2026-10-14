@@ -16,13 +16,13 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 const colorVariantStyles: Record<BadgeColor, Record<BadgeVariant, string>> = {
   default: {
     filled: 'bg-[var(--primitive-neutral-700)] text-[var(--primitive-neutral-50)]',
-    outlined: 'border border-[var(--color-border-default)] text-[var(--color-text-secondary)]',
-    subtle: 'bg-[var(--primitive-neutral-800)] text-[var(--color-text-secondary)]',
-    dot: 'text-[var(--color-text-secondary)]',
+    outlined: 'border border-aurora-line text-aurora-muted',
+    subtle: 'bg-aurora-canvas text-aurora-muted',
+    dot: 'text-aurora-muted',
   },
   primary: {
-    filled: 'bg-[var(--color-interactive-primary)] text-[var(--color-text-on-primary)]',
-    outlined: 'border border-[var(--color-interactive-primary)] text-[var(--color-interactive-primary)]',
+    filled: '[background:var(--aurora-gradient-action)] text-[var(--color-text-on-primary)]',
+    outlined: 'border border-aurora-violet text-aurora-violet',
     subtle: 'bg-[hsl(226,84%,57%,0.12)] text-[var(--primitive-primary-400)] border border-[hsl(226,84%,57%,0.2)]',
     dot: 'text-[var(--primitive-primary-400)]',
   },
@@ -60,7 +60,7 @@ const colorVariantStyles: Record<BadgeColor, Record<BadgeVariant, string>> = {
 
 const dotColorMap: Record<BadgeColor, string> = {
   default: 'bg-[var(--color-text-tertiary)]',
-  primary: 'bg-[var(--color-interactive-primary)]',
+  primary: '[background:var(--aurora-gradient-action)]',
   success: 'bg-[var(--color-status-success-text)]',
   warning: 'bg-[var(--color-status-warning-text)]',
   error: 'bg-[var(--color-status-error-text)]',
@@ -69,8 +69,8 @@ const dotColorMap: Record<BadgeColor, string> = {
 };
 
 const sizeClasses: Record<BadgeSize, string> = {
-  sm: 'text-[10px] px-1.5 py-0.5 rounded-[var(--radius-sm)] font-bold tracking-wider uppercase',
-  md: 'text-xs px-2.5 py-1 rounded-[var(--radius-md)] font-semibold',
+  sm: 'text-[10px] px-1.5 py-0.5 rounded-lg font-bold tracking-wider uppercase',
+  md: 'text-xs px-2.5 py-1 rounded-2xl font-semibold',
 };
 
 export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(

@@ -94,25 +94,25 @@ export const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-slate-950 text-slate-100 font-sans">
-      <div className="max-w-2xl w-full bg-slate-900 border border-slate-800 rounded-xl p-8 shadow-2xl space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-aurora-canvas text-aurora-ink font-sans">
+      <div className="max-w-2xl w-full bg-aurora-canvas border border-aurora-line rounded-xl p-8 shadow-2xl space-y-6">
+        <div className="flex items-center justify-between border-b border-aurora-line pb-4">
           <div className="space-y-1">
             <h1 className="text-3xl font-display font-bold tracking-tight bg-linear-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
               User Profile
             </h1>
-            <p className="text-sm text-slate-400">Authenticated Session Foundation Verification</p>
+            <p className="text-sm text-aurora-muted">Authenticated Session Foundation Verification</p>
           </div>
           <div className="flex gap-2">
             <Link
               to="/resume"
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 border border-indigo-700 text-slate-100 font-semibold text-xs rounded-lg transition-colors text-center flex items-center"
+              className="px-4 py-2 [background:var(--aurora-gradient-action)] hover:brightness-110 border border-indigo-700 text-white font-semibold text-xs rounded-lg transition-colors text-center flex items-center"
             >
               Manage Resume
             </Link>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-slate-850 hover:bg-slate-800 border border-slate-800 text-slate-300 font-medium text-xs rounded-lg transition-colors cursor-pointer"
+              className="px-4 py-2 bg-slate-850 hover:bg-aurora-canvas border border-aurora-line text-aurora-muted font-medium text-xs rounded-lg transition-colors cursor-pointer"
             >
               Sign Out
             </button>
@@ -120,33 +120,33 @@ export const ProfilePage: React.FC = () => {
         </div>
 
         {isProfileLoading ? (
-          <div className="text-center py-10 text-slate-400">Loading user metadata from API...</div>
+          <div className="text-center py-10 text-aurora-muted">Loading user metadata from API...</div>
         ) : profileError ? (
-          <div className="p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-lg text-sm font-medium">
+          <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-sm font-medium">
             Authentication Validation Failed: {(profileError as { message?: string }).message}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-4">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-400">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-aurora-indigo">
                 Session Metadata
               </h2>
-              <div className="bg-slate-950 border border-slate-850 rounded-lg p-4 space-y-3 text-xs">
+              <div className="bg-aurora-canvas border border-aurora-line rounded-lg p-4 space-y-3 text-xs">
                 <div className="flex justify-between">
-                  <span className="text-slate-500">User ID</span>
-                  <span className="font-mono text-slate-300">{dbProfile?.id}</span>
+                  <span className="text-aurora-muted">User ID</span>
+                  <span className="text-aurora-muted">{dbProfile?.id}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Email Address</span>
-                  <span className="text-slate-300">{dbProfile?.email}</span>
+                  <span className="text-aurora-muted">Email Address</span>
+                  <span className="text-aurora-muted">{dbProfile?.email}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Security Role</span>
-                  <span className="capitalize text-slate-300">{dbProfile?.role}</span>
+                  <span className="text-aurora-muted">Security Role</span>
+                  <span className="capitalize text-aurora-muted">{dbProfile?.role}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-500">Account Status</span>
-                  <span className="capitalize inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-emerald-500/10 text-emerald-400">
+                  <span className="text-aurora-muted">Account Status</span>
+                  <span className="capitalize inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-emerald-50 text-emerald-700">
                     {dbProfile?.accountStatus}
                   </span>
                 </div>
@@ -154,19 +154,19 @@ export const ProfilePage: React.FC = () => {
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-400">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-aurora-indigo">
                 Update Information
               </h2>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-semibold uppercase tracking-wider text-aurora-muted">
                   Full Name
                 </label>
                 <input
                   type="text"
                   placeholder="Enter name"
                   {...register('fullName')}
-                  className="w-full px-4 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-lg text-slate-100 focus:outline-none text-xs transition-colors"
+                  className="w-full px-4 py-2 bg-aurora-canvas border border-aurora-line focus:border-indigo-500 rounded-lg text-aurora-ink focus:outline-none text-xs transition-colors"
                 />
                 {errors.fullName && (
                   <span className="text-xs text-rose-500">{errors.fullName.message}</span>
@@ -174,14 +174,14 @@ export const ProfilePage: React.FC = () => {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <label className="text-xs font-semibold uppercase tracking-wider text-aurora-muted">
                   Avatar Image URL
                 </label>
                 <input
                   type="text"
                   placeholder="https://example.com/avatar.png"
                   {...register('avatar')}
-                  className="w-full px-4 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-500 rounded-lg text-slate-100 focus:outline-none text-xs transition-colors"
+                  className="w-full px-4 py-2 bg-aurora-canvas border border-aurora-line focus:border-indigo-500 rounded-lg text-aurora-ink focus:outline-none text-xs transition-colors"
                 />
                 {errors.avatar && (
                   <span className="text-xs text-rose-500">{errors.avatar.message}</span>
@@ -189,12 +189,12 @@ export const ProfilePage: React.FC = () => {
               </div>
 
               {updateMutation.isSuccess && (
-                <div className="p-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-lg text-xs font-medium">
+                <div className="p-2 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg text-xs font-medium">
                   Profile updated successfully.
                 </div>
               )}
               {updateMutation.isError && (
-                <div className="p-2 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-lg text-xs font-medium">
+                <div className="p-2 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-xs font-medium">
                   {(updateMutation.error as { message?: string }).message}
                 </div>
               )}
@@ -202,7 +202,7 @@ export const ProfilePage: React.FC = () => {
               <button
                 type="submit"
                 disabled={updateMutation.isPending}
-                className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 font-medium rounded-lg text-xs transition-colors cursor-pointer"
+                className="w-full py-2 px-4 [background:var(--aurora-gradient-action)] hover:brightness-110 disabled:bg-indigo-800 font-medium rounded-lg text-xs transition-colors cursor-pointer"
               >
                 {updateMutation.isPending ? 'Updating...' : 'Save Profile'}
               </button>

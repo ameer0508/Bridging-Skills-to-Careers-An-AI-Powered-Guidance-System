@@ -19,7 +19,7 @@ export const CareerWorkspaceHeader: React.FC<CareerWorkspaceHeaderProps> = ({
   const navigate = useNavigate();
 
   return (
-    <Card variant="elevated" className="p-6 md:p-8 bg-gradient-to-r from-[var(--color-bg-surface-raised)] to-[var(--color-bg-surface)] border-[var(--color-border-default)]">
+    <Card variant="elevated" className="p-6 md:p-8 bg-gradient-to-r from-[var(--color-bg-surface-raised)] to-[var(--color-bg-surface)] border-aurora-line">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2 max-w-xl">
           <div className="flex items-center gap-2">
@@ -36,11 +36,11 @@ export const CareerWorkspaceHeader: React.FC<CareerWorkspaceHeaderProps> = ({
             </Badge>
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-bold font-display text-[var(--color-text-primary)] tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-bold font-display text-aurora-ink tracking-tight">
             Career Intelligence
           </h1>
 
-          <p className="text-xs md:text-sm text-[var(--color-text-secondary)] leading-relaxed">
+          <p className="text-xs md:text-sm text-aurora-muted leading-relaxed">
             Deterministic role alignments computed strictly from your verified skill evidence graph. No random percentages—every match is traceable to explicit skills and gaps.
           </p>
 
@@ -75,20 +75,20 @@ export const CareerWorkspaceHeader: React.FC<CareerWorkspaceHeaderProps> = ({
         </div>
 
         {/* Quick Summary Strip */}
-        <div className="grid grid-cols-3 gap-3 p-3 bg-[var(--color-bg-surface-sunken)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)] w-full md:w-auto shrink-0 text-center">
+        <div className="grid grid-cols-3 gap-3 p-3 bg-[var(--color-bg-surface-sunken)] border border-aurora-line rounded-2xl w-full md:w-auto shrink-0 text-center">
           <div className="px-3 py-1">
-            <div className="text-xl font-bold font-display text-[var(--color-interactive-primary)]">
+            <div className="text-xl font-bold font-display text-aurora-violet">
               {totalMatches}
             </div>
-            <div className="text-[10px] uppercase font-bold text-[var(--color-text-tertiary)] tracking-wider mt-0.5">
+            <div className="text-[10px] uppercase font-bold text-aurora-muted tracking-wider mt-0.5">
               Matches
             </div>
           </div>
-          <div className="px-3 py-1 border-x border-[var(--color-border-subtle)]">
+          <div className="px-3 py-1 border-x border-aurora-line">
             <div className="text-xl font-bold font-display text-[var(--color-status-success-text)]">
               {topFitScore}%
             </div>
-            <div className="text-[10px] uppercase font-bold text-[var(--color-text-tertiary)] tracking-wider mt-0.5">
+            <div className="text-[10px] uppercase font-bold text-aurora-muted tracking-wider mt-0.5">
               Top Fit
             </div>
           </div>
@@ -96,7 +96,7 @@ export const CareerWorkspaceHeader: React.FC<CareerWorkspaceHeaderProps> = ({
             <div className="text-xl font-bold font-display text-[var(--color-ai-accent)]">
               {avgConfidence}%
             </div>
-            <div className="text-[10px] uppercase font-bold text-[var(--color-text-tertiary)] tracking-wider mt-0.5">
+            <div className="text-[10px] uppercase font-bold text-aurora-muted tracking-wider mt-0.5">
               Avg Conf.
             </div>
           </div>

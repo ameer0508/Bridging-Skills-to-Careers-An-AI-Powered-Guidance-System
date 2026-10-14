@@ -24,9 +24,9 @@ const DIAGNOSTIC_STAGES: StageNode[] = [
     detail: 'Ingests candidate work history, project repositories, and academic certifications.',
     evidenceSource: 'PDF / DOCX Raw Stream',
     icon: FileText,
-    accentColor: 'text-indigo-400',
-    badgeBg: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20',
-    borderColor: 'border-indigo-500/30',
+    accentColor: 'text-aurora-indigo',
+    badgeBg: 'bg-aurora-violet/[0.06] text-aurora-indigo border-aurora-violet/25',
+    borderColor: 'border-aurora-violet/25',
   },
   {
     id: 'stage-2',
@@ -36,9 +36,9 @@ const DIAGNOSTIC_STAGES: StageNode[] = [
     detail: 'Isolates verified skill entities, role tenures, and hands-on capstone implementations.',
     evidenceSource: 'Entity Extraction Engine',
     icon: Cpu,
-    accentColor: 'text-cyan-400',
-    badgeBg: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20',
-    borderColor: 'border-cyan-500/30',
+    accentColor: 'text-aurora-violet',
+    badgeBg: 'bg-aurora-violet/[0.06] text-aurora-violet border-aurora-violet/25',
+    borderColor: 'border-aurora-violet/25',
   },
   {
     id: 'stage-3',
@@ -48,9 +48,9 @@ const DIAGNOSTIC_STAGES: StageNode[] = [
     detail: 'Evaluates Technical (50%), Experience (25%), Projects (15%), and Certifications (10%).',
     evidenceSource: 'ReadinessCalculator.ts',
     icon: BarChart2,
-    accentColor: 'text-emerald-400',
-    badgeBg: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
-    borderColor: 'border-emerald-500/30',
+    accentColor: 'text-emerald-700',
+    badgeBg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    borderColor: 'border-emerald-200',
   },
   {
     id: 'stage-4',
@@ -60,9 +60,9 @@ const DIAGNOSTIC_STAGES: StageNode[] = [
     detail: 'Audits missing required skills and applies deterministic penalty reduction (up to -40%).',
     evidenceSource: 'GapPrioritizer.ts',
     icon: AlertCircle,
-    accentColor: 'text-amber-400',
-    badgeBg: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
-    borderColor: 'border-amber-500/30',
+    accentColor: 'text-amber-700',
+    badgeBg: 'bg-amber-50 text-amber-700 border-amber-200',
+    borderColor: 'border-amber-200',
   },
   {
     id: 'stage-5',
@@ -72,8 +72,8 @@ const DIAGNOSTIC_STAGES: StageNode[] = [
     detail: 'Generates composite readiness score and classifies candidate into Senior, Mid, or Entry tiers.',
     evidenceSource: 'Deterministic Classification',
     icon: Award,
-    accentColor: 'text-purple-400',
-    badgeBg: 'bg-purple-500/10 text-purple-300 border-purple-500/20',
+    accentColor: 'text-aurora-violet',
+    badgeBg: 'bg-purple-500/10 text-aurora-violet border-purple-500/20',
     borderColor: 'border-purple-500/30',
   },
 ];
@@ -82,24 +82,24 @@ export const ReadinessDiagnosticPipelineVisual: React.FC = () => {
   const [activeStage, setActiveStage] = React.useState<string>('stage-3');
 
   return (
-    <div className="relative rounded-3xl border border-white/10 bg-slate-950/80 backdrop-blur-xl p-6 sm:p-8 overflow-hidden shadow-2xl">
+    <div className="relative rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl p-6 sm:p-8 overflow-hidden shadow-2xl">
       {/* Background Ambience */}
-      <div className="pointer-events-none absolute -top-24 left-1/4 w-96 h-96 rounded-full bg-cyan-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 rounded-full bg-indigo-500/10 blur-3xl" />
+      <div className="pointer-events-none absolute -top-24 left-1/4 w-96 h-96 rounded-full bg-aurora-violet/[0.06] blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 rounded-full bg-aurora-violet/[0.06] blur-3xl" />
 
       {/* Header telemetry ribbon */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-5 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-aurora-line pb-5 mb-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-[10px] font-mono font-bold text-cyan-300 uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-aurora-violet/25 bg-aurora-violet/[0.06] text-[10px] font-bold text-aurora-violet uppercase tracking-widest">
             <span>Diagnostic Audit Architecture</span>
           </div>
-          <h3 className="text-base sm:text-lg font-bold text-white tracking-tight mt-1.5">
+          <h3 className="text-base sm:text-lg font-bold text-aurora-ink tracking-tight mt-1.5">
             5-Stage Evidence & Preparedness Progression
           </h3>
         </div>
 
         <div className="flex items-center gap-3 text-xs font-mono">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-slate-900/60 text-slate-300">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-aurora-line bg-aurora-canvas/60 text-aurora-muted">
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
             <span>STATE: AWAITING EVIDENCE</span>
           </div>
@@ -119,25 +119,25 @@ export const ReadinessDiagnosticPipelineVisual: React.FC = () => {
               onClick={() => setActiveStage(stage.id)}
               className={`p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between relative ${
                 isSelected
-                  ? 'bg-slate-900/90 border-cyan-500/50 shadow-lg shadow-cyan-500/10'
-                  : 'bg-slate-900/40 border-white/10 hover:border-white/20 hover:bg-slate-900/60'
+                  ? 'bg-aurora-canvas/60 border-aurora-violet/25 shadow-lg shadow-cyan-500/10'
+                  : 'bg-aurora-canvas/60 border-aurora-line hover:border-aurora-line hover:bg-aurora-canvas/60'
               }`}
             >
               {/* Step indicator & connector */}
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono font-bold text-slate-400">
+                  <span className="text-[10px] font-bold text-aurora-muted">
                     STAGE {stage.step}
                   </span>
                   {idx < 4 && (
-                    <span className="hidden md:inline text-slate-600 font-mono text-xs">→</span>
+                    <span className="hidden md:inline text-aurora-muted text-xs">→</span>
                   )}
                 </div>
                 <div
                   className={`w-7 h-7 rounded-lg flex items-center justify-center border ${
                     isSelected
-                      ? `${stage.borderColor} bg-white/5`
-                      : 'border-white/10 bg-slate-800/40'
+                      ? `${stage.borderColor} bg-aurora-canvas`
+                      : 'border-aurora-line bg-aurora-canvas/40'
                   }`}
                 >
                   <Icon className={`w-3.5 h-3.5 ${stage.accentColor}`} />
@@ -146,21 +146,21 @@ export const ReadinessDiagnosticPipelineVisual: React.FC = () => {
 
               {/* Title & Category */}
               <div className="space-y-1 my-1">
-                <span className={`text-[9px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border inline-block ${stage.badgeBg}`}>
+                <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border inline-block ${stage.badgeBg}`}>
                   {stage.category}
                 </span>
-                <h4 className="text-xs font-bold text-white leading-snug">
+                <h4 className="text-xs font-bold text-aurora-ink leading-snug">
                   {stage.title}
                 </h4>
-                <p className="text-[11px] text-slate-400 leading-relaxed line-clamp-2">
+                <p className="text-[11px] text-aurora-muted leading-relaxed line-clamp-2">
                   {stage.detail}
                 </p>
               </div>
 
               {/* Evidence source tag */}
-              <div className="mt-3 pt-2.5 border-t border-white/5 flex items-center justify-between text-[9px] font-mono text-slate-400">
+              <div className="mt-3 pt-2.5 border-t border-aurora-line flex items-center justify-between text-[9px] text-aurora-muted">
                 <span>SOURCE:</span>
-                <span className="text-slate-300 font-bold truncate max-w-[120px]">{stage.evidenceSource}</span>
+                <span className="text-aurora-muted font-bold truncate max-w-[120px]">{stage.evidenceSource}</span>
               </div>
             </motion.div>
           );
@@ -168,9 +168,9 @@ export const ReadinessDiagnosticPipelineVisual: React.FC = () => {
       </div>
 
       {/* Trajectory connection line (Desktop) */}
-      <div className="hidden md:block relative h-1.5 bg-slate-800/80 rounded-full mt-4 overflow-hidden border border-white/5">
+      <div className="hidden md:block relative h-1.5 bg-aurora-canvas/80 rounded-full mt-4 overflow-hidden border border-aurora-line">
         <motion.div
-          className="absolute top-0 bottom-0 left-0 bg-linear-to-r from-indigo-500 via-cyan-400 to-emerald-400 rounded-full"
+          className="absolute top-0 bottom-0 left-0 bg-linear-to-r from-aurora-violet via-aurora-sky to-aurora-mint rounded-full"
           initial={{ width: '0%' }}
           animate={{ width: '100%' }}
           transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}

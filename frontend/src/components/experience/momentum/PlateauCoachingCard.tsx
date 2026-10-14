@@ -23,31 +23,31 @@ export const PlateauCoachingCard: React.FC<PlateauCoachingCardProps> = ({
   if (!plateau.isPlateauDetected) return null;
 
   return (
-    <GlassCard className={`p-6 border-amber-500/30 bg-amber-950/20 space-y-4 ${className}`}>
-      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+    <GlassCard className={`p-6 border-amber-200 bg-amber-50 space-y-4 ${className}`}>
+      <div className="flex items-center justify-between pb-3 border-b border-aurora-line">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
+          <div className="p-2 rounded-lg bg-amber-50 text-amber-700">
             <AlertTriangle className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">Learning Plateau Coaching Insight</h3>
-            <p className="text-xs text-amber-300">Constructive feedback to maintain progress velocity</p>
+            <h3 className="text-base font-bold text-aurora-ink">Learning Plateau Coaching Insight</h3>
+            <p className="text-xs text-amber-700">Constructive feedback to maintain progress velocity</p>
           </div>
         </div>
       </div>
 
       <div className="space-y-3 text-xs">
-        <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1">
-          <span className="font-semibold text-neutral-400 block">AI Telemetry Observation:</span>
-          <p className="text-neutral-200 leading-relaxed">{plateau.observation}</p>
+        <div className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1">
+          <span className="font-semibold text-aurora-muted block">AI Telemetry Observation:</span>
+          <p className="text-aurora-ink leading-relaxed">{plateau.observation}</p>
         </div>
 
-        <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-1">
-          <span className="font-bold text-amber-300 flex items-center gap-1">
-            <Lightbulb className="w-4 h-4 text-amber-400" />
+        <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 space-y-1">
+          <span className="font-bold text-amber-700 flex items-center gap-1">
+            <Lightbulb className="w-4 h-4 text-amber-700" />
             Strategic Advice:
           </span>
-          <p className="text-neutral-200 leading-relaxed">{plateau.coachingAdvice}</p>
+          <p className="text-aurora-ink leading-relaxed">{plateau.coachingAdvice}</p>
         </div>
       </div>
 

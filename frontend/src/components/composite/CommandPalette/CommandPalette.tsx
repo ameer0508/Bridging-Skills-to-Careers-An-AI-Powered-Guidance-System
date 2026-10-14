@@ -79,11 +79,11 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           aria-expanded="true"
           aria-haspopup="listbox"
           onClick={e => e.stopPropagation()}
-          className="w-full max-w-xl bg-[var(--color-bg-surface-raised)] border border-[var(--color-border-default)] rounded-[var(--radius-xl)] shadow-[var(--shadow-xl)] overflow-hidden flex flex-col animate-scale-in"
+          className="w-full max-w-xl bg-white border border-aurora-line rounded-[var(--radius-xl)] shadow-[var(--shadow-xl)] overflow-hidden flex flex-col animate-scale-in"
         >
           {/* Header Input */}
-          <div className="flex items-center px-4 py-3.5 border-b border-[var(--color-border-subtle)] gap-3">
-            <Icon size="md" color="var(--color-text-tertiary)">
+          <div className="flex items-center px-4 py-3.5 border-b border-aurora-line gap-3">
+            <Icon size="md" color="#515b80">
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </Icon>
@@ -96,9 +96,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                 setSelectedIndex(0);
               }}
               placeholder={placeholder}
-              className="w-full bg-transparent text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-tertiary)] focus:outline-none"
+              className="w-full bg-transparent text-sm text-aurora-ink placeholder-[var(--color-text-tertiary)] focus:outline-none"
             />
-            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono font-semibold bg-[var(--color-bg-surface-sunken)] border border-[var(--color-border-subtle)] text-[var(--color-text-tertiary)] rounded-[var(--radius-sm)]">
+            <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-semibold bg-[var(--color-bg-surface-sunken)] border border-aurora-line text-aurora-muted rounded-lg">
               ESC
             </kbd>
           </div>
@@ -106,7 +106,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           {/* Command List */}
           <div role="listbox" className="max-h-72 overflow-y-auto p-2 space-y-1 custom-scrollbar">
             {filteredCommands.length === 0 ? (
-              <div className="p-6 text-center text-xs text-[var(--color-text-tertiary)]">
+              <div className="p-6 text-center text-xs text-aurora-muted">
                 No matching commands found.
               </div>
             ) : (
@@ -123,25 +123,25 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       onClose();
                     }}
                     onMouseEnter={() => setSelectedIndex(idx)}
-                    className={`px-3 py-2.5 rounded-[var(--radius-md)] text-xs font-medium flex items-center justify-between cursor-pointer transition-colors ${
+                    className={`px-3 py-2.5 rounded-2xl text-xs font-medium flex items-center justify-between cursor-pointer transition-colors ${
                       isSelected
-                        ? 'bg-[var(--color-interactive-primary)] text-[var(--color-text-on-primary)] font-semibold'
-                        : 'text-[var(--color-text-primary)] hover:bg-[var(--color-interactive-secondary-hover)]'
+                        ? '[background:var(--aurora-gradient-action)] text-[var(--color-text-on-primary)] font-semibold'
+                        : 'text-aurora-ink hover:bg-[var(--color-interactive-secondary-hover)]'
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
                       {cmd.icon && <span className="shrink-0">{cmd.icon}</span>}
                       <span>{cmd.label}</span>
                       {cmd.category && (
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-[var(--radius-sm)] ${
-                          isSelected ? 'bg-white/20 text-white' : 'bg-[var(--color-bg-surface-sunken)] text-[var(--color-text-tertiary)]'
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-lg ${
+                          isSelected ? 'bg-white/80 text-aurora-indigo' : 'bg-[var(--color-bg-surface-sunken)] text-aurora-muted'
                         }`}>
                           {cmd.category}
                         </span>
                       )}
                     </div>
                     {cmd.shortcut && (
-                      <span className={`font-mono text-[10px] ${isSelected ? 'text-white' : 'text-[var(--color-text-tertiary)]'}`}>
+                      <span className={`text-[10px] ${isSelected ? 'text-aurora-ink' : 'text-aurora-muted'}`}>
                         {cmd.shortcut}
                       </span>
                     )}

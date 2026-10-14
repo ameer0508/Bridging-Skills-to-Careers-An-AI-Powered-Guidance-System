@@ -145,14 +145,14 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
       />
 
       {/* STREAM CONTROL TOOLBAR */}
-      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-indigo-500/30">
+      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-aurora-violet/25">
         <div className="flex items-center gap-3">
-          <span className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+          <span className="p-2 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
             <Radio className="w-5 h-5 animate-pulse" />
           </span>
           <div>
-            <h3 className="text-sm font-bold text-white">Live Event Streaming Transport</h3>
-            <span className="text-[11px] font-mono text-slate-400">
+            <h3 className="text-sm font-bold text-aurora-ink">Live Event Streaming Transport</h3>
+            <span className="text-[11px] text-aurora-muted">
               Transport: In-Memory / Pluggable Redis Streams • PubSub Fanout Model
             </span>
           </div>
@@ -163,8 +163,8 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
             onClick={() => setIsLiveStreamActive(!isLiveStreamActive)}
             className={`py-2 px-4 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
               isLiveStreamActive
-                ? 'bg-emerald-600/20 text-emerald-400 border-emerald-500/40 hover:bg-emerald-600/30'
-                : 'bg-amber-600/20 text-amber-400 border-amber-500/40 hover:bg-amber-600/30'
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-50'
+                : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-50'
             }`}
           >
             {isLiveStreamActive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -175,40 +175,40 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
 
       {/* TOP EVENT METRICS ROW */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <GlassPanel className="p-4 space-y-2 border-indigo-500/30">
+        <GlassPanel className="p-4 space-y-2 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Total Events Stored</span>
-            <Activity className="w-4 h-4 text-indigo-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Total Events Stored</span>
+            <Activity className="w-4 h-4 text-aurora-indigo" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">1,420 Events</span>
-          <span className="text-xs font-mono text-indigo-300">Audited in EventStore</span>
+          <span className="text-xl font-bold text-aurora-ink block">1,420 Events</span>
+          <span className="text-xs text-aurora-indigo">Audited in EventStore</span>
         </GlassPanel>
 
-        <GlassPanel className="p-4 space-y-2 border-emerald-500/30">
+        <GlassPanel className="p-4 space-y-2 border-emerald-200">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Subscriber Success</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Subscriber Success</span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-700" />
           </div>
-          <span className="text-xl font-bold text-emerald-400 font-mono block">99.93% Delivery</span>
-          <span className="text-xs font-mono text-emerald-300">0 Network Retries</span>
+          <span className="text-xl font-bold text-emerald-700 block">99.93% Delivery</span>
+          <span className="text-xs text-emerald-700">0 Network Retries</span>
         </GlassPanel>
 
         <GlassPanel className="p-4 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Retry Handler</span>
-            <RotateCcw className="w-4 h-4 text-cyan-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Retry Handler</span>
+            <RotateCcw className="w-4 h-4 text-aurora-violet" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">Exponential 1.5x</span>
-          <span className="text-xs font-mono text-cyan-300">Max 3 Attempts</span>
+          <span className="text-xl font-bold text-aurora-ink block">Exponential 1.5x</span>
+          <span className="text-xs text-aurora-violet">Max 3 Attempts</span>
         </GlassPanel>
 
-        <GlassPanel className="p-4 space-y-2 border-rose-500/30">
+        <GlassPanel className="p-4 space-y-2 border-rose-200">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Dead-Letter Queue</span>
-            <AlertTriangle className="w-4 h-4 text-rose-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Dead-Letter Queue</span>
+            <AlertTriangle className="w-4 h-4 text-rose-700" />
           </div>
-          <span className="text-xl font-bold text-rose-400 font-mono block">1 DLQ Record</span>
-          <span className="text-xs font-mono text-slate-400">Ready for Replay</span>
+          <span className="text-xl font-bold text-rose-700 block">1 DLQ Record</span>
+          <span className="text-xs text-aurora-muted">Ready for Replay</span>
         </GlassPanel>
       </div>
 
@@ -222,9 +222,9 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
               value={searchCorrelationId}
               onChange={(e) => setSearchCorrelationId(e.target.value)}
               placeholder="Search by correlation ID or producer service..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500"
             />
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
 
           {/* Event Type Filter */}
@@ -233,14 +233,14 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
               aria-label="Event type"
               value={selectedEventType}
               onChange={(e) => setSelectedEventType(e.target.value)}
-              className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
+              className="w-full py-2 px-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
-              <option value="all" className="bg-slate-900 text-white">All 16 Domain Event Types</option>
-              <option value="ResumeParsed" className="bg-slate-900 text-white">ResumeParsed</option>
-              <option value="SkillsExtracted" className="bg-slate-900 text-white">SkillsExtracted</option>
-              <option value="CareerMatched" className="bg-slate-900 text-white">CareerMatched</option>
-              <option value="JobDataUpdated" className="bg-slate-900 text-white">JobDataUpdated</option>
-              <option value="MarketTrendUpdated" className="bg-slate-900 text-white">MarketTrendUpdated</option>
+              <option value="all" className="bg-aurora-canvas text-aurora-ink">All 16 Domain Event Types</option>
+              <option value="ResumeParsed" className="bg-aurora-canvas text-aurora-ink">ResumeParsed</option>
+              <option value="SkillsExtracted" className="bg-aurora-canvas text-aurora-ink">SkillsExtracted</option>
+              <option value="CareerMatched" className="bg-aurora-canvas text-aurora-ink">CareerMatched</option>
+              <option value="JobDataUpdated" className="bg-aurora-canvas text-aurora-ink">JobDataUpdated</option>
+              <option value="MarketTrendUpdated" className="bg-aurora-canvas text-aurora-ink">MarketTrendUpdated</option>
             </select>
           </div>
         </div>
@@ -249,13 +249,13 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
       {/* MAIN STREAM & DETAILS (2 COLS) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* LIVE EVENT STREAM FEED (7 COLS) */}
-        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-indigo-500/30">
+        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Radio className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Radio className="w-4 h-4 text-aurora-indigo" />
               Live Domain Event Stream Feed ({filteredEvents.length})
             </span>
-            <span className="text-[10px] font-mono text-cyan-400 font-bold bg-cyan-500/10 px-2 py-0.5 rounded">
+            <span className="text-[10px] text-aurora-violet font-bold bg-aurora-violet/[0.06] px-2 py-0.5 rounded">
               {isLiveStreamActive ? 'Streaming Live' : 'Paused'}
             </span>
           </div>
@@ -269,23 +269,23 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
                   onClick={() => setSelectedEventId(evt.id)}
                   className={`p-3.5 rounded-xl border transition-all cursor-pointer space-y-2 ${
                     isSelected
-                      ? 'bg-indigo-600/20 border-indigo-500 shadow-lg shadow-indigo-600/30'
-                      : 'bg-slate-950/70 border-white/5 hover:border-white/20'
+                      ? 'bg-violet-50 border-indigo-500 shadow-lg shadow-indigo-600/30'
+                      : 'bg-aurora-canvas/60 border-aurora-line hover:border-aurora-line'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-mono text-[10px] font-bold">
+                      <span className="px-2 py-0.5 rounded bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo text-[10px] font-bold">
                         {evt.eventType}
                       </span>
-                      <span className="text-[10px] font-mono text-slate-400">{evt.producer}</span>
+                      <span className="text-[10px] text-aurora-muted">{evt.producer}</span>
                     </div>
 
                     <span
-                      className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded ${
+                      className={`text-[9px] font-bold px-2 py-0.5 rounded ${
                         evt.status === 'DELIVERED'
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                          : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-rose-50 text-rose-700 border border-rose-200'
                       }`}
                     >
                       {evt.status}
@@ -293,8 +293,8 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
                   </div>
 
                   <div className="flex items-center justify-between text-xs font-mono">
-                    <span className="text-slate-400">Correlation ID: <strong className="text-slate-200">{evt.correlationId}</strong></span>
-                    <span className="text-slate-500">{evt.timestamp}</span>
+                    <span className="text-aurora-muted">Correlation ID: <strong className="text-aurora-ink">{evt.correlationId}</strong></span>
+                    <span className="text-aurora-muted">{evt.timestamp}</span>
                   </div>
                 </div>
               );
@@ -304,33 +304,33 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
 
         {/* EVENT DETAILS & PAYLOAD INSPECTOR (5 COLS) */}
         <div className="lg:col-span-5 space-y-6">
-          <GlassPanel className="p-6 space-y-4 border-cyan-500/30">
+          <GlassPanel className="p-6 space-y-4 border-aurora-violet/25">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-cyan-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-aurora-violet" />
                 Payload & Correlation Inspector
               </span>
-              <span className="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 font-mono text-[10px] font-bold">
+              <span className="px-2 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-violet text-[10px] font-bold">
                 {selectedEvent.eventType}
               </span>
             </div>
 
             <div className="space-y-2 text-xs font-mono">
-              <div className="p-2.5 rounded-xl bg-slate-950 border border-white/5 space-y-1">
-                <span className="text-[9px] text-slate-500 block uppercase">Event ID</span>
-                <span className="text-slate-200 font-bold">{selectedEvent.id}</span>
+              <div className="p-2.5 rounded-xl bg-aurora-canvas border border-aurora-line space-y-1">
+                <span className="text-[9px] text-aurora-muted block uppercase">Event ID</span>
+                <span className="text-aurora-ink font-bold">{selectedEvent.id}</span>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-slate-950 border border-white/5 space-y-1">
-                <span className="text-[9px] text-slate-500 block uppercase">Correlation ID</span>
-                <span className="text-cyan-300 font-bold">{selectedEvent.correlationId}</span>
+              <div className="p-2.5 rounded-xl bg-aurora-canvas border border-aurora-line space-y-1">
+                <span className="text-[9px] text-aurora-muted block uppercase">Correlation ID</span>
+                <span className="text-aurora-violet font-bold">{selectedEvent.correlationId}</span>
               </div>
             </div>
 
             {/* JSON Payload Display */}
             <div className="space-y-1">
-              <span className="text-[10px] text-slate-400 font-mono uppercase">Event Payload Metadata</span>
-              <pre className="p-3 rounded-xl bg-slate-950 border border-white/10 text-[11px] font-mono text-emerald-400 overflow-x-auto">
+              <span className="text-[10px] text-aurora-muted uppercase">Event Payload Metadata</span>
+              <pre className="p-3 rounded-xl bg-aurora-canvas border border-aurora-line text-[11px] text-emerald-700 overflow-x-auto">
                 {JSON.stringify(selectedEvent.payload, null, 2)}
               </pre>
             </div>
@@ -339,7 +339,7 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
             <div className="pt-2">
               <button
                 onClick={() => handleReplayEvent(selectedEvent.correlationId)}
-                className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full py-2.5 px-4 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span>Replay Correlation Event Flow</span>
@@ -349,21 +349,21 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
 
           {/* CONSUMER SERVICES HEALTH */}
           <GlassPanel className="p-6 space-y-4">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Server className="w-4 h-4 text-purple-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Server className="w-4 h-4 text-aurora-violet" />
               Active Subscriber Services ({consumerServices.length})
             </span>
 
             <div className="space-y-2 text-xs">
               {consumerServices.map((sub, i) => (
-                <div key={i} className="p-3 rounded-xl bg-slate-950/70 border border-white/5 flex items-center justify-between">
+                <div key={i} className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between">
                   <div>
-                    <span className="font-bold text-white block">{sub.name}</span>
-                    <span className="text-[10px] font-mono text-slate-400">Subscribed: {sub.subscribedTo}</span>
+                    <span className="font-bold text-aurora-ink block">{sub.name}</span>
+                    <span className="text-[10px] text-aurora-muted">Subscribed: {sub.subscribedTo}</span>
                   </div>
                   <div className="text-right font-mono">
-                    <span className="text-emerald-400 font-bold block">{sub.latencyMs} ms</span>
-                    <span className="text-[10px] text-slate-500">{sub.processed} Processed</span>
+                    <span className="text-emerald-700 font-bold block">{sub.latencyMs} ms</span>
+                    <span className="text-[10px] text-aurora-muted">{sub.processed} Processed</span>
                   </div>
                 </div>
               ))}

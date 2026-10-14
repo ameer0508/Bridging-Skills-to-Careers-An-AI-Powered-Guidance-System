@@ -109,22 +109,22 @@ export const CareerIdentityCompleteness: React.FC<CareerIdentityCompletenessProp
 
   return (
     <div className="w-full font-mono">
-      <GlassPanel className="p-6 sm:p-8 space-y-6 border-indigo-500/30">
+      <GlassPanel className="p-6 sm:p-8 space-y-6 border-aurora-violet/25">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-aurora-line">
           <div className="space-y-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold uppercase tracking-wider text-aurora-indigo flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-aurora-indigo" />
               Career Identity Grounding & Completeness
             </span>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-aurora-muted">
               Evidence-based audit of the 5 core pillars powering SkillBridge's AI recommendation and match engines.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-xl bg-slate-900 border border-white/10 text-xs font-bold text-slate-300">
-              <strong className="text-emerald-400">{completedCount}</strong> of {pillars.length} Pillars Grounded
+            <span className="px-3 py-1 rounded-xl bg-aurora-canvas border border-aurora-line text-xs font-bold text-aurora-muted">
+              <strong className="text-emerald-700">{completedCount}</strong> of {pillars.length} Pillars Grounded
             </span>
           </div>
         </div>
@@ -138,8 +138,8 @@ export const CareerIdentityCompleteness: React.FC<CareerIdentityCompletenessProp
                 key={pillar.id}
                 className={`p-4 rounded-2xl border transition-all duration-200 flex flex-col justify-between gap-3 ${
                   pillar.isComplete
-                    ? 'bg-slate-950/70 border-white/10 hover:border-emerald-500/30'
-                    : 'bg-slate-950/90 border-amber-500/20 hover:border-amber-500/40'
+                    ? 'bg-aurora-canvas/60 border-aurora-line hover:border-emerald-200'
+                    : 'bg-aurora-canvas/60 border-amber-200 hover:border-amber-200'
                 }`}
               >
                 <div className="space-y-2">
@@ -148,13 +148,13 @@ export const CareerIdentityCompleteness: React.FC<CareerIdentityCompletenessProp
                       <div
                         className={`w-7 h-7 rounded-xl flex items-center justify-center ${
                           pillar.isComplete
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                            : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                            : 'bg-amber-50 text-amber-700 border border-amber-200'
                         }`}
                       >
                         <Icon className="w-4 h-4" />
                       </div>
-                      <span className="text-xs font-bold text-white tracking-tight">
+                      <span className="text-xs font-bold text-aurora-ink tracking-tight">
                         {pillar.title}
                       </span>
                     </div>
@@ -162,8 +162,8 @@ export const CareerIdentityCompleteness: React.FC<CareerIdentityCompletenessProp
                     <span
                       className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
                         pillar.isComplete
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                          : 'bg-amber-500/10 text-amber-300 border border-amber-500/30'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200'
                       }`}
                     >
                       {pillar.isComplete ? (
@@ -180,25 +180,25 @@ export const CareerIdentityCompleteness: React.FC<CareerIdentityCompletenessProp
                     </span>
                   </div>
 
-                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                  <p className="text-[11px] text-aurora-muted leading-relaxed">
                     {pillar.description}
                   </p>
 
                   {!pillar.isComplete && (
-                    <p className="text-[10px] text-amber-300/80 font-medium pt-1">
+                    <p className="text-[10px] text-amber-800 font-medium pt-1">
                       → {pillar.missingNote}
                     </p>
                   )}
                 </div>
 
-                <div className="pt-2 border-t border-white/5 flex items-center justify-between">
-                  <span className="text-[9px] text-slate-500 uppercase">
+                <div className="pt-2 border-t border-aurora-line flex items-center justify-between">
+                  <span className="text-[9px] text-aurora-muted uppercase">
                     {pillar.isComplete ? 'Pillar Verified' : 'Incomplete Context'}
                   </span>
                   <button
                     onClick={pillar.onClick}
                     type="button"
-                    className="text-[11px] font-semibold text-indigo-300 hover:text-white flex items-center gap-1 transition cursor-pointer"
+                    className="text-[11px] font-semibold text-aurora-indigo hover:text-aurora-indigo flex items-center gap-1 transition cursor-pointer"
                   >
                     <span>{pillar.actionLabel}</span>
                     <ArrowRight className="w-3 h-3" />

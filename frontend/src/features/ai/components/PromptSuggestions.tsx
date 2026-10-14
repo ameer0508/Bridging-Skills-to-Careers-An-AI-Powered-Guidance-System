@@ -11,8 +11,8 @@ export const PromptSuggestions: React.FC<PromptSuggestionsProps> = ({
   onSelectPrompt,
 }) => {
   return (
-    <div className="p-4 border-t border-[var(--color-border-subtle)] space-y-2 bg-[var(--color-bg-surface-sunken)]">
-      <span className="text-[10px] uppercase font-bold text-[var(--color-text-tertiary)] tracking-wider block">
+    <div className="p-4 border-t border-aurora-line space-y-2 bg-[var(--color-bg-surface-sunken)]">
+      <span className="text-[10px] uppercase font-bold text-aurora-muted tracking-wider block">
         Suggested Advisory Questions:
       </span>
       <div className="flex flex-wrap gap-2">
@@ -21,7 +21,7 @@ export const PromptSuggestions: React.FC<PromptSuggestionsProps> = ({
             key={i}
             variant="interactive"
             onClick={() => onSelectPrompt(p)}
-            className="bg-[var(--color-bg-surface-raised)] border-[var(--color-border-default)] text-[var(--color-text-secondary)] hover:text-[var(--color-interactive-primary)] text-xs"
+            className="bg-white border-aurora-line text-aurora-muted hover:text-aurora-violet text-xs"
           >
             {p}
           </Chip>

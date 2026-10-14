@@ -71,18 +71,18 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
   const active = scenarios[selectedScenario];
 
   return (
-    <GlassPanel className="p-6 space-y-6 border-indigo-500/30">
-      <div className="flex items-center justify-between border-b border-white/10 pb-4">
+    <GlassPanel className="p-6 space-y-6 border-aurora-violet/25">
+      <div className="flex items-center justify-between border-b border-aurora-line pb-4">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-xl">
+          <div className="p-2.5 bg-aurora-violet/[0.06] text-aurora-indigo rounded-xl">
             <Sliders className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">Interactive "What-If" Scenario Simulator</h3>
-            <p className="text-xs text-slate-400">Simulate hypothetical career actions and evaluate predictive readiness & salary gains</p>
+            <h3 className="text-base font-bold text-aurora-ink">Interactive "What-If" Scenario Simulator</h3>
+            <p className="text-xs text-aurora-muted">Simulate hypothetical career actions and evaluate predictive readiness & salary gains</p>
           </div>
         </div>
-        <span className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-xs font-mono font-bold">
+        <span className="px-3 py-1 rounded-full bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo text-xs font-bold">
           Simulator Engine v2.0
         </span>
       </div>
@@ -90,87 +90,87 @@ export const WhatIfSimulator: React.FC<WhatIfSimulatorProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         {/* SCENARIO SELECTOR */}
         <div className="md:col-span-5 space-y-2">
-          <span className="text-xs font-bold text-slate-400 font-mono uppercase tracking-wider block mb-2">
+          <span className="text-xs font-bold text-aurora-muted uppercase tracking-wider block mb-2">
             Select Simulation Scenario:
           </span>
 
           <button
             onClick={() => setSelectedScenario('cert_aws')}
-            className={`w-full p-3 rounded-xl font-mono text-xs text-left transition-all flex items-center justify-between cursor-pointer ${
+            className={`w-full p-3 rounded-xl text-xs text-left transition-all flex items-center justify-between cursor-pointer ${
               selectedScenario === 'cert_aws'
-                ? 'bg-indigo-600/20 border border-indigo-500/50 text-white font-bold'
-                : 'bg-slate-950/60 border border-white/5 text-slate-400 hover:border-indigo-500/30 hover:text-slate-200'
+                ? 'bg-violet-50 border border-aurora-violet/25 text-aurora-ink font-bold'
+                : 'bg-aurora-canvas/60 border border-aurora-line text-aurora-muted hover:border-aurora-violet/25 hover:text-aurora-ink'
             }`}
           >
             <span>🏆 Earn AWS Solutions Architect Cert</span>
-            <ArrowRight className="w-3.5 h-3.5 text-indigo-400" />
+            <ArrowRight className="w-3.5 h-3.5 text-aurora-indigo" />
           </button>
 
           <button
             onClick={() => setSelectedScenario('hours_20')}
-            className={`w-full p-3 rounded-xl font-mono text-xs text-left transition-all flex items-center justify-between cursor-pointer ${
+            className={`w-full p-3 rounded-xl text-xs text-left transition-all flex items-center justify-between cursor-pointer ${
               selectedScenario === 'hours_20'
-                ? 'bg-indigo-600/20 border border-indigo-500/50 text-white font-bold'
-                : 'bg-slate-950/60 border border-white/5 text-slate-400 hover:border-indigo-500/30 hover:text-slate-200'
+                ? 'bg-violet-50 border border-aurora-violet/25 text-aurora-ink font-bold'
+                : 'bg-aurora-canvas/60 border border-aurora-line text-aurora-muted hover:border-aurora-violet/25 hover:text-aurora-ink'
             }`}
           >
             <span>⚡ Boost Study to 20 hrs/week</span>
-            <ArrowRight className="w-3.5 h-3.5 text-indigo-400" />
+            <ArrowRight className="w-3.5 h-3.5 text-aurora-indigo" />
           </button>
 
           <button
             onClick={() => setSelectedScenario('complete_roadmap')}
-            className={`w-full p-3 rounded-xl font-mono text-xs text-left transition-all flex items-center justify-between cursor-pointer ${
+            className={`w-full p-3 rounded-xl text-xs text-left transition-all flex items-center justify-between cursor-pointer ${
               selectedScenario === 'complete_roadmap'
-                ? 'bg-indigo-600/20 border border-indigo-500/50 text-white font-bold'
-                : 'bg-slate-950/60 border border-white/5 text-slate-400 hover:border-indigo-500/30 hover:text-slate-200'
+                ? 'bg-violet-50 border border-aurora-violet/25 text-aurora-ink font-bold'
+                : 'bg-aurora-canvas/60 border border-aurora-line text-aurora-muted hover:border-aurora-violet/25 hover:text-aurora-ink'
             }`}
           >
             <span>🎯 Complete 100% Roadmap Milestones</span>
-            <ArrowRight className="w-3.5 h-3.5 text-indigo-400" />
+            <ArrowRight className="w-3.5 h-3.5 text-aurora-indigo" />
           </button>
         </div>
 
         {/* COMPARISON RESULTS DISPLAY */}
-        <div className="md:col-span-7 p-5 bg-slate-950/80 border border-indigo-500/20 rounded-2xl space-y-4">
-          <div className="flex justify-between items-center border-b border-white/10 pb-3">
-            <span className="text-xs font-mono text-indigo-300 font-bold">
-              Active Scenario: <strong className="text-white">{active.scenarioAction}</strong>
+        <div className="md:col-span-7 p-5 bg-aurora-canvas/60 border border-aurora-violet/25 rounded-2xl space-y-4">
+          <div className="flex justify-between items-center border-b border-aurora-line pb-3">
+            <span className="text-xs text-aurora-indigo font-bold">
+              Active Scenario: <strong className="text-aurora-ink">{active.scenarioAction}</strong>
             </span>
-            <span className="text-[10px] font-mono text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+            <span className="text-[10px] text-emerald-700 font-bold px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200">
               Confidence: 94%
             </span>
           </div>
 
-          <p className="text-xs text-slate-400 leading-relaxed font-sans">{active.description}</p>
+          <p className="text-xs text-aurora-muted leading-relaxed font-sans">{active.description}</p>
 
-          <div className="grid grid-cols-2 gap-3 text-xs font-mono pt-2">
-            <div className="p-3 bg-slate-900 rounded-xl border border-white/5 space-y-1">
-              <span className="text-[10px] text-slate-500 block uppercase">Simulated Readiness</span>
+          <div className="grid grid-cols-2 gap-3 text-xs pt-2">
+            <div className="p-3 bg-aurora-canvas rounded-xl border border-aurora-line space-y-1">
+              <span className="text-[10px] text-aurora-muted block uppercase">Simulated Readiness</span>
               <div className="flex items-center gap-2">
-                <span className="text-slate-400 line-through text-xs">{active.baselineReadiness}%</span>
-                <span className="font-bold text-emerald-400 text-sm">{active.simulatedReadiness}%</span>
-                <span className="text-[10px] font-bold text-emerald-400">(+{active.readinessGain}%)</span>
+                <span className="text-aurora-muted line-through text-xs">{active.baselineReadiness}%</span>
+                <span className="font-bold text-emerald-700 text-sm">{active.simulatedReadiness}%</span>
+                <span className="text-[10px] font-bold text-emerald-700">(+{active.readinessGain}%)</span>
               </div>
             </div>
 
-            <div className="p-3 bg-slate-900 rounded-xl border border-white/5 space-y-1">
-              <span className="text-[10px] text-slate-500 block uppercase">Simulated Match Gain</span>
+            <div className="p-3 bg-aurora-canvas rounded-xl border border-aurora-line space-y-1">
+              <span className="text-[10px] text-aurora-muted block uppercase">Simulated Match Gain</span>
               <div className="flex items-center gap-2">
-                <span className="text-slate-400 line-through text-xs">{active.baselineMatch}%</span>
-                <span className="font-bold text-cyan-400 text-sm">{active.simulatedMatch}%</span>
-                <span className="text-[10px] font-bold text-cyan-400">(+{active.matchGain}%)</span>
+                <span className="text-aurora-muted line-through text-xs">{active.baselineMatch}%</span>
+                <span className="font-bold text-aurora-violet text-sm">{active.simulatedMatch}%</span>
+                <span className="text-[10px] font-bold text-aurora-violet">(+{active.matchGain}%)</span>
               </div>
             </div>
 
-            <div className="p-3 bg-slate-900 rounded-xl border border-white/5 space-y-1">
-              <span className="text-[10px] text-slate-500 block uppercase">Est. Salary Boost</span>
-              <span className="font-bold text-amber-300 text-sm">+{active.estimatedSalaryBoostPct}%</span>
+            <div className="p-3 bg-aurora-canvas rounded-xl border border-aurora-line space-y-1">
+              <span className="text-[10px] text-aurora-muted block uppercase">Est. Salary Boost</span>
+              <span className="font-bold text-amber-700 text-sm">+{active.estimatedSalaryBoostPct}%</span>
             </div>
 
-            <div className="p-3 bg-slate-900 rounded-xl border border-white/5 space-y-1">
-              <span className="text-[10px] text-slate-500 block uppercase">Recruiter Callbacks</span>
-              <span className="font-bold text-indigo-300 text-sm">+{active.recruiterCallbackBoostPct}%</span>
+            <div className="p-3 bg-aurora-canvas rounded-xl border border-aurora-line space-y-1">
+              <span className="text-[10px] text-aurora-muted block uppercase">Recruiter Callbacks</span>
+              <span className="font-bold text-aurora-indigo text-sm">+{active.recruiterCallbackBoostPct}%</span>
             </div>
           </div>
         </div>

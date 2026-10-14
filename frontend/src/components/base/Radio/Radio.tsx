@@ -23,14 +23,14 @@ export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
             className="peer sr-only"
             {...props}
           />
-          <div className="w-4 h-4 rounded-full border border-[var(--color-border-default)] bg-[var(--color-bg-surface-sunken)] transition-colors duration-[var(--duration-fast)] flex items-center justify-center peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--color-border-focus)] peer-checked:border-[var(--color-interactive-primary)] peer-disabled:opacity-50 peer-disabled:cursor-not-allowed cursor-pointer">
-            <div className="w-2 h-2 rounded-full bg-[var(--color-interactive-primary)] scale-0 peer-checked:scale-100 transition-transform duration-[var(--duration-fast)]" />
+          <div className="w-4 h-4 rounded-full border border-aurora-line bg-[var(--color-bg-surface-sunken)] transition-colors duration-[var(--duration-fast)] flex items-center justify-center peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--color-border-focus)] peer-checked:border-aurora-violet peer-disabled:opacity-50 peer-disabled:cursor-not-allowed cursor-pointer">
+            <div className="w-2 h-2 rounded-full [background:var(--aurora-gradient-action)] scale-0 peer-checked:scale-100 transition-transform duration-[var(--duration-fast)]" />
           </div>
         </div>
         {label && (
           <label
             htmlFor={inputId}
-            className={`text-sm text-[var(--color-text-primary)] cursor-pointer ${
+            className={`text-sm text-aurora-ink cursor-pointer ${
               disabled ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >

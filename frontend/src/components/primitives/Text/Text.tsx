@@ -54,9 +54,9 @@ const variantStyles: Record<TextVariant, string> = {
 };
 
 const colorStyles: Record<TextColor, string> = {
-  primary: 'text-[var(--color-text-primary)]',
-  secondary: 'text-[var(--color-text-secondary)]',
-  tertiary: 'text-[var(--color-text-tertiary)]',
+  primary: 'text-aurora-ink',
+  secondary: 'text-aurora-muted',
+  tertiary: 'text-aurora-muted',
   disabled: 'text-[var(--color-text-disabled)]',
   inverse: 'text-[var(--color-text-inverse)]',
   link: 'text-[var(--color-text-link)] hover:underline cursor-pointer',

@@ -181,7 +181,7 @@ export const AnalyticsWorkspace: React.FC = () => {
   if (analyticsLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-16 rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[320px]">
+        <div className="p-16 rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[320px]">
           <AIThinkingAnimation statusText="Connecting to Career Progress Observatory & Telemetry Vectors..." />
         </div>
       </div>

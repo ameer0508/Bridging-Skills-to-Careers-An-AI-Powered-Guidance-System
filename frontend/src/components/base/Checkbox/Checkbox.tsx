@@ -50,7 +50,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
             {...props}
           />
           <div
-            className={`w-4 h-4 rounded-[var(--radius-sm)] border border-[var(--color-border-default)] bg-[var(--color-bg-surface-sunken)] transition-colors duration-[var(--duration-fast)] flex items-center justify-center peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--color-border-focus)] peer-checked:bg-[var(--color-interactive-primary)] peer-checked:border-[var(--color-interactive-primary)] peer-disabled:opacity-50 peer-disabled:cursor-not-allowed cursor-pointer ${
+            className={`w-4 h-4 rounded-lg border border-aurora-line bg-[var(--color-bg-surface-sunken)] transition-colors duration-[var(--duration-fast)] flex items-center justify-center peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--color-border-focus)] peer-checked:[background:var(--aurora-gradient-action)] peer-checked:border-aurora-violet peer-disabled:opacity-50 peer-disabled:cursor-not-allowed cursor-pointer ${
               error ? 'border-[var(--color-border-error)]' : ''
             }`}
           >
@@ -69,7 +69,7 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className={`text-sm text-[var(--color-text-primary)] cursor-pointer ${
+            className={`text-sm text-aurora-ink cursor-pointer ${
               disabled ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >

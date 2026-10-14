@@ -99,9 +99,9 @@ export const NetworkingAgentWorkspace: React.FC = () => {
       />
 
       {/* TOP TARGET COMPANY & SKILL SEARCH BAR */}
-      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-indigo-500/30">
+      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-aurora-violet/25">
         <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap sm:flex-nowrap">
-          <span className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+          <span className="p-2 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
             <Users className="w-5 h-5" />
           </span>
           <div className="relative w-full sm:w-56">
@@ -110,9 +110,9 @@ export const NetworkingAgentWorkspace: React.FC = () => {
               value={targetCompany}
               onChange={(e) => setTargetCompany(e.target.value)}
               placeholder="Target Company..."
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-3 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
             />
-            <Building className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+            <Building className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
           <div className="relative w-full sm:w-64">
             <input
@@ -120,9 +120,9 @@ export const NetworkingAgentWorkspace: React.FC = () => {
               value={targetSkill}
               onChange={(e) => setTargetSkill(e.target.value)}
               placeholder="Target Skill..."
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-3 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
             />
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
         </div>
 
@@ -130,7 +130,7 @@ export const NetworkingAgentWorkspace: React.FC = () => {
           <button
             onClick={handleRunNetworkingCycle}
             disabled={isAnalyzing}
-            className="w-full sm:w-auto py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+            className="w-full sm:w-auto py-2 px-4 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
             <span>{isAnalyzing ? 'Matching Network...' : 'Run Autonomous Networking Cycle'}</span>
@@ -140,67 +140,67 @@ export const NetworkingAgentWorkspace: React.FC = () => {
 
       {/* 4 SUMMARY METRIC CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <GlassPanel className="p-4 space-y-2 border-indigo-500/30">
+        <GlassPanel className="p-4 space-y-2 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Networking Score</span>
-            <Award className="w-4 h-4 text-indigo-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Networking Score</span>
+            <Award className="w-4 h-4 text-aurora-indigo" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">96.5 / 100</span>
-          <span className="text-xs font-mono text-indigo-300">142 Topology Nodes</span>
+          <span className="text-xl font-bold text-aurora-ink block">96.5 / 100</span>
+          <span className="text-xs text-aurora-indigo">142 Topology Nodes</span>
         </GlassPanel>
 
-        <GlassPanel className="p-4 space-y-2 border-emerald-500/30">
+        <GlassPanel className="p-4 space-y-2 border-emerald-200">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Warm Referral Impact</span>
-            <Share2 className="w-4 h-4 text-emerald-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Warm Referral Impact</span>
+            <Share2 className="w-4 h-4 text-emerald-700" />
           </div>
-          <span className="text-xl font-bold text-emerald-400 font-mono block">3.5x Callback</span>
-          <span className="text-xs font-mono text-emerald-300">Stanford Alumni Verified</span>
+          <span className="text-xl font-bold text-emerald-700 block">3.5x Callback</span>
+          <span className="text-xs text-emerald-700">Stanford Alumni Verified</span>
         </GlassPanel>
 
-        <GlassPanel className="p-4 space-y-2 border-cyan-500/30">
+        <GlassPanel className="p-4 space-y-2 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Alumni Matches</span>
-            <GraduationCap className="w-4 h-4 text-cyan-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Alumni Matches</span>
+            <GraduationCap className="w-4 h-4 text-aurora-violet" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">Stanford Network</span>
-          <span className="text-xs font-mono text-cyan-300">At {targetCompany}</span>
+          <span className="text-xl font-bold text-aurora-ink block">Stanford Network</span>
+          <span className="text-xs text-aurora-violet">At {targetCompany}</span>
         </GlassPanel>
 
         <GlassPanel className="p-4 space-y-2 border-purple-500/30">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">1:1 Mentors</span>
-            <Sparkles className="w-4 h-4 text-purple-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">1:1 Mentors</span>
+            <Sparkles className="w-4 h-4 text-aurora-violet" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">3 Senior Mentors</span>
-          <span className="text-xs font-mono text-purple-300">Vector Indexing Focus</span>
+          <span className="text-xl font-bold text-aurora-ink block">3 Senior Mentors</span>
+          <span className="text-xs text-aurora-violet">Vector Indexing Focus</span>
         </GlassPanel>
       </div>
 
       {/* RECOMMENDED CONNECTIONS & OUTREACH DRAFT STUDIO (2 COLS) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* RECOMMENDED CONNECTIONS & ALUMNI (7 COLS) */}
-        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-indigo-500/30">
+        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Users className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Users className="w-4 h-4 text-aurora-indigo" />
               Recommended High-Value Connections & Alumni
             </span>
           </div>
 
-          <div className="space-y-3 font-mono text-xs">
+          <div className="space-y-3 text-xs">
             {networkingAgentMetrics.connections.map((c) => (
-              <div key={c.id} className="p-4 rounded-xl bg-slate-950/80 border border-white/10 space-y-2">
+              <div key={c.id} className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-sm">{c.name}</span>
-                  <span className="text-emerald-400 font-bold text-[11px] flex items-center gap-1">
+                  <span className="font-bold text-aurora-ink text-sm">{c.name}</span>
+                  <span className="text-emerald-700 font-bold text-[11px] flex items-center gap-1">
                     <Sparkles className="w-3.5 h-3.5" /> {c.matchScore}% Match
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between text-[11px] text-slate-400">
-                  <span>{c.role} @ <strong className="text-indigo-300">{c.company}</strong></span>
-                  <span className="text-cyan-300 font-bold">{c.path}</span>
+                <div className="flex items-center justify-between text-[11px] text-aurora-muted">
+                  <span>{c.role} @ <strong className="text-aurora-indigo">{c.company}</strong></span>
+                  <span className="text-aurora-violet font-bold">{c.path}</span>
                 </div>
               </div>
             ))}
@@ -209,26 +209,26 @@ export const NetworkingAgentWorkspace: React.FC = () => {
 
         {/* OUTREACH DRAFT STUDIO & FOLLOWUPS (5 COLS) */}
         <div className="lg:col-span-5 space-y-6">
-          <GlassPanel className="p-6 space-y-4 border-cyan-500/30">
+          <GlassPanel className="p-6 space-y-4 border-aurora-violet/25">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <MessageCircle className="w-4 h-4 text-cyan-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+                <MessageCircle className="w-4 h-4 text-aurora-violet" />
                 User-Editable Outreach Draft Studio
               </span>
             </div>
 
-            <div className="space-y-3 font-mono text-xs">
+            <div className="space-y-3 text-xs">
               <textarea
                 aria-label="Outreach message draft"
                 rows={6}
                 value={outreachDraft}
                 onChange={(e) => setOutreachDraft(e.target.value)}
-                className="w-full p-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500 leading-relaxed resize-none"
+                className="w-full p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-cyan-500 leading-relaxed resize-none"
               />
 
               <button
                 onClick={handleSendDraft}
-                className="w-full py-2 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-xs font-bold text-white flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full py-2 px-4 rounded-xl bg-aurora-violet hover:bg-aurora-indigo text-xs font-bold text-white flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" /> Authorize & Prepare Outreach
               </button>
@@ -238,19 +238,19 @@ export const NetworkingAgentWorkspace: React.FC = () => {
           {/* UPCOMING EVENTS & MENTORS */}
           <GlassPanel className="p-6 space-y-4 border-purple-500/30">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-purple-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-aurora-violet" />
                 Upcoming Tech Conferences & Summits
               </span>
             </div>
 
-            <div className="space-y-2.5 font-mono text-xs">
+            <div className="space-y-2.5 text-xs">
               {networkingAgentMetrics.events.map((e) => (
-                <div key={e.title} className="p-3 rounded-xl bg-slate-950/80 border border-white/10 space-y-1">
-                  <span className="font-bold text-white text-[11px] block">{e.title}</span>
-                  <div className="flex items-center justify-between text-[10px] text-slate-400">
+                <div key={e.title} className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1">
+                  <span className="font-bold text-aurora-ink text-[11px] block">{e.title}</span>
+                  <div className="flex items-center justify-between text-[10px] text-aurora-muted">
                     <span>{e.date} • {e.location}</span>
-                    <span className="text-purple-300 font-bold">★ {e.rating}% Match</span>
+                    <span className="text-aurora-violet font-bold">★ {e.rating}% Match</span>
                   </div>
                 </div>
               ))}

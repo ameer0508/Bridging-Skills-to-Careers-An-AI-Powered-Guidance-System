@@ -105,9 +105,9 @@ export const CodingIntelligenceWorkspace: React.FC = () => {
       />
 
       {/* TOP USERNAME SEARCH BAR */}
-      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-indigo-500/30">
+      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-aurora-violet/25">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <span className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+          <span className="p-2 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
             <Terminal className="w-5 h-5" />
           </span>
           <div className="relative w-full sm:w-72">
@@ -116,9 +116,9 @@ export const CodingIntelligenceWorkspace: React.FC = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter competitive coding handle..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
             />
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
         </div>
 
@@ -126,7 +126,7 @@ export const CodingIntelligenceWorkspace: React.FC = () => {
           <button
             onClick={handleAnalyzeProfile}
             disabled={isAnalyzing}
-            className="w-full sm:w-auto py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+            className="w-full sm:w-auto py-2 px-4 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
             <span>{isAnalyzing ? 'Aggregating Platforms...' : 'Analyze Coding Profile'}</span>
@@ -137,17 +137,17 @@ export const CodingIntelligenceWorkspace: React.FC = () => {
       {/* PLATFORM CARDS (4 COLS) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {platformProfiles.map((pf) => (
-          <GlassPanel key={pf.platform} className="p-4 space-y-3 border-indigo-500/30">
+          <GlassPanel key={pf.platform} className="p-4 space-y-3 border-aurora-violet/25">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white font-mono">{pf.platform}</span>
-              <span className="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 font-mono text-[10px] font-bold border border-indigo-500/30">
+              <span className="text-xs font-bold text-aurora-ink font-mono">{pf.platform}</span>
+              <span className="px-2 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-indigo text-[10px] font-bold border border-aurora-violet/25">
                 {pf.badge}
               </span>
             </div>
-            <div className="space-y-1 font-mono text-xs">
-              <div>Solved: <strong className="text-white font-bold">{pf.totalSolved} Problems</strong></div>
-              {pf.rating && <div>Rating: <span className="text-cyan-400 font-bold">{pf.rating}</span></div>}
-              {pf.rank && <div className="text-[10px] text-slate-400">Rank: {pf.rank}</div>}
+            <div className="space-y-1 text-xs">
+              <div>Solved: <strong className="text-aurora-ink font-bold">{pf.totalSolved} Problems</strong></div>
+              {pf.rating && <div>Rating: <span className="text-aurora-violet font-bold">{pf.rating}</span></div>}
+              {pf.rank && <div className="text-[10px] text-aurora-muted">Rank: {pf.rank}</div>}
             </div>
           </GlassPanel>
         ))}
@@ -156,44 +156,44 @@ export const CodingIntelligenceWorkspace: React.FC = () => {
       {/* DIFFICULTY BREAKDOWN & TOPIC HEATMAP (2 COLS) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* DIFFICULTY BREAKDOWN (5 COLS) */}
-        <GlassPanel className="lg:col-span-5 p-6 space-y-4 border-emerald-500/30">
+        <GlassPanel className="lg:col-span-5 p-6 space-y-4 border-emerald-200">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Trophy className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Trophy className="w-4 h-4 text-emerald-700" />
               Problem Difficulty Distribution
             </span>
-            <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">
+            <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
               Balanced Mix
             </span>
           </div>
 
-          <div className="space-y-4 font-mono text-xs">
+          <div className="space-y-4 text-xs">
             <div className="space-y-1">
-              <div className="flex justify-between text-emerald-400 font-bold">
+              <div className="flex justify-between text-emerald-700 font-bold">
                 <span>Easy Problems</span>
                 <span>180 Solved</span>
               </div>
-              <div className="h-2 rounded-full bg-slate-900 overflow-hidden">
+              <div className="h-2 rounded-full bg-aurora-canvas overflow-hidden">
                 <div className="h-full bg-emerald-500 w-[35%]" />
               </div>
             </div>
 
             <div className="space-y-1">
-              <div className="flex justify-between text-amber-400 font-bold">
+              <div className="flex justify-between text-amber-700 font-bold">
                 <span>Medium Problems</span>
                 <span>280 Solved</span>
               </div>
-              <div className="h-2 rounded-full bg-slate-900 overflow-hidden">
+              <div className="h-2 rounded-full bg-aurora-canvas overflow-hidden">
                 <div className="h-full bg-amber-500 w-[55%]" />
               </div>
             </div>
 
             <div className="space-y-1">
-              <div className="flex justify-between text-rose-400 font-bold">
+              <div className="flex justify-between text-rose-700 font-bold">
                 <span>Hard Problems</span>
                 <span>80 Solved</span>
               </div>
-              <div className="h-2 rounded-full bg-slate-900 overflow-hidden">
+              <div className="h-2 rounded-full bg-aurora-canvas overflow-hidden">
                 <div className="h-full bg-rose-500 w-[20%]" />
               </div>
             </div>
@@ -201,25 +201,25 @@ export const CodingIntelligenceWorkspace: React.FC = () => {
         </GlassPanel>
 
         {/* TOPIC MASTERY BREAKDOWN (7 COLS) */}
-        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-indigo-500/30">
+        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Cpu className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Cpu className="w-4 h-4 text-aurora-indigo" />
               Algorithmic & Data Structures Topic Mastery
             </span>
           </div>
 
           <div className="space-y-3">
             {topicStrengths.map((tp) => (
-              <div key={tp.topic} className="p-3.5 rounded-xl bg-slate-950/80 border border-white/10 flex items-center justify-between text-xs font-mono">
+              <div key={tp.topic} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between text-xs font-mono">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className={`w-4 h-4 ${tp.score >= 90 ? 'text-emerald-400' : 'text-amber-400'}`} />
-                  <span className="text-white font-bold">{tp.topic}</span>
+                  <CheckCircle2 className={`w-4 h-4 ${tp.score >= 90 ? 'text-emerald-700' : 'text-amber-700'}`} />
+                  <span className="text-aurora-ink font-bold">{tp.topic}</span>
                 </div>
                 <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold border ${
                   tp.score >= 90
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                    : 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : 'bg-amber-50 text-amber-700 border-amber-200'
                 }`}>
                   {tp.score}% ({tp.level})
                 </span>

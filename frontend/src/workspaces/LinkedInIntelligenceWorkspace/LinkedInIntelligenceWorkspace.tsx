@@ -103,9 +103,9 @@ export const LinkedInIntelligenceWorkspace: React.FC = () => {
       />
 
       {/* TOP PROFILE INPUT BAR */}
-      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-indigo-500/30">
+      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-aurora-violet/25">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <span className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+          <span className="p-2 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
             <Users className="w-5 h-5" />
           </span>
           <div className="relative w-full sm:w-72">
@@ -114,9 +114,9 @@ export const LinkedInIntelligenceWorkspace: React.FC = () => {
               value={profileId}
               onChange={(e) => setProfileId(e.target.value)}
               placeholder="Enter LinkedIn profile ID..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
             />
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
         </div>
 
@@ -124,7 +124,7 @@ export const LinkedInIntelligenceWorkspace: React.FC = () => {
           <button
             onClick={handleAnalyzeProfile}
             disabled={isAnalyzing}
-            className="w-full sm:w-auto py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+            className="w-full sm:w-auto py-2 px-4 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
             <span>{isAnalyzing ? 'Analyzing LinkedIn Profile...' : 'Analyze LinkedIn Profile'}</span>
@@ -133,31 +133,31 @@ export const LinkedInIntelligenceWorkspace: React.FC = () => {
       </GlassPanel>
 
       {/* AI BRANDING OPTIMIZATION BANNER */}
-      <GlassPanel className="p-6 space-y-4 border-cyan-500/30 relative overflow-hidden">
+      <GlassPanel className="p-6 space-y-4 border-aurora-violet/25 relative overflow-hidden">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-cyan-400 animate-pulse" />
-            <span className="text-sm font-bold text-white uppercase tracking-wider">
+            <Sparkles className="w-5 h-5 text-aurora-violet animate-pulse" />
+            <span className="text-sm font-bold text-aurora-ink uppercase tracking-wider">
               AI-Optimized Recruiter Headline Recommendation
             </span>
           </div>
           <button
             onClick={handleCopyHeadline}
-            className="py-1.5 px-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold hover:bg-cyan-500/20 flex items-center gap-1.5 transition-all cursor-pointer"
+            className="py-1.5 px-3 rounded-lg bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-violet text-xs font-semibold hover:bg-aurora-violet/[0.06] flex items-center gap-1.5 transition-all cursor-pointer"
           >
-            {copiedHeadline ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+            {copiedHeadline ? <Check className="w-3.5 h-3.5 text-emerald-700" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copiedHeadline ? 'Copied!' : 'Copy Headline'}</span>
           </button>
         </div>
 
-        <div className="p-4 rounded-xl bg-slate-950/80 border border-white/10 text-xs font-mono text-cyan-300 leading-relaxed">
+        <div className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-violet leading-relaxed">
           "{profileSummary.suggestedHeadline}"
         </div>
 
         <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar">
-          <span className="text-slate-400 text-xs font-mono">Suggested Recruiter Keywords:</span>
+          <span className="text-aurora-muted text-xs font-mono">Suggested Recruiter Keywords:</span>
           {profileSummary.suggestedKeywords.map((kw) => (
-            <span key={kw} className="px-2.5 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-[10px] font-mono font-bold shrink-0">
+            <span key={kw} className="px-2.5 py-0.5 rounded-full bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo text-[10px] font-bold shrink-0">
               +{kw}
             </span>
           ))}
@@ -167,26 +167,26 @@ export const LinkedInIntelligenceWorkspace: React.FC = () => {
       {/* CAREER TIMELINE & ENDORSEMENTS (2 COLS) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* CAREER PROGRESSION TIMELINE (7 COLS) */}
-        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-indigo-500/30">
+        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Briefcase className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-aurora-indigo" />
               Verified Career Progression ({experiences.length} Roles)
             </span>
-            <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">
+            <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
               Upward Trajectory
             </span>
           </div>
 
           <div className="space-y-4">
             {experiences.map((exp, idx) => (
-              <div key={idx} className="p-4 rounded-xl bg-slate-950/80 border border-white/10 space-y-2 text-xs">
+              <div key={idx} className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-bold text-white">{exp.title}</h4>
-                  <span className="text-[10px] font-mono text-cyan-400 font-bold">{exp.duration}</span>
+                  <h4 className="text-sm font-bold text-aurora-ink">{exp.title}</h4>
+                  <span className="text-[10px] text-aurora-violet font-bold">{exp.duration}</span>
                 </div>
-                <span className="text-indigo-300 font-mono text-[11px] block">{exp.company}</span>
-                <p className="text-slate-400 leading-relaxed text-[11px]">
+                <span className="text-aurora-indigo text-[11px] block">{exp.company}</span>
+                <p className="text-aurora-muted leading-relaxed text-[11px]">
                   {exp.description}
                 </p>
               </div>
@@ -198,17 +198,17 @@ export const LinkedInIntelligenceWorkspace: React.FC = () => {
         <div className="lg:col-span-5 space-y-6">
           <GlassPanel className="p-6 space-y-4 border-purple-500/30">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <Star className="w-4 h-4 text-amber-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+                <Star className="w-4 h-4 text-amber-700" />
                 Peer Skill Endorsements
               </span>
             </div>
 
             <div className="space-y-2 text-xs font-mono">
               {topEndorsedSkills.map((sk) => (
-                <div key={sk.name} className="p-3 rounded-xl bg-slate-950/80 border border-white/10 flex items-center justify-between">
-                  <span className="text-white font-bold">{sk.name}</span>
-                  <span className="text-amber-400 font-bold bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/30">
+                <div key={sk.name} className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between">
+                  <span className="text-aurora-ink font-bold">{sk.name}</span>
+                  <span className="text-amber-700 font-bold bg-amber-50 px-2.5 py-0.5 rounded border border-amber-200">
                     ★ {sk.endorsements} Endorsements
                   </span>
                 </div>

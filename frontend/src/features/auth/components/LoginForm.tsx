@@ -61,22 +61,22 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-slate-950/80 backdrop-blur-2xl p-8 sm:p-10 shadow-2xl shadow-black/80 w-full max-w-md">
+    <div className="relative overflow-hidden rounded-[28px] border border-aurora-line bg-aurora-canvas/60 backdrop-blur-2xl p-8 sm:p-10 shadow-2xl shadow-black/80 w-full max-w-md">
       {/* Top Ambient Glow inside card */}
       <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full bg-linear-to-br from-indigo-500/20 to-cyan-500/10 blur-3xl" />
 
       {/* Card Header */}
       <div className="text-center space-y-2 mb-8 relative z-10">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-indigo-500/30 bg-indigo-500/10 backdrop-blur-md mb-1">
-          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-          <span className="text-[11px] font-mono font-bold text-indigo-300 tracking-wider uppercase">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-aurora-violet/25 bg-aurora-violet/[0.06] backdrop-blur-md mb-1">
+          <Sparkles className="w-3.5 h-3.5 text-aurora-violet" />
+          <span className="text-[11px] font-bold text-aurora-indigo tracking-wider uppercase">
             Authentication Gate
           </span>
         </div>
-        <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+        <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-aurora-ink tracking-tight">
           Welcome Back.
         </h1>
-        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <p className="text-xs sm:text-sm text-aurora-muted leading-relaxed">
           Continue building your career with intelligence.
         </p>
       </div>
@@ -107,7 +107,7 @@ export const LoginForm: React.FC = () => {
                 e.preventDefault();
                 alert('Password reset link sent to your registered email address.');
               }}
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+              className="text-xs text-aurora-indigo hover:text-aurora-indigo font-medium transition-colors"
             >
               Forgot password?
             </a>
@@ -116,12 +116,12 @@ export const LoginForm: React.FC = () => {
 
         {/* Remember Me Checkbox */}
         <div className="flex items-center justify-between pt-1">
-          <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-300">
+          <label className="flex items-center gap-2 cursor-pointer text-xs text-aurora-muted">
             <input
               type="checkbox"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded bg-slate-900 border-white/20 text-indigo-600 focus:ring-indigo-500/40"
+              className="w-4 h-4 rounded bg-aurora-canvas border-aurora-line text-indigo-600 focus:ring-indigo-500/40"
             />
             <span>Remember this device for 30 days</span>
           </label>
@@ -134,9 +134,9 @@ export const LoginForm: React.FC = () => {
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium flex items-center gap-2.5"
+              className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2.5"
             >
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-700" />
               <span>
                 {(mutation.error as { message?: string })?.message ||
                   'Authentication failed. Please check your email and password.'}
@@ -155,7 +155,7 @@ export const LoginForm: React.FC = () => {
         >
           {mutation.isPending ? (
             <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-aurora-line border-t-white rounded-full animate-spin" />
               <span>Authenticating...</span>
             </>
           ) : (
@@ -168,16 +168,16 @@ export const LoginForm: React.FC = () => {
       </form>
 
       {/* Card Footer */}
-      <div className="mt-8 pt-6 border-t border-white/10 text-center relative z-10 flex flex-col items-center gap-3">
-        <p className="text-xs text-slate-400">
+      <div className="mt-8 pt-6 border-t border-aurora-line text-center relative z-10 flex flex-col items-center gap-3">
+        <p className="text-xs text-aurora-muted">
           Don't have an account?{' '}
-          <Link to="/register" className="font-bold text-indigo-400 hover:text-indigo-300 transition-colors">
+          <Link to="/register" className="font-bold text-aurora-indigo hover:text-aurora-indigo transition-colors">
             Create Account
           </Link>
         </p>
 
-        <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-mono">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+        <div className="flex items-center gap-1.5 text-[10px] text-aurora-muted font-mono">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
           <span>256-Bit Encrypted Workspace Auth</span>
         </div>
       </div>

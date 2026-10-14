@@ -203,7 +203,7 @@ export const CareerIdentityWorkspace: React.FC = () => {
   if (isProfileLoading) {
     return (
       <div className="w-full max-w-7xl mx-auto space-y-6 pb-12 px-4 font-mono">
-        <div className="p-12 rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[300px]">
+        <div className="p-12 rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[300px]">
           <AIThinkingAnimation statusText="Connecting to Career Identity Center..." />
         </div>
       </div>
@@ -213,7 +213,7 @@ export const CareerIdentityWorkspace: React.FC = () => {
   return (
     <div className="w-full max-w-7xl mx-auto space-y-8 pb-16 px-4 font-mono">
       {/* LOCAL STICKY SECTION NAVIGATOR */}
-      <div className="sticky top-2 z-30 p-1.5 rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-white/10 shadow-xl flex items-center justify-between gap-2 overflow-x-auto text-xs">
+      <div className="sticky top-2 z-30 p-1.5 rounded-2xl bg-aurora-canvas/60 backdrop-blur-xl border border-aurora-line shadow-xl flex items-center justify-between gap-2 overflow-x-auto text-xs">
         <div className="flex items-center gap-1">
           {[
             { id: 'all', label: 'Complete Profile' },
@@ -229,8 +229,8 @@ export const CareerIdentityWorkspace: React.FC = () => {
               onClick={() => setActiveSection(sec.id as typeof activeSection)}
               className={`px-3.5 py-1.5 rounded-xl font-bold transition cursor-pointer whitespace-nowrap ${
                 activeSection === sec.id
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-sm'
+                  : 'text-aurora-muted hover:text-aurora-indigo hover:bg-aurora-canvas/60'
               }`}
             >
               {sec.label}
@@ -238,7 +238,7 @@ export const CareerIdentityWorkspace: React.FC = () => {
           ))}
         </div>
 
-        <span className="hidden sm:inline-block text-[10px] text-slate-500 pr-3 uppercase">
+        <span className="hidden sm:inline-block text-[10px] text-aurora-muted pr-3 uppercase">
           SkillBridge Career Identity Center
         </span>
       </div>

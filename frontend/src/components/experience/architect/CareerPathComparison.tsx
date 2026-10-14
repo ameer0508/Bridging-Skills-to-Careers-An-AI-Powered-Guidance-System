@@ -49,14 +49,14 @@ export const CareerPathComparison: React.FC<CareerPathComparisonProps> = ({
 
   return (
     <GlassCard className={`p-6 space-y-4 ${className}`}>
-      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+      <div className="flex items-center justify-between pb-3 border-b border-aurora-line">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+          <div className="p-2 rounded-lg bg-aurora-violet/[0.06] text-aurora-indigo">
             <Layers className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">Target Career Path Comparison</h3>
-            <p className="text-xs text-neutral-400">
+            <h3 className="text-base font-bold text-aurora-ink">Target Career Path Comparison</h3>
+            <p className="text-xs text-aurora-muted">
               Comparative matrix evaluating alternative career trajectories
             </p>
           </div>
@@ -70,8 +70,8 @@ export const CareerPathComparison: React.FC<CareerPathComparisonProps> = ({
             onClick={() => onSelectPath?.(path.id)}
             className={`p-5 rounded-xl border transition-all cursor-pointer relative flex flex-col justify-between space-y-4 ${
               path.isRecommended
-                ? 'bg-indigo-950/40 border-indigo-500/60 shadow-lg shadow-indigo-500/20 ring-2 ring-indigo-500/40'
-                : 'bg-black/40 border-white/10 hover:border-white/20'
+                ? 'bg-violet-50 border-aurora-violet/25 shadow-lg shadow-indigo-500/20 ring-2 ring-indigo-500/40'
+                : 'bg-aurora-canvas/60 border-aurora-line hover:border-aurora-line'
             }`}
           >
             {path.isRecommended && (
@@ -81,36 +81,36 @@ export const CareerPathComparison: React.FC<CareerPathComparisonProps> = ({
             )}
 
             <div className="space-y-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-aurora-muted">
                 {path.category}
               </span>
-              <h4 className="text-base font-bold text-white">{path.title}</h4>
+              <h4 className="text-base font-bold text-aurora-ink">{path.title}</h4>
 
               <div className="flex items-baseline gap-1 pt-1">
-                <span className="text-2xl font-extrabold text-white">{path.matchScore}%</span>
-                <span className="text-xs text-neutral-400">Match Score</span>
+                <span className="text-2xl font-extrabold text-aurora-ink">{path.matchScore}%</span>
+                <span className="text-xs text-aurora-muted">Match Score</span>
               </div>
             </div>
 
-            <div className="space-y-2 pt-2 border-t border-white/5 text-xs text-neutral-300">
+            <div className="space-y-2 pt-2 border-t border-aurora-line text-xs text-aurora-muted">
               <div className="flex items-center justify-between">
-                <span className="text-neutral-400 flex items-center gap-1">
-                  <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="text-aurora-muted flex items-center gap-1">
+                  <CheckCircle className="w-3.5 h-3.5 text-emerald-700" />
                   Matching Skills:
                 </span>
-                <span className="font-bold text-white">{path.matchingSkillsCount}</span>
+                <span className="font-bold text-aurora-ink">{path.matchingSkillsCount}</span>
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-neutral-400 flex items-center gap-1">
-                  <Award className="w-3.5 h-3.5 text-amber-400" />
+                <span className="text-aurora-muted flex items-center gap-1">
+                  <Award className="w-3.5 h-3.5 text-amber-700" />
                   Target Skill Gaps:
                 </span>
-                <span className="font-bold text-white">{path.missingSkillsCount}</span>
+                <span className="font-bold text-aurora-ink">{path.missingSkillsCount}</span>
               </div>
 
               <div className="pt-2">
-                <button className="w-full py-2 rounded-lg text-xs font-semibold bg-white/5 hover:bg-white/10 text-indigo-300 transition-colors flex items-center justify-center gap-1">
+                <button className="w-full py-2 rounded-lg text-xs font-semibold bg-aurora-canvas hover:bg-aurora-canvas text-aurora-indigo transition-colors flex items-center justify-center gap-1">
                   <span>Select Career Goal</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>

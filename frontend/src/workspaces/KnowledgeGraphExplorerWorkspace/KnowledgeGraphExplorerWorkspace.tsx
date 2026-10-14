@@ -167,15 +167,15 @@ export const KnowledgeGraphExplorerWorkspace: React.FC = () => {
       />
 
       {/* TOP CONTROLS & PATH CALCULATOR BAR */}
-      <GlassPanel className="p-4 space-y-4 border-indigo-500/30">
+      <GlassPanel className="p-4 space-y-4 border-aurora-violet/25">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+            <span className="p-2 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
               <Share2 className="w-5 h-5" />
             </span>
             <div>
-              <h3 className="text-sm font-bold text-white">Shortest Learning & Career Transition Path Engine</h3>
-              <span className="text-[11px] font-mono text-slate-400">
+              <h3 className="text-sm font-bold text-aurora-ink">Shortest Learning & Career Transition Path Engine</h3>
+              <span className="text-[11px] text-aurora-muted">
                 BFS Graph Search calculating optimal progression pathways
               </span>
             </div>
@@ -186,28 +186,28 @@ export const KnowledgeGraphExplorerWorkspace: React.FC = () => {
               aria-label="Path start"
               value={startNodeId}
               onChange={(e) => setStartNodeId(e.target.value)}
-              className="py-1.5 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
+              className="py-1.5 px-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
-              <option value="role-backend-dev" className="bg-slate-900 text-white">From: Senior Backend Dev</option>
-              <option value="role-ai-engineer" className="bg-slate-900 text-white">From: AI Engineer</option>
+              <option value="role-backend-dev" className="bg-aurora-canvas text-aurora-ink">From: Senior Backend Dev</option>
+              <option value="role-ai-engineer" className="bg-aurora-canvas text-aurora-ink">From: AI Engineer</option>
             </select>
 
-            <span className="text-slate-500 text-xs font-mono">➔</span>
+            <span className="text-aurora-muted text-xs font-mono">➔</span>
 
             <select
               aria-label="Path target"
               value={targetNodeId}
               onChange={(e) => setTargetNodeId(e.target.value)}
-              className="py-1.5 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
+              className="py-1.5 px-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
-              <option value="skill-vector" className="bg-slate-900 text-white">To: Vector Indexing & RAG</option>
-              <option value="tech-k8s" className="bg-slate-900 text-white">To: Kubernetes</option>
-              <option value="cert-cka" className="bg-slate-900 text-white">To: CKA Certification</option>
+              <option value="skill-vector" className="bg-aurora-canvas text-aurora-ink">To: Vector Indexing & RAG</option>
+              <option value="tech-k8s" className="bg-aurora-canvas text-aurora-ink">To: Kubernetes</option>
+              <option value="cert-cka" className="bg-aurora-canvas text-aurora-ink">To: CKA Certification</option>
             </select>
 
             <button
               onClick={handleCalculatePath}
-              className="py-1.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
+              className="py-1.5 px-4 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
             >
               Compute Path
             </button>
@@ -216,16 +216,16 @@ export const KnowledgeGraphExplorerWorkspace: React.FC = () => {
 
         {/* HIGHLIGHTED PATH BADGE STRIP */}
         {highlightedPath.length > 0 && (
-          <div className="p-3 rounded-xl bg-slate-950/80 border border-white/10 flex items-center gap-2 overflow-x-auto text-xs font-mono">
-            <span className="text-slate-400 font-bold shrink-0">Shortest Path:</span>
+          <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center gap-2 overflow-x-auto text-xs font-mono">
+            <span className="text-aurora-muted font-bold shrink-0">Shortest Path:</span>
             {highlightedPath.map((nodeId, idx) => {
               const n = graphNodes.find((gn) => gn.id === nodeId);
               return (
                 <React.Fragment key={nodeId}>
-                  <span className="px-2.5 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 font-bold shrink-0">
+                  <span className="px-2.5 py-1 rounded-lg bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo font-bold shrink-0">
                     {n ? n.name : nodeId}
                   </span>
-                  {idx < highlightedPath.length - 1 && <span className="text-cyan-400">➔</span>}
+                  {idx < highlightedPath.length - 1 && <span className="text-aurora-violet">➔</span>}
                 </React.Fragment>
               );
             })}
@@ -236,11 +236,11 @@ export const KnowledgeGraphExplorerWorkspace: React.FC = () => {
       {/* GRAPH VISUALIZER & DETAILS PANEL (2 COLS) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* INTERACTIVE GRAPH CANVAS (7 COLS) */}
-        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-indigo-500/30">
+        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-aurora-violet/25">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Compass className="w-4 h-4 text-cyan-400" />
-              <span className="text-xs font-bold text-white uppercase tracking-wider">
+              <Compass className="w-4 h-4 text-aurora-violet" />
+              <span className="text-xs font-bold text-aurora-ink uppercase tracking-wider">
                 Interactive Graph Topology
               </span>
             </div>
@@ -252,14 +252,14 @@ export const KnowledgeGraphExplorerWorkspace: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search nodes..."
-                className="w-full pl-8 pr-3 py-1 rounded-lg bg-slate-950/80 border border-white/10 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                className="w-full pl-8 pr-3 py-1 rounded-lg bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500"
               />
-              <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-2" />
+              <Search className="w-3.5 h-3.5 text-aurora-muted absolute left-2.5 top-2" />
             </div>
           </div>
 
           {/* VISUAL NODES NETWORK */}
-          <div className="p-6 rounded-2xl bg-slate-950/90 border border-white/10 min-h-[380px] flex flex-col justify-center space-y-4">
+          <div className="p-6 rounded-2xl bg-aurora-canvas/60 border border-aurora-line min-h-[380px] flex flex-col justify-center space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {filteredNodes.map((node) => {
                 const isSelected = selectedNodeId === node.id;
@@ -273,23 +273,23 @@ export const KnowledgeGraphExplorerWorkspace: React.FC = () => {
                     onClick={() => setSelectedNodeId(node.id)}
                     className={`p-4 rounded-xl border transition-all cursor-pointer space-y-2 ${
                       isSelected
-                        ? 'bg-indigo-600/20 border-indigo-500 shadow-lg shadow-indigo-600/30'
+                        ? 'bg-violet-50 border-indigo-500 shadow-lg shadow-indigo-600/30'
                         : isPathNode
-                        ? 'bg-cyan-500/10 border-cyan-500/50'
-                        : 'bg-slate-900/60 border-white/5 hover:border-white/20'
+                        ? 'bg-aurora-violet/[0.06] border-aurora-violet/25'
+                        : 'bg-aurora-canvas/60 border-aurora-line hover:border-aurora-line'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="px-2 py-0.5 rounded bg-slate-950 text-indigo-300 font-mono text-[9px] font-bold border border-white/10">
+                      <span className="px-2 py-0.5 rounded bg-aurora-canvas text-aurora-indigo text-[9px] font-bold border border-aurora-line">
                         {node.type}
                       </span>
-                      <span className="text-[10px] font-mono text-emerald-400 font-bold">
+                      <span className="text-[10px] text-emerald-700 font-bold">
                         {node.marketDemand}
                       </span>
                     </div>
 
-                    <h4 className="text-xs font-bold text-white leading-snug">{node.name}</h4>
-                    <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                    <h4 className="text-xs font-bold text-aurora-ink leading-snug">{node.name}</h4>
+                    <p className="text-[11px] text-aurora-muted line-clamp-2 leading-relaxed">
                       {node.description}
                     </p>
                   </motion.div>
@@ -302,33 +302,33 @@ export const KnowledgeGraphExplorerWorkspace: React.FC = () => {
         {/* SELECTED ENTITY INSPECTOR (5 COLS) */}
         <div className="lg:col-span-5 space-y-6">
           {/* NODE DETAILS CARD */}
-          <GlassPanel className="p-6 space-y-4 border-cyan-500/30">
+          <GlassPanel className="p-6 space-y-4 border-aurora-violet/25">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <Layers className="w-4 h-4 text-cyan-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+                <Layers className="w-4 h-4 text-aurora-violet" />
                 Entity Details Inspector
               </span>
-              <span className="px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-mono text-[10px] font-bold">
+              <span className="px-2 py-0.5 rounded bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-violet text-[10px] font-bold">
                 {selectedNode.type}
               </span>
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-base font-bold text-white">{selectedNode.name}</h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <h3 className="text-base font-bold text-aurora-ink">{selectedNode.name}</h3>
+              <p className="text-xs text-aurora-muted leading-relaxed">
                 {selectedNode.description}
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-2">
-              <div className="p-2.5 rounded-xl bg-slate-950 border border-white/5 space-y-0.5">
-                <span className="text-[9px] text-slate-500 block uppercase">Market Demand</span>
-                <span className="text-emerald-400 font-bold">{selectedNode.marketDemand}</span>
+            <div className="grid grid-cols-2 gap-2 text-xs pt-2">
+              <div className="p-2.5 rounded-xl bg-aurora-canvas border border-aurora-line space-y-0.5">
+                <span className="text-[9px] text-aurora-muted block uppercase">Market Demand</span>
+                <span className="text-emerald-700 font-bold">{selectedNode.marketDemand}</span>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-slate-950 border border-white/5 space-y-0.5">
-                <span className="text-[9px] text-slate-500 block uppercase">Confidence</span>
-                <span className="text-cyan-300 font-bold">{selectedNode.confidence}%</span>
+              <div className="p-2.5 rounded-xl bg-aurora-canvas border border-aurora-line space-y-0.5">
+                <span className="text-[9px] text-aurora-muted block uppercase">Confidence</span>
+                <span className="text-aurora-violet font-bold">{selectedNode.confidence}%</span>
               </div>
             </div>
           </GlassPanel>
@@ -336,20 +336,20 @@ export const KnowledgeGraphExplorerWorkspace: React.FC = () => {
           {/* CONNECTED RELATIONSHIPS */}
           <GlassPanel className="p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <Share2 className="w-4 h-4 text-purple-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+                <Share2 className="w-4 h-4 text-aurora-violet" />
                 Connected Graph Relationships ({connectedEdges.length})
               </span>
             </div>
 
             <div className="space-y-2">
               {connectedEdges.map((e, idx) => (
-                <div key={idx} className="p-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs flex items-center justify-between">
+                <div key={idx} className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <span className="text-[10px] font-mono text-cyan-400 font-bold block">{e.relation}</span>
-                    <span className="text-white font-bold">{e.target}</span>
+                    <span className="text-[10px] text-aurora-violet font-bold block">{e.relation}</span>
+                    <span className="text-aurora-ink font-bold">{e.target}</span>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-slate-500" />
+                  <ArrowRight className="w-4 h-4 text-aurora-muted" />
                 </div>
               ))}
             </div>

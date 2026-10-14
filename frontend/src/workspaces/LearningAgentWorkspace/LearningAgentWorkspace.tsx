@@ -175,7 +175,7 @@ export const LearningAgentWorkspace: React.FC = () => {
   if (isRoadmapLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
+        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
           <AIThinkingAnimation statusText="Connecting to Autonomous AI Learning Agent..." />
         </div>
       </div>
@@ -200,9 +200,9 @@ export const LearningAgentWorkspace: React.FC = () => {
       />
 
       {/* TOP TARGET SKILL SEARCH BAR & CONTROLS */}
-      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-indigo-500/30">
+      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-aurora-violet/25">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <span className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+          <span className="p-2 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
             <GraduationCap className="w-5 h-5" />
           </span>
           <div className="relative w-full sm:w-80">
@@ -211,23 +211,23 @@ export const LearningAgentWorkspace: React.FC = () => {
               value={filterQuery}
               onChange={(e) => setFilterQuery(e.target.value)}
               placeholder="Filter curriculum modules..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
             />
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
         </div>
 
         <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-end">
           <button
             onClick={() => navigate('/roadmap')}
-            className="text-xs text-indigo-400 hover:text-indigo-300 font-mono font-bold px-2 py-1"
+            className="text-xs text-aurora-indigo hover:text-aurora-indigo font-bold px-2 py-1"
           >
             Roadmap Graph →
           </button>
           <button
             onClick={handleRunCycle}
             disabled={isAnalyzing}
-            className="w-full sm:w-auto py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+            className="w-full sm:w-auto py-2 px-4 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
             <span>{isAnalyzing ? 'Optimizing Curriculum...' : 'Run Autonomous Learning Cycle'}</span>
@@ -237,73 +237,73 @@ export const LearningAgentWorkspace: React.FC = () => {
 
       {/* 4 SUMMARY METRIC CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <GlassPanel className="p-4 space-y-2 border-indigo-500/30">
+        <GlassPanel className="p-4 space-y-2 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Curriculum Progress</span>
-            <BookOpen className="w-4 h-4 text-indigo-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Curriculum Progress</span>
+            <BookOpen className="w-4 h-4 text-aurora-indigo" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">
+          <span className="text-xl font-bold text-aurora-ink block">
             {completionPercent}%
           </span>
-          <span className="text-xs font-mono text-indigo-300">
+          <span className="text-xs text-aurora-indigo">
             {completedCount} of {totalCount} Modules Mastered
           </span>
         </GlassPanel>
 
-        <GlassPanel className="p-4 space-y-2 border-emerald-500/30">
+        <GlassPanel className="p-4 space-y-2 border-emerald-200">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Readiness Impact</span>
-            <Calendar className="w-4 h-4 text-emerald-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Readiness Impact</span>
+            <Calendar className="w-4 h-4 text-emerald-700" />
           </div>
-          <span className="text-xl font-bold text-emerald-400 font-mono block">
+          <span className="text-xl font-bold text-emerald-700 block">
             {readinessBoostLabel}
           </span>
-          <span className="text-xs font-mono text-emerald-300">Grounded Competency</span>
+          <span className="text-xs text-emerald-700">Grounded Competency</span>
         </GlassPanel>
 
-        <GlassPanel className="p-4 space-y-2 border-cyan-500/30">
+        <GlassPanel className="p-4 space-y-2 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Prerequisite Health</span>
-            <ShieldCheck className="w-4 h-4 text-cyan-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Prerequisite Health</span>
+            <ShieldCheck className="w-4 h-4 text-aurora-violet" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">
+          <span className="text-xl font-bold text-aurora-ink block">
             {overallReadiness >= 50 ? 'Validated' : 'Building'}
           </span>
-          <span className="text-xs font-mono text-cyan-300">
+          <span className="text-xs text-aurora-violet">
             Readiness: {overallReadiness}%
           </span>
         </GlassPanel>
 
         <GlassPanel className="p-4 space-y-2 border-purple-500/30">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Target Role</span>
-            <Zap className="w-4 h-4 text-purple-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Target Role</span>
+            <Zap className="w-4 h-4 text-aurora-violet" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block truncate">
+          <span className="text-xl font-bold text-aurora-ink block truncate">
             {targetCareerTitle}
           </span>
-          <span className="text-xs font-mono text-purple-300">Top Competency Focus</span>
+          <span className="text-xs text-aurora-violet">Top Competency Focus</span>
         </GlassPanel>
       </div>
 
       {/* ADAPTIVE CURRICULUM & STUDY SCHEDULE (2 COLS) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* ADAPTIVE CURRICULUM SEQUENCE (7 COLS) */}
-        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-indigo-500/30">
+        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-aurora-indigo" />
               Adaptive Curriculum Sequence ({filteredItems.length} Modules)
             </span>
-            <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">
+            <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
               {completionPercent}% Complete
             </span>
           </div>
 
           {filteredItems.length === 0 ? (
-            <div className="p-8 text-center space-y-3 bg-slate-950/60 rounded-xl border border-white/5 font-mono text-xs">
-              <BookOpen className="w-8 h-8 text-slate-500 mx-auto" />
-              <p className="text-slate-400">
+            <div className="p-8 text-center space-y-3 bg-aurora-canvas/60 rounded-xl border border-aurora-line text-xs">
+              <BookOpen className="w-8 h-8 text-aurora-muted mx-auto" />
+              <p className="text-aurora-muted">
                 No learning roadmap modules found. Select a target career in Career Intelligence to generate a personalized learning path.
               </p>
             </div>
@@ -316,42 +316,42 @@ export const LearningAgentWorkspace: React.FC = () => {
                 return (
                   <div
                     key={itemId || m.title}
-                    className="p-4 rounded-xl bg-slate-950/80 border border-white/10 space-y-2 text-xs font-mono hover:border-indigo-500/40 transition-colors"
+                    className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2 text-xs hover:border-aurora-violet/25 transition-colors"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2.5">
                         <button
                           onClick={() => itemId && handleToggleStatus(itemId, m.status)}
-                          className="text-slate-400 hover:text-emerald-400 cursor-pointer transition-colors"
+                          className="text-aurora-muted hover:text-emerald-700 cursor-pointer transition-colors"
                           title="Toggle Completion Status"
                         >
                           {isCompleted ? (
-                            <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                            <CheckCircle2 className="w-5 h-5 text-emerald-700" />
                           ) : (
-                            <Circle className="w-5 h-5 text-slate-500" />
+                            <Circle className="w-5 h-5 text-aurora-muted" />
                           )}
                         </button>
-                        <span className={`font-bold text-sm ${isCompleted ? 'line-through text-slate-400' : 'text-white'}`}>
+                        <span className={`font-bold text-sm ${isCompleted ? 'line-through text-aurora-muted' : 'text-aurora-ink'}`}>
                           {m.title}
                         </span>
                       </div>
-                      <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${isCompleted ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-indigo-500/10 text-indigo-300 border border-indigo-500/30'}`}>
+                      <span className={`text-[10px] px-2 py-0.5 rounded font-bold ${isCompleted ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25'}`}>
                         {m.status}
                       </span>
                     </div>
 
                     {m.description && (
-                      <p className="text-slate-400 text-[11px] leading-relaxed pl-7">
+                      <p className="text-aurora-muted text-[11px] leading-relaxed pl-7">
                         {m.description}
                       </p>
                     )}
 
-                    <div className="flex items-center justify-between text-[11px] pt-1 border-t border-white/5 pl-7">
-                      <span className="flex items-center gap-1 text-slate-400">
-                        <Clock className="w-3.5 h-3.5 text-slate-500" /> {m.hours || 4} Hours Estimated
+                    <div className="flex items-center justify-between text-[11px] pt-1 border-t border-aurora-line pl-7">
+                      <span className="flex items-center gap-1 text-aurora-muted">
+                        <Clock className="w-3.5 h-3.5 text-aurora-muted" /> {m.hours || 4} Hours Estimated
                       </span>
                       {isCompleted && (
-                        <span className="text-emerald-400 font-bold flex items-center gap-1">
+                        <span className="text-emerald-700 font-bold flex items-center gap-1">
                           <CheckCircle2 className="w-3.5 h-3.5" /> Verified Mastered
                         </span>
                       )}
@@ -367,25 +367,25 @@ export const LearningAgentWorkspace: React.FC = () => {
         <div className="lg:col-span-5 space-y-6">
           <GlassPanel className="p-6 space-y-4 border-purple-500/30">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <Lightbulb className="w-4 h-4 text-purple-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-aurora-violet" />
                 AI Learning Recommendations ({recommendationsList.length})
               </span>
             </div>
 
-            <div className="space-y-2.5 font-mono text-xs">
+            <div className="space-y-2.5 text-xs">
               {recommendationsList.length === 0 ? (
-                <div className="p-3 text-slate-400 text-xs text-center italic">
+                <div className="p-3 text-aurora-muted text-xs text-center italic">
                   No active learning recommendations.
                 </div>
               ) : (
                 recommendationsList.slice(0, 4).map((rec: { _id: string; title: string; reasoning: string; actionType: string }) => (
-                  <div key={rec._id} className="p-3 rounded-xl bg-slate-950/80 border border-white/10 space-y-1">
+                  <div key={rec._id} className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1">
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-white text-[11px] truncate">{rec.title}</span>
-                      <ExternalLink className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                      <span className="font-bold text-aurora-ink text-[11px] truncate">{rec.title}</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-aurora-violet shrink-0" />
                     </div>
-                    <p className="text-[10px] text-slate-400 line-clamp-2 leading-relaxed">
+                    <p className="text-[10px] text-aurora-muted line-clamp-2 leading-relaxed">
                       {rec.reasoning}
                     </p>
                   </div>

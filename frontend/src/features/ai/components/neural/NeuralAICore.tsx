@@ -32,7 +32,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
       label: 'Core Synchronized',
       glowColor: 'rgba(6, 182, 212, 0.45)',
       borderColor: 'border-cyan-400/50',
-      icon: <Sparkles className="w-8 h-8 text-cyan-300" />,
+      icon: <Sparkles className="w-8 h-8 text-aurora-violet" />,
       speedClass: 'animate-ring-cw',
       pulseClass: 'animate-neural-core',
     },
@@ -40,7 +40,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
       label: 'Context Analysis',
       glowColor: 'rgba(139, 92, 246, 0.65)',
       borderColor: 'border-purple-400/70',
-      icon: <Cpu className="w-8 h-8 text-purple-300 animate-spin" />,
+      icon: <Cpu className="w-8 h-8 text-aurora-violet animate-spin" />,
       speedClass: 'animate-ring-cw-fast',
       pulseClass: 'scale-105 filter drop-shadow-[0_0_35px_rgba(168,85,247,0.8)]',
     },
@@ -48,7 +48,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
       label: 'Retrieving Telemetry',
       glowColor: 'rgba(59, 130, 246, 0.65)',
       borderColor: 'border-blue-400/70',
-      icon: <Activity className="w-8 h-8 text-blue-300 animate-pulse" />,
+      icon: <Activity className="w-8 h-8 text-sky-800 animate-pulse" />,
       speedClass: 'animate-ring-ccw',
       pulseClass: 'scale-105',
     },
@@ -56,7 +56,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
       label: 'Orchestrating Subsystems',
       glowColor: 'rgba(168, 85, 247, 0.75)',
       borderColor: 'border-purple-400/80',
-      icon: <Zap className="w-8 h-8 text-purple-300 animate-bounce" />,
+      icon: <Zap className="w-8 h-8 text-aurora-violet animate-bounce" />,
       speedClass: 'animate-ring-cw-fast',
       pulseClass: 'scale-110 filter drop-shadow-[0_0_40px_rgba(168,85,247,0.9)]',
     },
@@ -64,7 +64,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
       label: 'Synthesizing Advisory',
       glowColor: 'rgba(6, 182, 212, 0.8)',
       borderColor: 'border-cyan-300',
-      icon: <Sparkles className="w-8 h-8 text-cyan-200 animate-pulse" />,
+      icon: <Sparkles className="w-8 h-8 text-aurora-violet animate-pulse" />,
       speedClass: 'animate-ring-cw-fast',
       pulseClass: 'scale-110 filter drop-shadow-[0_0_40px_rgba(34,211,238,0.95)]',
     },
@@ -72,7 +72,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
       label: 'Orchestration Ready',
       glowColor: 'rgba(16, 185, 129, 0.55)',
       borderColor: 'border-emerald-400/60',
-      icon: <ShieldCheck className="w-8 h-8 text-emerald-300" />,
+      icon: <ShieldCheck className="w-8 h-8 text-emerald-700" />,
       speedClass: 'animate-ring-cw',
       pulseClass: 'scale-100 filter drop-shadow-[0_0_20px_rgba(16,185,129,0.5)]',
     },
@@ -80,7 +80,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
       label: 'Degraded State',
       glowColor: 'rgba(239, 68, 68, 0.65)',
       borderColor: 'border-red-500/70',
-      icon: <AlertCircle className="w-8 h-8 text-red-400" />,
+      icon: <AlertCircle className="w-8 h-8 text-rose-700" />,
       speedClass: 'animate-ring-cw',
       pulseClass: 'scale-95',
     },
@@ -163,7 +163,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
           background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.8), rgba(99, 102, 241, 0.8), rgba(168, 85, 247, 0.8))',
         }}
       >
-        <div className="w-full h-full rounded-full bg-slate-950/90 backdrop-blur-xl border border-white/20 flex flex-col items-center justify-center p-3 text-center shadow-inner relative overflow-hidden">
+        <div className="w-full h-full rounded-full bg-aurora-canvas/60 backdrop-blur-xl border border-aurora-line flex flex-col items-center justify-center p-3 text-center shadow-inner relative overflow-hidden">
           {/* Inner Light Reflection */}
           <div className="absolute top-0 inset-x-0 h-1/2 bg-linear-to-b from-white/15 to-transparent pointer-events-none rounded-t-full" />
 
@@ -171,12 +171,12 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
           <div className="mb-1 relative z-10">{current.icon}</div>
 
           {/* Core Title */}
-          <span className="font-display font-black text-[13px] text-white tracking-wider uppercase">
+          <span className="font-display font-black text-[13px] text-aurora-ink tracking-wider uppercase">
             AI Core
           </span>
 
           {/* Subsystem State */}
-          <span className="text-[10px] font-mono text-cyan-300 truncate max-w-[100px] block mt-0.5">
+          <span className="text-[10px] text-aurora-violet truncate max-w-[100px] block mt-0.5">
             {current.label}
           </span>
         </div>
@@ -184,11 +184,11 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
 
       {/* State Badge & Target Career Ribbon below Core */}
       <div className="relative z-10 mt-5 flex flex-col items-center gap-1.5 text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white/[0.04] border border-white/10 backdrop-blur-md shadow-lg">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white/[0.04] border border-aurora-line backdrop-blur-md shadow-lg">
           <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
-          <span className="text-slate-200 font-mono tracking-wide">{targetRole}</span>
-          <span className="text-slate-500 text-[10px]">|</span>
-          <span className="text-slate-400 text-[11px]">{activeCareerDomain}</span>
+          <span className="text-aurora-ink tracking-wide">{targetRole}</span>
+          <span className="text-aurora-muted text-[10px]">|</span>
+          <span className="text-aurora-muted text-[11px]">{activeCareerDomain}</span>
         </div>
       </div>
     </div>

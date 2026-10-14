@@ -63,28 +63,28 @@ export const AgentTopologyNetwork: React.FC<AgentTopologyNetworkProps> = ({
   const activeFocusId = hoveredAgentId || selectedAgentId;
 
   return (
-    <GlassPanel className="p-6 space-y-6 border-indigo-500/30">
+    <GlassPanel className="p-6 space-y-6 border-aurora-violet/25">
       {/* Header with Mode Toggle */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="space-y-1">
-          <span className="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-2">
-            <Workflow className="w-4 h-4 text-indigo-400" />
+          <span className="text-xs font-bold uppercase tracking-wider text-aurora-indigo flex items-center gap-2">
+            <Workflow className="w-4 h-4 text-aurora-indigo" />
             Living Agent Topology Network (10 Subsystems)
           </span>
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-aurora-muted">
             Interactive map of SkillBridge's autonomous agents. Hover to trace inter-agent context flow; click to inspect subsystem details.
           </p>
         </div>
 
         {/* View Switcher: Interactive Graph vs Accessible Table */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950 border border-white/10 text-xs">
+        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-aurora-canvas border border-aurora-line text-xs">
           <button
             onClick={() => setViewMode('GRAPH')}
             type="button"
             className={`px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
               viewMode === 'GRAPH'
-                ? 'bg-indigo-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
+                ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-sm'
+                : 'text-aurora-muted hover:text-aurora-indigo'
             }`}
           >
             Spatial Graph
@@ -94,8 +94,8 @@ export const AgentTopologyNetwork: React.FC<AgentTopologyNetworkProps> = ({
             type="button"
             className={`px-3 py-1 rounded-lg font-bold transition cursor-pointer ${
               viewMode === 'TABLE'
-                ? 'bg-indigo-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
+                ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-sm'
+                : 'text-aurora-muted hover:text-aurora-indigo'
             }`}
           >
             Tabular Matrix
@@ -105,7 +105,7 @@ export const AgentTopologyNetwork: React.FC<AgentTopologyNetworkProps> = ({
 
       {viewMode === 'GRAPH' ? (
         /* SPATIAL SVG TOPOLOGY VISUALIZATION */
-        <div className="relative w-full h-[520px] rounded-2xl bg-slate-950 border border-white/10 overflow-hidden shadow-inner flex items-center justify-center">
+        <div className="relative w-full h-[520px] rounded-2xl bg-aurora-canvas border border-aurora-line overflow-hidden shadow-inner flex items-center justify-center">
           {/* Subtle Grid Background */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b15_1px,transparent_1px),linear-gradient(to_bottom,#1e293b15_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
           
@@ -198,12 +198,12 @@ export const AgentTopologyNetwork: React.FC<AgentTopologyNetworkProps> = ({
                   <div
                     className={`relative p-3 sm:p-3.5 rounded-2xl border transition-all duration-200 flex items-center gap-2.5 shadow-xl ${
                       isRoot
-                        ? 'bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-900 border-indigo-400 text-white ring-2 ring-indigo-500/50'
+                        ? 'bg-violet-50 border-aurora-violet text-aurora-ink ring-2 ring-indigo-500/50'
                         : isSelected
-                        ? 'bg-indigo-600/30 border-indigo-400 text-white ring-2 ring-indigo-400'
+                        ? 'bg-violet-50 border-indigo-400 text-aurora-ink ring-2 ring-indigo-400'
                         : isHovered
-                        ? 'bg-slate-900 border-indigo-500/60 text-white scale-105'
-                        : 'bg-slate-950/90 border-white/10 text-slate-300 hover:border-white/20'
+                        ? 'bg-aurora-canvas border-aurora-violet/25 text-aurora-ink scale-105'
+                        : 'bg-aurora-canvas/60 border-aurora-line text-aurora-muted hover:border-aurora-line'
                     }`}
                   >
                     {/* Node Status Dot */}
@@ -221,18 +221,18 @@ export const AgentTopologyNetwork: React.FC<AgentTopologyNetworkProps> = ({
                           {agent.name}
                         </span>
                         {isRoot && (
-                          <span className="px-1.5 py-0.2 rounded text-[8px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 uppercase">
+                          <span className="px-1.5 py-0.2 rounded text-[8px] font-bold bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25 uppercase">
                             ROOT
                           </span>
                         )}
                       </div>
-                      <span className="text-[9px] text-slate-400 block tracking-tight truncate max-w-[140px]">
+                      <span className="text-[9px] text-aurora-muted block tracking-tight truncate max-w-[140px]">
                         v{agent.version} • {agent.category}
                       </span>
                     </div>
 
                     {/* Subtle Click Cue */}
-                    <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 transition" />
+                    <ChevronRight className="w-3.5 h-3.5 text-aurora-muted group-hover:text-aurora-indigo transition" />
                   </div>
                 </div>
               );
@@ -241,14 +241,14 @@ export const AgentTopologyNetwork: React.FC<AgentTopologyNetworkProps> = ({
 
           {/* Hovered Node Quick Telemetry Banner (Bottom of Graph) */}
           {hoveredAgentId && (
-            <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-slate-900/90 backdrop-blur-md border border-indigo-500/40 z-20 flex items-center justify-between text-xs">
+            <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-aurora-canvas/60 backdrop-blur-md border border-aurora-violet/25 z-20 flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
-                <Info className="w-4 h-4 text-indigo-400 shrink-0" />
-                <span className="text-slate-300">
+                <Info className="w-4 h-4 text-aurora-indigo shrink-0" />
+                <span className="text-aurora-muted">
                   {agents.find((a) => a.id === hoveredAgentId)?.purpose}
                 </span>
               </div>
-              <span className="text-[10px] text-indigo-300 font-bold uppercase shrink-0">
+              <span className="text-[10px] text-aurora-indigo font-bold uppercase shrink-0">
                 Click to Open Subsystem Inspector →
               </span>
             </div>
@@ -256,9 +256,9 @@ export const AgentTopologyNetwork: React.FC<AgentTopologyNetworkProps> = ({
         </div>
       ) : (
         /* ACCESSIBLE TABULAR MATRIX ALTERNATIVE */
-        <div className="overflow-x-auto rounded-2xl border border-white/10">
+        <div className="overflow-x-auto rounded-2xl border border-aurora-line">
           <table className="w-full text-left text-xs font-mono">
-            <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] border-b border-white/10">
+            <thead className="bg-aurora-canvas text-aurora-muted uppercase text-[10px] border-b border-aurora-line">
               <tr>
                 <th className="p-3">Agent Identity</th>
                 <th className="p-3">Category</th>
@@ -268,36 +268,36 @@ export const AgentTopologyNetwork: React.FC<AgentTopologyNetworkProps> = ({
                 <th className="p-3 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5 bg-slate-900/60">
+            <tbody className="divide-y divide-aurora-line bg-aurora-canvas/60">
               {agents.map((agent) => (
                 <tr
                   key={agent.id}
                   onClick={() => onSelectAgent(agent)}
-                  className={`hover:bg-indigo-950/30 transition cursor-pointer ${
-                    selectedAgentId === agent.id ? 'bg-indigo-950/50' : ''
+                  className={`hover:bg-violet-50 transition cursor-pointer ${
+                    selectedAgentId === agent.id ? 'bg-violet-50' : ''
                   }`}
                 >
-                  <td className="p-3 font-bold text-white flex items-center gap-2">
+                  <td className="p-3 font-bold text-aurora-ink flex items-center gap-2">
                     <span
                       className={`w-2 h-2 rounded-full ${
                         agent.status === 'ACTIVE' ? 'bg-emerald-400' : 'bg-amber-400'
                       }`}
                     />
                     <span>{agent.name}</span>
-                    <span className="text-[10px] text-slate-500">v{agent.version}</span>
+                    <span className="text-[10px] text-aurora-muted">v{agent.version}</span>
                   </td>
-                  <td className="p-3 text-slate-400">{agent.category}</td>
+                  <td className="p-3 text-aurora-muted">{agent.category}</td>
                   <td className="p-3">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                       {agent.status}
                     </span>
                   </td>
-                  <td className="p-3 text-slate-300 max-w-sm truncate">{agent.purpose}</td>
-                  <td className="p-3 text-indigo-300">{agent.tools[0] || 'Core Engine'}</td>
+                  <td className="p-3 text-aurora-muted max-w-sm truncate">{agent.purpose}</td>
+                  <td className="p-3 text-aurora-indigo">{agent.tools[0] || 'Core Engine'}</td>
                   <td className="p-3 text-right">
                     <button
                       type="button"
-                      className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-indigo-600 text-white text-[11px] font-semibold transition"
+                      className="px-2.5 py-1 rounded-lg bg-aurora-canvas hover:bg-indigo-600 text-white text-[11px] font-semibold transition"
                     >
                       Inspect
                     </button>

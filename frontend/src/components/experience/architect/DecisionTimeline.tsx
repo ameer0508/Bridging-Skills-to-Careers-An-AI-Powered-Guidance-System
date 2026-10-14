@@ -55,21 +55,21 @@ export const DecisionTimeline: React.FC<DecisionTimelineProps> = ({
 
   return (
     <GlassCard className={`p-6 space-y-4 ${className}`}>
-      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+      <div className="flex items-center justify-between pb-3 border-b border-aurora-line">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+          <div className="p-2 rounded-lg bg-aurora-violet/[0.06] text-aurora-indigo">
             <History className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">Strategic Decision Timeline</h3>
-            <p className="text-xs text-neutral-400">
+            <h3 className="text-base font-bold text-aurora-ink">Strategic Decision Timeline</h3>
+            <p className="text-xs text-aurora-muted">
               Key milestone checkpoints mapping your long-term destination
             </p>
           </div>
         </div>
       </div>
 
-      <div className="relative pl-6 space-y-4 border-l border-white/10 my-2">
+      <div className="relative pl-6 space-y-4 border-l border-aurora-line my-2">
         {defaultCheckpoints.map((cp, idx) => (
           <div key={idx} className="relative group">
             {/* Timeline Dot */}
@@ -77,12 +77,12 @@ export const DecisionTimeline: React.FC<DecisionTimelineProps> = ({
               className={`absolute -left-7.75 top-0.5 p-1 rounded-full border ${
 
                 cp.isDecisionPoint
-                  ? 'bg-purple-900 border-purple-400 text-purple-300'
-                  : 'bg-neutral-900 border-white/20 text-neutral-400'
+                  ? 'bg-purple-100 border-purple-400 text-aurora-violet'
+                  : 'bg-aurora-canvas/60 border-aurora-line text-aurora-muted'
               }`}
             >
               {cp.isCompleted ? (
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
               ) : (
                 <Circle className="w-3.5 h-3.5" />
               )}
@@ -90,17 +90,17 @@ export const DecisionTimeline: React.FC<DecisionTimelineProps> = ({
 
             <div className="space-y-0.5">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-300">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-aurora-indigo">
                   {cp.timeframe}
                 </span>
                 {cp.isDecisionPoint && (
-                  <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-violet-50 text-aurora-violet border border-purple-500/30">
                     Decision Checkpoint
                   </span>
                 )}
               </div>
-              <h4 className="text-xs font-bold text-white">{cp.title}</h4>
-              <p className="text-xs text-neutral-300">{cp.description}</p>
+              <h4 className="text-xs font-bold text-aurora-ink">{cp.title}</h4>
+              <p className="text-xs text-aurora-muted">{cp.description}</p>
             </div>
           </div>
         ))}

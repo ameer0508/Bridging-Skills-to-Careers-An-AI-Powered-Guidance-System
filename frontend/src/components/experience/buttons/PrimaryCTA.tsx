@@ -82,7 +82,7 @@ export const PrimaryCTA = React.forwardRef<HTMLButtonElement, PrimaryCTAProps>(
         {isLoading ? (
           <Loader2 className="w-5 h-5 animate-spin shrink-0" />
         ) : isSuccess ? (
-          <Check className="w-5 h-5 text-emerald-300 shrink-0" />
+          <Check className="w-5 h-5 text-emerald-800 shrink-0" />
         ) : null}
 
         <span className="relative z-10">{isSuccess ? 'Completed' : children}</span>

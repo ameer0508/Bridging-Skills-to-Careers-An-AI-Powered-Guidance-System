@@ -82,23 +82,23 @@ export const CareerPreferencesEditor: React.FC<CareerPreferencesEditorProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in font-mono">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 sm:p-8 rounded-3xl bg-slate-900 border border-white/10 shadow-2xl space-y-6 text-xs custom-scrollbar">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-aurora-canvas/60 backdrop-blur-md animate-fade-in font-mono">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 sm:p-8 rounded-3xl bg-aurora-canvas border border-aurora-line shadow-2xl space-y-6 text-xs custom-scrollbar">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
+        <div className="flex items-center justify-between border-b border-aurora-line pb-4">
           <div>
-            <h3 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
-              <Compass className="w-4 h-4 text-indigo-400" />
+            <h3 className="text-base font-bold text-aurora-ink tracking-tight flex items-center gap-2">
+              <Compass className="w-4 h-4 text-aurora-indigo" />
               Configure Career Direction & Preferences
             </h3>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-aurora-muted">
               Your choices recalibrate skill gap analysis, recommendations, and live job matching.
             </p>
           </div>
           <button
             onClick={onClose}
             type="button"
-            className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer"
+            className="p-1.5 rounded-xl hover:bg-aurora-canvas text-aurora-muted hover:text-aurora-indigo transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -107,7 +107,7 @@ export const CareerPreferencesEditor: React.FC<CareerPreferencesEditorProps> = (
         <form onSubmit={handleFormSubmit} className="space-y-5">
           {/* Step 1: Primary Career Domain */}
           <div className="space-y-2">
-            <label className="text-[11px] font-bold text-slate-300 uppercase block">
+            <label className="text-[11px] font-bold text-aurora-muted uppercase block">
               1. Primary Career Domain
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -120,15 +120,15 @@ export const CareerPreferencesEditor: React.FC<CareerPreferencesEditorProps> = (
                     onClick={() => handleDomainChange(domain.id)}
                     className={`p-3 rounded-xl border text-left transition cursor-pointer flex items-start gap-2.5 ${
                       isSelected
-                        ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-md'
-                        : 'bg-slate-950/60 border-white/5 text-slate-400 hover:border-white/20'
+                        ? 'bg-violet-50 border-indigo-500 text-aurora-ink shadow-md'
+                        : 'bg-aurora-canvas/60 border-aurora-line text-aurora-muted hover:border-aurora-line'
                     }`}
                   >
                     <div className="space-y-0.5 min-w-0">
-                      <strong className="text-xs font-bold block truncate text-white">
+                      <strong className="text-xs font-bold block truncate text-aurora-ink">
                         {domain.name}
                       </strong>
-                      <span className="text-[10px] text-slate-400 block line-clamp-1">
+                      <span className="text-[10px] text-aurora-muted block line-clamp-1">
                         {domain.desc}
                       </span>
                     </div>
@@ -140,7 +140,7 @@ export const CareerPreferencesEditor: React.FC<CareerPreferencesEditorProps> = (
 
           {/* Step 2: Specific Target Role */}
           <div className="space-y-2">
-            <label className="text-[11px] font-bold text-slate-300 uppercase block">
+            <label className="text-[11px] font-bold text-aurora-muted uppercase block">
               2. Specific Target Role / Objective
             </label>
             <input
@@ -149,13 +149,13 @@ export const CareerPreferencesEditor: React.FC<CareerPreferencesEditorProps> = (
               onChange={(e) => setTargetRole(e.target.value)}
               placeholder="e.g. Principal AI Infrastructure Architect"
               required
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-xs"
+              className="w-full px-4 py-2.5 rounded-xl bg-aurora-canvas border border-aurora-line text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-xs"
             />
           </div>
 
           {/* Step 3: Seniority / Experience Tier */}
           <div className="space-y-2">
-            <label className="text-[11px] font-bold text-slate-300 uppercase block">
+            <label className="text-[11px] font-bold text-aurora-muted uppercase block">
               3. Experience Tier
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
@@ -172,8 +172,8 @@ export const CareerPreferencesEditor: React.FC<CareerPreferencesEditorProps> = (
                   onClick={() => setExperienceLevel(tier.id)}
                   className={`py-2 px-3 rounded-xl border text-center font-bold text-xs transition cursor-pointer ${
                     experienceLevel === tier.id
-                      ? 'bg-indigo-600 text-white border-indigo-500 shadow-md'
-                      : 'bg-slate-950 text-slate-400 border-white/10 hover:text-white'
+                      ? 'text-white [background:var(--aurora-gradient-action)] border-indigo-500 shadow-aurora-sm'
+                      : 'bg-aurora-canvas text-aurora-muted border-aurora-line hover:text-aurora-indigo'
                   }`}
                 >
                   {tier.label}
@@ -185,7 +185,7 @@ export const CareerPreferencesEditor: React.FC<CareerPreferencesEditorProps> = (
           {/* Step 4: Specialization Focus Areas */}
           {availableTags.length > 0 && (
             <div className="space-y-2">
-              <label className="text-[11px] font-bold text-slate-300 uppercase block">
+              <label className="text-[11px] font-bold text-aurora-muted uppercase block">
                 4. Secondary Specialization Tags
               </label>
               <div className="flex items-center gap-2 flex-wrap">
@@ -198,8 +198,8 @@ export const CareerPreferencesEditor: React.FC<CareerPreferencesEditorProps> = (
                       onClick={() => toggleTag(tag)}
                       className={`px-3 py-1 rounded-xl text-[10px] font-bold transition cursor-pointer border ${
                         isSelected
-                          ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40 shadow-sm'
-                          : 'bg-slate-950 text-slate-400 border-white/5 hover:border-white/20'
+                          ? 'bg-aurora-violet/[0.06] text-aurora-indigo border-aurora-violet/25 shadow-sm'
+                          : 'bg-aurora-canvas text-aurora-muted border-aurora-line hover:border-aurora-line'
                       }`}
                     >
                       # {tag}
@@ -211,23 +211,23 @@ export const CareerPreferencesEditor: React.FC<CareerPreferencesEditorProps> = (
           )}
 
           {error && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs">
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
               {error}
             </div>
           )}
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-aurora-line">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-aurora-canvas hover:bg-aurora-line text-aurora-muted transition cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSaving || !targetRole.trim()}
-              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition cursor-pointer shadow-lg shadow-indigo-600/30 flex items-center gap-2"
+              className="px-5 py-2 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-white font-bold transition cursor-pointer shadow-lg shadow-indigo-600/30 flex items-center gap-2"
             >
               {isSaving ? 'Synchronizing...' : 'Save & Recalibrate'}
             </button>

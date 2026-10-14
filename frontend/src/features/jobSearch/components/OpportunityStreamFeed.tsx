@@ -79,7 +79,7 @@ export const OpportunityStreamFeed: React.FC<OpportunityStreamFeedProps> = ({
       case 'offer':
         return { label: 'Offer Received', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
       case 'rejected':
-        return { label: 'Archived', color: 'bg-aurora-canvas text-aurora-muted border-slate-700' };
+        return { label: 'Archived', color: 'bg-aurora-canvas text-aurora-muted border-aurora-line' };
       default:
         return { label: 'Saved', color: 'bg-amber-50 text-amber-700 border-amber-200' };
     }

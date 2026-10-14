@@ -33,9 +33,9 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div role="alert" data-testid="error-boundary" className="min-h-87.5 p-8 rounded-2xl border border-rose-500/30 bg-neutral-900/90 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 text-center">
+        <div role="alert" data-testid="error-boundary" className="min-h-87.5 p-8 rounded-2xl border border-rose-500/30 bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 text-center">
 
-          <div className="p-3 rounded-full bg-rose-500/10 text-rose-400">
+          <div className="p-3 rounded-full bg-rose-500/10 text-rose-700">
             <AlertTriangle className="w-8 h-8" />
           </div>
 
@@ -43,15 +43,15 @@ export class ErrorBoundary extends Component<Props, State> {
             <h3 className="text-lg font-bold text-white">
               {this.props.fallbackTitle || 'Workspace Recovered From Exception'}
             </h3>
-            <p className="text-xs text-neutral-400">
+            <p className="text-xs text-aurora-muted">
               An unexpected runtime error occurred. Telemetry cache state remains secure.
             </p>
             {/* Technical details only while developing: users never see stack traces */}
             {import.meta.env.DEV && this.state.error && (
-              <div role="region" aria-label="Error details" tabIndex={0} className="p-3 rounded-xl bg-rose-950/40 border border-rose-500/20 text-rose-300 text-xs text-left font-mono overflow-auto max-h-40">
+              <div role="region" aria-label="Error details" tabIndex={0} className="p-3 rounded-xl bg-rose-50 border border-rose-500/20 text-rose-700 text-xs text-left font-mono overflow-auto max-h-40">
                 <p className="font-bold">{this.state.error.name}: {this.state.error.message}</p>
                 {this.state.error.stack && (
-                  <pre className="text-[10px] text-rose-400/80 mt-1 whitespace-pre-wrap">{this.state.error.stack.split('\n').slice(0, 4).join('\n')}</pre>
+                  <pre className="text-[10px] text-rose-700/80 mt-1 whitespace-pre-wrap">{this.state.error.stack.split('\n').slice(0, 4).join('\n')}</pre>
                 )}
               </div>
             )}

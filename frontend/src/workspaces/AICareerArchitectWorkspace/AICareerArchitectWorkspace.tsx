@@ -275,7 +275,7 @@ export const AICareerArchitectWorkspace: React.FC = () => {
       <div className="neural-command-center min-h-screen p-6 sm:p-12 flex flex-col items-center justify-center space-y-6">
         <div className="neural-glass-blade p-12 flex flex-col items-center justify-center space-y-4 max-w-md w-full text-center">
           <AIThinkingAnimation statusText="Connecting to Neural AI Orchestrator..." />
-          <span className="text-xs font-mono text-cyan-300">Synchronizing Grounded Telemetry Stream...</span>
+          <span className="text-xs font-mono text-aurora-violet">Synchronizing Grounded Telemetry Stream...</span>
         </div>
         <div className="w-full max-w-4xl space-y-4">
           <SkeletonShimmer height={340} />

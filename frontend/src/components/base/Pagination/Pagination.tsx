@@ -52,7 +52,7 @@ export const Pagination: React.FC<PaginationProps> = ({
 
       {getPages().map((page, index) =>
         page === '...' ? (
-          <span key={index} className="px-2 text-xs text-[var(--color-text-tertiary)] select-none">
+          <span key={index} className="px-2 text-xs text-aurora-muted select-none">
             ...
           </span>
         ) : (

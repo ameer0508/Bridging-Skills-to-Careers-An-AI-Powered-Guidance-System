@@ -29,7 +29,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     const helperId = `${textareaId}-helper`;
 
     const baseClasses =
-      'w-full p-3 text-sm bg-[var(--input-bg)] border text-[var(--input-text)] placeholder:[var(--input-placeholder)] rounded-[var(--radius-md)] transition-colors duration-[var(--duration-fast)] ease-[var(--ease-default)] focus:outline-none focus:ring-2 focus:ring-[var(--input-border-focus)] disabled:opacity-50 disabled:cursor-not-allowed resize-y';
+      'w-full p-3 text-sm bg-[var(--input-bg)] border text-[var(--input-text)] placeholder:[var(--input-placeholder)] rounded-2xl transition-colors duration-[var(--duration-fast)] ease-[var(--ease-default)] focus:outline-none focus:ring-2 focus:ring-[var(--input-border-focus)] disabled:opacity-50 disabled:cursor-not-allowed resize-y';
 
     const borderClass = error
       ? 'border-[var(--input-border-error)] focus:ring-[var(--input-border-error)]'
@@ -40,7 +40,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && (
           <label
             htmlFor={textareaId}
-            className="block text-xs font-semibold text-[var(--color-text-secondary)] mb-1.5"
+            className="block text-xs font-semibold text-aurora-muted mb-1.5"
           >
             {label}
             {required && <span className="text-[var(--color-status-error-text)] ml-1" aria-hidden="true">*</span>}
@@ -61,7 +61,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           <p
             id={helperId}
             className={`mt-1 text-xs ${
-              error ? 'text-[var(--color-status-error-text)] font-medium' : 'text-[var(--color-text-tertiary)]'
+              error ? 'text-[var(--color-status-error-text)] font-medium' : 'text-aurora-muted'
             }`}
           >
             {error || helperText}

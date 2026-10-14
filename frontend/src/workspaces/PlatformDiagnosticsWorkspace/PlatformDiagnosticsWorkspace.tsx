@@ -110,14 +110,14 @@ export const PlatformDiagnosticsWorkspace: React.FC = () => {
       />
 
       {/* TOP DIAGNOSTICS CONTROL TOOLBAR */}
-      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-indigo-500/30">
+      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-aurora-violet/25">
         <div className="flex items-center gap-3">
-          <span className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+          <span className="p-2 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
             <Activity className="w-5 h-5" />
           </span>
           <div>
-            <h3 className="text-sm font-bold text-white">Gateway Infrastructure Monitor</h3>
-            <span className="text-[11px] font-mono text-slate-400">
+            <h3 className="text-sm font-bold text-aurora-ink">Gateway Infrastructure Monitor</h3>
+            <span className="text-[11px] text-aurora-muted">
               Protocol: REST/gRPC • Port 8000 • Single Integration Point
             </span>
           </div>
@@ -126,16 +126,16 @@ export const PlatformDiagnosticsWorkspace: React.FC = () => {
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={handleClearCache}
-            className="py-2 px-3.5 rounded-xl bg-slate-900 border border-white/10 text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/5 flex items-center gap-2 transition-all cursor-pointer"
+            className="py-2 px-3.5 rounded-xl bg-aurora-canvas border border-aurora-line text-xs font-semibold text-aurora-muted hover:text-aurora-indigo hover:bg-aurora-canvas flex items-center gap-2 transition-all cursor-pointer"
           >
-            <Trash2 className="w-4 h-4 text-rose-400" />
+            <Trash2 className="w-4 h-4 text-rose-700" />
             <span>Purge Gateway Cache</span>
           </button>
 
           <button
             onClick={handleForceSync}
             disabled={isSyncing}
-            className="py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+            className="py-2 px-4 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} />
             <span>{isSyncing ? 'Synchronizing...' : 'Force Sync All Domains'}</span>
@@ -145,40 +145,40 @@ export const PlatformDiagnosticsWorkspace: React.FC = () => {
 
       {/* TOP GATEWAY METRICS SUMMARY ROW */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <GlassPanel className="p-4 space-y-2 border-emerald-500/30">
+        <GlassPanel className="p-4 space-y-2 border-emerald-200">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Circuit Breaker</span>
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Circuit Breaker</span>
+            <ShieldCheck className="w-4 h-4 text-emerald-700" />
           </div>
-          <span className="text-xl font-bold text-emerald-400 font-mono block">CLOSED (All Clear)</span>
-          <span className="text-xs font-mono text-slate-400">0 Open Breakers</span>
+          <span className="text-xl font-bold text-emerald-700 block">CLOSED (All Clear)</span>
+          <span className="text-xs text-aurora-muted">0 Open Breakers</span>
         </GlassPanel>
 
-        <GlassPanel className="p-4 space-y-2 border-cyan-500/30">
+        <GlassPanel className="p-4 space-y-2 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Rate Limiter</span>
-            <Zap className="w-4 h-4 text-cyan-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Rate Limiter</span>
+            <Zap className="w-4 h-4 text-aurora-violet" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">10.0 Token/sec</span>
-          <span className="text-xs font-mono text-cyan-300">0 Tokens Throttled</span>
-        </GlassPanel>
-
-        <GlassPanel className="p-4 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Sync Scheduler</span>
-            <Clock className="w-4 h-4 text-indigo-400" />
-          </div>
-          <span className="text-xl font-bold text-white font-mono block">Every 6 Hours</span>
-          <span className="text-xs font-mono text-purple-300">Next Sync in 2h 14m</span>
+          <span className="text-xl font-bold text-aurora-ink block">10.0 Token/sec</span>
+          <span className="text-xs text-aurora-violet">0 Tokens Throttled</span>
         </GlassPanel>
 
         <GlassPanel className="p-4 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">PubSub Bus</span>
-            <Radio className="w-4 h-4 text-cyan-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Sync Scheduler</span>
+            <Clock className="w-4 h-4 text-aurora-indigo" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">5 Domain Events</span>
-          <span className="text-xs font-mono text-emerald-400">100% Delivery Rate</span>
+          <span className="text-xl font-bold text-aurora-ink block">Every 6 Hours</span>
+          <span className="text-xs text-aurora-violet">Next Sync in 2h 14m</span>
+        </GlassPanel>
+
+        <GlassPanel className="p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-aurora-muted uppercase">PubSub Bus</span>
+            <Radio className="w-4 h-4 text-aurora-violet" />
+          </div>
+          <span className="text-xl font-bold text-aurora-ink block">5 Domain Events</span>
+          <span className="text-xs text-emerald-700">100% Delivery Rate</span>
         </GlassPanel>
       </div>
 
@@ -197,8 +197,8 @@ export const PlatformDiagnosticsWorkspace: React.FC = () => {
                 onClick={() => setSelectedDomainFilter(d)}
                 className={`py-1.5 px-3.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer shrink-0 ${
                   selectedDomainFilter === d
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                    : 'bg-slate-950/80 border border-white/10 text-slate-400 hover:text-white'
+                    ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-sm shadow-indigo-600/30'
+                    : 'bg-aurora-canvas/60 border border-aurora-line text-aurora-muted hover:text-aurora-indigo'
                 }`}
               >
                 {d}
@@ -210,40 +210,40 @@ export const PlatformDiagnosticsWorkspace: React.FC = () => {
             {filteredProviders.map((prov, i) => (
               <GlassPanel key={i} className="p-4 space-y-3 relative overflow-hidden">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 rounded-full bg-slate-950 border border-white/10 text-cyan-400 font-mono text-[10px] font-bold">
+                  <span className="px-2.5 py-0.5 rounded-full bg-aurora-canvas border border-aurora-line text-aurora-violet text-[10px] font-bold">
                     {prov.domain}
                   </span>
                   <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                       prov.status === 'Healthy'
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                        : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        : 'bg-amber-50 text-amber-700 border border-amber-200'
                     }`}
                   >
                     ● {prov.status}
                   </span>
                 </div>
 
-                <h4 className="text-sm font-bold text-white">{prov.name}</h4>
+                <h4 className="text-sm font-bold text-aurora-ink">{prov.name}</h4>
 
                 <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-                  <div className="p-2 rounded-lg bg-slate-950 border border-white/5 space-y-0.5">
-                    <span className="text-[9px] text-slate-500 block">LATENCY</span>
-                    <span className="text-slate-200 font-bold">{prov.latencyMs} ms</span>
+                  <div className="p-2 rounded-lg bg-aurora-canvas border border-aurora-line space-y-0.5">
+                    <span className="text-[9px] text-aurora-muted block">LATENCY</span>
+                    <span className="text-aurora-ink font-bold">{prov.latencyMs} ms</span>
                   </div>
-                  <div className="p-2 rounded-lg bg-slate-950 border border-white/5 space-y-0.5">
-                    <span className="text-[9px] text-slate-500 block">UPTIME</span>
-                    <span className="text-emerald-400 font-bold">{prov.uptime}</span>
+                  <div className="p-2 rounded-lg bg-aurora-canvas border border-aurora-line space-y-0.5">
+                    <span className="text-[9px] text-aurora-muted block">UPTIME</span>
+                    <span className="text-emerald-700 font-bold">{prov.uptime}</span>
                   </div>
                 </div>
 
                 {/* Quota Progress Bar */}
                 <div className="space-y-1 pt-1">
-                  <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                  <div className="flex items-center justify-between text-[10px] text-aurora-muted">
                     <span>API Quota Used</span>
                     <span>{prov.quotaUsed}%</span>
                   </div>
-                  <div className="w-full h-1.5 rounded-full bg-slate-950 border border-white/5 overflow-hidden">
+                  <div className="w-full h-1.5 rounded-full bg-aurora-canvas border border-aurora-line overflow-hidden">
                     <div
                       className={`h-full transition-all ${
                         prov.quotaUsed > 80 ? 'bg-amber-400' : 'bg-cyan-400'
@@ -263,11 +263,11 @@ export const PlatformDiagnosticsWorkspace: React.FC = () => {
         {/* LATENCY TIMELINE CHART (7 COLS) */}
         <GlassPanel className="lg:col-span-7 p-6 space-y-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-cyan-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-aurora-violet" />
               Gateway Multi-Domain Latency Timeline (ms)
             </span>
-            <span className="text-[10px] font-mono text-slate-400">Live Telemetry</span>
+            <span className="text-[10px] text-aurora-muted">Live Telemetry</span>
           </div>
 
           <div className="h-64 w-full pt-2">
@@ -283,7 +283,7 @@ export const PlatformDiagnosticsWorkspace: React.FC = () => {
                 <XAxis dataKey="time" stroke="#94a3b8" fontSize={11} tickLine={false} />
                 <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
+                  contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e6eaf6', color: '#10153b', borderRadius: '12px', fontSize: '12px' }}
                 />
                 <Area type="monotone" dataKey="jobsLatency" stroke="#06b6d4" strokeWidth={3} fillOpacity={1} fill="url(#latGrad)" name="Jobs Domain (ms)" />
                 <Area type="monotone" dataKey="courseLatency" stroke="#6366f1" strokeWidth={2} strokeDasharray="4 4" fillOpacity={0} name="Courses Domain (ms)" />
@@ -293,31 +293,31 @@ export const PlatformDiagnosticsWorkspace: React.FC = () => {
         </GlassPanel>
 
         {/* LOG VIEWER & AUDIT TRAIL (5 COLS) */}
-        <GlassPanel className="lg:col-span-5 p-6 space-y-4 border-indigo-500/30">
+        <GlassPanel className="lg:col-span-5 p-6 space-y-4 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Terminal className="w-4 h-4 text-aurora-indigo" />
               Gateway Event Audit Trail & Logs
             </span>
-            <span className="text-[10px] font-mono text-cyan-400 font-bold bg-cyan-500/10 px-2 py-0.5 rounded">
+            <span className="text-[10px] text-aurora-violet font-bold bg-aurora-violet/[0.06] px-2 py-0.5 rounded">
               Live Stream
             </span>
           </div>
 
-          <div className="space-y-2 text-xs font-mono max-h-64 overflow-y-auto custom-scrollbar" role="region" aria-label="Gateway event log" tabIndex={0}>
+          <div className="space-y-2 text-xs max-h-64 overflow-y-auto custom-scrollbar" role="region" aria-label="Gateway event log" tabIndex={0}>
             {gatewayLogs.map((log, idx) => (
-              <div key={idx} className="p-2.5 rounded-xl bg-slate-950/80 border border-white/10 space-y-1">
+              <div key={idx} className="p-2.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-500">{log.timestamp}</span>
+                  <span className="text-aurora-muted">{log.timestamp}</span>
                   <span
                     className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
-                      log.level === 'WARN' ? 'bg-amber-500/10 text-amber-400' : 'bg-cyan-500/10 text-cyan-300'
+                      log.level === 'WARN' ? 'bg-amber-50 text-amber-700' : 'bg-aurora-violet/[0.06] text-aurora-violet'
                     }`}
                   >
                     {log.level}
                   </span>
                 </div>
-                <p className="text-slate-300 text-[11px] leading-snug">{log.msg}</p>
+                <p className="text-aurora-muted text-[11px] leading-snug">{log.msg}</p>
               </div>
             ))}
           </div>

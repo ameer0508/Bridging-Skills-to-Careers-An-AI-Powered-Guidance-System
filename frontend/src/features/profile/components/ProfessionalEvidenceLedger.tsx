@@ -53,20 +53,20 @@ export const ProfessionalEvidenceLedger: React.FC<ProfessionalEvidenceLedgerProp
 
   return (
     <div className="w-full font-mono">
-      <GlassPanel className="p-6 sm:p-8 space-y-6 border-indigo-500/30">
+      <GlassPanel className="p-6 sm:p-8 space-y-6 border-aurora-violet/25">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-aurora-line">
           <div className="space-y-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-2">
-              <Database className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold uppercase tracking-wider text-aurora-indigo flex items-center gap-2">
+              <Database className="w-4 h-4 text-aurora-indigo" />
               My Professional Evidence • Grounding Infrastructure
             </span>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-aurora-muted">
               The verifiable telemetry and documents SkillBridge uses to understand your capabilities without hallucination.
             </p>
           </div>
 
-          <span className="text-[10px] text-slate-500 bg-slate-900 px-3 py-1 rounded-xl border border-white/5">
+          <span className="text-[10px] text-aurora-muted bg-aurora-canvas px-3 py-1 rounded-xl border border-aurora-line">
             Click any source to inspect AI grounding
           </span>
         </div>
@@ -98,18 +98,18 @@ export const ProfessionalEvidenceLedger: React.FC<ProfessionalEvidenceLedgerProp
                 actionLabel: 'Open Resume Intelligence',
               })
             }
-            className="p-5 rounded-2xl bg-slate-950/70 hover:bg-slate-900 border border-white/10 hover:border-amber-500/40 transition-all cursor-pointer flex flex-col justify-between gap-4 group"
+            className="p-5 rounded-2xl bg-aurora-canvas/60 hover:bg-aurora-canvas border border-aurora-line hover:border-amber-200 transition-all cursor-pointer flex flex-col justify-between gap-4 group"
           >
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center">
                   <FileText className="w-4 h-4" />
                 </div>
                 <span
                   className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                     hasResume
-                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-slate-900 text-slate-400 border border-white/10'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : 'bg-aurora-canvas text-aurora-muted border border-aurora-line'
                   }`}
                 >
                   {hasResume ? 'CONNECTED' : 'NOT ATTACHED'}
@@ -117,29 +117,29 @@ export const ProfessionalEvidenceLedger: React.FC<ProfessionalEvidenceLedgerProp
               </div>
 
               <div>
-                <h4 className="text-xs font-bold text-white group-hover:text-amber-300 transition">
+                <h4 className="text-xs font-bold text-aurora-ink group-hover:text-amber-700 transition">
                   Resume Foundation
                 </h4>
-                <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                <p className="text-[11px] text-aurora-muted truncate mt-0.5">
                   {hasResume ? resumeData?.originalFileName : 'No file uploaded yet'}
                 </p>
               </div>
 
               {hasResume && (
-                <div className="pt-2 border-t border-white/5 space-y-1 text-[10px] text-slate-400">
+                <div className="pt-2 border-t border-aurora-line space-y-1 text-[10px] text-aurora-muted">
                   <div className="flex justify-between">
                     <span>ATS Audit:</span>
-                    <strong className="text-emerald-400">{resumeData?.atsScore || 'Evaluated'}/100</strong>
+                    <strong className="text-emerald-700">{resumeData?.atsScore || 'Evaluated'}/100</strong>
                   </div>
                   <div className="flex justify-between">
                     <span>Extracted Experience:</span>
-                    <strong className="text-white">{resumeData?.experience?.length || 0} Roles</strong>
+                    <strong className="text-aurora-ink">{resumeData?.experience?.length || 0} Roles</strong>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-indigo-300">
+            <div className="pt-2 border-t border-aurora-line flex items-center justify-between text-[10px] text-aurora-indigo">
               <span className="group-hover:underline">Inspect Source</span>
               <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
             </div>
@@ -166,18 +166,18 @@ export const ProfessionalEvidenceLedger: React.FC<ProfessionalEvidenceLedgerProp
                 actionLabel: 'Open Skill Intelligence',
               })
             }
-            className="p-5 rounded-2xl bg-slate-950/70 hover:bg-slate-900 border border-white/10 hover:border-cyan-500/40 transition-all cursor-pointer flex flex-col justify-between gap-4 group"
+            className="p-5 rounded-2xl bg-aurora-canvas/60 hover:bg-aurora-canvas border border-aurora-line hover:border-aurora-violet/25 transition-all cursor-pointer flex flex-col justify-between gap-4 group"
           >
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <div className="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-aurora-violet/[0.06] text-aurora-violet border border-aurora-violet/25 flex items-center justify-center">
                   <Cpu className="w-4 h-4" />
                 </div>
                 <span
                   className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                     totalSkills > 0
-                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-slate-900 text-slate-400 border border-white/10'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : 'bg-aurora-canvas text-aurora-muted border border-aurora-line'
                   }`}
                 >
                   {totalSkills > 0 ? `${totalSkills} SKILLS` : '0 SKILLS'}
@@ -185,20 +185,20 @@ export const ProfessionalEvidenceLedger: React.FC<ProfessionalEvidenceLedgerProp
               </div>
 
               <div>
-                <h4 className="text-xs font-bold text-white group-hover:text-cyan-300 transition">
+                <h4 className="text-xs font-bold text-aurora-ink group-hover:text-aurora-violet transition">
                   Verified Skills
                 </h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className="text-[11px] text-aurora-muted mt-0.5">
                   {totalSkills > 0 ? 'Structured capability matrix' : 'Extract skills to verify'}
                 </p>
               </div>
 
               {totalSkills > 0 && topCategories.length > 0 && (
-                <div className="pt-2 border-t border-white/5 flex flex-wrap gap-1">
+                <div className="pt-2 border-t border-aurora-line flex flex-wrap gap-1">
                   {topCategories.map((c) => (
                     <span
                       key={c}
-                      className="px-1.5 py-0.5 rounded bg-slate-900 text-[9px] text-slate-300 border border-white/5"
+                      className="px-1.5 py-0.5 rounded bg-aurora-canvas text-[9px] text-aurora-muted border border-aurora-line"
                     >
                       {c}
                     </span>
@@ -207,7 +207,7 @@ export const ProfessionalEvidenceLedger: React.FC<ProfessionalEvidenceLedgerProp
               )}
             </div>
 
-            <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-indigo-300">
+            <div className="pt-2 border-t border-aurora-line flex items-center justify-between text-[10px] text-aurora-indigo">
               <span className="group-hover:underline">Inspect Source</span>
               <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
             </div>
@@ -234,18 +234,18 @@ export const ProfessionalEvidenceLedger: React.FC<ProfessionalEvidenceLedgerProp
                 actionLabel: 'Open Code Intelligence',
               })
             }
-            className="p-5 rounded-2xl bg-slate-950/70 hover:bg-slate-900 border border-white/10 hover:border-purple-500/40 transition-all cursor-pointer flex flex-col justify-between gap-4 group"
+            className="p-5 rounded-2xl bg-aurora-canvas/60 hover:bg-aurora-canvas border border-aurora-line hover:border-purple-500/40 transition-all cursor-pointer flex flex-col justify-between gap-4 group"
           >
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-aurora-violet border border-purple-500/20 flex items-center justify-center">
                   <Code2 className="w-4 h-4" />
                 </div>
                 <span
                   className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                     githubUrl
-                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-slate-900 text-slate-400 border border-white/10'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : 'bg-aurora-canvas text-aurora-muted border border-aurora-line'
                   }`}
                 >
                   {githubUrl ? 'LINKED' : 'NOT LINKED'}
@@ -253,20 +253,20 @@ export const ProfessionalEvidenceLedger: React.FC<ProfessionalEvidenceLedgerProp
               </div>
 
               <div>
-                <h4 className="text-xs font-bold text-white group-hover:text-purple-300 transition">
+                <h4 className="text-xs font-bold text-aurora-ink group-hover:text-aurora-violet transition">
                   Developer Identity
                 </h4>
-                <p className="text-[11px] text-slate-400 truncate mt-0.5">
+                <p className="text-[11px] text-aurora-muted truncate mt-0.5">
                   {githubUrl ? githubUrl.replace('https://github.com/', '@') : 'No GitHub link in resume'}
                 </p>
               </div>
 
-              <div className="pt-2 border-t border-white/5 text-[10px] text-slate-400">
+              <div className="pt-2 border-t border-aurora-line text-[10px] text-aurora-muted">
                 <span>Code telemetry grounding</span>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-indigo-300">
+            <div className="pt-2 border-t border-aurora-line flex items-center justify-between text-[10px] text-aurora-indigo">
               <span className="group-hover:underline">Inspect Source</span>
               <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
             </div>
@@ -293,18 +293,18 @@ export const ProfessionalEvidenceLedger: React.FC<ProfessionalEvidenceLedgerProp
                 actionLabel: 'Open Interview Studio',
               })
             }
-            className="p-5 rounded-2xl bg-slate-950/70 hover:bg-slate-900 border border-white/10 hover:border-emerald-500/40 transition-all cursor-pointer flex flex-col justify-between gap-4 group"
+            className="p-5 rounded-2xl bg-aurora-canvas/60 hover:bg-aurora-canvas border border-aurora-line hover:border-emerald-200 transition-all cursor-pointer flex flex-col justify-between gap-4 group"
           >
             <div className="space-y-2.5">
               <div className="flex items-center justify-between">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center justify-center">
                   <Award className="w-4 h-4" />
                 </div>
                 <span
                   className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                     interviewsCount > 0
-                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-slate-900 text-slate-400 border border-white/10'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : 'bg-aurora-canvas text-aurora-muted border border-aurora-line'
                   }`}
                 >
                   {interviewsCount > 0 ? `${interviewsCount} SESSIONS` : 'READY'}
@@ -312,23 +312,23 @@ export const ProfessionalEvidenceLedger: React.FC<ProfessionalEvidenceLedgerProp
               </div>
 
               <div>
-                <h4 className="text-xs font-bold text-white group-hover:text-emerald-300 transition">
+                <h4 className="text-xs font-bold text-aurora-ink group-hover:text-emerald-700 transition">
                   Interview Telemetry
                 </h4>
-                <p className="text-[11px] text-slate-400 mt-0.5">
+                <p className="text-[11px] text-aurora-muted mt-0.5">
                   {interviewsCount > 0 ? 'Simulation transcripts logged' : 'Simulate role scenarios'}
                 </p>
               </div>
 
               {typeof interviewsAvgScore === 'number' && (
-                <div className="pt-2 border-t border-white/5 text-[10px] text-slate-400 flex justify-between">
+                <div className="pt-2 border-t border-aurora-line text-[10px] text-aurora-muted flex justify-between">
                   <span>Average Performance:</span>
-                  <strong className="text-emerald-400">{interviewsAvgScore}% STAR</strong>
+                  <strong className="text-emerald-700">{interviewsAvgScore}% STAR</strong>
                 </div>
               )}
             </div>
 
-            <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-indigo-300">
+            <div className="pt-2 border-t border-aurora-line flex items-center justify-between text-[10px] text-aurora-indigo">
               <span className="group-hover:underline">Inspect Source</span>
               <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
             </div>

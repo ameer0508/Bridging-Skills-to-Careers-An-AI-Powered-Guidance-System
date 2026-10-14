@@ -47,14 +47,14 @@ export const SkillClusterCards: React.FC<{ clusters?: SkillCluster[] }> = ({
   const getProficiencyBadge = (level: string) => {
     switch (level) {
       case 'Expert':
-        return 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300';
+        return 'bg-emerald-50 border-emerald-200 text-emerald-700';
       case 'Advanced':
-        return 'bg-cyan-500/10 border-cyan-500/30 text-cyan-300';
+        return 'bg-aurora-violet/[0.06] border-aurora-violet/25 text-aurora-violet';
       case 'Intermediate':
-        return 'bg-amber-500/10 border-amber-500/30 text-amber-300';
+        return 'bg-amber-50 border-amber-200 text-amber-700';
       case 'Beginner':
       default:
-        return 'bg-slate-800 border-white/10 text-slate-400';
+        return 'bg-aurora-canvas border-aurora-line text-aurora-muted';
     }
   };
 
@@ -64,27 +64,27 @@ export const SkillClusterCards: React.FC<{ clusters?: SkillCluster[] }> = ({
         <GlassPanel key={idx} className="p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="p-2 bg-slate-900 text-indigo-400 rounded-lg border border-white/5">
+              <div className="p-2 bg-aurora-canvas text-aurora-indigo rounded-lg border border-aurora-line">
                 <Layers className="w-4 h-4" />
               </div>
-              <h4 className="font-bold text-sm text-white">{cluster.clusterName}</h4>
+              <h4 className="font-bold text-sm text-aurora-ink">{cluster.clusterName}</h4>
             </div>
-            <span className={`px-2.5 py-0.5 rounded text-xs font-mono font-bold border ${getProficiencyBadge(cluster.proficiencyLevel)}`}>
+            <span className={`px-2.5 py-0.5 rounded text-xs font-bold border ${getProficiencyBadge(cluster.proficiencyLevel)}`}>
               {cluster.proficiencyLevel}
             </span>
           </div>
 
-          <p className="text-xs text-slate-400 leading-relaxed">{cluster.description}</p>
+          <p className="text-xs text-aurora-muted leading-relaxed">{cluster.description}</p>
 
-          <div className="space-y-2 pt-2 border-t border-white/5">
-            <span className="text-[10px] text-slate-500 uppercase font-mono tracking-wider block">
+          <div className="space-y-2 pt-2 border-t border-aurora-line">
+            <span className="text-[10px] text-aurora-muted uppercase tracking-wider block">
               Clustered Skills ({cluster.skills.length}):
             </span>
             <div className="flex flex-wrap gap-1.5">
               {cluster.skills.map((skill, sIdx) => (
                 <span
                   key={sIdx}
-                  className="px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-mono font-semibold"
+                  className="px-2 py-0.5 rounded bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo text-xs font-semibold"
                 >
                   {skill}
                 </span>

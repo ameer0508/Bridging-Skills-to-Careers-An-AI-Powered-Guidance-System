@@ -33,17 +33,17 @@ export const ScenarioSimulator: React.FC<ScenarioSimulatorProps> = ({
   };
 
   return (
-    <GlassCard className={`p-6 border-indigo-500/20 bg-indigo-950/20 space-y-4 ${className}`}>
+    <GlassCard className={`p-6 border-aurora-violet/25 bg-violet-50 space-y-4 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+      <div className="flex items-center justify-between pb-3 border-b border-aurora-line">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+          <div className="p-2 rounded-lg bg-aurora-violet/[0.06] text-aurora-indigo">
             <Sliders className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">Interactive Scenario Simulator</h3>
-            <p className="text-xs text-neutral-400">
-              Explore "What If?" career decisions for <strong className="text-white">{targetRoleTitle}</strong>
+            <h3 className="text-base font-bold text-aurora-ink">Interactive Scenario Simulator</h3>
+            <p className="text-xs text-aurora-muted">
+              Explore "What If?" career decisions for <strong className="text-aurora-ink">{targetRoleTitle}</strong>
             </p>
           </div>
         </div>
@@ -55,8 +55,8 @@ export const ScenarioSimulator: React.FC<ScenarioSimulatorProps> = ({
           onClick={() => handleSelectScenario('complete_skill', 'Database Indexing Mastery')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer outline-none ${
             activeScenarioType === 'complete_skill'
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-              : 'bg-black/40 text-neutral-400 border border-white/10 hover:text-white'
+              ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-sm shadow-indigo-600/30'
+              : 'bg-aurora-canvas/60 text-aurora-muted border border-aurora-line hover:text-aurora-indigo'
           }`}
         >
           What if I complete Database Indexing?
@@ -66,8 +66,8 @@ export const ScenarioSimulator: React.FC<ScenarioSimulatorProps> = ({
           onClick={() => handleSelectScenario('switch_role', 'Cloud Architect')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer outline-none ${
             activeScenarioType === 'switch_role'
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-              : 'bg-black/40 text-neutral-400 border border-white/10 hover:text-white'
+              ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-sm shadow-indigo-600/30'
+              : 'bg-aurora-canvas/60 text-aurora-muted border border-aurora-line hover:text-aurora-indigo'
           }`}
         >
           What if I switch goal to Cloud Architect?
@@ -77,8 +77,8 @@ export const ScenarioSimulator: React.FC<ScenarioSimulatorProps> = ({
           onClick={() => handleSelectScenario('increase_effort', 'Double Daily Learning Time')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer outline-none ${
             activeScenarioType === 'increase_effort'
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-              : 'bg-black/40 text-neutral-400 border border-white/10 hover:text-white'
+              ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-sm shadow-indigo-600/30'
+              : 'bg-aurora-canvas/60 text-aurora-muted border border-aurora-line hover:text-aurora-indigo'
           }`}
         >
           What if I double daily study effort?
@@ -93,30 +93,30 @@ export const ScenarioSimulator: React.FC<ScenarioSimulatorProps> = ({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.2 }}
-          className="p-5 rounded-xl bg-black/50 border border-white/10 space-y-3"
+          className="p-5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-3"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Zap className="w-5 h-5 text-amber-400" />
-              <h4 className="text-sm font-bold text-white">{result.scenarioTitle}</h4>
+              <Zap className="w-5 h-5 text-amber-700" />
+              <h4 className="text-sm font-bold text-aurora-ink">{result.scenarioTitle}</h4>
             </div>
-            <div className="flex items-center gap-1 text-xs font-extrabold text-emerald-400">
+            <div className="flex items-center gap-1 text-xs font-extrabold text-emerald-700">
               <TrendingUp className="w-4 h-4" />
               <span>+{result.readinessDelta}% Match Delta</span>
             </div>
           </div>
 
-          <p className="text-xs text-neutral-300 leading-relaxed">{result.explanation}</p>
+          <p className="text-xs text-aurora-muted leading-relaxed">{result.explanation}</p>
 
-          <div className="pt-2 border-t border-white/5 space-y-1">
-            <span className="text-[11px] text-neutral-400 block">Unlocked Opportunities & Milestones:</span>
+          <div className="pt-2 border-t border-aurora-line space-y-1">
+            <span className="text-[11px] text-aurora-muted block">Unlocked Opportunities & Milestones:</span>
             <div className="flex flex-wrap gap-1.5">
               {result.unlockedOpportunities.map((opp, idx) => (
                 <span
                   key={idx}
-                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"
                 >
-                  <CheckCircle className="w-3 h-3 text-emerald-400" />
+                  <CheckCircle className="w-3 h-3 text-emerald-700" />
                   {opp}
                 </span>
               ))}

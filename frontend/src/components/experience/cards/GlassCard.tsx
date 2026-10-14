@@ -38,7 +38,7 @@ export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
             ? { y: -4, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } }
             : undefined
         }
-        className={`relative overflow-hidden rounded-xl border border-white/10 dark:border-white/10 light:border-black/10 bg-white/5 dark:bg-neutral-900/40 light:bg-white/80 shadow-lg ${blurMap[blur]} ${className}`}
+        className={`relative overflow-hidden rounded-xl border border-aurora-line dark:border-aurora-line light:border-black/10 bg-aurora-canvas dark:bg-neutral-900/40 light:bg-white/80 shadow-lg ${blurMap[blur]} ${className}`}
         style={{
           boxShadow: hoverEffect ? `0 10px 30px -10px ${glowColor}` : undefined,
         }}

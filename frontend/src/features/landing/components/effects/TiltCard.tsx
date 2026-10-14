@@ -59,7 +59,7 @@ export const TiltCard: React.FC<TiltCardProps> = ({
       }}
       transition={{ type: 'spring', stiffness: 300, damping: 25 }}
       style={{ perspective: 1000, transformStyle: 'preserve-3d' }}
-      className={`relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl transition-all duration-300 ${className}`}
+      className={`relative overflow-hidden rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl transition-all duration-300 ${className}`}
     >
       {/* Spotlight Hover Glow Overlay */}
       <div
@@ -72,7 +72,7 @@ export const TiltCard: React.FC<TiltCardProps> = ({
 
       {/* Glass border sheen on hover */}
       <div
-        className="pointer-events-none absolute inset-0 rounded-2xl border border-white/20 transition-opacity duration-300"
+        className="pointer-events-none absolute inset-0 rounded-2xl border border-aurora-line transition-opacity duration-300"
         style={{ opacity: isHovered ? 0.6 : 0 }}
       />
 

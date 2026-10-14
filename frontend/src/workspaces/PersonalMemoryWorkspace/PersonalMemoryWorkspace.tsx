@@ -113,9 +113,9 @@ export const PersonalMemoryWorkspace: React.FC = () => {
       />
 
       {/* TOP CONTROLS & SEARCH BAR */}
-      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-indigo-500/30">
+      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-aurora-violet/25">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <span className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+          <span className="p-2 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
             <Brain className="w-5 h-5" />
           </span>
           <div className="relative w-full sm:w-80">
@@ -124,9 +124,9 @@ export const PersonalMemoryWorkspace: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search Memory Nodes..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
             />
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
         </div>
 
@@ -135,10 +135,10 @@ export const PersonalMemoryWorkspace: React.FC = () => {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`py-1.5 px-3 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer whitespace-nowrap ${
+              className={`py-1.5 px-3 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
                 selectedCategory === cat
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                  : 'bg-slate-950/80 border border-white/10 text-slate-400 hover:text-white'
+                  ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-md'
+                  : 'bg-aurora-canvas/60 border border-aurora-line text-aurora-muted hover:text-aurora-indigo'
               }`}
             >
               {cat}
@@ -149,69 +149,69 @@ export const PersonalMemoryWorkspace: React.FC = () => {
 
       {/* 4 SUMMARY METRIC CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <GlassPanel className="p-4 space-y-2 border-indigo-500/30">
+        <GlassPanel className="p-4 space-y-2 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Memory Nodes</span>
-            <Brain className="w-4 h-4 text-indigo-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Memory Nodes</span>
+            <Brain className="w-4 h-4 text-aurora-indigo" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">142 Items</span>
-          <span className="text-xs font-mono text-indigo-300">Retrieved by 7 Agents</span>
+          <span className="text-xl font-bold text-aurora-ink block">142 Items</span>
+          <span className="text-xs text-aurora-indigo">Retrieved by 7 Agents</span>
         </GlassPanel>
 
-        <GlassPanel className="p-4 space-y-2 border-emerald-500/30">
+        <GlassPanel className="p-4 space-y-2 border-emerald-200">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Consent Status</span>
-            <Shield className="w-4 h-4 text-emerald-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Consent Status</span>
+            <Shield className="w-4 h-4 text-emerald-700" />
           </div>
-          <span className="text-xl font-bold text-emerald-400 font-mono block">100% Compliant</span>
-          <span className="text-xs font-mono text-emerald-300">GDPR Ready</span>
+          <span className="text-xl font-bold text-emerald-700 block">100% Compliant</span>
+          <span className="text-xs text-emerald-700">GDPR Ready</span>
         </GlassPanel>
 
-        <GlassPanel className="p-4 space-y-2 border-cyan-500/30">
+        <GlassPanel className="p-4 space-y-2 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Active Target Goal</span>
-            <Target className="w-4 h-4 text-cyan-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Active Target Goal</span>
+            <Target className="w-4 h-4 text-aurora-violet" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">AI Architect</span>
-          <span className="text-xs font-mono text-cyan-300">85% Milestone Complete</span>
+          <span className="text-xl font-bold text-aurora-ink block">AI Architect</span>
+          <span className="text-xs text-aurora-violet">85% Milestone Complete</span>
         </GlassPanel>
 
         <GlassPanel className="p-4 space-y-2 border-purple-500/30">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Verified Achievement</span>
-            <Award className="w-4 h-4 text-purple-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Verified Achievement</span>
+            <Award className="w-4 h-4 text-aurora-violet" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">Hackathon Winner</span>
-          <span className="text-xs font-mono text-purple-300">Global AI Infrastructure</span>
+          <span className="text-xl font-bold text-aurora-ink block">Hackathon Winner</span>
+          <span className="text-xs text-aurora-violet">Global AI Infrastructure</span>
         </GlassPanel>
       </div>
 
       {/* MEMORY TIMELINE & CONSENT MANAGER (2 COLS) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* TIMELINE EXPLORER (7 COLS) */}
-        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-indigo-500/30">
+        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Layers className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Layers className="w-4 h-4 text-aurora-indigo" />
               Persistent Memory Timeline Nodes ({filteredMemories.length})
             </span>
           </div>
 
-          <div className="space-y-3 font-mono text-xs">
+          <div className="space-y-3 text-xs">
             {filteredMemories.map((m) => (
-              <div key={m.id} className="p-4 rounded-xl bg-slate-950/80 border border-white/10 space-y-2">
+              <div key={m.id} className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-sm">{m.title}</span>
-                  <span className="text-emerald-400 font-bold text-[10px] bg-emerald-500/10 px-2 py-0.5 rounded flex items-center gap-1">
+                  <span className="font-bold text-aurora-ink text-sm">{m.title}</span>
+                  <span className="text-emerald-700 font-bold text-[10px] bg-emerald-50 px-2 py-0.5 rounded flex items-center gap-1">
                     <Sparkles className="w-3 h-3" /> {(m.confidence * 100).toFixed(1)}% Confidence
                   </span>
                 </div>
 
-                <p className="text-slate-400 text-[11px] leading-relaxed">{m.details}</p>
+                <p className="text-aurora-muted text-[11px] leading-relaxed">{m.details}</p>
 
-                <div className="flex items-center justify-between text-[10px] text-slate-500 border-t border-white/5 pt-2">
-                  <span>Category: <strong className="text-indigo-300">{m.category}</strong></span>
-                  <span>Accessed By: <strong className="text-cyan-300">{m.agents.join(', ')}</strong></span>
+                <div className="flex items-center justify-between text-[10px] text-aurora-muted border-t border-aurora-line pt-2">
+                  <span>Category: <strong className="text-aurora-indigo">{m.category}</strong></span>
+                  <span>Accessed By: <strong className="text-aurora-violet">{m.agents.join(', ')}</strong></span>
                 </div>
               </div>
             ))}
@@ -220,24 +220,24 @@ export const PersonalMemoryWorkspace: React.FC = () => {
 
         {/* CONSENT MANAGER & PRIVACY PURGE (5 COLS) */}
         <div className="lg:col-span-5 space-y-6">
-          <GlassPanel className="p-6 space-y-4 border-emerald-500/30">
+          <GlassPanel className="p-6 space-y-4 border-emerald-200">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <Shield className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+                <Shield className="w-4 h-4 text-emerald-700" />
                 Granular Privacy Consent Manager
               </span>
             </div>
 
-            <div className="space-y-3 font-mono text-xs">
+            <div className="space-y-3 text-xs">
               {(Object.keys(consentState) as Array<keyof typeof consentState>).map((key) => (
-                <div key={key} className="p-3 rounded-xl bg-slate-950/80 border border-white/10 flex items-center justify-between">
-                  <span className="font-bold text-white capitalize">{key} Memory Consent</span>
+                <div key={key} className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between">
+                  <span className="font-bold text-aurora-ink capitalize">{key} Memory Consent</span>
                   <button
                     onClick={() => handleToggleConsent(key)}
                     className={`py-1 px-3 rounded-lg text-[10px] font-bold cursor-pointer transition-all ${
                       consentState[key]
-                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                        : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        : 'bg-rose-50 text-rose-700 border border-rose-200'
                     }`}
                   >
                     {consentState[key] ? 'ENABLED' : 'DISABLED'}
@@ -247,7 +247,7 @@ export const PersonalMemoryWorkspace: React.FC = () => {
 
               <button
                 onClick={handlePurgeCategory}
-                className="w-full mt-2 py-2 px-4 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-xs font-bold text-rose-300 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full mt-2 py-2 px-4 rounded-xl bg-rose-50 hover:bg-rose-50 border border-rose-200 text-xs font-bold text-rose-700 flex items-center justify-center gap-2 transition-all cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" /> Purge Memory Category (GDPR Right-to-be-Forgotten)
               </button>
@@ -255,15 +255,15 @@ export const PersonalMemoryWorkspace: React.FC = () => {
           </GlassPanel>
 
           {/* EXPLAINABLE MEMORY AI REASONING */}
-          <GlassPanel className="p-6 space-y-4 border-cyan-500/30">
+          <GlassPanel className="p-6 space-y-4 border-aurora-violet/25">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <Lightbulb className="w-4 h-4 text-cyan-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-aurora-violet" />
                 Explainable Memory Context Rationale
               </span>
             </div>
 
-            <p className="text-slate-300 leading-relaxed text-[11px] font-mono">
+            <p className="text-aurora-muted leading-relaxed text-[11px] font-mono">
               {memoryMetrics.reasoning}
             </p>
           </GlassPanel>

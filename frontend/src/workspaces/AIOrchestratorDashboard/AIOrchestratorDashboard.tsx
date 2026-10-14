@@ -158,7 +158,7 @@ export const AIOrchestratorDashboard: React.FC = () => {
   if (isAgentsLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4 font-mono">
-        <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
+        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
           <AIThinkingAnimation statusText="Connecting to Multi-Agent AI Control Plane..." />
         </div>
       </div>

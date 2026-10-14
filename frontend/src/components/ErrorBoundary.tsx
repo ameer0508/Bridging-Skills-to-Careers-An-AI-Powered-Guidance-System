@@ -25,14 +25,14 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="flex flex-col items-center justify-center h-screen bg-slate-950 text-slate-200">
+        <div className="flex flex-col items-center justify-center h-screen bg-aurora-canvas text-aurora-ink">
           <h1 className="text-4xl font-bold mb-4 text-rose-500">Something went wrong</h1>
-          <p className="text-slate-400 mb-6 max-w-lg text-center">
+          <p className="text-aurora-muted mb-6 max-w-lg text-center">
              An unexpected error occurred in the application. Our team has been notified.
           </p>
           <button 
              onClick={() => window.location.reload()}
-             className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white font-semibold transition-colors"
+             className="px-6 py-2 [background:var(--aurora-gradient-action)] hover:brightness-110 rounded-lg text-white font-semibold transition-colors"
           >
              Refresh Page
           </button>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { useReducedMotion } from '../hooks/useReducedMotion';
 
 export interface GlassPanelProps {
   children: React.ReactNode;
@@ -17,6 +18,8 @@ export const GlassPanel: React.FC<GlassPanelProps> = ({
   animateIn = true,
   onClick,
 }) => {
+  // With reduced motion the panel is shown at once, whether or not it has scrolled into view
+  const reducedMotion = useReducedMotion();
   const interactive = onClick
     ? {
         role: 'button' as const,
@@ -51,7 +54,7 @@ export const GlassPanel: React.FC<GlassPanelProps> = ({
 
   const content = (
     <div
-      className={`w-full relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl transition-all duration-300 group hover:border-white/20 ${innerClasses.join(' ')}`}
+      className={`w-full relative overflow-hidden rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl transition-all duration-300 group hover:border-aurora-line ${innerClasses.join(' ')}`}
     >
       {/* Reflection Glow */}
       <div
@@ -76,7 +79,7 @@ export const GlassPanel: React.FC<GlassPanelProps> = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={reducedMotion ? false : { opacity: 0, y: 15 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.4 }}

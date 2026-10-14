@@ -5,8 +5,8 @@ import { messageOf } from '../../../lib/collections';
 import { GUIDANCE, LANGUAGE_NAMES } from '../guidance';
 import { Analysis, analyzeFile, analyzeText, deleteAnalysis, fetchAnalyses, fetchAnalysis, fetchSettings, saveSettings, UiLanguage } from '../languagesApi';
 
-const card = 'rounded-[var(--radius-md)] border border-[var(--color-border-default)] p-4';
-const primaryButton = 'rounded-[var(--radius-md)] bg-[var(--color-interactive-primary)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60';
+const card = 'rounded-2xl border border-aurora-line p-4';
+const primaryButton = 'rounded-2xl [background:var(--aurora-gradient-action)] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60';
 const SECTION_NAMES: Record<string, string> = {
   summary: 'Summary', experience: 'Experience', education: 'Education', skills: 'Skills',
   projects: 'Projects', certifications: 'Certifications', languages: 'Languages', contact: 'Contact',
@@ -41,17 +41,17 @@ export const ResumeLanguagePage: React.FC = () => {
   const error = fromFile.error ?? fromText.error;
 
   // Wait for the saved language so the page does not flash in English first
-  if (settings.isPending) return <p role="status" className="px-4 py-6 text-sm text-[var(--color-text-secondary)]">…</p>;
+  if (settings.isPending) return <p role="status" className="px-4 py-6 text-sm text-aurora-muted">…</p>;
 
   return (
     <div lang={lang} className="mx-auto flex w-full max-w-5xl flex-col gap-5 px-4 py-6" data-testid="resume-language-page">
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-bold font-display text-[var(--color-text-primary)]">{t.title}</h1>
-          <label className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
+          <h1 className="text-2xl font-bold font-display text-aurora-ink">{t.title}</h1>
+          <label className="flex items-center gap-2 text-sm text-aurora-muted">
             <Languages size={16} aria-hidden="true" /> {t.interfaceLanguage}
             <select
-              className="rounded-[var(--radius-md)] border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-2 py-1 text-sm"
+              className="rounded-2xl border border-aurora-line bg-white px-2 py-1 text-sm"
               value={lang}
               disabled={setLanguage.isPending}
               onChange={e => setLanguage.mutate(e.target.value as UiLanguage)}
@@ -62,8 +62,8 @@ export const ResumeLanguagePage: React.FC = () => {
             </select>
           </label>
         </div>
-        <p className="max-w-3xl text-sm text-[var(--color-text-secondary)]" data-testid="guidance-intro">{t.intro}</p>
-        <p className="max-w-3xl text-xs text-[var(--color-text-secondary)]">{t.tips}</p>
+        <p className="max-w-3xl text-sm text-aurora-muted" data-testid="guidance-intro">{t.intro}</p>
+        <p className="max-w-3xl text-xs text-aurora-muted">{t.tips}</p>
       </header>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -75,7 +75,7 @@ export const ResumeLanguagePage: React.FC = () => {
             if (file) fromFile.mutate(file);
           }}
         >
-          <label className="flex flex-col gap-1 text-sm font-semibold text-[var(--color-text-primary)]">
+          <label className="flex flex-col gap-1 text-sm font-semibold text-aurora-ink">
             {t.uploadLabel}
             <input type="file" accept=".pdf,.docx,.txt" onChange={e => setFile(e.target.files?.[0] ?? null)} className="text-sm font-normal" />
           </label>
@@ -89,17 +89,17 @@ export const ResumeLanguagePage: React.FC = () => {
             fromText.mutate(text);
           }}
         >
-          <label className="flex flex-col gap-1 text-sm font-semibold text-[var(--color-text-primary)]">
+          <label className="flex flex-col gap-1 text-sm font-semibold text-aurora-ink">
             {t.pasteLabel}
-            <textarea rows={5} maxLength={100000} value={text} onChange={e => setText(e.target.value)} className="rounded-[var(--radius-md)] border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] p-2 text-sm font-normal" />
+            <textarea rows={5} maxLength={100000} value={text} onChange={e => setText(e.target.value)} className="rounded-2xl border border-aurora-line bg-white p-2 text-sm font-normal" />
           </label>
           <div><button type="submit" className={primaryButton} disabled={text.trim().length < 20 || fromText.isPending}>{t.analyseText}</button></div>
         </form>
       </div>
 
-      {(fromFile.isPending || fromText.isPending) && <p role="status" className="text-sm text-[var(--color-text-secondary)]">…</p>}
+      {(fromFile.isPending || fromText.isPending) && <p role="status" className="text-sm text-aurora-muted">…</p>}
       {error && (
-        <p role="alert" className="flex items-center gap-2 text-sm text-[var(--color-status-error,#dc2626)]">
+        <p role="alert" className="flex items-center gap-2 text-sm text-rose-700">
           <AlertTriangle size={16} aria-hidden="true" /> {messageOf(error, 'The resume could not be analysed.')}
         </p>
       )}
@@ -107,8 +107,8 @@ export const ResumeLanguagePage: React.FC = () => {
       {selectedId && <AnalysisView id={selectedId} labels={t} />}
 
       <section aria-labelledby="analyses-heading">
-        <h2 id="analyses-heading" className="mb-2 text-base font-bold text-[var(--color-text-primary)]">{t.history}</h2>
-        {analyses.data?.length === 0 && <p className="text-sm text-[var(--color-text-secondary)]">{t.none}</p>}
+        <h2 id="analyses-heading" className="mb-2 text-base font-bold text-aurora-ink">{t.history}</h2>
+        {analyses.data?.length === 0 && <p className="text-sm text-aurora-muted">{t.none}</p>}
         <ul className="flex flex-col gap-2" data-testid="analysis-history">
           {analyses.data?.map(a => (
             <li key={a.id} className={`${card} flex flex-wrap items-center justify-between gap-2 text-sm`}>
@@ -121,14 +121,14 @@ export const ResumeLanguagePage: React.FC = () => {
             </li>
           ))}
         </ul>
-        <p className="mt-2 text-xs text-[var(--color-text-secondary)]">{t.privacy}</p>
+        <p className="mt-2 text-xs text-aurora-muted">{t.privacy}</p>
       </section>
     </div>
   );
 };
 
 const Source: React.FC<{ line: number; text: string; label: string; origin?: 'ocr'; ocrConfidence?: number; ocrMark?: string }> = ({ line, text, label, origin, ocrConfidence, ocrMark }) => (
-  <span className="block text-xs text-[var(--color-text-secondary)]">
+  <span className="block text-xs text-aurora-muted">
     {label} {line + 1}: <q>{text}</q>
     {origin === 'ocr' && <span className="ml-1 rounded border border-amber-500 px-1 text-amber-800" data-testid="ocr-mark">{ocrMark} {ocrConfidence}%</span>}
   </span>
@@ -136,14 +136,14 @@ const Source: React.FC<{ line: number; text: string; label: string; origin?: 'oc
 
 const AnalysisView: React.FC<{ id: string; labels: Record<string, string> }> = ({ id, labels }) => {
   const q = useQuery({ queryKey: ['resume-analysis', id], queryFn: () => fetchAnalysis(id), retry: false });
-  if (q.isPending) return <p role="status" className="text-sm text-[var(--color-text-secondary)]">…</p>;
+  if (q.isPending) return <p role="status" className="text-sm text-aurora-muted">…</p>;
   if (q.isError || !q.data) return <p role="alert" className="text-sm">{messageOf(q.error, 'Not found.')}</p>;
   const a = q.data;
   const ok = a.status === 'extracted';
 
   return (
     <section className={`${card} flex flex-col gap-3`} aria-labelledby="analysis-heading" data-testid="analysis" data-status={a.status}>
-      <h2 id="analysis-heading" className="flex items-center gap-2 text-base font-bold text-[var(--color-text-primary)]">
+      <h2 id="analysis-heading" className="flex items-center gap-2 text-base font-bold text-aurora-ink">
         {ok ? <CheckCircle2 size={18} aria-hidden="true" className="text-emerald-600" /> : <AlertTriangle size={18} aria-hidden="true" className="text-amber-600" />}
         {a.fileName}
       </h2>
@@ -152,12 +152,12 @@ const AnalysisView: React.FC<{ id: string; labels: Record<string, string> }> = (
         {a.language.mixed ? ' (with English terms)' : ''} · {labels.layout}: {a.layout.type.replace('_', ' ')} · method {a.method}
       </p>
       {a.textSource && a.textSource !== 'text_layer' && a.ocr?.used && (
-        <p role="note" data-testid="ocr-notice" className="rounded-[var(--radius-md)] border border-amber-500 p-3 text-sm">
+        <p role="note" data-testid="ocr-notice" className="rounded-2xl border border-amber-500 p-3 text-sm">
           <strong>{labels.ocrNotice}</strong>{a.ocr.engine ? ` (${a.ocr.engine}; ${(a.ocr.languages ?? []).join(', ')})` : ''} · {labels.ocrConfidence} {a.ocr.meanConfidence ?? '—'}%. {labels.ocrCheck}
         </p>
       )}
       {a.warnings.length > 0 && (
-        <ul role="alert" className="list-disc space-y-1 rounded-[var(--radius-md)] border border-amber-500 bg-amber-50 p-3 pl-7 text-sm text-amber-900" data-testid="analysis-warnings">
+        <ul role="alert" className="list-disc space-y-1 rounded-2xl border border-amber-500 bg-amber-50 p-3 pl-7 text-sm text-amber-900" data-testid="analysis-warnings">
           {a.warnings.map(w => <li key={w}>{w}</li>)}
         </ul>
       )}
@@ -182,7 +182,7 @@ const AnalysisView: React.FC<{ id: string; labels: Record<string, string> }> = (
           </dl>
           <div>
             <h3 className="text-sm font-semibold">{labels.experienceDates}</h3>
-            {a.fields.experience.length === 0 ? <p className="text-sm text-[var(--color-text-secondary)]">—</p> : (
+            {a.fields.experience.length === 0 ? <p className="text-sm text-aurora-muted">—</p> : (
               <ul className="text-sm" data-testid="experience-list">
                 {a.fields.experience.map(e => (
                   <li key={`${e.source.line}`}>{e.start} → {e.end}{e.context ? ` · ${e.context}` : ''}{e.inferred ? ' (inferred: heading not readable)' : ''}<Source {...e.source} label={labels.fromLine} ocrMark={labels.ocrMark} /></li>
@@ -192,10 +192,10 @@ const AnalysisView: React.FC<{ id: string; labels: Record<string, string> }> = (
           </div>
           <div>
             <h3 className="text-sm font-semibold">{labels.skills}</h3>
-            {a.fields.skills.length === 0 ? <p className="text-sm text-[var(--color-text-secondary)]">—</p> : (
+            {a.fields.skills.length === 0 ? <p className="text-sm text-aurora-muted">—</p> : (
               <ul className="flex flex-wrap gap-2 text-sm" data-testid="skill-list">
                 {a.fields.skills.map(s => (
-                  <li key={s.name} className="rounded border border-[var(--color-border-default)] px-2 py-0.5" title={`${labels.fromLine} ${s.source.line + 1}: ${s.source.text}`}>
+                  <li key={s.name} className="rounded border border-aurora-line px-2 py-0.5" title={`${labels.fromLine} ${s.source.line + 1}: ${s.source.text}`}>
                     {s.name}{s.matched !== s.name ? ` (“${s.matched}”)` : ''}{s.source.origin === 'ocr' ? <span className="ml-1 text-xs text-amber-800" data-testid="ocr-mark">· OCR {s.source.ocrConfidence}%</span> : null}
                   </li>
                 ))}

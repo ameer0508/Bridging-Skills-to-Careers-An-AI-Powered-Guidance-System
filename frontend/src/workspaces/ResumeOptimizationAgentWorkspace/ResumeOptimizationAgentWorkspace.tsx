@@ -178,7 +178,7 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
   if (isResumeLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
+        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
           <AIThinkingAnimation statusText="Connecting to Resume Optimization Agent..." />
         </div>
       </div>
@@ -203,9 +203,9 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
       />
 
       {/* TOP TARGET ROLE SEARCH BAR & EXPORT CONTROLS */}
-      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-indigo-500/30">
+      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-aurora-violet/25">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <span className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+          <span className="p-2 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
             <FileText className="w-5 h-5" />
           </span>
           <div className="relative w-full sm:w-80">
@@ -214,28 +214,28 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
               placeholder="Filter target role keywords..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
             />
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0 w-full sm:w-auto justify-end flex-wrap">
           <button
             onClick={() => navigate('/resume')}
-            className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-mono font-bold text-slate-200 flex items-center gap-1.5 transition-all cursor-pointer"
+            className="py-2 px-3 rounded-xl bg-aurora-canvas hover:bg-aurora-line text-xs font-bold text-aurora-ink flex items-center gap-1.5 transition-all cursor-pointer"
           >
             <Upload className="w-3.5 h-3.5" /> Upload Resume
           </button>
           <button
             onClick={() => handleExport('Markdown')}
-            className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-mono font-bold text-slate-200 flex items-center gap-1.5 transition-all cursor-pointer"
+            className="py-2 px-3 rounded-xl bg-aurora-canvas hover:bg-aurora-line text-xs font-bold text-aurora-ink flex items-center gap-1.5 transition-all cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" /> MD
           </button>
           <button
             onClick={() => handleExport('PDF')}
-            className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-mono font-bold text-slate-200 flex items-center gap-1.5 transition-all cursor-pointer"
+            className="py-2 px-3 rounded-xl bg-aurora-canvas hover:bg-aurora-line text-xs font-bold text-aurora-ink flex items-center gap-1.5 transition-all cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" /> PDF
           </button>
@@ -243,7 +243,7 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
           <button
             onClick={handleOptimizeResume}
             disabled={isAnalyzing}
-            className="py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+            className="py-2 px-4 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
             <span>{isAnalyzing ? 'Tailoring Resume...' : 'Optimize Resume for Target Role'}</span>
@@ -253,76 +253,76 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
 
       {/* 4 SUMMARY METRIC CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <GlassPanel className="p-4 space-y-2 border-indigo-500/30">
+        <GlassPanel className="p-4 space-y-2 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">ATS Compatibility</span>
-            <Zap className="w-4 h-4 text-indigo-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">ATS Compatibility</span>
+            <Zap className="w-4 h-4 text-aurora-indigo" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">
+          <span className="text-xl font-bold text-aurora-ink block">
             {atsScore > 0 ? `${atsScore} / 100` : '0 / 100'}
           </span>
-          <span className="text-xs font-mono text-indigo-300">Parseable Standard</span>
+          <span className="text-xs text-aurora-indigo">Parseable Standard</span>
         </GlassPanel>
 
-        <GlassPanel className="p-4 space-y-2 border-emerald-500/30">
+        <GlassPanel className="p-4 space-y-2 border-emerald-200">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Keyword Coverage</span>
-            <Sparkles className="w-4 h-4 text-emerald-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Keyword Coverage</span>
+            <Sparkles className="w-4 h-4 text-emerald-700" />
           </div>
-          <span className="text-xl font-bold text-emerald-400 font-mono block">
+          <span className="text-xl font-bold text-emerald-700 block">
             {keywordCoveragePercent}%
           </span>
-          <span className="text-xs font-mono text-emerald-300">{matchedKeywords.length} Keywords Matched</span>
+          <span className="text-xs text-emerald-700">{matchedKeywords.length} Keywords Matched</span>
         </GlassPanel>
 
-        <GlassPanel className="p-4 space-y-2 border-cyan-500/30">
+        <GlassPanel className="p-4 space-y-2 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Claim Evidence Rate</span>
-            <ShieldCheck className="w-4 h-4 text-cyan-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Claim Evidence Rate</span>
+            <ShieldCheck className="w-4 h-4 text-aurora-violet" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">
+          <span className="text-xl font-bold text-aurora-ink block">
             {readinessScore}% Verified
           </span>
-          <span className="text-xs font-mono text-cyan-300">Verified Competency</span>
+          <span className="text-xs text-aurora-violet">Verified Competency</span>
         </GlassPanel>
 
         <GlassPanel className="p-4 space-y-2 border-purple-500/30">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Target Role Focus</span>
-            <Award className="w-4 h-4 text-purple-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Target Role Focus</span>
+            <Award className="w-4 h-4 text-aurora-violet" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block truncate">
+          <span className="text-xl font-bold text-aurora-ink block truncate">
             {targetRoleTitle}
           </span>
-          <span className="text-xs font-mono text-purple-300">STAR Bullet Structured</span>
+          <span className="text-xs text-aurora-violet">STAR Bullet Structured</span>
         </GlassPanel>
       </div>
 
       {/* STAR BULLET OPTIMIZER & KEYWORDS (2 COLS) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* STAR BULLET OPTIMIZER (7 COLS) */}
-        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-indigo-500/30">
+        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-aurora-indigo" />
               STAR Metric-Driven Bullet Optimization
             </span>
-            <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">
+            <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
               Quantified Impact
             </span>
           </div>
 
-          <div className="space-y-4 font-mono text-xs">
-            <div className="p-3.5 rounded-xl bg-slate-950/80 border border-white/10 space-y-1.5">
-              <span className="text-slate-400 text-[10px] uppercase block">Original Bullet Point:</span>
-              <p className="text-slate-300 text-[11px] font-mono">"{originalBullet}"</p>
+          <div className="space-y-4 text-xs">
+            <div className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1.5">
+              <span className="text-aurora-muted text-[10px] uppercase block">Original Bullet Point:</span>
+              <p className="text-aurora-muted text-[11px] font-mono">"{originalBullet}"</p>
             </div>
 
-            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
-              <span className="text-emerald-400 font-bold text-[10px] uppercase block flex items-center gap-1.5">
+            <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 space-y-2">
+              <span className="text-emerald-700 font-bold text-[10px] uppercase block flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5" /> AI STAR Optimized Bullet:
               </span>
-              <p className="text-white font-bold text-[11px] leading-relaxed">
+              <p className="text-aurora-ink font-bold text-[11px] leading-relaxed">
                 "{optimizedBullet}"
               </p>
             </div>
@@ -331,23 +331,23 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
 
         {/* KEYWORD MATRIX & AI REASONING (5 COLS) */}
         <div className="lg:col-span-5 space-y-6">
-          <GlassPanel className="p-6 space-y-4 border-cyan-500/30">
+          <GlassPanel className="p-6 space-y-4 border-aurora-violet/25">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <Layers className="w-4 h-4 text-cyan-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+                <Layers className="w-4 h-4 text-aurora-violet" />
                 ATS Keyword Coverage Matrix
               </span>
             </div>
 
-            <div className="space-y-3 font-mono text-xs">
+            <div className="space-y-3 text-xs">
               <div>
-                <span className="text-slate-400 text-[11px] block mb-1.5">Matched Target Skills ({matchedKeywords.length}):</span>
+                <span className="text-aurora-muted text-[11px] block mb-1.5">Matched Target Skills ({matchedKeywords.length}):</span>
                 {matchedKeywords.length === 0 ? (
-                  <span className="text-slate-500 text-[11px] italic">No matched skills yet.</span>
+                  <span className="text-aurora-muted text-[11px] italic">No matched skills yet.</span>
                 ) : (
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {matchedKeywords.map((kw) => (
-                      <span key={kw} className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-[10px]">
+                      <span key={kw} className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold text-[10px]">
                         ✓ {kw}
                       </span>
                     ))}
@@ -355,14 +355,14 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
                 )}
               </div>
 
-              <div className="pt-2 border-t border-white/5">
-                <span className="text-slate-400 text-[11px] block mb-1.5">Recommended Skills to Add ({missingKeywords.length}):</span>
+              <div className="pt-2 border-t border-aurora-line">
+                <span className="text-aurora-muted text-[11px] block mb-1.5">Recommended Skills to Add ({missingKeywords.length}):</span>
                 {missingKeywords.length === 0 ? (
-                  <span className="text-emerald-400 text-[11px] font-bold">100% Target Skill Match!</span>
+                  <span className="text-emerald-700 text-[11px] font-bold">100% Target Skill Match!</span>
                 ) : (
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {missingKeywords.map((kw) => (
-                      <span key={kw} className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-[10px]">
+                      <span key={kw} className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 font-bold text-[10px]">
                         + {kw}
                       </span>
                     ))}
@@ -375,13 +375,13 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
           {/* AI REASONING */}
           <GlassPanel className="p-6 space-y-4 border-purple-500/30">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <Lightbulb className="w-4 h-4 text-purple-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-aurora-violet" />
                 Optimization Rationale
               </span>
             </div>
 
-            <p className="text-slate-300 leading-relaxed text-[11px] font-mono">
+            <p className="text-aurora-muted leading-relaxed text-[11px] font-mono">
               Tailoring bullet points in STAR format with quantified performance metrics to boost ATS compatibility for [{targetRoleTitle}]. Current keyword match rate is {keywordCoveragePercent}%.
             </p>
           </GlassPanel>

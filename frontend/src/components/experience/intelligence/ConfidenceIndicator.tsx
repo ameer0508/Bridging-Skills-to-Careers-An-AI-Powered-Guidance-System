@@ -16,12 +16,12 @@ export const ConfidenceIndicator: React.FC<ConfidenceIndicatorProps> = ({
 }) => {
   const getBadgeStyle = () => {
     if (score >= 75 || tier.includes('High')) {
-      return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
+      return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-800 border-emerald-500/20';
     }
     if (score >= 45 || tier.includes('Medium')) {
-      return 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20';
+      return 'bg-indigo-500/10 text-indigo-600 dark:text-aurora-indigo border-indigo-500/20';
     }
-    return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
+    return 'bg-amber-500/10 text-amber-600 dark:text-amber-800 border-amber-500/20';
   };
 
   return (

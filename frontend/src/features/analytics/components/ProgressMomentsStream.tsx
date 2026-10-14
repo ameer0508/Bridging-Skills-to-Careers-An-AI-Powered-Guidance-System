@@ -38,7 +38,7 @@ export const ProgressMomentsStream: React.FC<ProgressMomentsStreamProps> = ({
         return {
           label: 'Skill Indexed',
           icon: Cpu,
-          badgeColor: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+          badgeColor: 'bg-aurora-violet/[0.06] text-aurora-violet border-aurora-violet/25',
           dotColor: 'bg-cyan-400',
           description: 'Added a verified technical capability to your profile.',
         };
@@ -46,7 +46,7 @@ export const ProgressMomentsStream: React.FC<ProgressMomentsStreamProps> = ({
         return {
           label: 'Roadmap Milestone',
           icon: CheckCircle2,
-          badgeColor: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+          badgeColor: 'bg-purple-500/10 text-aurora-violet border-purple-500/20',
           dotColor: 'bg-purple-400',
           description: 'Executed an active learning curriculum task.',
         };
@@ -56,7 +56,7 @@ export const ProgressMomentsStream: React.FC<ProgressMomentsStreamProps> = ({
         return {
           label: 'Resume Evidence',
           icon: FileText,
-          badgeColor: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+          badgeColor: 'bg-aurora-violet/[0.06] text-aurora-indigo border-aurora-violet/25',
           dotColor: 'bg-indigo-400',
           description: 'Supplied authentic resume artifact for skill extraction.',
         };
@@ -64,7 +64,7 @@ export const ProgressMomentsStream: React.FC<ProgressMomentsStreamProps> = ({
         return {
           label: 'Interview Practice',
           icon: Video,
-          badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+          badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
           dotColor: 'bg-emerald-400',
           description: 'Completed mock interview evaluation session.',
         };
@@ -72,7 +72,7 @@ export const ProgressMomentsStream: React.FC<ProgressMomentsStreamProps> = ({
         return {
           label: 'Action Completed',
           icon: Award,
-          badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+          badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
           dotColor: 'bg-amber-400',
           description: 'Resolved a high-priority career recommendation.',
         };
@@ -80,7 +80,7 @@ export const ProgressMomentsStream: React.FC<ProgressMomentsStreamProps> = ({
         return {
           label: eventType.replace(/_/g, ' '),
           icon: Sparkles,
-          badgeColor: 'bg-slate-800 text-slate-300 border-slate-700',
+          badgeColor: 'bg-aurora-canvas text-aurora-muted border-aurora-line',
           dotColor: 'bg-indigo-400',
           description: 'Recorded developmental platform activity.',
         };
@@ -96,25 +96,25 @@ export const ProgressMomentsStream: React.FC<ProgressMomentsStreamProps> = ({
   });
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/70 p-6 md:p-8 shadow-2xl backdrop-blur-xl space-y-6">
+    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 md:p-8 shadow-2xl backdrop-blur-xl space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-aurora-line pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+            <span className="p-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700">
               <Clock className="w-4 h-4" />
             </span>
-            <h3 className="text-xl font-bold tracking-tight text-white">
+            <h3 className="text-xl font-bold tracking-tight text-aurora-ink">
               Moments That Moved Your Profile
             </h3>
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-aurora-muted">
             Chronological log of verified milestones, skill verifications, and roadmap actions.
           </p>
         </div>
 
         {/* Filter Tabs */}
-        <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl border border-white/10 text-xs">
+        <div className="flex items-center gap-1 bg-aurora-canvas/60 p-1 rounded-xl border border-aurora-line text-xs">
           {[
             { id: 'all', label: 'All Moments' },
             { id: 'skills', label: 'Skills' },
@@ -127,8 +127,8 @@ export const ProgressMomentsStream: React.FC<ProgressMomentsStreamProps> = ({
               type="button"
               className={`px-3 py-1 rounded-lg font-medium transition cursor-pointer ${
                 filterType === f.id
-                  ? 'bg-slate-800 text-white font-semibold'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-aurora-canvas text-aurora-ink font-semibold'
+                  : 'text-aurora-muted hover:text-aurora-ink'
               }`}
             >
               {f.label}
@@ -139,10 +139,10 @@ export const ProgressMomentsStream: React.FC<ProgressMomentsStreamProps> = ({
 
       {/* Events Stream */}
       {filteredEvents.length === 0 ? (
-        <div className="p-8 text-center rounded-2xl bg-slate-950/40 border border-white/5 space-y-2">
-          <Clock className="w-8 h-8 text-slate-600 mx-auto" />
-          <p className="text-sm font-semibold text-slate-300">No telemetry events logged yet</p>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+        <div className="p-8 text-center rounded-2xl bg-aurora-canvas/60 border border-aurora-line space-y-2">
+          <Clock className="w-8 h-8 text-aurora-muted mx-auto" />
+          <p className="text-sm font-semibold text-aurora-muted">No telemetry events logged yet</p>
+          <p className="text-xs text-aurora-muted max-w-sm mx-auto">
             Events appear automatically as you upload a resume, index skills, or complete curriculum tasks.
           </p>
         </div>
@@ -174,49 +174,49 @@ export const ProgressMomentsStream: React.FC<ProgressMomentsStreamProps> = ({
                 className="relative group"
               >
                 {/* Timeline node marker */}
-                <div className={`absolute -left-[30px] top-1.5 w-4 h-4 rounded-full border-2 border-slate-900 ${meta.dotColor} shadow-md group-hover:scale-125 transition`} />
+                <div className={`absolute -left-[30px] top-1.5 w-4 h-4 rounded-full border-2 border-aurora-line ${meta.dotColor} shadow-md group-hover:scale-125 transition`} />
 
                 {/* Event Card */}
-                <div className="p-4 rounded-2xl bg-slate-950/60 border border-white/5 hover:border-white/15 transition space-y-2">
+                <div className="p-4 rounded-2xl bg-aurora-canvas/60 border border-aurora-line hover:border-aurora-line transition space-y-2">
                   <div className="flex items-center justify-between gap-3 flex-wrap">
                     <div className="flex items-center gap-2">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider border ${meta.badgeColor}`}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${meta.badgeColor}`}>
                         {meta.label}
                       </span>
-                      <span className="text-xs text-slate-400 font-mono">
+                      <span className="text-xs text-aurora-muted font-mono">
                         {displayDate}
                       </span>
                     </div>
 
-                    <IconComp className="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition" />
+                    <IconComp className="w-4 h-4 text-aurora-muted group-hover:text-aurora-muted transition" />
                   </div>
 
-                  <p className="text-xs text-slate-300 leading-relaxed font-medium">
+                  <p className="text-xs text-aurora-muted leading-relaxed font-medium">
                     {meta.description}
                   </p>
 
                   {/* Specific Event Metadata Details */}
                   {details.skillName && (
-                    <div className="pt-2 border-t border-white/5 flex items-center gap-2 text-xs font-mono">
-                      <span className="text-slate-400">Skill:</span>
-                      <span className="text-cyan-300 font-bold">{details.skillName}</span>
+                    <div className="pt-2 border-t border-aurora-line flex items-center gap-2 text-xs font-mono">
+                      <span className="text-aurora-muted">Skill:</span>
+                      <span className="text-aurora-violet font-bold">{details.skillName}</span>
                       {details.category && (
-                        <span className="text-[10px] text-slate-500">({details.category})</span>
+                        <span className="text-[10px] text-aurora-muted">({details.category})</span>
                       )}
                     </div>
                   )}
 
                   {details.fileName && (
-                    <div className="pt-2 border-t border-white/5 flex items-center gap-2 text-xs font-mono">
-                      <span className="text-slate-400">File:</span>
-                      <span className="text-indigo-300 font-bold">{details.fileName}</span>
+                    <div className="pt-2 border-t border-aurora-line flex items-center gap-2 text-xs font-mono">
+                      <span className="text-aurora-muted">File:</span>
+                      <span className="text-aurora-indigo font-bold">{details.fileName}</span>
                     </div>
                   )}
 
                   {details.title && (
-                    <div className="pt-2 border-t border-white/5 flex items-center gap-2 text-xs font-mono">
-                      <span className="text-slate-400">Task:</span>
-                      <span className="text-purple-300 font-bold">{details.title}</span>
+                    <div className="pt-2 border-t border-aurora-line flex items-center gap-2 text-xs font-mono">
+                      <span className="text-aurora-muted">Task:</span>
+                      <span className="text-aurora-violet font-bold">{details.title}</span>
                     </div>
                   )}
                 </div>

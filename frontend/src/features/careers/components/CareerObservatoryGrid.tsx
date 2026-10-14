@@ -28,10 +28,10 @@ export const CareerObservatoryGrid: React.FC<CareerObservatoryGridProps> = ({
 }) => {
   if (matches.length === 0) {
     return (
-      <div className="p-8 rounded-2xl bg-slate-950/70 border border-white/10 text-center space-y-2">
-        <Target className="w-8 h-8 text-slate-500 mx-auto" />
-        <h4 className="text-sm font-bold text-white">No Career Matches Found</h4>
-        <p className="text-xs text-slate-400">Ensure your resume is parsed and skills are mapped.</p>
+      <div className="p-8 rounded-2xl bg-aurora-canvas/60 border border-aurora-line text-center space-y-2">
+        <Target className="w-8 h-8 text-aurora-muted mx-auto" />
+        <h4 className="text-sm font-bold text-aurora-ink">No Career Matches Found</h4>
+        <p className="text-xs text-aurora-muted">Ensure your resume is parsed and skills are mapped.</p>
       </div>
     );
   }
@@ -46,7 +46,7 @@ export const CareerObservatoryGrid: React.FC<CareerObservatoryGridProps> = ({
           <div
             key={match.id}
             onClick={() => onSelectMatch(match)}
-            className="group relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/70 p-6 hover:border-indigo-500/40 hover:bg-slate-900/80 transition-all cursor-pointer space-y-5 shadow-xl flex flex-col justify-between"
+            className="group relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 hover:border-aurora-violet/25 hover:bg-aurora-canvas/60 transition-all cursor-pointer space-y-5 shadow-xl flex flex-col justify-between"
           >
             {/* Top Accent Gauge Bar */}
             <div
@@ -62,10 +62,10 @@ export const CareerObservatoryGrid: React.FC<CareerObservatoryGridProps> = ({
             <div className="space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <span className="px-2.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono text-[9px] font-bold border border-indigo-500/30 uppercase">
+                  <span className="px-2.5 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-indigo text-[9px] font-bold border border-aurora-violet/25 uppercase">
                     {match.careerId.category}
                   </span>
-                  <h3 className="font-display text-lg font-bold text-white group-hover:text-cyan-300 transition-colors mt-1">
+                  <h3 className="font-display text-lg font-bold text-aurora-ink group-hover:text-aurora-violet transition-colors mt-1">
                     {match.careerId.title}
                   </h3>
                 </div>
@@ -74,33 +74,33 @@ export const CareerObservatoryGrid: React.FC<CareerObservatoryGridProps> = ({
                   <span
                     className={`font-display text-2xl font-extrabold block ${
                       isHighFit
-                        ? 'text-emerald-400'
+                        ? 'text-emerald-700'
                         : isMedFit
-                        ? 'text-cyan-400'
-                        : 'text-amber-400'
+                        ? 'text-aurora-violet'
+                        : 'text-amber-700'
                     }`}
                   >
                     {match.matchScore}%
                   </span>
-                  <span className="text-[9px] font-mono text-slate-500 uppercase font-bold">
+                  <span className="text-[9px] text-aurora-muted uppercase font-bold">
                     Fit Score
                   </span>
                 </div>
               </div>
 
-              <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+              <p className="text-xs text-aurora-muted line-clamp-2 leading-relaxed">
                 {match.careerId.description}
               </p>
             </div>
 
             {/* Skill Alignment Summary */}
-            <div className="space-y-2 pt-3 border-t border-white/5">
-              <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
-                <span className="flex items-center gap-1 text-emerald-400 font-bold">
+            <div className="space-y-2 pt-3 border-t border-aurora-line">
+              <div className="flex items-center justify-between text-[10px] text-aurora-muted">
+                <span className="flex items-center gap-1 text-emerald-700 font-bold">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   {match.matchingSkills?.length || 0} Matched
                 </span>
-                <span className="flex items-center gap-1 text-rose-400 font-bold">
+                <span className="flex items-center gap-1 text-rose-700 font-bold">
                   <AlertTriangle className="w-3.5 h-3.5" />
                   {match.missingSkills?.length || 0} Gaps
                 </span>
@@ -110,7 +110,7 @@ export const CareerObservatoryGrid: React.FC<CareerObservatoryGridProps> = ({
                 {match.matchingSkills?.slice(0, 3).map((skill, idx) => (
                   <span
                     key={idx}
-                    className="px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-[10px] font-mono"
+                    className="px-2 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25 text-[10px] font-mono"
                   >
                     {skill}
                   </span>
@@ -118,7 +118,7 @@ export const CareerObservatoryGrid: React.FC<CareerObservatoryGridProps> = ({
                 {match.missingSkills?.slice(0, 2).map((skill, idx) => (
                   <span
                     key={idx}
-                    className="px-2 py-0.5 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20 text-[10px] font-mono"
+                    className="px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-mono"
                   >
                     -{skill}
                   </span>
@@ -127,7 +127,7 @@ export const CareerObservatoryGrid: React.FC<CareerObservatoryGridProps> = ({
             </div>
 
             {/* Footer Action Trigger */}
-            <div className="pt-2 flex items-center justify-between text-xs font-mono text-cyan-400 group-hover:text-cyan-300">
+            <div className="pt-2 flex items-center justify-between text-xs text-aurora-violet group-hover:text-aurora-violet">
               <span className="font-bold">Inspect Deep-Dive Analysis</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </div>

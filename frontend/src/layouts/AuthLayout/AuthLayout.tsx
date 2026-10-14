@@ -27,7 +27,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
   return (
     <AuroraBackground
       showParticles={true}
-      className="min-h-screen w-screen flex flex-col justify-between overflow-x-hidden font-sans selection:bg-indigo-500/30 selection:text-white"
+      className="min-h-screen w-screen flex flex-col justify-between overflow-x-hidden font-sans selection:bg-violet-50 selection:text-aurora-ink"
     >
       {/* Top Header Bar */}
       <header className="relative z-20 w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between pointer-events-auto">
@@ -36,10 +36,10 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
             <Sparkles className="w-5 h-5" />
           </div>
           <div className="flex flex-col">
-            <span className="font-display text-lg font-extrabold tracking-tight text-white group-hover:text-indigo-200 transition-colors">
+            <span className="font-display text-lg font-extrabold tracking-tight text-aurora-ink group-hover:text-aurora-indigo transition-colors">
               SkillBridge
             </span>
-            <span className="text-[10px] font-mono font-bold tracking-widest text-cyan-400 uppercase -mt-1">
+            <span className="text-[10px] font-bold tracking-widest text-aurora-violet uppercase -mt-1">
               AI Intelligence OS
             </span>
           </div>
@@ -47,7 +47,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
 
         <Link
           to="/"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold text-slate-300 hover:text-white bg-slate-900/60 border border-white/10 hover:border-white/20 backdrop-blur-md transition-all duration-200 group"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold text-aurora-muted hover:text-aurora-indigo bg-aurora-canvas/60 border border-aurora-line hover:border-aurora-line backdrop-blur-md transition-all duration-200 group"
         >
           <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
           <span>Back to Landing Page</span>
@@ -64,18 +64,18 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
           className="hidden lg:flex lg:col-span-7 flex-col gap-6 justify-center pr-4"
         >
           {/* Eyebrow badge */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-indigo-500/30 bg-indigo-500/10 backdrop-blur-md self-start">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-aurora-violet/25 bg-aurora-violet/[0.06] backdrop-blur-md self-start">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
             </span>
-            <span className="text-xs font-mono font-bold text-indigo-300 tracking-wider uppercase">
+            <span className="text-xs font-bold text-aurora-indigo tracking-wider uppercase">
               {isRegister ? 'Build Career Intelligence' : 'Entering SkillBridge Doorway'}
             </span>
           </div>
 
           <div className="space-y-3">
-            <h1 className="font-display text-4xl xl:text-5xl font-extrabold text-white tracking-tight leading-tight">
+            <h1 className="font-display text-4xl xl:text-5xl font-extrabold text-aurora-ink tracking-tight leading-tight">
               {isRegister ? (
                 <>
                   Map Your Career <br />
@@ -92,7 +92,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
                 </>
               )}
             </h1>
-            <p className="text-slate-300 text-base leading-relaxed max-w-lg">
+            <p className="text-aurora-muted text-base leading-relaxed max-w-lg">
               Unlock vector skill matching, automated ATS resume intelligence, and adaptive milestone roadmaps tailored to your capabilities.
             </p>
           </div>
@@ -105,58 +105,58 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
           {/* Floating Glass Showcase Card */}
           <TiltCard glowColor="rgba(99, 102, 241, 0.25)" className="p-5 -mt-6">
             <div className="space-y-3">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center justify-between border-b border-aurora-line pb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-linear-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white shadow-md">
                     <Brain className="w-4 h-4" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-white">Target Match: AI Systems Engineer</h4>
-                    <p className="text-[10px] text-slate-400 font-mono">Embedding Cosine Search</p>
+                    <h4 className="text-xs font-bold text-aurora-ink">Target Match: AI Systems Engineer</h4>
+                    <p className="text-[10px] text-aurora-muted font-mono">Embedding Cosine Search</p>
                   </div>
                 </div>
-                <span className="px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-xs font-bold">
+                <span className="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold">
                   94.8% Vector Match
                 </span>
               </div>
 
               <div className="grid grid-cols-3 gap-3 text-xs">
-                <div className="p-2.5 rounded-xl bg-slate-950/70 border border-white/10 flex flex-col">
-                  <span className="text-[10px] text-slate-400 flex items-center justify-between">
+                <div className="p-2.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex flex-col">
+                  <span className="text-[10px] text-aurora-muted flex items-center justify-between">
                     <span>ATS Index</span>
-                    <Award className="w-3 h-3 text-purple-400" />
+                    <Award className="w-3 h-3 text-aurora-violet" />
                   </span>
-                  <span className="text-base font-bold text-white mt-1">98/100</span>
-                  <span className="text-[9px] text-emerald-400 font-mono">Optimized</span>
+                  <span className="text-base font-bold text-aurora-ink mt-1">98/100</span>
+                  <span className="text-[9px] text-emerald-700 font-mono">Optimized</span>
                 </div>
 
-                <div className="p-2.5 rounded-xl bg-slate-950/70 border border-white/10 flex flex-col">
-                  <span className="text-[10px] text-slate-400 flex items-center justify-between">
+                <div className="p-2.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex flex-col">
+                  <span className="text-[10px] text-aurora-muted flex items-center justify-between">
                     <span>Skill Gaps</span>
-                    <Target className="w-3 h-3 text-cyan-400" />
+                    <Target className="w-3 h-3 text-aurora-violet" />
                   </span>
-                  <span className="text-base font-bold text-white mt-1">3 Missing</span>
-                  <span className="text-[9px] text-indigo-300 font-mono">Roadmap Ready</span>
+                  <span className="text-base font-bold text-aurora-ink mt-1">3 Missing</span>
+                  <span className="text-[9px] text-aurora-indigo font-mono">Roadmap Ready</span>
                 </div>
 
-                <div className="p-2.5 rounded-xl bg-slate-950/70 border border-white/10 flex flex-col">
-                  <span className="text-[10px] text-slate-400 flex items-center justify-between">
+                <div className="p-2.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex flex-col">
+                  <span className="text-[10px] text-aurora-muted flex items-center justify-between">
                     <span>Velocity</span>
-                    <TrendingUp className="w-3 h-3 text-emerald-400" />
+                    <TrendingUp className="w-3 h-3 text-emerald-700" />
                   </span>
-                  <span className="text-base font-bold text-white mt-1">4.8x Avg</span>
-                  <span className="text-[9px] text-emerald-400 font-mono">High Growth</span>
+                  <span className="text-base font-bold text-aurora-ink mt-1">4.8x Avg</span>
+                  <span className="text-[9px] text-emerald-700 font-mono">High Growth</span>
                 </div>
               </div>
 
-              <div className="p-2.5 rounded-xl bg-indigo-950/50 border border-indigo-500/20 flex items-center justify-between text-xs text-indigo-200">
+              <div className="p-2.5 rounded-xl bg-violet-50 border border-aurora-violet/25 flex items-center justify-between text-xs text-aurora-indigo">
                 <div className="flex items-center gap-2">
-                  <Zap className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <Zap className="w-3.5 h-3.5 text-amber-700 shrink-0" />
                   <span className="text-[11px]">
                     <strong>AI System:</strong> Real-time guidance engine ready
                   </span>
                 </div>
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
               </div>
             </div>
           </TiltCard>
@@ -185,12 +185,12 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
       </main>
 
       {/* Footer minimal info */}
-      <footer className="relative z-20 w-full max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 border-t border-white/5 gap-2 font-mono">
+      <footer className="relative z-20 w-full max-w-7xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between text-[11px] text-aurora-muted border-t border-aurora-line gap-2 font-mono">
         <span>© {new Date().getFullYear()} SkillBridge Platform. Production Hardened v1.0</span>
         <div className="flex items-center gap-4">
-          <span className="hover:text-slate-400 transition-colors cursor-pointer">Privacy Specification</span>
-          <span className="hover:text-slate-400 transition-colors cursor-pointer">Terms of Service</span>
-          <span className="hover:text-slate-400 transition-colors cursor-pointer">System Telemetry</span>
+          <span className="hover:text-aurora-muted transition-colors cursor-pointer">Privacy Specification</span>
+          <span className="hover:text-aurora-muted transition-colors cursor-pointer">Terms of Service</span>
+          <span className="hover:text-aurora-muted transition-colors cursor-pointer">System Telemetry</span>
         </div>
       </footer>
     </AuroraBackground>

@@ -30,20 +30,20 @@ export const WorkspaceSpotlight: React.FC<WorkspaceSpotlightProps> = ({
       <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-3 max-w-2xl">
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-violet flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-amber-700 fill-amber-400" />
               <span>{badge}</span>
             </span>
-            <span className="px-2.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold">
+            <span className="px-2.5 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold">
               {impactScore}
             </span>
           </div>
 
-          <h3 className="font-display text-xl sm:text-2xl font-bold text-white tracking-tight">
+          <h3 className="font-display text-xl sm:text-2xl font-bold text-aurora-ink tracking-tight">
             {title}
           </h3>
 
-          <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+          <p className="text-aurora-muted text-xs sm:text-sm leading-relaxed">
             {description}
           </p>
         </div>
@@ -55,7 +55,7 @@ export const WorkspaceSpotlight: React.FC<WorkspaceSpotlightProps> = ({
             onClick={onAction}
             className="py-3 px-6 rounded-xl bg-linear-to-r from-indigo-600 via-purple-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 font-bold text-xs text-white shadow-xl shadow-indigo-600/30 flex items-center justify-center gap-2 shrink-0 transition-all cursor-pointer"
           >
-            <Sparkles className="w-4 h-4 text-cyan-200" />
+            <Sparkles className="w-4 h-4 text-aurora-violet" />
             <span>{actionLabel}</span>
             <ArrowRight className="w-4 h-4" />
           </motion.button>

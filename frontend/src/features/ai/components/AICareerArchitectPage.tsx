@@ -111,26 +111,26 @@ export const AICareerArchitectPage: React.FC = () => {
     <div className="flex h-[calc(100vh-140px)] gap-6 animate-fade-in max-w-7xl mx-auto">
       
       {/* Sidebar: Conversation History */}
-      <div className="w-64 bg-slate-900 border border-slate-800 rounded-xl flex flex-col hidden md:flex shrink-0">
-         <div className="p-4 border-b border-slate-800">
+      <div className="w-64 bg-aurora-canvas border border-aurora-line rounded-xl flex flex-col hidden md:flex shrink-0">
+         <div className="p-4 border-b border-aurora-line">
            <button 
              onClick={startNew}
-             className="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-lg transition-colors text-sm"
+             className="w-full py-2 [background:var(--aurora-gradient-action)] hover:brightness-110 text-white font-semibold rounded-lg transition-colors text-sm"
            >
              + New Chat
            </button>
          </div>
          <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
            {loadingConvs ? (
-             <div className="text-center text-slate-500 mt-4 text-xs">Loading...</div>
+             <div className="text-center text-aurora-muted mt-4 text-xs">Loading...</div>
            ) : conversations?.map((c: { _id: string; title: string }) => (
              <button
                key={c._id}
                onClick={() => setActiveConversationId(c._id)}
                className={`w-full text-left p-3 rounded-lg mb-1 text-sm transition-colors truncate ${
                  activeConversationId === c._id 
-                 ? 'bg-slate-800 text-indigo-400 font-semibold border border-slate-700' 
-                 : 'text-slate-400 hover:bg-slate-800/50'
+                 ? 'bg-aurora-canvas text-aurora-indigo font-semibold border border-aurora-line' 
+                 : 'text-aurora-muted hover:bg-aurora-canvas/50'
                }`}
              >
                {c.title}
@@ -140,20 +140,20 @@ export const AICareerArchitectPage: React.FC = () => {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 bg-slate-900 border border-slate-800 rounded-xl flex flex-col overflow-hidden relative">
+      <div className="flex-1 bg-aurora-canvas border border-aurora-line rounded-xl flex flex-col overflow-hidden relative">
         
         {/* Chat Header */}
-        <div className="h-16 border-b border-slate-800 flex items-center justify-between px-6 shrink-0 bg-slate-900/50 backdrop-blur-sm z-10">
+        <div className="h-16 border-b border-aurora-line flex items-center justify-between px-6 shrink-0 bg-aurora-canvas/60 backdrop-blur-sm z-10">
           <div>
-            <h2 className="text-lg font-bold text-slate-200">AI Career Architect</h2>
-            <p className="text-xs text-slate-500">Grounded in your verified platform intelligence</p>
+            <h2 className="text-lg font-bold text-aurora-ink">AI Career Architect</h2>
+            <p className="text-xs text-aurora-muted">Grounded in your verified platform intelligence</p>
           </div>
           
           {activeHistory?.conversation && careersData && (
              <select 
                value={activeHistory.conversation.careerId || ''}
                onChange={(e) => switchCareerMutation.mutate(e.target.value)}
-               className="bg-slate-800 border border-slate-700 text-slate-300 text-xs rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500"
+               className="bg-aurora-canvas border border-aurora-line text-aurora-muted text-xs rounded px-3 py-1.5 focus:outline-none focus:border-indigo-500"
              >
                <option value="" disabled>Target Career Context...</option>
                {careersData.map((match: { careerId: { _id: string; title: string } }) => (
@@ -170,13 +170,13 @@ export const AICareerArchitectPage: React.FC = () => {
           {!activeConversationId ? (
             <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto">
               <div className="text-4xl mb-4">🧠</div>
-              <h3 className="text-xl font-bold text-slate-200 mb-2">SkillBridge AI Architect</h3>
-              <p className="text-sm text-slate-400 mb-8">
+              <h3 className="text-xl font-bold text-aurora-ink mb-2">SkillBridge AI Architect</h3>
+              <p className="text-sm text-aurora-muted mb-8">
                 I am your personalized AI career advisor. My responses are dynamically grounded in your verified skills, readiness scores, roadmap progress, and analytical trends.
               </p>
               <button 
                 onClick={startNew}
-                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition-all hover:scale-105"
+                className="px-6 py-3 [background:var(--aurora-gradient-action)] hover:brightness-110 text-white font-bold rounded-xl shadow-lg transition-all hover:scale-105"
               >
                 Start a Conversation
               </button>
@@ -186,20 +186,20 @@ export const AICareerArchitectPage: React.FC = () => {
               {activeHistory?.messages?.map((msg: { _id: string; role: string; content: string; contextSnapshotId?: string }) => (
                 <div key={msg._id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   {msg.role === 'system' ? (
-                     <div className="w-full text-center text-[11px] font-semibold text-slate-500 uppercase tracking-widest my-2">
+                     <div className="w-full text-center text-[11px] font-semibold text-aurora-muted uppercase tracking-widest my-2">
                        {msg.content}
                      </div>
                   ) : (
                     <div className={`max-w-[80%] rounded-2xl p-4 ${
                       msg.role === 'user' 
-                      ? 'bg-indigo-600 text-white rounded-br-none' 
-                      : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-bl-none shadow-lg'
+                      ? 'text-white [background:var(--aurora-gradient-action)] rounded-br-none' 
+                      : 'bg-aurora-canvas text-aurora-ink border border-aurora-line rounded-bl-none shadow-lg'
                     }`}>
                       {msg.role === 'assistant' && (
-                        <div className="flex items-center gap-2 mb-2 text-indigo-400 font-bold text-xs uppercase tracking-wider">
+                        <div className="flex items-center gap-2 mb-2 text-aurora-indigo font-bold text-xs uppercase tracking-wider">
                           <span>✨ AI Architect</span>
                           {msg.contextSnapshotId && (
-                            <span className="bg-indigo-500/20 px-1.5 py-0.5 rounded text-[9px]" title="Grounded in verified snapshot">Grounded</span>
+                            <span className="bg-aurora-violet/[0.06] px-1.5 py-0.5 rounded text-[9px]" title="Grounded in verified snapshot">Grounded</span>
                           )}
                         </div>
                       )}
@@ -209,16 +209,16 @@ export const AICareerArchitectPage: React.FC = () => {
                       </div>
 
                       {msg.role === 'assistant' && (
-                        <div className="flex gap-2 mt-3 pt-3 border-t border-slate-700/50">
+                        <div className="flex gap-2 mt-3 pt-3 border-t border-aurora-line">
                           <button 
                             onClick={() => submitFeedbackMutation.mutate({ messageId: msg._id, isHelpful: true })}
-                            className="text-xs text-slate-500 hover:text-emerald-400 transition-colors"
+                            className="text-xs text-aurora-muted hover:text-emerald-700 transition-colors"
                           >
                             👍 Helpful
                           </button>
                           <button 
                             onClick={() => submitFeedbackMutation.mutate({ messageId: msg._id, isHelpful: false })}
-                            className="text-xs text-slate-500 hover:text-rose-400 transition-colors"
+                            className="text-xs text-aurora-muted hover:text-rose-700 transition-colors"
                           >
                             👎 Not Helpful
                           </button>
@@ -231,7 +231,7 @@ export const AICareerArchitectPage: React.FC = () => {
               
               {sendMessageMutation.isPending && (
                 <div className="flex justify-start">
-                   <div className="bg-slate-800 text-slate-400 border border-slate-700 rounded-2xl rounded-bl-none p-4 shadow-lg text-sm flex items-center gap-2">
+                   <div className="bg-aurora-canvas text-aurora-muted border border-aurora-line rounded-2xl rounded-bl-none p-4 shadow-lg text-sm flex items-center gap-2">
                       <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce"></div>
                       <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                       <div className="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
@@ -253,7 +253,7 @@ export const AICareerArchitectPage: React.FC = () => {
                 onClick={() => {
                   setInputMessage(q);
                 }}
-                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-full text-xs text-slate-300 transition-colors"
+                className="px-3 py-1.5 bg-aurora-canvas hover:bg-aurora-line border border-aurora-line rounded-full text-xs text-aurora-muted transition-colors"
               >
                 {q}
               </button>
@@ -263,25 +263,25 @@ export const AICareerArchitectPage: React.FC = () => {
 
         {/* Input Area */}
         {activeConversationId && (
-          <div className="p-4 bg-slate-900 border-t border-slate-800">
-            <div className="flex items-end gap-2 bg-slate-950 border border-slate-800 rounded-xl p-2 focus-within:border-indigo-500 transition-colors shadow-inner">
+          <div className="p-4 bg-aurora-canvas border-t border-aurora-line">
+            <div className="flex items-end gap-2 bg-aurora-canvas border border-aurora-line rounded-xl p-2 focus-within:border-indigo-500 transition-colors shadow-inner">
               <textarea
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about your career readiness, roadmap, or skills..."
-                className="flex-1 bg-transparent text-slate-200 text-sm max-h-32 min-h-[44px] resize-none outline-none px-3 py-2 custom-scrollbar"
+                className="flex-1 bg-transparent text-aurora-ink text-sm max-h-32 min-h-[44px] resize-none outline-none px-3 py-2 custom-scrollbar"
                 disabled={sendMessageMutation.isPending}
               />
               <button
                 onClick={handleSend}
                 disabled={!inputMessage.trim() || sendMessageMutation.isPending}
-                className="p-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-lg transition-colors flex-shrink-0"
+                className="p-3 [background:var(--aurora-gradient-action)] hover:brightness-110 disabled:opacity-50 text-white rounded-lg transition-colors flex-shrink-0"
               >
                 Send
               </button>
             </div>
-            <div className="text-center mt-2 text-[10px] text-slate-500 mb-2">
+            <div className="text-center mt-2 text-[10px] text-aurora-muted mb-2">
               AI Architect uses your verified platform data to provide personalized guidance. It cannot fabricate or guess information.
             </div>
             <AIStatusBar

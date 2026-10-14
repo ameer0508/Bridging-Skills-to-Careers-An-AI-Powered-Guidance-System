@@ -49,23 +49,23 @@ export const IntelligenceCategoryFilter: React.FC<IntelligenceCategoryFilterProp
       {/* Top Row: Status Tabs + Search + Sort Controls */}
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         {/* Status Tabs */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-950/80 border border-white/10 overflow-x-auto custom-scrollbar">
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-aurora-canvas/60 border border-aurora-line overflow-x-auto custom-scrollbar">
           {statuses.map((tab) => {
             const isActive = activeStatus === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => onStatusChange(tab.id)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer flex items-center gap-2 ${
                   isActive
-                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-md'
+                    : 'text-aurora-muted hover:text-aurora-indigo hover:bg-aurora-canvas'
                 }`}
               >
                 <span>{tab.label}</span>
                 <span
                   className={`px-1.5 py-0.5 rounded-md text-[10px] ${
-                    isActive ? 'bg-indigo-900 text-white' : 'bg-slate-800 text-slate-400'
+                    isActive ? 'bg-violet-100 text-aurora-ink' : 'bg-aurora-canvas text-aurora-muted'
                   }`}
                 >
                   {tab.count}
@@ -79,18 +79,18 @@ export const IntelligenceCategoryFilter: React.FC<IntelligenceCategoryFilterProp
         <div className="flex items-center gap-3">
           {/* Search Box */}
           <div className="relative flex-1 sm:w-64">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-aurora-muted absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder="Filter actions or skills..."
-              className="w-full pl-9 pr-3 py-2 bg-slate-950/80 border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono transition-colors"
+              className="w-full pl-9 pr-3 py-2 bg-aurora-canvas/60 border border-aurora-line rounded-xl text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
             />
             {searchQuery && (
               <button
                 onClick={() => onSearchChange('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white text-xs font-mono"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-aurora-muted hover:text-aurora-indigo text-xs font-mono"
               >
                 ✕
               </button>
@@ -98,19 +98,19 @@ export const IntelligenceCategoryFilter: React.FC<IntelligenceCategoryFilterProp
           </div>
 
           {/* Sort Selector */}
-          <div className="flex items-center gap-1.5 px-3 py-2 bg-slate-950/80 border border-white/10 rounded-xl text-xs font-mono text-slate-300 shrink-0">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-slate-500 hidden sm:inline">Sort:</span>
+          <div className="flex items-center gap-1.5 px-3 py-2 bg-aurora-canvas/60 border border-aurora-line rounded-xl text-xs text-aurora-muted shrink-0">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-aurora-muted" />
+            <span className="text-aurora-muted hidden sm:inline">Sort:</span>
             <select
               aria-label="Sort by"
               value={sortBy}
               onChange={(e) => onSortChange(e.target.value)}
-              className="bg-transparent text-white font-bold focus:outline-none cursor-pointer text-xs"
+              className="bg-transparent text-aurora-ink font-bold focus:outline-none cursor-pointer text-xs"
             >
-              <option value="impact_desc" className="bg-slate-900 text-white">Highest Impact</option>
-              <option value="priority_desc" className="bg-slate-900 text-white">Priority Score</option>
-              <option value="time_asc" className="bg-slate-900 text-white">Quickest Win</option>
-              <option value="difficulty_asc" className="bg-slate-900 text-white">Difficulty</option>
+              <option value="impact_desc" className="bg-aurora-canvas text-aurora-ink">Highest Impact</option>
+              <option value="priority_desc" className="bg-aurora-canvas text-aurora-ink">Priority Score</option>
+              <option value="time_asc" className="bg-aurora-canvas text-aurora-ink">Quickest Win</option>
+              <option value="difficulty_asc" className="bg-aurora-canvas text-aurora-ink">Difficulty</option>
             </select>
           </div>
         </div>
@@ -126,13 +126,13 @@ export const IntelligenceCategoryFilter: React.FC<IntelligenceCategoryFilterProp
             <button
               key={cat.id}
               onClick={() => onCategoryChange(cat.id)}
-              className={`px-3 py-1.5 rounded-xl font-mono text-xs font-semibold shrink-0 cursor-pointer flex items-center gap-2 transition-all border ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 cursor-pointer flex items-center gap-2 transition-all border ${
                 isSelected
-                  ? 'bg-amber-500/15 text-amber-300 border-amber-500/40 shadow-sm'
-                  : 'bg-slate-950/50 text-slate-400 hover:text-slate-200 border-white/5 hover:border-white/15'
+                  ? 'bg-amber-50 text-amber-700 border-amber-200 shadow-sm'
+                  : 'bg-aurora-canvas/60 text-aurora-muted hover:text-aurora-ink border-aurora-line hover:border-aurora-line'
               }`}
             >
-              <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-amber-400' : 'text-slate-400'}`} />
+              <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-amber-700' : 'text-aurora-muted'}`} />
               <span>{cat.label}</span>
             </button>
           );

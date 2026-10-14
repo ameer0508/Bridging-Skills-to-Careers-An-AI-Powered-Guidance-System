@@ -16,7 +16,7 @@ export interface BreadcrumbProps {
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({
   items,
   separator = (
-    <Icon size={14} className="text-[var(--color-text-tertiary)]">
+    <Icon size={14} className="text-aurora-muted">
       <polyline points="9 18 15 12 9 6" />
     </Icon>
   ),
@@ -32,14 +32,14 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
             <li key={index} className="flex items-center gap-1.5">
               {index > 0 && <span aria-hidden="true">{separator}</span>}
               {isLast ? (
-                <span className="text-[var(--color-text-primary)] font-semibold" aria-current="page">
+                <span className="text-aurora-ink font-semibold" aria-current="page">
                   {item.label}
                 </span>
               ) : item.href ? (
                 <a
                   href={item.href}
                   onClick={item.onClick}
-                  className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors"
+                  className="text-aurora-muted hover:text-aurora-ink transition-colors"
                 >
                   {item.label}
                 </a>
@@ -47,7 +47,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({
                 <button
                   type="button"
                   onClick={item.onClick}
-                  className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer"
+                  className="text-aurora-muted hover:text-aurora-ink transition-colors cursor-pointer"
                 >
                   {item.label}
                 </button>

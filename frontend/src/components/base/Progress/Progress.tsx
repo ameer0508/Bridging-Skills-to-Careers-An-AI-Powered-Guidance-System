@@ -18,7 +18,7 @@ const heightMap = {
 };
 
 const variantColorMap = {
-  primary: 'bg-[var(--color-interactive-primary)]',
+  primary: '[background:var(--aurora-gradient-action)]',
   success: 'bg-[var(--color-status-success-text)]',
   warning: 'bg-[var(--color-status-warning-text)]',
   error: 'bg-[var(--color-status-error-text)]',
@@ -41,7 +41,7 @@ export const Progress: React.FC<ProgressProps> = ({
   return (
     <div className={`w-full ${className}`} {...props}>
       {(label || showValue) && (
-        <div className="flex justify-between items-center mb-1 text-xs font-medium text-[var(--color-text-secondary)]">
+        <div className="flex justify-between items-center mb-1 text-xs font-medium text-aurora-muted">
           {label && <span>{label}</span>}
           {showValue && <span>{Math.round(percentage)}%</span>}
         </div>

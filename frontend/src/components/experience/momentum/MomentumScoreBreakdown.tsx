@@ -50,36 +50,36 @@ export const MomentumScoreBreakdown: React.FC<MomentumScoreBreakdownProps> = ({
   return (
     <GlassCard className={`p-6 space-y-5 ${className}`}>
       {/* Header Bar */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+      <div className="flex items-center justify-between pb-3 border-b border-aurora-line">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+          <div className="p-2 rounded-lg bg-aurora-violet/[0.06] text-aurora-indigo">
             <Activity className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">Overall Career Momentum</h3>
-            <p className="text-xs text-neutral-400">
+            <h3 className="text-base font-bold text-aurora-ink">Overall Career Momentum</h3>
+            <p className="text-xs text-aurora-muted">
               Transparent, evidence-weighted professional momentum score
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1 text-xs font-semibold text-emerald-400">
+        <div className="flex items-center gap-1 text-xs font-semibold text-emerald-700">
           <TrendingUp className="w-4 h-4" />
           <span>+{momentumScoreData.recentDelta}% Recent Growth</span>
         </div>
       </div>
 
       {/* Main Score Hero */}
-      <div className="flex items-baseline justify-between p-5 rounded-xl bg-black/40 border border-white/5">
+      <div className="flex items-baseline justify-between p-5 rounded-xl bg-aurora-canvas/60 border border-aurora-line">
         <div>
-          <span className="text-xs font-medium text-neutral-400 block mb-1">
+          <span className="text-xs font-medium text-aurora-muted block mb-1">
             Calculated Momentum Rating
           </span>
-          <div className="text-4xl font-extrabold text-white">
+          <div className="text-4xl font-extrabold text-aurora-ink">
             <CountUpNumber value={momentumScoreData.overallScore} suffix="%" />
           </div>
         </div>
         <div className="text-right">
-          <span className="text-[11px] font-mono text-indigo-300 px-2.5 py-1 rounded bg-indigo-500/20 border border-indigo-500/30">
+          <span className="text-[11px] text-aurora-indigo px-2.5 py-1 rounded bg-aurora-violet/[0.06] border border-aurora-violet/25">
             {momentumScoreData.confidence}
           </span>
         </div>
@@ -87,28 +87,28 @@ export const MomentumScoreBreakdown: React.FC<MomentumScoreBreakdownProps> = ({
 
       {/* Transparent Contributing Factor Weights */}
       <div className="space-y-3 pt-1">
-        <span className="text-xs font-semibold text-neutral-300 flex items-center gap-1">
+        <span className="text-xs font-semibold text-aurora-muted flex items-center gap-1">
           <span>Contributing Telemetry Factors</span>
-          <HelpCircle className="w-3.5 h-3.5 text-neutral-500" />
+          <HelpCircle className="w-3.5 h-3.5 text-aurora-muted" />
         </span>
 
         <div className="space-y-2.5">
           {momentumScoreData.factors.map((factor, idx) => (
             <div key={idx} className="space-y-1">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-white">
+                <span className="font-semibold text-aurora-ink">
                   {factor.name}{' '}
-                  <span className="text-neutral-500 font-normal">({factor.weightPercentage}% Weight)</span>
+                  <span className="text-aurora-muted font-normal">({factor.weightPercentage}% Weight)</span>
                 </span>
-                <span className="font-bold text-indigo-400">+{factor.contribution}% Score</span>
+                <span className="font-bold text-aurora-indigo">+{factor.contribution}% Score</span>
               </div>
-              <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+              <div className="w-full h-2 rounded-full bg-aurora-canvas overflow-hidden">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500"
                   style={{ width: `${Math.min(100, factor.score)}%` }}
                 />
               </div>
-              <span className="text-[10px] text-neutral-400 block">{factor.evidence}</span>
+              <span className="text-[10px] text-aurora-muted block">{factor.evidence}</span>
             </div>
           ))}
         </div>

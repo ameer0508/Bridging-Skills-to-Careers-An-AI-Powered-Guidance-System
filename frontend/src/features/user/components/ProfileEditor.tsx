@@ -40,20 +40,20 @@ export const ProfileEditor: React.FC<ProfileEditorProps> = ({
   return (
     <Card variant="default">
       <CardHeader>
-        <h3 className="text-base font-bold font-display text-[var(--color-text-primary)]">
+        <h3 className="text-base font-bold font-display text-aurora-ink">
           Personal Details & Avatar
         </h3>
       </CardHeader>
 
       <CardBody>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex items-center gap-4 p-4 bg-[var(--color-bg-surface-sunken)] border border-[var(--color-border-subtle)] rounded-[var(--radius-lg)]">
+          <div className="flex items-center gap-4 p-4 bg-[var(--color-bg-surface-sunken)] border border-aurora-line rounded-2xl">
             <Avatar name={fullName || email} src={avatarUrl} size="lg" />
             <div>
-              <span className="text-xs font-semibold text-[var(--color-text-primary)] block">
+              <span className="text-xs font-semibold text-aurora-ink block">
                 {fullName || 'User Avatar'}
               </span>
-              <span className="text-[10px] text-[var(--color-text-tertiary)] block">
+              <span className="text-[10px] text-aurora-muted block">
                 {email}
               </span>
             </div>

@@ -11,7 +11,7 @@ export interface ProgressRingProps extends React.SVGAttributes<SVGSVGElement> {
 }
 
 const strokeColorMap = {
-  primary: 'var(--color-interactive-primary)',
+  primary: '#5540f5',
   success: 'var(--color-status-success-text)',
   warning: 'var(--color-status-warning-text)',
   error: 'var(--color-status-error-text)',
@@ -53,7 +53,7 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="var(--color-border-subtle)"
+          stroke="#e6eaf6"
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -70,7 +70,7 @@ export const ProgressRing: React.FC<ProgressRingProps> = ({
           className="transition-all duration-[var(--duration-slow)] ease-[var(--ease-default)]"
         />
       </svg>
-      <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-[var(--color-text-primary)]">
+      <div className="absolute inset-0 flex items-center justify-center text-xs font-bold text-aurora-ink">
         {children ? children : showValueLabel ? `${Math.round(percentage)}%` : null}
       </div>
     </div>

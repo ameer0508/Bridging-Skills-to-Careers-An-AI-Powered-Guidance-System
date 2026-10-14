@@ -62,25 +62,25 @@ export const CareerJourneyMap: React.FC<CareerJourneyMapProps> = ({
   return (
     <GlassCard className={`p-6 space-y-5 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+      <div className="flex items-center justify-between pb-3 border-b border-aurora-line">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+          <div className="p-2 rounded-lg bg-aurora-violet/[0.06] text-aurora-indigo">
             <Compass className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">Career Journey Map</h3>
-            <p className="text-xs text-neutral-400">
+            <h3 className="text-base font-bold text-aurora-ink">Career Journey Map</h3>
+            <p className="text-xs text-aurora-muted">
               Interactive trajectory from current competencies to target destination
             </p>
           </div>
         </div>
-        <span className="text-xs font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+        <span className="text-xs px-2 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25">
           Destination Guided
         </span>
       </div>
 
       {/* Visual Journey Track */}
-      <div className="p-6 rounded-xl bg-black/40 border border-white/5 overflow-x-auto">
+      <div className="p-6 rounded-xl bg-aurora-canvas/60 border border-aurora-line overflow-x-auto">
         <div className="flex items-center justify-between min-w-162.5 gap-4 relative">
           {/* Connecting Track Line */}
           <div className="absolute top-1/2 left-12 right-12 h-1 bg-linear-to-r from-emerald-500 via-indigo-500 to-amber-500 -translate-y-1/2 opacity-30 pointer-events-none" />
@@ -97,31 +97,31 @@ export const CareerJourneyMap: React.FC<CareerJourneyMapProps> = ({
                   className={`relative z-10 p-4 rounded-xl border transition-all cursor-pointer min-w-37.5 ${
 
                     step.status === 'completed'
-                      ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-300'
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
                       : step.status === 'active'
-                      ? 'bg-indigo-950/50 border-indigo-500/80 text-white shadow-lg shadow-indigo-500/25 ring-2 ring-indigo-500/50'
-                      : 'bg-neutral-900/60 border-white/10 text-neutral-400'
+                      ? 'bg-violet-50 border-aurora-violet/25 text-aurora-ink shadow-lg shadow-indigo-500/25 ring-2 ring-indigo-500/50'
+                      : 'bg-aurora-canvas/60 border-aurora-line text-aurora-muted'
                   } ${isSelected ? 'ring-2 ring-white' : ''}`}
                 >
                   <div className="flex items-center justify-between gap-1 mb-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-aurora-muted">
                       0{index + 1}. {step.category}
                     </span>
                     {step.status === 'completed' ? (
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
                     ) : step.status === 'active' ? (
-                      <Zap className="w-4 h-4 text-amber-400 shrink-0 animate-pulse" />
+                      <Zap className="w-4 h-4 text-amber-700 shrink-0 animate-pulse" />
                     ) : (
-                      <Award className="w-4 h-4 text-neutral-500 shrink-0" />
+                      <Award className="w-4 h-4 text-aurora-muted shrink-0" />
                     )}
                   </div>
-                  <h4 className="text-xs font-bold text-white leading-tight">{step.title}</h4>
-                  <p className="text-[10px] text-neutral-400 mt-1 truncate">{step.subtitle}</p>
+                  <h4 className="text-xs font-bold text-aurora-ink leading-tight">{step.title}</h4>
+                  <p className="text-[10px] text-aurora-muted mt-1 truncate">{step.subtitle}</p>
                 </motion.div>
 
                 {/* Arrow Step Connector */}
                 {index < defaultSteps.length - 1 && (
-                  <div className="z-10 text-neutral-500 shrink-0">
+                  <div className="z-10 text-aurora-muted shrink-0">
                     <ArrowRight className="w-4 h-4" />
                   </div>
                 )}
@@ -133,15 +133,15 @@ export const CareerJourneyMap: React.FC<CareerJourneyMapProps> = ({
 
       {/* Selected Step Inspector */}
       {selectedStep && (
-        <div className="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between text-xs text-neutral-300">
+        <div className="p-4 rounded-xl bg-aurora-canvas border border-aurora-line flex items-center justify-between text-xs text-aurora-muted">
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-indigo-400 shrink-0" />
+            <Target className="w-5 h-5 text-aurora-indigo shrink-0" />
             <div>
-              <span className="font-bold text-white block">{selectedStep.title}</span>
+              <span className="font-bold text-aurora-ink block">{selectedStep.title}</span>
               <span>{selectedStep.subtitle}</span>
             </div>
           </div>
-          <span className="px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+          <span className="px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25">
             {selectedStep.status}
           </span>
         </div>

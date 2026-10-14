@@ -15,20 +15,20 @@ export const LearningROICard: React.FC<LearningROIProps> = ({
   const getRoiColor = (roi: string) => {
     switch (roi) {
       case 'Exceptional':
-        return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30';
+        return 'text-emerald-700 bg-emerald-50 border-emerald-200';
       case 'Very High':
-        return 'text-cyan-400 bg-cyan-500/10 border-cyan-500/30';
+        return 'text-aurora-violet bg-aurora-violet/[0.06] border-aurora-violet/25';
       case 'High':
-        return 'text-indigo-400 bg-indigo-500/10 border-indigo-500/30';
+        return 'text-aurora-indigo bg-aurora-violet/[0.06] border-aurora-violet/25';
       default:
-        return 'text-slate-400 bg-slate-800 border-white/10';
+        return 'text-aurora-muted bg-aurora-canvas border-aurora-line';
     }
   };
 
   return (
-    <div className="p-3.5 bg-slate-950/60 border border-white/5 rounded-xl space-y-2 text-xs font-mono">
+    <div className="p-3.5 bg-aurora-canvas/60 border border-aurora-line rounded-xl space-y-2 text-xs font-mono">
       <div className="flex justify-between items-center">
-        <span className="text-[10px] text-slate-500 uppercase font-bold">Learning ROI:</span>
+        <span className="text-[10px] text-aurora-muted uppercase font-bold">Learning ROI:</span>
         <span className={`px-2 py-0.5 rounded border text-[10px] font-bold ${getRoiColor(roiLevel)}`}>
           {roiLevel} ROI
         </span>
@@ -36,12 +36,12 @@ export const LearningROICard: React.FC<LearningROIProps> = ({
 
       <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
         <div>
-          <span className="text-slate-500 block text-[10px]">Estimated Time:</span>
-          <span className="text-slate-200 font-bold">{learningTime}</span>
+          <span className="text-aurora-muted block text-[10px]">Estimated Time:</span>
+          <span className="text-aurora-ink font-bold">{learningTime}</span>
         </div>
         <div>
-          <span className="text-slate-500 block text-[10px]">Difficulty Level:</span>
-          <span className="text-purple-300 font-bold">{difficulty}</span>
+          <span className="text-aurora-muted block text-[10px]">Difficulty Level:</span>
+          <span className="text-aurora-violet font-bold">{difficulty}</span>
         </div>
       </div>
     </div>

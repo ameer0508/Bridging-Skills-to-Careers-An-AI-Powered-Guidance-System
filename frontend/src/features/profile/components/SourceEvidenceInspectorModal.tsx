@@ -35,20 +35,20 @@ export const SourceEvidenceInspectorModal: React.FC<SourceEvidenceInspectorModal
   if (!source) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fade-in font-mono">
-      <div className="relative w-full max-w-xl p-6 sm:p-8 rounded-3xl bg-slate-900 border border-white/10 shadow-2xl space-y-6 text-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-aurora-canvas/60 backdrop-blur-md animate-fade-in font-mono">
+      <div className="relative w-full max-w-xl p-6 sm:p-8 rounded-3xl bg-aurora-canvas border border-aurora-line shadow-2xl space-y-6 text-xs">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
+        <div className="flex items-center justify-between border-b border-aurora-line pb-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+              <span className="px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25">
                 EVIDENCE SOURCE INSPECTOR
               </span>
-              <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                 {source.status}
               </span>
             </div>
-            <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
+            <h3 className="text-base sm:text-lg font-bold text-aurora-ink tracking-tight">
               {source.name}
             </h3>
           </div>
@@ -56,21 +56,21 @@ export const SourceEvidenceInspectorModal: React.FC<SourceEvidenceInspectorModal
           <button
             onClick={onClose}
             type="button"
-            className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition cursor-pointer"
+            className="p-1.5 rounded-xl hover:bg-aurora-canvas text-aurora-muted hover:text-aurora-indigo transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Freshness & Telemetry Bar */}
-        <div className="grid grid-cols-2 gap-3 p-3.5 rounded-2xl bg-slate-950 border border-white/5">
+        <div className="grid grid-cols-2 gap-3 p-3.5 rounded-2xl bg-aurora-canvas border border-aurora-line">
           <div className="space-y-0.5">
-            <span className="text-[9px] text-slate-500 uppercase block">Data Records</span>
-            <strong className="text-white text-xs block">{source.itemsCount} Verified Records</strong>
+            <span className="text-[9px] text-aurora-muted uppercase block">Data Records</span>
+            <strong className="text-aurora-ink text-xs block">{source.itemsCount} Verified Records</strong>
           </div>
           <div className="space-y-0.5">
-            <span className="text-[9px] text-slate-500 uppercase block">Last Synced / Updated</span>
-            <span className="text-cyan-300 text-xs font-semibold block flex items-center gap-1">
+            <span className="text-[9px] text-aurora-muted uppercase block">Last Synced / Updated</span>
+            <span className="text-aurora-violet text-xs font-semibold block flex items-center gap-1">
               <Clock className="w-3 h-3" />
               {source.updatedAt ? new Date(source.updatedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Live Verified'}
             </span>
@@ -79,17 +79,17 @@ export const SourceEvidenceInspectorModal: React.FC<SourceEvidenceInspectorModal
 
         {/* What SkillBridge Uses */}
         <div className="space-y-2">
-          <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block flex items-center gap-1.5">
-            <Database className="w-3.5 h-3.5 text-indigo-400" />
+          <span className="text-[10px] text-aurora-muted uppercase font-bold tracking-wider block flex items-center gap-1.5">
+            <Database className="w-3.5 h-3.5 text-aurora-indigo" />
             What SkillBridge Extracts & Uses:
           </span>
           <div className="space-y-1.5">
             {source.whatSkillBridgeUses.map((item, idx) => (
               <div
                 key={idx}
-                className="p-2.5 rounded-xl bg-slate-950/60 border border-white/5 flex items-start gap-2 text-slate-300 text-[11px]"
+                className="p-2.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-start gap-2 text-aurora-muted text-[11px]"
               >
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" />
                 <span>{item}</span>
               </div>
             ))}
@@ -97,22 +97,22 @@ export const SourceEvidenceInspectorModal: React.FC<SourceEvidenceInspectorModal
         </div>
 
         {/* Why It Matters for AI Personalization */}
-        <div className="p-4 rounded-2xl bg-indigo-950/30 border border-indigo-500/20 space-y-1.5">
-          <span className="text-[10px] text-indigo-300 uppercase font-bold tracking-wider block flex items-center gap-1.5">
-            <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+        <div className="p-4 rounded-2xl bg-violet-50 border border-aurora-violet/25 space-y-1.5">
+          <span className="text-[10px] text-aurora-indigo uppercase font-bold tracking-wider block flex items-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-aurora-indigo" />
             Why This Grounding Matters:
           </span>
-          <p className="text-slate-300 text-[11px] leading-relaxed">
+          <p className="text-aurora-muted text-[11px] leading-relaxed">
             {source.whyItMatters}
           </p>
         </div>
 
         {/* Action Footer */}
-        <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+        <div className="pt-4 border-t border-aurora-line flex items-center justify-between">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition cursor-pointer"
+            className="px-4 py-2 rounded-xl bg-aurora-canvas hover:bg-aurora-line text-aurora-muted text-xs transition cursor-pointer"
           >
             Close Inspector
           </button>
@@ -123,7 +123,7 @@ export const SourceEvidenceInspectorModal: React.FC<SourceEvidenceInspectorModal
               onClose();
               onNavigate(source.targetRoute);
             }}
-            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition cursor-pointer shadow-lg shadow-indigo-600/30 flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-white font-bold text-xs transition cursor-pointer shadow-lg shadow-indigo-600/30 flex items-center gap-1.5"
           >
             <span>{source.actionLabel}</span>
             <ArrowRight className="w-3.5 h-3.5" />

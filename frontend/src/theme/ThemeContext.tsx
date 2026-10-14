@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 
 export type Theme = 'dark' | 'light' | 'system';
 
@@ -11,59 +11,25 @@ interface ThemeContextProps {
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ defaultTheme?: Theme; children: React.ReactNode }> = ({
-  defaultTheme = 'dark',
-  children
-}) => {
-  const [theme, setThemeState] = useState<Theme>(
-    () => (localStorage.getItem('skillbridge-theme') as Theme) || defaultTheme
-  );
-  const [resolvedTheme, setResolvedTheme] = useState<'dark' | 'light'>('dark');
-
-  const setTheme = (newTheme: Theme) => {
-    localStorage.setItem('skillbridge-theme', newTheme);
-    setThemeState(newTheme);
-  };
-
+/**
+ * SkillBridge has one visual design, Aurora Elite, which is light. Every screen is drawn for it,
+ * so the light semantic tokens (`html.light` in main.css) are always applied. The API is kept so
+ * existing callers keep working; asking for another theme changes nothing.
+ */
+export const ThemeProvider: React.FC<{ defaultTheme?: Theme; children: React.ReactNode }> = ({ children }) => {
   useEffect(() => {
     const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
-
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-      root.classList.add(systemTheme);
-      setResolvedTheme(systemTheme);
-      return;
+    root.classList.remove('dark');
+    root.classList.add('light');
+    try {
+      // An earlier dark choice no longer applies
+      localStorage.removeItem('skillbridge-theme');
+    } catch {
+      // Storage unavailable
     }
+  }, []);
 
-    root.classList.add(theme);
-    setResolvedTheme(theme);
-  }, [theme]);
-
-  // Sync system theme changes dynamically if on 'system' mode
-  useEffect(() => {
-    if (theme !== 'system') return;
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => {
-      const root = window.document.documentElement;
-      root.classList.remove('light', 'dark');
-      const systemTheme = mediaQuery.matches ? 'dark' : 'light';
-      root.classList.add(systemTheme);
-      setResolvedTheme(systemTheme);
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme]);
-
-  return (
-    <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme: 'light', setTheme: () => undefined, resolvedTheme: 'light' }}>{children}</ThemeContext.Provider>;
 };
 
 export const useTheme = () => {

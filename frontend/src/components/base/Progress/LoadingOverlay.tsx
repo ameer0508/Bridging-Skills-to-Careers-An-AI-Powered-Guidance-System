@@ -26,7 +26,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
       >
         <Spinner size={32} />
         {message && (
-          <p className="mt-3 text-sm font-medium text-[var(--color-text-secondary)]">
+          <p className="mt-3 text-sm font-medium text-aurora-muted">
             {message}
           </p>
         )}

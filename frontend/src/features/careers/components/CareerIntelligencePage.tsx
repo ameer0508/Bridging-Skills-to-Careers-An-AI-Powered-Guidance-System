@@ -77,7 +77,7 @@ export const CareerIntelligencePage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
+        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
           <AIThinkingAnimation statusText="Evaluating Deterministic Career Match Scores..." />
         </div>
       </div>
@@ -122,7 +122,7 @@ export const CareerIntelligencePage: React.FC = () => {
       subtitle: 'Target career strategy',
       icon: Brain,
       shortcut: '⌘1',
-      color: 'text-cyan-400',
+      color: 'text-aurora-violet',
       onClick: () => navigate('/ai'),
     },
     {
@@ -131,7 +131,7 @@ export const CareerIntelligencePage: React.FC = () => {
       subtitle: 'Dimensional gap scoring',
       icon: Compass,
       shortcut: '⌘2',
-      color: 'text-emerald-400',
+      color: 'text-emerald-700',
       onClick: () => navigate('/readiness'),
     },
     {
@@ -140,7 +140,7 @@ export const CareerIntelligencePage: React.FC = () => {
       subtitle: 'Upload updated resume',
       icon: FileText,
       shortcut: '⌘3',
-      color: 'text-indigo-400',
+      color: 'text-aurora-indigo',
       onClick: () => navigate('/resume'),
     },
   ];
@@ -155,15 +155,15 @@ export const CareerIntelligencePage: React.FC = () => {
       />
 
       {/* SECTION 2 — SEARCH & CATEGORY FILTER BAR */}
-      <div className="p-4 rounded-2xl border border-white/10 bg-slate-950/70 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="p-4 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+          <Search className="w-4 h-4 text-aurora-muted absolute left-3.5 top-3" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search career roles or skills..."
-            className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs text-white placeholder-slate-500 outline-none focus:border-indigo-500/50 transition-colors"
+            className="w-full pl-10 pr-4 py-2 rounded-xl bg-aurora-canvas border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 outline-none focus:border-aurora-violet/25 transition-colors"
           />
         </div>
 
@@ -172,10 +172,10 @@ export const CareerIntelligencePage: React.FC = () => {
             <button
               key={c}
               onClick={() => setSelectedCategory(c)}
-              className={`px-3 py-1.5 rounded-xl font-mono text-xs transition-colors shrink-0 cursor-pointer ${
+              className={`px-3 py-1.5 rounded-xl text-xs transition-colors shrink-0 cursor-pointer ${
                 selectedCategory === c
-                  ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-600/30'
-                  : 'bg-slate-900 text-slate-400 hover:text-white border border-white/5'
+                  ? 'text-white [background:var(--aurora-gradient-action)] font-bold shadow-aurora-sm shadow-indigo-600/30'
+                  : 'bg-aurora-canvas text-aurora-muted hover:text-aurora-indigo border border-aurora-line'
               }`}
             >
               {c === 'all' ? 'All Roles' : c}

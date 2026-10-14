@@ -172,7 +172,7 @@ export const RecordingControl: React.FC<{ sessionId: string; questionIndex: numb
     <div className="space-y-2 text-[11px] text-aurora-muted" data-testid="recording">
       <div className="flex flex-wrap items-center gap-2">
         {recording ? (
-          <button type="button" className={`${button} animate-pulse border-rose-500 bg-rose-600/30 text-rose-700`} onClick={() => recorderRef.current?.stop()}>
+          <button type="button" className={`${button} animate-pulse border-rose-500 bg-rose-50 text-rose-700`} onClick={() => recorderRef.current?.stop()}>
             <Square className="h-3.5 w-3.5" aria-hidden="true" /> Stop recording ({seconds}s / {MAX_SECONDS}s)
           </button>
         ) : (

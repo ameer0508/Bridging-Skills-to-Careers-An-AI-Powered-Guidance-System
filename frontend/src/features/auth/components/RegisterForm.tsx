@@ -83,22 +83,22 @@ export const RegisterForm: React.FC = () => {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-white/15 bg-slate-950/80 backdrop-blur-2xl p-8 sm:p-10 shadow-2xl shadow-black/80 w-full max-w-md">
+    <div className="relative overflow-hidden rounded-[28px] border border-aurora-line bg-aurora-canvas/60 backdrop-blur-2xl p-8 sm:p-10 shadow-2xl shadow-black/80 w-full max-w-md">
       {/* Top Ambient Glow inside card */}
       <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full bg-linear-to-br from-indigo-500/20 to-cyan-500/10 blur-3xl" />
 
       {/* Card Header */}
       <div className="text-center space-y-2 mb-8 relative z-10">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/10 backdrop-blur-md mb-1">
-          <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-          <span className="text-[11px] font-mono font-bold text-cyan-300 tracking-wider uppercase">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-aurora-violet/25 bg-aurora-violet/[0.06] backdrop-blur-md mb-1">
+          <Sparkles className="w-3.5 h-3.5 text-aurora-violet" />
+          <span className="text-[11px] font-bold text-aurora-violet tracking-wider uppercase">
             Build Intelligence Profile
           </span>
         </div>
-        <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+        <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-aurora-ink tracking-tight">
           Create Account.
         </h1>
-        <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+        <p className="text-xs sm:text-sm text-aurora-muted leading-relaxed">
           Create your profile & let SkillBridge navigate your career.
         </p>
       </div>
@@ -107,17 +107,17 @@ export const RegisterForm: React.FC = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 relative z-10">
         {/* Role Selector Tabs */}
         <div className="space-y-1.5">
-          <label className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+          <label className="text-xs font-semibold uppercase tracking-wider text-aurora-muted">
             Primary Role Profile
           </label>
-          <div className="grid grid-cols-2 gap-2 bg-slate-900/80 p-1 rounded-xl border border-white/10">
+          <div className="grid grid-cols-2 gap-2 bg-aurora-canvas/60 p-1 rounded-xl border border-aurora-line">
             <button
               type="button"
               onClick={() => setUserRole('student')}
               className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 userRole === 'student'
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-sm'
+                  : 'text-aurora-muted hover:text-aurora-indigo'
               }`}
             >
               <User className="w-3.5 h-3.5" />
@@ -128,8 +128,8 @@ export const RegisterForm: React.FC = () => {
               onClick={() => setUserRole('professional')}
               className={`py-2 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                 userRole === 'professional'
-                  ? 'bg-indigo-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
+                  ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-sm'
+                  : 'text-aurora-muted hover:text-aurora-indigo'
               }`}
             >
               <Briefcase className="w-3.5 h-3.5" />
@@ -176,18 +176,18 @@ export const RegisterForm: React.FC = () => {
 
         {/* Country Selector */}
         <div className="space-y-1.5">
-          <label htmlFor="register-country" className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+          <label htmlFor="register-country" className="text-xs font-semibold uppercase tracking-wider text-aurora-muted">
             Country / Region
           </label>
           <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-aurora-muted">
               <Globe className="w-4 h-4" />
             </div>
             <select
               id="register-country"
               value={country}
               onChange={(e) => setCountry(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-900/80 border border-white/10 focus:border-indigo-400 rounded-xl text-slate-100 text-sm focus:outline-none transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-aurora-canvas/60 border border-aurora-line focus:border-indigo-400 rounded-xl text-aurora-ink text-sm focus:outline-none transition-all"
             >
               <option value="United States">United States</option>
               <option value="United Kingdom">United Kingdom</option>
@@ -202,20 +202,20 @@ export const RegisterForm: React.FC = () => {
 
         {/* Terms Checkbox */}
         <div className="pt-1">
-          <label className="flex items-start gap-2.5 cursor-pointer text-xs text-slate-400 leading-normal">
+          <label className="flex items-start gap-2.5 cursor-pointer text-xs text-aurora-muted leading-normal">
             <input
               type="checkbox"
               checked={agreeTerms}
               onChange={(e) => setAgreeTerms(e.target.checked)}
-              className="w-4 h-4 rounded bg-slate-900 border-white/20 text-indigo-600 focus:ring-indigo-500/40 mt-0.5 shrink-0"
+              className="w-4 h-4 rounded bg-aurora-canvas border-aurora-line text-indigo-600 focus:ring-indigo-500/40 mt-0.5 shrink-0"
             />
             <span>
               I agree to the{' '}
-              <a href="#" className="text-indigo-400 hover:underline">
+              <a href="#" className="text-aurora-indigo hover:underline">
                 Terms of Service
               </a>{' '}
               and{' '}
-              <a href="#" className="text-indigo-400 hover:underline">
+              <a href="#" className="text-aurora-indigo hover:underline">
                 Privacy Policy
               </a>
             </span>
@@ -229,9 +229,9 @@ export const RegisterForm: React.FC = () => {
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium flex items-center gap-2.5"
+              className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2.5"
             >
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400" />
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-700" />
               <span>
                 {(mutation.error as { message?: string })?.message ||
                   'Account registration failed. Please try again.'}
@@ -250,7 +250,7 @@ export const RegisterForm: React.FC = () => {
         >
           {mutation.isPending ? (
             <>
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-aurora-line border-t-white rounded-full animate-spin" />
               <span>Creating Your Workspace...</span>
             </>
           ) : (
@@ -263,16 +263,16 @@ export const RegisterForm: React.FC = () => {
       </form>
 
       {/* Card Footer */}
-      <div className="mt-8 pt-6 border-t border-white/10 text-center relative z-10 flex flex-col items-center gap-3">
-        <p className="text-xs text-slate-400">
+      <div className="mt-8 pt-6 border-t border-aurora-line text-center relative z-10 flex flex-col items-center gap-3">
+        <p className="text-xs text-aurora-muted">
           Already have an account?{' '}
-          <Link to="/login" className="font-bold text-indigo-400 hover:text-indigo-300 transition-colors">
+          <Link to="/login" className="font-bold text-aurora-indigo hover:text-aurora-indigo transition-colors">
             Sign In
           </Link>
         </p>
 
-        <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-mono">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+        <div className="flex items-center gap-1.5 text-[10px] text-aurora-muted font-mono">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
           <span>256-Bit Encrypted Workspace Auth</span>
         </div>
       </div>

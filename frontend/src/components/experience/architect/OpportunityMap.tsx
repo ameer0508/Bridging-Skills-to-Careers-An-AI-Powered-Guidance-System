@@ -40,14 +40,14 @@ export const OpportunityMap: React.FC<OpportunityMapProps> = ({
 }) => {
   return (
     <GlassCard className={`p-6 space-y-4 ${className}`}>
-      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+      <div className="flex items-center justify-between pb-3 border-b border-aurora-line">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+          <div className="p-2 rounded-lg bg-emerald-50 text-emerald-700">
             <Network className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">Unlocked Opportunity Map</h3>
-            <p className="text-xs text-neutral-400">
+            <h3 className="text-base font-bold text-aurora-ink">Unlocked Opportunity Map</h3>
+            <p className="text-xs text-aurora-muted">
               Future career pathways unlocked by completing current milestones
             </p>
           </div>
@@ -58,20 +58,20 @@ export const OpportunityMap: React.FC<OpportunityMapProps> = ({
         {opportunities.map((opp, idx) => (
           <div
             key={idx}
-            className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-2 hover:border-emerald-500/30 transition-colors"
+            className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2 hover:border-emerald-200 transition-colors"
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-aurora-muted">
                 {opp.category}
               </span>
-              <Unlock className="w-3.5 h-3.5 text-emerald-400" />
+              <Unlock className="w-3.5 h-3.5 text-emerald-700" />
             </div>
 
-            <h4 className="text-xs font-bold text-white leading-snug">{opp.title}</h4>
+            <h4 className="text-xs font-bold text-aurora-ink leading-snug">{opp.title}</h4>
 
-            <div className="pt-1 flex items-center justify-between text-[11px] text-neutral-300 border-t border-white/5">
-              <span>Unlocks: <strong className="text-emerald-300">{opp.unlockedRole}</strong></span>
-              <span className="text-emerald-400 font-bold">+{opp.impactScore}%</span>
+            <div className="pt-1 flex items-center justify-between text-[11px] text-aurora-muted border-t border-aurora-line">
+              <span>Unlocks: <strong className="text-emerald-700">{opp.unlockedRole}</strong></span>
+              <span className="text-emerald-700 font-bold">+{opp.impactScore}%</span>
             </div>
           </div>
         ))}

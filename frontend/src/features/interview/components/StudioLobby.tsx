@@ -244,7 +244,7 @@ export const StudioLobby: React.FC<StudioLobbyProps> = ({
                     type="button"
                     className={`p-4 rounded-2xl border text-left transition-all duration-200 cursor-pointer relative overflow-hidden flex flex-col justify-between ${
                       isSelected
-                        ? 'bg-indigo-600/20 border-indigo-400 text-aurora-ink shadow-lg shadow-indigo-600/20 ring-1 ring-indigo-400'
+                        ? 'bg-violet-50 border-indigo-400 text-aurora-ink shadow-lg shadow-indigo-600/20 ring-1 ring-indigo-400'
                         : 'bg-aurora-canvas/60 border-aurora-line text-aurora-muted hover:border-aurora-line hover:bg-aurora-canvas/60'
                     }`}
                   >

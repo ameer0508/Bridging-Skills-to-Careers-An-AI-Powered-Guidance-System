@@ -28,11 +28,11 @@ export interface IllustrativeNoticeProps {
 export const IllustrativeNotice: React.FC<IllustrativeNoticeProps> = ({ kind = 'sample', children, className = '' }) => (
   <div
     role="note"
-    className={`flex items-start gap-3 rounded-xl border border-amber-400/40 bg-amber-500/10 px-4 py-3 text-xs text-amber-100 ${className}`}
+    className={`flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900 ${className}`}
   >
-    <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" aria-hidden="true" />
+    <Info className="mt-0.5 h-4 w-4 shrink-0 text-amber-700" aria-hidden="true" />
     <p className="leading-relaxed">
-      <strong className="font-semibold text-amber-200">{COPY[kind].title}.</strong> {children ?? COPY[kind].body}
+      <strong className="font-semibold text-amber-900">{COPY[kind].title}.</strong> {children ?? COPY[kind].body}
     </p>
   </div>
 );

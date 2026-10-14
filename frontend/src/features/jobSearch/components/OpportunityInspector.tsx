@@ -170,7 +170,7 @@ export const OpportunityInspector: React.FC<OpportunityInspectorProps> = ({
                     className={`px-2.5 py-1 rounded-lg text-xs font-medium border ${
                       isMatched
                         ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                        : 'bg-aurora-canvas/80 text-aurora-muted border-slate-700/50'
+                        : 'bg-aurora-canvas/80 text-aurora-muted border-aurora-line'
                     }`}
                   >
                     {skill} {isMatched && '✓'}

@@ -33,14 +33,14 @@ export const SmartInsightFeed: React.FC<SmartInsightFeedProps> = ({
 }) => {
   return (
     <GlassCard className={`p-6 space-y-4 ${className}`}>
-      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+      <div className="flex items-center justify-between pb-3 border-b border-aurora-line">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
+          <div className="p-2 rounded-lg bg-aurora-violet/[0.06] text-aurora-indigo">
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-white">Prioritized Adaptive Telemetry</h3>
-            <p className="text-xs text-neutral-400">
+            <h3 className="text-base font-bold text-aurora-ink">Prioritized Adaptive Telemetry</h3>
+            <p className="text-xs text-aurora-muted">
               Ranked observations sorted by impact score and confidence
             </p>
           </div>
@@ -51,23 +51,23 @@ export const SmartInsightFeed: React.FC<SmartInsightFeedProps> = ({
         {insights.slice(0, 3).map((ins) => (
           <div
             key={ins.id}
-            className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-2 hover:border-indigo-500/30 transition-colors"
+            className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2 hover:border-aurora-violet/25 transition-colors"
           >
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-aurora-indigo">
                 Rank #{ins.rank} • {ins.category}
               </span>
-              <span className="flex items-center gap-1 text-[11px] font-extrabold text-emerald-400">
+              <span className="flex items-center gap-1 text-[11px] font-extrabold text-emerald-700">
                 <Zap className="w-3.5 h-3.5" />
                 {ins.impactScore}% Impact
               </span>
             </div>
 
-            <h4 className="text-xs font-bold text-white leading-snug">{ins.title}</h4>
+            <h4 className="text-xs font-bold text-aurora-ink leading-snug">{ins.title}</h4>
 
-            <div className="pt-1 flex items-center justify-between text-[10px] text-neutral-400 border-t border-white/5">
+            <div className="pt-1 flex items-center justify-between text-[10px] text-aurora-muted border-t border-aurora-line">
               <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                <ShieldCheck className="w-3 h-3 text-emerald-700" />
                 {ins.confidenceTier}
               </span>
               <span>{ins.evidence}</span>

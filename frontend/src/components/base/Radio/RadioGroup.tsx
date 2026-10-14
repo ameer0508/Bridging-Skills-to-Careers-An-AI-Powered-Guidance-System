@@ -40,7 +40,7 @@ export const RadioGroup: React.FC<RadioGroupProps> = ({
   return (
     <RadioGroupContext.Provider value={{ name, value: currentValue, onChange: handleChange }}>
       <div role="radiogroup" aria-label={label} className={`flex ${orientation === 'vertical' ? 'flex-col gap-2' : 'flex-row gap-4'} ${className}`}>
-        {label && <span className="text-xs font-semibold text-[var(--color-text-secondary)] mb-1 block">{label}</span>}
+        {label && <span className="text-xs font-semibold text-aurora-muted mb-1 block">{label}</span>}
         {children}
       </div>
     </RadioGroupContext.Provider>

@@ -74,22 +74,22 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 const ToastItem: React.FC<{ toast: ToastMessage; onClose: () => void }> = ({ toast, onClose }) => {
   const variantStyles: Record<ToastVariant, { bg: string; border: string; text: string }> = {
     info: {
-      bg: 'bg-[var(--color-bg-surface-raised)]',
+      bg: 'bg-white',
       border: 'border-[var(--color-status-info-border)]',
       text: 'text-[var(--color-status-info-text)]',
     },
     success: {
-      bg: 'bg-[var(--color-bg-surface-raised)]',
+      bg: 'bg-white',
       border: 'border-[var(--color-status-success-border)]',
       text: 'text-[var(--color-status-success-text)]',
     },
     warning: {
-      bg: 'bg-[var(--color-bg-surface-raised)]',
+      bg: 'bg-white',
       border: 'border-[var(--color-status-warning-border)]',
       text: 'text-[var(--color-status-warning-text)]',
     },
     error: {
-      bg: 'bg-[var(--color-bg-surface-raised)]',
+      bg: 'bg-white',
       border: 'border-[var(--color-status-error-border)]',
       text: 'text-[var(--color-status-error-text)]',
     },
@@ -99,7 +99,7 @@ const ToastItem: React.FC<{ toast: ToastMessage; onClose: () => void }> = ({ toa
 
   return (
     <div
-      className={`pointer-events-auto p-3.5 rounded-[var(--radius-lg)] border shadow-[var(--shadow-lg)] flex items-center justify-between gap-3 text-xs font-medium text-[var(--color-text-primary)] animate-slide-in-right ${style.bg} ${style.border}`}
+      className={`pointer-events-auto p-3.5 rounded-2xl border shadow-[var(--shadow-lg)] flex items-center justify-between gap-3 text-xs font-medium text-aurora-ink animate-slide-in-right ${style.bg} ${style.border}`}
     >
       <div className="flex items-center gap-2.5">
         <span className={style.text}>
@@ -112,7 +112,7 @@ const ToastItem: React.FC<{ toast: ToastMessage; onClose: () => void }> = ({ toa
       <button
         type="button"
         onClick={onClose}
-        className="text-[var(--color-text-tertiary)] hover:text-[var(--color-text-primary)] focus:outline-none p-1"
+        className="text-aurora-muted hover:text-aurora-ink focus:outline-none p-1"
         aria-label="Dismiss toast"
       >
         <Icon size={12}>

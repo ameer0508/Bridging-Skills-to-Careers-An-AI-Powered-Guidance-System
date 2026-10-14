@@ -19,7 +19,7 @@ export const CapabilityActivationHub: React.FC = () => {
       title: 'Evidence Ingestion',
       subtitle: 'Upload parsed resume & project portfolio',
       icon: FileText,
-      color: 'text-cyan-400',
+      color: 'text-aurora-violet',
       status: 'Awaiting Evidence',
     },
     {
@@ -27,7 +27,7 @@ export const CapabilityActivationHub: React.FC = () => {
       title: 'Taxonomy Normalization',
       subtitle: 'AI canonicalizes skills and maps synonyms',
       icon: Brain,
-      color: 'text-indigo-400',
+      color: 'text-aurora-indigo',
       status: 'Engine Standby',
     },
     {
@@ -35,7 +35,7 @@ export const CapabilityActivationHub: React.FC = () => {
       title: 'Multi-Source Weighting',
       subtitle: 'Deterministic points from experience & certs',
       icon: ShieldCheck,
-      color: 'text-purple-400',
+      color: 'text-aurora-violet',
       status: 'Evidence Ready',
     },
     {
@@ -43,7 +43,7 @@ export const CapabilityActivationHub: React.FC = () => {
       title: 'Living Capability Map',
       subtitle: 'Interactive ontology graph & gap scoring',
       icon: GitBranch,
-      color: 'text-emerald-400',
+      color: 'text-emerald-700',
       status: 'Auto-Constructs',
     },
   ];
@@ -51,19 +51,19 @@ export const CapabilityActivationHub: React.FC = () => {
   return (
     <div className="space-y-8 max-w-5xl mx-auto py-8">
       {/* Hero Activation Card */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900/90 via-slate-950 to-indigo-950/40 p-8 md:p-12 backdrop-blur-xl shadow-2xl text-center space-y-6">
-        <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto shadow-lg shadow-indigo-950/50">
+      <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-gradient-to-br from-white via-aurora-surface to-aurora-sidebar p-8 md:p-12 backdrop-blur-xl shadow-2xl text-center space-y-6">
+        <div className="w-16 h-16 rounded-2xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo flex items-center justify-center mx-auto shadow-lg shadow-aurora-violet/10">
           <Brain className="w-8 h-8 animate-pulse" />
         </div>
 
         <div className="space-y-2 max-w-xl mx-auto">
-          <span className="text-xs font-mono uppercase tracking-widest text-indigo-400 font-bold">
+          <span className="text-xs uppercase tracking-widest text-aurora-indigo font-bold">
             Skill Intelligence & Taxonomy Engine
           </span>
-          <h2 className="text-2xl sm:text-3xl font-black font-display text-white tracking-tight">
+          <h2 className="text-2xl sm:text-3xl font-black font-display text-aurora-ink tracking-tight">
             Your Capability Map is Waiting for Evidence
           </h2>
-          <p className="text-sm text-slate-400 leading-relaxed">
+          <p className="text-sm text-aurora-muted leading-relaxed">
             SkillBridge maps what you actually know by indexing verified evidence from your past experience,
             projects, and credentials into an interactive capability ontology.
           </p>
@@ -77,24 +77,24 @@ export const CapabilityActivationHub: React.FC = () => {
             return (
               <div
                 key={stage.step}
-                className="p-5 rounded-2xl bg-slate-950/70 border border-white/5 space-y-3 relative group hover:border-white/15 transition-all"
+                className="p-5 rounded-2xl bg-aurora-canvas/60 border border-aurora-line space-y-3 relative group hover:border-aurora-line transition-all"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold text-slate-500">
+                  <span className="text-[10px] font-bold text-aurora-muted">
                     STAGE {stage.step}
                   </span>
-                  <span className="text-[9px] font-mono font-semibold px-2 py-0.5 rounded bg-white/5 text-slate-400">
+                  <span className="text-[9px] font-semibold px-2 py-0.5 rounded bg-aurora-canvas text-aurora-muted">
                     {stage.status}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2.5">
-                  <div className={`p-2 rounded-xl bg-white/5 ${stage.color}`}>
+                  <div className={`p-2 rounded-xl bg-aurora-canvas ${stage.color}`}>
                     <Icon className="w-4 h-4" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-white">{stage.title}</h4>
-                    <p className="text-[11px] text-slate-400 line-clamp-1">{stage.subtitle}</p>
+                    <h4 className="text-xs font-bold text-aurora-ink">{stage.title}</h4>
+                    <p className="text-[11px] text-aurora-muted line-clamp-1">{stage.subtitle}</p>
                   </div>
                 </div>
               </div>
@@ -107,7 +107,7 @@ export const CapabilityActivationHub: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate('/resume')}
-            className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/30 cursor-pointer"
+            className="px-6 py-3 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/30 cursor-pointer"
           >
             <UploadCloud className="w-4 h-4" />
             <span>Upload Resume Evidence</span>
@@ -117,7 +117,7 @@ export const CapabilityActivationHub: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate('/careers')}
-            className="px-6 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all flex items-center gap-2 border border-white/10 cursor-pointer"
+            className="px-6 py-3 rounded-xl bg-aurora-canvas hover:bg-aurora-line text-aurora-ink text-xs font-bold transition-all flex items-center gap-2 border border-aurora-line cursor-pointer"
           >
             <Compass className="w-4 h-4" />
             <span>Explore Career Target Requirements</span>

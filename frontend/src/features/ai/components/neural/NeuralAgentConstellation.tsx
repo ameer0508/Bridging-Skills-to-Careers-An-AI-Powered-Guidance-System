@@ -52,7 +52,7 @@ export const NeuralAgentConstellation: React.FC<NeuralAgentConstellationProps> =
       metricValue: `${matchScore}% Match`,
       dagStep: 1,
       angleDeg: -90, // Top
-      icon: <Compass className="w-4 h-4 text-cyan-400" />,
+      icon: <Compass className="w-4 h-4 text-aurora-violet" />,
       color: 'cyan',
     },
     {
@@ -67,7 +67,7 @@ export const NeuralAgentConstellation: React.FC<NeuralAgentConstellationProps> =
       metricValue: 'Adaptive Pace',
       dagStep: 2,
       angleDeg: -38, // Top Right
-      icon: <GraduationCap className="w-4 h-4 text-purple-400" />,
+      icon: <GraduationCap className="w-4 h-4 text-aurora-violet" />,
       color: 'purple',
     },
     {
@@ -82,7 +82,7 @@ export const NeuralAgentConstellation: React.FC<NeuralAgentConstellationProps> =
       metricValue: atsScore > 0 ? `${atsScore}/100` : 'Calibrating',
       dagStep: 2,
       angleDeg: 14, // Middle Right
-      icon: <FileCheck2 className="w-4 h-4 text-indigo-400" />,
+      icon: <FileCheck2 className="w-4 h-4 text-aurora-indigo" />,
       color: 'indigo',
     },
     {
@@ -97,7 +97,7 @@ export const NeuralAgentConstellation: React.FC<NeuralAgentConstellationProps> =
       metricValue: `${Math.round(readinessScore)}%`,
       dagStep: 3,
       angleDeg: 66, // Bottom Right
-      icon: <Video className="w-4 h-4 text-emerald-400" />,
+      icon: <Video className="w-4 h-4 text-emerald-700" />,
       color: 'emerald',
     },
     {
@@ -112,7 +112,7 @@ export const NeuralAgentConstellation: React.FC<NeuralAgentConstellationProps> =
       metricValue: `${opportunityCount} Verified`,
       dagStep: 4,
       angleDeg: 120, // Bottom Left
-      icon: <TrendingUp className="w-4 h-4 text-amber-400" />,
+      icon: <TrendingUp className="w-4 h-4 text-amber-700" />,
       color: 'amber',
     },
     {
@@ -127,7 +127,7 @@ export const NeuralAgentConstellation: React.FC<NeuralAgentConstellationProps> =
       metricValue: 'Real-time',
       dagStep: 4,
       angleDeg: 180, // Middle Left
-      icon: <Search className="w-4 h-4 text-cyan-400" />,
+      icon: <Search className="w-4 h-4 text-aurora-violet" />,
       color: 'cyan',
     },
     {
@@ -142,7 +142,7 @@ export const NeuralAgentConstellation: React.FC<NeuralAgentConstellationProps> =
       metricValue: 'High Match',
       dagStep: 3,
       angleDeg: 232, // Top Left
-      icon: <Share2 className="w-4 h-4 text-indigo-400" />,
+      icon: <Share2 className="w-4 h-4 text-aurora-indigo" />,
       color: 'indigo',
     },
   ];
@@ -221,21 +221,21 @@ export const NeuralAgentConstellation: React.FC<NeuralAgentConstellationProps> =
               whileTap={{ scale: 0.94 }}
               className={`flex items-center gap-3 px-3.5 py-2 rounded-2xl border transition-all duration-300 cursor-pointer backdrop-blur-xl shadow-xl ${
                 isHovered || isSelected
-                  ? 'bg-slate-900/95 border-cyan-400 text-white shadow-[0_0_25px_rgba(6,182,212,0.4)] ring-1 ring-cyan-400/60'
-                  : 'bg-slate-950/80 border-white/10 text-slate-300 hover:border-white/30'
+                  ? 'bg-aurora-canvas/60 border-cyan-400 text-aurora-ink shadow-[0_0_25px_rgba(6,182,212,0.4)] ring-1 ring-cyan-400/60'
+                  : 'bg-aurora-canvas/60 border-aurora-line text-aurora-muted hover:border-aurora-line'
               }`}
             >
-              <div className="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/10 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-white/[0.05] border border-aurora-line flex items-center justify-center shrink-0">
                 {agent.icon}
               </div>
               <div className="flex flex-col text-left leading-tight pr-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-xs font-display font-bold text-white truncate max-w-[130px]">
+                  <span className="text-xs font-display font-bold text-aurora-ink truncate max-w-[130px]">
                     {agent.name}
                   </span>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0 shadow-[0_0_6px_#10b981]" />
                 </div>
-                <span className="text-[10px] font-mono text-cyan-300/80">
+                <span className="text-[10px] text-aurora-violet/80">
                   {agent.metricValue}
                 </span>
               </div>

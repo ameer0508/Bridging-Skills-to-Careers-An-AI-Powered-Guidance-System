@@ -88,35 +88,35 @@ export const MultiLayerTrajectoryObservatory: React.FC<MultiLayerTrajectoryObser
   }, [chartData]);
 
   const layers: { id: LayerMode; label: string; icon: React.FC<{ className?: string }>; color: string }[] = [
-    { id: 'all', label: 'Synchronized Layers', icon: Layers, color: 'text-white' },
-    { id: 'readiness', label: 'Readiness Trajectory', icon: Award, color: 'text-indigo-400' },
-    { id: 'skills', label: 'Skill Index', icon: Cpu, color: 'text-cyan-400' },
-    { id: 'roadmap', label: 'Curriculum Velocity', icon: CheckCircle2, color: 'text-purple-400' },
+    { id: 'all', label: 'Synchronized Layers', icon: Layers, color: 'text-aurora-ink' },
+    { id: 'readiness', label: 'Readiness Trajectory', icon: Award, color: 'text-aurora-indigo' },
+    { id: 'skills', label: 'Skill Index', icon: Cpu, color: 'text-aurora-violet' },
+    { id: 'roadmap', label: 'Curriculum Velocity', icon: CheckCircle2, color: 'text-aurora-violet' },
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-900/70 p-6 md:p-8 shadow-2xl backdrop-blur-xl space-y-6">
+    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 md:p-8 shadow-2xl backdrop-blur-xl space-y-6">
       {/* Header controls & Layer filters */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-aurora-line pb-5">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+            <span className="p-1.5 rounded-lg bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
               <Activity className="w-4 h-4" />
             </span>
-            <h2 className="text-xl font-bold tracking-tight text-white">
+            <h2 className="text-xl font-bold tracking-tight text-aurora-ink">
               Multi-Layer Trajectory Observatory
             </h2>
-            <span className="px-2 py-0.5 rounded-md text-[11px] font-mono bg-slate-800 text-slate-300 border border-white/5">
+            <span className="px-2 py-0.5 rounded-md text-[11px] bg-aurora-canvas text-aurora-muted border border-aurora-line">
               {periodName}
             </span>
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-aurora-muted">
             Synchronized timeline tracking readiness evolution, verified skills accumulation, and curriculum completions.
           </p>
         </div>
 
         {/* Layer Filters */}
-        <div className="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-white/10 overflow-x-auto">
+        <div className="flex items-center gap-1.5 bg-aurora-canvas/60 p-1 rounded-xl border border-aurora-line overflow-x-auto">
           {layers.map((layer) => {
             const IconComp = layer.icon;
             const isSelected = activeLayer === layer.id;
@@ -127,11 +127,11 @@ export const MultiLayerTrajectoryObservatory: React.FC<MultiLayerTrajectoryObser
                 type="button"
                 className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                   isSelected
-                    ? 'bg-indigo-600 text-white shadow-md font-semibold'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                    ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-sm font-semibold'
+                    : 'text-aurora-muted hover:text-aurora-ink hover:bg-aurora-canvas'
                 }`}
               >
-                <IconComp className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : layer.color}`} />
+                <IconComp className={`w-3.5 h-3.5 ${isSelected ? 'text-aurora-ink' : layer.color}`} />
                 <span>{layer.label}</span>
               </button>
             );
@@ -141,11 +141,11 @@ export const MultiLayerTrajectoryObservatory: React.FC<MultiLayerTrajectoryObser
 
       {/* Snapshot Calibration Notice if < 2 snapshots */}
       {snapshots.length < 2 && (
-        <div className="flex items-start gap-3 p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/20 text-xs text-indigo-200 leading-relaxed">
-          <Info className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-violet-50 border border-aurora-violet/25 text-xs text-aurora-indigo leading-relaxed">
+          <Info className="w-4 h-4 text-aurora-indigo shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <p className="font-semibold text-white">Initial Telemetry Calibration Active</p>
-            <p className="text-indigo-300/80">
+            <p className="font-semibold text-aurora-ink">Initial Telemetry Calibration Active</p>
+            <p className="text-aurora-indigo/80">
               Your profile has {snapshots.length === 1 ? '1 recorded snapshot' : 'no prior snapshots'}. As you complete roadmap tasks, add verified skills, or upload new resume evidence, daily snapshots will systematically plot your longitudinal trajectory across this multi-layered canvas.
             </p>
           </div>
@@ -215,10 +215,10 @@ export const MultiLayerTrajectoryObservatory: React.FC<MultiLayerTrajectoryObser
                 if (!active || !payload || !payload.length) return null;
                 const data = payload[0].payload;
                 return (
-                  <div className="rounded-xl border border-white/10 bg-slate-950/95 p-4 shadow-2xl backdrop-blur-md space-y-2 min-w-[200px]">
-                    <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                      <span className="text-xs font-mono text-slate-400">{data.formattedDate}</span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300">
+                  <div className="rounded-xl border border-aurora-line bg-aurora-canvas/60 p-4 shadow-2xl backdrop-blur-md space-y-2 min-w-[200px]">
+                    <div className="flex items-center justify-between border-b border-aurora-line pb-2">
+                      <span className="text-xs text-aurora-muted">{data.formattedDate}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-indigo">
                         Telemetry Point
                       </span>
                     </div>
@@ -226,31 +226,31 @@ export const MultiLayerTrajectoryObservatory: React.FC<MultiLayerTrajectoryObser
                     <div className="space-y-1.5 text-xs">
                       {(activeLayer === 'all' || activeLayer === 'readiness') && (
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-400 flex items-center gap-1.5">
+                          <span className="text-aurora-muted flex items-center gap-1.5">
                             <span className="w-2 h-2 rounded-full bg-indigo-500" />
                             Readiness Score:
                           </span>
-                          <span className="font-mono font-bold text-indigo-400">{data.readiness}%</span>
+                          <span className="font-bold text-aurora-indigo">{data.readiness}%</span>
                         </div>
                       )}
 
                       {(activeLayer === 'all' || activeLayer === 'skills') && (
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-400 flex items-center gap-1.5">
+                          <span className="text-aurora-muted flex items-center gap-1.5">
                             <span className="w-2 h-2 rounded-full bg-cyan-400" />
                             Verified Skills:
                           </span>
-                          <span className="font-mono font-bold text-cyan-300">{data.skills}</span>
+                          <span className="font-bold text-aurora-violet">{data.skills}</span>
                         </div>
                       )}
 
                       {(activeLayer === 'all' || activeLayer === 'roadmap') && (
                         <div className="flex items-center justify-between">
-                          <span className="text-slate-400 flex items-center gap-1.5">
+                          <span className="text-aurora-muted flex items-center gap-1.5">
                             <span className="w-2 h-2 rounded-full bg-purple-400" />
                             Roadmap Actions:
                           </span>
-                          <span className="font-mono font-bold text-purple-300">{data.completedItems}</span>
+                          <span className="font-bold text-aurora-violet">{data.completedItems}</span>
                         </div>
                       )}
                     </div>
@@ -307,28 +307,28 @@ export const MultiLayerTrajectoryObservatory: React.FC<MultiLayerTrajectoryObser
       </div>
 
       {/* Interactive Legend & Synchronization Footer */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-white/5">
-        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-950/50 border border-white/5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t border-aurora-line">
+        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line">
           <div className="w-3 h-3 rounded-full bg-indigo-500 shrink-0" />
           <div className="text-xs">
-            <span className="font-semibold text-white">Readiness Score</span>
-            <p className="text-[10px] text-slate-400">Target role qualification (0–100%)</p>
+            <span className="font-semibold text-aurora-ink">Readiness Score</span>
+            <p className="text-[10px] text-aurora-muted">Target role qualification (0–100%)</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-950/50 border border-white/5">
+        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line">
           <div className="w-3 h-3 rounded-full bg-cyan-400 shrink-0" />
           <div className="text-xs">
-            <span className="font-semibold text-white">Capability Index</span>
-            <p className="text-[10px] text-slate-400">Verified skills accumulated</p>
+            <span className="font-semibold text-aurora-ink">Capability Index</span>
+            <p className="text-[10px] text-aurora-muted">Verified skills accumulated</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-950/50 border border-white/5">
+        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line">
           <div className="w-3 h-3 rounded-full bg-purple-400 shrink-0" />
           <div className="text-xs">
-            <span className="font-semibold text-white">Curriculum Tasks</span>
-            <p className="text-[10px] text-slate-400">Completed roadmap milestones</p>
+            <span className="font-semibold text-aurora-ink">Curriculum Tasks</span>
+            <p className="text-[10px] text-aurora-muted">Completed roadmap milestones</p>
           </div>
         </div>
       </div>

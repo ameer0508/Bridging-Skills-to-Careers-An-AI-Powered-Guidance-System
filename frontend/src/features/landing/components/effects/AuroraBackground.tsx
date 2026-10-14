@@ -130,7 +130,7 @@ export const AuroraBackground: React.FC<AuroraBackgroundProps> = ({
   }, [showParticles]);
 
   return (
-    <div className={`relative overflow-hidden bg-slate-950 text-slate-100 ${className}`}>
+    <div className={`relative overflow-hidden bg-aurora-canvas text-aurora-ink ${className}`}>
       {/* Aurora Ambient Blobs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div

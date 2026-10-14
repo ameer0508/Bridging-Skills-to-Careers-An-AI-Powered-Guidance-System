@@ -28,10 +28,10 @@ export const DangerZoneCard: React.FC<DangerZoneCardProps> = ({ onConfirmLogout 
         <CardBody className="space-y-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <span className="text-xs font-bold text-[var(--color-text-primary)] block">
+              <span className="text-xs font-bold text-aurora-ink block">
                 Revoke All Active Sessions & Log Out
               </span>
-              <span className="text-[10px] text-[var(--color-text-tertiary)] block">
+              <span className="text-[10px] text-aurora-muted block">
                 Immediately revokes refresh tokens and clears local storage session state across devices.
               </span>
             </div>

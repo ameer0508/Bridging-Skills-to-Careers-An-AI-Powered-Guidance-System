@@ -200,7 +200,7 @@ export const PerformanceReview: React.FC<PerformanceReviewProps> = ({
                     key={i}
                     className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-aurora-muted text-xs leading-relaxed flex items-start gap-2.5"
                   >
-                    <span className="w-5 h-5 rounded-full bg-indigo-600/20 text-aurora-indigo text-[10px] font-bold flex items-center justify-center shrink-0 border border-aurora-violet/25 mt-0.5">
+                    <span className="w-5 h-5 rounded-full bg-violet-50 text-aurora-indigo text-[10px] font-bold flex items-center justify-center shrink-0 border border-aurora-violet/25 mt-0.5">
                       {i + 1}
                     </span>
                     <span>{rec}</span>
@@ -336,7 +336,7 @@ export const PerformanceReview: React.FC<PerformanceReviewProps> = ({
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25 uppercase">
                   SCENARIO 0{selectedQuestionIndex + 1}
                 </span>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-aurora-violet border border-purple-500/30 uppercase">
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-violet-50 text-aurora-violet border border-purple-500/30 uppercase">
                   {selectedQuestion.category} Track
                 </span>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-aurora-canvas text-aurora-muted border border-aurora-line uppercase">

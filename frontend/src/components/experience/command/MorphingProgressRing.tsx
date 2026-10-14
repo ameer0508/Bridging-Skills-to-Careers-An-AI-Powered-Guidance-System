@@ -52,7 +52,7 @@ export const MorphingProgressRing: React.FC<MorphingProgressRingProps> = ({
             stroke="currentColor"
             strokeWidth={strokeWidth}
             fill="transparent"
-            className="text-neutral-200 dark:text-neutral-800"
+            className="text-aurora-ink dark:text-neutral-800"
           />
           {/* Animated Progress Circle */}
           <motion.circle
@@ -74,9 +74,9 @@ export const MorphingProgressRing: React.FC<MorphingProgressRingProps> = ({
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
           <div className="flex items-baseline text-3xl font-extrabold text-neutral-900 dark:text-white">
             <CountUpNumber value={score} duration={1200} />
-            <span className="text-sm font-semibold text-neutral-500 dark:text-neutral-400 ml-0.5">%</span>
+            <span className="text-sm font-semibold text-aurora-muted dark:text-neutral-400 ml-0.5">%</span>
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 mt-0.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-aurora-indigo mt-0.5">
             Readiness
           </span>
         </div>
@@ -84,16 +84,16 @@ export const MorphingProgressRing: React.FC<MorphingProgressRingProps> = ({
 
       {/* Meta Indicators */}
       <div className="mt-3 flex items-center gap-3 text-xs">
-        <div className="flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-400">
+        <div className="flex items-center gap-1 font-semibold text-emerald-600 dark:text-emerald-800">
           <TrendingUp className="w-3.5 h-3.5" />
           <span>{trendLabel}</span>
         </div>
-        <span className="text-neutral-300 dark:text-neutral-700">•</span>
+        <span className="text-aurora-muted dark:text-neutral-700">•</span>
         <div className="flex items-center gap-1 font-medium text-neutral-600 dark:text-neutral-400">
           {score >= 80 ? (
             <Award className="w-3.5 h-3.5 text-amber-500" />
           ) : (
-            <ShieldCheck className="w-3.5 h-3.5 text-indigo-400" />
+            <ShieldCheck className="w-3.5 h-3.5 text-aurora-indigo" />
           )}
           <span>{tier}</span>
         </div>

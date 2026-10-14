@@ -28,20 +28,20 @@ export const NeuralCommandDeck: React.FC<NeuralCommandDeckProps> = ({
   };
 
   return (
-    <div className="w-full neural-glass-blade p-5 sm:p-7 border-cyan-500/20 shadow-2xl space-y-4">
+    <div className="w-full neural-glass-blade p-5 sm:p-7 border-aurora-violet/25 shadow-2xl space-y-4">
       {/* 1. Header with Terminal & Prompt Catalysts */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <div className="p-1 rounded-lg bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+          <div className="p-1 rounded-lg bg-aurora-violet/[0.06] text-aurora-violet border border-aurora-violet/25">
             <Terminal className="w-4 h-4" />
           </div>
-          <span className="text-xs font-mono font-bold tracking-wider uppercase text-slate-300">
+          <span className="text-xs font-bold tracking-wider uppercase text-aurora-muted">
             Neural Command Interface
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
-          <Command className="w-3 h-3 text-cyan-400" />
+        <div className="flex items-center gap-1.5 text-[11px] text-aurora-muted">
+          <Command className="w-3 h-3 text-aurora-violet" />
           <span>Press Enter to dispatch query</span>
         </div>
       </div>
@@ -53,16 +53,16 @@ export const NeuralCommandDeck: React.FC<NeuralCommandDeckProps> = ({
             key={idx}
             type="button"
             onClick={() => onSelectPrompt(prompt)}
-            className="text-left px-3 py-1.5 rounded-xl text-xs font-medium text-slate-300 bg-white/[0.04] border border-white/10 hover:border-cyan-400/40 hover:text-white hover:bg-cyan-500/10 transition-all duration-200 cursor-pointer shadow-sm"
+            className="text-left px-3 py-1.5 rounded-xl text-xs font-medium text-aurora-muted bg-white/[0.04] border border-aurora-line hover:border-cyan-400/40 hover:text-aurora-indigo hover:bg-aurora-violet/[0.06] transition-all duration-200 cursor-pointer shadow-sm"
           >
-            <span className="text-cyan-400 mr-1.5 font-mono">›</span>
+            <span className="text-aurora-violet mr-1.5 font-mono">›</span>
             <span>{prompt}</span>
           </button>
         ))}
       </div>
 
       {/* 3. Command Input Box with Send Button */}
-      <div className="relative rounded-2xl bg-slate-950/80 border border-white/10 focus-within:border-cyan-400/60 focus-within:ring-1 focus-within:ring-cyan-400/40 transition-all duration-200 overflow-hidden shadow-inner">
+      <div className="relative rounded-2xl bg-aurora-canvas/60 border border-aurora-line focus-within:border-cyan-400/60 focus-within:ring-1 focus-within:ring-cyan-400/40 transition-all duration-200 overflow-hidden shadow-inner">
         <textarea
           value={inputMessage}
           onChange={(e) => onInputChange(e.target.value)}
@@ -70,11 +70,11 @@ export const NeuralCommandDeck: React.FC<NeuralCommandDeckProps> = ({
           rows={2}
           placeholder="Ask your AI Career Architect or issue an orchestration directive..."
           disabled={isSending}
-          className="w-full bg-transparent px-4 py-3 text-sm text-white placeholder-slate-500 resize-none outline-none custom-scrollbar"
+          className="w-full bg-transparent px-4 py-3 text-sm text-aurora-ink placeholder-slate-500 resize-none outline-none custom-scrollbar"
         />
 
-        <div className="flex items-center justify-between px-4 pb-3 pt-1 border-t border-white/5">
-          <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono">
+        <div className="flex items-center justify-between px-4 pb-3 pt-1 border-t border-aurora-line">
+          <div className="flex items-center gap-2 text-[11px] text-aurora-muted font-mono">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
             <span>Grounded against verified skill & telemetry state</span>
           </div>

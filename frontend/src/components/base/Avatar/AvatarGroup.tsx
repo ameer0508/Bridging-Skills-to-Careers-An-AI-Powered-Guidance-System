@@ -30,7 +30,7 @@ export const AvatarGroup: React.FC<AvatarGroupProps> = ({
       ))}
       {remainingCount > 0 && (
         <div
-          className={`relative inline-flex items-center justify-center rounded-full bg-[var(--primitive-neutral-700)] text-[var(--color-text-primary)] font-bold text-xs ring-2 ring-[var(--color-bg-app)] shrink-0 ${
+          className={`relative inline-flex items-center justify-center rounded-full bg-[var(--primitive-neutral-700)] text-aurora-ink font-bold text-xs ring-2 ring-[var(--color-bg-app)] shrink-0 ${
             size === 'xs' ? 'w-5 h-5 text-[9px]' : size === 'sm' ? 'w-7 h-7 text-xs' : 'w-9 h-9 text-xs'
           }`}
         >

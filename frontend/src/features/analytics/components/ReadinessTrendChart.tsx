@@ -22,7 +22,7 @@ export const ReadinessTrendChart: React.FC<ReadinessTrendChartProps> = ({ snapsh
   return (
     <Card variant="default">
       <CardHeader>
-        <h3 className="text-base font-bold font-display text-[var(--color-text-primary)]">
+        <h3 className="text-base font-bold font-display text-aurora-ink">
           Career Readiness & Skill Trajectory
         </h3>
       </CardHeader>
@@ -30,7 +30,7 @@ export const ReadinessTrendChart: React.FC<ReadinessTrendChartProps> = ({ snapsh
       <CardBody>
         <div className="h-72 w-full">
           {chartData.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-xs text-[var(--color-text-tertiary)] italic">
+            <div className="h-full flex items-center justify-center text-xs text-aurora-muted italic">
               Insufficient historical snapshots to plot trend line.
             </div>
           ) : (
@@ -42,24 +42,24 @@ export const ReadinessTrendChart: React.FC<ReadinessTrendChartProps> = ({ snapsh
                     <stop offset="95%" stopColor="hsl(226, 84%, 57%)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" vertical={false} />
-                <XAxis dataKey="date" stroke="var(--color-text-tertiary)" fontSize={11} tickLine={false} />
-                <YAxis stroke="var(--color-text-tertiary)" fontSize={11} domain={[0, 100]} tickLine={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e6eaf6" vertical={false} />
+                <XAxis dataKey="date" stroke="#515b80" fontSize={11} tickLine={false} />
+                <YAxis stroke="#515b80" fontSize={11} domain={[0, 100]} tickLine={false} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'var(--color-bg-surface-raised)',
-                    borderColor: 'var(--color-border-default)',
+                    backgroundColor: '#ffffff',
+                    borderColor: '#e6eaf6',
                     borderRadius: 'var(--radius-md)',
-                    color: 'var(--color-text-primary)',
+                    color: '#10153b',
                     fontSize: '12px',
                   }}
-                  itemStyle={{ color: 'var(--color-interactive-primary)' }}
+                  itemStyle={{ color: '#5540f5' }}
                 />
                 <Area
                   type="monotone"
                   dataKey="readiness"
                   name="Readiness %"
-                  stroke="var(--color-interactive-primary)"
+                  stroke="#5540f5"
                   strokeWidth={3}
                   fillOpacity={1}
                   fill="url(#readinessGrad)"

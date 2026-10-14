@@ -49,15 +49,15 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
   const getSourceMeta = (sourceType: string) => {
     switch (sourceType) {
       case 'resume_experience':
-        return { label: 'Work Experience', icon: Briefcase, color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' };
+        return { label: 'Work Experience', icon: Briefcase, color: 'text-emerald-700 bg-emerald-50 border-emerald-200' };
       case 'resume_projects':
-        return { label: 'Project Portfolio', icon: FolderGit2, color: 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20' };
+        return { label: 'Project Portfolio', icon: FolderGit2, color: 'text-aurora-violet bg-aurora-violet/[0.06] border-aurora-violet/25' };
       case 'resume_certifications':
-        return { label: 'Verified Certification', icon: Award, color: 'text-purple-400 bg-purple-500/10 border-purple-500/20' };
+        return { label: 'Verified Certification', icon: Award, color: 'text-aurora-violet bg-purple-500/10 border-purple-500/20' };
       case 'resume_education':
-        return { label: 'Academic Education', icon: GraduationCap, color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' };
+        return { label: 'Academic Education', icon: GraduationCap, color: 'text-amber-700 bg-amber-50 border-amber-200' };
       default:
-        return { label: 'Extracted Skill Evidence', icon: FileText, color: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20' };
+        return { label: 'Extracted Skill Evidence', icon: FileText, color: 'text-aurora-indigo bg-aurora-violet/[0.06] border-aurora-violet/25' };
     }
   };
 
@@ -73,27 +73,27 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ duration: prefersReducedMotion ? 0 : 0.3, ease: 'easeOut' }}
-          className="w-full max-w-xl h-full bg-slate-950 border-l border-white/10 p-6 md:p-8 overflow-y-auto custom-scrollbar shadow-2xl flex flex-col justify-between space-y-6"
+          className="w-full max-w-xl h-full bg-aurora-canvas border-l border-aurora-line p-6 md:p-8 overflow-y-auto custom-scrollbar shadow-2xl flex flex-col justify-between space-y-6"
         >
           {/* Header */}
           <div className="space-y-5">
-            <div className="flex items-center justify-between pb-4 border-b border-white/10">
+            <div className="flex items-center justify-between pb-4 border-b border-aurora-line">
               <div className="flex items-center gap-2.5">
-                <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+                <div className="p-2.5 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
                   <Brain className="w-5 h-5" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-mono uppercase text-indigo-400 font-bold tracking-wider block">
+                  <span className="text-[10px] uppercase text-aurora-indigo font-bold tracking-wider block">
                     Capability Evidence Inspector
                   </span>
-                  <h3 className="text-base font-bold text-white">Verified Skill Deep-Dive</h3>
+                  <h3 className="text-base font-bold text-aurora-ink">Verified Skill Deep-Dive</h3>
                 </div>
               </div>
 
               <button
                 type="button"
                 onClick={onClose}
-                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                className="p-2 rounded-xl text-aurora-muted hover:text-aurora-indigo hover:bg-aurora-canvas transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -102,35 +102,35 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
             {/* Title & Domain */}
             <div className="space-y-1">
               <div className="flex items-center justify-between gap-2">
-                <h2 className="text-2xl font-black font-display text-white tracking-tight">
+                <h2 className="text-2xl font-black font-display text-aurora-ink tracking-tight">
                   {skill.name}
                 </h2>
-                <span className="px-3 py-1 rounded-xl bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-mono text-xs font-bold">
+                <span className="px-3 py-1 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo text-xs font-bold">
                   {skill.category || 'General'}
                 </span>
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-aurora-muted">
                 Deterministic skill vector index entry linked to user knowledge profile.
               </p>
             </div>
 
             {/* Evidence Score Meter */}
-            <div className="p-4 rounded-2xl bg-slate-900/80 border border-white/10 space-y-2">
+            <div className="p-4 rounded-2xl bg-aurora-canvas/60 border border-aurora-line space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono uppercase text-slate-400 font-bold">
+                <span className="text-xs uppercase text-aurora-muted font-bold">
                   Evidence Strength Score
                 </span>
-                <span className="text-xl font-black font-display text-emerald-400">
+                <span className="text-xl font-black font-display text-emerald-700">
                   {skill.evidenceScore}%
                 </span>
               </div>
-              <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-white/5">
+              <div className="w-full h-2 bg-aurora-canvas rounded-full overflow-hidden border border-aurora-line">
                 <div
                   style={{ width: `${Math.min(100, Math.max(5, skill.evidenceScore))}%` }}
                   className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-400"
                 />
               </div>
-              <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-0.5">
+              <div className="flex items-center justify-between text-[10px] text-aurora-muted pt-0.5">
                 <span>Weight Factor: {(skill.evidenceScore / 100).toFixed(2)}</span>
                 <span>{skill.evidences?.length || 1} Evidence Points Evaluated</span>
               </div>
@@ -139,14 +139,14 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
             {/* Aliases */}
             {skill.aliases && skill.aliases.length > 0 && (
               <div className="space-y-1.5">
-                <span className="text-[10px] font-mono uppercase text-slate-400 font-bold tracking-wider block">
+                <span className="text-[10px] uppercase text-aurora-muted font-bold tracking-wider block">
                   Normalized Taxonomy Synonyms & Aliases
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {skill.aliases.map((alias, idx) => (
                     <span
                       key={idx}
-                      className="px-2.5 py-0.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 text-xs font-mono"
+                      className="px-2.5 py-0.5 rounded-lg bg-aurora-canvas border border-aurora-line text-aurora-muted text-xs font-mono"
                     >
                       {alias}
                     </span>
@@ -157,8 +157,8 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
 
             {/* Verified Evidence Trail */}
             <div className="space-y-2.5">
-              <span className="text-xs font-mono uppercase text-cyan-400 font-bold tracking-wider block flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="text-xs uppercase text-aurora-violet font-bold tracking-wider block flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-aurora-violet" />
                 Verified Evidence Trail ({skill.evidences?.length || 0})
               </span>
 
@@ -171,27 +171,27 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
                     return (
                       <div
                         key={idx}
-                        className="p-3.5 rounded-2xl bg-slate-900/90 border border-white/5 space-y-1.5"
+                        className="p-3.5 rounded-2xl bg-aurora-canvas/60 border border-aurora-line space-y-1.5"
                       >
                         <div className="flex items-center justify-between">
                           <span
-                            className={`px-2 py-0.5 rounded-md border text-[10px] font-mono font-bold flex items-center gap-1.5 ${meta.color}`}
+                            className={`px-2 py-0.5 rounded-md border text-[10px] font-bold flex items-center gap-1.5 ${meta.color}`}
                           >
                             <Icon className="w-3 h-3" />
                             {meta.label}
                           </span>
-                          <span className="text-[10px] font-mono text-slate-400">
+                          <span className="text-[10px] text-aurora-muted">
                             Impact: {(evidence.weight * 100).toFixed(0)}%
                           </span>
                         </div>
-                        <p className="text-xs text-slate-300 leading-relaxed">
+                        <p className="text-xs text-aurora-muted leading-relaxed">
                           {evidence.description}
                         </p>
                       </div>
                     );
                   })
                 ) : (
-                  <p className="text-xs text-slate-400 italic">
+                  <p className="text-xs text-aurora-muted italic">
                     Derived from resume taxonomy normalization.
                   </p>
                 )}
@@ -200,16 +200,16 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
 
             {/* Cross-System Graph Connections */}
             {(incomingPrereqs.length > 0 || outgoingUnlocks.length > 0) && (
-              <div className="space-y-2.5 pt-2 border-t border-white/10">
-                <span className="text-xs font-mono uppercase text-indigo-400 font-bold tracking-wider block flex items-center gap-1.5">
-                  <GitBranch className="w-3.5 h-3.5 text-indigo-400" />
+              <div className="space-y-2.5 pt-2 border-t border-aurora-line">
+                <span className="text-xs uppercase text-aurora-indigo font-bold tracking-wider block flex items-center gap-1.5">
+                  <GitBranch className="w-3.5 h-3.5 text-aurora-indigo" />
                   Ontology Graph Position
                 </span>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   {/* Incoming */}
-                  <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5 space-y-1">
-                    <span className="text-[10px] font-mono text-amber-400 font-bold block">
+                  <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1">
+                    <span className="text-[10px] text-amber-700 font-bold block">
                       Prerequisites:
                     </span>
                     {incomingPrereqs.length > 0 ? (
@@ -217,20 +217,20 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
                         {incomingPrereqs.map((p, idx) => (
                           <span
                             key={idx}
-                            className="px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 text-[11px] font-mono"
+                            className="px-2 py-0.5 rounded bg-amber-50 text-amber-700 text-[11px] font-mono"
                           >
                             {p.name}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-slate-500 text-[11px] italic">None (Root)</span>
+                      <span className="text-aurora-muted text-[11px] italic">None (Root)</span>
                     )}
                   </div>
 
                   {/* Outgoing */}
-                  <div className="p-3 rounded-xl bg-slate-900/60 border border-white/5 space-y-1">
-                    <span className="text-[10px] font-mono text-cyan-400 font-bold block">
+                  <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1">
+                    <span className="text-[10px] text-aurora-violet font-bold block">
                       Enables Downstream:
                     </span>
                     {outgoingUnlocks.length > 0 ? (
@@ -238,14 +238,14 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
                         {outgoingUnlocks.map((u, idx) => (
                           <span
                             key={idx}
-                            className="px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 text-[11px] font-mono"
+                            className="px-2 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-violet text-[11px] font-mono"
                           >
                             {u.name}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-slate-500 text-[11px] italic">Terminal Node</span>
+                      <span className="text-aurora-muted text-[11px] italic">Terminal Node</span>
                     )}
                   </div>
                 </div>
@@ -254,8 +254,8 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
           </div>
 
           {/* Action Footer */}
-          <div className="pt-4 border-t border-white/10 space-y-3">
-            <span className="text-xs font-mono uppercase text-slate-400 font-bold block">
+          <div className="pt-4 border-t border-aurora-line space-y-3">
+            <span className="text-xs uppercase text-aurora-muted font-bold block">
               Cross-Subsystem Actions
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -265,7 +265,7 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
                   onClose();
                   navigate('/roadmap');
                 }}
-                className="p-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/30 cursor-pointer"
+                className="p-3 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/30 cursor-pointer"
               >
                 <span>View in Learning Roadmap</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -277,9 +277,9 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
                   onClose();
                   navigate('/interviews');
                 }}
-                className="p-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-white/10 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                className="p-3 rounded-xl bg-aurora-canvas hover:bg-aurora-canvas text-aurora-ink border border-aurora-line text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
-                <Target className="w-3.5 h-3.5 text-cyan-400" />
+                <Target className="w-3.5 h-3.5 text-aurora-violet" />
                 <span>Test in Mock Interview</span>
               </button>
             </div>

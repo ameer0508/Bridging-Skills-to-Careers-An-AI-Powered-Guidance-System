@@ -131,9 +131,9 @@ export const PortfolioIntelligenceWorkspace: React.FC = () => {
       />
 
       {/* TOP URL INPUT & SEARCH BAR */}
-      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-indigo-500/30">
+      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-aurora-violet/25">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <span className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+          <span className="p-2 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
             <Globe className="w-5 h-5" />
           </span>
           <div className="relative w-full sm:w-80">
@@ -142,9 +142,9 @@ export const PortfolioIntelligenceWorkspace: React.FC = () => {
               value={portfolioUrl}
               onChange={(e) => setPortfolioUrl(e.target.value)}
               placeholder="Enter portfolio URL (e.g. https://alexmercer.dev)..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
             />
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
         </div>
 
@@ -152,7 +152,7 @@ export const PortfolioIntelligenceWorkspace: React.FC = () => {
           <button
             onClick={handleAnalyzePortfolio}
             disabled={isAnalyzing}
-            className="w-full sm:w-auto py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+            className="w-full sm:w-auto py-2 px-4 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
             <span>{isAnalyzing ? 'Crawling Website...' : 'Analyze Portfolio Website'}</span>
@@ -162,40 +162,40 @@ export const PortfolioIntelligenceWorkspace: React.FC = () => {
 
       {/* METRIC GRID (4 CARDS) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <GlassPanel className="p-4 space-y-2 border-indigo-500/30">
+        <GlassPanel className="p-4 space-y-2 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">UI/UX & Aesthetics</span>
-            <Palette className="w-4 h-4 text-indigo-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">UI/UX & Aesthetics</span>
+            <Palette className="w-4 h-4 text-aurora-indigo" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">96.5 / 100</span>
-          <span className="text-xs font-mono text-indigo-300">Glassmorphism UI</span>
+          <span className="text-xl font-bold text-aurora-ink block">96.5 / 100</span>
+          <span className="text-xs text-aurora-indigo">Glassmorphism UI</span>
         </GlassPanel>
 
-        <GlassPanel className="p-4 space-y-2 border-emerald-500/30">
+        <GlassPanel className="p-4 space-y-2 border-emerald-200">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">System Architecture</span>
-            <Cpu className="w-4 h-4 text-emerald-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">System Architecture</span>
+            <Cpu className="w-4 h-4 text-emerald-700" />
           </div>
-          <span className="text-xl font-bold text-emerald-400 font-mono block">95.0 / 100</span>
-          <span className="text-xs font-mono text-emerald-300">RAG + Microservices</span>
+          <span className="text-xl font-bold text-emerald-700 block">95.0 / 100</span>
+          <span className="text-xs text-emerald-700">RAG + Microservices</span>
         </GlassPanel>
 
         <GlassPanel className="p-4 space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Deployment & Hosting</span>
-            <Server className="w-4 h-4 text-cyan-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Deployment & Hosting</span>
+            <Server className="w-4 h-4 text-aurora-violet" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">98.0 / 100</span>
-          <span className="text-xs font-mono text-cyan-300">Vercel / Cloudflare CDN</span>
+          <span className="text-xl font-bold text-aurora-ink block">98.0 / 100</span>
+          <span className="text-xs text-aurora-violet">Vercel / Cloudflare CDN</span>
         </GlassPanel>
 
         <GlassPanel className="p-4 space-y-2 border-purple-500/30">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Accessibility WCAG</span>
-            <Eye className="w-4 h-4 text-purple-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Accessibility WCAG</span>
+            <Eye className="w-4 h-4 text-aurora-violet" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">94.0 / 100</span>
-          <span className="text-xs font-mono text-purple-300">AA Compliant</span>
+          <span className="text-xl font-bold text-aurora-ink block">94.0 / 100</span>
+          <span className="text-xs text-aurora-violet">AA Compliant</span>
         </GlassPanel>
       </div>
 
@@ -203,30 +203,30 @@ export const PortfolioIntelligenceWorkspace: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* LIVE SHOWCASE EVIDENCE (5 COLS) */}
         <div className="lg:col-span-5 space-y-6">
-          <GlassPanel className="p-6 space-y-4 border-emerald-500/30">
+          <GlassPanel className="p-6 space-y-4 border-emerald-200">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-emerald-700" />
                 Live Showcase Skill Evidence Verification
               </span>
             </div>
 
             <div className="space-y-3">
               {verifiedSkills.map((sk) => (
-                <div key={sk.skill} className="p-3.5 rounded-xl bg-slate-950/80 border border-white/10 space-y-2 text-xs">
+                <div key={sk.skill} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2 text-xs">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                      <span className="font-bold text-white">{sk.skill}</span>
+                      <CheckCircle2 className="w-4 h-4 text-emerald-700" />
+                      <span className="font-bold text-aurora-ink">{sk.skill}</span>
                     </div>
-                    <span className="text-emerald-400 font-mono font-bold text-[11px]">
+                    <span className="text-emerald-700 font-bold text-[11px]">
                       {sk.confidenceScore}% Confidence
                     </span>
                   </div>
 
-                  <div className="space-y-1 pt-1 font-mono text-[11px] text-slate-400">
-                    <div>Evidence Projects: <strong className="text-indigo-300">{sk.evidenceProjects.join(', ')}</strong></div>
-                    <div>Status: <span className="text-emerald-400 font-bold">● {sk.evidenceStatus}</span></div>
+                  <div className="space-y-1 pt-1 text-[11px] text-aurora-muted">
+                    <div>Evidence Projects: <strong className="text-aurora-indigo">{sk.evidenceProjects.join(', ')}</strong></div>
+                    <div>Status: <span className="text-emerald-700 font-bold">● {sk.evidenceStatus}</span></div>
                   </div>
                 </div>
               ))}
@@ -235,13 +235,13 @@ export const PortfolioIntelligenceWorkspace: React.FC = () => {
         </div>
 
         {/* SHOWCASE PROJECTS EXPLORER (7 COLS) */}
-        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-indigo-500/30">
+        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Layers className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Layers className="w-4 h-4 text-aurora-indigo" />
               Extracted Project Showcases ({showcaseProjects.length})
             </span>
-            <span className="text-[10px] font-mono text-cyan-400 font-bold bg-cyan-500/10 px-2 py-0.5 rounded">
+            <span className="text-[10px] text-aurora-violet font-bold bg-aurora-violet/[0.06] px-2 py-0.5 rounded">
               High Quality
             </span>
           </div>
@@ -255,20 +255,20 @@ export const PortfolioIntelligenceWorkspace: React.FC = () => {
                   onClick={() => setSelectedProjectTitle(proj.title)}
                   className={`p-4 rounded-xl border transition-all cursor-pointer space-y-3 ${
                     isSelected
-                      ? 'bg-indigo-600/20 border-indigo-500 shadow-lg shadow-indigo-600/30'
-                      : 'bg-slate-950/70 border-white/5 hover:border-white/20'
+                      ? 'bg-violet-50 border-indigo-500 shadow-lg shadow-indigo-600/30'
+                      : 'bg-aurora-canvas/60 border-aurora-line hover:border-aurora-line'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-white font-mono">{proj.title}</h4>
-                    <span className="px-2 py-0.5 rounded bg-slate-950 text-indigo-300 font-mono text-[10px] font-bold border border-white/10">
+                    <h4 className="text-xs font-bold text-aurora-ink font-mono">{proj.title}</h4>
+                    <span className="px-2 py-0.5 rounded bg-aurora-canvas text-aurora-indigo text-[10px] font-bold border border-aurora-line">
                       {proj.category}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {proj.techStack.map((tech) => (
-                      <span key={tech} className="px-2 py-0.5 rounded-full bg-slate-900 border border-white/5 text-[10px] font-mono text-slate-300">
+                      <span key={tech} className="px-2 py-0.5 rounded-full bg-aurora-canvas border border-aurora-line text-[10px] text-aurora-muted">
                         {tech}
                       </span>
                     ))}
@@ -279,7 +279,7 @@ export const PortfolioIntelligenceWorkspace: React.FC = () => {
                       href={proj.liveDemoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-bold"
+                      className="text-aurora-violet hover:text-aurora-violet flex items-center gap-1 font-bold"
                     >
                       <ExternalLink className="w-3.5 h-3.5" /> Live Demo
                     </a>
@@ -287,7 +287,7 @@ export const PortfolioIntelligenceWorkspace: React.FC = () => {
                       href={proj.githubUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-slate-400 hover:text-white flex items-center gap-1"
+                      className="text-aurora-muted hover:text-aurora-indigo flex items-center gap-1"
                     >
                       <Code2 className="w-3.5 h-3.5" /> GitHub Source
                     </a>

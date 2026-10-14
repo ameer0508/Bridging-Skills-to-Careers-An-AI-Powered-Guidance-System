@@ -134,7 +134,7 @@ export const AuthIntelligenceField: React.FC<AuthIntelligenceFieldProps> = ({ ac
   return (
     <div className="relative w-full h-80 sm:h-96 flex items-center justify-center overflow-hidden">
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
-      <div className="absolute inset-0 pointer-events-none bg-radial from-transparent via-slate-950/20 to-slate-950" />
+      <div className="absolute inset-0 pointer-events-none bg-radial from-transparent via-aurora-canvas/20 to-aurora-canvas" />
     </div>
   );
 };

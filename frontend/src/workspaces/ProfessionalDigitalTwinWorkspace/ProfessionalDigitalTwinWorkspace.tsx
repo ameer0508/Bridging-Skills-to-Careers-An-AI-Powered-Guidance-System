@@ -79,9 +79,9 @@ export const ProfessionalDigitalTwinWorkspace: React.FC = () => {
       />
 
       {/* TOP USER ID SEARCH BAR */}
-      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-indigo-500/30">
+      <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-aurora-violet/25">
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <span className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+          <span className="p-2 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
             <Network className="w-5 h-5" />
           </span>
           <div className="relative w-full sm:w-72">
@@ -90,9 +90,9 @@ export const ProfessionalDigitalTwinWorkspace: React.FC = () => {
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
               placeholder="Enter User ID..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
             />
-            <Search className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
         </div>
 
@@ -100,7 +100,7 @@ export const ProfessionalDigitalTwinWorkspace: React.FC = () => {
           <button
             onClick={handleGenerateTwin}
             disabled={isAnalyzing}
-            className="w-full sm:w-auto py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+            className="w-full sm:w-auto py-2 px-4 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
             <span>{isAnalyzing ? 'Synthesizing Twin...' : 'Generate Digital Twin Graph'}</span>
@@ -111,32 +111,32 @@ export const ProfessionalDigitalTwinWorkspace: React.FC = () => {
       {/* GRAPH TOPOLOGY & INFERRED REASONING (2 COLS) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* INTERACTIVE GRAPH NODE EXPLORER (7 COLS) */}
-        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-indigo-500/30">
+        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <GitBranch className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <GitBranch className="w-4 h-4 text-aurora-indigo" />
               Digital Twin Topology Explorer (Nodes & Edges)
             </span>
-            <span className="text-[10px] font-mono text-indigo-300 font-bold bg-indigo-500/10 px-2 py-0.5 rounded">
+            <span className="text-[10px] text-aurora-indigo font-bold bg-aurora-violet/[0.06] px-2 py-0.5 rounded">
               Snapshot {digitalTwinMetrics.version}
             </span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 font-mono text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
             {digitalTwinMetrics.nodes.map((node) => (
               <div
                 key={node.id}
                 onClick={() => setSelectedNode(node.id)}
                 className={`p-3.5 rounded-xl border transition-all cursor-pointer space-y-1 ${
                   selectedNode === node.id
-                    ? 'bg-indigo-600/20 border-indigo-500 text-white'
-                    : 'bg-slate-950/80 border-white/10 text-slate-300 hover:border-indigo-500/50'
+                    ? 'bg-violet-50 border-indigo-500 text-aurora-ink'
+                    : 'bg-aurora-canvas/60 border-aurora-line text-aurora-muted hover:border-aurora-violet/25'
                 }`}
               >
-                <span className="text-[10px] text-slate-400 uppercase block">{node.type}</span>
+                <span className="text-[10px] text-aurora-muted uppercase block">{node.type}</span>
                 <span className="font-bold text-xs block truncate">{node.name}</span>
                 {node.verified && (
-                  <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                  <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3" /> {node.confidence}% Confidence
                   </span>
                 )}
@@ -149,21 +149,21 @@ export const ProfessionalDigitalTwinWorkspace: React.FC = () => {
         <div className="lg:col-span-5 space-y-6">
           <GlassPanel className="p-6 space-y-4 border-purple-500/30">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <Lightbulb className="w-4 h-4 text-purple-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-aurora-violet" />
                 AI Graph Reasoning & Inferred Skills
               </span>
             </div>
 
             <div className="space-y-3">
               {digitalTwinMetrics.inferredSkills.map((inf) => (
-                <div key={inf.name} className="p-3.5 rounded-xl bg-slate-950/80 border border-white/10 space-y-1.5 text-xs font-mono">
+                <div key={inf.name} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1.5 text-xs font-mono">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-purple-300">{inf.name}</span>
-                    <span className="text-emerald-400 font-bold text-[11px]">{inf.confidence}%</span>
+                    <span className="font-bold text-aurora-violet">{inf.name}</span>
+                    <span className="text-emerald-700 font-bold text-[11px]">{inf.confidence}%</span>
                   </div>
-                  <span className="text-[11px] text-slate-400 block">
-                    Inferred from: <strong className="text-white">{inf.source}</strong>
+                  <span className="text-[11px] text-aurora-muted block">
+                    Inferred from: <strong className="text-aurora-ink">{inf.source}</strong>
                   </span>
                 </div>
               ))}
@@ -171,24 +171,24 @@ export const ProfessionalDigitalTwinWorkspace: React.FC = () => {
           </GlassPanel>
 
           {/* CONTRADICTION CENTER */}
-          <GlassPanel className="p-6 space-y-4 border-amber-500/30">
+          <GlassPanel className="p-6 space-y-4 border-amber-200">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-amber-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-700" />
                 Contradiction & Evidence Gap Center
               </span>
             </div>
 
             <div className="space-y-2.5">
               {digitalTwinMetrics.contradictions.map((c) => (
-                <div key={c.item} className="p-3 rounded-xl bg-slate-950/80 border border-amber-500/30 text-xs font-mono space-y-1">
+                <div key={c.item} className="p-3 rounded-xl bg-aurora-canvas/60 border border-amber-200 text-xs space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-amber-300">{c.item}</span>
-                    <span className="text-[10px] bg-amber-500/10 text-amber-400 font-bold px-2 py-0.5 rounded">
+                    <span className="font-bold text-amber-700">{c.item}</span>
+                    <span className="text-[10px] bg-amber-50 text-amber-700 font-bold px-2 py-0.5 rounded">
                       {c.severity}
                     </span>
                   </div>
-                  <span className="text-[11px] text-slate-400 block">{c.reason}</span>
+                  <span className="text-[11px] text-aurora-muted block">{c.reason}</span>
                 </div>
               ))}
             </div>

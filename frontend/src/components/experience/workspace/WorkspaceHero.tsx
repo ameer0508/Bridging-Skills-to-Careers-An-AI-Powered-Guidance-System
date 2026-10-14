@@ -59,31 +59,31 @@ export const WorkspaceHero: React.FC<WorkspaceHeroProps> = ({
         <div className="space-y-4 max-w-2xl">
           {/* Eyebrow greeting */}
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-aurora-violet" />
               <span>{badge ?? `${greeting}${userName ? `, ${userName}` : ''}`}</span>
             </span>
           </div>
 
           {/* Main Title */}
-          <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+          <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold text-aurora-ink tracking-tight leading-tight">
             {title}
           </h1>
 
           {/* Subtitle description */}
-          <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+          <p className="text-aurora-muted text-sm sm:text-base leading-relaxed">
             {body}
           </p>
 
           {/* AI Summary Banner */}
           {aiSummary && (
-            <div className="p-3.5 rounded-xl bg-slate-950/70 border border-white/10 flex items-center gap-3 text-xs text-slate-200">
+            <div className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center gap-3 text-xs text-aurora-ink">
               <span className="relative flex h-2 w-2 shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
               </span>
               <span className="font-medium flex-1">{aiSummary}</span>
-              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+              <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
             </div>
           )}
         </div>
@@ -93,15 +93,15 @@ export const WorkspaceHero: React.FC<WorkspaceHeroProps> = ({
           {stats.length > 0 && (
             <div className="grid grid-cols-2 gap-3 min-w-60">
               {stats.map((stat, i) => (
-                <div key={i} className="p-3.5 rounded-xl bg-slate-950/80 border border-white/10 flex flex-col">
-                  <span className="text-[10px] text-slate-400 font-medium uppercase tracking-wider">
+                <div key={i} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex flex-col">
+                  <span className="text-[10px] text-aurora-muted font-medium uppercase tracking-wider">
                     {stat.label}
                   </span>
-                  <span className="text-xl font-bold text-white font-mono mt-1">
+                  <span className="text-xl font-bold text-aurora-ink mt-1">
                     {stat.value}
                   </span>
                   {stat.change && (
-                    <span className={`text-[10px] flex items-center gap-1 mt-1 font-semibold ${stat.isPositive !== false ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    <span className={`text-[10px] flex items-center gap-1 mt-1 font-semibold ${stat.isPositive !== false ? 'text-emerald-700' : 'text-rose-700'}`}>
                       <TrendingUp className="w-3 h-3" />
                       {stat.change}
                     </span>

@@ -48,7 +48,7 @@ The landing page was rebuilt in the Aurora Elite visual language (`frontend/src/
 
 ## Aurora Elite app shell and Command Center (2026-10-14)
 
-The signed-in shell (sidebar, top bar, account menu, phone drawer) and the Command Center (`/home`) were rebuilt in Aurora Elite (`frontend/src/layouts/`, `frontend/src/features/home/aurora/`). Pages not yet migrated keep their earlier dark design inside one dark container (`.sb-legacy-dark`, listed in `frontend/src/design/aurora/routes.ts`). That container goes away once every group is migrated.
+The signed-in shell (sidebar, top bar, account menu, phone drawer) and the Command Center (`/home`) were rebuilt in Aurora Elite (`frontend/src/layouts/`, `frontend/src/features/home/aurora/`). During the migration, pages not yet redesigned kept their earlier dark design inside one dark container (`.sb-legacy-dark`, listed in `frontend/src/design/aurora/routes.ts`). Both were removed in group 5, once every route had moved.
 
 - **Removed claims:**
   - the sidebar's "OS v2.0" and "AI Engine Online" badges;
@@ -169,6 +169,29 @@ The signed-in shell (sidebar, top bar, account menu, phone drawer) and the Comma
 - market evidence is unavailable rather than zero, and synthetic data is labelled; salaries are unavailable;
 - the honest header on `/opportunities`;
 - keyboard filters; axe on every screen; reduced motion; no sideways scrolling at five widths; a clean console.
+
+## Stage D group 5: AI assistant, Language and OCR, Employer, Administration, Settings, and every remaining route (2026-10-14)
+
+`/ai`, `/agent`, `/resume-language`, `/employer-postings`, `/ai-observability`, `/settings` and `/profile` were rebuilt in Aurora Elite, along with every other signed-in route that still used the dark design. The temporary dark container (`.sb-legacy-dark`), `design/aurora/routes.ts` and the `.sb-legacy-dark` token scope in `styles/main.css` are gone, and the base components, dialogs, menus, toasts and portals were moved to the light design. All of the following are unchanged:
+- the AI architect's requests and answers;
+- language detection, translation, OCR confidence and deletion of stored text;
+- employer self-declaration, publishing confirmations, reports and administrator review;
+- administrator-only access to AI observability;
+- profile and preference saving.
+
+- **Dark leftovers fixed.** The AI architect's stylesheet (`features/ai/styles/neural_command_center.css`) no longer paints a near-black canvas and dark glass panels. Dark hero gradients, dark chart tooltips and `bg-black` panels behind dark text were replaced.
+- **Contrast.** White text on cyan-600 and emerald-600 buttons (about 3.7:1) now sits on violet or emerald-700 (4.5:1 or more).
+- **Reduced motion.** `GlassPanel` and `PremiumSection` show their content at once under reduced motion. Previously, a panel below the fold stayed invisible until it was scrolled into view.
+
+`e2e/tests/group5.mjs` (14 browser steps) checks:
+- signed-out access to the group 5 screens and the administrator API is refused;
+- no legacy dark container is rendered and the document is light;
+- no large dark surface and no error screen on the group 5 screens or on the 23 other remaining routes;
+- Hindi guidance is kept after a reload and stored on the account;
+- the employer disclosure is shown, with no "verified employer" claim and no review tab for a regular user;
+- a target role edited in Settings is saved and kept after a reload;
+- a regular user is refused AI observability, while an administrator sees it and the employer review tab on the light design;
+- axe on every screen; reduced motion; no sideways scrolling at five widths; a clean console.
 
 ## Pages inside the app
 

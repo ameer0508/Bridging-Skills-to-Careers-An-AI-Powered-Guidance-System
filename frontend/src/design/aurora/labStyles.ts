@@ -1,8 +1,25 @@
 /**
- * Aurora Elite versions of the Career Lab class names (features/careerLab/components/labStyles.ts),
- * with the same names so a screen moves to the light design by changing its import.
+ * Class names and helpers shared by the Career Lab panels and the other lab-style screens
+ * (Aurora Elite).
  */
-export { errorText, formatDate, formatDateTime } from '../../features/careerLab/components/labStyles';
+export const errorText = (error: unknown, fallback: string): string => {
+  const message = (error as { message?: unknown } | null)?.message;
+  return typeof message === 'string' && message ? message : fallback;
+};
+
+export const formatDate = (value: string | null | undefined): string => {
+  if (!value) return '';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+};
+
+export const formatDateTime = (value: string | null | undefined): string => {
+  if (!value) return '';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? ''
+    : date.toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+};
 
 export const panelClass = 'rounded-[28px] border border-aurora-line bg-white p-5 shadow-aurora-md sm:p-6 space-y-5';
 export const insetClass = 'rounded-2xl border border-aurora-line bg-aurora-canvas/60 p-4';

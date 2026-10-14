@@ -43,7 +43,7 @@ export const Dialog: React.FC<DialogProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} size="sm" footer={footer}>
-      <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">{description}</p>
+      <p className="text-sm text-aurora-muted leading-relaxed">{description}</p>
     </Modal>
   );
 };

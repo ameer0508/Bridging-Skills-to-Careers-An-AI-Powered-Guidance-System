@@ -28,7 +28,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
         </Icon>
       </div>
       <h3 className="text-base font-bold text-[var(--color-status-error-text)] mb-2">{title}</h3>
-      <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed mb-6 max-w-xs">{message}</p>
+      <p className="text-xs text-aurora-muted leading-relaxed mb-6 max-w-xs">{message}</p>
       {onRetry && (
         <Button variant="destructive" size="sm" onClick={onRetry}>
           Try Again

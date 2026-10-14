@@ -85,7 +85,7 @@ export const AIOperationsCenterWorkspace: React.FC = () => {
       />
 
       {/* NAVIGATION TAB STRIP */}
-      <GlassPanel className="p-2 flex items-center gap-2 overflow-x-auto custom-scrollbar border-indigo-500/30">
+      <GlassPanel className="p-2 flex items-center gap-2 overflow-x-auto custom-scrollbar border-aurora-violet/25">
         {[
           { id: 'overview', label: 'Executive Operations Overview', icon: Activity },
           { id: 'traces', label: 'Distributed Trace Spans', icon: Terminal },
@@ -100,8 +100,8 @@ export const AIOperationsCenterWorkspace: React.FC = () => {
               onClick={() => setActiveTab(tab.id as 'overview' | 'traces' | 'flags' | 'experiments')}
               className={`py-2 px-4 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shrink-0 ${
                 isActive
-                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                  : 'bg-slate-950/60 text-slate-400 hover:text-white hover:bg-white/5'
+                  ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-md'
+                  : 'bg-aurora-canvas/60 text-aurora-muted hover:text-aurora-indigo hover:bg-aurora-canvas'
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -117,21 +117,21 @@ export const AIOperationsCenterWorkspace: React.FC = () => {
           {/* PIPELINE STATUS BOARD */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {pipelineStatus.map((pipe, i) => (
-              <GlassPanel key={i} className="p-4 space-y-3 border-emerald-500/30">
+              <GlassPanel key={i} className="p-4 space-y-3 border-emerald-200">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-white">{pipe.name}</span>
-                  <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold border border-emerald-500/30">
+                  <span className="text-xs font-bold text-aurora-ink">{pipe.name}</span>
+                  <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
                     ● {pipe.status}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs font-mono">
-                  <div className="p-2 rounded-lg bg-slate-950 border border-white/5 space-y-0.5">
-                    <span className="text-[9px] text-slate-500 block">LATENCY</span>
-                    <span className="text-slate-200 font-bold">{pipe.latency}</span>
+                  <div className="p-2 rounded-lg bg-aurora-canvas border border-aurora-line space-y-0.5">
+                    <span className="text-[9px] text-aurora-muted block">LATENCY</span>
+                    <span className="text-aurora-ink font-bold">{pipe.latency}</span>
                   </div>
-                  <div className="p-2 rounded-lg bg-slate-950 border border-white/5 space-y-0.5">
-                    <span className="text-[9px] text-slate-500 block">SUCCESS RATE</span>
-                    <span className="text-emerald-400 font-bold">{pipe.successRate}</span>
+                  <div className="p-2 rounded-lg bg-aurora-canvas border border-aurora-line space-y-0.5">
+                    <span className="text-[9px] text-aurora-muted block">SUCCESS RATE</span>
+                    <span className="text-emerald-700 font-bold">{pipe.successRate}</span>
                   </div>
                 </div>
               </GlassPanel>
@@ -139,13 +139,13 @@ export const AIOperationsCenterWorkspace: React.FC = () => {
           </div>
 
           {/* LATENCY & COST TELEMETRY CHART */}
-          <GlassPanel className="p-6 space-y-4 border-indigo-500/30">
+          <GlassPanel className="p-6 space-y-4 border-aurora-violet/25">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-white flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-cyan-400" />
+              <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-aurora-violet" />
                 AI Inference Latency & Cost Telemetry
               </span>
-              <span className="text-[10px] font-mono text-slate-400">Live Telemetry</span>
+              <span className="text-[10px] text-aurora-muted">Live Telemetry</span>
             </div>
 
             <div className="h-64 w-full pt-2">
@@ -161,7 +161,7 @@ export const AIOperationsCenterWorkspace: React.FC = () => {
                   <XAxis dataKey="time" stroke="#94a3b8" fontSize={11} tickLine={false} />
                   <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
                   <Tooltip
-                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px', fontSize: '12px' }}
+                    contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e6eaf6', color: '#10153b', borderRadius: '12px', fontSize: '12px' }}
                   />
                   <Area type="monotone" dataKey="latencyMs" stroke="#6366f1" strokeWidth={3} fillOpacity={1} fill="url(#opsLatGrad)" name="Latency (ms)" />
                 </AreaChart>
@@ -173,30 +173,30 @@ export const AIOperationsCenterWorkspace: React.FC = () => {
 
       {/* TAB 2 — DISTRIBUTED TRACING */}
       {activeTab === 'traces' && (
-        <GlassPanel className="p-6 space-y-4 border-indigo-500/30">
+        <GlassPanel className="p-6 space-y-4 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Terminal className="w-4 h-4 text-aurora-indigo" />
               OpenTelemetry Distributed Spans (Trace ID: trace-d26060a9)
             </span>
           </div>
 
-          <div className="space-y-3 font-mono text-xs">
+          <div className="space-y-3 text-xs">
             {traceSpans.map((span, idx) => (
-              <div key={idx} className="p-4 rounded-xl bg-slate-950 border border-white/10 flex items-center justify-between">
+              <div key={idx} className="p-4 rounded-xl bg-aurora-canvas border border-aurora-line flex items-center justify-between">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-bold">
+                    <span className="px-2 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-indigo font-bold">
                       {span.component}
                     </span>
-                    <span className="text-white font-bold">{span.operation}</span>
+                    <span className="text-aurora-ink font-bold">{span.operation}</span>
                   </div>
-                  <span className="text-[10px] text-slate-500">Trace: {span.traceId}</span>
+                  <span className="text-[10px] text-aurora-muted">Trace: {span.traceId}</span>
                 </div>
 
                 <div className="text-right">
-                  <span className="text-emerald-400 font-bold block">{span.durationMs} ms</span>
-                  <span className="text-[10px] text-emerald-300 font-bold">● {span.status}</span>
+                  <span className="text-emerald-700 font-bold block">{span.durationMs} ms</span>
+                  <span className="text-[10px] text-emerald-700 font-bold">● {span.status}</span>
                 </div>
               </div>
             ))}
@@ -206,20 +206,20 @@ export const AIOperationsCenterWorkspace: React.FC = () => {
 
       {/* TAB 3 — FEATURE FLAGS */}
       {activeTab === 'flags' && (
-        <GlassPanel className="p-6 space-y-4 border-cyan-500/30">
+        <GlassPanel className="p-6 space-y-4 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Zap className="w-4 h-4 text-cyan-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Zap className="w-4 h-4 text-aurora-violet" />
               Canary Feature Flags & Kill Switch Console
             </span>
           </div>
 
           <div className="space-y-3">
             {Object.entries(featureFlags).map(([key, enabled]) => (
-              <div key={key} className="p-4 rounded-xl bg-slate-950 border border-white/10 flex items-center justify-between">
+              <div key={key} className="p-4 rounded-xl bg-aurora-canvas border border-aurora-line flex items-center justify-between">
                 <div>
-                  <span className="text-sm font-bold text-white font-mono block">{key}</span>
-                  <span className="text-xs text-slate-400">
+                  <span className="text-sm font-bold text-aurora-ink block">{key}</span>
+                  <span className="text-xs text-aurora-muted">
                     {key === 'emergency_kill_switch' ? 'CRITICAL: Instantly disables all AI inference' : 'Canary feature flag rollout'}
                   </span>
                 </div>
@@ -228,11 +228,11 @@ export const AIOperationsCenterWorkspace: React.FC = () => {
                   onClick={() => handleToggleFlag(key)}
                   className={`p-2 rounded-xl border flex items-center gap-2 text-xs font-bold transition-all cursor-pointer ${
                     enabled
-                      ? 'bg-emerald-600/20 border-emerald-500/50 text-emerald-400'
-                      : 'bg-slate-900 border-white/10 text-slate-400'
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                      : 'bg-aurora-canvas border-aurora-line text-aurora-muted'
                   }`}
                 >
-                  {enabled ? <ToggleRight className="w-5 h-5 text-emerald-400" /> : <ToggleLeft className="w-5 h-5 text-slate-500" />}
+                  {enabled ? <ToggleRight className="w-5 h-5 text-emerald-700" /> : <ToggleLeft className="w-5 h-5 text-aurora-muted" />}
                   <span>{enabled ? 'ENABLED' : 'DISABLED'}</span>
                 </button>
               </div>
@@ -244,27 +244,27 @@ export const AIOperationsCenterWorkspace: React.FC = () => {
       {/* TAB 4 — EXPERIMENTS */}
       {activeTab === 'experiments' && (
         <GlassPanel className="p-6 space-y-4 border-purple-500/30">
-          <span className="text-xs font-bold text-white flex items-center gap-2">
-            <FlaskConical className="w-4 h-4 text-purple-400" />
+          <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+            <FlaskConical className="w-4 h-4 text-aurora-violet" />
             Live A/B Model Experiments (exp-career-matching-v2)
           </span>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-xl bg-slate-950 border border-white/10 space-y-2">
-              <span className="text-[10px] font-mono text-indigo-400 uppercase font-bold">Variant A (50% Traffic)</span>
-              <h4 className="text-sm font-bold text-white">Gemini-2.5-Flash</h4>
-              <div className="text-xs font-mono text-slate-400 space-y-1">
-                <div>Avg Latency: <span className="text-white font-bold">135 ms</span></div>
-                <div>Match Acceptance: <span className="text-emerald-400 font-bold">96.4%</span></div>
+            <div className="p-4 rounded-xl bg-aurora-canvas border border-aurora-line space-y-2">
+              <span className="text-[10px] text-aurora-indigo uppercase font-bold">Variant A (50% Traffic)</span>
+              <h4 className="text-sm font-bold text-aurora-ink">Gemini-2.5-Flash</h4>
+              <div className="text-xs text-aurora-muted space-y-1">
+                <div>Avg Latency: <span className="text-aurora-ink font-bold">135 ms</span></div>
+                <div>Match Acceptance: <span className="text-emerald-700 font-bold">96.4%</span></div>
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-950 border border-white/10 space-y-2">
-              <span className="text-[10px] font-mono text-purple-400 uppercase font-bold">Variant B (50% Traffic)</span>
-              <h4 className="text-sm font-bold text-white">Gemini-1.5-Pro</h4>
-              <div className="text-xs font-mono text-slate-400 space-y-1">
-                <div>Avg Latency: <span className="text-white font-bold">240 ms</span></div>
-                <div>Match Acceptance: <span className="text-emerald-400 font-bold">97.8%</span></div>
+            <div className="p-4 rounded-xl bg-aurora-canvas border border-aurora-line space-y-2">
+              <span className="text-[10px] text-aurora-violet uppercase font-bold">Variant B (50% Traffic)</span>
+              <h4 className="text-sm font-bold text-aurora-ink">Gemini-1.5-Pro</h4>
+              <div className="text-xs text-aurora-muted space-y-1">
+                <div>Avg Latency: <span className="text-aurora-ink font-bold">240 ms</span></div>
+                <div>Match Acceptance: <span className="text-emerald-700 font-bold">97.8%</span></div>
               </div>
             </div>
           </div>

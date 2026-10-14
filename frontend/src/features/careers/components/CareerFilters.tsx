@@ -51,7 +51,7 @@ export const CareerFilters: React.FC<CareerFiltersProps> = ({
             <button
               type="button"
               onClick={onOpenCompare}
-              className="px-3 py-2 text-xs font-bold rounded-[var(--radius-md)] bg-[var(--color-interactive-primary)] text-[var(--color-text-on-primary)] shadow-sm hover:bg-[var(--color-interactive-primary-hover)] transition-colors cursor-pointer"
+              className="px-3 py-2 text-xs font-bold rounded-2xl [background:var(--aurora-gradient-action)] text-[var(--color-text-on-primary)] shadow-sm hover:bg-[var(--color-interactive-primary-hover)] transition-colors cursor-pointer"
             >
               Compare Selected ({compareCount})
             </button>
@@ -71,7 +71,7 @@ export const CareerFilters: React.FC<CareerFiltersProps> = ({
 
       {/* Category Filter Chips */}
       <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-1">
-        <span className="text-xs font-semibold text-[var(--color-text-tertiary)] shrink-0 mr-1">
+        <span className="text-xs font-semibold text-aurora-muted shrink-0 mr-1">
           Categories:
         </span>
         {categories.map(cat => {
@@ -83,8 +83,8 @@ export const CareerFilters: React.FC<CareerFiltersProps> = ({
               onClick={() => onSelectCategory(cat)}
               className={
                 isSelected
-                  ? 'bg-[var(--color-interactive-primary)] text-[var(--color-text-on-primary)] border-[var(--color-interactive-primary)] font-semibold'
-                  : 'bg-[var(--color-bg-surface-sunken)] text-[var(--color-text-secondary)] border-[var(--color-border-subtle)]'
+                  ? '[background:var(--aurora-gradient-action)] text-[var(--color-text-on-primary)] border-aurora-violet font-semibold'
+                  : 'bg-[var(--color-bg-surface-sunken)] text-aurora-muted border-aurora-line'
               }
             >
               {cat.charAt(0).toUpperCase() + cat.slice(1)}

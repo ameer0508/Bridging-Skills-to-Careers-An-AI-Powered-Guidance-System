@@ -25,32 +25,32 @@ export const PriorityFocusCard: React.FC<PriorityFocusCardProps> = ({
   return (
     <LightingSurface
       profile="heroSpotlight"
-      className={`p-6 rounded-2xl border border-indigo-500/40 bg-neutral-900/90 backdrop-blur-xl space-y-4 shadow-xl shadow-indigo-500/10 ${className}`}
+      className={`p-6 rounded-2xl border border-aurora-violet/25 bg-aurora-canvas/60 backdrop-blur-xl space-y-4 shadow-xl shadow-indigo-500/10 ${className}`}
     >
-      <div className="flex items-center justify-between pb-3 border-b border-white/10">
+      <div className="flex items-center justify-between pb-3 border-b border-aurora-line">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-400">
+          <div className="p-2 rounded-lg bg-aurora-violet/[0.06] text-aurora-indigo">
             <Target className="w-5 h-5" />
           </div>
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-300">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-aurora-indigo">
               Primary Adaptive Focus
             </span>
-            <h3 className="text-base font-bold text-white">{prioritization.focusTitle}</h3>
+            <h3 className="text-base font-bold text-aurora-ink">{prioritization.focusTitle}</h3>
           </div>
         </div>
 
-        <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+        <span className="text-xs font-bold px-2.5 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25">
           {prioritization.urgencyScore}% Priority Score
         </span>
       </div>
 
-      <p className="text-xs text-neutral-200 leading-relaxed bg-black/40 p-4 rounded-xl border border-white/5 font-medium">
+      <p className="text-xs text-aurora-ink leading-relaxed bg-aurora-canvas/60 p-4 rounded-xl border border-aurora-line font-medium">
         {prioritization.focusDescription}
       </p>
 
-      <div className="p-3 rounded-lg bg-white/5 border border-white/10 text-xs text-neutral-300 flex items-center gap-2">
-        <HelpCircle className="w-4 h-4 text-indigo-400 shrink-0" />
+      <div className="p-3 rounded-lg bg-aurora-canvas border border-aurora-line text-xs text-aurora-muted flex items-center gap-2">
+        <HelpCircle className="w-4 h-4 text-aurora-indigo shrink-0" />
         <span>{prioritization.explanation}</span>
       </div>
 

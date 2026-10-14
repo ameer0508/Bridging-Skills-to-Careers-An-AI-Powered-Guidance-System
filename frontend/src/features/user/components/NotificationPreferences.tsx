@@ -46,54 +46,54 @@ export const NotificationPreferences: React.FC = () => {
   return (
     <Card variant="default">
       <CardHeader>
-        <h3 className="text-base font-bold font-display text-[var(--color-text-primary)]">
+        <h3 className="text-base font-bold font-display text-aurora-ink">
           Notification Preferences
         </h3>
       </CardHeader>
 
       <CardBody className="space-y-4">
-        <div className="flex items-center justify-between p-3 bg-[var(--color-bg-surface-sunken)] border border-[var(--color-border-subtle)] rounded-[var(--radius-md)]">
+        <div className="flex items-center justify-between p-3 bg-[var(--color-bg-surface-sunken)] border border-aurora-line rounded-2xl">
           <div>
-            <span className="text-xs font-bold text-[var(--color-text-primary)] block">
+            <span className="text-xs font-bold text-aurora-ink block">
               Email System Alerts
             </span>
-            <span className="text-[10px] text-[var(--color-text-tertiary)] block">
+            <span className="text-[10px] text-aurora-muted block">
               Important account security and parse status updates
             </span>
           </div>
           <Switch aria-label="Security and system alerts" checked={emailAlerts} onChange={e => togglePref('emailAlerts', e.target.checked)} />
         </div>
 
-        <div className="flex items-center justify-between p-3 bg-[var(--color-bg-surface-sunken)] border border-[var(--color-border-subtle)] rounded-[var(--radius-md)]">
+        <div className="flex items-center justify-between p-3 bg-[var(--color-bg-surface-sunken)] border border-aurora-line rounded-2xl">
           <div>
-            <span className="text-xs font-bold text-[var(--color-text-primary)] block">
+            <span className="text-xs font-bold text-aurora-ink block">
               Career Alignment Digest
             </span>
-            <span className="text-[10px] text-[var(--color-text-tertiary)] block">
+            <span className="text-[10px] text-aurora-muted block">
               Weekly notifications when new career matches or fit score recalculations occur
             </span>
           </div>
           <Switch aria-label="Career alignment digest" checked={careerDigest} onChange={e => togglePref('careerDigest', e.target.checked)} />
         </div>
 
-        <div className="flex items-center justify-between p-3 bg-[var(--color-bg-surface-sunken)] border border-[var(--color-border-subtle)] rounded-[var(--radius-md)]">
+        <div className="flex items-center justify-between p-3 bg-[var(--color-bg-surface-sunken)] border border-aurora-line rounded-2xl">
           <div>
-            <span className="text-xs font-bold text-[var(--color-text-primary)] block">
+            <span className="text-xs font-bold text-aurora-ink block">
               Roadmap Progress Reminders
             </span>
-            <span className="text-[10px] text-[var(--color-text-tertiary)] block">
+            <span className="text-[10px] text-aurora-muted block">
               Reminders to complete milestone action items in your active learning roadmap
             </span>
           </div>
           <Switch aria-label="Roadmap milestone reminders" checked={roadmapReminders} onChange={e => togglePref('roadmapReminders', e.target.checked)} />
         </div>
 
-        <div className="flex items-center justify-between p-3 bg-[var(--color-bg-surface-sunken)] border border-[var(--color-border-subtle)] rounded-[var(--radius-md)]">
+        <div className="flex items-center justify-between p-3 bg-[var(--color-bg-surface-sunken)] border border-aurora-line rounded-2xl">
           <div>
-            <span className="text-xs font-bold text-[var(--color-text-primary)] block">
+            <span className="text-xs font-bold text-aurora-ink block">
               AI Advisory Insights
             </span>
-            <span className="text-[10px] text-[var(--color-text-tertiary)] block">
+            <span className="text-[10px] text-aurora-muted block">
               Proactive AI career advice and skill gap notifications
             </span>
           </div>

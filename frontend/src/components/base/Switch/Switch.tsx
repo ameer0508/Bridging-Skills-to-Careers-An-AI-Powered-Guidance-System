@@ -45,7 +45,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
             {...props}
           />
           <div
-            className={`${trackSizeClasses[size]} rounded-full bg-[var(--color-bg-surface-sunken)] border border-[var(--color-border-default)] transition-colors duration-[var(--duration-normal)] ease-[var(--ease-default)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--color-border-focus)] peer-checked:bg-[var(--color-interactive-primary)] peer-checked:border-[var(--color-interactive-primary)] peer-disabled:opacity-50 peer-disabled:cursor-not-allowed cursor-pointer flex items-center`}
+            className={`${trackSizeClasses[size]} rounded-full bg-[var(--color-bg-surface-sunken)] border border-aurora-line transition-colors duration-[var(--duration-normal)] ease-[var(--ease-default)] peer-focus-visible:ring-2 peer-focus-visible:ring-[var(--color-border-focus)] peer-checked:[background:var(--aurora-gradient-action)] peer-checked:border-aurora-violet peer-disabled:opacity-50 peer-disabled:cursor-not-allowed cursor-pointer flex items-center`}
           >
             <div
               className={`${thumbSizeClasses[size]} rounded-full bg-white shadow-sm transition-transform duration-[var(--duration-normal)] ease-[var(--ease-default)] transform ${
@@ -57,7 +57,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className={`text-sm text-[var(--color-text-primary)] cursor-pointer ${
+            className={`text-sm text-aurora-ink cursor-pointer ${
               disabled ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >

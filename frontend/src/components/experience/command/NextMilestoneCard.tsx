@@ -28,19 +28,19 @@ export const NextMilestoneCard: React.FC<NextMilestoneCardProps> = ({
     <SpotlightCard className={`p-6 space-y-4 ${className}`}>
       <div className="flex items-center justify-between pb-3 border-b border-neutral-200 dark:border-neutral-800">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-500 dark:text-indigo-400">
+          <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-500 dark:text-aurora-indigo">
             <Compass className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-base font-bold text-neutral-900 dark:text-white">
               Next Learning Milestone
             </h3>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            <p className="text-xs text-aurora-muted dark:text-neutral-400">
               {careerTitle} Roadmap Phase
             </p>
           </div>
         </div>
-        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
+        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-indigo-50 dark:bg-violet-50 text-indigo-600 dark:text-aurora-indigo border border-indigo-200 dark:border-indigo-800">
           {completedItems}/{totalItems} Items Done
         </span>
       </div>
@@ -54,9 +54,9 @@ export const NextMilestoneCard: React.FC<NextMilestoneCardProps> = ({
 
         <ProgressLoader progress={progressPercentage} showLabel height={8} />
 
-        <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 pt-2">
+        <div className="flex items-center justify-between text-xs text-aurora-muted dark:text-neutral-400 pt-2">
           <span>{totalItems - completedItems} Actionable items remaining</span>
-          <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+          <span className="font-semibold text-indigo-600 dark:text-aurora-indigo">
             {progressPercentage}% Phase Complete
           </span>
         </div>

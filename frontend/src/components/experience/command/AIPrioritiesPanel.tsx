@@ -31,11 +31,11 @@ export const AIPrioritiesPanel: React.FC<AIPrioritiesPanelProps> = ({
     switch (priority.toLowerCase()) {
       case 'critical':
       case 'high':
-        return 'bg-rose-500/20 text-rose-300 border-rose-500/30';
+        return 'bg-rose-50 text-rose-700 border-rose-500/30';
       case 'medium':
-        return 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+        return 'bg-amber-50 text-amber-800 border-amber-500/30';
       default:
-        return 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30';
+        return 'bg-violet-50 text-aurora-indigo border-indigo-500/30';
     }
   };
 
@@ -44,19 +44,19 @@ export const AIPrioritiesPanel: React.FC<AIPrioritiesPanelProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between pb-3 border-b border-neutral-200 dark:border-neutral-800">
         <div className="flex items-center gap-2">
-          <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-500 dark:text-indigo-400">
+          <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-500 dark:text-aurora-indigo">
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
             <h3 className="text-base font-bold text-neutral-900 dark:text-white">
               AI Action Priorities
             </h3>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            <p className="text-xs text-aurora-muted dark:text-neutral-400">
               Highest impact steps synthesized by your Career Architect
             </p>
           </div>
         </div>
-        <span className="text-xs font-mono px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-semibold">
+        <span className="text-xs font-mono px-2 py-0.5 rounded bg-indigo-50 dark:bg-violet-50 text-indigo-600 dark:text-aurora-indigo font-semibold">
           {activePriorities.length} Active
         </span>
       </div>
@@ -68,7 +68,7 @@ export const AIPrioritiesPanel: React.FC<AIPrioritiesPanelProps> = ({
           <h4 className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">
             All High Priorities Addressed
           </h4>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1 max-w-sm mx-auto">
+          <p className="text-xs text-aurora-muted dark:text-neutral-400 mt-1 max-w-sm mx-auto">
             Your career recommendations are fully up to date. Keep advancing your learning roadmap to generate new milestones.
           </p>
         </div>
@@ -89,7 +89,7 @@ export const AIPrioritiesPanel: React.FC<AIPrioritiesPanelProps> = ({
                     >
                       {item.priority} Priority
                     </span>
-                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <span className="text-xs text-aurora-muted dark:text-neutral-400">
                       {item.category}
                     </span>
                   </div>
@@ -101,10 +101,10 @@ export const AIPrioritiesPanel: React.FC<AIPrioritiesPanelProps> = ({
                       {item.reason}
                     </p>
                   )}
-                  <div className="flex items-center gap-4 text-[11px] text-neutral-500 dark:text-neutral-400 pt-1">
+                  <div className="flex items-center gap-4 text-[11px] text-aurora-muted dark:text-neutral-400 pt-1">
                     {item.estimatedTime && (
                       <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3 text-neutral-400" />
+                        <Clock className="w-3 h-3 text-aurora-muted" />
                         {item.estimatedTime}
                       </span>
                     )}

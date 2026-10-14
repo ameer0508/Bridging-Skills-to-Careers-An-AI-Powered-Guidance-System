@@ -244,32 +244,32 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
   return (
     <div className="space-y-8">
       {/* HEADER CONTROLS & TABS */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-aurora-line pb-6">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+            <span className="p-2 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
               <Briefcase className="w-5 h-5" />
             </span>
-            <h2 className="text-xl font-bold text-white tracking-tight">
+            <h2 className="text-xl font-bold text-aurora-ink tracking-tight">
               Live Market Job Intelligence Feed
             </h2>
-            <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-mono text-[11px] font-bold">
+            <span className="px-2.5 py-0.5 rounded-full bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-violet text-[11px] font-bold">
               {filteredJobs.length} Positions Synced
             </span>
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-aurora-muted">
             Real-time market opportunities matched against your verified technical skill vector.
           </p>
         </div>
 
         {/* TAB NAVIGATION */}
-        <div className="flex items-center gap-2 bg-slate-900/80 p-1.5 rounded-xl border border-white/10 shrink-0">
+        <div className="flex items-center gap-2 bg-aurora-canvas/60 p-1.5 rounded-xl border border-aurora-line shrink-0">
           <button
             onClick={() => setActiveTab('all')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'all'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-sm shadow-indigo-600/30'
+                : 'text-aurora-muted hover:text-aurora-indigo'
             }`}
           >
             All Live Jobs ({jobs.length})
@@ -278,22 +278,22 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
             onClick={() => setActiveTab('featured')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'featured'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-sm shadow-indigo-600/30'
+                : 'text-aurora-muted hover:text-aurora-indigo'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <Sparkles className="w-3.5 h-3.5 text-amber-700" />
             <span>Featured ({jobs.filter((j) => j.featured || j.matchScore >= 92).length})</span>
           </button>
           <button
             onClick={() => setActiveTab('saved')}
             className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'saved'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-sm shadow-indigo-600/30'
+                : 'text-aurora-muted hover:text-aurora-indigo'
             }`}
           >
-            <Bookmark className="w-3.5 h-3.5 text-cyan-400" />
+            <Bookmark className="w-3.5 h-3.5 text-aurora-violet" />
             <span>Saved ({savedJobIds.length})</span>
           </button>
         </div>
@@ -304,28 +304,28 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
         {/* COMPANY SPOTLIGHT (8 COLS) */}
         <GlassPanel className="lg:col-span-8 p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Building2 className="w-4 h-4 text-cyan-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-aurora-violet" />
               High Velocity Hiring Companies
             </span>
-            <span className="text-[10px] text-slate-500 font-mono">Market Velocity Synced</span>
+            <span className="text-[10px] text-aurora-muted font-mono">Market Velocity Synced</span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {companySpotlights.slice(0, 4).map((comp, idx) => (
               <div
                 key={idx}
-                className="p-3 rounded-xl bg-slate-950/80 border border-white/10 hover:border-indigo-500/40 transition-all flex flex-col justify-between"
+                className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line hover:border-aurora-violet/25 transition-all flex flex-col justify-between"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xl">{comp.logo}</span>
-                  <span className="text-[9px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                  <span className="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
                     {comp.growth}
                   </span>
                 </div>
                 <div className="mt-2">
-                  <span className="text-xs font-bold text-white block truncate">{comp.name}</span>
-                  <span className="text-[10px] text-slate-400 font-mono block">{comp.count} Active Matches</span>
+                  <span className="text-xs font-bold text-aurora-ink block truncate">{comp.name}</span>
+                  <span className="text-[10px] text-aurora-muted block">{comp.count} Active Matches</span>
                 </div>
               </div>
             ))}
@@ -335,21 +335,21 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
         {/* SKILL DEMAND SUMMARY (4 COLS) */}
         <GlassPanel className="lg:col-span-4 p-5 space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-emerald-700" />
               Highest Demand Skill Vectors
             </span>
-            <span className="text-[10px] text-slate-500 font-mono">Live Index</span>
+            <span className="text-[10px] text-aurora-muted font-mono">Live Index</span>
           </div>
 
           <div className="flex flex-wrap gap-1.5">
             {topDemandSkills.map(([skill, count], i) => (
               <span
                 key={i}
-                className="px-2.5 py-1 rounded-lg bg-slate-950 border border-white/10 text-[11px] font-mono text-slate-200 flex items-center gap-1.5"
+                className="px-2.5 py-1 rounded-lg bg-aurora-canvas border border-aurora-line text-[11px] text-aurora-ink flex items-center gap-1.5"
               >
                 <span>{skill}</span>
-                <span className="px-1 py-0.2 rounded bg-indigo-500/20 text-indigo-300 text-[9px] font-bold">
+                <span className="px-1 py-0.2 rounded bg-aurora-violet/[0.06] text-aurora-indigo text-[9px] font-bold">
                   {count}
                 </span>
               </span>
@@ -368,9 +368,9 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search roles, companies, or required skills..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500"
             />
-            <Briefcase className="w-4 h-4 text-slate-500 absolute left-3 top-2.5" />
+            <Briefcase className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
 
           {/* Sector Dropdown */}
@@ -379,10 +379,10 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
               aria-label="Filter by category"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
+              className="w-full py-2 px-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
               {categories.map((c) => (
-                <option key={c} value={c} className="bg-slate-900 text-white">
+                <option key={c} value={c} className="bg-aurora-canvas text-aurora-ink">
                   {c === 'all' ? 'All Sectors' : c}
                 </option>
               ))}
@@ -395,12 +395,12 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
               aria-label="Filter by workplace"
               value={selectedWorkplace}
               onChange={(e) => setSelectedWorkplace(e.target.value)}
-              className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
+              className="w-full py-2 px-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
-              <option value="all" className="bg-slate-900 text-white">All Workplaces</option>
-              <option value="Remote" className="bg-slate-900 text-white">Remote Only</option>
-              <option value="Hybrid" className="bg-slate-900 text-white">Hybrid</option>
-              <option value="On-site" className="bg-slate-900 text-white">On-site</option>
+              <option value="all" className="bg-aurora-canvas text-aurora-ink">All Workplaces</option>
+              <option value="Remote" className="bg-aurora-canvas text-aurora-ink">Remote Only</option>
+              <option value="Hybrid" className="bg-aurora-canvas text-aurora-ink">Hybrid</option>
+              <option value="On-site" className="bg-aurora-canvas text-aurora-ink">On-site</option>
             </select>
           </div>
 
@@ -410,13 +410,13 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
               aria-label="Filter by experience level"
               value={selectedExperience}
               onChange={(e) => setSelectedExperience(e.target.value)}
-              className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
+              className="w-full py-2 px-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
-              <option value="all" className="bg-slate-900 text-white">All Levels</option>
-              <option value="Senior" className="bg-slate-900 text-white">Senior</option>
-              <option value="Lead" className="bg-slate-900 text-white">Lead</option>
-              <option value="Principal" className="bg-slate-900 text-white">Principal</option>
-              <option value="Mid" className="bg-slate-900 text-white">Mid-Level</option>
+              <option value="all" className="bg-aurora-canvas text-aurora-ink">All Levels</option>
+              <option value="Senior" className="bg-aurora-canvas text-aurora-ink">Senior</option>
+              <option value="Lead" className="bg-aurora-canvas text-aurora-ink">Lead</option>
+              <option value="Principal" className="bg-aurora-canvas text-aurora-ink">Principal</option>
+              <option value="Mid" className="bg-aurora-canvas text-aurora-ink">Mid-Level</option>
             </select>
           </div>
 
@@ -426,21 +426,21 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
               aria-label="Sort by"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              className="w-full py-2 px-3 rounded-xl bg-slate-950/80 border border-white/10 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 cursor-pointer"
+              className="w-full py-2 px-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink focus:outline-none focus:border-indigo-500 cursor-pointer"
             >
-              <option value="matchScore-desc" className="bg-slate-900 text-white">Match Score (High-Low)</option>
-              <option value="salary-desc" className="bg-slate-900 text-white">Salary (High-Low)</option>
-              <option value="recent" className="bg-slate-900 text-white">Recently Posted</option>
-              <option value="company" className="bg-slate-900 text-white">Company Name</option>
+              <option value="matchScore-desc" className="bg-aurora-canvas text-aurora-ink">Match Score (High-Low)</option>
+              <option value="salary-desc" className="bg-aurora-canvas text-aurora-ink">Salary (High-Low)</option>
+              <option value="recent" className="bg-aurora-canvas text-aurora-ink">Recently Posted</option>
+              <option value="company" className="bg-aurora-canvas text-aurora-ink">Company Name</option>
             </select>
           </div>
         </div>
 
         {/* Min Match Slider Bar */}
-        <div className="flex items-center gap-4 pt-2 border-t border-white/5 text-xs text-slate-400">
-          <span className="font-semibold text-slate-300 flex items-center gap-1.5 shrink-0">
-            <Filter className="w-3.5 h-3.5 text-indigo-400" />
-            Min Match Threshold: <strong className="text-cyan-400 font-mono">{minMatchScore}%</strong>
+        <div className="flex items-center gap-4 pt-2 border-t border-aurora-line text-xs text-aurora-muted">
+          <span className="font-semibold text-aurora-muted flex items-center gap-1.5 shrink-0">
+            <Filter className="w-3.5 h-3.5 text-aurora-indigo" />
+            Min Match Threshold: <strong className="text-aurora-violet font-mono">{minMatchScore}%</strong>
           </span>
           <input
             aria-label="Minimum match score"
@@ -450,12 +450,12 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
             step="5"
             value={minMatchScore}
             onChange={(e) => setMinMatchScore(Number(e.target.value))}
-            className="flex-1 accent-indigo-500 cursor-pointer h-1.5 bg-slate-800 rounded-lg"
+            className="flex-1 accent-[#5540f5] cursor-pointer h-1.5 bg-aurora-canvas rounded-lg"
           />
           {minMatchScore > 0 && (
             <button
               onClick={() => setMinMatchScore(0)}
-              className="text-[10px] text-indigo-400 hover:underline cursor-pointer"
+              className="text-[10px] text-aurora-indigo hover:underline cursor-pointer"
             >
               Reset Filter
             </button>
@@ -480,8 +480,8 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
                 transition={{ duration: 0.2 }}
               >
                 <GlassPanel
-                  className={`p-5 space-y-4 relative overflow-hidden transition-all duration-300 hover:border-indigo-500/50 hover:shadow-xl hover:shadow-indigo-950/30 cursor-pointer flex flex-col justify-between h-full ${
-                    job.featured ? 'border-indigo-500/40 bg-slate-900/90' : ''
+                  className={`p-5 space-y-4 relative overflow-hidden transition-all duration-300 hover:border-aurora-violet/25 hover:shadow-xl hover:shadow-aurora-violet/10 cursor-pointer flex flex-col justify-between h-full ${
+                    job.featured ? 'border-aurora-violet/25 bg-aurora-canvas/60' : ''
                   }`}
                   onClick={() => onSelectJobForDetail(job)}
                 >
@@ -495,15 +495,15 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-slate-950 border border-white/10 flex items-center justify-center text-xl shrink-0">
+                        <div className="w-10 h-10 rounded-xl bg-aurora-canvas border border-aurora-line flex items-center justify-center text-xl shrink-0">
                           {job.companyLogo || '💼'}
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-white leading-snug group-hover:text-indigo-300 transition-colors">
+                          <h4 className="text-sm font-bold text-aurora-ink leading-snug group-hover:text-aurora-indigo transition-colors">
                             {job.title}
                           </h4>
-                          <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono">
-                            <span className="text-slate-200 font-semibold">{job.company}</span>
+                          <div className="flex items-center gap-2 text-[11px] text-aurora-muted font-mono">
+                            <span className="text-aurora-ink font-semibold">{job.company}</span>
                             <span>•</span>
                             <span>{job.location}</span>
                           </div>
@@ -515,8 +515,8 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
                         onClick={(e) => toggleSaveJob(job.id, e)}
                         className={`p-2 rounded-xl transition-colors cursor-pointer ${
                           isSaved
-                            ? 'text-cyan-400 bg-cyan-500/10 border border-cyan-500/30'
-                            : 'text-slate-400 hover:text-white hover:bg-white/10'
+                            ? 'text-aurora-violet bg-aurora-violet/[0.06] border border-aurora-violet/25'
+                            : 'text-aurora-muted hover:text-aurora-indigo hover:bg-aurora-canvas'
                         }`}
                         aria-label="Bookmark job"
                       >
@@ -527,40 +527,40 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
                     {/* Match Score & Badges */}
                     <div className="flex items-center justify-between pt-1">
                       <div className="flex items-center gap-2">
-                        <span className="px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 font-mono text-xs font-bold flex items-center gap-1">
-                          <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400" />
+                        <span className="px-2.5 py-1 rounded-lg bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo text-xs font-bold flex items-center gap-1">
+                          <Zap className="w-3.5 h-3.5 text-aurora-violet fill-cyan-400" />
                           {job.matchScore}% Match
                         </span>
-                        <span className="px-2 py-0.5 rounded bg-slate-950 border border-white/10 text-slate-300 text-[10px] font-mono">
+                        <span className="px-2 py-0.5 rounded bg-aurora-canvas border border-aurora-line text-aurora-muted text-[10px] font-mono">
                           {job.workplaceType}
                         </span>
                       </div>
 
-                      <span className="text-[10px] text-slate-500 font-mono flex items-center gap-1">
+                      <span className="text-[10px] text-aurora-muted flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         {job.postingAge}
                       </span>
                     </div>
 
                     {/* Salary & Experience */}
-                    <div className="p-2.5 rounded-xl bg-slate-950/70 border border-white/5 flex items-center justify-between text-xs">
-                      <span className="font-mono font-bold text-emerald-400 flex items-center gap-1">
+                    <div className="p-2.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between text-xs">
+                      <span className="font-bold text-emerald-700 flex items-center gap-1">
                         <DollarSign className="w-3.5 h-3.5" />
                         ${job.salaryMin}k - ${job.salaryMax}k / yr
                       </span>
-                      <span className="text-[10px] text-slate-400 font-semibold">{job.experienceLevel} Level</span>
+                      <span className="text-[10px] text-aurora-muted font-semibold">{job.experienceLevel} Level</span>
                     </div>
 
                     {/* Required Skills Chips */}
                     <div className="space-y-1.5">
-                      <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider block">
+                      <span className="text-[10px] text-aurora-muted uppercase tracking-wider block">
                         Matching & Required Skill Vectors
                       </span>
                       <div className="flex flex-wrap gap-1">
                         {job.matchingSkills.slice(0, 4).map((s, i) => (
                           <span
                             key={i}
-                            className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-[10px] font-mono"
+                            className="px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-mono"
                           >
                             ✓ {s}
                           </span>
@@ -568,7 +568,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
                         {job.missingSkills.slice(0, 2).map((s, i) => (
                           <span
                             key={i}
-                            className="px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/20 text-rose-300 text-[10px] font-mono"
+                            className="px-2 py-0.5 rounded bg-rose-50 border border-rose-200 text-rose-700 text-[10px] font-mono"
                           >
                             ⚡ {s}
                           </span>
@@ -578,7 +578,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
                   </div>
 
                   {/* Card Bottom Actions */}
-                  <div className="pt-4 border-t border-white/5 flex items-center justify-between gap-2 mt-4">
+                  <div className="pt-4 border-t border-aurora-line flex items-center justify-between gap-2 mt-4">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -586,8 +586,8 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
                       }}
                       className={`text-[11px] font-semibold px-2.5 py-1.5 rounded-lg border transition-colors cursor-pointer ${
                         isCompared
-                          ? 'bg-indigo-600 text-white border-indigo-500'
-                          : 'bg-slate-950/60 text-slate-400 border-white/10 hover:text-white hover:bg-white/5'
+                          ? 'text-white [background:var(--aurora-gradient-action)] border-indigo-500'
+                          : 'bg-aurora-canvas/60 text-aurora-muted border-aurora-line hover:text-aurora-indigo hover:bg-aurora-canvas'
                       }`}
                     >
                       {isCompared ? 'Compared ✓' : '+ Compare'}
@@ -599,8 +599,8 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
                         disabled={isApplied}
                         className={`py-1.5 px-3 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer shadow-md ${
                           isApplied
-                            ? 'bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 cursor-not-allowed'
-                            : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30'
+                            ? 'bg-emerald-50 border border-emerald-200 text-emerald-700 cursor-not-allowed'
+                            : '[background:var(--aurora-gradient-action)] hover:brightness-110 text-white shadow-indigo-600/30'
                         }`}
                       >
                         {isApplied ? (
@@ -629,10 +629,10 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
         <div className="flex justify-center pt-4">
           <button
             onClick={() => setVisibleCount((prev) => prev + 6)}
-            className="py-3 px-8 rounded-xl bg-slate-900 border border-white/10 hover:border-indigo-500/40 text-xs font-bold text-slate-200 hover:text-white flex items-center gap-2 transition-all cursor-pointer shadow-lg"
+            className="py-3 px-8 rounded-xl bg-aurora-canvas border border-aurora-line hover:border-aurora-violet/25 text-xs font-bold text-aurora-ink hover:text-aurora-indigo flex items-center gap-2 transition-all cursor-pointer shadow-lg"
           >
             <span>Load More Market Positions ({filteredJobs.length - visibleCount} Remaining)</span>
-            <ChevronDown className="w-4 h-4 text-indigo-400" />
+            <ChevronDown className="w-4 h-4 text-aurora-indigo" />
           </button>
         </div>
       )}

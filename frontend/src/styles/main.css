@@ -155,11 +155,9 @@
    All component tokens reference these. Never reference
    primitive tokens directly in component code.
    ────────────────────────────────────────────────────────── */
-/* `.sb-legacy-dark` is the theme boundary for screens not yet moved to Aurora Elite: it
-   re-declares these dark tokens so everything inside stays dark whatever the page theme. */
+/* Dark values; the app applies the light set below (html.light) on every screen. */
 :root,
-html.dark,
-.sb-legacy-dark {
+html.dark {
   /* ── Background Tokens ── */
   --color-bg-app:             var(--primitive-neutral-950);   /* Root application background */
   --color-bg-surface:         var(--primitive-neutral-900);   /* Cards, panels */
@@ -479,8 +477,24 @@ html.dark,
    Only tokens that differ between dark and light are listed.
    ────────────────────────────────────────────────────── */
 html.light {
+  /* Aurora Elite: the light semantic tokens are the only ones in use (see theme/ThemeContext.tsx) */
+  --color-text-on-primary:            #ffffff;
+  --color-interactive-primary:        #5540f5;
+  --color-interactive-primary-hover:  #3929c9;
+  --color-interactive-primary-active: #3929c9;
+  --color-status-success-text:   #047857;
+  --color-status-success-border: #a7f3d0;
+  --color-status-warning-text:   #92400e;
+  --color-status-warning-border: #fde68a;
+  --color-status-error-text:     #be123c;
+  --color-status-error-border:   #fecdd3;
+  --color-status-info-text:      #075985;
+  --color-status-info-border:    #bae6fd;
+  --color-ai-accent:        #3929c9;
+  --color-ai-accent-subtle: rgb(85 64 245 / 0.08);
+
   /* Backgrounds */
-  --color-bg-app:             var(--primitive-neutral-100);
+  --color-bg-app:             #f5f7ff;
   --color-bg-surface:         hsl(0, 0%, 100%);
   --color-bg-surface-raised:  var(--primitive-neutral-50);
   --color-bg-surface-overlay: hsl(0, 0%, 100%, 0.90);
@@ -488,16 +502,16 @@ html.light {
   --color-bg-inverse:         var(--primitive-neutral-900);
 
   /* Text */
-  --color-text-primary:   var(--primitive-neutral-900);
-  --color-text-secondary: var(--primitive-neutral-600);
-  --color-text-tertiary:  var(--primitive-neutral-400);
+  --color-text-primary:   #10153b;
+  --color-text-secondary: #515b80;
+  --color-text-tertiary:  #515b80;
   --color-text-disabled:  var(--primitive-neutral-300);
   --color-text-inverse:   var(--primitive-neutral-50);
-  --color-text-link:      var(--primitive-primary-600);
+  --color-text-link:      #3929c9;
 
   /* Borders */
-  --color-border-default:  var(--primitive-neutral-200);
-  --color-border-subtle:   var(--primitive-neutral-150);
+  --color-border-default:  #e6eaf6;
+  --color-border-subtle:   #e6eaf6;
   --color-border-strong:   var(--primitive-neutral-400);
   --color-border-disabled: var(--primitive-neutral-200);
 
@@ -815,26 +829,10 @@ button:active {
 }
 
 /* ──────────────────────────────────────────────────────────
-   AURORA ELITE MIGRATION BOUNDARY
-   Redesigned screens render on the light Aurora canvas. Screens not yet migrated render inside
-   one dark container with their original colours; portals (dialogs, menus, tooltips, toasts)
-   share that dark scope because their components are still dark-designed.
+   AURORA ELITE
+   Every screen is drawn in the light Aurora Elite design. (The temporary dark container used
+   during the screen-by-screen migration was removed once every route had moved.)
    ────────────────────────────────────────────────────────── */
-.sb-legacy-dark {
-  background-color: var(--color-bg-app);
-  color: var(--primitive-neutral-100);
-  color-scheme: dark;
-}
-/* Small captions in the dark screens used slate-500 and the primary-500 link colour, which fall
-   below 4.5:1 on this background (about 4.2:1 and 3.8:1). Inside the boundary they are lifted one
-   step; the rules go away with the boundary. */
-.sb-legacy-dark .text-slate-500,
-.sb-legacy-dark .placeholder\:text-slate-500::placeholder {
-  color: var(--color-slate-400);
-}
-.sb-legacy-dark .text-\[var\(--color-interactive-primary\)\] {
-  color: var(--primitive-primary-300);
-}
 .sb-aurora {
   color-scheme: light;
 }

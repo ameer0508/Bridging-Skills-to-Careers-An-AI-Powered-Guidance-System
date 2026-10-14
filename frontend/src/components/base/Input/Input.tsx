@@ -14,9 +14,9 @@ export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElem
 }
 
 const sizeClasses: Record<InputSize, string> = {
-  sm: 'h-8 px-2.5 text-xs rounded-[var(--radius-sm)]',
-  md: 'h-10 px-3.5 text-sm rounded-[var(--radius-md)]',
-  lg: 'h-12 px-4 text-base rounded-[var(--radius-lg)]',
+  sm: 'h-8 px-2.5 text-xs rounded-lg',
+  md: 'h-10 px-3.5 text-sm rounded-2xl',
+  lg: 'h-12 px-4 text-base rounded-2xl',
 };
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
@@ -56,7 +56,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs font-semibold text-[var(--color-text-secondary)] mb-1.5"
+            className="block text-xs font-semibold text-aurora-muted mb-1.5"
           >
             {label}
             {required && <span className="text-[var(--color-status-error-text)] ml-1" aria-hidden="true">*</span>}
@@ -64,7 +64,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <div className="relative flex items-center">
           {leftIcon && (
-            <div className="absolute left-3 flex items-center justify-center text-[var(--color-text-tertiary)] pointer-events-none">
+            <div className="absolute left-3 flex items-center justify-center text-aurora-muted pointer-events-none">
               {leftIcon}
             </div>
           )}
@@ -79,7 +79,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
           {rightIcon && (
-            <div className="absolute right-3 flex items-center justify-center text-[var(--color-text-tertiary)]">
+            <div className="absolute right-3 flex items-center justify-center text-aurora-muted">
               {rightIcon}
             </div>
           )}
@@ -88,7 +88,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <p
             id={helperId}
             className={`mt-1 text-xs ${
-              error ? 'text-[var(--color-status-error-text)] font-medium' : 'text-[var(--color-text-tertiary)]'
+              error ? 'text-[var(--color-status-error-text)] font-medium' : 'text-aurora-muted'
             }`}
           >
             {error || helperText}

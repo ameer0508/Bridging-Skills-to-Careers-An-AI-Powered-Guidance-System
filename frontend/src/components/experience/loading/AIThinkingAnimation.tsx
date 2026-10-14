@@ -23,7 +23,7 @@ export const AIThinkingAnimation: React.FC<AIThinkingAnimationProps> = ({
             prefersReducedMotion ? '' : 'animate-[sb-glow-pulse_3s_ease-in-out_infinite]'
           }`}
         />
-        <div className="relative z-10 flex items-center justify-center w-12 h-12 rounded-full bg-neutral-900 border border-indigo-500/30 text-indigo-400 shadow-inner">
+        <div className="relative z-10 flex items-center justify-center w-12 h-12 rounded-full bg-aurora-canvas/60 border border-indigo-500/30 text-aurora-indigo shadow-inner">
           <Sparkles className={`w-6 h-6 ${prefersReducedMotion ? '' : 'animate-pulse'}`} />
         </div>
       </div>

@@ -30,7 +30,7 @@ export const RecentWinsPanel: React.FC<RecentWinsPanelProps> = ({
             <h3 className="text-base font-bold text-neutral-900 dark:text-white">
               Recent Milestones & Wins
             </h3>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            <p className="text-xs text-aurora-muted dark:text-neutral-400">
               Verified accomplishments in your career journey
             </p>
           </div>
@@ -39,11 +39,11 @@ export const RecentWinsPanel: React.FC<RecentWinsPanelProps> = ({
 
       {wins.length === 0 ? (
         <div className="p-6 text-center rounded-xl bg-neutral-50/50 dark:bg-neutral-900/30 border border-dashed border-neutral-200 dark:border-neutral-800 space-y-2">
-          <Sparkles className="w-8 h-8 mx-auto text-indigo-400 opacity-80" />
+          <Sparkles className="w-8 h-8 mx-auto text-aurora-indigo opacity-80" />
           <h4 className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">
             Your Journey Has Begun
           </h4>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-sm mx-auto">
+          <p className="text-xs text-aurora-muted dark:text-neutral-400 max-w-sm mx-auto">
             Complete your first roadmap item or verified skill assessment to record milestone achievements here.
           </p>
         </div>
@@ -61,7 +61,7 @@ export const RecentWinsPanel: React.FC<RecentWinsPanelProps> = ({
                     {win.title}
                   </h5>
                   {win.category && (
-                    <span className="text-[10px] text-neutral-500 dark:text-neutral-400">
+                    <span className="text-[10px] text-aurora-muted dark:text-neutral-400">
                       {win.category}
                     </span>
                   )}

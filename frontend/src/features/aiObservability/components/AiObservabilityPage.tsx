@@ -4,7 +4,7 @@ import { AlertTriangle, ShieldCheck } from 'lucide-react';
 import { messageOf } from '../../../lib/collections';
 import { fetchEvents, fetchProviders, fetchSummary } from '../aiObservabilityApi';
 
-const card = 'rounded-[var(--radius-md)] border border-[var(--color-border-default)] p-4';
+const card = 'rounded-2xl border border-aurora-line p-4';
 const th = 'py-1 pr-3 font-semibold';
 const td = 'py-1 pr-3';
 const WINDOWS = [1, 24, 24 * 7, 24 * 14];
@@ -26,8 +26,8 @@ export const AiObservabilityPage: React.FC = () => {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6">
       <header className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold font-display text-[var(--color-text-primary)]">AI observability</h1>
-        <p className="flex items-start gap-2 text-sm text-[var(--color-text-secondary)]">
+        <h1 className="text-2xl font-bold font-display text-aurora-ink">AI observability</h1>
+        <p className="flex items-start gap-2 text-sm text-aurora-muted">
           <ShieldCheck size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
           Decisions, failure categories and timings from the AI gateway. Prompts, resume text, error messages and keys are never recorded.
           {summary.data && ` Events are kept for ${summary.data.retentionDays} days${summary.data.persisted ? ' in private daily files' : ' in memory only'}.`}
@@ -36,7 +36,7 @@ export const AiObservabilityPage: React.FC = () => {
           <p
             data-testid="observability-scope"
             data-source={summary.data.scope.source}
-            className={`rounded-[var(--radius-md)] border p-3 text-sm ${summary.data.scope.source === 'memory' ? 'border-amber-500 bg-amber-50 text-amber-900' : 'border-[var(--color-border-default)] text-[var(--color-text-secondary)]'}`}
+            className={`rounded-2xl border p-3 text-sm ${summary.data.scope.source === 'memory' ? 'border-amber-500 bg-amber-50 text-amber-900' : 'border-aurora-line text-aurora-muted'}`}
           >
             <strong>What these figures cover:</strong> {summary.data.scope.coverage}
             {summary.data.scope.source === 'memory' && ` This process started ${summary.data.scope.processStartedAt.slice(0, 16).replace('T', ' ')} UTC. Set AI_AUDIT_DIR for a record that survives restarts and covers every process.`}
@@ -45,15 +45,15 @@ export const AiObservabilityPage: React.FC = () => {
         )}
         <label className="flex items-center gap-2 text-sm">
           Time window
-          <select aria-label="Time window" value={windowHours} onChange={e => setWindowHours(Number(e.target.value))} className="rounded border border-[var(--color-border-default)] bg-transparent px-2 py-1">
+          <select aria-label="Time window" value={windowHours} onChange={e => setWindowHours(Number(e.target.value))} className="rounded border border-aurora-line bg-transparent px-2 py-1">
             {WINDOWS.map(w => <option key={w} value={w}>{w < 24 ? `${w} hour` : `${w / 24} day${w > 24 ? 's' : ''}`}</option>)}
           </select>
         </label>
       </header>
 
-      {(summary.isPending || providers.isPending) && <p role="status" className="text-sm text-[var(--color-text-secondary)]">Loading…</p>}
+      {(summary.isPending || providers.isPending) && <p role="status" className="text-sm text-aurora-muted">Loading…</p>}
       {error && (
-        <div role="alert" data-testid="observability-error" className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-status-error,#dc2626)] p-3 text-sm">
+        <div role="alert" data-testid="observability-error" className="flex items-center gap-2 rounded-2xl border border-rose-300 p-3 text-sm">
           <AlertTriangle size={16} aria-hidden="true" /> {messageOf(error, 'The AI observability data could not be loaded.')}
         </div>
       )}
@@ -84,7 +84,7 @@ export const AiObservabilityPage: React.FC = () => {
         <section className={card} aria-labelledby="providers-heading" data-testid="provider-stats">
           <h2 id="providers-heading" className="mb-2 text-base font-bold">Providers in this window ({summary.data.events} events)</h2>
           {Object.keys(summary.data.providers).length === 0 ? (
-            <p className="text-sm text-[var(--color-text-secondary)]">No provider calls recorded in this window.</p>
+            <p className="text-sm text-aurora-muted">No provider calls recorded in this window.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[640px] text-left text-sm">
@@ -95,7 +95,7 @@ export const AiObservabilityPage: React.FC = () => {
                       <th scope="row" className={`${td} font-normal`}>{name}</th>
                       <td className={td}>{p.attempts}</td>
                       <td className={td}>{p.failureRate === null ? '—' : `${Math.round(p.failureRate * 100)}%`}</td>
-                      <td className={td}>{ms(p.latencyMs.p50)} / {ms(p.latencyMs.p95)} <span className="text-xs text-[var(--color-text-secondary)]">(n={p.latencyMs.samples})</span></td>
+                      <td className={td}>{ms(p.latencyMs.p50)} / {ms(p.latencyMs.p95)} <span className="text-xs text-aurora-muted">(n={p.latencyMs.samples})</span></td>
                       <td className={td}>{counts(p.failures)}</td>
                       <td className={td}>{[counts(p.policyRefusals), p.rateLimited ? `rate limited ×${p.rateLimited}` : '', p.quotaPauses ? `quota paused ×${p.quotaPauses}` : ''].filter(s => s && s !== '—').join('; ') || '—'}</td>
                     </tr>
@@ -121,7 +121,7 @@ export const AiObservabilityPage: React.FC = () => {
               </table>
             </div>
           )}
-          <p className="mt-2 text-xs text-[var(--color-text-secondary)]">Latency percentiles are shown only from recorded samples; with few samples they are not representative.</p>
+          <p className="mt-2 text-xs text-aurora-muted">Latency percentiles are shown only from recorded samples; with few samples they are not representative.</p>
         </section>
       )}
 
@@ -129,7 +129,7 @@ export const AiObservabilityPage: React.FC = () => {
         <section className={card} aria-labelledby="events-heading" data-testid="audit-events">
           <h2 id="events-heading" className="mb-2 text-base font-bold">Recent events</h2>
           {events.data.events.length === 0 ? (
-            <p className="text-sm text-[var(--color-text-secondary)]">No events in this window.</p>
+            <p className="text-sm text-aurora-muted">No events in this window.</p>
           ) : (
             <div className="max-h-96 overflow-auto">
               <table className="w-full min-w-[640px] text-left text-xs">

@@ -18,7 +18,7 @@ export const CareerAlignmentPipelineVisual: React.FC<CareerAlignmentPipelineVisu
       subtitle: 'Work history & projects',
       status: currentStage > 0 ? 'Extracted' : isProcessing ? 'Reading...' : 'Awaiting Input',
       icon: FileText,
-      activeColor: 'text-amber-400 border-amber-500/40 bg-amber-500/10',
+      activeColor: 'text-amber-700 border-amber-200 bg-amber-50',
       nodeGlow: 'from-amber-500/20',
     },
     {
@@ -27,7 +27,7 @@ export const CareerAlignmentPipelineVisual: React.FC<CareerAlignmentPipelineVisu
       subtitle: 'Vector normalization',
       status: currentStage > 1 ? 'Vectorized' : currentStage === 1 ? 'Extracting...' : 'Taxonomy Armed',
       icon: Cpu,
-      activeColor: 'text-cyan-400 border-cyan-500/40 bg-cyan-500/10',
+      activeColor: 'text-aurora-violet border-aurora-violet/25 bg-aurora-violet/[0.06]',
       nodeGlow: 'from-cyan-500/20',
     },
     {
@@ -36,7 +36,7 @@ export const CareerAlignmentPipelineVisual: React.FC<CareerAlignmentPipelineVisu
       subtitle: '8+ Domain taxonomies',
       status: currentStage > 2 ? 'Aligned' : currentStage === 2 ? 'Mapping...' : 'Standby',
       icon: Compass,
-      activeColor: 'text-indigo-400 border-indigo-500/40 bg-indigo-500/10',
+      activeColor: 'text-aurora-indigo border-aurora-violet/25 bg-aurora-violet/[0.06]',
       nodeGlow: 'from-indigo-500/20',
     },
     {
@@ -45,7 +45,7 @@ export const CareerAlignmentPipelineVisual: React.FC<CareerAlignmentPipelineVisu
       subtitle: 'Core 70% / Preferred 30%',
       status: currentStage > 3 ? 'Scored' : currentStage === 3 ? 'Calculating...' : 'Deterministic Model',
       icon: Calculator,
-      activeColor: 'text-purple-400 border-purple-500/40 bg-purple-500/10',
+      activeColor: 'text-aurora-violet border-purple-500/40 bg-purple-500/10',
       nodeGlow: 'from-purple-500/20',
     },
     {
@@ -54,34 +54,34 @@ export const CareerAlignmentPipelineVisual: React.FC<CareerAlignmentPipelineVisu
       subtitle: 'Delta to 90%+ readiness',
       status: currentStage > 4 ? 'Diagnosed' : currentStage === 4 ? 'Auditing...' : 'Ready to Analyze',
       icon: Target,
-      activeColor: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10',
+      activeColor: 'text-emerald-700 border-emerald-200 bg-emerald-50',
       nodeGlow: 'from-emerald-500/20',
     },
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-slate-950/80 backdrop-blur-2xl p-6 sm:p-8 lg:p-10 shadow-2xl">
+    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-2xl p-6 sm:p-8 lg:p-10 shadow-2xl">
       {/* Ambient background trajectory glows */}
       <div className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full bg-linear-to-tr from-cyan-500/10 via-indigo-500/10 to-transparent blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-linear-to-bl from-amber-500/10 via-purple-500/10 to-transparent blur-3xl" />
 
       <div className="relative z-10 space-y-6">
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-aurora-line pb-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-cyan-400 px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-aurora-violet px-2 py-0.5 rounded bg-aurora-violet/[0.06] border border-aurora-violet/25">
                 Analytical Pipeline Architecture
               </span>
-              <span className="text-[10px] font-mono text-slate-400">
+              <span className="text-[10px] text-aurora-muted">
                 Deterministic Fit Protocol
               </span>
             </div>
-            <h3 className="font-display text-lg sm:text-xl font-bold text-white tracking-tight">
+            <h3 className="font-display text-lg sm:text-xl font-bold text-aurora-ink tracking-tight">
               Evidence-Driven Career Intelligence Sequence
             </h3>
           </div>
-          <div className="text-xs font-mono text-slate-400 flex items-center gap-2">
+          <div className="text-xs text-aurora-muted flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
             <span>Engine Status: {isProcessing ? 'Processing Input' : 'Awaiting Resume Evidence'}</span>
           </div>
@@ -102,22 +102,22 @@ export const CareerAlignmentPipelineVisual: React.FC<CareerAlignmentPipelineVisu
                 transition={{ duration: 0.3, delay: idx * 0.08 }}
                 className={`relative rounded-2xl border p-4 flex flex-col justify-between space-y-3 transition-all ${
                   isCurrent
-                    ? 'border-cyan-400/60 bg-slate-900/90 shadow-lg shadow-cyan-500/10 scale-[1.02]'
+                    ? 'border-cyan-400/60 bg-aurora-canvas/60 shadow-lg shadow-cyan-500/10 scale-[1.02]'
                     : isPassed
-                    ? 'border-emerald-500/30 bg-slate-900/70'
-                    : 'border-white/10 bg-slate-950/60 hover:border-white/20'
+                    ? 'border-emerald-200 bg-aurora-canvas/60'
+                    : 'border-aurora-line bg-aurora-canvas/60 hover:border-aurora-line'
                 }`}
               >
                 {/* Connecting arrow for desktop between stages */}
                 {idx < stages.length - 1 && (
-                  <div className="hidden md:block absolute -right-2 top-1/2 -translate-y-1/2 z-20 text-slate-600">
+                  <div className="hidden md:block absolute -right-2 top-1/2 -translate-y-1/2 z-20 text-aurora-muted">
                     <ArrowRight className="w-4 h-4" />
                   </div>
                 )}
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs font-extrabold text-slate-500">
+                    <span className="text-xs font-extrabold text-aurora-muted">
                       {stage.step}
                     </span>
                     <div className={`p-2 rounded-xl border ${stage.activeColor}`}>
@@ -126,26 +126,26 @@ export const CareerAlignmentPipelineVisual: React.FC<CareerAlignmentPipelineVisu
                   </div>
 
                   <div>
-                    <h4 className="font-display text-sm font-bold text-white tracking-tight">
+                    <h4 className="font-display text-sm font-bold text-aurora-ink tracking-tight">
                       {stage.title}
                     </h4>
-                    <p className="text-[11px] text-slate-400 font-sans leading-tight mt-0.5">
+                    <p className="text-[11px] text-aurora-muted font-sans leading-tight mt-0.5">
                       {stage.subtitle}
                     </p>
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-white/5 flex items-center justify-between">
-                  <span className="text-[10px] font-mono text-slate-400 uppercase">
+                <div className="pt-2 border-t border-aurora-line flex items-center justify-between">
+                  <span className="text-[10px] text-aurora-muted uppercase">
                     Status:
                   </span>
                   <span
-                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded ${
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded ${
                       isPassed
-                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                         : isCurrent
-                        ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 animate-pulse'
-                        : 'bg-slate-900 text-slate-400 border border-white/5'
+                        ? 'bg-aurora-violet/[0.06] text-aurora-violet border border-aurora-violet/25 animate-pulse'
+                        : 'bg-aurora-canvas text-aurora-muted border border-aurora-line'
                     }`}
                   >
                     {stage.status}
@@ -157,14 +157,14 @@ export const CareerAlignmentPipelineVisual: React.FC<CareerAlignmentPipelineVisu
         </div>
 
         {/* Analytical Flow Guidance Footer */}
-        <div className="p-3.5 rounded-xl bg-slate-900/60 border border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs font-mono text-slate-300">
+        <div className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-aurora-muted">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+            <Sparkles className="w-3.5 h-3.5 text-aurora-violet shrink-0" />
             <span>
               SkillBridge utilizes <strong>deterministic bipartite requirement scoring</strong>, not opaque LLM hallucinations.
             </span>
           </div>
-          <span className="text-slate-400 text-[11px]">
+          <span className="text-aurora-muted text-[11px]">
             Input Document → Mapped Career Hypotheses
           </span>
         </div>

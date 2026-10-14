@@ -105,31 +105,31 @@ export const CareerOSDashboard: React.FC = () => {
             setIsCommandPaletteOpen(true);
             addToast({ message: 'Command Palette triggered (Ctrl + K)', type: 'info' });
           }}
-          className="absolute top-4 right-4 py-2 px-4 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/40 text-xs font-mono font-bold text-indigo-300 flex items-center gap-2 transition-all cursor-pointer shadow-lg"
+          className="absolute top-4 right-4 py-2 px-4 rounded-xl bg-violet-50 hover:bg-violet-50 border border-aurora-violet/25 text-xs font-bold text-aurora-indigo flex items-center gap-2 transition-all cursor-pointer shadow-lg"
         >
           <Command className="w-4 h-4" /> Quick Command (Ctrl + K)
         </button>
       </div>
 
       {/* MORNING AI BRIEFING BENTO HERO */}
-      <GlassPanel className="p-6 space-y-4 border-indigo-500/40 relative overflow-hidden bg-gradient-to-r from-slate-950 via-indigo-950/20 to-slate-950">
+      <GlassPanel className="p-6 space-y-4 border-aurora-violet/25 relative overflow-hidden bg-gradient-to-r from-white via-aurora-sidebar to-white">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <span className="p-2.5 rounded-xl bg-indigo-500/20 border border-indigo-500/40 text-indigo-400">
+            <span className="p-2.5 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
               <Sparkles className="w-5 h-5" />
             </span>
             <div>
-              <h2 className="text-lg font-bold text-white tracking-wide">{careerOSMetrics.briefing.greeting}</h2>
-              <span className="text-xs font-mono text-indigo-300">Daily Morning AI Briefing • 96.5% Candidate Readiness</span>
+              <h2 className="text-lg font-bold text-aurora-ink tracking-wide">{careerOSMetrics.briefing.greeting}</h2>
+              <span className="text-xs text-aurora-indigo">Daily Morning AI Briefing • 96.5% Candidate Readiness</span>
             </div>
           </div>
 
-          <span className="text-xs font-mono text-emerald-400 font-bold bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-xl flex items-center gap-1.5">
+          <span className="text-xs text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl flex items-center gap-1.5">
             <CheckCircle2 className="w-3.5 h-3.5" /> All 7 Agents Synchronized
           </span>
         </div>
 
-        <p className="text-slate-300 text-xs leading-relaxed font-mono pl-1 border-l-2 border-indigo-500/40">
+        <p className="text-aurora-muted text-xs leading-relaxed pl-1 border-l-2 border-aurora-violet/25">
           {careerOSMetrics.briefing.summary}
         </p>
       </GlassPanel>
@@ -137,29 +137,29 @@ export const CareerOSDashboard: React.FC = () => {
       {/* BENTO GRID (CAREER HEALTH, ACTION CENTER, TOP PRIORITIES) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* ACTION CENTER & HUMAN APPROVALS (7 COLS) */}
-        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-cyan-500/30">
+        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Zap className="w-4 h-4 text-cyan-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Zap className="w-4 h-4 text-aurora-violet" />
               Action Center & Human-in-the-Loop Approvals ({careerOSMetrics.actions.length})
             </span>
           </div>
 
-          <div className="space-y-3 font-mono text-xs">
+          <div className="space-y-3 text-xs">
             {careerOSMetrics.actions.map((act) => (
               <div
                 key={act.id}
                 onClick={() => handleActionClick(act.route, act.title)}
-                className="p-4 rounded-xl bg-slate-950/80 border border-white/10 hover:border-cyan-500/40 transition-all cursor-pointer space-y-2 flex items-center justify-between group"
+                className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line hover:border-aurora-violet/25 transition-all cursor-pointer space-y-2 flex items-center justify-between group"
               >
                 <div>
-                  <span className="font-bold text-white text-sm block group-hover:text-cyan-300 transition-colors">
+                  <span className="font-bold text-aurora-ink text-sm block group-hover:text-aurora-violet transition-colors">
                     {act.title}
                   </span>
-                  <span className="text-[10px] text-slate-400">Type: <strong className="text-cyan-300">{act.type}</strong></span>
+                  <span className="text-[10px] text-aurora-muted">Type: <strong className="text-aurora-violet">{act.type}</strong></span>
                 </div>
 
-                <span className="py-1.5 px-3 rounded-xl bg-cyan-600/20 text-cyan-300 font-bold text-[11px] group-hover:bg-cyan-600 group-hover:text-white transition-all flex items-center gap-1">
+                <span className="py-1.5 px-3 rounded-xl bg-cyan-50 text-aurora-violet font-bold text-[11px] group-hover:bg-sky-100 group-hover:text-aurora-indigo transition-all flex items-center gap-1">
                   <Send className="w-3 h-3" /> Review Action
                 </span>
               </div>
@@ -170,22 +170,22 @@ export const CareerOSDashboard: React.FC = () => {
         {/* TODAY'S AI PRIORITIES (5 COLS) */}
         <GlassPanel className="lg:col-span-5 p-6 space-y-4 border-purple-500/30">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Award className="w-4 h-4 text-purple-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Award className="w-4 h-4 text-aurora-violet" />
               Today's AI Priorities
             </span>
           </div>
 
-          <div className="space-y-3 font-mono text-xs">
+          <div className="space-y-3 text-xs">
             {careerOSMetrics.priorities.map((p) => (
-              <div key={p.id} className="p-3.5 rounded-xl bg-slate-950/80 border border-white/10 space-y-1">
+              <div key={p.id} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-[11px]">{p.title}</span>
-                  <span className="text-[10px] bg-purple-500/10 text-purple-300 font-bold px-2 py-0.5 rounded">
+                  <span className="font-bold text-aurora-ink text-[11px]">{p.title}</span>
+                  <span className="text-[10px] bg-purple-500/10 text-aurora-violet font-bold px-2 py-0.5 rounded">
                     {p.urgency}
                   </span>
                 </div>
-                <span className="text-[10px] text-slate-400 block">Agent: {p.agent}</span>
+                <span className="text-[10px] text-aurora-muted block">Agent: {p.agent}</span>
               </div>
             ))}
           </div>
@@ -195,10 +195,10 @@ export const CareerOSDashboard: React.FC = () => {
       {/* MULTI-AGENT ACTIVITY STREAM & TOP OPPORTUNITIES (2 COLS) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* MULTI-AGENT ACTIVITY STREAM (7 COLS) */}
-        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-indigo-500/30">
+        <GlassPanel className="lg:col-span-7 p-6 space-y-4 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Workflow className="w-4 h-4 text-indigo-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Workflow className="w-4 h-4 text-aurora-indigo" />
               Real-Time Multi-Agent Activity Stream
             </span>
 
@@ -207,8 +207,8 @@ export const CareerOSDashboard: React.FC = () => {
                 <button
                   key={ag}
                   onClick={() => setSelectedAgent(ag)}
-                  className={`py-0.5 px-2 rounded text-[10px] font-mono font-bold transition-all cursor-pointer whitespace-nowrap ${
-                    selectedAgent === ag ? 'bg-indigo-600 text-white' : 'bg-slate-900 text-slate-400 hover:text-white'
+                  className={`py-0.5 px-2 rounded text-[10px] font-bold transition-all cursor-pointer whitespace-nowrap ${
+                    selectedAgent === ag ? 'text-white [background:var(--aurora-gradient-action)]' : 'bg-aurora-canvas text-aurora-muted hover:text-aurora-indigo'
                   }`}
                 >
                   {ag === 'ALL' ? 'ALL' : ag.split('_')[0]}
@@ -217,38 +217,38 @@ export const CareerOSDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="space-y-2.5 font-mono text-xs max-h-80 overflow-y-auto pr-1" role="region" aria-label="Agent activity" tabIndex={0}>
+          <div className="space-y-2.5 text-xs max-h-80 overflow-y-auto pr-1" role="region" aria-label="Agent activity" tabIndex={0}>
             {filteredAgentActivities.map((a) => (
-              <div key={a.name} className="p-3 rounded-xl bg-slate-950/80 border border-white/10 flex items-center justify-between text-[11px]">
+              <div key={a.name} className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between text-[11px]">
                 <div className="space-y-0.5">
-                  <span className="font-bold text-indigo-300 block">{a.name}</span>
-                  <span className="text-slate-300">{a.action}</span>
+                  <span className="font-bold text-aurora-indigo block">{a.name}</span>
+                  <span className="text-aurora-muted">{a.action}</span>
                 </div>
-                <span className="text-[10px] text-slate-500 shrink-0">{a.time}</span>
+                <span className="text-[10px] text-aurora-muted shrink-0">{a.time}</span>
               </div>
             ))}
           </div>
         </GlassPanel>
 
         {/* TOP OPPORTUNITIES & FELLOWSHIPS (5 COLS) */}
-        <GlassPanel className="lg:col-span-5 p-6 space-y-4 border-emerald-500/30">
+        <GlassPanel className="lg:col-span-5 p-6 space-y-4 border-emerald-200">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Briefcase className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-emerald-700" />
               Surfaced Opportunities
             </span>
           </div>
 
-          <div className="space-y-3 font-mono text-xs">
+          <div className="space-y-3 text-xs">
             {careerOSMetrics.opportunities.map((op) => (
-              <div key={op.title} className="p-3.5 rounded-xl bg-slate-950/80 border border-white/10 space-y-1.5">
+              <div key={op.title} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-[11px]">{op.title}</span>
-                  <span className="text-emerald-400 font-bold text-[10px]">★ {op.match}% Match</span>
+                  <span className="font-bold text-aurora-ink text-[11px]">{op.title}</span>
+                  <span className="text-emerald-700 font-bold text-[10px]">★ {op.match}% Match</span>
                 </div>
-                <div className="flex items-center justify-between text-[10px] text-slate-400">
+                <div className="flex items-center justify-between text-[10px] text-aurora-muted">
                   <span>{op.company}</span>
-                  <span className="text-emerald-300 font-bold">{op.salary}</span>
+                  <span className="text-emerald-700 font-bold">{op.salary}</span>
                 </div>
               </div>
             ))}
@@ -257,13 +257,13 @@ export const CareerOSDashboard: React.FC = () => {
       </div>
 
       {/* QUICK JUMP WORKSPACE NAVIGATOR BENTO */}
-      <GlassPanel className="p-6 space-y-4 border-indigo-500/30">
-        <span className="text-xs font-bold text-white flex items-center gap-2">
-          <Brain className="w-4 h-4 text-indigo-400" />
+      <GlassPanel className="p-6 space-y-4 border-aurora-violet/25">
+        <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
+          <Brain className="w-4 h-4 text-aurora-indigo" />
           Quick Workspace Jump Navigator
         </span>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 font-mono text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 text-xs">
           {[
             { label: 'Career Agent', route: '/agent', icon: TrendingUp },
             { label: 'Job Search', route: '/job-agent', icon: Briefcase },
@@ -278,10 +278,10 @@ export const CareerOSDashboard: React.FC = () => {
               <button
                 key={item.label}
                 onClick={() => navigate(item.route)}
-                className="p-3 rounded-xl bg-slate-950/80 border border-white/10 hover:border-indigo-500/40 transition-all cursor-pointer flex flex-col items-center justify-center gap-2 group text-center"
+                className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line hover:border-aurora-violet/25 transition-all cursor-pointer flex flex-col items-center justify-center gap-2 group text-center"
               >
-                <IconComp className="w-5 h-5 text-indigo-400 group-hover:scale-110 transition-transform" />
-                <span className="text-[11px] font-bold text-slate-200 group-hover:text-indigo-300 transition-colors">
+                <IconComp className="w-5 h-5 text-aurora-indigo group-hover:scale-110 transition-transform" />
+                <span className="text-[11px] font-bold text-aurora-ink group-hover:text-aurora-indigo transition-colors">
                   {item.label}
                 </span>
               </button>

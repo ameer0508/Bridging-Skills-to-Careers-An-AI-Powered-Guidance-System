@@ -34,7 +34,7 @@ export const Accordion: React.FC<AccordionProps> = ({
   };
 
   return (
-    <div className={`divide-y divide-[var(--color-border-subtle)] border-y border-[var(--color-border-subtle)] ${className}`}>
+    <div className={`divide-y divide-[var(--color-border-subtle)] border-y border-aurora-line ${className}`}>
       {items.map(item => {
         const isExpanded = expanded.includes(item.id);
 
@@ -45,20 +45,20 @@ export const Accordion: React.FC<AccordionProps> = ({
               disabled={item.disabled}
               onClick={() => toggle(item.id)}
               aria-expanded={isExpanded}
-              className="w-full py-2 flex items-center justify-between text-left font-semibold text-sm text-[var(--color-text-primary)] hover:text-[var(--color-interactive-primary)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full py-2 flex items-center justify-between text-left font-semibold text-sm text-aurora-ink hover:text-aurora-violet transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
               <span>{item.title}</span>
               <Icon
                 size="sm"
                 className={`transform transition-transform duration-[var(--duration-normal)] ${
-                  isExpanded ? 'rotate-180 text-[var(--color-interactive-primary)]' : 'text-[var(--color-text-tertiary)]'
+                  isExpanded ? 'rotate-180 text-aurora-violet' : 'text-aurora-muted'
                 }`}
               >
                 <polyline points="6 9 12 15 18 9" />
               </Icon>
             </button>
             {isExpanded && (
-              <div className="py-2 text-sm text-[var(--color-text-secondary)] leading-relaxed animate-fade-in">
+              <div className="py-2 text-sm text-aurora-muted leading-relaxed animate-fade-in">
                 {item.content}
               </div>
             )}

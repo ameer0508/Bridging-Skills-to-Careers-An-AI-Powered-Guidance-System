@@ -32,8 +32,8 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
   );
 
   return (
-    <aside className="w-64 bg-[var(--color-bg-surface-raised)] border-r border-[var(--color-border-default)] flex flex-col shrink-0 h-full rounded-l-[var(--radius-xl)]">
-      <div className="p-3 border-b border-[var(--color-border-subtle)] space-y-2">
+    <aside className="w-64 bg-white border-r border-aurora-line flex flex-col shrink-0 h-full rounded-l-[var(--radius-xl)]">
+      <div className="p-3 border-b border-aurora-line space-y-2">
         <Button variant="primary" size="sm" fullWidth onClick={onNewChat} leftIcon={
           <Icon size="sm">
             <line x1="12" y1="5" x2="12" y2="19" />
@@ -53,11 +53,11 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
 
       <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
         {isLoading ? (
-          <div className="p-4 text-center text-xs text-[var(--color-text-tertiary)] italic">
+          <div className="p-4 text-center text-xs text-aurora-muted italic">
             Loading conversations...
           </div>
         ) : filtered.length === 0 ? (
-          <div className="p-4 text-center text-xs text-[var(--color-text-tertiary)] italic">
+          <div className="p-4 text-center text-xs text-aurora-muted italic">
             No conversations found.
           </div>
         ) : (
@@ -68,10 +68,10 @@ export const ConversationSidebar: React.FC<ConversationSidebarProps> = ({
                 key={c._id}
                 type="button"
                 onClick={() => onSelect(c._id)}
-                className={`w-full p-2.5 rounded-[var(--radius-md)] text-xs text-left truncate transition-colors cursor-pointer flex items-center gap-2 ${
+                className={`w-full p-2.5 rounded-2xl text-xs text-left truncate transition-colors cursor-pointer flex items-center gap-2 ${
                   isActive
-                    ? 'bg-[var(--color-interactive-primary)] text-[var(--color-text-on-primary)] font-semibold shadow-sm'
-                    : 'text-[var(--color-text-secondary)] hover:bg-[var(--color-interactive-secondary-hover)] hover:text-[var(--color-text-primary)]'
+                    ? '[background:var(--aurora-gradient-action)] text-[var(--color-text-on-primary)] font-semibold shadow-sm'
+                    : 'text-aurora-muted hover:bg-[var(--color-interactive-secondary-hover)] hover:text-aurora-ink'
                 }`}
               >
                 <Icon size="sm" className="shrink-0">

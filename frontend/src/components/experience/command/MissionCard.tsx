@@ -24,17 +24,17 @@ export const MissionCard: React.FC<MissionCardProps> = ({
 }) => {
   if (!title) {
     return (
-      <GlassCard className={`p-6 border-indigo-500/20 bg-indigo-950/20 ${className}`}>
+      <GlassCard className={`p-6 border-indigo-500/20 bg-violet-50 ${className}`}>
         <div className="flex items-start gap-4">
-          <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shrink-0">
+          <div className="p-3 rounded-xl bg-indigo-500/10 text-aurora-indigo border border-indigo-500/20 shrink-0">
             <Target className="w-6 h-6" />
           </div>
           <div className="space-y-1">
-            <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
+            <span className="text-xs font-semibold uppercase tracking-wider text-aurora-indigo">
               Today's Mission
             </span>
             <h4 className="text-base font-bold text-white">Upload Resume to Activate Missions</h4>
-            <p className="text-xs text-neutral-400">
+            <p className="text-xs text-aurora-muted">
               Your AI Career Architect will construct personalized daily missions once your profile or resume is analyzed.
             </p>
           </div>
@@ -44,7 +44,7 @@ export const MissionCard: React.FC<MissionCardProps> = ({
   }
 
   return (
-    <GlassCard className={`p-6 border-indigo-500/30 bg-indigo-950/30 shadow-xl ${className}`}>
+    <GlassCard className={`p-6 border-indigo-500/30 bg-violet-50 shadow-xl ${className}`}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         {/* Left Info */}
         <div className="flex items-start gap-4">
@@ -54,23 +54,23 @@ export const MissionCard: React.FC<MissionCardProps> = ({
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-400">
+              <span className="text-xs font-bold uppercase tracking-wider text-aurora-indigo">
                 Today's Priority Mission
               </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-violet-50 text-aurora-indigo border border-indigo-500/30">
                 {category}
               </span>
             </div>
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               {title}
-              {isCompleted && <CheckCircle2 className="w-5 h-5 text-emerald-400" />}
+              {isCompleted && <CheckCircle2 className="w-5 h-5 text-emerald-800" />}
             </h3>
-            <div className="flex items-center gap-4 text-xs text-neutral-400 pt-1">
+            <div className="flex items-center gap-4 text-xs text-aurora-muted pt-1">
               <div className="flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-neutral-400" />
+                <Clock className="w-3.5 h-3.5 text-aurora-muted" />
                 <span>{estimatedEffort}</span>
               </div>
-              <div className="flex items-center gap-1 font-medium text-emerald-400">
+              <div className="flex items-center gap-1 font-medium text-emerald-800">
                 <Zap className="w-3.5 h-3.5" />
                 <span>+{impactScore}% Impact Score</span>
               </div>
