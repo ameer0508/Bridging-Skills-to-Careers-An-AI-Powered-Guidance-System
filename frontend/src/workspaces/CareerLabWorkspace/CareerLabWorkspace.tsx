@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
 import { FlaskConical } from 'lucide-react';
 import { careerLabApi, type CareerOption } from '../../features/careerLab/careerLabApi';
 import { ComparePanel } from '../../features/careerLab/components/ComparePanel';
@@ -26,7 +27,10 @@ type TabId = (typeof TABS)[number]['id'];
  * this page comes from the same scoring rules as the rest of SkillBridge.
  */
 export const CareerLabWorkspace: React.FC = () => {
-  const [active, setActive] = useState<TabId>('compare');
+  // ?tab=verify (or another tab id) opens that section directly, e.g. from the roadmap
+  const [params] = useSearchParams();
+  const requested = TABS.find(t => t.id === params.get('tab'))?.id;
+  const [active, setActive] = useState<TabId>(requested ?? 'compare');
   const catalog = useQuery<CareerOption[]>({ queryKey: ['career-lab', 'catalog'], queryFn: careerLabApi.catalog, staleTime: 10 * 60 * 1000 });
   const careers = catalog.data || [];
 

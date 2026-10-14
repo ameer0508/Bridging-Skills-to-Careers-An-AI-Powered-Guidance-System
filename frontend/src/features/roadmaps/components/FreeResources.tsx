@@ -1,9 +1,9 @@
 import React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, ExternalLink } from 'lucide-react';
 import apiClient from '../../../lib/axios';
-import { EmptyState, ErrorNote, Loading, Note } from '../../careerLab/components/labUi';
-import { errorText, labelClass, panelClass, quietButton } from '../../careerLab/components/labStyles';
+import { EmptyState, ErrorNote, Loading, Note } from '../../../design/aurora/labUi';
+import { errorText, labelClass, panelClass, quietButton } from '../../../design/aurora/labStyles';
 
 /** Shapes mirror backend/src/services/LearningResourceService.ts. */
 type MyStatus = 'saved' | 'done' | null;
@@ -42,10 +42,10 @@ export const FreeResourcesPanel: React.FC<{ careerId: string }> = ({ careerId })
 
   const heading = (
     <div className="flex items-start gap-3">
-      <BookOpen className="w-5 h-5 text-cyan-300 shrink-0 mt-0.5" aria-hidden="true" />
+      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-aurora-violet/[0.08] text-aurora-violet"><BookOpen className="h-5 w-5" aria-hidden="true" /></span>
       <div className="space-y-1">
-        <h2 id="free-resources-heading" className="text-base font-bold text-white">Free resources for your gaps</h2>
-        <p className="text-xs text-slate-400">Official documentation and first-party tutorials on other sites, listed for the skills you have not yet shown in use.</p>
+        <h2 id="free-resources-heading" className="font-heading text-lg font-bold text-aurora-ink">Free resources for your gaps</h2>
+        <p className="text-sm text-aurora-muted">Official documentation and first-party tutorials on other sites, listed for the skills you have not yet shown in use.</p>
       </div>
     </div>
   );
@@ -76,15 +76,16 @@ export const FreeResourcesPanel: React.FC<{ careerId: string }> = ({ careerId })
       ) : (
         <ul className="space-y-3">
           {data.groups.map((group) => (
-            <li key={group.skill} className="p-4 rounded-2xl bg-slate-900/50 border border-white/10 space-y-2" data-testid="resource-group" data-skill={group.skill}>
-              <h3 className="text-sm font-bold text-white">{group.skill} <span className="text-[11px] font-normal text-slate-400">({group.importance})</span></h3>
-              <ul className="space-y-2">
+            <li key={group.skill} className="p-4 rounded-2xl bg-aurora-canvas/60 border border-aurora-line space-y-2" data-testid="resource-group" data-skill={group.skill}>
+              <h3 className="text-sm font-bold text-aurora-ink">{group.skill} <span className="text-[11px] font-normal text-aurora-muted">({group.importance})</span></h3>
+              <ul className="grid gap-2 md:grid-cols-2">
                 {group.resources.map((resource) => (
-                  <li key={resource.id} className="space-y-1" data-testid="resource" data-status={resource.myStatus ?? 'none'}>
-                    <a href={resource.url} target="_blank" rel="noopener noreferrer nofollow" className="text-xs text-cyan-300 underline">
+                  <li key={resource.id} className="space-y-2 rounded-2xl border border-aurora-line bg-white p-3.5 shadow-aurora-sm" data-testid="resource" data-status={resource.myStatus ?? 'none'}>
+                    <a href={resource.url} target="_blank" rel="noopener noreferrer nofollow" className="inline-flex items-start gap-1.5 text-sm font-semibold text-aurora-indigo underline-offset-2 hover:underline">
+                      <ExternalLink className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                       {resource.title} (opens {resource.host} in a new tab)
                     </a>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-aurora-muted">
                       {resource.provider}, {resource.type.toLowerCase()}, {resource.difficulty.toLowerCase()}. Third-party site. {resource.cost}.
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -120,7 +121,7 @@ export const FreeResourcesPanel: React.FC<{ careerId: string }> = ({ careerId })
       {data.hasProfile && data.withoutResources.length > 0 && (
         <div className="space-y-1" data-testid="resources-missing">
           <h3 className={labelClass}>No resource in the catalogue</h3>
-          <p className="text-xs text-slate-300">{data.withoutResources.join(', ')}. These are still gaps; the catalogue simply has nothing listed for them.</p>
+          <p className="text-sm text-aurora-muted">{data.withoutResources.join(', ')}. These are still gaps; the catalogue simply has nothing listed for them.</p>
         </div>
       )}
 

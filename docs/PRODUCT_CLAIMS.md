@@ -84,6 +84,33 @@ The signed-in shell (sidebar, top bar, account menu, phone drawer) and the Comma
   - **Removed:** the invented "Impact: -30%" and "-15%" fallbacks. Gap priority is shown as the stored priority out of 100.
 - **Career Lab.** Same panels and figures. What-if results now animate from the current score to the scenario score and stay labelled "Hypothetical". Live listings stay labelled with their source.
 
+## Stage D group 2: Roadmap, Skill checks, Practice projects, Portfolio (2026-10-14)
+
+`/roadmap` and `/portfolio` were rebuilt in Aurora Elite and added to `AURORA_ROUTES`. The skill checks (Career Lab, Verify tab) and the public page `/p/:token` were rebuilt too. APIs, scoring, the evidence model and sharing rules are unchanged.
+
+- **Roadmap.**
+  - **Layout:** the stored phases on a path. Completed phases are marked done, the first unfinished phase is "You are here", and later phases are upcoming. An item waiting on a prerequisite shows "Do first" from the schedule.
+  - **Figures:** each item's hours come from the schedule and say whether the resource stated them or they are assumed. Items can be started, completed, skipped and undone. Progress is the stored percentage.
+  - **Interactions:** the readiness gaps for the career highlight the items that work on them. Study reminders can be switched on from the page; they are off by default, using the existing setting.
+  - **Removed:** the decision simulator, the opportunity forecast, the course and certification sample panels, and a status bar claiming "98.4" confidence. The heuristic or sample figures behind them are no longer shown. Opening a resource never marks anything.
+- **Skill checks.**
+  - Same questions, scoring, attempt limits and evidence.
+  - Added: a directory of the eight checks; progress counted from the questions answered; a quiet minutes-left note, updated every 30 seconds; and a confirmation before the irreversible submission, saying how many questions are unanswered. The review shows each answer with its explanation.
+  - `/career-lab?tab=verify` opens the checks directly.
+- **Practice projects.** Suggestion cards with the gap reason, the skills each project puts to work, the assumed effort and the hypothetical score. The brief (tasks and deliverables) opens in place. Taken-on projects show the tasks you ticked, labelled as your own record that changes no score.
+- **Portfolio.**
+  - A showcase with the entry cards, the add and edit form in an accessible dialog, and the share panel stating "Sharing is off: nobody else can see your portfolio" or "Sharing is on…".
+  - Entries keep the "Your own record, not checked" label. Only a passed skill check shows "verified by skill check".
+  - The public page shows only shared entries and never the owner's e-mail. The owner's name appears only when they allow it.
+
+`e2e/tests/group2.mjs` (16 browser steps) checks:
+- signed-out access is refused, and the private endpoints answer 401;
+- roadmap completion survives a reload, and undo and skip work;
+- gap focus, details and the keyboard toggle; the reminder opt-in is stored;
+- project briefs open; the skill-check confirmation, cancelling it, and the server-scored review;
+- portfolio privacy through the public link;
+- axe on every screen and dialog; reduced motion; no sideways scrolling at 1440, 1024, 768, 390 and 360 px; the load-failure notice; a clean console.
+
 ## Pages inside the app
 
 Pages whose content is built-in sample content are wrapped in `DemoWorkspace`, which shows the "Illustrative sample data" notice:

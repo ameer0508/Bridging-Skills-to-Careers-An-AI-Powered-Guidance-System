@@ -3,8 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarClock } from 'lucide-react';
 import apiClient from '../../../lib/axios';
 import { rangeText, type Range } from './scheduleText';
-import { ErrorNote, Loading, Note } from '../../careerLab/components/labUi';
-import { errorText, fieldClass, formatDate, formatDateTime, labelClass, panelClass, primaryButton, quietButton } from '../../careerLab/components/labStyles';
+import { ErrorNote, Loading, Note } from '../../../design/aurora/labUi';
+import { errorText, fieldClass, formatDate, formatDateTime, labelClass, panelClass, primaryButton, quietButton } from '../../../design/aurora/labStyles';
 
 /** Shapes mirror backend/src/services/RoadmapScheduler.ts. */
 interface WeekWindow {
@@ -62,7 +62,7 @@ export const StudyPlanPanel: React.FC<{ careerId: string }> = ({ careerId }) => 
   if (plan.isError || !plan.data) {
     return (
       <section className={panelClass} aria-labelledby="study-plan-heading">
-        <h2 id="study-plan-heading" className="text-base font-bold text-white">Study plan</h2>
+        <h2 id="study-plan-heading" className="font-heading text-lg font-bold text-aurora-ink">Study plan</h2>
         <ErrorNote message={errorText(plan.error, 'Your study plan could not be loaded.')} />
         <button type="button" className={quietButton} onClick={() => plan.refetch()}>Try again</button>
       </section>
@@ -86,10 +86,10 @@ export const StudyPlanPanel: React.FC<{ careerId: string }> = ({ careerId }) => 
   return (
     <section className={panelClass} aria-labelledby="study-plan-heading" data-testid="study-plan">
       <div className="flex items-start gap-3">
-        <CalendarClock className="w-5 h-5 text-cyan-300 shrink-0 mt-0.5" aria-hidden="true" />
+        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-aurora-violet/[0.08] text-aurora-violet"><CalendarClock className="h-5 w-5" aria-hidden="true" /></span>
         <div className="space-y-1">
-          <h2 id="study-plan-heading" className="text-base font-bold text-white">Study plan</h2>
-          <p className="text-xs text-slate-400">Tell SkillBridge how many hours a week you can study and the roadmap is laid out in weeks. Nothing is assumed until you do.</p>
+          <h2 id="study-plan-heading" className="font-heading text-lg font-bold text-aurora-ink">Study plan</h2>
+          <p className="text-sm text-aurora-muted">Tell SkillBridge how many hours a week you can study and the roadmap is laid out in weeks. Nothing is assumed until you do.</p>
         </div>
       </div>
 
@@ -115,37 +115,37 @@ export const StudyPlanPanel: React.FC<{ careerId: string }> = ({ careerId }) => 
           <button type="button" className={quietButton} disabled={save.isPending} onClick={() => { setInvalid(null); save.mutate(null); }}>Clear</button>
         )}
       </form>
-      {invalid && <p id="hours-per-week-error" role="alert" className="text-xs text-rose-300">{invalid}</p>}
+      {invalid && <p id="hours-per-week-error" role="alert" className="text-xs text-rose-700">{invalid}</p>}
       <ErrorNote message={save.isError ? errorText(save.error, 'Your weekly hours could not be saved.') : null} />
 
       {schedule.remainingItems === 0 ? (
-        <p className="text-sm text-slate-200" data-testid="study-plan-summary">
+        <p className="text-sm text-aurora-ink" data-testid="study-plan-summary">
           {schedule.totalItems === 0 ? 'This roadmap has no items yet.' : 'Every item on this roadmap is done. There is nothing left to schedule.'}
         </p>
       ) : (
         <>
           <dl className="grid grid-cols-1 sm:grid-cols-3 gap-3" data-testid="study-plan-summary" data-weeks-low={schedule.weeksRemaining?.low ?? ''} data-weeks-high={schedule.weeksRemaining?.high ?? ''}>
-            <div className="p-3 rounded-2xl bg-slate-900/60 border border-white/10">
+            <div className="p-3 rounded-2xl bg-aurora-canvas/60 border border-aurora-line">
               <dt className={labelClass}>Work remaining</dt>
-              <dd className="text-sm font-bold text-white">{schedule.remainingItems} of {schedule.totalItems} items, {rangeText(schedule.remainingHours, 'hour')}</dd>
+              <dd className="text-sm font-bold text-aurora-ink">{schedule.remainingItems} of {schedule.totalItems} items, {rangeText(schedule.remainingHours, 'hour')}</dd>
             </div>
-            <div className="p-3 rounded-2xl bg-slate-900/60 border border-white/10">
+            <div className="p-3 rounded-2xl bg-aurora-canvas/60 border border-aurora-line">
               <dt className={labelClass}>At your pace</dt>
-              <dd className="text-sm font-bold text-white">
+              <dd className="text-sm font-bold text-aurora-ink">
                 {schedule.weeksRemaining ? `${rangeText(schedule.weeksRemaining, 'week')} at ${schedule.hoursPerWeek} hours a week` : 'Set your weekly hours to see weeks'}
               </dd>
             </div>
-            <div className="p-3 rounded-2xl bg-slate-900/60 border border-white/10">
+            <div className="p-3 rounded-2xl bg-aurora-canvas/60 border border-aurora-line">
               <dt className={labelClass}>Would finish</dt>
-              <dd className="text-sm font-bold text-white">
+              <dd className="text-sm font-bold text-aurora-ink">
                 {schedule.finishBetween ? `between ${formatDate(schedule.finishBetween.earliest)} and ${formatDate(schedule.finishBetween.latest)}` : 'Not scheduled'}
               </dd>
             </div>
           </dl>
 
           {schedule.nextItem && (
-            <p className="text-xs text-slate-300" data-testid="study-plan-next">
-              Next: <span className="font-semibold text-white">{schedule.nextItem.title}</span> (phase {schedule.nextItem.phaseOrder}).
+            <p className="text-xs text-aurora-muted" data-testid="study-plan-next">
+              Next: <span className="font-semibold text-aurora-ink">{schedule.nextItem.title}</span> (phase {schedule.nextItem.phaseOrder}).
             </p>
           )}
 
@@ -155,17 +155,17 @@ export const StudyPlanPanel: React.FC<{ careerId: string }> = ({ careerId }) => 
               {schedule.phases.map((phase) => {
                 const items = schedule.items.filter((item) => item.phaseOrder === phase.order);
                 return (
-                  <li key={phase.order} className="p-3 rounded-2xl bg-slate-900/50 border border-white/10 space-y-2" data-testid="study-plan-phase">
-                    <p className="text-sm font-bold text-white">{phase.title}</p>
-                    <p className="text-xs text-slate-300">
+                  <li key={phase.order} className="p-3 rounded-2xl bg-aurora-canvas/60 border border-aurora-line space-y-2" data-testid="study-plan-phase">
+                    <p className="text-sm font-bold text-aurora-ink">{phase.title}</p>
+                    <p className="text-sm text-aurora-muted">
                       {phase.remainingItems === 0
                         ? 'Done.'
                         : `${phase.remainingItems} item${phase.remainingItems === 1 ? '' : 's'} left, ${rangeText(phase.remainingHours, 'hour')}${phase.finish ? `; finished ${weekText(phase.finish)}` : ''}.`}
                     </p>
                     <ul className="space-y-1">
                       {items.map((item) => (
-                        <li key={item.itemId || item.title} className="text-[11px] text-slate-400" data-testid="study-plan-item" data-status={item.status}>
-                          <span className="text-slate-200">{item.title}</span>
+                        <li key={item.itemId || item.title} className="text-[11px] text-aurora-muted" data-testid="study-plan-item" data-status={item.status}>
+                          <span className="text-aurora-ink">{item.title}</span>
                           {item.status === 'completed' || item.status === 'skipped'
                             ? ` (${item.status})`
                             : <>
@@ -185,13 +185,13 @@ export const StudyPlanPanel: React.FC<{ careerId: string }> = ({ careerId }) => 
       )}
 
       {lastUpdate && (
-        <p className="text-[11px] text-slate-400" data-testid="study-plan-last-update">
+        <p className="text-[11px] text-aurora-muted" data-testid="study-plan-last-update">
           Last updated {formatDateTime(lastUpdate.at)}. {lastUpdate.details}
         </p>
       )}
 
-      <details className="text-[11px] text-slate-400">
-        <summary className="cursor-pointer text-slate-300 font-semibold">How this schedule is worked out</summary>
+      <details className="text-[11px] text-aurora-muted">
+        <summary className="cursor-pointer text-aurora-muted font-semibold">How this schedule is worked out</summary>
         <ul className="mt-2 space-y-1 list-disc pl-5" data-testid="study-plan-assumptions">
           {schedule.assumptions.map((line) => <li key={line}>{line}</li>)}
         </ul>

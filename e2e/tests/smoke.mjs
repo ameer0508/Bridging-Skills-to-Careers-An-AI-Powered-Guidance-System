@@ -351,9 +351,11 @@ export async function run({ webUrl, apiUrl, aiControl }) {
           const prompt = (await question.locator('legend').innerText()).replace(/^\d+\.\s*/, '');
           if (known.has(prompt)) await question.getByLabel(known.get(prompt), { exact: true }).check();
         }
+        // Submitting is irreversible, so the page asks for confirmation first
+        await page.getByRole('button', { name: 'Submit answers' }).click();
         const [response] = await Promise.all([
           page.waitForResponse((r) => /\/skills\/assessments\/[^/]+\/submit$/.test(r.url())),
-          page.getByRole('button', { name: 'Submit answers' }).click(),
+          page.getByRole('dialog').getByRole('button', { name: 'Submit now' }).click(),
         ]);
         const scored = (await response.json()).data;
         for (const item of scored.review) known.set(item.prompt, item.options[item.correctOption]);
