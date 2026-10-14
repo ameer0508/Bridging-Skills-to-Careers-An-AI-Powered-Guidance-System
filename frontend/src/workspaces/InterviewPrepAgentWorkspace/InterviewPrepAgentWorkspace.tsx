@@ -4,9 +4,9 @@ import { InterviewProgressPanel } from '../../features/interview/components/Inte
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import apiClient from '../../lib/axios';
-import { WorkspaceHero, AIStatusBar } from '../../components/experience/workspace';
+import { MessageSquare } from 'lucide-react';
+import { Notice, PageHeader, PageSkeleton, StatTile } from '../../design/aurora/kit';
 import { useToast } from '../../components/composite/Toast';
-import { AIThinkingAnimation } from '../../components/experience';
 import {
   StudioLobby,
   LiveInterviewRoom,
@@ -362,49 +362,30 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
     setStudioMode('REVIEW');
   };
 
-  if (isReadinessLoading) {
-    return (
-      <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4 font-mono">
-        <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
-          <AIThinkingAnimation statusText="Connecting to Grounded AI Interview Studio..." />
-        </div>
-      </div>
-    );
-  }
+  if (isReadinessLoading) return <PageSkeleton label="Loading the interview studio" />;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-12 px-4 font-mono">
-      {/* WORKSPACE HERO */}
-      <WorkspaceHero
-        greeting="Adaptive AI Interview Studio & STAR Evaluator"
-        userName={targetRoleTitle}
-        title="AI Interview Studio"
-        description="Immersive mock interviews grounded in candidate verified skills, STAR response evaluation, and private debrief coaching."
-        aiSummary={`Career readiness: ${readinessScore}% • ${confidenceRating}`}
-        stats={[
-          {
-            label: 'Career Readiness',
-            value: `${readinessScore} / 100`,
-            change: confidenceRating,
-            isPositive: readinessScore >= 70,
-          },
-          {
-            label: 'Technical Skills Evidence',
-            value: `${technicalDepth}%`,
-            change: 'From your readiness breakdown',
-            isPositive: technicalDepth >= 70,
-          },
-          {
-            label: 'Experience Evidence',
-            value: `${behavioralScore}%`,
-            change: 'From your readiness breakdown',
-            isPositive: behavioralScore >= 70,
-          },
-        ]}
-      />
+    <div className="mx-auto max-w-7xl space-y-6 px-4 pb-16 pt-6 sm:px-6">
+      {(studioMode === 'LOBBY' || studioMode === 'HISTORY') && (
+      <>
+      <PageHeader
+        eyebrow="Interview Studio"
+        icon={<MessageSquare className="h-7 w-7" aria-hidden="true" />}
+        title={targetRoleTitle ? `Practise for ${targetRoleTitle}` : 'Practise interviews'}
+        lead="Questions are drawn from your role and your own evidence. Each answer is scored against a rubric you can see; scores describe the answer, not your chance of being hired."
+      >
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <StatTile label="Career readiness" value={`${readinessScore} / 100`} hint={confidenceRating} accent />
+          <StatTile label="Technical skills evidence" value={`${technicalDepth}%`} hint="From your readiness breakdown" />
+          <StatTile label="Experience evidence" value={`${behavioralScore}%`} hint="From your readiness breakdown" />
+        </div>
+      </PageHeader>
 
-      {/* AI STATUS & PROVENANCE BAR */}
-      <AIStatusBar status="idle" provider="Answers are scored by an AI rubric when a provider is available, otherwise by a rule-based rubric" />
+      <Notice title="How answers are scored">
+        By an AI rubric when a language model is reachable, otherwise by the built-in rule-based rubric. Every report says which one scored it.
+      </Notice>
+      </>
+      )}
 
       {/* MODE 1: STUDIO LOBBY */}
       {studioMode === 'LOBBY' && (
@@ -429,18 +410,18 @@ export const InterviewPrepAgentWorkspace: React.FC = () => {
           settingsSlot={
             <>
               <RubricPicker roleTitle={targetRoleTitle} value={rubricChoice} onChange={setRubricChoice} />
-              <label className="flex items-start gap-2 rounded-2xl border border-white/10 bg-slate-900/40 p-4 text-xs text-slate-300">
+              <label className="flex items-start gap-2 rounded-2xl border border-aurora-line bg-aurora-canvas/60 p-4 text-xs text-aurora-muted">
                 <input type="checkbox" className="mt-0.5" checked={adaptiveFollowUps} onChange={(e) => setAdaptiveFollowUps(e.target.checked)} />
                 <span>
-                  <span className="font-semibold text-slate-100">Ask follow-up questions</span> when an answer misses an expected point or lacks detail
+                  <span className="font-semibold text-aurora-ink">Ask follow-up questions</span> when an answer misses an expected point or lacks detail
                   (at most one per question, three per round). Follow-ups are reported separately and do not change your overall score.
                 </span>
               </label>
               <Link
                 to="/interview-agent/assessments"
-                className="block rounded-2xl border border-white/10 bg-slate-900/40 p-4 text-xs text-slate-300 hover:border-indigo-400/40"
+                className="block rounded-2xl border border-aurora-line bg-aurora-canvas/60 p-4 text-xs text-aurora-muted hover:border-indigo-400/40"
               >
-                <span className="font-semibold text-slate-100">Technical assessment</span>: read code and answer trace, bug, complexity and SQL
+                <span className="font-semibold text-aurora-ink">Technical assessment</span>: read code and answer trace, bug, complexity and SQL
                 tasks. Nothing you type is run as code.
               </Link>
             </>

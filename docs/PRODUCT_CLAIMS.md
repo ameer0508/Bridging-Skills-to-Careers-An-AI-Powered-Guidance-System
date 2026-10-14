@@ -111,6 +111,40 @@ The signed-in shell (sidebar, top bar, account menu, phone drawer) and the Comma
 - portfolio privacy through the public link;
 - axe on every screen and dialog; reduced motion; no sideways scrolling at 1440, 1024, 768, 390 and 360 px; the load-failure notice; a clean console.
 
+## Stage D group 3: Interviews, Voice, Technical assessment, Exams (2026-10-14)
+
+`/interview-agent` (with `/interview-agent/assessments`), `/interviews` and `/exams` (with `/exams/:examId`) were rebuilt in Aurora Elite and added to `AURORA_ROUTES`. The following are all unchanged:
+- question selection, rubrics, follow-ups and technical scoring;
+- exam questions, timing and submission;
+- voice consent, retention, playback and deletion.
+
+- **Claims corrected.**
+  - "Submit for AI Evaluation" is now "Submit answer for evaluation". When no model is reachable, answers are scored by the rule-based rubric, and every report already names the path that scored it. A note on the setup screen says so too.
+  - Removed: "AI Interview Studio" telemetry copy, "Prepare for the Hot Seat", the "verified" wording for skills that only come from the resume, and the loading text "Connecting to Grounded AI Interview Studio".
+  - The page header states that scores describe the answer, not the chance of being hired.
+- **Voice.** States are shown only as the browser and backend actually report them:
+  - unsupported dictation;
+  - consent before the microphone is touched;
+  - a refused microphone, announced in a live region;
+  - recording, saved and playback;
+  - withdrawal, which deletes every recording.
+
+  No waveform or level meter is drawn, because the existing component does not measure the stream.
+- **Technical assessment.** Same tasks and scoring. It still says nothing you type is run as code, and there is no run or terminal control.
+- **Exams.**
+  - A sticky question navigator marks each question answered or not, with a progress bar counted from the stored answers. Answer rows are larger touch targets.
+  - The server timer, the submit confirmation and the timeout behaviour are unchanged. Results show marks, correct, wrong, unanswered and each answer's explanation.
+  - No rank, percentile, cutoff or affiliation is shown.
+
+`e2e/tests/group3.mjs` (13 browser steps) checks:
+- signed-out access is refused;
+- the scoring note on setup, and the absence of the old claims;
+- unsupported dictation, consent before the microphone, the refused-microphone alert and consent withdrawal;
+- the typed answer, the report's scoring source and keyboard access to history;
+- a technical assessment from start to history;
+- GATE CS with the navigator, the submit confirmation and per-question results; an SSC CGL timed set with a running server timer;
+- axe on every screen and the consent panel; reduced motion; no sideways scrolling at five widths; a clean console.
+
 ## Pages inside the app
 
 Pages whose content is built-in sample content are wrapped in `DemoWorkspace`, which shows the "Illustrative sample data" notice:

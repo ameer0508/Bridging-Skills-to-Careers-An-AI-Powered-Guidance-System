@@ -62,22 +62,22 @@ export const InterviewProgressPanel: React.FC = () => {
   });
 
   return (
-    <section aria-labelledby="progress-heading" data-testid="interview-progress" className="rounded-2xl border border-white/10 bg-slate-900/40 p-5 text-slate-200">
+    <section aria-labelledby="progress-heading" data-testid="interview-progress" className="rounded-2xl border border-aurora-line bg-aurora-canvas/60 p-5 text-aurora-ink">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h2 id="progress-heading" className="text-base font-bold text-white">Progress across sessions</h2>
-        <label className="flex flex-col gap-1 text-[11px] text-slate-400">
+        <h2 id="progress-heading" className="text-base font-bold text-aurora-ink">Progress across sessions</h2>
+        <label className="flex flex-col gap-1 text-[11px] text-aurora-muted">
           Interview mode
-          <select className="rounded-lg border border-white/10 bg-slate-950 px-3 py-1.5 text-xs text-slate-100" value={mode} onChange={e => setMode(e.target.value)}>
+          <select className="rounded-lg border border-aurora-line bg-aurora-canvas px-3 py-1.5 text-xs text-aurora-ink" value={mode} onChange={e => setMode(e.target.value)}>
             <option value="">All modes</option>
             {['technical', 'behavioral', 'project', 'resume', 'career', 'mixed'].map(m => <option key={m} value={m}>{m}</option>)}
           </select>
         </label>
       </div>
 
-      {query.isPending && <p role="status" className="mt-3 text-xs text-slate-400">Loading progress…</p>}
-      {query.isError && <p role="alert" className="mt-3 text-xs text-rose-300">Progress could not be loaded: {messageOf(query.error, 'the server did not respond.')}</p>}
+      {query.isPending && <p role="status" className="mt-3 text-xs text-aurora-muted">Loading progress…</p>}
+      {query.isError && <p role="alert" className="mt-3 text-xs text-rose-700">Progress could not be loaded: {messageOf(query.error, 'the server did not respond.')}</p>}
       {query.data && query.data.series.length === 0 && (
-        <p className="mt-3 text-xs text-slate-400" data-testid="progress-empty">Complete a session with at least one answer to start tracking progress.</p>
+        <p className="mt-3 text-xs text-aurora-muted" data-testid="progress-empty">Complete a session with at least one answer to start tracking progress.</p>
       )}
       {query.data?.series.map(series => {
         const shown = (Object.keys(LABEL) as Dimension[]).filter(d => series.dimensions[d].points.length > 0);
@@ -87,7 +87,7 @@ export const InterviewProgressPanel: React.FC = () => {
         }));
         return (
           <div key={series.evaluationSource} className="mt-4" data-testid="progress-series" data-source={series.evaluationSource}>
-            <h3 className="text-sm font-semibold text-white">{SOURCE_LABEL[series.evaluationSource]} · {series.sessions.length} session{series.sessions.length === 1 ? '' : 's'}</h3>
+            <h3 className="text-sm font-semibold text-aurora-ink">{SOURCE_LABEL[series.evaluationSource]} · {series.sessions.length} session{series.sessions.length === 1 ? '' : 's'}</h3>
             {series.sessions.length > 1 && (
               <div className="mt-2 h-48 w-full" aria-hidden="true">
                 <ResponsiveContainer width="100%" height="100%">
@@ -103,7 +103,7 @@ export const InterviewProgressPanel: React.FC = () => {
             )}
             <table className="mt-2 w-full text-left text-xs" data-testid="progress-table">
               <caption className="sr-only">Dimension scores across sessions, {SOURCE_LABEL[series.evaluationSource]}</caption>
-              <thead className="text-slate-400">
+              <thead className="text-aurora-muted">
                 <tr><th scope="col" className="py-1 pr-3 font-medium">Dimension</th><th scope="col" className="py-1 pr-3 font-medium">First</th><th scope="col" className="py-1 pr-3 font-medium">Latest</th><th scope="col" className="py-1 font-medium">Change</th></tr>
               </thead>
               <tbody>
@@ -124,7 +124,7 @@ export const InterviewProgressPanel: React.FC = () => {
         );
       })}
       {query.data && (
-        <ul className="mt-4 list-disc space-y-1 pl-5 text-[11px] text-slate-400">
+        <ul className="mt-4 list-disc space-y-1 pl-5 text-[11px] text-aurora-muted">
           {query.data.excluded.mixedScoring > 0 && <li>{query.data.excluded.mixedScoring} session(s) scored partly by AI and partly by the built-in rubric are left out of these series.</li>}
           <li>A change is stated only with {query.data.minimums.sessionsForTrend} or more sessions and a difference of at least {query.data.minimums.changeThreshold} points between the earlier and the recent half.</li>
           {query.data.caveats.map(c => <li key={c}>{c}</li>)}

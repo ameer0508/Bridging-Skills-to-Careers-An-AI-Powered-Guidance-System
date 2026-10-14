@@ -81,7 +81,7 @@ export async function run({ webUrl, apiUrl }) {
     const box = page.locator('textarea').first();
     await box.waitFor({ timeout: 20_000 });
     await box.fill(ANSWER);
-    await page.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+    await page.getByRole('button', { name: /Submit answer for evaluation/ }).click();
     await page.waitForTimeout(1500);
     await page.getByRole('button', { name: /Conclude Round/ }).click();
     await page.waitForTimeout(3000);
@@ -140,7 +140,7 @@ export async function run({ webUrl, apiUrl }) {
       const box = page.locator('textarea').first();
       await box.waitFor({ timeout: 20_000 });
       await box.fill(VAGUE);
-      await page.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+      await page.getByRole('button', { name: /Submit answer for evaluation/ }).click();
       const badge = page.getByTestId('follow-up-badge');
       await badge.waitFor({ timeout: 20_000 });
       const grounding = await page.getByTestId('question-grounding').first().innerText();
@@ -153,7 +153,7 @@ export async function run({ webUrl, apiUrl }) {
     await t.step('the follow-up is answered and reported apart from the overall score', async () => {
       const box = page.locator('textarea').first();
       await box.fill(`${ANSWER} The key point I missed is handled explicitly, with a measured result.`);
-      await page.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+      await page.getByRole('button', { name: /Submit answer for evaluation/ }).click();
       await page.waitForTimeout(1500);
       await page.getByRole('button', { name: /Conclude Round/ }).click();
       const summary = page.getByTestId('follow-up-summary');
@@ -210,7 +210,7 @@ export async function run({ webUrl, apiUrl }) {
       await page.waitForFunction(() => document.querySelector('textarea')?.value.includes('A B test'));
       await page.getByRole('button', { name: /Listening/ }).click();
       await box.fill((await box.inputValue()).replace('A B test', 'A/B test') + ' and measured conversion over two weeks because that is the decision metric.');
-      await page.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+      await page.getByRole('button', { name: /Submit answer for evaluation/ }).click();
       await page.waitForTimeout(1500);
       const session = await latestSession();
       expect(session.questions[0].answerInputMethod === 'mixed', `stored input method ${session.questions[0].answerInputMethod}`);
@@ -243,7 +243,7 @@ export async function run({ webUrl, apiUrl }) {
       await other.getByTestId('dictation-unsupported').waitFor({ timeout: 20_000 });
       expect((await other.getByRole('button', { name: /dictat/i }).count()) === 0, 'a dictation button is shown without support');
       await other.getByLabel('Your answer').fill(ANSWER);
-      await other.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+      await other.getByRole('button', { name: /Submit answer for evaluation/ }).click();
       await other.waitForTimeout(1500);
       const stored = (await otherApi('GET', '/interviews/history')).data.history[0];
       await plain.close();
@@ -306,11 +306,11 @@ export async function run({ webUrl, apiUrl }) {
       const box = page.locator('textarea').first();
       await box.waitFor({ timeout: 20_000 });
       await box.fill(ANSWER);
-      await page.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+      await page.getByRole('button', { name: /Submit answer for evaluation/ }).click();
       // The room moves on to question 2: answer it in Hindi
       await page.waitForFunction(() => document.body.innerText.includes('QUESTION 2 OF'), null, { timeout: 20_000 });
       await page.locator('textarea').first().fill('मैंने इस समस्या पर टीम के साथ काम किया और एक भरोसेमंद समाधान बनाया जो भारी ट्रैफ़िक में भी चलता रहा।');
-      await page.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+      await page.getByRole('button', { name: /Submit answer for evaluation/ }).click();
       await page.waitForTimeout(1500);
       await page.getByRole('button', { name: /Conclude Round/ }).click();
       const details = page.getByTestId('evaluation-details').first();

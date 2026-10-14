@@ -36,11 +36,11 @@ function factorLines(f: Record<string, unknown>): string[] {
 /** How an answer was scored and how far to trust it (X9). Renders nothing for older evaluations. */
 export const EvaluationDetails: React.FC<{ evaluation: EvaluationQuality; tone?: 'dark' | 'light' }> = ({ evaluation: e, tone = 'dark' }) => {
   if (!e.method && !e.notScored) return null;
-  const muted = tone === 'dark' ? 'text-slate-400' : 'text-[var(--color-text-secondary)]';
+  const muted = tone === 'dark' ? 'text-aurora-muted' : 'text-aurora-muted';
   return (
     <div className={`space-y-2 text-[11px] ${muted}`} data-testid="evaluation-details" data-uncertainty={e.uncertainty?.level ?? ''} data-not-scored={e.notScored ? 'true' : 'false'}>
       {e.notScored && (
-        <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-2 text-amber-200" data-testid="not-scored">
+        <p className="rounded-lg border border-amber-200 bg-amber-50 p-2 text-amber-700" data-testid="not-scored">
           Not scored: {e.notScoredReason} Practice scoring works in English only; this answer is saved but not counted in your overall score.
         </p>
       )}

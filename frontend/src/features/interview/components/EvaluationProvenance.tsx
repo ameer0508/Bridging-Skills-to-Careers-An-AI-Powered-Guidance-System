@@ -1,3 +1,4 @@
+import { motion, useReducedMotion } from 'framer-motion';
 import React from 'react';
 import { Bot, ListChecks } from 'lucide-react';
 import { QUESTION_SOURCE_LABEL, SCORING_SOURCE_LABEL } from './evaluationLabels';
@@ -34,7 +35,7 @@ export const SourceBadge: React.FC<SourceBadgeProps> = ({ kind, source }) => {
   return (
     <span
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border ${
-        isAi ? 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30' : 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+        isAi ? 'bg-aurora-violet/[0.06] text-aurora-violet border-aurora-violet/25' : 'bg-amber-50 text-amber-700 border-amber-200'
       }`}
       data-testid={`${kind}-source`}
       data-source={source}
@@ -52,9 +53,10 @@ interface DimensionBarsProps {
 /** The rubric dimensions exactly as scored. A dimension that was not judged says so instead of showing a number. */
 export const DimensionBars: React.FC<DimensionBarsProps> = ({ dimensions }) => {
   const values = (dimensions || {}) as Record<string, number | null | undefined>;
+  const reduce = useReducedMotion();
   const hasAny = DIMENSIONS.some((d) => typeof values[d.key] === 'number');
   if (!hasAny) {
-    return <p className="text-xs text-slate-400">No dimension scores were recorded for this answer.</p>;
+    return <p className="text-xs text-aurora-muted">No dimension scores were recorded for this answer.</p>;
   }
   return (
     <dl className="space-y-3" data-testid="evaluation-dimensions">
@@ -62,18 +64,23 @@ export const DimensionBars: React.FC<DimensionBarsProps> = ({ dimensions }) => {
         const value = values[dimension.key];
         const scored = typeof value === 'number';
         return (
-          <div key={dimension.key} className="space-y-1.5">
-            <div className="flex items-center justify-between text-xs gap-3">
-              <dt className="text-slate-300 font-medium" title={dimension.hint}>
-                {dimension.label}
-              </dt>
-              <dd className={`font-bold ${scored ? 'text-indigo-300' : 'text-slate-500'}`}>
-                {scored ? `${value}/100` : 'Not assessed'}
-              </dd>
-            </div>
-            <div className="w-full h-2 rounded-full bg-slate-900 border border-white/5 overflow-hidden" aria-hidden="true">
-              {scored && <div className="h-full rounded-full bg-indigo-500" style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />}
-            </div>
+          <div key={dimension.key} className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1.5 text-xs">
+            <dt className="font-medium text-aurora-muted" title={dimension.hint}>
+              {dimension.label}
+            </dt>
+            <dd className={`font-bold ${scored ? 'text-aurora-indigo' : 'text-aurora-muted'}`}>
+              {scored ? `${value}/100` : 'Not assessed'}
+            </dd>
+            <dd className="col-span-2 h-2 w-full overflow-hidden rounded-full border border-aurora-line bg-aurora-canvas" aria-hidden="true">
+              {scored && (
+                <motion.div
+                  className="h-full rounded-full [background:var(--aurora-gradient-action)]"
+                  initial={reduce ? false : { width: 0 }}
+                  animate={{ width: `${Math.min(100, Math.max(0, value))}%` }}
+                  transition={reduce ? { duration: 0 } : { duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                />
+              )}
+            </dd>
           </div>
         );
       })}

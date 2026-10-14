@@ -55,7 +55,7 @@ export const DictationControl: React.FC<{ onTranscript: (text: string) => void; 
 
   if (!ctor) {
     return (
-      <p className="text-[11px] text-slate-400" data-testid="dictation-unsupported">
+      <p className="text-[11px] text-aurora-muted" data-testid="dictation-unsupported">
         Voice dictation is not available in this browser. Type your answer: typing works everywhere and nothing is lost.
       </p>
     );
@@ -96,16 +96,16 @@ export const DictationControl: React.FC<{ onTranscript: (text: string) => void; 
   };
 
   return (
-    <div ref={focus.containerRef} tabIndex={-1} className="space-y-2 text-[11px] text-slate-300 outline-none" data-testid="dictation">
+    <div ref={focus.containerRef} tabIndex={-1} className="space-y-2 text-[11px] text-aurora-muted outline-none" data-testid="dictation">
       {consent === 'none' && !askingConsent && (
-        <button ref={focus.triggerRef} type="button" className={`${button} border-white/10 bg-slate-800/80 text-slate-300`} disabled={disabled || settings.isPending} onClick={() => setAskingConsent(true)}>
+        <button ref={focus.triggerRef} type="button" className={`${button} border-aurora-line bg-aurora-canvas/80 text-aurora-muted`} disabled={disabled || settings.isPending} onClick={() => setAskingConsent(true)}>
           <MicOff className="h-3.5 w-3.5" aria-hidden="true" /> Enable voice dictation
         </button>
       )}
 
       {askingConsent && (
-        <div ref={focus.panelRef} tabIndex={-1} role="dialog" aria-labelledby="dictation-consent-title" className="space-y-2 rounded-xl border border-amber-400/40 bg-amber-500/5 p-3 outline-none focus-visible:ring-2 focus-visible:ring-amber-300" data-testid="dictation-consent">
-          <p id="dictation-consent-title" className="flex items-center gap-1.5 font-bold text-amber-200">
+        <div ref={focus.panelRef} tabIndex={-1} role="dialog" aria-labelledby="dictation-consent-title" className="space-y-2 rounded-xl border border-amber-400/40 bg-amber-50 p-3 outline-none focus-visible:ring-2 focus-visible:ring-amber-300" data-testid="dictation-consent">
+          <p id="dictation-consent-title" className="flex items-center gap-1.5 font-bold text-amber-700">
             <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" /> Before you dictate
           </p>
           <p>
@@ -115,20 +115,20 @@ export const DictationControl: React.FC<{ onTranscript: (text: string) => void; 
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              className={`${button} border-emerald-400/40 text-emerald-200`}
+              className={`${button} border-emerald-400/40 text-emerald-700`}
               disabled={onDevice !== 'available' || setConsent.isPending}
               onClick={() => setConsent.mutate('on_device_only')}
             >
               Only on this device
             </button>
-            <button type="button" className={`${button} border-amber-400/40 text-amber-200`} disabled={setConsent.isPending} onClick={() => setConsent.mutate('browser_service')}>
+            <button type="button" className={`${button} border-amber-400/40 text-amber-700`} disabled={setConsent.isPending} onClick={() => setConsent.mutate('browser_service')}>
               Allow my browser&apos;s speech service
             </button>
-            <button type="button" className={`${button} border-white/10 text-slate-300`} onClick={() => setAskingConsent(false)}>
+            <button type="button" className={`${button} border-aurora-line text-aurora-muted`} onClick={() => setAskingConsent(false)}>
               Not now
             </button>
           </div>
-          <p className="text-slate-400">
+          <p className="text-aurora-muted">
             {onDevice === 'available'
               ? 'This browser can recognise speech on the device, so audio need not leave it.'
               : 'This browser has not confirmed on-device recognition, so "Only on this device" is unavailable.'}{' '}
@@ -141,17 +141,17 @@ export const DictationControl: React.FC<{ onTranscript: (text: string) => void; 
       {consent !== 'none' && (
         <div className="flex flex-wrap items-center gap-2">
           {listening ? (
-            <button type="button" className={`${button} animate-pulse border-rose-500 bg-rose-600/30 text-rose-200`} onClick={stop}>
+            <button type="button" className={`${button} animate-pulse border-rose-500 bg-rose-600/30 text-rose-700`} onClick={stop}>
               <Mic className="h-3.5 w-3.5" aria-hidden="true" /> Listening… stop
             </button>
           ) : (
-            <button type="button" className={`${button} border-white/10 bg-slate-800/80 text-slate-200`} disabled={disabled || blockedOnDevice} onClick={start}>
+            <button type="button" className={`${button} border-aurora-line bg-aurora-canvas/80 text-aurora-ink`} disabled={disabled || blockedOnDevice} onClick={start}>
               <Mic className="h-3.5 w-3.5" aria-hidden="true" /> Dictate
             </button>
           )}
           <button
             type="button"
-            className="text-[11px] text-slate-400 underline"
+            className="text-[11px] text-aurora-muted underline"
             onClick={() => {
               stop();
               setConsent.mutate('none');
@@ -159,7 +159,7 @@ export const DictationControl: React.FC<{ onTranscript: (text: string) => void; 
           >
             Turn off dictation
           </button>
-          <span className="text-slate-400" data-testid="dictation-status">
+          <span className="text-aurora-muted" data-testid="dictation-status">
             {blockedOnDevice
               ? 'You allowed on-device dictation only, and this browser cannot do that, so dictation stays off. Type your answer.'
               : consent === 'on_device_only'
@@ -171,7 +171,7 @@ export const DictationControl: React.FC<{ onTranscript: (text: string) => void; 
       )}
 
       <ErrorRegion error={error} errorId={errorId} testId="dictation-errors" />
-      {setConsent.isError && <p role="alert" className="text-rose-300">Your dictation choice could not be saved. Dictation stays off.</p>}
+      {setConsent.isError && <p role="alert" className="text-rose-700">Your dictation choice could not be saved. Dictation stays off.</p>}
     </div>
   );
 };

@@ -27,7 +27,7 @@ export const ReadAloudButton: React.FC<{ text: string }> = ({ text }) => {
     <button
       type="button"
       data-testid="read-aloud"
-      className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-slate-800/80 px-3 py-1.5 text-[11px] font-bold text-slate-200"
+      className="inline-flex items-center gap-1.5 rounded-xl border border-aurora-line bg-aurora-canvas/80 px-3 py-1.5 text-[11px] font-bold text-aurora-ink"
       onClick={() => {
         window.speechSynthesis.cancel();
         const utterance = new SpeechSynthesisUtterance(text);

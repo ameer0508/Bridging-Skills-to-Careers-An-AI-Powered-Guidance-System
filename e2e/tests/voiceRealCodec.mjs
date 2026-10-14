@@ -216,7 +216,7 @@ async function runChannel(t, channel, { webUrl, apiUrl, tmpDir }, wav) {
       await recordFor(1500);
       const during = (await api('GET', `/interviews/${round}/recordings`)).data.recordings.length;
       await page.getByLabel('Your answer').fill(ANSWER);
-      await page.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+      await page.getByRole('button', { name: /Submit answer for evaluation/ }).click();
       await page.waitForTimeout(1500);
       await page.getByRole('button', { name: /Conclude Round/ }).click();
       await page.waitForTimeout(3000);
@@ -282,7 +282,7 @@ async function runChannel(t, channel, { webUrl, apiUrl, tmpDir }, wav) {
       const dictationAnnouncements = await p.evaluate(() => window.__added['dictation-errors']);
       expect(recordingAnnouncements >= 2 && dictationAnnouncements >= 2, `repeated errors added ${recordingAnnouncements} recording and ${dictationAnnouncements} dictation nodes; each needs 2`);
       await p.getByLabel('Your answer').fill(ANSWER);
-      await p.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+      await p.getByRole('button', { name: /Submit answer for evaluation/ }).click();
       await p.waitForTimeout(1500);
       const stored = (await papi('GET', '/interviews/history')).data.history[0];
       expect(tracks === 0, `a track was opened despite the refusal (${tracks})`);
@@ -328,7 +328,7 @@ async function realRecogniser(t, channel, { webUrl, apiUrl }, wav) {
       if (await p.getByRole('button', { name: /Listening/ }).count()) await p.getByRole('button', { name: /Listening/ }).click();
       const dictated = await p.getByLabel('Your answer').inputValue();
       await p.getByLabel('Your answer').fill(`${dictated} ${ANSWER}`.trim());
-      await p.getByRole('button', { name: /Submit for AI Evaluation/ }).click();
+      await p.getByRole('button', { name: /Submit answer for evaluation/ }).click();
       await p.waitForTimeout(1500);
       const stored = (await papi('GET', '/interviews/history')).data.history[0];
       expect(stored.questions[0].candidateResponse.includes('definitions'), 'the typed answer was not stored');

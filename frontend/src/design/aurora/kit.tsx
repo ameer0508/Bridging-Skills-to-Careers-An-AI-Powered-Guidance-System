@@ -340,3 +340,31 @@ export const Disclosure: React.FC<{ summary: React.ReactNode; children: React.Re
 export const fieldClass =
   'w-full rounded-2xl border border-aurora-line bg-white px-4 py-2.5 text-sm text-aurora-ink placeholder:text-aurora-muted shadow-aurora-sm focus:border-aurora-violet focus:outline-none focus:ring-2 focus:ring-aurora-violet/30 disabled:opacity-60';
 export const labelClass = 'block text-xs font-semibold text-aurora-muted';
+
+/**
+ * A porcelain panel with the same props as the dark GlassPanel, so a migrated screen swaps the
+ * import. With onClick it behaves as a button (Enter and Space activate it).
+ */
+export const Panel: React.FC<{ children: React.ReactNode; className?: string; onClick?: () => void; animateIn?: boolean; glowColor?: string }> = ({ children, className = '', onClick }) => {
+  const interactive = onClick
+    ? {
+        role: 'button' as const,
+        tabIndex: 0,
+        onClick,
+        onKeyDown: (event: React.KeyboardEvent) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            onClick();
+          }
+        },
+      }
+    : {};
+  return (
+    <div
+      {...interactive}
+      className={`relative rounded-[28px] border border-aurora-line bg-white shadow-aurora-sm transition-shadow ${onClick ? 'cursor-pointer hover:shadow-aurora-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora-violet' : ''} ${className}`}
+    >
+      {children}
+    </div>
+  );
+};

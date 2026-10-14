@@ -750,7 +750,7 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       for (let i = 0; i < 6; i++) {
         const box = page.locator('textarea').first();
         if (!(await box.isVisible().catch(() => false))) break;
-        const submit = page.getByRole('button', { name: /Submit for AI Evaluation/ });
+        const submit = page.getByRole('button', { name: /Submit answer for evaluation/ });
         await box.fill(`${answer} (answer ${i + 1})`);
         if (!(await submit.isEnabled({ timeout: 4000 }).catch(() => false))) break;
         await submit.click();
