@@ -232,6 +232,87 @@ export async function runEmployerPostingTests() {
     await EmployerPostingService.removeAllForUser(someone!._id.toString());
     assert.equal(await MarketPosting.countDocuments({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id }), before - 1);
     console.log('  ✓ Deleting an account removes its postings from the market records');
+
+    // 11. Regression checks for defects found in the 2026-10-14 review ==========================
+    const fresh = async (label: string, name: string, approve: boolean) => {
+      const u = await h.registerUser(label);
+      await h.api('PUT', '/employer/organization', { token: u.token, json: { organizationName: name } });
+      if (approve) await ADMIN('POST', `/employer/admin/organizations/${u.userId}/review`, { decision: 'approve' });
+      return u;
+    };
+    const as = (u: { token: string }) => (method: string, path: string, json?: unknown) => h.api(method, path, { token: u.token, json });
+    const recordsFor = (id: string) => MarketPosting.countDocuments({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id, sourceRecordId: id });
+
+    // a. Bidirectional overrides and zero-width characters cannot disguise a name or title
+    const spoof = await fresh('spoof', 'Real\u202eCo\u200b Ltd', false);
+    const spoofOrg = (await as(spoof)('GET', '/employer/organization')).body.data.organization;
+    assert.equal(spoofOrg.organizationName, 'RealCo Ltd', 'bidi and zero-width characters stripped from the name');
+    const spoofPosting = (await as(spoof)('POST', '/employer/postings', posting({ title: 'Data\u2066 Analyst\u2069' }))).body.data.posting;
+    assert.equal(spoofPosting.title, 'Data Analyst');
+
+    // b. A rename followed by a new review certifies, and counts, the new name only
+    const renamer = await fresh('renamer', 'Old Name Analytics', true);
+    const rp = (await as(renamer)('POST', '/employer/postings', posting({ city: 'Nashik' }))).body.data.posting;
+    await as(renamer)('POST', `/employer/postings/${rp.id}/publish`, CONSENT);
+    assert.equal((await MarketPosting.findOne({ sourceRecordId: rp.id }).lean())?.company, 'Old Name Analytics');
+    await as(renamer)('PUT', '/employer/organization', { organizationName: 'New Name Analytics' });
+    assert.equal(await recordsFor(rp.id), 0, 'out of the figures after the rename');
+    await ADMIN('POST', `/employer/admin/organizations/${renamer.userId}/review`, { decision: 'approve' });
+    assert.equal((await MarketPosting.findOne({ sourceRecordId: rp.id }).lean())?.company, 'New Name Analytics', 'counted under the reviewed name, not the old one');
+    assert.equal((await as(renamer)('GET', '/employer/postings/mine')).body.data.postings[0].organizationName, 'New Name Analytics');
+
+    // c. Every market record needs a complete, current grant; reconciliation removes anything else
+    const granter = await fresh('granter', 'Grant Check Ltd', true);
+    const gp = (await as(granter)('POST', '/employer/postings', posting({ city: 'Kochi', state: 'Kerala' }))).body.data.posting;
+    await as(granter)('POST', `/employer/postings/${gp.id}/publish`, CONSENT);
+    assert.equal(await recordsFor(gp.id), 1);
+    await EmployerPosting.updateOne({ _id: gp.id }, { $set: { 'consent.uses': ['display_to_signed_in_users'] } }); // a partial grant
+    const repaired = await EmployerPostingService.reconcileMarketRecords();
+    assert.ok(repaired.removed >= 1 && (await recordsFor(gp.id)) === 0, 'a record without every derived use is removed');
+    await ADMIN('POST', `/employer/admin/organizations/${granter.userId}/review`, { decision: 'approve' });
+    assert.equal(await recordsFor(gp.id), 0, 'and an approval does not bring it back');
+    await EmployerPosting.updateOne({ _id: gp.id }, { $set: { status: 'withdrawn' } });
+    await MarketPosting.create({ dataset: 'sourced', sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id, sourceRecordId: gp.id, fingerprint: `orphan-${gp.id}`, title: 'Data Analyst', company: 'Grant Check Ltd', locationText: 'Kochi, Kerala', country: 'IN', postedAt: new Date(), firstSeenAt: new Date(), lastSeenAt: new Date(), importBatchId: new mongoose.Types.ObjectId() });
+    await EmployerPostingService.reconcileMarketRecords();
+    assert.equal(await recordsFor(gp.id), 0, 'a record left behind for a withdrawn posting is removed');
+
+    // d. Two simultaneous publishes of one draft: exactly one succeeds
+    const racer = await fresh('racer', 'Race Ltd', true);
+    const rd = (await as(racer)('POST', '/employer/postings', posting({ city: 'Surat', state: 'Gujarat' }))).body.data.posting;
+    const statuses = (await Promise.all([1, 2, 3].map(() => as(racer)('POST', `/employer/postings/${rd.id}/publish`, CONSENT)))).map(r => r.status).sort();
+    assert.deepEqual(statuses, [200, 409, 409]);
+    assert.equal(await recordsFor(rd.id), 1);
+
+    // e. A withdrawal racing an approval or an edit never leaves the posting in the figures
+    for (let i = 0; i < 4; i++) {
+      const w = await fresh(`withdrawer${i}`, `Withdraw Race ${i} Ltd`, false);
+      const wp = (await as(w)('POST', '/employer/postings', posting({ city: `Race City ${i}` }))).body.data.posting;
+      await as(w)('POST', `/employer/postings/${wp.id}/publish`, CONSENT);
+      await Promise.all([
+        ADMIN('POST', `/employer/admin/organizations/${w.userId}/review`, { decision: 'approve' }),
+        as(w)('POST', `/employer/postings/${wp.id}/withdraw`),
+        as(w)('PATCH', `/employer/postings/${wp.id}`, { salary: { min: 500000, max: 900000, currency: 'INR', period: 'YEAR' } }),
+      ]);
+      assert.equal((await EmployerPosting.findById(wp.id).lean())?.status, 'withdrawn');
+      assert.equal(await recordsFor(wp.id), 0, `withdrawn posting ${i} is in no figure`);
+      assert.equal(await MarketPosting.countDocuments({ 'alsoSeenIn.sourceRecordId': wp.id }), 0);
+    }
+
+    // f. Two accounts post the same role under the same name: counted once; withdrawing the first
+    //    keeps the second, which was merged into it, in the figures
+    const twinA = await fresh('twinA', 'Twin Employer Ltd', true);
+    const twinB = await fresh('twinB', 'Twin Employer Ltd', true);
+    const ta = (await as(twinA)('POST', '/employer/postings', posting({ city: 'Indore', state: 'Madhya Pradesh' }))).body.data.posting;
+    const tb = (await as(twinB)('POST', '/employer/postings', posting({ city: 'Indore', state: 'Madhya Pradesh' }))).body.data.posting;
+    await as(twinA)('POST', `/employer/postings/${ta.id}/publish`, CONSENT);
+    await as(twinB)('POST', `/employer/postings/${tb.id}/publish`, CONSENT);
+    assert.equal(await recordsFor(ta.id), 1);
+    assert.equal(await recordsFor(tb.id), 0, 'the same vacancy is counted once');
+    assert.equal(await MarketPosting.countDocuments({ 'alsoSeenIn.sourceRecordId': tb.id }), 1);
+    await as(twinA)('POST', `/employer/postings/${ta.id}/withdraw`);
+    assert.equal(await recordsFor(ta.id), 0);
+    assert.equal(await recordsFor(tb.id), 1, "the second account's posting keeps its own record");
+    console.log('  ✓ Regressions: spoofing characters stripped; a rename is counted only under the re-reviewed name; partial grants and orphans reconciled away; one of three simultaneous publishes wins; withdrawal beats a racing approval or edit; a merged twin survives the other being withdrawn');
   } finally {
     await EmployerPosting.deleteMany({});
     await EmployerProfile.deleteMany({});

@@ -46,8 +46,16 @@ const DAY_MS = 86_400_000;
 const text = (min: number, max: number) =>
   z
     .string()
-    // eslint-disable-next-line no-control-regex
-    .transform(v => v.replace(/<[^>]*>/g, ' ').replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '').replace(/[ \t]+/g, ' ').trim())
+    .transform(v =>
+      v
+        .replace(/<[^>]*>/g, ' ')
+        // Control characters, and bidirectional overrides and zero-width characters, which can
+        // make a name or title display differently from what it is
+        // eslint-disable-next-line no-control-regex
+        .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f\u200b-\u200f\u202a-\u202e\u2060-\u2069\ufeff]/g, '')
+        .replace(/[ \t]+/g, ' ')
+        .trim()
+    )
     .pipe(z.string().min(min, `needs at least ${min} characters`).max(max, `must be at most ${max} characters`));
 
 const httpsUrl = z
@@ -230,6 +238,7 @@ const ownerView = (p: IEmployerPosting, reports = 0, profile: IEmployerProfile |
 class EmployerPostingService {
   /** At startup: if any posting was ever published under the terms, the channel is a source. */
   async syncSourceRegistration(): Promise<boolean> {
+    await this.reconcileMarketRecords();
     const any = await MarketPosting.exists({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id });
     if (any) activateEmployerSource();
     return Boolean(any);
@@ -272,8 +281,12 @@ class EmployerPostingService {
       { upsert: true }
     );
     if (previous && claimChanged) await this.removeMarketRecords(await this.publishedIds(userId));
-    // Open and draft postings carry the organization's current name
-    await EmployerPosting.updateMany({ userId: oid(userId, 'user'), status: { $in: ['draft'] } }, { $set: { organizationName: input.organizationName } });
+    // Every posting carries the organization's current name: a later review then certifies exactly
+    // the name its market records use (withdrawn postings keep the name they were withdrawn under)
+    await EmployerPosting.updateMany(
+      { userId: oid(userId, 'user'), status: { $in: ['draft', 'open', 'closed', 'hidden'] } },
+      { $set: { organizationName: input.organizationName } }
+    );
     return this.getProfile(userId);
   }
 
@@ -334,9 +347,15 @@ class EmployerPostingService {
     if ('salary' in input && input.salary !== undefined) {
       posting.salary = input.salary ? { min: input.salary.min ?? null, max: input.salary.max ?? null, currency: 'INR', period: input.salary.period } : null;
     }
-    await posting.save();
-    if (posting.status === 'open') await this.syncMarketRecord(posting);
-    return ownerView(posting);
+    // Save only if the posting is still in the state it was read in (a withdrawal may have won)
+    const saved = await EmployerPosting.findOneAndUpdate(
+      { _id: posting._id, status: posting.status },
+      { $set: { title: posting.title, description: posting.description, city: posting.city, state: posting.state, workMode: posting.workMode, employmentType: posting.employmentType, applyUrl: posting.applyUrl, salary: posting.salary, skills: posting.skills, unrecognisedSkills: posting.unrecognisedSkills } },
+      { new: true }
+    );
+    if (!saved) throw new AppError('The posting changed while it was being edited. Reload and try again.', 409, 'CONFLICT');
+    if (saved.status === 'open') await this.syncMarketRecord(saved);
+    return ownerView(saved);
   }
 
   async removeDraft(userId: string, id: string) {
@@ -362,21 +381,32 @@ class EmployerPostingService {
     if (await EmployerPosting.exists({ userId: posting.userId, status: 'open', title: posting.title, city: posting.city, state: posting.state, _id: { $ne: posting._id } })) {
       throw new AppError('This role is already open in this place. Close it before posting it again.', 409, 'DUPLICATE_POSTING');
     }
-    posting.status = 'open';
-    posting.publishedAt = now;
-    posting.expiresAt = new Date(now.getTime() + LIMITS.openDays * DAY_MS);
-    posting.consent = { termsVersion: CONTRIBUTION_TERMS_VERSION, uses: [...CONTRIBUTION_USES], authorizedToPost: true, realOpening: true, grantedAt: now };
-    await posting.save();
-    await this.syncMarketRecord(posting);
-    return ownerView(posting);
+    // Draft to open in one conditional update, so two simultaneous publishes cannot both succeed
+    const opened = await EmployerPosting.findOneAndUpdate(
+      { _id: posting._id, userId: posting.userId, status: 'draft' },
+      {
+        $set: {
+          status: 'open',
+          publishedAt: now,
+          expiresAt: new Date(now.getTime() + LIMITS.openDays * DAY_MS),
+          consent: { termsVersion: CONTRIBUTION_TERMS_VERSION, uses: [...CONTRIBUTION_USES], authorizedToPost: true, realOpening: true, grantedAt: now },
+        },
+      },
+      { new: true }
+    );
+    if (!opened) throw new AppError('Only a draft can be published.', 409, 'NOT_A_DRAFT');
+    await this.syncMarketRecord(opened);
+    return ownerView(opened);
   }
 
   async close(userId: string, id: string) {
-    const posting = await this.ownPosting(userId, id);
-    if (posting.status !== 'open') throw new AppError('Only an open posting can be closed.', 409, 'NOT_OPEN');
-    posting.status = 'closed';
-    posting.closedAt = new Date();
-    await posting.save();
+    await this.ownPosting(userId, id);
+    const posting = await EmployerPosting.findOneAndUpdate(
+      { _id: oid(id), userId: oid(userId, 'user'), status: 'open' },
+      { $set: { status: 'closed', closedAt: new Date() } },
+      { new: true }
+    );
+    if (!posting) throw new AppError('Only an open posting can be closed.', 409, 'NOT_OPEN');
     // Kept in the market records, as the terms allow; it was last advertised when it closed
     await MarketPosting.updateOne({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id, sourceRecordId: posting._id.toString() }, { $set: { lastSeenAt: posting.closedAt } });
     return ownerView(posting);
@@ -384,11 +414,13 @@ class EmployerPostingService {
 
   /** Withdrawing removes the posting from view and from every market figure, at once. */
   async withdraw(userId: string, id: string) {
-    const posting = await this.ownPosting(userId, id);
-    if (!['open', 'closed', 'hidden'].includes(posting.status)) throw new AppError('Only a published posting can be withdrawn.', 409, 'NOT_PUBLISHED');
-    posting.status = 'withdrawn';
-    posting.withdrawnAt = new Date();
-    await posting.save();
+    await this.ownPosting(userId, id);
+    const posting = await EmployerPosting.findOneAndUpdate(
+      { _id: oid(id), userId: oid(userId, 'user'), status: { $in: ['open', 'closed', 'hidden'] } },
+      { $set: { status: 'withdrawn', withdrawnAt: new Date() } },
+      { new: true }
+    );
+    if (!posting) throw new AppError('Only a published posting can be withdrawn.', 409, 'NOT_PUBLISHED');
     await this.removeMarketRecords([posting._id]);
     return ownerView(posting);
   }
@@ -496,6 +528,7 @@ class EmployerPostingService {
     const postings = await EmployerPosting.find({ userId: profile.userId, status: { $in: ['open', 'closed'] } });
     if (input.decision === 'approve') for (const posting of postings) await this.syncMarketRecord(posting);
     else await this.removeMarketRecords(postings.map(p => p._id));
+    await this.reconcileMarketRecords();
     return (await this.listOrganizations()).find(o => o.organizationId === profile.userId.toString());
   }
 
@@ -534,11 +567,51 @@ class EmployerPostingService {
     return due.length;
   }
 
+  /**
+   * Whether a posting may be in the market records at all, read fresh from the database: published
+   * (open or closed), a complete grant of every derived use at the current terms version, its
+   * organization reviewed, and the posting under the very name that was reviewed.
+   */
+  private async eligibleForMarket(postingId: Types.ObjectId): Promise<IEmployerPosting | null> {
+    const posting = await EmployerPosting.findById(postingId);
+    if (!posting || !['open', 'closed'].includes(posting.status)) return null;
+    const consent = posting.consent;
+    if (!consent || consent.termsVersion !== CONTRIBUTION_TERMS_VERSION || !consent.authorizedToPost || !consent.realOpening) return null;
+    if (!CONTRIBUTION_USES.every(use => consent.uses.includes(use))) return null;
+    const profile = await EmployerProfile.findOne({ userId: posting.userId }).select('marketReview organizationName');
+    if (profile?.marketReview?.status !== 'approved' || profile.organizationName !== posting.organizationName) return null;
+    return posting;
+  }
+
+  /**
+   * Removes every employer market record (and merged reference) whose posting is no longer
+   * eligible. Run at start-up and after reviews; it repairs anything a race left behind.
+   */
+  async reconcileMarketRecords(): Promise<{ removed: number; referencesRemoved: number }> {
+    const records = await MarketPosting.find({ $or: [{ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id }, { 'alsoSeenIn.sourceId': EMPLOYER_SUBMISSIONS_SOURCE.id }] })
+      .select('sourceId sourceRecordId alsoSeenIn')
+      .lean();
+    const ids = new Set<string>();
+    for (const r of records) {
+      if (r.sourceId === EMPLOYER_SUBMISSIONS_SOURCE.id && r.sourceRecordId) ids.add(r.sourceRecordId);
+      for (const a of r.alsoSeenIn ?? []) if (a.sourceId === EMPLOYER_SUBMISSIONS_SOURCE.id && a.sourceRecordId) ids.add(a.sourceRecordId);
+    }
+    const ineligible: string[] = [];
+    for (const id of ids) {
+      if (!Types.ObjectId.isValid(id) || !(await this.eligibleForMarket(new Types.ObjectId(id)))) ineligible.push(id);
+    }
+    if (ineligible.length === 0) return { removed: 0, referencesRemoved: 0 };
+    const removed = await MarketPosting.countDocuments({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id, sourceRecordId: { $in: ineligible } });
+    const referencesRemoved = await MarketPosting.countDocuments({ alsoSeenIn: { $elemMatch: { sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id, sourceRecordId: { $in: ineligible } } } });
+    await this.removeMarketRecords(ineligible.filter(i => Types.ObjectId.isValid(i)).map(i => new Types.ObjectId(i)), ineligible);
+    return { removed, referencesRemoved };
+  }
+
   /** Mirrors one published posting into the market records through the normal ingestion path. */
-  private async syncMarketRecord(posting: IEmployerPosting): Promise<boolean> {
-    // Only organizations an administrator has reviewed contribute to market records
-    const profile = await EmployerProfile.findOne({ userId: posting.userId }).select('marketReview');
-    if (profile?.marketReview?.status !== 'approved') return false;
+  private async syncMarketRecord(candidate: IEmployerPosting): Promise<boolean> {
+    // Only an eligible posting, read fresh, so a withdrawal or rename that has just happened wins
+    const posting = await this.eligibleForMarket(candidate._id);
+    if (!posting) return false;
     activateEmployerSource();
     const recordId = posting._id.toString();
     const existing = await MarketPosting.findOne({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id, sourceRecordId: recordId });
@@ -579,6 +652,11 @@ class EmployerPostingService {
       posting.userId.toString()
     );
     if (batch.counts.rejected > 0) logger.warn(`Employer posting ${recordId} was not added to market records: ${batch.rejections.map(r => r.reason).join('; ')}`);
+    // If the posting stopped being eligible while it was being added, take it out again
+    if (!(await this.eligibleForMarket(posting._id))) {
+      await this.removeMarketRecords([posting._id]);
+      return false;
+    }
     return batch.counts.rejected === 0;
   }
 
@@ -586,11 +664,26 @@ class EmployerPostingService {
     return (await EmployerPosting.find({ userId: oid(userId, 'user'), status: { $in: ['open', 'closed'] } }).select('_id').lean()).map(p => p._id);
   }
 
-  private async removeMarketRecords(ids: Types.ObjectId[]) {
-    const recordIds = ids.map(i => i.toString());
+  private async removeMarketRecords(ids: Types.ObjectId[], extraRecordIds: string[] = []) {
+    const recordIds = [...new Set([...ids.map(i => i.toString()), ...extraRecordIds])];
+    // Other employer postings merged into a record being removed lose their only market record
+    const removing = await MarketPosting.find({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id, sourceRecordId: { $in: recordIds } }).select('alsoSeenIn').lean();
+    const orphaned = removing
+      .flatMap(r => r.alsoSeenIn ?? [])
+      .filter(a => a.sourceId === EMPLOYER_SUBMISSIONS_SOURCE.id && a.sourceRecordId && !recordIds.includes(a.sourceRecordId))
+      .map(a => a.sourceRecordId as string);
     await MarketPosting.deleteMany({ sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id, sourceRecordId: { $in: recordIds } });
     // A posting merged into another source's copy is only a reference there; drop the reference
-    await MarketPosting.updateMany({}, { $pull: { alsoSeenIn: { sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id, sourceRecordId: { $in: recordIds } } } });
+    await MarketPosting.updateMany(
+      { alsoSeenIn: { $elemMatch: { sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id, sourceRecordId: { $in: recordIds } } } },
+      { $pull: { alsoSeenIn: { sourceId: EMPLOYER_SUBMISSIONS_SOURCE.id, sourceRecordId: { $in: recordIds } } } }
+    );
+    // ...so each one that is still eligible gets its own record back
+    for (const id of new Set(orphaned)) {
+      if (!Types.ObjectId.isValid(id)) continue;
+      const posting = await EmployerPosting.findById(id);
+      if (posting) await this.syncMarketRecord(posting);
+    }
   }
 
   /** Account deletion: the user's postings leave every market figure, and reports about them go too. */
