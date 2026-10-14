@@ -25,7 +25,7 @@
 
 | Check | Result |
 |---|---|
-| Backend suites (`runAllTests.ts`) | 58 of 58 pass (308 checks), including `security_sweep` and `api_reference` (167 routes), `account_deletion`, `onjob_live_listings` and `employer_postings` |
+| Backend suites (`runAllTests.ts`) | 58 of 58 pass (310 checks), including `security_sweep` and `api_reference` (167 routes), `account_deletion`, `employer_postings` (with the 2026-10-14 race, rename, grant, merge and spoofing regressions) and the market suites (with the forecast diversity regression and a 2,000-case property test) |
 | AI service (`pytest`) | 190 passed (with Tesseract installed), including the Devanagari tokenizer regression |
 | Browser suites (15) | voiceRealCodec 24/24 (12 steps each in real Google Chrome Stable 155 and Edge 155), smoke 50/50, navigation 27/27 (all 24 sidebar entries), employer 8/8, accessibility 54/54, interviews 23/23, market 15/15, applications 15/15, salaries 14/14, exams 12/12, languages 11/11, outcomes 10/10, careerDomains 8/8, aiObservability 6/6, landing 6/6 |
 | Typecheck, lint, production build | Pass (frontend and backend) |
@@ -35,7 +35,7 @@
 | Accessibility (V3) | `ACCESSIBILITY.md`: axe on 50 pages, 0 serious or critical violations; keyboard sign-in |
 | API reference | Every route listed (enforced by `api_reference.test.ts`) |
 
-All code figures above are from the final tree of 2026-10-14 (release readiness: employer review gate, Hindi tokenizer fix, navigation suite, demo material); the GitHub Actions row names its own commit. **Checklist: 81 / 100 verified; 19 open** (section 4). Demonstration: `DEMO_SCRIPT.md`; overview: `PROJECT_HANDBOOK.md`.
+All code figures above are from the final tree of 2026-10-14 (second hardening pass: employer pipeline race and consent fixes, forecast employer diversity); the GitHub Actions row names its own commit. **Checklist: 81 / 100 verified; 19 open** (section 4). Demonstration: `DEMO_SCRIPT.md`; overview: `PROJECT_HANDBOOK.md`.
 
 ## 3. Honesty rules applied
 

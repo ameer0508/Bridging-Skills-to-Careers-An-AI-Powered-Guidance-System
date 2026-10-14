@@ -72,6 +72,19 @@ The grant is stored with the posting (version, the seven uses, time).
 | Cross-account isolation | Owner-only actions answer 404 to anyone else; administrator routes check the role in the database | `employer_postings`; `security_sweep` |
 | Report abuse (three accounts hiding a genuine posting) | Hidden postings go to the administrator, who can restore them (reports are then cleared) | `employer_postings` |
 
+### Defects found and fixed in the second review (2026-10-14)
+
+Each has a regression test in `employer_postings` §11.
+
+| Defect | Fix |
+|---|---|
+| A withdrawal racing an approval or an edit could leave the withdrawn posting in the market records | Status changes are single conditional updates; edits never write a stale status; every mirror re-reads the posting and checks eligibility before and after adding it |
+| After a rename, re-approval re-added published postings under the **old**, unreviewed name | Postings take the organization's current name; a record is allowed only under the reviewed name |
+| Market records were not tied to their grant | **Eligibility rule.** A posting may be in the market records only if it is open or closed, its stored consent grants every derived use at the current terms version, its organization is approved, and it carries the reviewed name. `reconcileMarketRecords()` removes any record or merged reference that fails the rule; it runs at start-up and after every review |
+| Two accounts posting the same vacancy under one name were merged into one record; withdrawing the first dropped the second's consented posting | The second gets its own record back |
+| Bidirectional overrides and zero-width characters could make a name or title display as something else | Stripped from every submitted text |
+| Simultaneous publishes | Exactly one succeeds (tested with three at once) |
+
 **Residual risk.** Administrator review is human judgement, not verification. A determined person with a matching domain could still pass it. Until real organizations use the channel there is no data to mislead with.
 
 ## Privacy and security

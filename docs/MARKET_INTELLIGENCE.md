@@ -233,6 +233,8 @@ The contract test shows that only an exactly tied pair is reordered, that all-ne
 
 ## 5c. C2 cautious demand forecasting
 
+**Employer diversity (added 2026-10-14).** A forecast is also refused when its postings come from fewer than 5 named employers, or one employer supplies more than half (`too_few_employers` / `one_employer_dominates`). This is the same rule as history, career summaries, salaries and skill trends (`services/market/employerDiversity.ts`). Before this, 30 dense months from a single employer produced a forecast; `market_forecast` now checks that they are refused. A seeded property test in `market_intelligence` checks the rule on 2,000 random employer mixes.
+
 `GET /api/v1/market/forecast?dataset&skill&country&to&horizon=1..3` (sign-in required). Service: `backend/src/services/market/MarketForecastService.ts`. Shown as "Postings forecast" on `/market`.
 
 **What is forecast.** It forecasts the number of distinct postings SkillBridge would hold per month from its sources. It does not forecast employment, hiring or anyone's chances. `to` must be a completed month (default: the last one), because a month in progress looks like a fall.

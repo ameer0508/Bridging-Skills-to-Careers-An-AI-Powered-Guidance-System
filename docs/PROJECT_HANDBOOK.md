@@ -139,7 +139,7 @@ Run on the final code, 2026-10-14.
 
 | Check | Result |
 |---|---|
-| Backend suites (`cd backend && npx tsx src/tests/runAllTests.ts`) | 58/58 pass, including the route-wide security sweep, account deletion, the API-reference coverage check (167 routes) and the employer and market suites |
+| Backend suites (`cd backend && npx tsx src/tests/runAllTests.ts`) | 58/58 pass (310 checks), including the route-wide security sweep, account deletion, the API-reference coverage check (167 routes) and the employer and market suites |
 | AI service (`cd ai && python -m pytest`) | 190 passed |
 | Browser suites (`cd e2e && E2E_TEST_FILE=./tests/<suite>.mjs node run.mjs`) | 15 suites, all pass; the voice suite runs in real Chrome and Edge. See the release report |
 | Typecheck, lint (no warnings allowed), production build | Pass |
