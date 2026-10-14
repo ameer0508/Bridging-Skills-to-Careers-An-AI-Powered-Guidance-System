@@ -87,7 +87,7 @@ export const RecommendationExplanation: React.FC<RecommendationExplanationProps>
                 <div>
                   <span className="block text-[10px] text-aurora-muted">Prerequisites</span>
                   <span className="font-bold text-aurora-ink">
-                    {matchingSkills.length > 0 ? `${matchingSkills.length} Verified` : 'Direct Skill'}
+                    {matchingSkills.length > 0 ? `${matchingSkills.length} Matched` : 'Direct Skill'}
                   </span>
                 </div>
               </div>

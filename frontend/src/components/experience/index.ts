@@ -71,7 +71,6 @@ export * from './command/RecentWinsPanel';
 export * from './command/NextMilestoneCard';
 
 // Initialization Experience Overlay
-export * from './initialization/AIInitializationOverlay';
 
 // AI Intelligence Layer & Mentorship System
 export * from './intelligence/StreamingReadyArchitecture';

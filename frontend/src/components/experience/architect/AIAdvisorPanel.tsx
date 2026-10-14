@@ -37,7 +37,7 @@ export const AIAdvisorPanel: React.FC<AIAdvisorPanelProps> = ({
   return (
     <LightingSurface
       profile="heroSpotlight"
-      className={`p-6 rounded-2xl border border-aurora-violet/25 bg-aurora-canvas/60 backdrop-blur-xl space-y-4 ${className}`}
+      className={`p-6 rounded-2xl border border-aurora-violet/25 bg-aurora-canvas/60 space-y-4 ${className}`}
     >
       <div className="flex items-center justify-between pb-3 border-b border-aurora-line">
         <div className="flex items-center gap-3">

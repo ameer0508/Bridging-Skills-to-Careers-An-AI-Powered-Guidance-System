@@ -74,7 +74,8 @@ export const JobSearchAgentWorkspace: React.FC = () => {
 
   // Query 1: Candidate Career Target Roles
   const { data: matchesData } = useQuery({
-    queryKey: ['careers', 'matches'],
+    // The bare list is cached under its own key: ['careers', 'matches'] holds { matches }
+    queryKey: ['careers', 'matches', 'list'],
     queryFn: async () => {
       const response = await apiClient.get('/careers/matches');
       return response.data.data.matches || [];

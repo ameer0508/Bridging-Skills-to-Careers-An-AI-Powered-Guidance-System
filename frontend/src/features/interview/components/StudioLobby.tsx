@@ -116,7 +116,7 @@ export const StudioLobby: React.FC<StudioLobbyProps> = ({
           <div className="space-y-2.5 max-w-2xl">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
                 Set up your round
               </span>
               {opportunityContext && (
@@ -318,7 +318,7 @@ export const StudioLobby: React.FC<StudioLobbyProps> = ({
               </p>
             </div>
 
-            {/* Verified Skills */}
+            {/* Skills on Profile */}
             <div className="space-y-2 p-3.5 rounded-2xl bg-aurora-canvas/60 border border-aurora-line">
               <span className="text-[10px] text-emerald-700 font-bold uppercase tracking-wider flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5" />

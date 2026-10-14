@@ -121,7 +121,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
           missingSkills: match.missingSkills || [],
           readinessScore: Math.round(matchScore * 0.94 * 10) / 10,
           expectedImprovement,
-          whyMatchReason: `High vector similarity across ${match.matchingSkills?.length || 8} verified technical competencies with top tier benchmark alignment.`,
+          whyMatchReason: `High vector similarity across ${match.matchingSkills?.length || 8} matching skills with top tier benchmark alignment.`,
           featured: cIdx === 0 && idx === 0,
         };
       });
@@ -251,14 +251,14 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
               <Briefcase className="w-5 h-5" />
             </span>
             <h2 className="text-xl font-bold text-aurora-ink tracking-tight">
-              Live Market Job Intelligence Feed
+              Job Listings Matched to Your Profile
             </h2>
             <span className="px-2.5 py-0.5 rounded-full bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-violet text-[11px] font-bold">
               {filteredJobs.length} Positions Synced
             </span>
           </div>
           <p className="text-xs text-aurora-muted">
-            Real-time market opportunities matched against your verified technical skill vector.
+            Listings from the configured job source, or labelled samples, matched against the skills on your profile.
           </p>
         </div>
 
@@ -272,7 +272,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
                 : 'text-aurora-muted hover:text-aurora-indigo'
             }`}
           >
-            All Live Jobs ({jobs.length})
+            All Listings ({jobs.length})
           </button>
           <button
             onClick={() => setActiveTab('featured')}
@@ -308,7 +308,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
               <Building2 className="w-4 h-4 text-aurora-violet" />
               High Velocity Hiring Companies
             </span>
-            <span className="text-[10px] text-aurora-muted font-mono">Market Velocity Synced</span>
+            <span className="text-[10px] text-aurora-muted tabular-nums">Market Velocity Synced</span>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -339,7 +339,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
               <TrendingUp className="w-4 h-4 text-emerald-700" />
               Highest Demand Skill Vectors
             </span>
-            <span className="text-[10px] text-aurora-muted font-mono">Live Index</span>
+            <span className="text-[10px] text-aurora-muted tabular-nums">Live Index</span>
           </div>
 
           <div className="flex flex-wrap gap-1.5">
@@ -440,7 +440,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
         <div className="flex items-center gap-4 pt-2 border-t border-aurora-line text-xs text-aurora-muted">
           <span className="font-semibold text-aurora-muted flex items-center gap-1.5 shrink-0">
             <Filter className="w-3.5 h-3.5 text-aurora-indigo" />
-            Min Match Threshold: <strong className="text-aurora-violet font-mono">{minMatchScore}%</strong>
+            Min Match Threshold: <strong className="text-aurora-violet tabular-nums">{minMatchScore}%</strong>
           </span>
           <input
             aria-label="Minimum match score"
@@ -502,7 +502,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
                           <h4 className="text-sm font-bold text-aurora-ink leading-snug group-hover:text-aurora-indigo transition-colors">
                             {job.title}
                           </h4>
-                          <div className="flex items-center gap-2 text-[11px] text-aurora-muted font-mono">
+                          <div className="flex items-center gap-2 text-[11px] text-aurora-muted tabular-nums">
                             <span className="text-aurora-ink font-semibold">{job.company}</span>
                             <span>•</span>
                             <span>{job.location}</span>
@@ -531,7 +531,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
                           <Zap className="w-3.5 h-3.5 text-aurora-violet fill-cyan-400" />
                           {job.matchScore}% Match
                         </span>
-                        <span className="px-2 py-0.5 rounded bg-aurora-canvas border border-aurora-line text-aurora-muted text-[10px] font-mono">
+                        <span className="px-2 py-0.5 rounded bg-aurora-canvas border border-aurora-line text-aurora-muted text-[10px] tabular-nums">
                           {job.workplaceType}
                         </span>
                       </div>
@@ -560,7 +560,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
                         {job.matchingSkills.slice(0, 4).map((s, i) => (
                           <span
                             key={i}
-                            className="px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-mono"
+                            className="px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] tabular-nums"
                           >
                             ✓ {s}
                           </span>
@@ -568,7 +568,7 @@ export const JobIntelligenceFeed: React.FC<JobIntelligenceFeedProps> = ({
                         {job.missingSkills.slice(0, 2).map((s, i) => (
                           <span
                             key={i}
-                            className="px-2 py-0.5 rounded bg-rose-50 border border-rose-200 text-rose-700 text-[10px] font-mono"
+                            className="px-2 py-0.5 rounded bg-rose-50 border border-rose-200 text-rose-700 text-[10px] tabular-nums"
                           >
                             ⚡ {s}
                           </span>

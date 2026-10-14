@@ -206,10 +206,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse,
 
   return (
     <>
-      <div className="sticky top-0 z-40 hidden h-screen shrink-0 md:block">{content(isCollapsed, false)}</div>
+      <div className="sticky top-0 z-40 hidden h-screen shrink-0 lg:block">{content(isCollapsed, false)}</div>
       <AnimatePresence>
         {isMobileOpen && (
-          <div className="fixed inset-0 z-50 flex md:hidden" role="dialog" aria-modal="true" aria-label="Navigation">
+          <div className="fixed inset-0 z-50 flex lg:hidden" role="dialog" aria-modal="true" aria-label="Navigation">
             <motion.div
               initial={reduce ? undefined : { opacity: 0 }}
               animate={reduce ? undefined : { opacity: 1 }}

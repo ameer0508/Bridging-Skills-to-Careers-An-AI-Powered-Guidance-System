@@ -72,28 +72,28 @@ export const PortfolioIntelligenceWorkspace: React.FC = () => {
         verified: true,
         confidenceScore: 98.0,
         evidenceProjects: ['Vector Search RAG Engine'],
-        evidenceStatus: 'Live Showcase Verified',
+        evidenceStatus: 'Live showcase (sample)',
       },
       {
         skill: 'React',
         verified: true,
         confidenceScore: 98.0,
         evidenceProjects: ['SkillBridge AI Platform'],
-        evidenceStatus: 'Live Showcase Verified',
+        evidenceStatus: 'Live showcase (sample)',
       },
       {
         skill: 'Docker',
         verified: true,
         confidenceScore: 98.0,
         evidenceProjects: ['Vector Search RAG Engine'],
-        evidenceStatus: 'Live Showcase Verified',
+        evidenceStatus: 'Live showcase (sample)',
       },
       {
         skill: 'FastAPI',
         verified: true,
         confidenceScore: 95.0,
         evidenceProjects: ['Vector Search RAG Engine'],
-        evidenceStatus: 'Live Showcase Verified',
+        evidenceStatus: 'Live showcase (sample)',
       },
     ],
     []
@@ -142,7 +142,7 @@ export const PortfolioIntelligenceWorkspace: React.FC = () => {
               value={portfolioUrl}
               onChange={(e) => setPortfolioUrl(e.target.value)}
               placeholder="Enter portfolio URL (e.g. https://alexmercer.dev)..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 tabular-nums"
             />
             <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
@@ -260,7 +260,7 @@ export const PortfolioIntelligenceWorkspace: React.FC = () => {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-aurora-ink font-mono">{proj.title}</h4>
+                    <h4 className="text-xs font-bold text-aurora-ink tabular-nums">{proj.title}</h4>
                     <span className="px-2 py-0.5 rounded bg-aurora-canvas text-aurora-indigo text-[10px] font-bold border border-aurora-line">
                       {proj.category}
                     </span>
@@ -274,7 +274,7 @@ export const PortfolioIntelligenceWorkspace: React.FC = () => {
                     ))}
                   </div>
 
-                  <div className="flex items-center justify-between pt-1 text-[11px] font-mono">
+                  <div className="flex items-center justify-between pt-1 text-[11px] tabular-nums">
                     <a
                       href={proj.liveDemoUrl}
                       target="_blank"
@@ -300,11 +300,7 @@ export const PortfolioIntelligenceWorkspace: React.FC = () => {
       </div>
 
       {/* BOTTOM STATUS BAR */}
-      <AIStatusBar
-        status="active"
-        confidence={95.0}
-        lastUpdated="Portfolio Intelligence Live"
-      />
+      <AIStatusBar status="idle" provider="Built-in sample content" />
     </div>
   );
 };

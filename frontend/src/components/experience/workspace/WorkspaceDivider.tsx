@@ -21,7 +21,7 @@ export const WorkspaceDivider: React.FC<WorkspaceDividerProps> = ({
 
       {/* Center Label or Glowing Node */}
       {label ? (
-        <div className="relative bg-aurora-canvas px-4 text-xs font-semibold uppercase tracking-widest text-aurora-indigo flex items-center gap-2 border border-aurora-line rounded-full py-1 backdrop-blur-md">
+        <div className="relative bg-aurora-canvas px-4 text-xs font-semibold uppercase tracking-widest text-aurora-indigo flex items-center gap-2 border border-aurora-line rounded-full py-1">
           <Sparkles className="w-3 h-3 text-aurora-violet" />
           <span>{label}</span>
         </div>

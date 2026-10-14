@@ -34,10 +34,10 @@ export const ContextPrioritizationEngine = {
       return {
         primaryFocus: 'strategy',
         focusTitle: 'Accelerate Career Strategy Alignment',
-        focusDescription: `Your verified skill profile exhibits ${plan.aiContext.confidenceScore}% alignment for ${
+        focusDescription: `Your skill profile exhibits ${plan.aiContext.confidenceScore}% alignment for ${
           plan.aiContext.topMatch?.careerId?.title || 'your target role'
         }.`,
-        explanation: 'Prioritized because your verified skills unlock high-confidence role matches and placement opportunities.',
+        explanation: 'Prioritized because your skills unlock high-confidence role matches and placement opportunities.',
         evidence: `${plan.aiContext.confidenceScore}% match confidence score`,
         urgencyScore: 80,
       };
@@ -60,7 +60,7 @@ export const ContextPrioritizationEngine = {
     return {
       primaryFocus: 'overview',
       focusTitle: 'AI Career Operating System Active',
-      focusDescription: 'Your workspace is synchronized with real-time career match telemetry.',
+      focusDescription: 'Your workspace shows your latest career match records.',
       explanation: 'Standard adaptive layout displaying complete platform workspace.',
       evidence: 'All engines operational',
       urgencyScore: 50,

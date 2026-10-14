@@ -36,7 +36,7 @@ export const CareerHealthEngine = {
         dimension: 'Skill Breadth',
         score: Math.min(100, Math.max(25, totalSkills * 12)),
         rating: totalSkills >= 5 ? 'Optimal' : totalSkills >= 2 ? 'Healthy' : 'Attention Needed',
-        evidence: `${totalSkills} Verified Skills`,
+        evidence: `${totalSkills} Skills on Profile`,
       },
       {
         dimension: 'Readiness Stability',
@@ -48,7 +48,7 @@ export const CareerHealthEngine = {
         dimension: 'Learning Consistency',
         score: Math.min(100, Math.max(50, totalSkills * 10 + roadmapProgress)),
         rating: 'Healthy',
-        evidence: 'Session Telemetry Active',
+        evidence: 'Based on your records so far',
       },
       {
         dimension: 'Recommendation Execution',

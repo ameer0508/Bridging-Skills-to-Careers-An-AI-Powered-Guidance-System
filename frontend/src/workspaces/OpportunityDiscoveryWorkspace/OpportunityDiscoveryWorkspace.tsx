@@ -176,7 +176,8 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
 
   // Query 4: Target Career Matches (MongoDB Career Taxonomy)
   const { data: matchesData } = useQuery({
-    queryKey: ['careers', 'matches'],
+    // The bare list is cached under its own key: ['careers', 'matches'] holds { matches }
+    queryKey: ['careers', 'matches', 'list'],
     queryFn: async () => {
       const response = await apiClient.get('/careers/matches');
       return response.data.data.matches || [];
@@ -835,7 +836,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                   </span>
                 </div>
                 <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between">
-                  <span>Verified User Skills:</span>
+                  <span>Skills on your profile:</span>
                   <strong className="text-aurora-violet">{userSkillNames.length} Skills</strong>
                 </div>
                 <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between">
@@ -994,7 +995,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
           role="dialog"
           aria-modal="true"
           aria-labelledby="opportunity-drawer-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-aurora-canvas/60 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-aurora-canvas/60"
         >
           <GlassPanel className="max-w-2xl w-full p-6 space-y-6 border-aurora-violet/25 relative max-h-[90vh] overflow-y-auto text-xs shadow-aurora-lg">
             {/* CLOSE BUTTON */}
@@ -1050,7 +1051,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
 
               {selectedOpportunity.matchedSkills.length > 0 && (
                 <div className="space-y-1">
-                  <span className="text-aurora-muted text-[10px] font-bold block">VERIFIED MATCHED SKILLS:</span>
+                  <span className="text-aurora-muted text-[10px] font-bold block">MATCHED SKILLS:</span>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {selectedOpportunity.matchedSkills.map((sk) => (
                       <span key={sk} className="px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold">

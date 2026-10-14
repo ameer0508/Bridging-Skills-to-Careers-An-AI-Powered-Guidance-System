@@ -29,7 +29,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
     }
   > = {
     IDLE: {
-      label: 'Core Synchronized',
+      label: 'Ready',
       glowColor: 'rgba(6, 182, 212, 0.45)',
       borderColor: 'border-cyan-400/50',
       icon: <Sparkles className="w-8 h-8 text-aurora-violet" />,
@@ -37,7 +37,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
       pulseClass: 'animate-neural-core',
     },
     ANALYZING: {
-      label: 'Context Analysis',
+      label: 'Reading your context',
       glowColor: 'rgba(139, 92, 246, 0.65)',
       borderColor: 'border-purple-400/70',
       icon: <Cpu className="w-8 h-8 text-aurora-violet animate-spin" />,
@@ -45,7 +45,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
       pulseClass: 'scale-105 filter drop-shadow-[0_0_35px_rgba(168,85,247,0.8)]',
     },
     RETRIEVING: {
-      label: 'Retrieving Telemetry',
+      label: 'Loading your data',
       glowColor: 'rgba(59, 130, 246, 0.65)',
       borderColor: 'border-blue-400/70',
       icon: <Activity className="w-8 h-8 text-sky-800 animate-pulse" />,
@@ -53,7 +53,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
       pulseClass: 'scale-105',
     },
     ORCHESTRATING: {
-      label: 'Orchestrating Subsystems',
+      label: 'Preparing the answer',
       glowColor: 'rgba(168, 85, 247, 0.75)',
       borderColor: 'border-purple-400/80',
       icon: <Zap className="w-8 h-8 text-aurora-violet animate-bounce" />,
@@ -61,7 +61,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
       pulseClass: 'scale-110 filter drop-shadow-[0_0_40px_rgba(168,85,247,0.9)]',
     },
     GENERATING: {
-      label: 'Synthesizing Advisory',
+      label: 'Writing the answer',
       glowColor: 'rgba(6, 182, 212, 0.8)',
       borderColor: 'border-cyan-300',
       icon: <Sparkles className="w-8 h-8 text-aurora-violet animate-pulse" />,
@@ -69,7 +69,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
       pulseClass: 'scale-110 filter drop-shadow-[0_0_40px_rgba(34,211,238,0.95)]',
     },
     COMPLETED: {
-      label: 'Orchestration Ready',
+      label: 'Answer ready',
       glowColor: 'rgba(16, 185, 129, 0.55)',
       borderColor: 'border-emerald-400/60',
       icon: <ShieldCheck className="w-8 h-8 text-emerald-700" />,
@@ -77,7 +77,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
       pulseClass: 'scale-100 filter drop-shadow-[0_0_20px_rgba(16,185,129,0.5)]',
     },
     ERROR: {
-      label: 'Degraded State',
+      label: 'Something went wrong',
       glowColor: 'rgba(239, 68, 68, 0.65)',
       borderColor: 'border-red-500/70',
       icon: <AlertCircle className="w-8 h-8 text-rose-700" />,
@@ -163,7 +163,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
           background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.8), rgba(99, 102, 241, 0.8), rgba(168, 85, 247, 0.8))',
         }}
       >
-        <div className="w-full h-full rounded-full bg-aurora-canvas/60 backdrop-blur-xl border border-aurora-line flex flex-col items-center justify-center p-3 text-center shadow-inner relative overflow-hidden">
+        <div className="w-full h-full rounded-full bg-aurora-canvas/60 border border-aurora-line flex flex-col items-center justify-center p-3 text-center shadow-inner relative overflow-hidden">
           {/* Inner Light Reflection */}
           <div className="absolute top-0 inset-x-0 h-1/2 bg-linear-to-b from-white/15 to-transparent pointer-events-none rounded-t-full" />
 
@@ -184,7 +184,7 @@ export const NeuralAICore: React.FC<NeuralAICoreProps> = ({
 
       {/* State Badge & Target Career Ribbon below Core */}
       <div className="relative z-10 mt-5 flex flex-col items-center gap-1.5 text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white/[0.04] border border-aurora-line backdrop-blur-md shadow-lg">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-white/[0.04] border border-aurora-line shadow-lg">
           <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
           <span className="text-aurora-ink tracking-wide">{targetRole}</span>
           <span className="text-aurora-muted text-[10px]">|</span>

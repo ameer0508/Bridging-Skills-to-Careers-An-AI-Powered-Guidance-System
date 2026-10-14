@@ -13,7 +13,7 @@ export const CareerHealthRadar: React.FC<CareerHealthRadarProps> = ({
     overallHealthScore: 82,
     dimensions: [
       { dimension: 'Roadmap Velocity', score: 75, rating: 'Optimal', evidence: '40% Progress' },
-      { dimension: 'Skill Breadth', score: 80, rating: 'Optimal', evidence: '6 Verified Skills' },
+      { dimension: 'Skill Breadth', score: 80, rating: 'Optimal', evidence: '6 Skills on Profile' },
       { dimension: 'Readiness Stability', score: 85, rating: 'Optimal', evidence: '85% Alignment' },
       { dimension: 'Learning Consistency', score: 90, rating: 'Optimal', evidence: 'Active Sessions' },
       { dimension: 'Recommendation Execution', score: 70, rating: 'Healthy', evidence: 'Finished Recs' },

@@ -136,11 +136,29 @@ async function main() {
         RAPIDAPI_KEY: '',
         JSEARCH_API_KEY: '',
         GEMINI_API_KEY: '',
+        // The suites keep the production request limit; only tools that load hundreds of pages
+        // (tools/visualAudit.mjs) raise it, with E2E_API_RATE_LIMIT_MAX
+        ...(process.env.E2E_API_RATE_LIMIT_MAX ? { API_RATE_LIMIT_MAX: process.env.E2E_API_RATE_LIMIT_MAX } : {}),
       },
       logFile: logs.backend,
     });
 
-    const frontendProcess = start('frontend', [viteCli, '--port', String(webPort), '--strictPort', '--host', '127.0.0.1'], {
+    // E2E_FRONTEND=preview serves a production build (built into the temp directory) instead of
+    // the dev server, for measurements that must reflect what users download
+    let frontendArgs = [viteCli, '--port', String(webPort), '--strictPort', '--host', '127.0.0.1'];
+    if (process.env.E2E_FRONTEND === 'preview') {
+      const outDir = path.join(tmpDir, 'dist');
+      const build = spawnSync(process.execPath, [viteCli, 'build', '--outDir', outDir, '--emptyOutDir'], {
+        cwd: frontendDir,
+        env: { ...process.env, VITE_API_URL: apiUrl },
+        encoding: 'utf8',
+      });
+      if (build.status !== 0) throw new Error(`production build failed:
+${build.stdout}
+${build.stderr}`);
+      frontendArgs = [viteCli, 'preview', '--outDir', outDir, '--port', String(webPort), '--strictPort', '--host', '127.0.0.1'];
+    }
+    const frontendProcess = start('frontend', frontendArgs, {
       cwd: frontendDir,
       env: { VITE_API_URL: apiUrl },
       logFile: logs.frontend,

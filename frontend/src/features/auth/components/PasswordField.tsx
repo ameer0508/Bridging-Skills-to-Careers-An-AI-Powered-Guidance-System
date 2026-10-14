@@ -85,7 +85,7 @@ export const PasswordField = forwardRef<HTMLInputElement, PasswordFieldProps>(
 
         {/* Caps Lock Indicator */}
         {isCapsLockOn && (
-          <div className="flex items-center gap-1.5 text-[11px] text-amber-700 pt-0.5 font-mono">
+          <div className="flex items-center gap-1.5 text-[11px] text-amber-700 pt-0.5 tabular-nums">
             <AlertCircle className="w-3.5 h-3.5" />
             <span>Caps Lock is ON</span>
           </div>

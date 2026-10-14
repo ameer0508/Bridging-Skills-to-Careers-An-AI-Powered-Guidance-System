@@ -26,7 +26,7 @@ export const LearningROICard: React.FC<LearningROIProps> = ({
   };
 
   return (
-    <div className="p-3.5 bg-aurora-canvas/60 border border-aurora-line rounded-xl space-y-2 text-xs font-mono">
+    <div className="p-3.5 bg-aurora-canvas/60 border border-aurora-line rounded-xl space-y-2 text-xs tabular-nums">
       <div className="flex justify-between items-center">
         <span className="text-[10px] text-aurora-muted uppercase font-bold">Learning ROI:</span>
         <span className={`px-2 py-0.5 rounded border text-[10px] font-bold ${getRoiColor(roiLevel)}`}>

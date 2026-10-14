@@ -35,7 +35,7 @@ export const MomentumScoreEngine = {
     const roadmapScore = Math.min(100, roadmapProgress * 1.2);
     const roadmapContrib = Math.round(roadmapScore * 0.35);
 
-    // 2. Factor: Verified Skill Graph (Weight: 30%)
+    // 2. Factor: Skill Evidence Graph (Weight: 30%)
     const skillScore = Math.min(100, totalSkills * 10);
     const skillContrib = Math.round(skillScore * 0.3);
 
@@ -57,11 +57,11 @@ export const MomentumScoreEngine = {
         evidence: `${roadmapProgress}% of active curriculum completed`,
       },
       {
-        name: 'Verified Skill Graph',
+        name: 'Skill Evidence Graph',
         weightPercentage: 30,
         score: skillScore,
         contribution: skillContrib,
-        evidence: `${totalSkills} skills indexed & verified`,
+        evidence: `${totalSkills} skills on your profile`,
       },
       {
         name: 'Target Role Readiness',
@@ -83,7 +83,7 @@ export const MomentumScoreEngine = {
       overallScore,
       factors,
       recentDelta: Math.max(1, Math.round(overallScore * 0.08)),
-      confidence: 'High Confidence (Verified Data)',
+      confidence: 'Based on your recorded data',
     };
   },
 };

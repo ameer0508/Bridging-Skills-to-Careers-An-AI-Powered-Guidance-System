@@ -50,7 +50,7 @@ const variantStyles: Record<TextVariant, string> = {
   caption: 'text-[length:var(--font-size-caption)] leading-[var(--line-height-normal)]',
   label: 'text-[length:var(--font-size-label)] font-medium leading-none',
   labelSm: 'text-[length:var(--font-size-label-sm)] font-medium uppercase tracking-[var(--letter-spacing-wide)] leading-none',
-  code: 'text-[length:var(--font-size-code)] font-mono',
+  code: 'text-[length:var(--font-size-code)] tabular-nums',
 };
 
 const colorStyles: Record<TextColor, string> = {

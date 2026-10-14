@@ -15,7 +15,7 @@ export const ReadinessMethodologyModal: React.FC<ReadinessMethodologyModalProps>
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -59,7 +59,7 @@ export const ReadinessMethodologyModal: React.FC<ReadinessMethodologyModalProps>
               </p>
             </div>
             <p className="text-xs text-aurora-muted leading-relaxed">
-              Readiness is never estimated arbitrarily. Each dimension scores the candidate's verified evidence against role requirements published by industry benchmarks.
+              Readiness is never estimated arbitrarily. Each dimension scores the candidate's recorded evidence against role requirements published by industry benchmarks.
             </p>
           </div>
 
@@ -73,7 +73,7 @@ export const ReadinessMethodologyModal: React.FC<ReadinessMethodologyModalProps>
               <div className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1">
                 <span className="font-bold text-aurora-ink block">Technical Skills (50%)</span>
                 <p className="text-aurora-muted text-[11px] leading-relaxed">
-                  Evaluates core competencies matching required skills. Scored from 0 to 100 based on verified keyword presence and evidence density.
+                  Evaluates core competencies matching required skills. Scored from 0 to 100 based on keyword presence and evidence density.
                 </p>
               </div>
 
@@ -94,7 +94,7 @@ export const ReadinessMethodologyModal: React.FC<ReadinessMethodologyModalProps>
               <div className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1">
                 <span className="font-bold text-aurora-ink block">Education & Certifications (10%)</span>
                 <p className="text-aurora-muted text-[11px] leading-relaxed">
-                  Accounts for accredited degrees, certifications (AWS, GCP, CKA), and verified coursework that reinforce theoretical foundation.
+                  Accounts for accredited degrees, certifications (AWS, GCP, CKA), and coursework that reinforce theoretical foundation.
                 </p>
               </div>
             </div>

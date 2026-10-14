@@ -98,7 +98,7 @@ export const PlatformDiagnosticsWorkspace: React.FC = () => {
       {/* WORKSPACE HERO & PLATFORM STATUS BAR */}
       <WorkspaceHero
         title="External Intelligence Gateway Diagnostics"
-        subtitle="Real-time telemetry, provider health grids, circuit breaker metrics, & event throughput monitoring"
+        subtitle="Sample console: telemetry, provider health grids, circuit breaker metrics, & event throughput monitoring"
         badge="Platform Operations"
         badgeColor="indigo"
         metrics={[
@@ -226,7 +226,7 @@ export const PlatformDiagnosticsWorkspace: React.FC = () => {
 
                 <h4 className="text-sm font-bold text-aurora-ink">{prov.name}</h4>
 
-                <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                <div className="grid grid-cols-2 gap-2 text-xs tabular-nums">
                   <div className="p-2 rounded-lg bg-aurora-canvas border border-aurora-line space-y-0.5">
                     <span className="text-[9px] text-aurora-muted block">LATENCY</span>
                     <span className="text-aurora-ink font-bold">{prov.latencyMs} ms</span>
@@ -267,7 +267,7 @@ export const PlatformDiagnosticsWorkspace: React.FC = () => {
               <BarChart3 className="w-4 h-4 text-aurora-violet" />
               Gateway Multi-Domain Latency Timeline (ms)
             </span>
-            <span className="text-[10px] text-aurora-muted">Live Telemetry</span>
+            <span className="text-[10px] text-aurora-muted">Sample data</span>
           </div>
 
           <div className="h-64 w-full pt-2">
@@ -325,11 +325,7 @@ export const PlatformDiagnosticsWorkspace: React.FC = () => {
       </div>
 
       {/* BOTTOM STATUS BAR */}
-      <AIStatusBar
-        status="active"
-        confidence={99.9}
-        lastUpdated="Telemetry Live"
-      />
+      <AIStatusBar status="idle" provider="Built-in sample content" />
     </div>
   );
 };

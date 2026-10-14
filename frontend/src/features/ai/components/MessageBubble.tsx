@@ -89,8 +89,8 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
           isUser
             ? 'text-white [background:var(--aurora-gradient-action)] rounded-br-none font-medium'
             : isFallback
-              ? 'bg-amber-50 border border-amber-200 text-aurora-ink rounded-bl-none backdrop-blur-xl'
-              : 'bg-aurora-canvas/60 border border-aurora-line text-aurora-ink rounded-bl-none backdrop-blur-xl'
+              ? 'bg-amber-50 border border-amber-200 text-aurora-ink rounded-bl-none'
+              : 'bg-aurora-canvas/60 border border-aurora-line text-aurora-ink rounded-bl-none'
         }`}
       >
         {!isUser && isFallback && (
@@ -106,7 +106,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
               <span>AI reply</span>
             </div>
             {message.contextSnapshotId && (
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25 text-[10px] font-mono" title="The assistant was given your stored skills, readiness and roadmap data">
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25 text-[10px] tabular-nums" title="The assistant was given your stored skills, readiness and roadmap data">
                 <ShieldCheck className="w-3 h-3 text-aurora-violet" />
                 Uses your saved data
               </span>
@@ -183,7 +183,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
 
         {/* Action Controls for Assistant */}
         {!isUser && !isFallback && (
-          <div className="flex items-center justify-between pt-2 border-t border-aurora-line text-xs text-aurora-muted font-mono">
+          <div className="flex items-center justify-between pt-2 border-t border-aurora-line text-xs text-aurora-muted tabular-nums">
             <button
               type="button"
               onClick={handleCopy}

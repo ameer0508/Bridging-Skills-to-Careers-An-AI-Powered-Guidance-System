@@ -35,6 +35,8 @@ interface NeuralCommandCenterCanvasProps {
   atsScore: number;
   opportunityCount: number;
   onOpenConversationDrawer?: () => void;
+  /** From the career snapshot: true when a language model answered the last probe; null while unknown */
+  aiLive?: boolean | null;
 }
 
 export const NeuralCommandCenterCanvas: React.FC<NeuralCommandCenterCanvasProps> = ({
@@ -51,6 +53,7 @@ export const NeuralCommandCenterCanvas: React.FC<NeuralCommandCenterCanvasProps>
   atsScore,
   opportunityCount,
   onOpenConversationDrawer,
+  aiLive = null,
 }) => {
   const [selectedAgent, setSelectedAgent] = useState<AgentDescriptor | null>(null);
   const [isCareerDropdownOpen, setIsCareerDropdownOpen] = useState(false);
@@ -94,7 +97,7 @@ export const NeuralCommandCenterCanvas: React.FC<NeuralCommandCenterCanvasProps>
           <div className="relative">
             <button
               onClick={() => setIsCareerDropdownOpen(!isCareerDropdownOpen)}
-              className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold bg-aurora-violet/[0.06] text-aurora-violet border border-cyan-400/30 hover:bg-aurora-violet/[0.06] backdrop-blur-md transition-all shadow-[0_0_20px_rgba(6,182,212,0.15)]"
+              className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold bg-aurora-violet/[0.06] text-aurora-violet border border-cyan-400/30 hover:bg-aurora-violet/[0.06] transition-all shadow-[0_0_20px_rgba(6,182,212,0.15)]"
             >
               <Target className="w-3.5 h-3.5 text-aurora-violet" />
               <span>Target Role: {targetRole}</span>
@@ -109,7 +112,7 @@ export const NeuralCommandCenterCanvas: React.FC<NeuralCommandCenterCanvasProps>
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 6, scale: 0.96 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute top-full left-0 mt-2 w-72 rounded-2xl bg-aurora-canvas/60 border border-aurora-line backdrop-blur-2xl shadow-2xl p-2 z-50 space-y-1"
+                  className="absolute top-full left-0 mt-2 w-72 rounded-2xl bg-aurora-canvas/60 border border-aurora-line shadow-2xl p-2 z-50 space-y-1"
                 >
                   <div className="px-3 py-1.5 text-[10px] text-aurora-muted uppercase tracking-widest border-b border-aurora-line">
                     Switch Active Intelligence Target
@@ -149,15 +152,15 @@ export const NeuralCommandCenterCanvas: React.FC<NeuralCommandCenterCanvasProps>
           </div>
 
           {activeDomain && (
-            <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-aurora-muted bg-white/[0.04] border border-aurora-line backdrop-blur-md">
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium text-aurora-muted bg-white/[0.04] border border-aurora-line">
               <Layers className="w-3 h-3 text-aurora-violet" />
               <span>{activeDomain}</span>
             </span>
           )}
 
           <div className="flex items-center gap-2 text-[11px] text-aurora-muted">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#10b981]" />
-            <span className="font-mono">Your data loaded</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#10b981]" />
+            <span className="tabular-nums">Your data loaded</span>
           </div>
         </div>
 
@@ -228,13 +231,20 @@ export const NeuralCommandCenterCanvas: React.FC<NeuralCommandCenterCanvasProps>
       <div className="relative z-20 flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-aurora-line text-xs text-aurora-muted">
         <div className="flex items-center gap-2">
           <Sparkles className="w-3.5 h-3.5 text-aurora-violet" />
-          <span>Interactive Neural Constellation: Hover agents or context nodes to inspect telemetry pathways.</span>
+          <span>The nodes show figures from your own records; hover or focus one for details.</span>
         </div>
 
-        <div className="flex items-center gap-4 text-[11px] font-mono">
-          <span>Engine: <span className="text-aurora-violet font-semibold">Gemini Multi-Agent Orchestration</span></span>
-          <span className="text-aurora-muted">•</span>
-          <span>Security: <span className="text-emerald-700 font-semibold">Deterministic Grounding</span></span>
+        <div className="flex items-center gap-4 text-[11px]" data-testid="assistant-source" data-ai-live={aiLive === true ? 'true' : aiLive === false ? 'false' : 'unknown'}>
+          <span>
+            Answers:{' '}
+            <span className="text-aurora-indigo font-semibold">
+              {aiLive === true
+                ? 'a language model, with your profile as context'
+                : aiLive === false
+                  ? 'built-in rules (no language model is reachable), labelled on each reply'
+                  : 'checking…'}
+            </span>
+          </span>
         </div>
       </div>
     </div>

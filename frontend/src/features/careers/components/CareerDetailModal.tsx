@@ -28,8 +28,8 @@ export const CareerDetailModal: React.FC<CareerDetailModalProps> = ({ match, onC
   if (!match) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-2xl rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto custom-scrollbar">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fade-in">
+      <div className="relative w-full max-w-2xl rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto custom-scrollbar">
         {/* Header */}
         <div className="flex items-start justify-between border-b border-aurora-line pb-4">
           <div className="space-y-1">
@@ -80,7 +80,7 @@ export const CareerDetailModal: React.FC<CareerDetailModalProps> = ({ match, onC
         {/* Matched Skills */}
         <div className="space-y-2">
           <span className="text-[10px] text-aurora-muted uppercase tracking-widest font-bold block">
-            Verified Matched Skills ({match.matchingSkills?.length || 0})
+            Matched Skills ({match.matchingSkills?.length || 0})
           </span>
           <div className="flex flex-wrap gap-1.5">
             {match.matchingSkills?.map((skill, idx) => (

@@ -192,7 +192,7 @@ export const KnowledgeGraphExplorerWorkspace: React.FC = () => {
               <option value="role-ai-engineer" className="bg-aurora-canvas text-aurora-ink">From: AI Engineer</option>
             </select>
 
-            <span className="text-aurora-muted text-xs font-mono">➔</span>
+            <span className="text-aurora-muted text-xs tabular-nums">➔</span>
 
             <select
               aria-label="Path target"
@@ -216,7 +216,7 @@ export const KnowledgeGraphExplorerWorkspace: React.FC = () => {
 
         {/* HIGHLIGHTED PATH BADGE STRIP */}
         {highlightedPath.length > 0 && (
-          <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center gap-2 overflow-x-auto text-xs font-mono">
+          <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center gap-2 overflow-x-auto text-xs tabular-nums">
             <span className="text-aurora-muted font-bold shrink-0">Shortest Path:</span>
             {highlightedPath.map((nodeId, idx) => {
               const n = graphNodes.find((gn) => gn.id === nodeId);
@@ -358,11 +358,7 @@ export const KnowledgeGraphExplorerWorkspace: React.FC = () => {
       </div>
 
       {/* BOTTOM STATUS BAR */}
-      <AIStatusBar
-        status="active"
-        confidence={98.4}
-        lastUpdated="Graph Topology Live"
-      />
+      <AIStatusBar status="idle" provider="Built-in sample content" />
     </div>
   );
 };

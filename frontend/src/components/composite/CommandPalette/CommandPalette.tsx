@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useId, useRef } from 'react';
+import { useDialogBehaviour } from '../../../design/aurora/useDialogBehaviour';
 import { Portal } from '../../primitives/Portal';
 import { Icon } from '../../primitives/Icon';
 
@@ -27,6 +28,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
   const [query, setQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const listId = useId();
+  // Focus goes to the search field, stays inside, and returns to what opened the palette; Escape closes
+  useDialogBehaviour(isOpen, onClose, panelRef, inputRef);
 
   const filteredCommands = commands.filter(c =>
     c.label.toLowerCase().includes(query.toLowerCase()) ||
@@ -45,9 +50,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isOpen) return;
 
-      if (e.key === 'Escape') {
-        onClose();
-      } else if (e.key === 'ArrowDown') {
+      if (e.key === 'ArrowDown') {
         e.preventDefault();
         setSelectedIndex(prev => (prev + 1) % (filteredCommands.length || 1));
       } else if (e.key === 'ArrowUp') {
@@ -75,9 +78,11 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
         onClick={onClose}
       >
         <div
-          role="combobox"
-          aria-expanded="true"
-          aria-haspopup="listbox"
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Search pages"
+          tabIndex={-1}
           onClick={e => e.stopPropagation()}
           className="w-full max-w-xl bg-white border border-aurora-line rounded-[var(--radius-xl)] shadow-[var(--shadow-xl)] overflow-hidden flex flex-col animate-scale-in"
         >
@@ -90,6 +95,12 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
             <input
               ref={inputRef}
               type="text"
+              role="combobox"
+              aria-label="Search pages"
+              aria-expanded="true"
+              aria-controls={listId}
+              aria-autocomplete="list"
+              aria-activedescendant={filteredCommands[selectedIndex] ? `${listId}-${filteredCommands[selectedIndex].id}` : undefined}
               value={query}
               onChange={e => {
                 setQuery(e.target.value);
@@ -104,7 +115,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
           </div>
 
           {/* Command List */}
-          <div role="listbox" className="max-h-72 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+          <div id={listId} role="listbox" aria-label="Pages" className="max-h-72 overflow-y-auto p-2 space-y-1 custom-scrollbar">
             {filteredCommands.length === 0 ? (
               <div className="p-6 text-center text-xs text-aurora-muted">
                 No matching commands found.
@@ -116,6 +127,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                 return (
                   <div
                     key={cmd.id}
+                    id={`${listId}-${cmd.id}`}
                     role="option"
                     aria-selected={isSelected}
                     onClick={() => {
@@ -141,7 +153,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       )}
                     </div>
                     {cmd.shortcut && (
-                      <span className={`text-[10px] ${isSelected ? 'text-aurora-ink' : 'text-aurora-muted'}`}>
+                      <span className={`text-[10px] ${isSelected ? 'text-white' : 'text-aurora-muted'}`}>
                         {cmd.shortcut}
                       </span>
                     )}

@@ -23,12 +23,12 @@ export const CareerAnalysisDimensionsPreview: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* DIMENSION 1: SKILL PROFILE TAXONOMY */}
-        <div className="p-6 rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl space-y-4 shadow-xl flex flex-col justify-between">
+        <div className="p-6 rounded-3xl border border-aurora-line bg-aurora-canvas/60 space-y-4 shadow-xl flex flex-col justify-between">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-aurora-violet uppercase tracking-wider flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-aurora-violet" />
-                Dimension 01 • Verified Skill Profile
+                Dimension 01 • Skill Evidence Profile
               </span>
               <span className="text-[10px] text-aurora-muted uppercase">
                 Vector Mapping
@@ -66,7 +66,7 @@ export const CareerAnalysisDimensionsPreview: React.FC = () => {
         </div>
 
         {/* DIMENSION 2: DETERMINISTIC ROLE FIT SCORING */}
-        <div className="p-6 rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl space-y-4 shadow-xl flex flex-col justify-between">
+        <div className="p-6 rounded-3xl border border-aurora-line bg-aurora-canvas/60 space-y-4 shadow-xl flex flex-col justify-between">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-aurora-indigo uppercase tracking-wider flex items-center gap-2">
@@ -108,7 +108,7 @@ export const CareerAnalysisDimensionsPreview: React.FC = () => {
         </div>
 
         {/* DIMENSION 3: CRITICAL SKILL GAP AUDIT */}
-        <div className="p-6 rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl space-y-4 shadow-xl flex flex-col justify-between">
+        <div className="p-6 rounded-3xl border border-aurora-line bg-aurora-canvas/60 space-y-4 shadow-xl flex flex-col justify-between">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-rose-700 uppercase tracking-wider flex items-center gap-2">
@@ -147,7 +147,7 @@ export const CareerAnalysisDimensionsPreview: React.FC = () => {
         </div>
 
         {/* DIMENSION 4: CAREER TRAJECTORY & COMPENSATION */}
-        <div className="p-6 rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl space-y-4 shadow-xl flex flex-col justify-between">
+        <div className="p-6 rounded-3xl border border-aurora-line bg-aurora-canvas/60 space-y-4 shadow-xl flex flex-col justify-between">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-amber-700 uppercase tracking-wider flex items-center gap-2">

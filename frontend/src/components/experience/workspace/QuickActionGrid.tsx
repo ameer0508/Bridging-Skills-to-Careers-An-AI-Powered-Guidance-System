@@ -49,7 +49,7 @@ export const QuickActionGrid: React.FC<QuickActionGridProps> = ({
             whileHover={{ y: -4, transition: { duration: 0.2 } }}
             whileTap={{ scale: 0.98 }}
             onClick={action.onClick}
-            className="p-5 rounded-2xl bg-aurora-canvas/60 border border-aurora-line hover:border-aurora-line backdrop-blur-xl text-left transition-all duration-300 group flex items-start justify-between cursor-pointer"
+            className="p-5 rounded-2xl bg-aurora-canvas/60 border border-aurora-line hover:border-aurora-line text-left transition-all duration-300 group flex items-start justify-between cursor-pointer"
           >
             <div className="space-y-3">
               <div

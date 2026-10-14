@@ -33,7 +33,7 @@ export const ProgressStoryActivationHub: React.FC<ProgressStoryActivationHubProp
     {
       step: '01',
       title: 'Evidence Ingestion',
-      desc: 'ATS resume parsing extracts verified skills and experience history.',
+      desc: 'ATS resume parsing extracts skills and experience history.',
       icon: FileText,
       active: hasResume,
       statusLabel: hasResume ? 'Evidence Active' : 'Resume Needed',
@@ -44,7 +44,7 @@ export const ProgressStoryActivationHub: React.FC<ProgressStoryActivationHubProp
     {
       step: '02',
       title: 'Capability Mapping',
-      desc: 'Verified skills form your multidimensional technical competency matrix.',
+      desc: 'Your skills form your multidimensional technical competency matrix.',
       icon: Cpu,
       active: totalSkills > 0,
       statusLabel: totalSkills > 0 ? `${totalSkills} Skills Indexed` : 'Add Skills',
@@ -77,7 +77,7 @@ export const ProgressStoryActivationHub: React.FC<ProgressStoryActivationHubProp
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-aurora-violet/25 bg-white [background-image:linear-gradient(135deg,rgb(167_139_250/0.10),transparent_60%)] p-6 md:p-8 lg:p-10 shadow-2xl backdrop-blur-xl space-y-8">
+    <div className="relative overflow-hidden rounded-3xl border border-aurora-violet/25 bg-white [background-image:linear-gradient(135deg,rgb(167_139_250/0.10),transparent_60%)] p-6 md:p-8 lg:p-10 shadow-2xl space-y-8">
       {/* Background ambient light */}
       <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 h-96 w-96 rounded-full bg-aurora-violet/[0.06] blur-[140px]" />
 

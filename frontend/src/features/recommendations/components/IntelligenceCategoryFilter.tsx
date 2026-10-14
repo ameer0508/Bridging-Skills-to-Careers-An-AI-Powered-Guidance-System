@@ -90,7 +90,7 @@ export const IntelligenceCategoryFilter: React.FC<IntelligenceCategoryFilterProp
             {searchQuery && (
               <button
                 onClick={() => onSearchChange('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-aurora-muted hover:text-aurora-indigo text-xs font-mono"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-aurora-muted hover:text-aurora-indigo text-xs tabular-nums"
               >
                 ✕
               </button>

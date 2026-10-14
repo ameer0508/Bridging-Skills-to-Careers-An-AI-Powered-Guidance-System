@@ -68,7 +68,7 @@ export const MultiLayerTrajectoryObservatory: React.FC<MultiLayerTrajectoryObser
         : 'Snapshot';
       const fullDate = isDateValid
         ? d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
-        : 'Live Telemetry';
+        : 'From your records';
 
       return {
         date: label,
@@ -95,7 +95,7 @@ export const MultiLayerTrajectoryObservatory: React.FC<MultiLayerTrajectoryObser
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 md:p-8 shadow-2xl backdrop-blur-xl space-y-6">
+    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 md:p-8 shadow-2xl space-y-6">
       {/* Header controls & Layer filters */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-aurora-line pb-5">
         <div className="space-y-1">
@@ -111,7 +111,7 @@ export const MultiLayerTrajectoryObservatory: React.FC<MultiLayerTrajectoryObser
             </span>
           </div>
           <p className="text-xs text-aurora-muted">
-            Synchronized timeline tracking readiness evolution, verified skills accumulation, and curriculum completions.
+            Synchronized timeline tracking readiness evolution, skills accumulation, and curriculum completions.
           </p>
         </div>
 
@@ -146,7 +146,7 @@ export const MultiLayerTrajectoryObservatory: React.FC<MultiLayerTrajectoryObser
           <div className="space-y-1">
             <p className="font-semibold text-aurora-ink">Initial Telemetry Calibration Active</p>
             <p className="text-aurora-indigo/80">
-              Your profile has {snapshots.length === 1 ? '1 recorded snapshot' : 'no prior snapshots'}. As you complete roadmap tasks, add verified skills, or upload new resume evidence, daily snapshots will systematically plot your longitudinal trajectory across this multi-layered canvas.
+              Your profile has {snapshots.length === 1 ? '1 recorded snapshot' : 'no prior snapshots'}. As you complete roadmap tasks, add skills, or upload new resume evidence, daily snapshots will systematically plot your longitudinal trajectory across this multi-layered canvas.
             </p>
           </div>
         </div>
@@ -215,7 +215,7 @@ export const MultiLayerTrajectoryObservatory: React.FC<MultiLayerTrajectoryObser
                 if (!active || !payload || !payload.length) return null;
                 const data = payload[0].payload;
                 return (
-                  <div className="rounded-xl border border-aurora-line bg-aurora-canvas/60 p-4 shadow-2xl backdrop-blur-md space-y-2 min-w-[200px]">
+                  <div className="rounded-xl border border-aurora-line bg-aurora-canvas/60 p-4 shadow-2xl space-y-2 min-w-[200px]">
                     <div className="flex items-center justify-between border-b border-aurora-line pb-2">
                       <span className="text-xs text-aurora-muted">{data.formattedDate}</span>
                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-indigo">
@@ -238,7 +238,7 @@ export const MultiLayerTrajectoryObservatory: React.FC<MultiLayerTrajectoryObser
                         <div className="flex items-center justify-between">
                           <span className="text-aurora-muted flex items-center gap-1.5">
                             <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                            Verified Skills:
+                            Skills on Profile:
                           </span>
                           <span className="font-bold text-aurora-violet">{data.skills}</span>
                         </div>
@@ -280,7 +280,7 @@ export const MultiLayerTrajectoryObservatory: React.FC<MultiLayerTrajectoryObser
                 yAxisId="counts"
                 type="monotone"
                 dataKey="skills"
-                name="Verified Skills"
+                name="Skills on Profile"
                 stroke="#06b6d4"
                 strokeWidth={2.5}
                 dot={{ r: 3, fill: '#06b6d4' }}
@@ -320,7 +320,7 @@ export const MultiLayerTrajectoryObservatory: React.FC<MultiLayerTrajectoryObser
           <div className="w-3 h-3 rounded-full bg-cyan-400 shrink-0" />
           <div className="text-xs">
             <span className="font-semibold text-aurora-ink">Capability Index</span>
-            <p className="text-[10px] text-aurora-muted">Verified skills accumulated</p>
+            <p className="text-[10px] text-aurora-muted">Skills on profile</p>
           </div>
         </div>
 

@@ -115,15 +115,16 @@ export const CapabilityMatrixCanvas: React.FC<CapabilityMatrixCanvasProps> = ({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Lens Mode Controller Strip */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-aurora-canvas/60 border border-aurora-line backdrop-blur-xl">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-aurora-canvas/60 border border-aurora-line">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <span className="text-xs uppercase text-aurora-muted font-bold tracking-wider">
-            Analysis Lens:
+            View:
           </span>
-          <div className="flex items-center gap-1.5 bg-aurora-canvas p-1 rounded-xl border border-aurora-line">
+          <div role="group" aria-label="View" className="flex flex-wrap items-center gap-1.5 bg-aurora-canvas p-1 rounded-xl border border-aurora-line">
             <button
               type="button"
               onClick={() => setActiveLens('clusters')}
+              aria-pressed={activeLens === 'clusters'}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeLens === 'clusters'
                   ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-sm shadow-indigo-600/30'
@@ -137,6 +138,7 @@ export const CapabilityMatrixCanvas: React.FC<CapabilityMatrixCanvasProps> = ({
             <button
               type="button"
               onClick={() => setActiveLens('graph')}
+              aria-pressed={activeLens === 'graph'}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeLens === 'graph'
                   ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-sm shadow-indigo-600/30'
@@ -150,6 +152,7 @@ export const CapabilityMatrixCanvas: React.FC<CapabilityMatrixCanvasProps> = ({
             <button
               type="button"
               onClick={() => setActiveLens('gaps')}
+              aria-pressed={activeLens === 'gaps'}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeLens === 'gaps'
                   ? 'text-white [background:var(--aurora-gradient-action)] shadow-aurora-sm shadow-indigo-600/30'
@@ -163,7 +166,7 @@ export const CapabilityMatrixCanvas: React.FC<CapabilityMatrixCanvasProps> = ({
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-3 text-[11px] text-aurora-muted">
+        <div className="flex flex-wrap items-center gap-3 text-[11px] text-aurora-muted">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-400" />
             <span>Expert (≥90%)</span>
@@ -196,7 +199,7 @@ export const CapabilityMatrixCanvas: React.FC<CapabilityMatrixCanvasProps> = ({
             {Object.entries(categories).map(([categoryName, skills]) => (
               <div
                 key={categoryName}
-                className="p-6 rounded-3xl bg-aurora-canvas/60 border border-aurora-line backdrop-blur-xl space-y-4 shadow-xl"
+                className="p-6 rounded-3xl bg-aurora-canvas/60 border border-aurora-line space-y-4 shadow-xl"
               >
                 {/* Domain Header */}
                 <div className="flex items-center justify-between border-b border-aurora-line pb-3">
@@ -237,7 +240,7 @@ export const CapabilityMatrixCanvas: React.FC<CapabilityMatrixCanvasProps> = ({
 
                         {/* Evidence Score & Progress Ring */}
                         <div className="space-y-1.5">
-                          <div className="flex items-center justify-between text-[10px] font-mono">
+                          <div className="flex items-center justify-between text-[10px] tabular-nums">
                             <span className="text-aurora-muted">Evidence Weight</span>
                             <span className={`font-bold ${tier.color}`}>
                               {skill.evidenceScore}%
@@ -252,7 +255,7 @@ export const CapabilityMatrixCanvas: React.FC<CapabilityMatrixCanvasProps> = ({
                         </div>
 
                         {/* Source Badges */}
-                        <div className="flex items-center justify-between pt-1 text-[9px] font-mono">
+                        <div className="flex items-center justify-between pt-1 text-[9px] tabular-nums">
                           <div className="flex items-center gap-1 flex-wrap">
                             {sourceBadges.map((sb) => (
                               <span
@@ -286,16 +289,16 @@ export const CapabilityMatrixCanvas: React.FC<CapabilityMatrixCanvasProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.25 }}
-            className="p-6 rounded-3xl bg-aurora-canvas/60 border border-aurora-line backdrop-blur-xl shadow-xl space-y-6"
+            className="p-6 rounded-3xl bg-aurora-canvas/60 border border-aurora-line shadow-xl space-y-6"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-aurora-line pb-4">
               <div className="space-y-1">
                 <h3 className="font-display text-base font-bold text-aurora-ink flex items-center gap-2">
                   <GitBranch className="w-4 h-4 text-aurora-violet" />
-                  Verified Skill Relationship Traversal
+                  Skill Relationship Traversal
                 </h3>
                 <p className="text-xs text-aurora-muted">
-                  Select any verified node to inspect its prerequisite and downstream enabled connections.
+                  Select any node to inspect its prerequisite and downstream enabled connections.
                 </p>
               </div>
               <span className="text-xs text-aurora-violet font-bold bg-aurora-violet/[0.06] border border-aurora-violet/25 px-3 py-1 rounded-full">
@@ -410,7 +413,7 @@ export const CapabilityMatrixCanvas: React.FC<CapabilityMatrixCanvasProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: prefersReducedMotion ? 0 : 0.25 }}
-            className="p-6 rounded-3xl bg-aurora-canvas/60 border border-aurora-line backdrop-blur-xl shadow-xl space-y-6"
+            className="p-6 rounded-3xl bg-aurora-canvas/60 border border-aurora-line shadow-xl space-y-6"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-aurora-line pb-4">
               <div className="space-y-1">
@@ -433,14 +436,14 @@ export const CapabilityMatrixCanvas: React.FC<CapabilityMatrixCanvasProps> = ({
               </div>
             </div>
 
-            {/* Dual Column: Verified Matches vs Missing Gaps */}
+            {/* Dual Column: Matches vs Missing Gaps */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Left Column: Verified Matched Skills */}
+              {/* Left Column: Matched Skills */}
               <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-3">
                 <div className="flex items-center gap-2 pb-2 border-b border-emerald-200">
                   <CheckCircle2 className="w-4 h-4 text-emerald-700" />
                   <h4 className="text-sm font-bold text-aurora-ink">
-                    Verified Competencies for {targetRoleTitle} ({matchedSkills.length})
+                    Your Skills for {targetRoleTitle} ({matchedSkills.length})
                   </h4>
                 </div>
 
@@ -471,7 +474,7 @@ export const CapabilityMatrixCanvas: React.FC<CapabilityMatrixCanvasProps> = ({
                   </div>
                 ) : (
                   <p className="text-xs text-aurora-muted italic">
-                    No verified skills currently matched with this target role.
+                    No skills currently matched with this target role.
                   </p>
                 )}
               </div>

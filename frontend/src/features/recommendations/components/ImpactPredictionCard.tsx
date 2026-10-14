@@ -29,7 +29,7 @@ export const ImpactPredictionCard: React.FC<ImpactPredictionProps> = ({
         </span>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs tabular-nums">
         <div className="p-3 bg-aurora-canvas/60 border border-aurora-line rounded-xl space-y-1">
           <span className="text-[10px] text-aurora-muted block uppercase">Readiness Gain</span>
           <span className="font-bold text-emerald-700 text-sm">+{readinessGain}%</span>

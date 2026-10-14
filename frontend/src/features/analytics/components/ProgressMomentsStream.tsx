@@ -40,7 +40,7 @@ export const ProgressMomentsStream: React.FC<ProgressMomentsStreamProps> = ({
           icon: Cpu,
           badgeColor: 'bg-aurora-violet/[0.06] text-aurora-violet border-aurora-violet/25',
           dotColor: 'bg-cyan-400',
-          description: 'Added a verified technical capability to your profile.',
+          description: 'Added a technical skill to your profile.',
         };
       case 'roadmap_progress':
         return {
@@ -96,7 +96,7 @@ export const ProgressMomentsStream: React.FC<ProgressMomentsStreamProps> = ({
   });
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 md:p-8 shadow-2xl backdrop-blur-xl space-y-6">
+    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 md:p-8 shadow-2xl space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-aurora-line pb-5">
         <div className="space-y-1">
@@ -183,7 +183,7 @@ export const ProgressMomentsStream: React.FC<ProgressMomentsStreamProps> = ({
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${meta.badgeColor}`}>
                         {meta.label}
                       </span>
-                      <span className="text-xs text-aurora-muted font-mono">
+                      <span className="text-xs text-aurora-muted tabular-nums">
                         {displayDate}
                       </span>
                     </div>
@@ -197,7 +197,7 @@ export const ProgressMomentsStream: React.FC<ProgressMomentsStreamProps> = ({
 
                   {/* Specific Event Metadata Details */}
                   {details.skillName && (
-                    <div className="pt-2 border-t border-aurora-line flex items-center gap-2 text-xs font-mono">
+                    <div className="pt-2 border-t border-aurora-line flex items-center gap-2 text-xs tabular-nums">
                       <span className="text-aurora-muted">Skill:</span>
                       <span className="text-aurora-violet font-bold">{details.skillName}</span>
                       {details.category && (
@@ -207,14 +207,14 @@ export const ProgressMomentsStream: React.FC<ProgressMomentsStreamProps> = ({
                   )}
 
                   {details.fileName && (
-                    <div className="pt-2 border-t border-aurora-line flex items-center gap-2 text-xs font-mono">
+                    <div className="pt-2 border-t border-aurora-line flex items-center gap-2 text-xs tabular-nums">
                       <span className="text-aurora-muted">File:</span>
                       <span className="text-aurora-indigo font-bold">{details.fileName}</span>
                     </div>
                   )}
 
                   {details.title && (
-                    <div className="pt-2 border-t border-aurora-line flex items-center gap-2 text-xs font-mono">
+                    <div className="pt-2 border-t border-aurora-line flex items-center gap-2 text-xs tabular-nums">
                       <span className="text-aurora-muted">Task:</span>
                       <span className="text-aurora-violet font-bold">{details.title}</span>
                     </div>

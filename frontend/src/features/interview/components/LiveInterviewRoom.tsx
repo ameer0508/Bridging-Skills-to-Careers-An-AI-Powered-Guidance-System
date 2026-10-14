@@ -107,7 +107,7 @@ export const LiveInterviewRoom: React.FC<LiveInterviewRoomProps> = ({
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-24 bg-gradient-to-b from-indigo-500/15 via-indigo-600/5 to-transparent blur-2xl pointer-events-none" />
 
         {/* Minimal Session Top Bar */}
-        <div className="relative z-10 px-6 py-4 border-b border-aurora-line flex items-center justify-between flex-wrap gap-4 bg-aurora-canvas/60 backdrop-blur-md">
+        <div className="relative z-10 px-6 py-4 border-b border-aurora-line flex items-center justify-between flex-wrap gap-4 bg-aurora-canvas/60">
           <div className="flex items-center gap-3">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
             <div className="flex items-center gap-2">
@@ -259,7 +259,7 @@ export const LiveInterviewRoom: React.FC<LiveInterviewRoomProps> = ({
                       Metrics {hasQuantifiedMetrics ? '✓' : '(e.g. 40% latency)'}
                     </span>
 
-                    <span className="text-aurora-muted font-mono">
+                    <span className="text-aurora-muted tabular-nums">
                       {wordCount} words
                     </span>
                   </div>

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
 import { IAgentMetadata } from '../../../types/orchestrator';
+import { DialogFrame } from '../../../design/aurora/DialogFrame';
 
 export interface AgentSubsystemInspectorProps {
   agent: IAgentMetadata | null;
@@ -25,13 +26,8 @@ export const AgentSubsystemInspector: React.FC<AgentSubsystemInspectorProps> = (
   if (!agent) return null;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={`${agent.name} Subsystem Inspector`}
-      className="fixed inset-0 z-50 flex items-center justify-end bg-aurora-canvas/60 backdrop-blur-sm p-4 sm:p-6 font-mono"
-    >
-      <GlassPanel className="max-w-xl w-full h-full max-h-[92vh] overflow-y-auto p-6 sm:p-8 space-y-6 border-aurora-violet/25 relative shadow-2xl bg-aurora-canvas/60 text-xs">
+    <DialogFrame onClose={onClose} label={`${agent.name} details`} side="right">
+      <GlassPanel className="max-w-xl w-full h-full overflow-y-auto p-6 sm:p-8 space-y-6 border-aurora-violet/25 relative shadow-aurora-lg bg-white text-xs">
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -49,7 +45,7 @@ export const AgentSubsystemInspector: React.FC<AgentSubsystemInspectorProps> = (
               {agent.category} SUBSYSTEM
             </span>
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               STATUS: {agent.status}
             </span>
             <span className="text-aurora-muted text-[10px]">v{agent.version}</span>
@@ -178,6 +174,6 @@ export const AgentSubsystemInspector: React.FC<AgentSubsystemInspectorProps> = (
           </button>
         </div>
       </GlassPanel>
-    </div>
+    </DialogFrame>
   );
 };

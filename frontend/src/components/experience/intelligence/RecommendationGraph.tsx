@@ -27,7 +27,7 @@ export const RecommendationGraph: React.FC<RecommendationGraphProps> = ({
   const [activeHoverNode, setActiveHoverNode] = useState<string | null>(null);
 
   const defaultNodes: GraphNode[] = nodes || [
-    { id: '1', title: 'Verified Skills Graph', category: 'skill', isCompleted: true },
+    { id: '1', title: 'Skills Graph', category: 'skill', isCompleted: true },
     { id: '2', title: 'Roadmap Milestone 1', category: 'milestone', isCompleted: false },
     { id: '3', title: targetRoleTitle, category: 'role', isTarget: true },
   ];
@@ -76,7 +76,7 @@ export const RecommendationGraph: React.FC<RecommendationGraphProps> = ({
                     {node.isCompleted ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
                     ) : (
-                      <span className="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-pulse" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-indigo-400" />
                     )}
                     <span className="text-[10px] font-bold uppercase tracking-wider text-aurora-muted">
                       Step 0{index + 1} • {node.category}

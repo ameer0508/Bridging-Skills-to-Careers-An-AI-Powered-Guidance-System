@@ -34,7 +34,7 @@ export const LoginForm: React.FC = () => {
   const location = useLocation();
   const from = (location.state as { from?: { pathname?: string } })?.from?.pathname || '/home';
   const setSession = useAuthStore((state) => state.setSession);
-  const [rememberMe, setRememberMe] = useState(true);
+  const [showResetNote, setShowResetNote] = useState(false);
 
   const {
     register,
@@ -61,23 +61,23 @@ export const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-aurora-line bg-aurora-canvas/60 backdrop-blur-2xl p-8 sm:p-10 shadow-2xl shadow-black/80 w-full max-w-md">
+    <div className="relative overflow-hidden rounded-[28px] border border-aurora-line bg-aurora-canvas/60 p-8 sm:p-10 shadow-2xl shadow-black/80 w-full max-w-md">
       {/* Top Ambient Glow inside card */}
       <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full bg-linear-to-br from-indigo-500/20 to-cyan-500/10 blur-3xl" />
 
       {/* Card Header */}
       <div className="text-center space-y-2 mb-8 relative z-10">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-aurora-violet/25 bg-aurora-violet/[0.06] backdrop-blur-md mb-1">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-aurora-violet/25 bg-aurora-violet/[0.06] mb-1">
           <Sparkles className="w-3.5 h-3.5 text-aurora-violet" />
           <span className="text-[11px] font-bold text-aurora-indigo tracking-wider uppercase">
-            Authentication Gate
+            Sign in
           </span>
         </div>
         <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-aurora-ink tracking-tight">
           Welcome Back.
         </h1>
         <p className="text-xs sm:text-sm text-aurora-muted leading-relaxed">
-          Continue building your career with intelligence.
+          Continue where you left off.
         </p>
       </div>
 
@@ -101,30 +101,21 @@ export const LoginForm: React.FC = () => {
             {...register('password')}
           />
           <div className="flex justify-end pt-1">
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                alert('Password reset link sent to your registered email address.');
-              }}
-              className="text-xs text-aurora-indigo hover:text-aurora-indigo font-medium transition-colors"
+            <button
+              type="button"
+              onClick={() => setShowResetNote((v) => !v)}
+              aria-expanded={showResetNote}
+              aria-controls="reset-note"
+              className="text-xs text-aurora-indigo hover:underline font-medium transition-colors"
             >
               Forgot password?
-            </a>
+            </button>
           </div>
-        </div>
-
-        {/* Remember Me Checkbox */}
-        <div className="flex items-center justify-between pt-1">
-          <label className="flex items-center gap-2 cursor-pointer text-xs text-aurora-muted">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded bg-aurora-canvas border-aurora-line text-indigo-600 focus:ring-indigo-500/40"
-            />
-            <span>Remember this device for 30 days</span>
-          </label>
+          {showResetNote && (
+            <p id="reset-note" role="status" className="rounded-xl border border-aurora-line bg-aurora-canvas px-3 py-2 text-xs text-aurora-muted">
+              Password reset by email is not available in this version. If you cannot sign in, ask whoever runs this SkillBridge installation to reset your password.
+            </p>
+          )}
         </div>
 
         {/* Error Alert Shake */}
@@ -176,9 +167,9 @@ export const LoginForm: React.FC = () => {
           </Link>
         </p>
 
-        <div className="flex items-center gap-1.5 text-[10px] text-aurora-muted font-mono">
+        <div className="flex items-center gap-1.5 text-[10px] text-aurora-muted tabular-nums">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-          <span>256-Bit Encrypted Workspace Auth</span>
+          <span>Passwords are stored hashed, never in plain text</span>
         </div>
       </div>
     </div>

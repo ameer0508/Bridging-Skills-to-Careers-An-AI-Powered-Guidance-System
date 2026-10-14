@@ -63,7 +63,7 @@ export const ReadinessActivationConsole: React.FC<ReadinessActivationConsoleProp
   const isWorking = uploadStatus === 'uploading' || uploadStatus === 'processing';
 
   return (
-    <div className="relative rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl overflow-hidden">
+    <div className="relative rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 sm:p-8 shadow-2xl overflow-hidden">
       {/* Dynamic Ambient Backlight */}
       <div
         className={`pointer-events-none absolute -inset-1 rounded-3xl opacity-25 blur-2xl transition-all duration-700 ${
@@ -86,7 +86,7 @@ export const ReadinessActivationConsole: React.FC<ReadinessActivationConsoleProp
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
         {/* Left Side: Activation Narrative */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-aurora-violet/25 bg-aurora-violet/[0.06] backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-aurora-violet/25 bg-aurora-violet/[0.06]">
             <Sparkles className="w-3.5 h-3.5 text-aurora-violet" />
             <span className="text-[10px] font-bold text-aurora-violet uppercase tracking-widest">
               Diagnostic Activation Terminal
@@ -98,7 +98,7 @@ export const ReadinessActivationConsole: React.FC<ReadinessActivationConsoleProp
               Ingest Experience Evidence to Run <span className="text-transparent bg-clip-text bg-linear-to-r from-cyan-400 via-indigo-300 to-emerald-400">Readiness Audit</span>
             </h2>
             <p className="text-xs sm:text-sm text-aurora-muted leading-relaxed max-w-xl">
-              SkillBridge analyzes your work history, verified projects, and credentials to calculate deterministic scores across 4 capability pillars. Upload your resume to activate personal assessment.
+              SkillBridge analyzes your work history, projects, and credentials to calculate deterministic scores across 4 capability pillars. Upload your resume to activate personal assessment.
             </p>
           </div>
 

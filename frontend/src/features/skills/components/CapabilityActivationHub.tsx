@@ -51,9 +51,9 @@ export const CapabilityActivationHub: React.FC = () => {
   return (
     <div className="space-y-8 max-w-5xl mx-auto py-8">
       {/* Hero Activation Card */}
-      <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-gradient-to-br from-white via-aurora-surface to-aurora-sidebar p-8 md:p-12 backdrop-blur-xl shadow-2xl text-center space-y-6">
+      <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-gradient-to-br from-white via-aurora-surface to-aurora-sidebar p-8 md:p-12 shadow-2xl text-center space-y-6">
         <div className="w-16 h-16 rounded-2xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo flex items-center justify-center mx-auto shadow-lg shadow-aurora-violet/10">
-          <Brain className="w-8 h-8 animate-pulse" />
+          <Brain className="w-8 h-8" />
         </div>
 
         <div className="space-y-2 max-w-xl mx-auto">
@@ -64,7 +64,7 @@ export const CapabilityActivationHub: React.FC = () => {
             Your Capability Map is Waiting for Evidence
           </h2>
           <p className="text-sm text-aurora-muted leading-relaxed">
-            SkillBridge maps what you actually know by indexing verified evidence from your past experience,
+            SkillBridge maps what you actually know by indexing the evidence from your past experience,
             projects, and credentials into an interactive capability ontology.
           </p>
         </div>

@@ -37,7 +37,7 @@ export const AdaptiveModuleContainer: React.FC<AdaptiveModuleContainerProps> = (
       } ${className}`}
     >
       {/* Header Controls Bar */}
-      <div className="flex items-center justify-between px-5 py-3 border-b border-aurora-line bg-aurora-canvas/60 backdrop-blur-md rounded-t-2xl">
+      <div className="flex items-center justify-between px-5 py-3 border-b border-aurora-line bg-aurora-canvas/60 rounded-t-2xl">
         <div className="flex items-center gap-2">
           {isPrioritized && (
             <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25">

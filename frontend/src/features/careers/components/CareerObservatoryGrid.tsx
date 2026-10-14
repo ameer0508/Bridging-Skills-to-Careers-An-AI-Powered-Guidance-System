@@ -110,7 +110,7 @@ export const CareerObservatoryGrid: React.FC<CareerObservatoryGridProps> = ({
                 {match.matchingSkills?.slice(0, 3).map((skill, idx) => (
                   <span
                     key={idx}
-                    className="px-2 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25 text-[10px] font-mono"
+                    className="px-2 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25 text-[10px] tabular-nums"
                   >
                     {skill}
                   </span>
@@ -118,7 +118,7 @@ export const CareerObservatoryGrid: React.FC<CareerObservatoryGridProps> = ({
                 {match.missingSkills?.slice(0, 2).map((skill, idx) => (
                   <span
                     key={idx}
-                    className="px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-mono"
+                    className="px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 text-[10px] tabular-nums"
                   >
                     -{skill}
                   </span>

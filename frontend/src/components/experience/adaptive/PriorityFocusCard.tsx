@@ -25,7 +25,7 @@ export const PriorityFocusCard: React.FC<PriorityFocusCardProps> = ({
   return (
     <LightingSurface
       profile="heroSpotlight"
-      className={`p-6 rounded-2xl border border-aurora-violet/25 bg-aurora-canvas/60 backdrop-blur-xl space-y-4 shadow-xl shadow-indigo-500/10 ${className}`}
+      className={`p-6 rounded-2xl border border-aurora-violet/25 bg-aurora-canvas/60 space-y-4 shadow-xl shadow-indigo-500/10 ${className}`}
     >
       <div className="flex items-center justify-between pb-3 border-b border-aurora-line">
         <div className="flex items-center gap-2">

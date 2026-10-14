@@ -54,7 +54,7 @@ export const AgentTopologyNetwork: React.FC<AgentTopologyNetworkProps> = ({
     { from: 'career_agent', to: 'skill_agent', label: 'Target Role Context' },
     { from: 'career_agent', to: 'readiness_agent', label: 'Role Requirements' },
     { from: 'skill_agent', to: 'learning_agent', label: 'Competency Gaps' },
-    { from: 'skill_agent', to: 'interview_agent', label: 'Verified Skills' },
+    { from: 'skill_agent', to: 'interview_agent', label: 'Skills on Profile' },
     { from: 'career_agent', to: 'job_agent', label: 'Search Criteria' },
     { from: 'readiness_agent', to: 'recommendation_agent', label: 'Diagnostic Signals' },
     { from: 'interview_agent', to: 'analytics_agent', label: 'Evaluation Telemetry' },
@@ -241,7 +241,7 @@ export const AgentTopologyNetwork: React.FC<AgentTopologyNetworkProps> = ({
 
           {/* Hovered Node Quick Telemetry Banner (Bottom of Graph) */}
           {hoveredAgentId && (
-            <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-aurora-canvas/60 backdrop-blur-md border border-aurora-violet/25 z-20 flex items-center justify-between text-xs">
+            <div className="absolute bottom-4 left-4 right-4 p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-violet/25 z-20 flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
                 <Info className="w-4 h-4 text-aurora-indigo shrink-0" />
                 <span className="text-aurora-muted">
@@ -257,7 +257,7 @@ export const AgentTopologyNetwork: React.FC<AgentTopologyNetworkProps> = ({
       ) : (
         /* ACCESSIBLE TABULAR MATRIX ALTERNATIVE */
         <div className="overflow-x-auto rounded-2xl border border-aurora-line">
-          <table className="w-full text-left text-xs font-mono">
+          <table className="w-full text-left text-xs tabular-nums">
             <thead className="bg-aurora-canvas text-aurora-muted uppercase text-[10px] border-b border-aurora-line">
               <tr>
                 <th className="p-3">Agent Identity</th>

@@ -77,7 +77,7 @@ export const CareerIntelligencePage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
+        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 flex flex-col items-center justify-center space-y-4 min-h-[260px]">
           <AIThinkingAnimation statusText="Evaluating Deterministic Career Match Scores..." />
         </div>
       </div>
@@ -88,8 +88,8 @@ export const CareerIntelligencePage: React.FC = () => {
     return (
       <div className="max-w-7xl mx-auto pb-12 px-4">
         <PremiumErrorState
-          title="Career Intelligence Connection Error"
-          message={`Failed to compute career matches: ${(error as Error).message}`}
+          title="Career matches could not be loaded"
+          message={(error as Error).message}
           onRetry={() => refetch()}
         />
       </div>
@@ -155,7 +155,7 @@ export const CareerIntelligencePage: React.FC = () => {
       />
 
       {/* SECTION 2 — SEARCH & CATEGORY FILTER BAR */}
-      <div className="p-4 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="p-4 rounded-2xl border border-aurora-line bg-aurora-canvas/60 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="relative w-full sm:w-80">
           <Search className="w-4 h-4 text-aurora-muted absolute left-3.5 top-3" />
           <input
@@ -187,7 +187,7 @@ export const CareerIntelligencePage: React.FC = () => {
       {/* SECTION 3 — CAREER OBSERVATORY GRID */}
       <PremiumSection
         title="Career Observatory Leaderboard"
-        subtitle="Ranked role alignments computed from verified skill requirements"
+        subtitle="Ranked role alignments computed from skill requirements"
         badge="Leaderboard"
       >
         <CareerObservatoryGrid
@@ -217,7 +217,7 @@ export const CareerIntelligencePage: React.FC = () => {
       </PremiumSection>
 
       {/* SECTION 7 — LIVE AI STATUS FOOTER */}
-      <AIStatusBar status="active" confidence={94.8} lastUpdated="Just now" />
+      <AIStatusBar status="active" provider="Your career match records" />
 
       {/* CAREER DETAIL MODAL */}
       <CareerDetailModal

@@ -55,11 +55,11 @@ export const AnalyticsSummaryGrid: React.FC<MetricsSummaryData> = ({
         </div>
       </Card>
 
-      {/* 2. Total Verified Skills */}
+      {/* 2. Total Skills on Profile */}
       <Card variant="default" className="p-5 flex items-center justify-between">
         <div>
           <span className="text-[10px] uppercase font-bold text-aurora-muted tracking-wider block mb-1">
-            Total Verified Skills
+            Total Skills on Profile
           </span>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-extrabold font-display text-aurora-ink">

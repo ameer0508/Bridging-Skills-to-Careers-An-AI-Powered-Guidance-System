@@ -242,7 +242,7 @@ export const AIFeatureExplorerWorkspace: React.FC = () => {
                       <span className="px-2 py-0.5 rounded bg-aurora-canvas text-aurora-indigo text-[10px] font-bold border border-aurora-line">
                         {feat.domain}
                       </span>
-                      <h4 className="text-xs font-bold text-aurora-ink font-mono">{feat.name}</h4>
+                      <h4 className="text-xs font-bold text-aurora-ink tabular-nums">{feat.name}</h4>
                     </div>
 
                     <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
@@ -273,7 +273,7 @@ export const AIFeatureExplorerWorkspace: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <h3 className="text-base font-bold text-aurora-ink font-mono">{selectedFeature.name}</h3>
+              <h3 className="text-base font-bold text-aurora-ink tabular-nums">{selectedFeature.name}</h3>
               <p className="text-xs text-aurora-muted leading-relaxed">
                 {selectedFeature.description}
               </p>
@@ -294,7 +294,7 @@ export const AIFeatureExplorerWorkspace: React.FC = () => {
             {/* Upstream Dependencies */}
             <div className="space-y-2 pt-2">
               <span className="text-[10px] text-aurora-muted uppercase">Upstream Input Signals</span>
-              <div className="space-y-1 text-xs font-mono">
+              <div className="space-y-1 text-xs tabular-nums">
                 {selectedFeature.dependencies.map((dep, idx) => (
                   <div key={idx} className="p-2 rounded-lg bg-aurora-canvas border border-aurora-line text-aurora-indigo flex items-center gap-2">
                     <ArrowRight className="w-3.5 h-3.5 text-aurora-indigo" />
@@ -307,7 +307,7 @@ export const AIFeatureExplorerWorkspace: React.FC = () => {
             {/* Downstream Consumers */}
             <div className="space-y-2 pt-2">
               <span className="text-[10px] text-aurora-muted uppercase">Downstream AI Consumers</span>
-              <div className="space-y-1 text-xs font-mono">
+              <div className="space-y-1 text-xs tabular-nums">
                 {selectedFeature.downstreamModels.map((consumer, idx) => (
                   <div key={idx} className="p-2 rounded-lg bg-aurora-canvas border border-aurora-line text-aurora-violet flex items-center gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-aurora-violet" />
@@ -322,9 +322,8 @@ export const AIFeatureExplorerWorkspace: React.FC = () => {
 
       {/* BOTTOM STATUS BAR */}
       <AIStatusBar
-        status="active"
-        confidence={100.0}
-        lastUpdated="Feature Store Online"
+        status="idle"
+        provider="Built-in sample content"
       />
     </div>
   );

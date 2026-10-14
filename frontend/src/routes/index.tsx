@@ -7,7 +7,7 @@ import { AppShell } from '../layouts/AppShell';
 import { AuthLayout } from '../layouts/AuthLayout';
 import { ErrorBoundary } from '../components/common/ErrorBoundary';
 import { NotFoundPage } from '../components/common/NotFoundPage';
-import { AIThinkingAnimation } from '../components/experience';
+import { PageSkeleton } from '../design/aurora/kit';
 
 // Lazy-loaded Workspaces for Route Code Splitting
 const HomeWorkspace = lazy(() => import('../workspaces/HomeWorkspace/HomeWorkspace'));
@@ -58,21 +58,17 @@ const CareerIdentityWorkspace = lazy(() => import('../workspaces/CareerIdentityW
 // Feature Pages
 import LoginForm from '../features/auth/components/LoginForm';
 import RegisterForm from '../features/auth/components/RegisterForm';
-import ResumePage from '../features/resume/components/ResumePage';
-import { SkillIntelligencePage } from '../features/skills/components/SkillIntelligencePage';
-import { CareerReadinessPage } from '../features/careers/components/CareerReadinessPage';
+const ResumePage = lazy(() => import('../features/resume/components/ResumePage'));
+const SkillIntelligencePage = lazy(() => import('../features/skills/components/SkillIntelligencePage'));
+const CareerReadinessPage = lazy(() => import('../features/careers/components/CareerReadinessPage'));
 
-import { RecommendationPage } from '../features/recommendations/components/RecommendationPage';
+const RecommendationPage = lazy(() => import('../features/recommendations/components/RecommendationPage'));
 
 // Suspense Fallback Wrapper
 const WorkspaceSuspense: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <ErrorBoundary>
     <Suspense
-      fallback={
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <AIThinkingAnimation statusText="Loading Adaptive Workspace..." />
-        </div>
-      }
+      fallback={<PageSkeleton label="Loading" />}
     >
       {children}
     </Suspense>
@@ -187,7 +183,11 @@ export const router = createBrowserRouter([
           },
           {
             path: '/recommendations',
-            element: <RecommendationPage />,
+            element: (
+              <WorkspaceSuspense>
+                <RecommendationPage />
+              </WorkspaceSuspense>
+            ),
           },
           {
             path: '/analytics',
@@ -223,15 +223,27 @@ export const router = createBrowserRouter([
           },
           {
             path: '/readiness',
-            element: <CareerReadinessPage />,
+            element: (
+              <WorkspaceSuspense>
+                <CareerReadinessPage />
+              </WorkspaceSuspense>
+            ),
           },
           {
             path: '/skills',
-            element: <SkillIntelligencePage />,
+            element: (
+              <WorkspaceSuspense>
+                <SkillIntelligencePage />
+              </WorkspaceSuspense>
+            ),
           },
           {
             path: '/resume',
-            element: <ResumePage />,
+            element: (
+              <WorkspaceSuspense>
+                <ResumePage />
+              </WorkspaceSuspense>
+            ),
           },
           {
             path: '/diagnostics',

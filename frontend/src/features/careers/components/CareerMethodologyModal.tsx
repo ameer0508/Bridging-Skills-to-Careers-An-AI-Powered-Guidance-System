@@ -22,7 +22,7 @@ export const CareerMethodologyModal: React.FC<CareerMethodologyModalProps> = ({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onClose}
-          className="absolute inset-0 bg-aurora-canvas/60 backdrop-blur-md"
+          className="absolute inset-0 bg-aurora-canvas/60"
         />
 
         {/* Modal Window */}
@@ -80,7 +80,7 @@ export const CareerMethodologyModal: React.FC<CareerMethodologyModalProps> = ({
                 <div className="p-2.5 rounded-xl bg-aurora-canvas border border-aurora-line space-y-0.5">
                   <span className="text-aurora-muted block uppercase text-[10px]">Core Skills (70%)</span>
                   <span className="text-emerald-700 font-bold">Mandatory Baseline</span>
-                  <span className="text-[10px] text-aurora-muted block">Requires verified documentary evidence</span>
+                  <span className="text-[10px] text-aurora-muted block">Requires documentary evidence</span>
                 </div>
                 <div className="p-2.5 rounded-xl bg-aurora-canvas border border-aurora-line space-y-0.5">
                   <span className="text-aurora-muted block uppercase text-[10px]">Preferred Skills (30%)</span>

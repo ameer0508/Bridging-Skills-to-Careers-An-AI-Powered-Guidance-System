@@ -40,7 +40,7 @@ export const WorkspaceToolbar: React.FC<WorkspaceToolbarProps> = ({
 
   return (
     <div
-      className={`p-3 rounded-2xl bg-aurora-canvas/60 border border-aurora-line backdrop-blur-xl flex flex-col md:flex-row items-center justify-between gap-3 ${className}`}
+      className={`p-3 rounded-2xl bg-aurora-canvas/60 border border-aurora-line flex flex-col md:flex-row items-center justify-between gap-3 ${className}`}
     >
       {/* Search Input Bar */}
       <div className="relative w-full md:w-80">

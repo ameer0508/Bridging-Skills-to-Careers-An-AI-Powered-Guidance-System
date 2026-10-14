@@ -20,7 +20,7 @@ export const ProfessionalAchievements: React.FC<ProfessionalAchievementsProps> =
             <Award className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-aurora-ink">Professional Verified Achievements</h3>
+            <h3 className="text-base font-bold text-aurora-ink">Recorded Achievements</h3>
             <p className="text-xs text-aurora-muted">
               Evidence-based competency milestones evaluated by AI telemetry
             </p>
@@ -31,7 +31,7 @@ export const ProfessionalAchievements: React.FC<ProfessionalAchievementsProps> =
       {achievements.length === 0 ? (
         <div className="p-6 text-center rounded-xl bg-aurora-canvas/60 border border-dashed border-aurora-line space-y-2">
           <ShieldCheck className="w-8 h-8 mx-auto text-aurora-indigo opacity-80" />
-          <h4 className="text-sm font-semibold text-aurora-ink">No Verified Achievements Yet</h4>
+          <h4 className="text-sm font-semibold text-aurora-ink">No Recorded Achievements Yet</h4>
           <p className="text-xs text-aurora-muted max-w-sm mx-auto">
             Complete your active roadmap milestones or skill graph verifications to record evidence-backed achievements.
           </p>

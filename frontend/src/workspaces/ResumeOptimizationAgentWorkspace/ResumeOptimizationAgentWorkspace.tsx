@@ -50,7 +50,8 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
 
   // Query 2: Target Career Matches
   const { data: matchesData } = useQuery({
-    queryKey: ['careers', 'matches'],
+    // The bare list is cached under its own key: ['careers', 'matches'] holds { matches }
+    queryKey: ['careers', 'matches', 'list'],
     queryFn: async () => {
       const response = await apiClient.get('/careers/matches');
       return response.data.data.matches || [];
@@ -83,7 +84,7 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
   const atsScore = resumeData?.atsScore || 0;
   const readinessScore = primaryReadiness(readinessData)?.overallScore ?? 0;
 
-  // Extracted User Verified Skills Names
+  // Extracted User Skills on Profile Names
   const userSkillNames = useMemo(() => {
     if (skillsData?.categories) {
       const all: string[] = [];
@@ -178,7 +179,7 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
   if (isResumeLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
+        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 flex flex-col items-center justify-center space-y-4 min-h-[260px]">
           <AIThinkingAnimation statusText="Connecting to Resume Optimization Agent..." />
         </div>
       </div>
@@ -214,7 +215,7 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
               placeholder="Filter target role keywords..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 tabular-nums"
             />
             <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
@@ -281,9 +282,9 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
             <ShieldCheck className="w-4 h-4 text-aurora-violet" />
           </div>
           <span className="text-xl font-bold text-aurora-ink block">
-            {readinessScore}% Verified
+            {readinessScore}% readiness
           </span>
-          <span className="text-xs text-aurora-violet">Verified Competency</span>
+          <span className="text-xs text-aurora-violet">Profile Skill</span>
         </GlassPanel>
 
         <GlassPanel className="p-4 space-y-2 border-purple-500/30">
@@ -315,7 +316,7 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
           <div className="space-y-4 text-xs">
             <div className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1.5">
               <span className="text-aurora-muted text-[10px] uppercase block">Original Bullet Point:</span>
-              <p className="text-aurora-muted text-[11px] font-mono">"{originalBullet}"</p>
+              <p className="text-aurora-muted text-[11px] tabular-nums">"{originalBullet}"</p>
             </div>
 
             <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 space-y-2">
@@ -381,7 +382,7 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
               </span>
             </div>
 
-            <p className="text-aurora-muted leading-relaxed text-[11px] font-mono">
+            <p className="text-aurora-muted leading-relaxed text-[11px] tabular-nums">
               Tailoring bullet points in STAR format with quantified performance metrics to boost ATS compatibility for [{targetRoleTitle}]. Current keyword match rate is {keywordCoveragePercent}%.
             </p>
           </GlassPanel>
@@ -390,9 +391,8 @@ export const ResumeOptimizationAgentWorkspace: React.FC = () => {
 
       {/* BOTTOM STATUS BAR */}
       <AIStatusBar
+        provider="Your resume records"
         status={isAnalyzing ? 'thinking' : 'active'}
-        confidence={atsScore || 90}
-        lastUpdated="Resume Agent Active"
       />
     </div>
   );

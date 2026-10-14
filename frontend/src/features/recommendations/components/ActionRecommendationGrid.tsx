@@ -101,7 +101,7 @@ export const ActionRecommendationGrid: React.FC<ActionRecommendationGridProps> =
 
               {/* Target Skill Tag */}
               {rec.targetSkill && (
-                <div className="flex items-center gap-2 pt-1 text-[10px] font-mono">
+                <div className="flex items-center gap-2 pt-1 text-[10px] tabular-nums">
                   <span className="text-aurora-muted">Target Skill Node:</span>
                   <span className="px-2 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25 font-bold flex items-center gap-1">
                     <ShieldCheck className="w-3 h-3 text-aurora-violet" />

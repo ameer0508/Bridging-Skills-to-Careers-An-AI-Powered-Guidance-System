@@ -52,7 +52,7 @@ export const CareerIdentityWorkspace: React.FC = () => {
     },
   });
 
-  // Query 3: Real Verified Skills from /skills/me
+  // Query 3: Real Skills on Profile from /skills/me
   const {
     data: skillsData,
   } = useQuery({
@@ -69,7 +69,8 @@ export const CareerIdentityWorkspace: React.FC = () => {
 
   // Query 4: Real Career Match Fits from /careers/matches
   const { data: matchesData } = useQuery({
-    queryKey: ['careers', 'matches'],
+    // The bare list is cached under its own key: ['careers', 'matches'] holds { matches }
+    queryKey: ['careers', 'matches', 'list'],
     queryFn: async () => {
       try {
         const res = await apiClient.get('/careers/matches');
@@ -202,8 +203,8 @@ export const CareerIdentityWorkspace: React.FC = () => {
 
   if (isProfileLoading) {
     return (
-      <div className="w-full max-w-7xl mx-auto space-y-6 pb-12 px-4 font-mono">
-        <div className="p-12 rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[300px]">
+      <div className="w-full max-w-7xl mx-auto space-y-6 pb-12 px-4 tabular-nums">
+        <div className="p-12 rounded-3xl border border-aurora-line bg-aurora-canvas/60 flex flex-col items-center justify-center space-y-4 min-h-[300px]">
           <AIThinkingAnimation statusText="Connecting to Career Identity Center..." />
         </div>
       </div>
@@ -211,9 +212,9 @@ export const CareerIdentityWorkspace: React.FC = () => {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-8 pb-16 px-4 font-mono">
+    <div className="w-full max-w-7xl mx-auto space-y-8 pb-16 px-4 tabular-nums">
       {/* LOCAL STICKY SECTION NAVIGATOR */}
-      <div className="sticky top-2 z-30 p-1.5 rounded-2xl bg-aurora-canvas/60 backdrop-blur-xl border border-aurora-line shadow-xl flex items-center justify-between gap-2 overflow-x-auto text-xs">
+      <div className="sticky top-2 z-30 p-1.5 rounded-2xl bg-aurora-canvas/60 border border-aurora-line shadow-xl flex items-center justify-between gap-2 overflow-x-auto text-xs">
         <div className="flex items-center gap-1">
           {[
             { id: 'all', label: 'Complete Profile' },

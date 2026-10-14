@@ -43,7 +43,7 @@ export const SkillIntelligencePage: React.FC = () => {
   const [inspectingSkill, setInspectingSkill] = useState<CapabilitySkill | null>(null);
   const [isInspectorOpen, setIsInspectorOpen] = useState(false);
 
-  // Query 1: User's Verified Skills
+  // Query 1: User's Skills on Profile
   const {
     data: skillsData,
     isLoading: skillsLoading,
@@ -172,8 +172,8 @@ export const SkillIntelligencePage: React.FC = () => {
   if (skillsLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[280px]">
-          <AIThinkingAnimation statusText="Constructing Verified Skill Taxonomy & Living Capability Map..." />
+        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 flex flex-col items-center justify-center space-y-4 min-h-[280px]">
+          <AIThinkingAnimation statusText="Constructing Skill Taxonomy & Living Capability Map..." />
         </div>
       </div>
     );
@@ -183,8 +183,8 @@ export const SkillIntelligencePage: React.FC = () => {
     return (
       <div className="max-w-7xl mx-auto pb-12 px-4">
         <PremiumErrorState
-          title="Skill Taxonomy Telemetry Connection Error"
-          message={`Failed to retrieve verified skills: ${(skillsError as Error).message}`}
+          title="Your skills could not be loaded"
+          message={(skillsError as Error).message}
           onRetry={() => refetchSkills()}
         />
       </div>
@@ -255,7 +255,7 @@ export const SkillIntelligencePage: React.FC = () => {
       />
 
       {/* SECTION 2 — INTELLIGENT COMMAND & FILTER STRIP */}
-      <div className="p-4 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl space-y-3">
+      <div className="p-4 rounded-2xl border border-aurora-line bg-aurora-canvas/60 space-y-3">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           {/* Search Box */}
           <div className="relative w-full sm:w-80">
@@ -329,7 +329,7 @@ export const SkillIntelligencePage: React.FC = () => {
       {/* SECTION 4 — INTELLIGENCE SHORTCUTS */}
       <PremiumSection
         title="Capability Operations Shortcuts"
-        subtitle="Leverage your verified skills across downstream intelligence systems"
+        subtitle="Leverage your skills across downstream intelligence systems"
         badge="Shortcuts"
       >
         <QuickActionGrid actions={quickActions} columns={4} />
@@ -338,8 +338,7 @@ export const SkillIntelligencePage: React.FC = () => {
       {/* SECTION 5 — LIVE AI STATUS FOOTER */}
       <AIStatusBar
         status="active"
-        confidence={98.5}
-        lastUpdated="Telemetry Live"
+        provider="Your skill records"
       />
 
       {/* CAPABILITY EVIDENCE INSPECTOR (Slide-over deep inspection studio) */}

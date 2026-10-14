@@ -18,7 +18,7 @@ export const ActionVelocityStrip: React.FC<ActionVelocityStripProps> = ({
   roadmapProgress,
 }) => {
   return (
-    <div className="rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl p-4 sm:p-5 shadow-xl">
+    <div className="rounded-2xl border border-aurora-line bg-aurora-canvas/60 p-4 sm:p-5 shadow-xl">
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 items-center">
         {/* Metric 1: Active Actions */}
         <div className="flex items-center gap-3">

@@ -38,7 +38,7 @@ export const AIInsightBanner: React.FC<AIInsightBannerProps> = ({
         return {
           bg: 'bg-violet-50 border-aurora-violet/25',
           badge: 'bg-aurora-violet/[0.06] text-aurora-indigo border-aurora-violet/25',
-          icon: <Brain className="w-5 h-5 text-aurora-indigo animate-pulse" />,
+          icon: <Brain className="w-5 h-5 text-aurora-indigo" />,
           glow: 'from-indigo-500/20 to-cyan-500/10',
         };
       case 'medium':
@@ -66,7 +66,7 @@ export const AIInsightBanner: React.FC<AIInsightBannerProps> = ({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className={`relative overflow-hidden rounded-2xl border backdrop-blur-xl p-5 sm:p-6 ${style.bg} ${className}`}
+      className={`relative overflow-hidden rounded-2xl border p-5 sm:p-6 ${style.bg} ${className}`}
     >
       {/* Background Glow */}
       <div className={`absolute inset-0 bg-linear-to-r ${style.glow} opacity-60 pointer-events-none`} />
@@ -97,7 +97,7 @@ export const AIInsightBanner: React.FC<AIInsightBannerProps> = ({
                 {evidence.map((item, idx) => (
                   <span
                     key={idx}
-                    className="px-2.5 py-0.5 rounded-md bg-aurora-canvas/60 border border-aurora-line text-[11px] text-aurora-muted font-mono"
+                    className="px-2.5 py-0.5 rounded-md bg-aurora-canvas/60 border border-aurora-line text-[11px] text-aurora-muted tabular-nums"
                   >
                     • {item}
                   </span>

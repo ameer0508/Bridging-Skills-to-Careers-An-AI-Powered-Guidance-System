@@ -13,7 +13,7 @@ export const RecommendationTelemetryHUD: React.FC<RecommendationTelemetryHUDProp
   peakImpact = 35,
 }) => {
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-aurora-line bg-aurora-canvas/60 backdrop-blur-2xl p-6 sm:p-8 shadow-2xl shadow-black/80">
+    <div className="relative overflow-hidden rounded-[28px] border border-aurora-line bg-aurora-canvas/60 p-6 sm:p-8 shadow-2xl shadow-black/80">
       {/* Ambient Radial Glows */}
       <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-linear-to-bl from-amber-500/20 via-indigo-500/10 to-transparent blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-linear-to-tr from-cyan-500/20 via-purple-500/10 to-transparent blur-3xl" />
@@ -21,7 +21,7 @@ export const RecommendationTelemetryHUD: React.FC<RecommendationTelemetryHUDProp
       <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
         {/* Left Column: Title & Overview */}
         <div className="lg:col-span-7 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-200 bg-amber-50 backdrop-blur-md">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-200 bg-amber-50">
             <Zap className="w-3.5 h-3.5 text-amber-700" />
             <span className="text-[11px] font-bold text-amber-700 tracking-wider uppercase">
               Action Priority & Impact Engine

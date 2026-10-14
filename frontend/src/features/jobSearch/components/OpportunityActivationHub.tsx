@@ -25,7 +25,7 @@ export const OpportunityActivationHub: React.FC<OpportunityActivationHubProps> =
   const navigate = useNavigate();
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-aurora-violet/25 bg-white [background-image:linear-gradient(135deg,rgb(167_139_250/0.10),transparent_60%)] p-8 md:p-12 shadow-aurora-md backdrop-blur-xl space-y-8 text-center max-w-3xl mx-auto">
+    <div className="relative overflow-hidden rounded-3xl border border-aurora-violet/25 bg-white [background-image:linear-gradient(135deg,rgb(167_139_250/0.10),transparent_60%)] p-8 md:p-12 shadow-aurora-md space-y-8 text-center max-w-3xl mx-auto">
       {/* Background glow */}
       <div className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 h-96 w-96 rounded-full bg-aurora-violet/[0.06] blur-[140px]" />
 
@@ -80,7 +80,7 @@ export const OpportunityActivationHub: React.FC<OpportunityActivationHubProps> =
             <Cpu className="w-3.5 h-3.5 text-aurora-violet" />
           </div>
           <p className="text-xs text-aurora-muted">
-            {totalSkills > 0 ? `${totalSkills} skills on your profile.` : 'Add skills to match live job requirements.'}
+            {totalSkills > 0 ? `${totalSkills} skills on your profile.` : 'Add skills to match job requirements.'}
           </p>
           <button
             onClick={() => navigate('/skills')}

@@ -20,6 +20,6 @@ export const ProgressNarrativeEngine = {
       return `You have completed ${progress}% of your learning roadmap for ${roleTitle}. Your current readiness score is ${score}%, positioning you in the "${topReadiness?.readinessTier || 'Active Evaluation'}" tier.`;
     }
 
-    return `Your verified skill graph contains ${totalSkills} competencies mapped to ${roleTitle}. Completing your upcoming milestone will advance your readiness trajectory.`;
+    return `Your skill graph contains ${totalSkills} competencies mapped to ${roleTitle}. Completing your upcoming milestone will advance your readiness trajectory.`;
   },
 };

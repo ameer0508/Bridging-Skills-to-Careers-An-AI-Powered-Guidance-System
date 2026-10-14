@@ -55,7 +55,7 @@ export const NeuralCommandDeck: React.FC<NeuralCommandDeckProps> = ({
             onClick={() => onSelectPrompt(prompt)}
             className="text-left px-3 py-1.5 rounded-xl text-xs font-medium text-aurora-muted bg-white/[0.04] border border-aurora-line hover:border-cyan-400/40 hover:text-aurora-indigo hover:bg-aurora-violet/[0.06] transition-all duration-200 cursor-pointer shadow-sm"
           >
-            <span className="text-aurora-violet mr-1.5 font-mono">›</span>
+            <span className="text-aurora-violet mr-1.5 tabular-nums">›</span>
             <span>{prompt}</span>
           </button>
         ))}
@@ -74,9 +74,9 @@ export const NeuralCommandDeck: React.FC<NeuralCommandDeckProps> = ({
         />
 
         <div className="flex items-center justify-between px-4 pb-3 pt-1 border-t border-aurora-line">
-          <div className="flex items-center gap-2 text-[11px] text-aurora-muted font-mono">
+          <div className="flex items-center gap-2 text-[11px] text-aurora-muted tabular-nums">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-            <span>Grounded against verified skill & telemetry state</span>
+            <span>Grounded in your profile data</span>
           </div>
 
           <button

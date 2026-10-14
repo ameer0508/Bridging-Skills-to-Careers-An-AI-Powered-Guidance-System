@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../Sidebar';
 import { TopBar } from '../Header';
 import { WorkspaceContainer } from '../WorkspaceContainer';
-import { CommandPalette, CommandItem } from '../../components/composite/CommandPalette';
+import { CommandPalette, CommandItem, OPEN_COMMAND_PALETTE_EVENT } from '../../components/composite/CommandPalette';
 import { ToastProvider } from '../../components/composite/Toast';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { useAuthStore } from '../../store/authStore';
@@ -59,8 +59,14 @@ export const AppShellContent: React.FC<AppShellProps> = ({ children }) => {
         setIsCommandPaletteOpen((prev) => !prev);
       }
     };
+    // Pages can open the palette from a button of their own
+    const handleOpenRequest = () => setIsCommandPaletteOpen(true);
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener(OPEN_COMMAND_PALETTE_EVENT, handleOpenRequest);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener(OPEN_COMMAND_PALETTE_EVENT, handleOpenRequest);
+    };
   }, []);
 
   // Navigation commands for Command Palette

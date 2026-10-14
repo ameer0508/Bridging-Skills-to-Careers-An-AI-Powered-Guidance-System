@@ -56,7 +56,7 @@ export const AIPrioritiesPanel: React.FC<AIPrioritiesPanelProps> = ({
             </p>
           </div>
         </div>
-        <span className="text-xs font-mono px-2 py-0.5 rounded bg-indigo-50 dark:bg-violet-50 text-indigo-600 dark:text-aurora-indigo font-semibold">
+        <span className="text-xs tabular-nums px-2 py-0.5 rounded bg-indigo-50 dark:bg-violet-50 text-indigo-600 dark:text-aurora-indigo font-semibold">
           {activePriorities.length} Active
         </span>
       </div>

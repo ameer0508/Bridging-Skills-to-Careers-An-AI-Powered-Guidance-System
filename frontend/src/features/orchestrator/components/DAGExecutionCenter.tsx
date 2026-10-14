@@ -39,7 +39,7 @@ export const DAGExecutionCenter: React.FC<DAGExecutionCenterProps> = ({
   }
 
   return (
-    <div className="w-full space-y-6 font-mono">
+    <div className="w-full space-y-6 tabular-nums">
       <GlassPanel className="w-full p-6 sm:p-8 space-y-6 border-aurora-violet/25 shadow-2xl">
         {/* Execution Header */}
         <div className="flex items-center justify-between flex-wrap gap-3 pb-4 border-b border-aurora-line">

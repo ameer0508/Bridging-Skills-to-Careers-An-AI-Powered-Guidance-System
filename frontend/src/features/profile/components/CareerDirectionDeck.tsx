@@ -25,7 +25,7 @@ export const CareerDirectionDeck: React.FC<CareerDirectionDeckProps> = ({
   onEditDirection,
 }) => {
   return (
-    <div className="w-full font-mono">
+    <div className="w-full tabular-nums">
       <GlassPanel className="p-6 sm:p-8 space-y-6 border-aurora-violet/25">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-aurora-line">
@@ -35,7 +35,7 @@ export const CareerDirectionDeck: React.FC<CareerDirectionDeckProps> = ({
               Where I'm Headed • Career Direction
             </span>
             <p className="text-[11px] text-aurora-muted">
-              The primary north star guiding SkillBridge's skill gap extraction, roadmap generation, and live job matching.
+              The primary north star guiding SkillBridge's skill gap extraction, roadmap generation, and job matching.
             </p>
           </div>
 
@@ -92,7 +92,7 @@ export const CareerDirectionDeck: React.FC<CareerDirectionDeckProps> = ({
               <div className="p-4 rounded-2xl bg-aurora-canvas/60 border border-emerald-200 flex items-center justify-between">
                 <div>
                   <span className="text-[10px] uppercase text-aurora-muted block font-semibold">
-                    Current Verified Capability Fit
+                    Current Capability Fit
                   </span>
                   <span className="text-2xl font-bold text-emerald-700">
                     {topMatchScore}% Alignment

@@ -41,7 +41,7 @@ export const CareerWorkspaceHeader: React.FC<CareerWorkspaceHeaderProps> = ({
           </h1>
 
           <p className="text-xs md:text-sm text-aurora-muted leading-relaxed">
-            Deterministic role alignments computed strictly from your verified skill evidence graph. No random percentages—every match is traceable to explicit skills and gaps.
+            Deterministic role alignments computed strictly from your skill evidence. No random percentages—every match is traceable to explicit skills and gaps.
           </p>
 
           <div className="pt-1 flex flex-wrap gap-2">

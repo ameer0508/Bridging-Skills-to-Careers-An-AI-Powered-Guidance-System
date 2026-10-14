@@ -88,7 +88,7 @@ export const OpenSourceIntelligenceWorkspace: React.FC = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter open-source handle..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 tabular-nums"
             />
             <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
@@ -159,7 +159,7 @@ export const OpenSourceIntelligenceWorkspace: React.FC = () => {
 
             <div className="space-y-3">
               {verifiedSkills.map((sk) => (
-                <div key={sk.skill} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2 text-xs font-mono">
+                <div key={sk.skill} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2 text-xs tabular-nums">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-700" />
@@ -200,11 +200,7 @@ export const OpenSourceIntelligenceWorkspace: React.FC = () => {
       </div>
 
       {/* BOTTOM STATUS BAR */}
-      <AIStatusBar
-        status="active"
-        confidence={98.8}
-        lastUpdated="Open Source Intelligence Live"
-      />
+      <AIStatusBar status="idle" provider="Built-in sample content" />
     </div>
   );
 };

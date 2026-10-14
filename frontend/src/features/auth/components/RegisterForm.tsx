@@ -48,6 +48,7 @@ export const RegisterForm: React.FC = () => {
   const [userRole, setUserRole] = useState<'student' | 'professional'>('student');
   const [country, setCountry] = useState('United States');
   const [agreeTerms, setAgreeTerms] = useState(true);
+  const [termsError, setTermsError] = useState('');
 
   const {
     register,
@@ -76,20 +77,21 @@ export const RegisterForm: React.FC = () => {
     }
     setConfirmError('');
     if (!agreeTerms) {
-      alert('Please accept Terms & Privacy Policy to continue.');
+      setTermsError('Please confirm this to create your account.');
       return;
     }
+    setTermsError('');
     mutation.mutate(data);
   };
 
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-aurora-line bg-aurora-canvas/60 backdrop-blur-2xl p-8 sm:p-10 shadow-2xl shadow-black/80 w-full max-w-md">
+    <div className="relative overflow-hidden rounded-[28px] border border-aurora-line bg-aurora-canvas/60 p-8 sm:p-10 shadow-2xl shadow-black/80 w-full max-w-md">
       {/* Top Ambient Glow inside card */}
       <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full bg-linear-to-br from-indigo-500/20 to-cyan-500/10 blur-3xl" />
 
       {/* Card Header */}
       <div className="text-center space-y-2 mb-8 relative z-10">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-aurora-violet/25 bg-aurora-violet/[0.06] backdrop-blur-md mb-1">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-aurora-violet/25 bg-aurora-violet/[0.06] mb-1">
           <Sparkles className="w-3.5 h-3.5 text-aurora-violet" />
           <span className="text-[11px] font-bold text-aurora-violet tracking-wider uppercase">
             Build Intelligence Profile
@@ -206,20 +208,23 @@ export const RegisterForm: React.FC = () => {
             <input
               type="checkbox"
               checked={agreeTerms}
-              onChange={(e) => setAgreeTerms(e.target.checked)}
+              onChange={(e) => {
+                setAgreeTerms(e.target.checked);
+                if (e.target.checked) setTermsError('');
+              }}
+              aria-invalid={termsError ? true : undefined}
+              aria-describedby={termsError ? 'terms-error' : undefined}
               className="w-4 h-4 rounded bg-aurora-canvas border-aurora-line text-indigo-600 focus:ring-indigo-500/40 mt-0.5 shrink-0"
             />
             <span>
-              I agree to the{' '}
-              <a href="#" className="text-aurora-indigo hover:underline">
-                Terms of Service
-              </a>{' '}
-              and{' '}
-              <a href="#" className="text-aurora-indigo hover:underline">
-                Privacy Policy
-              </a>
+              I agree that SkillBridge stores my resume and the records I add to give me guidance. I can delete my account and its data in Settings.
             </span>
           </label>
+          {termsError && (
+            <p id="terms-error" role="alert" className="mt-1.5 text-xs font-medium text-rose-700">
+              {termsError}
+            </p>
+          )}
         </div>
 
         {/* Error Alert Shake */}
@@ -271,9 +276,9 @@ export const RegisterForm: React.FC = () => {
           </Link>
         </p>
 
-        <div className="flex items-center gap-1.5 text-[10px] text-aurora-muted font-mono">
+        <div className="flex items-center gap-1.5 text-[10px] text-aurora-muted tabular-nums">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-          <span>256-Bit Encrypted Workspace Auth</span>
+          <span>Passwords are stored hashed, never in plain text</span>
         </div>
       </div>
     </div>

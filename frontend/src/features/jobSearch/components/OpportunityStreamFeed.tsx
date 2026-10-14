@@ -86,7 +86,7 @@ export const OpportunityStreamFeed: React.FC<OpportunityStreamFeedProps> = ({
   };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-5 md:p-6 shadow-aurora-md backdrop-blur-xl flex flex-col h-[740px]">
+    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-5 md:p-6 shadow-aurora-md flex flex-col h-[740px]">
       {/* Header Tabs: Live vs Saved */}
       <div className="flex items-center justify-between border-b border-aurora-line pb-4 mb-4 shrink-0">
         <div className="flex items-center gap-2 bg-aurora-canvas/60 p-1 rounded-2xl border border-aurora-line">

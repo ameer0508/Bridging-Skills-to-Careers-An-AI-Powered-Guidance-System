@@ -29,7 +29,7 @@ const READINESS_DIMENSIONS: DimensionPreviewItem[] = [
     borderColor: 'border-aurora-violet/25',
     sourceType: 'Base Skill Graph & Proficiency',
     description: 'Evaluates required and preferred technical competencies against role requirement benchmarks.',
-    sampleEvidence: ['Verified skill taxonomy', 'Proficiency evidence score (0-100)', 'Importance tier matching'],
+    sampleEvidence: ['Shared skill taxonomy', 'Proficiency evidence score (0-100)', 'Importance tier matching'],
     auditFocus: 'Core engineering capabilities & language mastery',
   },
   {
@@ -101,7 +101,7 @@ export const ReadinessDimensionFrameworkPreview: React.FC = () => {
             <motion.div
               key={dim.id}
               whileHover={{ y: -3 }}
-              className="p-5 rounded-2xl bg-aurora-canvas/60 border border-aurora-line hover:border-aurora-line transition-all flex flex-col justify-between space-y-4 shadow-lg backdrop-blur-sm"
+              className="p-5 rounded-2xl bg-aurora-canvas/60 border border-aurora-line hover:border-aurora-line transition-all flex flex-col justify-between space-y-4 shadow-lg"
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">

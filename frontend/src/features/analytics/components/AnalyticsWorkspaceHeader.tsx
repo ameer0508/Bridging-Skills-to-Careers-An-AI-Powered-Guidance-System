@@ -48,7 +48,7 @@ export const AnalyticsWorkspaceHeader: React.FC<AnalyticsWorkspaceHeaderProps> =
           </h1>
 
           <p className="text-xs md:text-sm text-aurora-muted leading-relaxed">
-            Deterministic progress tracking derived from verified platform data. Evaluate your skill growth velocity, readiness trends, and milestone velocity over time.
+            Deterministic progress tracking from your recorded SkillBridge data. Evaluate your skill growth velocity, readiness trends, and milestone velocity over time.
           </p>
         </div>
 

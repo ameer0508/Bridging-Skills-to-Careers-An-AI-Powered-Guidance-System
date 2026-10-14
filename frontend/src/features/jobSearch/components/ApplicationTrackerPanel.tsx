@@ -48,7 +48,7 @@ export const ApplicationTrackerPanel: React.FC<ApplicationTrackerPanelProps> = (
   return (
     <section
       aria-label="Application tracking"
-      className="rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl p-5 space-y-5"
+      className="rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-5 space-y-5"
       data-testid="application-tracker"
     >
       <div className="flex items-center justify-between gap-3">

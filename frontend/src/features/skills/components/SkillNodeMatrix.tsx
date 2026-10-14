@@ -65,7 +65,7 @@ export const SkillNodeMatrix: React.FC<SkillNodeMatrixProps> = ({
                   <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
                 </div>
 
-                <div className="flex items-center justify-between text-[10px] font-mono">
+                <div className="flex items-center justify-between text-[10px] tabular-nums">
                   <span className="text-aurora-muted">Evidence Score</span>
                   <span className="text-emerald-700 font-bold">{skill.evidenceScore}%</span>
                 </div>

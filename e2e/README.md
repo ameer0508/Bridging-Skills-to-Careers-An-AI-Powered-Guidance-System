@@ -38,6 +38,8 @@ labelled demo listings. The temp directory and all processes are removed at the 
 | `E2E_BROWSER_CHANNEL` | `msedge`, `chrome` or `chromium`. Default: the first one installed. |
 | `E2E_HEADED=1` | Show the browser window. |
 | `E2E_TEST_FILE` | Run another test module instead of `./tests/smoke.mjs` (path relative to `e2e/`). |
+| `E2E_FRONTEND=preview` | Serve a production build (built into the temp directory) with `vite preview` instead of the dev server. |
+| `E2E_API_RATE_LIMIT_MAX` | Raise the backend request limit (default 1000 per 15 minutes) for tools that load hundreds of pages, such as `tools/visualAudit.mjs`. The suites keep the default. |
 | `E2E_KEEP=1` | Keep the temp directory (database, uploads, `backend.log`, `frontend.log`, `ai.log`). |
 
 ## What is covered

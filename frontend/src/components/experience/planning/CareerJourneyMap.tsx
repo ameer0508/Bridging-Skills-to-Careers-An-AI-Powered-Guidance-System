@@ -30,7 +30,7 @@ export const CareerJourneyMap: React.FC<CareerJourneyMapProps> = ({
     {
       id: 'step-1',
       title: 'Current Position',
-      subtitle: 'Verified Skill Foundations',
+      subtitle: 'Skill Foundations',
       status: 'completed',
       category: 'Baseline',
     },
@@ -110,7 +110,7 @@ export const CareerJourneyMap: React.FC<CareerJourneyMapProps> = ({
                     {step.status === 'completed' ? (
                       <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
                     ) : step.status === 'active' ? (
-                      <Zap className="w-4 h-4 text-amber-700 shrink-0 animate-pulse" />
+                      <Zap className="w-4 h-4 text-amber-700 shrink-0" />
                     ) : (
                       <Award className="w-4 h-4 text-aurora-muted shrink-0" />
                     )}

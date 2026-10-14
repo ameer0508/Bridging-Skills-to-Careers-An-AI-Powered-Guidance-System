@@ -193,6 +193,30 @@ The signed-in shell (sidebar, top bar, account menu, phone drawer) and the Comma
 - a regular user is refused AI observability, while an administrator sees it and the employer review tab on the light design;
 - axe on every screen; reduced motion; no sideways scrolling at five widths; a clean console.
 
+## Stage E: product-wide claims and polish (2026-10-14)
+
+Every signed-in route, the sign-in and registration pages and the onboarding dialog were read in the running product at five widths. These claims were removed or corrected:
+
+| Where | Before | Now |
+|---|---|---|
+| Sign-in and registration | "94.8% Vector Match", "Embedding Cosine Search", "ATS Index 98/100", "4.8x Velocity", "256-Bit Encrypted Workspace Auth", "Production Hardened v1.0", "AI System: Real-time guidance engine ready", "With AI Vector Precision" | What signing in opens, with no figures; "Passwords are stored hashed, never in plain text" (bcrypt); the guidance source stated as an AI provider when configured, otherwise labelled rules |
+| "Forgot password?" | A pop-up saying "Password reset link sent to your registered email address"; no e-mail is sent | An inline note that reset by e-mail is not available and whom to ask |
+| Sign-in form | "Remember this device for 30 days", which did nothing (sessions last 7 days) | Removed |
+| Registration | Links to a Terms of Service and Privacy Policy that do not exist; a pop-up when unticked | A plain statement of what is stored and that the account can be deleted in Settings; an inline, announced message |
+| Skill counts everywhere | "Verified Skills", "Verified Competencies", "verified skill graph" for every skill on the profile | "Skills on your profile", "skill evidence"; "verified" is kept only for a passed SkillBridge skill check |
+| Status bars | "AI Gateway Connected", invented confidence (94.8 to 100), invented latency (105 ms, 160 ms), "Telemetry Live", "Live Synced" | What the page loaded and from where; no confidence or latency is shown because none is measured |
+| AI assistant (`/ai`) | "Engine: Gemini Multi-Agent Orchestration", "Core Synchronized", "Resume ATS Index", a "Predictive AI" simulator returning fixed numbers (+8%, +12%, "40% faster", "Accelerated Placement Qualification"), "Ranked by ROI", "Mathematical Convergence Model" | Who answers, from the backend's own availability check (a language model, or built-in rules); "Resume completeness"; a link to the Career Lab what-if, which computes from real requirements; "In roadmap order" |
+| Settings | "Connected Vault & SSO: 2 Services", "Security & Safety Index" (fixed 100), "AI Advisor Personalization" (fixed 98), made-up trend lines, counting animations, "Encrypted file", "Single sign-on", "automated recruiter matching" | Four figures from the account (profile completeness, closest match, skills, resume) shown as they are; the stored resume and session described as they are; "Commands" opens the command palette instead of a pop-up |
+| Recommendations | "Live Sync", "analysed against market requirements", "maximize recruiter callback velocity", "Execute Top Priority Move" | Gaps against the target career's requirements, ranked by a fixed formula that does not predict hiring |
+| Agent Orchestrator | "10 / 10 Active", "Workflow Latency 0ms", "COMPLETED" before any run, "OPTIMAL HARMONY", "Zero Contention", "Multi-Agent Orchestration Engine" | A module summary: what it reads, that no agent runs on its own, and the real time the last summary took, or "Not run yet" |
+| Progress analytics | "Deterministic Daily Telemetry", "Authentic benchmark fit", "genuine daily snapshots" | Snapshots SkillBridge has recorded so far |
+| Error screens | "Telemetry Connection Failed", raw "Request failed with status code 429" | What happened in plain words, with the technical text under "Technical details" |
+| Pulsing "live" dots | About 30 decorative pings and pulses on static content | Removed; animation remains only where something is happening (recording, searching, loading) |
+
+**Removed:** `components/experience/initialization/AIInitializationOverlay.tsx`, a timed "Verifying Security Tokens / Initializing AI Models" screen that was not rendered anywhere, so it cannot return.
+
+`e2e/tests/polish.mjs` (11 browser steps) checks the sign-in and registration copy and the absence of browser pop-ups; 30 forbidden claim patterns on all 46 signed-in routes; the assistant's stated source; the Settings figures and the command palette; dialog keyboard behaviour; plain error states; the tablet drawer; and that no looping animation runs under reduced motion.
+
 ## Pages inside the app
 
 Pages whose content is built-in sample content are wrapped in `DemoWorkspace`, which shows the "Illustrative sample data" notice:

@@ -119,7 +119,7 @@ export const AttemptRunner: React.FC<{ attemptId: string; onClose: () => void }>
       </div>
 
       {active && visible.length > 0 && (
-        <nav aria-label="Questions" className="sticky top-0 z-10 rounded-2xl border border-aurora-line bg-white/95 px-3 py-2.5 backdrop-blur" data-testid="exam-navigator">
+        <nav aria-label="Questions" className="sticky top-0 z-10 rounded-2xl border border-aurora-line bg-white/95 px-3 py-2.5" data-testid="exam-navigator">
           <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-aurora-line" aria-hidden="true">
             <div className="h-full rounded-full transition-[width] duration-300 motion-reduce:transition-none [background:var(--aurora-gradient-action)]" style={{ width: `${view.questions.length ? (answered / view.questions.length) * 100 : 0}%` }} />
           </div>

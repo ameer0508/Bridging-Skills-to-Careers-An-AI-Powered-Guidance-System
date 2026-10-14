@@ -23,7 +23,7 @@ export const JobSearchAgentStatusBar: React.FC<JobSearchAgentStatusBarProps> = (
   ];
 
   return (
-    <div className="rounded-2xl border border-aurora-line bg-aurora-canvas/60 p-4 shadow-lg backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div className="rounded-2xl border border-aurora-line bg-aurora-canvas/60 p-4 shadow-lg flex flex-col sm:flex-row items-center justify-between gap-4">
       {/* Left: Agent Status Badge */}
       <div className="flex items-center gap-3 w-full sm:w-auto">
         <div className="relative">

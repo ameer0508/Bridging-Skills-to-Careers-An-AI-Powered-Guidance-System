@@ -43,7 +43,7 @@ export const OrchestratorCommandDeck: React.FC<OrchestratorCommandDeckProps> = (
   ];
 
   return (
-    <div className="space-y-6 font-mono">
+    <div className="space-y-6 tabular-nums">
       {/* Control Plane Masthead */}
       <div className="relative p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-white via-aurora-surface to-aurora-sidebar border border-aurora-violet/25 overflow-hidden shadow-2xl">
         <div className="absolute top-0 right-0 w-96 h-96 bg-aurora-violet/[0.06] rounded-full blur-3xl pointer-events-none" />
@@ -53,21 +53,20 @@ export const OrchestratorCommandDeck: React.FC<OrchestratorCommandDeckProps> = (
           <div className="space-y-2 max-w-2xl">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25 flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                AI AGENT CONTROL PLANE • SYSTEM COMMAND
+                Module summary
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-aurora-canvas text-aurora-muted border border-aurora-line">
-                10 AUTONOMOUS SUBSYSTEMS
+                {totalAgentsCount} modules
               </span>
             </div>
 
             <h1 className="text-2xl sm:text-3xl font-bold text-aurora-ink tracking-tight">
-              Multi-Agent Orchestration Engine
+              Summarise your career data
             </h1>
 
             <p className="text-xs text-aurora-muted leading-relaxed">
-              Coordinate intelligence across your entire career ecosystem. Dispatch directed acyclic graph (DAG)
-              workflows that sequence and parallelize tasks across Career, Skills, Readiness, Roadmap, Jobs, and Interview agents.
+              Enter a goal and SkillBridge writes a four-part summary (role fit, skills and resume, learning,
+              jobs and interviews) from the records already stored on your account. No AI agent runs on its own.
             </p>
           </div>
 
@@ -75,9 +74,9 @@ export const OrchestratorCommandDeck: React.FC<OrchestratorCommandDeckProps> = (
           <div className="flex flex-col sm:flex-row md:flex-col gap-3 min-w-[220px]">
             <div className="p-3.5 rounded-2xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between">
               <div>
-                <span className="text-[10px] text-aurora-muted uppercase block">Active AI Agents</span>
-                <span className="text-lg font-bold text-emerald-700">
-                  {activeAgentsCount} / {totalAgentsCount} ONLINE
+                <span className="text-[10px] text-aurora-muted uppercase block">Modules available</span>
+                <span className="text-lg font-bold text-aurora-ink">
+                  {activeAgentsCount} of {totalAgentsCount}
                 </span>
               </div>
               <Cpu className="w-5 h-5 text-emerald-700/70" />
@@ -85,8 +84,8 @@ export const OrchestratorCommandDeck: React.FC<OrchestratorCommandDeckProps> = (
 
             <div className="p-3.5 rounded-2xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between">
               <div>
-                <span className="text-[10px] text-aurora-muted uppercase block">Workflow Latency</span>
-                <span className="text-lg font-bold text-aurora-violet">{latestLatencyMs}ms</span>
+                <span className="text-[10px] text-aurora-muted uppercase block">Last summary took</span>
+                <span className="text-lg font-bold text-aurora-indigo">{latestLatencyMs ? `${latestLatencyMs} ms` : 'Not run yet'}</span>
               </div>
               <Zap className="w-5 h-5 text-aurora-violet/70" />
             </div>
@@ -135,7 +134,7 @@ export const OrchestratorCommandDeck: React.FC<OrchestratorCommandDeckProps> = (
               value={goalQuery}
               onChange={(e) => onGoalChange(e.target.value)}
               placeholder="What career objective should the agent network execute? (e.g. Principal AI Infrastructure Architect)"
-              className="w-full pl-9 pr-3 py-3 rounded-2xl bg-aurora-canvas/60 border border-aurora-line text-xs sm:text-sm text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-mono"
+              className="w-full pl-9 pr-3 py-3 rounded-2xl bg-aurora-canvas/60 border border-aurora-line text-xs sm:text-sm text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 tabular-nums"
             />
             <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-3.5" />
           </div>
@@ -148,7 +147,7 @@ export const OrchestratorCommandDeck: React.FC<OrchestratorCommandDeckProps> = (
               value={targetCompany}
               onChange={(e) => onCompanyChange(e.target.value)}
               placeholder="Target Organization (e.g. OpenScale AI Systems)"
-              className="w-full px-3.5 py-3 rounded-2xl bg-aurora-canvas/60 border border-aurora-line text-xs sm:text-sm text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full px-3.5 py-3 rounded-2xl bg-aurora-canvas/60 border border-aurora-line text-xs sm:text-sm text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 tabular-nums"
             />
           </div>
 
@@ -167,7 +166,7 @@ export const OrchestratorCommandDeck: React.FC<OrchestratorCommandDeckProps> = (
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  <span>Dispatch DAG</span>
+                  <span>Write summary</span>
                 </>
               )}
             </button>
@@ -189,25 +188,6 @@ export const OrchestratorCommandDeck: React.FC<OrchestratorCommandDeckProps> = (
           ))}
         </div>
 
-        {/* Real System Telemetry Metrics */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-aurora-line">
-          <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1">
-            <span className="text-[10px] text-aurora-muted uppercase block">Registered Subsystems</span>
-            <strong className="text-sm text-aurora-ink block">{totalAgentsCount} Agents Online</strong>
-          </div>
-          <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1">
-            <span className="text-[10px] text-aurora-muted uppercase block">Execution Topology</span>
-            <strong className="text-sm text-aurora-indigo block">4-Phase Hybrid DAG</strong>
-          </div>
-          <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1">
-            <span className="text-[10px] text-aurora-muted uppercase block">Signal Arbitration</span>
-            <strong className="text-sm text-emerald-700 block">Zero Contention</strong>
-          </div>
-          <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1">
-            <span className="text-[10px] text-aurora-muted uppercase block">Context Isolation</span>
-            <strong className="text-sm text-aurora-violet block">Multi-Tenant Isolated</strong>
-          </div>
-        </div>
       </GlassPanel>
     </div>
   );

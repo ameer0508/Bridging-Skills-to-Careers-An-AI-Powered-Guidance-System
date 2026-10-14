@@ -52,7 +52,7 @@ export const ProfessionalEvidenceLedger: React.FC<ProfessionalEvidenceLedgerProp
   };
 
   return (
-    <div className="w-full font-mono">
+    <div className="w-full tabular-nums">
       <GlassPanel className="p-6 sm:p-8 space-y-6 border-aurora-violet/25">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-aurora-line">
@@ -145,12 +145,12 @@ export const ProfessionalEvidenceLedger: React.FC<ProfessionalEvidenceLedgerProp
             </div>
           </div>
 
-          {/* Source 2: Verified Capability Matrix */}
+          {/* Source 2: Capability Matrix */}
           <div
             onClick={() =>
               handleInspect({
                 id: 'skills',
-                name: 'Verified Capability Matrix',
+                name: 'Capability Matrix',
                 category: 'Normalized Vector Database',
                 status: totalSkills > 0 ? 'CONNECTED' : 'DISCONNECTED',
                 updatedAt: new Date().toISOString(),
@@ -186,7 +186,7 @@ export const ProfessionalEvidenceLedger: React.FC<ProfessionalEvidenceLedgerProp
 
               <div>
                 <h4 className="text-xs font-bold text-aurora-ink group-hover:text-aurora-violet transition">
-                  Verified Skills
+                  Skills on Profile
                 </h4>
                 <p className="text-[11px] text-aurora-muted mt-0.5">
                   {totalSkills > 0 ? 'Structured capability matrix' : 'Extract skills to verify'}
@@ -283,7 +283,7 @@ export const ProfessionalEvidenceLedger: React.FC<ProfessionalEvidenceLedgerProp
                 updatedAt: new Date().toISOString(),
                 itemsCount: interviewsCount,
                 whatSkillBridgeUses: [
-                  'Real-time answer transcripts and STAR framework adherence',
+                  'Answer transcripts and STAR framework adherence',
                   'Technical precision scores and response depth metrics',
                   'Identified communication strengths and detected knowledge gaps',
                 ],

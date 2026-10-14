@@ -36,7 +36,7 @@ export const StrategyGenerator = {
 
       const strengths = topMatch?.matchingSkills?.length
         ? topMatch.matchingSkills
-        : [`${safeTotalSkills} Verified Competencies Indexed`];
+        : [`${safeTotalSkills} Skills Indexed`];
 
       const weaknesses = topMatch?.missingSkills?.length
         ? topMatch.missingSkills
@@ -70,7 +70,7 @@ export const StrategyGenerator = {
       const evidence = [
         `${matchScore}% career match model alignment`,
         `${readinessScore}% readiness score evaluated`,
-        `${safeTotalSkills} skills verified in user graph`,
+        `${safeTotalSkills} skills on your profile`,
         `${safeRecs.length} recommendations prioritized`,
       ];
 
@@ -92,10 +92,10 @@ export const StrategyGenerator = {
         recommendedRoleTitle: 'Target Career Direction',
         matchScore: 0,
         readinessScore: 0,
-        strengths: [`${totalSkills || 0} Verified Skills`],
+        strengths: [`${totalSkills || 0} Skills on Profile`],
         weaknesses: ['Curriculum Initializing'],
         recommendedSequence: ['Explore Career Matches', 'Complete Skill Diagnostic'],
-        potentialBlockers: ['Requires verified skill evidence'],
+        potentialBlockers: ['Requires skill evidence'],
         estimatedTotalEffort: 'Adaptive',
         confidenceTier: 'Evaluating',
         evidence: ['Baseline telemetry initialized'],

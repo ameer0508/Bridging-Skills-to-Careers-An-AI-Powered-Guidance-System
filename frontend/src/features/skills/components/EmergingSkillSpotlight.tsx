@@ -54,7 +54,7 @@ export const EmergingSkillSpotlight: React.FC<{ items?: EmergingTechItem[] }> = 
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
                 tech.isExtracted ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-aurora-canvas text-aurora-muted'
               }`}>
-                {tech.isExtracted ? 'Verified in Skillset' : 'Target Emerging Skill'}
+                {tech.isExtracted ? 'On your profile' : 'Target Emerging Skill'}
               </span>
             </div>
 
@@ -62,7 +62,7 @@ export const EmergingSkillSpotlight: React.FC<{ items?: EmergingTechItem[] }> = 
               <span>{tech.name}</span>
             </h4>
 
-            <div className="pt-2 border-t border-aurora-line flex items-center justify-between text-[11px] font-mono">
+            <div className="pt-2 border-t border-aurora-line flex items-center justify-between text-[11px] tabular-nums">
               <span className="text-amber-700 font-semibold flex items-center gap-1">
                 <TrendingUp className="w-3 h-3" />
                 {tech.growthTrend}

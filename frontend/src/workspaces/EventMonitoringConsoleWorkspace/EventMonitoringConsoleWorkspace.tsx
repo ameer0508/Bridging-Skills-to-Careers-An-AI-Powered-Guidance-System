@@ -133,7 +133,7 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
       {/* WORKSPACE HERO & PLATFORM STATUS BAR */}
       <WorkspaceHero
         title="SkillBridge Event Bus & Streaming Console"
-        subtitle="Real-time domain event stream monitoring, consumer health grids, dead-letter queue inspection, & historical event replay"
+        subtitle="Sample console: domain event stream monitoring, consumer health grids, dead-letter queue inspection, & historical event replay"
         badge="Event Bus Operations"
         badgeColor="indigo"
         metrics={[
@@ -148,7 +148,7 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
       <GlassPanel className="p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-aurora-violet/25">
         <div className="flex items-center gap-3">
           <span className="p-2 rounded-xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo">
-            <Radio className="w-5 h-5 animate-pulse" />
+            <Radio className="w-5 h-5" />
           </span>
           <div>
             <h3 className="text-sm font-bold text-aurora-ink">Live Event Streaming Transport</h3>
@@ -292,7 +292,7 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs font-mono">
+                  <div className="flex items-center justify-between text-xs tabular-nums">
                     <span className="text-aurora-muted">Correlation ID: <strong className="text-aurora-ink">{evt.correlationId}</strong></span>
                     <span className="text-aurora-muted">{evt.timestamp}</span>
                   </div>
@@ -315,7 +315,7 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
               </span>
             </div>
 
-            <div className="space-y-2 text-xs font-mono">
+            <div className="space-y-2 text-xs tabular-nums">
               <div className="p-2.5 rounded-xl bg-aurora-canvas border border-aurora-line space-y-1">
                 <span className="text-[9px] text-aurora-muted block uppercase">Event ID</span>
                 <span className="text-aurora-ink font-bold">{selectedEvent.id}</span>
@@ -361,7 +361,7 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
                     <span className="font-bold text-aurora-ink block">{sub.name}</span>
                     <span className="text-[10px] text-aurora-muted">Subscribed: {sub.subscribedTo}</span>
                   </div>
-                  <div className="text-right font-mono">
+                  <div className="text-right tabular-nums">
                     <span className="text-emerald-700 font-bold block">{sub.latencyMs} ms</span>
                     <span className="text-[10px] text-aurora-muted">{sub.processed} Processed</span>
                   </div>
@@ -373,11 +373,7 @@ export const EventMonitoringConsoleWorkspace: React.FC = () => {
       </div>
 
       {/* BOTTOM STATUS BAR */}
-      <AIStatusBar
-        status="active"
-        confidence={99.9}
-        lastUpdated="Event Bus Telemetry Live"
-      />
+      <AIStatusBar status="idle" provider="Built-in sample content" />
     </div>
   );
 };

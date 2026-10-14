@@ -16,6 +16,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useReducedMotion } from '../../../components/experience/hooks/useReducedMotion';
 import type { CapabilitySkill, SkillGraphEdge } from './CapabilityMatrixCanvas';
+import { DialogFrame } from '../../../design/aurora/DialogFrame';
 
 export interface CapabilityEvidenceInspectorProps {
   skill: CapabilitySkill | null;
@@ -53,7 +54,7 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
       case 'resume_projects':
         return { label: 'Project Portfolio', icon: FolderGit2, color: 'text-aurora-violet bg-aurora-violet/[0.06] border-aurora-violet/25' };
       case 'resume_certifications':
-        return { label: 'Verified Certification', icon: Award, color: 'text-aurora-violet bg-purple-500/10 border-purple-500/20' };
+        return { label: 'Certification (stated)', icon: Award, color: 'text-aurora-violet bg-purple-500/10 border-purple-500/20' };
       case 'resume_education':
         return { label: 'Academic Education', icon: GraduationCap, color: 'text-amber-700 bg-amber-50 border-amber-200' };
       default:
@@ -63,7 +64,7 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
+      <DialogFrame onClose={onClose} label="Skill evidence" side="right">
         {/* Backdrop click */}
         <div className="flex-1" onClick={onClose} />
 
@@ -86,7 +87,7 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
                   <span className="text-[10px] uppercase text-aurora-indigo font-bold tracking-wider block">
                     Capability Evidence Inspector
                   </span>
-                  <h3 className="text-base font-bold text-aurora-ink">Verified Skill Deep-Dive</h3>
+                  <h3 className="text-base font-bold text-aurora-ink">Skill Evidence Deep-Dive</h3>
                 </div>
               </div>
 
@@ -146,7 +147,7 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
                   {skill.aliases.map((alias, idx) => (
                     <span
                       key={idx}
-                      className="px-2.5 py-0.5 rounded-lg bg-aurora-canvas border border-aurora-line text-aurora-muted text-xs font-mono"
+                      className="px-2.5 py-0.5 rounded-lg bg-aurora-canvas border border-aurora-line text-aurora-muted text-xs tabular-nums"
                     >
                       {alias}
                     </span>
@@ -155,11 +156,11 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
               </div>
             )}
 
-            {/* Verified Evidence Trail */}
+            {/* Evidence Trail */}
             <div className="space-y-2.5">
               <span className="text-xs uppercase text-aurora-violet font-bold tracking-wider block flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-aurora-violet" />
-                Verified Evidence Trail ({skill.evidences?.length || 0})
+                Evidence Trail ({skill.evidences?.length || 0})
               </span>
 
               <div className="space-y-2 max-h-56 overflow-y-auto custom-scrollbar pr-1">
@@ -217,7 +218,7 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
                         {incomingPrereqs.map((p, idx) => (
                           <span
                             key={idx}
-                            className="px-2 py-0.5 rounded bg-amber-50 text-amber-700 text-[11px] font-mono"
+                            className="px-2 py-0.5 rounded bg-amber-50 text-amber-700 text-[11px] tabular-nums"
                           >
                             {p.name}
                           </span>
@@ -238,7 +239,7 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
                         {outgoingUnlocks.map((u, idx) => (
                           <span
                             key={idx}
-                            className="px-2 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-violet text-[11px] font-mono"
+                            className="px-2 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-violet text-[11px] tabular-nums"
                           >
                             {u.name}
                           </span>
@@ -285,7 +286,7 @@ export const CapabilityEvidenceInspector: React.FC<CapabilityEvidenceInspectorPr
             </div>
           </div>
         </motion.div>
-      </div>
+      </DialogFrame>
     </AnimatePresence>
   );
 };

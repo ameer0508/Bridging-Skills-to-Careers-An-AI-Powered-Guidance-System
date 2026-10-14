@@ -56,7 +56,7 @@ export const CurrentTrajectoryVector: React.FC<CurrentTrajectoryVectorProps> = (
       id: 'skills',
       label: 'Capability Index',
       value: `${currentMetrics.totalSkills}`,
-      subtext: 'Verified technical skills',
+      subtext: 'Technical skills on your profile',
       delta: trends.skillsAdded,
       deltaLabel: trends.skillsAdded !== 0
         ? `${trends.skillsAdded > 0 ? '+' : ''}${trends.skillsAdded} added`
@@ -103,7 +103,7 @@ export const CurrentTrajectoryVector: React.FC<CurrentTrajectoryVectorProps> = (
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: idx * 0.08 }}
-            className="group relative overflow-hidden rounded-2xl border border-aurora-line bg-aurora-canvas/60 p-5 shadow-lg backdrop-blur-md transition-all hover:border-aurora-line hover:bg-aurora-canvas/60"
+            className="group relative overflow-hidden rounded-2xl border border-aurora-line bg-aurora-canvas/60 p-5 shadow-lg transition-all hover:border-aurora-line hover:bg-aurora-canvas/60"
           >
             {/* Ambient accent hover glow */}
             <div className="pointer-events-none absolute -right-12 -top-12 h-28 w-28 rounded-full bg-aurora-canvas blur-2xl transition group-hover:bg-aurora-canvas" />

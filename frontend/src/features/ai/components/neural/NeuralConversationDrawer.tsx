@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Sparkles, RefreshCw, MessageSquarePlus, History, MessageSquare } from 'lucide-react';
 import { MessageBubble, ChatMessage } from '../MessageBubble';
+import { DialogFrame } from '../../../../design/aurora/DialogFrame';
 
 interface ConversationItem {
   _id: string;
@@ -61,18 +62,13 @@ export const NeuralConversationDrawer: React.FC<NeuralConversationDrawerProps> =
   if (!isOpen) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-aurora-canvas/60 backdrop-blur-xl flex justify-end"
-    >
+    <DialogFrame onClose={onClose} label="Assistant conversation history" side="right">
       <motion.div
         initial={{ x: '100%' }}
         animate={{ x: 0 }}
         exit={{ x: '100%' }}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        className="w-full max-w-2xl h-full bg-aurora-canvas/60 border-l border-aurora-line shadow-2xl flex flex-col overflow-hidden"
+        className="w-full max-w-2xl h-full bg-white border-l border-aurora-line shadow-2xl flex flex-col overflow-hidden"
       >
         {/* Drawer Header */}
         <div className="h-16 px-6 border-b border-aurora-line flex items-center justify-between gap-4 bg-aurora-canvas/60 shrink-0">
@@ -133,7 +129,7 @@ export const NeuralConversationDrawer: React.FC<NeuralConversationDrawerProps> =
           {isLoadingHistory ? (
             <div className="h-full flex flex-col items-center justify-center gap-3 text-aurora-muted">
               <RefreshCw className="w-6 h-6 animate-spin text-aurora-violet" />
-              <span className="text-xs font-mono">Loading conversation...</span>
+              <span className="text-xs tabular-nums">Loading conversation...</span>
             </div>
           ) : messages.length === 0 && !isSending && !sendError ? (
             <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-3">
@@ -179,7 +175,7 @@ export const NeuralConversationDrawer: React.FC<NeuralConversationDrawerProps> =
           )}
         </div>
       </motion.div>
-    </motion.div>
+    </DialogFrame>
   );
 };
 

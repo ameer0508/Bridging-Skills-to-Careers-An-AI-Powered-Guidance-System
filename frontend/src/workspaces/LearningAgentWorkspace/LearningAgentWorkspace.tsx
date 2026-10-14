@@ -33,7 +33,8 @@ export const LearningAgentWorkspace: React.FC = () => {
 
   // Query 1: Top Matched Careers
   const { data: matchesData } = useQuery({
-    queryKey: ['careers', 'matches'],
+    // The bare list is cached under its own key: ['careers', 'matches'] holds { matches }
+    queryKey: ['careers', 'matches', 'list'],
     queryFn: async () => {
       const response = await apiClient.get('/careers/matches');
       return response.data.data.matches || [];
@@ -175,7 +176,7 @@ export const LearningAgentWorkspace: React.FC = () => {
   if (isRoadmapLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
+        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 flex flex-col items-center justify-center space-y-4 min-h-[260px]">
           <AIThinkingAnimation statusText="Connecting to Autonomous AI Learning Agent..." />
         </div>
       </div>
@@ -211,7 +212,7 @@ export const LearningAgentWorkspace: React.FC = () => {
               value={filterQuery}
               onChange={(e) => setFilterQuery(e.target.value)}
               placeholder="Filter curriculum modules..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 tabular-nums"
             />
             <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
@@ -352,7 +353,7 @@ export const LearningAgentWorkspace: React.FC = () => {
                       </span>
                       {isCompleted && (
                         <span className="text-emerald-700 font-bold flex items-center gap-1">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Verified Mastered
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Mastered
                         </span>
                       )}
                     </div>
@@ -398,9 +399,8 @@ export const LearningAgentWorkspace: React.FC = () => {
 
       {/* BOTTOM STATUS BAR */}
       <AIStatusBar
+        provider="Your roadmap records"
         status={isAnalyzing ? 'thinking' : 'active'}
-        confidence={completionPercent || 90}
-        lastUpdated="Learning Agent Active"
       />
     </div>
   );

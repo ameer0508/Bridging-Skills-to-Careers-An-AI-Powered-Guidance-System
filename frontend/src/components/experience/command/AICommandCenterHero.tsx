@@ -55,7 +55,7 @@ export const AICommandCenterHero: React.FC<AICommandCenterHeroProps> = ({
   // Authentic conversational AI briefing text generated strictly from real data
   const getBriefingText = () => {
     if (!hasResume || readinessScore === 0) {
-      return 'Your AI Career Architect is standing by. Upload your resume or add verified skills to unlock real-time match scores and custom learning roadmaps.';
+      return 'Your AI Career Architect is standing by. Upload your resume or add skills to unlock match scores and a learning roadmap.';
     }
     if (topCareerTitle) {
       return `Analysis complete. You demonstrate a ${matchScore}% skill alignment for ${topCareerTitle} with an overall readiness tier of "${readinessTier}".`;
@@ -93,7 +93,7 @@ export const AICommandCenterHero: React.FC<AICommandCenterHeroProps> = ({
                 </h1>
 
                 {/* AI Conversational Briefing */}
-                <div className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line backdrop-blur-md max-w-2xl">
+                <div className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line max-w-2xl">
                   <p className="text-sm sm:text-base text-aurora-muted font-medium leading-relaxed">
                     <TypingHeadline phrases={[briefingText]} typingSpeed={30} pauseDuration={10000} />
                   </p>
@@ -129,7 +129,7 @@ export const AICommandCenterHero: React.FC<AICommandCenterHeroProps> = ({
 
               {/* Right Column: Morphing Progress Ring */}
               <div className="lg:col-span-4 flex justify-center">
-                <div className="p-6 rounded-2xl bg-aurora-canvas/60 border border-aurora-line backdrop-blur-md">
+                <div className="p-6 rounded-2xl bg-aurora-canvas/60 border border-aurora-line">
                   <MorphingProgressRing
                     score={readinessScore}
                     tier={readinessTier}

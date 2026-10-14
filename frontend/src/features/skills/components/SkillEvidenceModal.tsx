@@ -25,8 +25,8 @@ export const SkillEvidenceModal: React.FC<SkillEvidenceModalProps> = ({ skill, o
   if (!skill) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-lg rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-2xl p-6 shadow-2xl space-y-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 animate-fade-in">
+      <div className="relative w-full max-w-lg rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 shadow-2xl space-y-5">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-aurora-line pb-4">
           <div className="flex items-center gap-3">
@@ -35,7 +35,7 @@ export const SkillEvidenceModal: React.FC<SkillEvidenceModalProps> = ({ skill, o
             </div>
             <div>
               <h3 className="font-display text-lg font-bold text-aurora-ink">{skill.name}</h3>
-              <p className="text-xs text-aurora-muted font-mono">
+              <p className="text-xs text-aurora-muted tabular-nums">
                 Evidence Score: <span className="text-emerald-700 font-bold">{skill.evidenceScore}%</span>
               </p>
             </div>
@@ -56,7 +56,7 @@ export const SkillEvidenceModal: React.FC<SkillEvidenceModalProps> = ({ skill, o
             </span>
             <div className="flex flex-wrap gap-1.5">
               {skill.aliases.map((alias, idx) => (
-                <span key={idx} className="px-2 py-0.5 rounded bg-aurora-canvas text-aurora-muted border border-aurora-line text-xs font-mono">
+                <span key={idx} className="px-2 py-0.5 rounded bg-aurora-canvas text-aurora-muted border border-aurora-line text-xs tabular-nums">
                   {alias}
                 </span>
               ))}
@@ -67,7 +67,7 @@ export const SkillEvidenceModal: React.FC<SkillEvidenceModalProps> = ({ skill, o
         {/* Evidence Trail List */}
         <div className="space-y-2">
           <span className="text-[10px] text-aurora-muted uppercase tracking-widest font-bold">
-            Verified Evidence Trail
+            Evidence Trail
           </span>
           <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
             {skill.evidences && skill.evidences.length > 0 ? (
@@ -78,7 +78,7 @@ export const SkillEvidenceModal: React.FC<SkillEvidenceModalProps> = ({ skill, o
                       <FileText className="w-3.5 h-3.5" />
                       {evidence.sourceType.replace('_', ' ').toUpperCase()}
                     </span>
-                    <span className="text-aurora-muted text-[10px] font-mono">
+                    <span className="text-aurora-muted text-[10px] tabular-nums">
                       Weight: {(evidence.weight * 100).toFixed(0)}%
                     </span>
                   </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { DialogFrame } from '../../../design/aurora/DialogFrame';
 import {
   MapPin,
   Briefcase,
@@ -72,14 +73,14 @@ export const CareerIdentityHero: React.FC<CareerIdentityHeroProps> = ({
   };
 
   return (
-    <div className="w-full relative font-mono">
+    <div className="w-full relative tabular-nums">
       {/* Ambient Gentle Mesh Background */}
       <div className="absolute inset-0 bg-white [background-image:linear-gradient(135deg,rgb(167_139_250/0.10),transparent_60%)] rounded-3xl -z-10 border border-aurora-line" />
 
-      <div className="p-8 sm:p-10 rounded-3xl bg-aurora-canvas/60 backdrop-blur-xl border border-aurora-line shadow-2xl space-y-8">
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-8">
+      <div className="p-5 sm:p-8 lg:p-10 rounded-3xl bg-white border border-aurora-line shadow-aurora-md space-y-8">
+        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 lg:gap-8">
           {/* Identity Presentation */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+          <div className="flex min-w-0 flex-col sm:flex-row items-start sm:items-center gap-6">
             {/* User Avatar Surface */}
             <div className="relative group shrink-0">
               {avatarUrl ? (
@@ -94,8 +95,8 @@ export const CareerIdentityHero: React.FC<CareerIdentityHeroProps> = ({
                 </div>
               )}
               <div className="absolute -bottom-1.5 -right-1.5 px-2 py-0.5 rounded-full bg-aurora-canvas border border-emerald-200 text-[9px] font-bold text-emerald-700 flex items-center gap-1 shadow-md">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                VERIFIED
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                SIGNED IN
               </div>
             </div>
 
@@ -132,7 +133,7 @@ export const CareerIdentityHero: React.FC<CareerIdentityHeroProps> = ({
           </div>
 
           {/* Action Trigger */}
-          <div className="shrink-0 pt-2 md:pt-0">
+          <div className="shrink-0">
             <button
               onClick={handleOpenEdit}
               type="button"
@@ -171,8 +172,8 @@ export const CareerIdentityHero: React.FC<CareerIdentityHeroProps> = ({
 
       {/* Focused Edit Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-aurora-canvas/60 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-lg p-6 sm:p-8 rounded-3xl bg-aurora-canvas border border-aurora-line shadow-2xl space-y-6 text-xs">
+        <DialogFrame onClose={() => setIsEditModalOpen(false)} label="Edit professional identity">
+          <div className="relative w-full max-w-lg max-h-[92vh] overflow-y-auto p-6 sm:p-8 rounded-t-3xl sm:rounded-3xl bg-white border border-aurora-line shadow-aurora-lg space-y-6 text-xs">
             <div className="flex items-center justify-between border-b border-aurora-line pb-4">
               <div>
                 <h3 className="text-base font-bold text-aurora-ink tracking-tight">
@@ -185,6 +186,7 @@ export const CareerIdentityHero: React.FC<CareerIdentityHeroProps> = ({
               <button
                 onClick={() => setIsEditModalOpen(false)}
                 type="button"
+                aria-label="Close"
                 className="p-1.5 rounded-xl hover:bg-aurora-canvas text-aurora-muted hover:text-aurora-indigo transition cursor-pointer"
               >
                 <X className="w-5 h-5" />
@@ -259,7 +261,7 @@ export const CareerIdentityHero: React.FC<CareerIdentityHeroProps> = ({
               </div>
             </form>
           </div>
-        </div>
+        </DialogFrame>
       )}
     </div>
   );

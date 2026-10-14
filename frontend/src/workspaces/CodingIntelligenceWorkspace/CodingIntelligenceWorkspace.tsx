@@ -116,7 +116,7 @@ export const CodingIntelligenceWorkspace: React.FC = () => {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter competitive coding handle..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 tabular-nums"
             />
             <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
@@ -139,7 +139,7 @@ export const CodingIntelligenceWorkspace: React.FC = () => {
         {platformProfiles.map((pf) => (
           <GlassPanel key={pf.platform} className="p-4 space-y-3 border-aurora-violet/25">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-aurora-ink font-mono">{pf.platform}</span>
+              <span className="text-xs font-bold text-aurora-ink tabular-nums">{pf.platform}</span>
               <span className="px-2 py-0.5 rounded bg-aurora-violet/[0.06] text-aurora-indigo text-[10px] font-bold border border-aurora-violet/25">
                 {pf.badge}
               </span>
@@ -211,7 +211,7 @@ export const CodingIntelligenceWorkspace: React.FC = () => {
 
           <div className="space-y-3">
             {topicStrengths.map((tp) => (
-              <div key={tp.topic} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between text-xs font-mono">
+              <div key={tp.topic} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between text-xs tabular-nums">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className={`w-4 h-4 ${tp.score >= 90 ? 'text-emerald-700' : 'text-amber-700'}`} />
                   <span className="text-aurora-ink font-bold">{tp.topic}</span>
@@ -230,11 +230,7 @@ export const CodingIntelligenceWorkspace: React.FC = () => {
       </div>
 
       {/* BOTTOM STATUS BAR */}
-      <AIStatusBar
-        status="active"
-        confidence={98.5}
-        lastUpdated="Coding Intelligence Live"
-      />
+      <AIStatusBar status="idle" provider="Built-in sample content" />
     </div>
   );
 };

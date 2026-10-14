@@ -4,7 +4,6 @@ import {
   Download,
   Activity,
   Sparkles,
-  ShieldCheck,
 } from 'lucide-react';
 import { PeriodType } from './AnalyticsWorkspaceHeader';
 
@@ -37,7 +36,7 @@ export const ProgressObservatoryHero: React.FC<ProgressObservatoryHeroProps> = (
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-gradient-to-b from-white via-white to-aurora-sidebar p-6 md:p-8 lg:p-10 shadow-2xl backdrop-blur-xl">
+    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-gradient-to-b from-white via-white to-aurora-sidebar p-6 md:p-8 lg:p-10 shadow-2xl">
       {/* Background ambient lighting */}
       <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-aurora-violet/[0.06] blur-[120px]" />
       <div className="pointer-events-none absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-aurora-violet/[0.06] blur-[120px]" />
@@ -47,14 +46,10 @@ export const ProgressObservatoryHero: React.FC<ProgressObservatoryHeroProps> = (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-aurora-line pb-5">
           <div className="flex items-center gap-3 flex-wrap">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25">
-              <Activity className="w-3.5 h-3.5 text-aurora-indigo animate-pulse" />
-              Career Progress Observatory
+              <Activity className="w-3.5 h-3.5 text-aurora-indigo" />
+              Progress over time
             </span>
 
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-              Deterministic Daily Telemetry
-            </span>
 
             <span className="text-xs text-aurora-muted flex items-center gap-1">
               <Compass className="w-3.5 h-3.5 text-aurora-muted" />
@@ -63,13 +58,14 @@ export const ProgressObservatoryHero: React.FC<ProgressObservatoryHeroProps> = (
           </div>
 
           {/* Timeframe selector + Export button */}
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-            <div className="flex bg-aurora-canvas/60 p-1 rounded-xl border border-aurora-line shadow-inner">
+          <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
+            <div role="group" aria-label="Period" className="flex flex-wrap bg-aurora-canvas/60 p-1 rounded-xl border border-aurora-line shadow-inner">
               {periods.map((p) => (
                 <button
                   key={p.id}
                   onClick={() => onPeriodChange(p.id)}
                   type="button"
+                  aria-pressed={period === p.id}
                   className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all cursor-pointer ${
                     period === p.id
                       ? 'bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md font-semibold'
@@ -86,7 +82,8 @@ export const ProgressObservatoryHero: React.FC<ProgressObservatoryHeroProps> = (
               onClick={onExport || (() => window.print())}
               type="button"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-aurora-line bg-aurora-canvas hover:bg-aurora-canvas text-aurora-ink text-xs font-medium transition cursor-pointer"
-              title="Export Temporal Telemetry Report"
+              title="Print or save this page as PDF"
+              aria-label="Export: print or save this page as PDF"
             >
               <Download className="w-3.5 h-3.5 text-aurora-muted" />
               <span className="hidden md:inline">Export</span>
@@ -99,13 +96,13 @@ export const ProgressObservatoryHero: React.FC<ProgressObservatoryHeroProps> = (
           <div className="lg:col-span-8 space-y-3">
             <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-aurora-indigo">
               <Sparkles className="w-3.5 h-3.5" />
-              Temporal Capability Intelligence
+              Progress analytics
             </div>
             <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-aurora-ink">
               See Your Career Development Unfold Over Time
             </h1>
             <p className="text-sm sm:text-base text-aurora-muted max-w-2xl leading-relaxed">
-              SkillBridge tracks every capability milestone, verified skill, roadmap task, and readiness delta. Observe how your empirical preparation evolves toward <span className="text-aurora-indigo font-semibold">{targetRoleTitle}</span> across genuine daily snapshots.
+              Your skills, roadmap tasks and readiness for <span className="text-aurora-indigo font-semibold">{targetRoleTitle}</span>, from the snapshots SkillBridge has recorded so far.
             </p>
           </div>
 
@@ -121,7 +118,7 @@ export const ProgressObservatoryHero: React.FC<ProgressObservatoryHeroProps> = (
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-aurora-muted">Authentic benchmark fit</p>
+              <p className="text-[11px] text-aurora-muted">For your target career</p>
             </div>
 
             <div className="p-4 rounded-2xl bg-aurora-canvas/60 border border-aurora-line space-y-1">

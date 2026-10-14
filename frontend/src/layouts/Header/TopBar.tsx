@@ -83,7 +83,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onOpenMobileSidebar, onOpenComma
   return (
     <header className="sb-aurora sticky top-0 z-30 flex h-[72px] shrink-0 items-center justify-between gap-3 border-b border-aurora-line/70 bg-aurora-canvas/80 px-4 backdrop-blur-xl md:px-6">
       <div className="flex min-w-0 items-center gap-2">
-        <button type="button" onClick={onOpenMobileSidebar} aria-label="Open navigation" className={`${iconButton} md:hidden`}>
+        <button type="button" onClick={onOpenMobileSidebar} aria-label="Open navigation" className={`${iconButton} lg:hidden`}>
           <Menu className="h-5 w-5" aria-hidden />
         </button>
         <div className="min-w-0">

@@ -41,14 +41,14 @@ export const CareerMomentum: React.FC<CareerMomentumProps> = ({
         </div>
       </ElevatedCard>
 
-      {/* 2. Verified Skills */}
+      {/* 2. Skills on Profile */}
       <ElevatedCard elevation="sm" className="p-5 flex items-start gap-4">
         <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-500 dark:text-emerald-800 shrink-0">
           <Layers className="w-6 h-6" />
         </div>
         <div>
           <span className="text-xs font-semibold text-aurora-muted dark:text-neutral-400">
-            Verified Skills
+            Skills on Profile
           </span>
           <div className="text-2xl font-extrabold text-neutral-900 dark:text-white mt-0.5">
             <CountUpNumber value={totalSkills} />

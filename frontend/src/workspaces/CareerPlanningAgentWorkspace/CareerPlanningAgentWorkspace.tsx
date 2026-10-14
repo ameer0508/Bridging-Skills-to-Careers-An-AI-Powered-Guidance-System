@@ -93,7 +93,7 @@ export const CareerPlanningAgentWorkspace: React.FC = () => {
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
               placeholder="Enter User ID..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 tabular-nums"
             />
             <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
@@ -103,7 +103,7 @@ export const CareerPlanningAgentWorkspace: React.FC = () => {
           <button
             onClick={() => handleRunAgent(true)}
             disabled={isAnalyzing}
-            className="w-full sm:w-auto py-2 px-3 rounded-xl bg-amber-50 hover:bg-amber-50 border border-amber-200 text-xs font-bold text-amber-700 flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 font-mono"
+            className="w-full sm:w-auto py-2 px-3 rounded-xl bg-amber-50 hover:bg-amber-50 border border-amber-200 text-xs font-bold text-amber-700 flex items-center justify-center gap-1.5 transition-all cursor-pointer disabled:opacity-50 tabular-nums"
           >
             <AlertTriangle className="w-3.5 h-3.5" />
             <span>Trigger Adaptation</span>
@@ -137,7 +137,7 @@ export const CareerPlanningAgentWorkspace: React.FC = () => {
 
             <div className="space-y-3">
               {agentPlanMetrics.quarterlyMilestones.map((m) => (
-                <div key={m.quarter} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1.5 text-xs font-mono">
+                <div key={m.quarter} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1.5 text-xs tabular-nums">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-aurora-indigo">{m.quarter}</span>
                     <span className="text-[10px] bg-aurora-violet/[0.06] text-aurora-indigo font-bold px-2 py-0.5 rounded">
@@ -161,7 +161,7 @@ export const CareerPlanningAgentWorkspace: React.FC = () => {
 
             <div className="space-y-2.5">
               {agentPlanMetrics.actionableTasks.map((t) => (
-                <div key={t.id} className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between text-xs font-mono">
+                <div key={t.id} className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between text-xs tabular-nums">
                   <div className="flex items-center gap-2.5">
                     <CheckCircle2 className={`w-4 h-4 ${t.status === 'Completed' ? 'text-emerald-700' : 'text-aurora-muted'}`} />
                     <span className="text-aurora-ink font-bold">{t.title}</span>
@@ -185,7 +185,7 @@ export const CareerPlanningAgentWorkspace: React.FC = () => {
               </span>
             </div>
 
-            <div className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2 text-xs font-mono">
+            <div className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2 text-xs tabular-nums">
               <span className="text-aurora-violet font-bold block">Why this strategy?</span>
               <p className="text-aurora-muted leading-relaxed text-[11px]">
                 {agentPlanMetrics.reasoningSummary}
@@ -202,7 +202,7 @@ export const CareerPlanningAgentWorkspace: React.FC = () => {
               </span>
             </div>
 
-            <div className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2 text-xs font-mono">
+            <div className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2 text-xs tabular-nums">
               <span className="text-emerald-700 font-bold text-lg block">96.0 / 100</span>
               <span className="text-aurora-ink font-bold block">{agentPlanMetrics.readinessTier}</span>
               <span className="text-[10px] text-aurora-muted block">Target Compensation: $240,000 USD</span>
@@ -212,11 +212,7 @@ export const CareerPlanningAgentWorkspace: React.FC = () => {
       </div>
 
       {/* BOTTOM STATUS BAR */}
-      <AIStatusBar
-        status="active"
-        confidence={98.8}
-        lastUpdated="Career Agent Active"
-      />
+      <AIStatusBar status="idle" provider="Built-in sample content" />
     </div>
   );
 };

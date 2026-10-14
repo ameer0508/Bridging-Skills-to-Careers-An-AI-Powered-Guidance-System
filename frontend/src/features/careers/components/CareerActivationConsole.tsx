@@ -68,7 +68,7 @@ export const CareerActivationConsole: React.FC<CareerActivationConsoleProps> = (
   const isProcessing = parsingStatus === 'pending' || parsingStatus === 'processing' || isUploading;
 
   return (
-    <div className="rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-2xl p-6 sm:p-8 lg:p-10 shadow-2xl space-y-6">
+    <div className="rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 sm:p-8 lg:p-10 shadow-2xl space-y-6">
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 border-b border-aurora-line pb-6">
         <div className="space-y-1.5 max-w-2xl">
           <div className="flex items-center gap-2">
@@ -83,7 +83,7 @@ export const CareerActivationConsole: React.FC<CareerActivationConsoleProps> = (
             Provide Resume Evidence to Activate Role Fit Mapping
           </h3>
           <p className="text-xs sm:text-sm text-aurora-muted leading-relaxed font-sans">
-            SkillBridge calculates deterministic compatibility directly from your parsed work history, technical stack, and verified capstones. Upload your active CV or resume to execute vector extraction.
+            SkillBridge calculates deterministic compatibility directly from your parsed work history, technical stack, and stated capstones. Upload your active CV or resume to execute vector extraction.
           </p>
         </div>
 
@@ -127,7 +127,7 @@ export const CareerActivationConsole: React.FC<CareerActivationConsoleProps> = (
               <h4 className="font-display text-base sm:text-lg font-bold text-aurora-ink">
                 Drag & Drop Your Resume File Here
               </h4>
-              <p className="text-xs text-aurora-muted font-mono">
+              <p className="text-xs text-aurora-muted tabular-nums">
                 or click to browse your workstation • PDF, DOC, DOCX up to <strong className="text-aurora-violet">10 MB</strong>
               </p>
             </div>
@@ -160,7 +160,7 @@ export const CareerActivationConsole: React.FC<CareerActivationConsoleProps> = (
                 ? 'Queueing Deterministic Extraction Worker...'
                 : 'Extracting Skills & Mapping Career Alignments...'}
             </h4>
-            <p className="text-xs text-aurora-muted font-mono">
+            <p className="text-xs text-aurora-muted tabular-nums">
               {selectedFile ? selectedFile.name : 'Active Resume Document'} • Processing through 5-stage analytical pipeline
             </p>
           </div>
@@ -182,7 +182,7 @@ export const CareerActivationConsole: React.FC<CareerActivationConsoleProps> = (
 
           <div className="flex items-center justify-center gap-6 text-xs text-aurora-muted pt-2 border-t border-aurora-line">
             <span className="flex items-center gap-1.5 text-aurora-violet">
-              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+              <span className="w-2 h-2 rounded-full bg-cyan-400" />
               Parsing Structure
             </span>
             <span className="flex items-center gap-1.5 text-aurora-muted">

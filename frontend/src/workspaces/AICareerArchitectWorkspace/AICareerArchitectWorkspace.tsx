@@ -35,6 +35,18 @@ export const AICareerArchitectWorkspace: React.FC = () => {
   const [isConversationDrawerOpen, setIsConversationDrawerOpen] = useState(false);
 
   // 1. Fetch matched careers for context switching
+  // Whether a language model or the built-in rules answer (the snapshot probes the AI service)
+  const { data: snapshotData } = useQuery({
+    queryKey: ['career-snapshot'],
+    queryFn: async () => {
+      const response = await apiClient.get('/users/me/career-snapshot');
+      return response.data.data;
+    },
+    staleTime: 60_000,
+  });
+  const aiStatus = (snapshotData as { telemetry?: { aiStatus?: 'LIVE' | 'FALLBACK' } } | undefined)?.telemetry?.aiStatus;
+  const aiLive = aiStatus === 'LIVE' ? true : aiStatus === 'FALLBACK' ? false : null;
+
   const { data: careersData, isLoading: matchesLoading } = useQuery({
     queryKey: ['careers-for-ai'],
     queryFn: async () => {
@@ -45,7 +57,8 @@ export const AICareerArchitectWorkspace: React.FC = () => {
 
   // 2. Fetch Readiness
   const { data: readinessData, isLoading: readinessLoading } = useQuery({
-    queryKey: ['readiness'],
+    // The bare list is cached under its own key: ['readiness'] holds { readiness }
+    queryKey: ['readiness', 'list'],
     queryFn: async () => {
       const response = await apiClient.get('/readiness');
       return response.data.data.readiness || [];
@@ -274,8 +287,8 @@ export const AICareerArchitectWorkspace: React.FC = () => {
     return (
       <div className="neural-command-center min-h-screen p-6 sm:p-12 flex flex-col items-center justify-center space-y-6">
         <div className="neural-glass-blade p-12 flex flex-col items-center justify-center space-y-4 max-w-md w-full text-center">
-          <AIThinkingAnimation statusText="Connecting to Neural AI Orchestrator..." />
-          <span className="text-xs font-mono text-aurora-violet">Synchronizing Grounded Telemetry Stream...</span>
+          <AIThinkingAnimation statusText="Loading the assistant" />
+          <span className="text-xs tabular-nums text-aurora-violet">Synchronizing Grounded Telemetry Stream...</span>
         </div>
         <div className="w-full max-w-4xl space-y-4">
           <SkeletonShimmer height={340} />
@@ -290,6 +303,7 @@ export const AICareerArchitectWorkspace: React.FC = () => {
       {/* 1. MASTER SPATIAL NEURAL STAGE */}
       <NeuralCommandCenterCanvas
         aiState={aiState}
+        aiLive={aiLive}
         targetRole={targetRoleTitle}
         activeDomain={user?.primaryCareerDomain}
         careers={matches}

@@ -90,7 +90,7 @@ export const ProfessionalDigitalTwinWorkspace: React.FC = () => {
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
               placeholder="Enter User ID..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 tabular-nums"
             />
             <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
@@ -157,7 +157,7 @@ export const ProfessionalDigitalTwinWorkspace: React.FC = () => {
 
             <div className="space-y-3">
               {digitalTwinMetrics.inferredSkills.map((inf) => (
-                <div key={inf.name} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1.5 text-xs font-mono">
+                <div key={inf.name} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-1.5 text-xs tabular-nums">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-aurora-violet">{inf.name}</span>
                     <span className="text-emerald-700 font-bold text-[11px]">{inf.confidence}%</span>
@@ -197,11 +197,7 @@ export const ProfessionalDigitalTwinWorkspace: React.FC = () => {
       </div>
 
       {/* BOTTOM STATUS BAR */}
-      <AIStatusBar
-        status="active"
-        confidence={98.5}
-        lastUpdated="Digital Twin Active"
-      />
+      <AIStatusBar status="idle" provider="Built-in sample content" />
     </div>
   );
 };

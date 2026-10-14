@@ -3,9 +3,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
   User,
-  ShieldCheck,
-  Sparkles,
-  Award,
   Lock,
   Compass,
   Layers,
@@ -19,6 +16,8 @@ import {
   Check,
 } from 'lucide-react';
 import apiClient from '../../lib/axios';
+import { openCommandPalette } from '../../components/composite/CommandPalette';
+import { PageSkeleton } from '../../design/aurora/kit';
 import { useAuthStore } from '../../store/authStore';
 import { CAREER_DOMAINS, SECONDARY_INTEREST_TAGS } from '../../features/onboarding/careerDomains';
 
@@ -45,7 +44,6 @@ import {
   WorkspaceToolbar,
   PremiumErrorState,
 } from '../../components/experience/workspace';
-import { AIThinkingAnimation } from '../../components/experience';
 
 export const SettingsWorkspace: React.FC = () => {
   const navigate = useNavigate();
@@ -92,7 +90,8 @@ export const SettingsWorkspace: React.FC = () => {
 
   // Query 4: Target Career Matches
   const { data: matchesData } = useQuery({
-    queryKey: ['careers', 'matches'],
+    // The bare list is cached under its own key: ['careers', 'matches'] holds { matches }
+    queryKey: ['careers', 'matches', 'list'],
     queryFn: async () => {
       const response = await apiClient.get('/careers/matches');
       return response.data.data.matches || [];
@@ -252,7 +251,7 @@ export const SettingsWorkspace: React.FC = () => {
     {
       id: 'resume',
       title: 'Manage Resume',
-      subtitle: resumeData ? `ATS Score: ${resumeData.atsScore || 85}/100` : 'Upload resume for ATS audit',
+      subtitle: resumeData ? resumeData.originalFileName : 'Upload a resume',
       icon: FileText,
       shortcut: '⌘3',
       color: 'text-amber-700',
@@ -291,21 +290,15 @@ export const SettingsWorkspace: React.FC = () => {
   ];
 
   if (isProfileLoading) {
-    return (
-      <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
-          <AIThinkingAnimation statusText="Connecting to Personal AI Control Center..." />
-        </div>
-      </div>
-    );
+    return <PageSkeleton label="Loading your settings" />;
   }
 
   if (profileError) {
     return (
       <div className="max-w-7xl mx-auto pb-12 px-4">
         <PremiumErrorState
-          title="Profile Connection Error"
-          message={`Failed to retrieve profile data: ${(profileError as Error).message}`}
+          title="Your settings could not be loaded"
+          message={(profileError as Error).message}
           onRetry={() => refetch()}
         />
       </div>
@@ -316,16 +309,16 @@ export const SettingsWorkspace: React.FC = () => {
     <div className="max-w-7xl mx-auto space-y-10 pb-16 px-4">
       {/* SECTION 1 — WORKSPACE HERO */}
       <WorkspaceHero
-        greeting="Personal AI Headquarters"
+        greeting="Your account"
         userName={profile?.fullName || user?.fullName || user?.email?.split('@')[0]}
         title="Profile & Settings"
-        description="Manage your identity, career preferences, AI personalization, privacy, and workspace experience from one intelligent control center."
+        description="Manage your details, career preferences, notifications and security."
         aiSummary={`Profile Completeness: ${profileCompleteness}% • Target Role: ${targetRoleTitle} • Email: ${profile?.email}`}
         stats={[
-          { label: 'Profile Completion', value: `${profileCompleteness}%`, change: profileCompleteness === 100 ? 'Fully Verified' : 'In Progress', isPositive: profileCompleteness >= 70 },
+          { label: 'Profile Completion', value: `${profileCompleteness}%`, change: profileCompleteness === 100 ? 'Complete' : 'In Progress', isPositive: profileCompleteness >= 70 },
           { label: 'Target Role Fit', value: topMatch ? `${careerGoalAlignment}%` : 'Not Selected', change: targetRoleTitle, isPositive: careerGoalAlignment >= 50 },
-          { label: 'Verified Skills', value: `${totalSkills} Skills`, change: 'Taxonomy Indexed', isPositive: totalSkills > 0 },
-          { label: 'Resume Vault', value: resumeData ? 'Active' : 'Missing', change: resumeData ? resumeData.originalFileName : 'Upload Required', isPositive: !!resumeData },
+          { label: 'Skills on Profile', value: `${totalSkills} Skills`, change: 'From your records', isPositive: totalSkills > 0 },
+          { label: 'Resume', value: resumeData ? 'Uploaded' : 'None', change: resumeData ? resumeData.originalFileName : 'Upload required', isPositive: !!resumeData },
         ]}
         primaryAction={{
           label: 'Edit Profile Information',
@@ -349,93 +342,41 @@ export const SettingsWorkspace: React.FC = () => {
         ]}
         activeFilter={activeFilter}
         onFilterChange={setActiveFilter}
-        onCommandPaletteOpen={() => alert('Command Palette triggered (⌘K).')}
+        onCommandPaletteOpen={openCommandPalette}
       />
 
       {/* SECTION 2 — PROFILE OVERVIEW (METRIC CARDS) */}
       <PremiumSection
-        title="Account Telemetry Overview"
-        subtitle="Identity completeness, security protection, and AI personalization status"
-        badge="Account Status"
+        title="Account overview"
+        subtitle="Figures from your own records. Profile completeness counts name, email, photo, resume, career matches and skills."
+        badge="Your account"
       >
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <PremiumMetricCard title="Profile completeness" value={profileCompleteness} suffix="%" trend={profileCompleteness === 100 ? 'Complete' : 'Add the missing items below'} icon={User} />
           <PremiumMetricCard
-            title="Profile Completeness"
-            value={profileCompleteness}
-            suffix="%"
-            trend={profileCompleteness === 100 ? 'Fully Verified' : 'Completion Active'}
-            isPositive={profileCompleteness >= 70}
-            confidence={99.1}
-            icon={User}
-            sparklineData={[Math.max(0, profileCompleteness - 30), Math.max(0, profileCompleteness - 15), profileCompleteness]}
-          />
-          <PremiumMetricCard
-            title="Target Role Alignment"
-            value={careerGoalAlignment}
-            suffix="%"
-            trend={targetRoleTitle}
-            isPositive={careerGoalAlignment >= 50}
-            confidence={98.6}
+            title="Closest career match"
+            value={topMatch ? `${careerGoalAlignment}%` : 'None yet'}
+            trend={topMatch ? `${targetRoleTitle}; not a hiring prediction` : 'Upload a resume to see matches'}
             icon={Compass}
-            sparklineData={[Math.max(0, careerGoalAlignment - 20), careerGoalAlignment]}
           />
-          <PremiumMetricCard
-            title="Connected Vault & SSO"
-            value={resumeData ? 2 : 1}
-            suffix=" Services"
-            trend="Password & Vault"
-            isPositive={true}
-            confidence={99.5}
-            icon={Award}
-            sparklineData={[1, resumeData ? 2 : 1]}
-          />
-          <PremiumMetricCard
-            title="Verified Skill Index"
-            value={totalSkills}
-            suffix=" Skills"
-            trend={totalSkills > 0 ? 'Taxonomy Synced' : 'No Skills Indexed'}
-            isPositive={totalSkills > 0}
-            confidence={97.8}
-            icon={Sliders}
-            sparklineData={[Math.max(0, totalSkills - 5), totalSkills]}
-          />
-          <PremiumMetricCard
-            title="Security & Safety Index"
-            value={100}
-            suffix="%"
-            trend="JWT Session Active"
-            isPositive={true}
-            confidence={99.2}
-            icon={ShieldCheck}
-            sparklineData={[90, 95, 100]}
-          />
-          <PremiumMetricCard
-            title="AI Advisor Personalization"
-            value={profileCompleteness >= 70 ? 98 : 60}
-            suffix="%"
-            trend="Grounded Engine"
-            isPositive={profileCompleteness >= 70}
-            confidence={98.6}
-            icon={Sparkles}
-            sparklineData={[60, 80, profileCompleteness >= 70 ? 98 : 60]}
-          />
+          <PremiumMetricCard title="Skills on your profile" value={totalSkills} trend={totalSkills > 0 ? 'From your resume and records' : 'None recorded yet'} icon={Sliders} />
+          <PremiumMetricCard title="Resume" value={resumeData ? 'Uploaded' : 'None'} trend={resumeData ? resumeData.originalFileName : 'Upload one on the Resume page'} icon={FileText} />
         </div>
       </PremiumSection>
 
       {/* SECTION 3 — AI PERSONALIZATION SUMMARY BANNER */}
       <AIInsightBanner
-        title={`Personal AI Advisor Profile: ${profileCompleteness >= 70 ? 'Active & Grounded' : 'Onboarding Initialized'}`}
+        title={profileCompleteness >= 70 ? 'Your guidance uses this profile' : 'Complete your profile for better guidance'}
         description={
           profileCompleteness >= 70
-            ? `Your personal telemetry grounds AI career guidance specifically for ${targetRoleTitle} with ${totalSkills} verified skills.`
-            : 'Complete your profile details, upload your ATS resume, or select a target career role to activate personalized AI recommendations.'
+            ? `Recommendations and the assistant use your target role (${targetRoleTitle}) and the ${totalSkills} skills on your profile.`
+            : 'Add your details, upload a resume or choose a target role so recommendations can use them.'
         }
-        confidence={98.6}
         priority={profileCompleteness < 70 ? 'high' : 'medium'}
         evidence={[
           `Profile Completeness: ${profileCompleteness}%`,
           `Target Role: ${targetRoleTitle}`,
-          `Verified Skills: ${totalSkills}`
+          `Skills on Profile: ${totalSkills}`
         ]}
         actionLabel="Manage Preferences"
         onAction={() => {
@@ -620,18 +561,18 @@ export const SettingsWorkspace: React.FC = () => {
               )}
 
               <p className="text-[11px] text-aurora-muted leading-relaxed pt-2 border-t border-aurora-line">
-                Updating your target career domain recalculates taxonomy matches, readiness scores, recommendations, and live job search context across all 12 workspaces.
+                Updating your target career domain recalculates taxonomy matches, readiness scores, recommendations, and job search context across your workspaces.
               </p>
             </GlassPanel>
 
             <GlassPanel className="p-6 space-y-4 border-aurora-violet/25">
               <span className="text-sm font-bold text-aurora-ink flex items-center gap-2">
                 <Cpu className="w-4 h-4 text-aurora-violet" />
-                Target Tech Stack & Verified Skills ({userSkillList.length})
+                Target Tech Stack & Skills ({userSkillList.length})
               </span>
               {userSkillList.length === 0 ? (
                 <div className="p-4 text-center text-xs text-aurora-muted italic bg-aurora-canvas/60 rounded-lg">
-                  No verified skills recorded yet. Upload a resume or add skills in Skill Intelligence to ground your tech stack.
+                  No skills recorded yet. Upload a resume or add skills in Skill Intelligence to ground your tech stack.
                 </div>
               ) : (
                 <div className="flex flex-wrap gap-2">
@@ -646,7 +587,7 @@ export const SettingsWorkspace: React.FC = () => {
                 </div>
               )}
               <p className="text-xs text-aurora-muted leading-relaxed pt-2 border-t border-aurora-line">
-                AI continuously weights job market postings using your verified tech stack.
+                Job listings are ranked against the skills on your profile.
               </p>
             </GlassPanel>
 
@@ -697,41 +638,41 @@ export const SettingsWorkspace: React.FC = () => {
       {/* SECTION 7 — ACCOUNT SPOTLIGHT */}
       <WorkspaceSpotlight
         badge="Highest-Impact Security & Identity Setup"
-        title="Complete Resume Vault Upload & Identity Verification"
-        description="Uploading your ATS resume file unlocks instant skill vector parsing, career readiness scoring, and automated recruiter matching."
+        title="Upload your resume"
+        description="Your skills, career matches and readiness are calculated from it."
         impactScore="+15% Profile Completeness"
-        actionLabel="Manage Resume Vault"
+        actionLabel="Go to Resume"
         onAction={() => navigate('/resume')}
       />
 
       {/* SECTION 8 — CONNECTED SERVICES */}
       <PremiumSection
-        title="Connected Authentication & Storage Services"
-        subtitle="Active identity providers and secure document vaults"
-        badge="Integrations"
+        title="How you sign in and what is stored"
+        subtitle="SkillBridge has no external sign-in or storage services"
+        badge="Account"
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[
             {
-              name: 'Local Password Auth',
-              status: 'Connected',
-              desc: 'Single sign-on authentication service.'
-            },
-            {
-              name: 'Resume Document Vault',
-              status: resumeData ? 'Connected' : 'Missing',
-              desc: resumeData ? `Encrypted file: ${resumeData.originalFileName}` : 'No resume file uploaded yet.'
-            },
-            {
-              name: 'Encrypted Session Token',
+              name: 'Email and password',
               status: 'Active',
-              desc: 'Secure JWT token authentication session.'
+              desc: 'Your password is stored as a bcrypt hash.'
+            },
+            {
+              name: 'Resume file',
+              status: resumeData ? 'Stored' : 'None',
+              desc: resumeData ? `${resumeData.originalFileName}, stored on this SkillBridge server and visible only to your account.` : 'No resume file uploaded yet.'
+            },
+            {
+              name: 'Session',
+              status: 'Active',
+              desc: 'A signed token keeps you signed in; signing out revokes it.'
             },
           ].map((srv, idx) => (
             <GlassPanel key={idx} className="p-5 space-y-2">
               <div className="flex items-center justify-between">
                 <h4 className="text-xs font-bold text-aurora-ink">{srv.name}</h4>
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${srv.status === 'Connected' || srv.status === 'Active' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-amber-50 border border-amber-200 text-amber-700'}`}>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${srv.status === 'Stored' || srv.status === 'Active' ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-amber-50 border border-amber-200 text-amber-700'}`}>
                   {srv.status}
                 </span>
               </div>
@@ -743,18 +684,17 @@ export const SettingsWorkspace: React.FC = () => {
 
       {/* SECTION 9 — ACCOUNT ACTIVITY LOG */}
       <PremiumSection
-        title="Recent Account Activity Log"
-        subtitle="Audit trail of security events, profile updates, and settings changes"
-        badge="Audit Trail"
+        title="Recent activity"
+        subtitle="The latest things recorded on your account"
+        badge="Activity"
       >
         <div className="space-y-3">
           {recentEvents.length === 0 ? (
             <GlassPanel className="p-4 flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
-                <span className="font-bold text-aurora-ink">Authenticated Session Established</span>
+                <span className="font-bold text-aurora-ink">Nothing recorded yet</span>
               </div>
-              <span className="text-[10px] text-aurora-muted font-mono">Active</span>
             </GlassPanel>
           ) : (
             recentEvents.slice(0, 5).map((evt: { _id: string; eventType: string; createdAt: string | number | Date; details?: { fileName?: string; skillName?: string } }) => (
@@ -787,9 +727,8 @@ export const SettingsWorkspace: React.FC = () => {
 
       {/* SECTION 12 — AI STATUS BAR */}
       <AIStatusBar
+        provider="Your profile"
         status={isProfileLoading ? 'thinking' : 'active'}
-        confidence={98.6}
-        lastUpdated="Just now"
       />
     </div>
   );

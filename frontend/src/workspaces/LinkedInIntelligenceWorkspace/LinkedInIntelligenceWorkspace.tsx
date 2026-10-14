@@ -114,7 +114,7 @@ export const LinkedInIntelligenceWorkspace: React.FC = () => {
               value={profileId}
               onChange={(e) => setProfileId(e.target.value)}
               placeholder="Enter LinkedIn profile ID..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 tabular-nums"
             />
             <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
@@ -136,7 +136,7 @@ export const LinkedInIntelligenceWorkspace: React.FC = () => {
       <GlassPanel className="p-6 space-y-4 border-aurora-violet/25 relative overflow-hidden">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-aurora-violet animate-pulse" />
+            <Sparkles className="w-5 h-5 text-aurora-violet" />
             <span className="text-sm font-bold text-aurora-ink uppercase tracking-wider">
               AI-Optimized Recruiter Headline Recommendation
             </span>
@@ -155,7 +155,7 @@ export const LinkedInIntelligenceWorkspace: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar">
-          <span className="text-aurora-muted text-xs font-mono">Suggested Recruiter Keywords:</span>
+          <span className="text-aurora-muted text-xs tabular-nums">Suggested Recruiter Keywords:</span>
           {profileSummary.suggestedKeywords.map((kw) => (
             <span key={kw} className="px-2.5 py-0.5 rounded-full bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo text-[10px] font-bold shrink-0">
               +{kw}
@@ -171,7 +171,7 @@ export const LinkedInIntelligenceWorkspace: React.FC = () => {
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
               <Briefcase className="w-4 h-4 text-aurora-indigo" />
-              Verified Career Progression ({experiences.length} Roles)
+              Career Progression ({experiences.length} Roles)
             </span>
             <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
               Upward Trajectory
@@ -204,7 +204,7 @@ export const LinkedInIntelligenceWorkspace: React.FC = () => {
               </span>
             </div>
 
-            <div className="space-y-2 text-xs font-mono">
+            <div className="space-y-2 text-xs tabular-nums">
               {topEndorsedSkills.map((sk) => (
                 <div key={sk.name} className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between">
                   <span className="text-aurora-ink font-bold">{sk.name}</span>
@@ -219,11 +219,7 @@ export const LinkedInIntelligenceWorkspace: React.FC = () => {
       </div>
 
       {/* BOTTOM STATUS BAR */}
-      <AIStatusBar
-        status="active"
-        confidence={96.9}
-        lastUpdated="LinkedIn Intelligence Live"
-      />
+      <AIStatusBar status="idle" provider="Built-in sample content" />
     </div>
   );
 };

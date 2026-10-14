@@ -62,7 +62,7 @@ export const NeuralAgentConstellation: React.FC<NeuralAgentConstellationProps> =
       status: 'ACTIVE',
       route: '/learning-agent',
       category: 'Curriculum & Skill Synthesis',
-      description: 'Synthesizes personalized learning roadmaps, phase milestones, and verified skill modules.',
+      description: 'Synthesizes personalized learning roadmaps, phase milestones, and skill modules.',
       metricLabel: 'Curriculum Velocity',
       metricValue: 'Adaptive Pace',
       dagStep: 2,
@@ -107,9 +107,9 @@ export const NeuralAgentConstellation: React.FC<NeuralAgentConstellationProps> =
       status: 'ACTIVE',
       route: '/opportunity-agent',
       category: 'Market Intelligence & Trajectory',
-      description: 'Scans real-time job requisitions, market salary tiers, and emerging role transitions.',
+      description: 'Searches job listings from configured sources, or labelled samples when none is configured.',
       metricLabel: 'Live Opportunities',
-      metricValue: `${opportunityCount} Verified`,
+      metricValue: `${opportunityCount} Listed`,
       dagStep: 4,
       angleDeg: 120, // Bottom Left
       icon: <TrendingUp className="w-4 h-4 text-amber-700" />,
@@ -122,9 +122,9 @@ export const NeuralAgentConstellation: React.FC<NeuralAgentConstellationProps> =
       status: 'ACTIVE',
       route: '/job-agent',
       category: 'Requisition Match & Filtering',
-      description: 'Filters verified industry openings matching the student candidate proficiencies.',
+      description: 'Filters listed openings matching the student candidate proficiencies.',
       metricLabel: 'Search Horizon',
-      metricValue: 'Real-time',
+      metricValue: 'On request',
       dagStep: 4,
       angleDeg: 180, // Middle Left
       icon: <Search className="w-4 h-4 text-aurora-violet" />,
@@ -219,7 +219,7 @@ export const NeuralAgentConstellation: React.FC<NeuralAgentConstellationProps> =
             <motion.div
               whileHover={{ scale: 1.12 }}
               whileTap={{ scale: 0.94 }}
-              className={`flex items-center gap-3 px-3.5 py-2 rounded-2xl border transition-all duration-300 cursor-pointer backdrop-blur-xl shadow-xl ${
+              className={`flex items-center gap-3 px-3.5 py-2 rounded-2xl border transition-all duration-300 cursor-pointer shadow-xl ${
                 isHovered || isSelected
                   ? 'bg-aurora-canvas/60 border-cyan-400 text-aurora-ink shadow-[0_0_25px_rgba(6,182,212,0.4)] ring-1 ring-cyan-400/60'
                   : 'bg-aurora-canvas/60 border-aurora-line text-aurora-muted hover:border-aurora-line'

@@ -57,7 +57,7 @@ export const ForecastCards: React.FC<ForecastCardsProps> = ({
       <GlassPanel className="p-4 space-y-2 border-purple-500/20">
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-aurora-muted uppercase font-bold">Market Relevance</span>
-          <span className="text-aurora-violet text-xs font-bold">Live Telemetry</span>
+          <span className="text-aurora-violet text-xs font-bold">From your records</span>
         </div>
         <div className="flex items-end justify-between">
           <h3 className="text-2xl font-bold text-aurora-ink">{marketIndex}%</h3>

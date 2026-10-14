@@ -37,7 +37,7 @@ export const NeuralContextOrbit: React.FC<NeuralContextOrbitProps> = ({
     {
       key: 'skills',
       label: 'Skills Matrix',
-      value: `${telemetry.totalSkills} Verified`,
+      value: `${telemetry.totalSkills} on profile`,
       sublabel: 'Evidence Grounded',
       icon: <Cpu className="w-4 h-4 text-aurora-violet" />,
       angleDeg: -60,
@@ -54,7 +54,7 @@ export const NeuralContextOrbit: React.FC<NeuralContextOrbitProps> = ({
     },
     {
       key: 'ats',
-      label: 'Resume ATS Index',
+      label: 'Resume completeness',
       value: telemetry.atsScore !== null && telemetry.atsScore > 0 ? `${telemetry.atsScore}/100` : 'Sync Pending',
       sublabel: 'Parser Telemetry',
       icon: <FileText className="w-4 h-4 text-aurora-indigo" />,
@@ -133,7 +133,7 @@ export const NeuralContextOrbit: React.FC<NeuralContextOrbitProps> = ({
             <motion.div
               whileHover={{ scale: 1.15 }}
               whileTap={{ scale: 0.92 }}
-              className={`flex items-center gap-2.5 px-3 py-1.5 rounded-full border transition-all duration-300 cursor-pointer shadow-lg backdrop-blur-md ${
+              className={`flex items-center gap-2.5 px-3 py-1.5 rounded-full border transition-all duration-300 cursor-pointer shadow-lg ${
                 isHovered
                   ? 'bg-aurora-canvas/60 border-cyan-400 text-aurora-ink shadow-[0_0_20px_rgba(6,182,212,0.4)] ring-1 ring-cyan-400/50'
                   : 'bg-aurora-canvas/60 border-aurora-line text-aurora-muted hover:border-aurora-line'
@@ -158,7 +158,7 @@ export const NeuralContextOrbit: React.FC<NeuralContextOrbitProps> = ({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 4, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 rounded-xl bg-aurora-canvas/60 border border-cyan-400/40 backdrop-blur-xl shadow-2xl text-center whitespace-nowrap z-30"
+                  className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-1.5 rounded-xl bg-aurora-canvas/60 border border-cyan-400/40 shadow-2xl text-center whitespace-nowrap z-30"
                 >
                   <span className="text-[10px] text-aurora-violet block">{node.sublabel}</span>
                   <span className="text-[9px] text-aurora-muted">Telemetry Feed Grounded</span>

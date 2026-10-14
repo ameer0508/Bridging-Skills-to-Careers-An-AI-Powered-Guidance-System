@@ -19,10 +19,10 @@ export const GrowthStoryEngine = {
     const progress = roadmap?.progressPercentage || 0;
 
     const headline = `Professional Growth Journey: ${roleTitle}`;
-    const narrativeParagraph = `Since initiating your ${roleTitle} path, you have indexed ${totalSkills} verified competencies, achieved a ${score}% career readiness rating, and completed ${progress}% of your structured curriculum roadmap. Maintaining this trajectory will position you for technical evaluation and job placement.`;
+    const narrativeParagraph = `Since initiating your ${roleTitle} path, you have indexed ${totalSkills} skills, achieved a ${score}% career readiness rating, and completed ${progress}% of your structured curriculum roadmap. Maintaining this trajectory will position you for technical evaluation and job placement.`;
 
     const evidenceChips = [
-      `${totalSkills} Verified Skills`,
+      `${totalSkills} Skills on Profile`,
       `${score}% Readiness Rating`,
       `${progress}% Roadmap Complete`,
       `Target Role: ${roleTitle}`,

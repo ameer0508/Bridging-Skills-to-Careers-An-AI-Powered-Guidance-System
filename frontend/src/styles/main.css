@@ -556,6 +556,19 @@ html.light {
    Collapse all durations to instant when user prefers
    reduced motion. State changes still occur; motion removed.
    ────────────────────────────────────────────────────── */
+/* Reduced motion: decorative and looping CSS animations stop (spinners and pulses included);
+   content that fades in is shown in its final state at once */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --duration-fast:     0ms;
@@ -676,6 +689,13 @@ body,
   margin-inline: auto;
   padding: var(--spacing-workspace-padding);
   width: 100%;
+}
+
+/* Phones: pages add their own inner padding, so the shared gutter is kept small */
+@media (max-width: 639px) {
+  .workspace-content {
+    padding: var(--spacing-3);
+  }
 }
 
 .workspace-content--home {

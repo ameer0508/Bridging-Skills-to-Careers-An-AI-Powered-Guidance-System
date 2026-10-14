@@ -71,7 +71,7 @@ export const ScoreBreakdown: React.FC<{ rows: Row[]; testId?: string }> = ({ row
                     transition={reduce ? { duration: 0 } : { duration: 0.8, ease: auroraEase, delay: Math.min(i, 12) * 0.03 }}
                   />
                 </span>
-                <span className="w-[5.5rem] shrink-0 whitespace-nowrap text-right font-mono text-xs font-semibold text-aurora-ink">
+                <span className="w-[5.5rem] shrink-0 whitespace-nowrap text-right tabular-nums text-xs font-semibold text-aurora-ink">
                   {row.pointsEarned} / {row.pointsPossible}
                 </span>
               </span>

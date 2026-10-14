@@ -60,7 +60,7 @@ export const CareerAlignmentPipelineVisual: React.FC<CareerAlignmentPipelineVisu
   ];
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-2xl p-6 sm:p-8 lg:p-10 shadow-2xl">
+    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 sm:p-8 lg:p-10 shadow-2xl">
       {/* Ambient background trajectory glows */}
       <div className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full bg-linear-to-tr from-cyan-500/10 via-indigo-500/10 to-transparent blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -right-24 w-96 h-96 rounded-full bg-linear-to-bl from-amber-500/10 via-purple-500/10 to-transparent blur-3xl" />
@@ -82,7 +82,7 @@ export const CareerAlignmentPipelineVisual: React.FC<CareerAlignmentPipelineVisu
             </h3>
           </div>
           <div className="text-xs text-aurora-muted flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+            <span className="w-2 h-2 rounded-full bg-cyan-400" />
             <span>Engine Status: {isProcessing ? 'Processing Input' : 'Awaiting Resume Evidence'}</span>
           </div>
         </div>

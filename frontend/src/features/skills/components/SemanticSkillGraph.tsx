@@ -74,7 +74,7 @@ export const SemanticSkillGraph: React.FC<SemanticSkillGraphProps> = ({
 
       {/* GRAPH NODE CANVAS */}
       <div className="p-6 bg-aurora-canvas/60 border border-aurora-line rounded-2xl space-y-6">
-        <div className="flex items-center justify-between text-xs text-aurora-muted font-mono">
+        <div className="flex items-center justify-between text-xs text-aurora-muted tabular-nums">
           <span>SELECT SKILL NODE TO EXPLORE PATH:</span>
           <span className="text-aurora-violet font-bold">Active: {activeNode}</span>
         </div>

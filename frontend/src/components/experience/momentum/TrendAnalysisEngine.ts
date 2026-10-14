@@ -24,7 +24,7 @@ export const TrendAnalysisEngine = {
       return {
         trendState: 'Improving',
         explanation: 'Steady progress detected in skill indexing and foundational learning objectives.',
-        evidence: `${totalSkills} verified skills contributing to +${Math.round(momentumScore * 0.2)}% momentum growth.`,
+        evidence: `${totalSkills} skills contributing to +${Math.round(momentumScore * 0.2)}% momentum growth.`,
         recommendation: 'Execute upcoming recommendations to unlock next phase topics.',
       };
     }
@@ -32,7 +32,7 @@ export const TrendAnalysisEngine = {
     return {
       trendState: 'Stable',
       explanation: 'Telemetry is accumulating. Complete active roadmap items to trigger positive momentum trend acceleration.',
-      evidence: 'Initial session telemetry active.',
+      evidence: 'Based on your records so far.',
       recommendation: 'Start your daily priority mission today.',
     };
   },

@@ -52,7 +52,7 @@ export const ExecutiveInsightsPanel: React.FC<ExecutiveInsightsProps> = ({
           </h4>
           <ul className="space-y-1.5">
             {primaryRisks.map((risk, idx) => (
-              <li key={idx} className="text-aurora-muted flex items-start gap-2 font-mono">
+              <li key={idx} className="text-aurora-muted flex items-start gap-2 tabular-nums">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
                 <span>{risk}</span>
               </li>

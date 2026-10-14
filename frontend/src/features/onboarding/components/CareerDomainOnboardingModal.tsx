@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { useDialogBehaviour } from '../../../design/aurora/useDialogBehaviour';
 import { useQueryClient } from '@tanstack/react-query';
 import { Sparkles, Compass, CheckCircle2, ArrowRight, ShieldCheck, Cpu } from 'lucide-react';
 import apiClient from '../../../lib/axios';
@@ -26,6 +27,9 @@ export const CareerDomainOnboardingModal: React.FC<CareerDomainOnboardingModalPr
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [targetRole, setTargetRole] = useState<string>('Full Stack Software Engineer');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const frameRef = useRef<HTMLDivElement>(null);
+  // Onboarding must be finished, so Escape does not close it; focus still moves in and stays in
+  useDialogBehaviour(isOpen, () => undefined, frameRef);
 
   if (!isOpen) return null;
 
@@ -100,17 +104,18 @@ export const CareerDomainOnboardingModal: React.FC<CareerDomainOnboardingModalPr
     }
   };
 
-  // Rendered outside the Aurora shell, in the dark portal layer, so it keeps its own design
   return (
-    <Portal>
+    <Portal theme="aurora">
     <div
       role="dialog"
       aria-modal="true"
       aria-label="Career Domain Onboarding Wizard"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-aurora-canvas/60 backdrop-blur-xl animate-fade-in"
+      ref={frameRef}
+      tabIndex={-1}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-aurora-ink/40 animate-fade-in focus-visible:outline-none"
     >
       <div className="w-full max-w-3xl">
-      <GlassPanel className="max-w-3xl w-full p-6 sm:p-8 space-y-6 border-aurora-violet/25 shadow-2xl relative overflow-hidden text-xs max-h-[90vh] overflow-y-auto">
+      <GlassPanel animateIn={false} className="max-w-3xl w-full p-5 sm:p-8 space-y-6 border-aurora-violet/25 shadow-aurora-lg relative overflow-hidden text-xs max-h-[92dvh] overflow-y-auto bg-white rounded-b-none sm:rounded-2xl">
         {/* TOP STEP INDICATOR */}
         <div className="flex items-center justify-between pb-4 border-b border-aurora-line">
           <div className="flex items-center gap-3">
@@ -121,10 +126,10 @@ export const CareerDomainOnboardingModal: React.FC<CareerDomainOnboardingModalPr
             </div>
             <div>
               <h2 className="text-base sm:text-lg font-bold text-aurora-ink tracking-tight">
-                SkillBridge Intelligence Activation
+                Set up your career goal
               </h2>
               <p className="text-xs text-aurora-muted">
-                Personalized Career Domain Onboarding • Step {step} of 3
+                Step {step} of 3
               </p>
             </div>
           </div>
@@ -156,7 +161,7 @@ export const CareerDomainOnboardingModal: React.FC<CareerDomainOnboardingModalPr
                 What primary career domain do you want to pursue?
               </h3>
               <p className="text-xs text-aurora-muted">
-                Select one primary domain. This choice grounds your initial career matches, readiness evaluation, recommendations, and live job search.
+                Select one primary domain. This choice grounds your initial career matches, readiness evaluation, recommendations, and job search.
               </p>
             </div>
 

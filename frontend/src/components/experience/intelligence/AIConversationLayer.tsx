@@ -34,7 +34,7 @@ export const AIConversationLayer: React.FC<AIConversationLayerProps> = ({
   return (
     <LightingSurface
       profile="glassReflection"
-      className={`p-6 rounded-2xl border border-aurora-violet/25 bg-aurora-canvas/60 backdrop-blur-xl ${className}`}
+      className={`p-6 rounded-2xl border border-aurora-violet/25 bg-aurora-canvas/60 ${className}`}
     >
       <div className="space-y-4">
         {/* Mentor Header */}
@@ -44,7 +44,6 @@ export const AIConversationLayer: React.FC<AIConversationLayerProps> = ({
 
               <Bot className="w-5 h-5" />
               <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-500" />
               </span>
             </div>

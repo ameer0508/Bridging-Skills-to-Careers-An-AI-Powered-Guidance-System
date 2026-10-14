@@ -41,7 +41,7 @@ export const JobMatchDetailModal: React.FC<JobMatchDetailModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-aurora-canvas/60 backdrop-blur-md overflow-y-auto">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-aurora-canvas/60 overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -97,7 +97,7 @@ export const JobMatchDetailModal: React.FC<JobMatchDetailModalProps> = ({
                 <span className="text-[10px] text-aurora-muted uppercase tracking-wider">
                   Compensation Range
                 </span>
-                <span className="text-2xl font-extrabold text-emerald-700 font-mono">
+                <span className="text-2xl font-extrabold text-emerald-700 tabular-nums">
                   ${job.salaryMin}k - ${job.salaryMax}k
                 </span>
                 <span className="text-[10px] text-aurora-muted">USD / Year + Equity</span>
@@ -107,7 +107,7 @@ export const JobMatchDetailModal: React.FC<JobMatchDetailModalProps> = ({
                 <span className="text-[10px] text-aurora-muted uppercase tracking-wider">
                   Current Readiness Score
                 </span>
-                <span className="text-2xl font-extrabold text-aurora-indigo font-mono">
+                <span className="text-2xl font-extrabold text-aurora-indigo tabular-nums">
                   {job.readinessScore}%
                 </span>
                 <span className="text-[10px] text-aurora-violet font-semibold">+{job.expectedImprovement}% Potential Boost</span>
@@ -134,10 +134,10 @@ export const JobMatchDetailModal: React.FC<JobMatchDetailModalProps> = ({
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-aurora-ink flex items-center gap-1.5">
                     <CheckCircle2 className="w-4 h-4 text-emerald-700" />
-                    Verified Skills Matched ({job.matchingSkills.length})
+                    Your Skills Matched ({job.matchingSkills.length})
                   </span>
                   <span className="text-[9px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded">
-                    100% Verified
+                    On your profile
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
@@ -195,7 +195,7 @@ export const JobMatchDetailModal: React.FC<JobMatchDetailModalProps> = ({
 
           {/* Modal Footer */}
           <div className="p-5 border-t border-aurora-line bg-aurora-canvas/60 flex items-center justify-between gap-4">
-            <span className="text-[10px] text-aurora-muted font-mono">
+            <span className="text-[10px] text-aurora-muted tabular-nums">
               Posted {job.postingAge} • {job.category} Category
             </span>
 

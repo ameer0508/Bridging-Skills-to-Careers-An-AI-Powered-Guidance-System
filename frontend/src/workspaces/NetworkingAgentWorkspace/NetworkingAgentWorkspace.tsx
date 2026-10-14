@@ -110,7 +110,7 @@ export const NetworkingAgentWorkspace: React.FC = () => {
               value={targetCompany}
               onChange={(e) => setTargetCompany(e.target.value)}
               placeholder="Target Company..."
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-3 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 tabular-nums"
             />
             <Building className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
@@ -120,7 +120,7 @@ export const NetworkingAgentWorkspace: React.FC = () => {
               value={targetSkill}
               onChange={(e) => setTargetSkill(e.target.value)}
               placeholder="Target Skill..."
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-3 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 tabular-nums"
             />
             <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
@@ -155,7 +155,7 @@ export const NetworkingAgentWorkspace: React.FC = () => {
             <Share2 className="w-4 h-4 text-emerald-700" />
           </div>
           <span className="text-xl font-bold text-emerald-700 block">3.5x Callback</span>
-          <span className="text-xs text-emerald-700">Stanford Alumni Verified</span>
+          <span className="text-xs text-emerald-700">Sample alumni connection</span>
         </GlassPanel>
 
         <GlassPanel className="p-4 space-y-2 border-aurora-violet/25">
@@ -260,11 +260,7 @@ export const NetworkingAgentWorkspace: React.FC = () => {
       </div>
 
       {/* BOTTOM STATUS BAR */}
-      <AIStatusBar
-        status="active"
-        confidence={96.5}
-        lastUpdated="Networking Agent Active"
-      />
+      <AIStatusBar status="idle" provider="Built-in sample content" />
     </div>
   );
 };

@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   Database
 } from 'lucide-react';
+import { DialogFrame } from '../../../design/aurora/DialogFrame';
 
 export interface SourceEvidenceDetail {
   id: string;
@@ -35,8 +36,8 @@ export const SourceEvidenceInspectorModal: React.FC<SourceEvidenceInspectorModal
   if (!source) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-aurora-canvas/60 backdrop-blur-md animate-fade-in font-mono">
-      <div className="relative w-full max-w-xl p-6 sm:p-8 rounded-3xl bg-aurora-canvas border border-aurora-line shadow-2xl space-y-6 text-xs">
+    <DialogFrame onClose={onClose} label="Evidence source">
+      <div className="relative w-full max-w-xl max-h-[92vh] overflow-y-auto p-6 sm:p-8 rounded-t-3xl sm:rounded-3xl bg-white border border-aurora-line shadow-aurora-lg space-y-6 text-xs">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-aurora-line pb-4">
           <div className="space-y-1">
@@ -66,7 +67,7 @@ export const SourceEvidenceInspectorModal: React.FC<SourceEvidenceInspectorModal
         <div className="grid grid-cols-2 gap-3 p-3.5 rounded-2xl bg-aurora-canvas border border-aurora-line">
           <div className="space-y-0.5">
             <span className="text-[9px] text-aurora-muted uppercase block">Data Records</span>
-            <strong className="text-aurora-ink text-xs block">{source.itemsCount} Verified Records</strong>
+            <strong className="text-aurora-ink text-xs block">{source.itemsCount} Records</strong>
           </div>
           <div className="space-y-0.5">
             <span className="text-[9px] text-aurora-muted uppercase block">Last Synced / Updated</span>
@@ -130,6 +131,6 @@ export const SourceEvidenceInspectorModal: React.FC<SourceEvidenceInspectorModal
           </button>
         </div>
       </div>
-    </div>
+    </DialogFrame>
   );
 };

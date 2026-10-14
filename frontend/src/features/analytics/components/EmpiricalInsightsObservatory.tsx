@@ -66,7 +66,7 @@ export const EmpiricalInsightsObservatory: React.FC<EmpiricalInsightsObservatory
   };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 md:p-8 shadow-2xl backdrop-blur-xl space-y-6">
+    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 md:p-8 shadow-2xl space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 border-b border-aurora-line pb-5">
         <div className="space-y-1">
@@ -84,7 +84,7 @@ export const EmpiricalInsightsObservatory: React.FC<EmpiricalInsightsObservatory
         </div>
 
         <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-aurora-canvas text-aurora-muted border border-aurora-line shrink-0">
-          {insights.length} Verified {insights.length === 1 ? 'Insight' : 'Insights'}
+          {insights.length} {insights.length === 1 ? 'Insight' : 'Insights'}
         </span>
       </div>
 
@@ -123,7 +123,7 @@ export const EmpiricalInsightsObservatory: React.FC<EmpiricalInsightsObservatory
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.25, delay: idx * 0.06 }}
-                className={`p-5 rounded-2xl border ${style.border} ${style.bg} space-y-3 relative overflow-hidden backdrop-blur-sm`}
+                className={`p-5 rounded-2xl border ${style.border} ${style.bg} space-y-3 relative overflow-hidden`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">

@@ -21,7 +21,7 @@ export const AICareerContextPanel: React.FC<AICareerContextPanelProps> = ({
   topRecommendationTitle,
 }) => {
   return (
-    <aside aria-label="Your Career Context" className="w-80 bg-aurora-canvas/60 border-r border-aurora-line backdrop-blur-xl flex flex-col h-full overflow-y-auto custom-scrollbar p-4 space-y-5 select-none">
+    <aside aria-label="Your Career Context" className="w-80 bg-aurora-canvas/60 border-r border-aurora-line flex flex-col h-full overflow-y-auto custom-scrollbar p-4 space-y-5 select-none">
       {/* HEADER */}
       <div className="flex items-center gap-2 pb-3 border-b border-aurora-line">
         <Sparkles className="w-4 h-4 text-aurora-violet shrink-0" />
@@ -53,7 +53,7 @@ export const AICareerContextPanel: React.FC<AICareerContextPanelProps> = ({
           {targetRole.length > 22 ? targetRole.slice(0, 20) + '...' : targetRole}
         </span>
 
-        <div className="pt-2 grid grid-cols-2 gap-1.5 text-[9px] font-mono">
+        <div className="pt-2 grid grid-cols-2 gap-1.5 text-[9px] tabular-nums">
           <span className="px-2 py-1 rounded bg-aurora-canvas border border-aurora-line text-aurora-violet">
             {totalSkills} Skills
           </span>
@@ -84,7 +84,7 @@ export const AICareerContextPanel: React.FC<AICareerContextPanelProps> = ({
         <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Cpu className="w-4 h-4 text-aurora-violet" />
-            <span className="text-xs text-aurora-muted font-medium">Verified Skill Nodes</span>
+            <span className="text-xs text-aurora-muted font-medium">Skill Nodes</span>
           </div>
           <span className="font-display font-bold text-xs text-aurora-violet">
             {totalSkills}

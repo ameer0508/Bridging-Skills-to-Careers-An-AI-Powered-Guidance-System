@@ -50,7 +50,7 @@ export const IntelligenceStreamFeed: React.FC<IntelligenceStreamFeedProps> = ({
 }) => {
   if (recommendations.length === 0) {
     return (
-      <div className="rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl p-12 text-center space-y-4">
+      <div className="rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-12 text-center space-y-4">
         <div className="w-12 h-12 rounded-2xl bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo mx-auto flex items-center justify-center">
           <Sparkles className="w-6 h-6" />
         </div>
@@ -96,7 +96,7 @@ export const IntelligenceStreamFeed: React.FC<IntelligenceStreamFeedProps> = ({
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, delay: index * 0.04 }}
-            className={`group relative rounded-3xl border transition-all duration-300 backdrop-blur-xl p-5 sm:p-6 lg:p-7 ${
+            className={`group relative rounded-3xl border transition-all duration-300 p-5 sm:p-6 lg:p-7 ${
               isHighest
                 ? 'bg-aurora-canvas/60 border-amber-200 hover:border-amber-200 shadow-xl shadow-amber-500/5'
                 : 'bg-aurora-canvas/60 border-aurora-line hover:border-aurora-violet/25 shadow-xl'
@@ -180,7 +180,7 @@ export const IntelligenceStreamFeed: React.FC<IntelligenceStreamFeedProps> = ({
               {/* Right Column: Telemetry Specs & Direct Action Controls */}
               <div className="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end justify-between gap-4 w-full lg:w-auto lg:min-w-[220px] pt-4 lg:pt-0 border-t lg:border-t-0 border-aurora-line">
                 {/* Telemetry Snapshot */}
-                <div className="grid grid-cols-2 gap-2 w-full text-[11px] font-mono">
+                <div className="grid grid-cols-2 gap-2 w-full text-[11px] tabular-nums">
                   <div className="p-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-center space-y-0.5">
                     <span className="text-[9px] text-aurora-muted uppercase block">Gap impact</span>
                     <span className="text-emerald-700 font-extrabold text-sm block">

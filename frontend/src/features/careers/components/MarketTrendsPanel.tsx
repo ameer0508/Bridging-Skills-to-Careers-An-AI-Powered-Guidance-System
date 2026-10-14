@@ -219,7 +219,7 @@ export const MarketTrendsPanel: React.FC<MarketTrendsPanelProps> = ({
             <span className="text-[11px] text-aurora-muted uppercase">Market Opportunity Index</span>
             <Zap className="w-4 h-4 text-emerald-700 fill-emerald-400" />
           </div>
-          <span className="text-lg font-bold text-emerald-700 block font-mono">96.5 / 100</span>
+          <span className="text-lg font-bold text-emerald-700 block tabular-nums">96.5 / 100</span>
           <span className="text-xs text-emerald-700 font-bold">Tier 1 Growth</span>
         </GlassPanel>
       </div>
@@ -343,7 +343,7 @@ export const MarketTrendsPanel: React.FC<MarketTrendsPanelProps> = ({
                     <span className="font-bold text-aurora-ink">{sk.name}</span>
                     <span className="font-bold text-rose-700">{sk.declineYoY}</span>
                   </div>
-                  <span className="text-[10px] text-aurora-muted block font-mono">
+                  <span className="text-[10px] text-aurora-muted block tabular-nums">
                     Recommended Pivot: <strong className="text-aurora-violet">{sk.pivot}</strong>
                   </span>
                 </div>
@@ -444,7 +444,7 @@ export const MarketTrendsPanel: React.FC<MarketTrendsPanelProps> = ({
                   <span className="font-bold text-aurora-ink block">{reg.region}</span>
                   <span className="text-[10px] text-aurora-muted">Focus: {reg.focus}</span>
                 </div>
-                <div className="text-right font-mono">
+                <div className="text-right tabular-nums">
                   <span className="font-bold text-aurora-violet block">{reg.index} Index</span>
                   <span className="text-[10px] text-aurora-muted">{reg.remote} Remote</span>
                 </div>
@@ -470,7 +470,7 @@ export const MarketTrendsPanel: React.FC<MarketTrendsPanelProps> = ({
                   <span className="font-bold text-aurora-ink block">{ind.industry}</span>
                   <span className="text-[10px] text-aurora-muted">Velocity: {ind.velocity}</span>
                 </div>
-                <div className="text-right font-mono">
+                <div className="text-right tabular-nums">
                   <span className="font-bold text-emerald-700 block">{ind.growthYoY} YoY</span>
                   <span className="text-[10px] text-aurora-muted">Health: {ind.healthScore}</span>
                 </div>

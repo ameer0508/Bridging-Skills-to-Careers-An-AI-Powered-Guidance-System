@@ -93,7 +93,7 @@ export const OrchestrationAuditLog: React.FC<OrchestrationAuditLogProps> = ({
               <Activity className="w-4 h-4 text-aurora-violet" />
               Telemetry Event Stream ({recentEvents.length})
             </span>
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
           </div>
 
           {recentEvents.length === 0 ? (

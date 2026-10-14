@@ -31,7 +31,7 @@ export const RecentWinsPanel: React.FC<RecentWinsPanelProps> = ({
               Recent Milestones & Wins
             </h3>
             <p className="text-xs text-aurora-muted dark:text-neutral-400">
-              Verified accomplishments in your career journey
+              Accomplishments recorded in SkillBridge
             </p>
           </div>
         </div>
@@ -44,7 +44,7 @@ export const RecentWinsPanel: React.FC<RecentWinsPanelProps> = ({
             Your Journey Has Begun
           </h4>
           <p className="text-xs text-aurora-muted dark:text-neutral-400 max-w-sm mx-auto">
-            Complete your first roadmap item or verified skill assessment to record milestone achievements here.
+            Complete your first roadmap item or skill check to record milestone achievements here.
           </p>
         </div>
       ) : (

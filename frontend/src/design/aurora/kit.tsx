@@ -1,9 +1,10 @@
-import React, { useEffect, useId, useRef } from 'react';
+import React, { useId, useRef } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { AlertTriangle, CheckCircle2, ChevronDown, Info, X } from 'lucide-react';
 import { Portal } from '../../components/primitives/Portal/Portal';
 import { auroraEase } from './motion';
 import { Eyebrow } from './primitives';
+import { useDialogBehaviour } from './useDialogBehaviour';
 
 /**
  * Aurora Elite building blocks for the app screens: page header, notices, pills, tabs, a dialog,
@@ -196,33 +197,7 @@ export const AuroraDialog: React.FC<{
   const reduce = useReducedMotion();
   const titleId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (!open) return;
-    const previous = document.activeElement as HTMLElement | null;
-    const timer = window.setTimeout(() => (initialFocus?.current ?? panelRef.current)?.focus(), 30);
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-      if (e.key === 'Tab' && panelRef.current) {
-        const items = panelRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])');
-        if (items.length === 0) return;
-        const first = items[0];
-        const last = items[items.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.clearTimeout(timer);
-      window.removeEventListener('keydown', onKey);
-      previous?.focus?.();
-    };
-  }, [open, onClose, initialFocus]);
+  useDialogBehaviour(open, onClose, panelRef, initialFocus);
   const width = { sm: 'max-w-md', md: 'max-w-xl', lg: 'max-w-3xl', xl: 'max-w-5xl' }[size];
   return (
     <Portal theme="aurora">

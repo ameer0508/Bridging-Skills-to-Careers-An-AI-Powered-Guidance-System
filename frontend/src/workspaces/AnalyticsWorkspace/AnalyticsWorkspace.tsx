@@ -56,7 +56,8 @@ export const AnalyticsWorkspace: React.FC = () => {
 
   // Query 2: Career Matches
   const { data: matchesData } = useQuery({
-    queryKey: ['careers', 'matches'],
+    // The bare list is cached under its own key: ['careers', 'matches'] holds { matches }
+    queryKey: ['careers', 'matches', 'list'],
     queryFn: async () => {
       const response = await apiClient.get('/careers/matches');
       return response.data.data.matches || [];
@@ -65,7 +66,8 @@ export const AnalyticsWorkspace: React.FC = () => {
 
   // Query 3: Career Readiness
   const { data: readinessData } = useQuery({
-    queryKey: ['readiness'],
+    // The bare list is cached under its own key: ['readiness'] holds { readiness }
+    queryKey: ['readiness', 'list'],
     queryFn: async () => {
       const response = await apiClient.get('/readiness');
       return response.data.data.readiness || [];
@@ -181,7 +183,7 @@ export const AnalyticsWorkspace: React.FC = () => {
   if (analyticsLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-16 rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[320px]">
+        <div className="p-16 rounded-3xl border border-aurora-line bg-aurora-canvas/60 flex flex-col items-center justify-center space-y-4 min-h-[320px]">
           <AIThinkingAnimation statusText="Connecting to Career Progress Observatory & Telemetry Vectors..." />
         </div>
       </div>
@@ -192,8 +194,8 @@ export const AnalyticsWorkspace: React.FC = () => {
     return (
       <div className="max-w-7xl mx-auto pb-12 px-4">
         <PremiumErrorState
-          title="Telemetry Connection Failed"
-          message={`Unable to retrieve progress analytics data: ${(error as Error).message}`}
+          title="Progress analytics could not be loaded"
+          message={(error as Error).message}
           onRetry={() => refetch()}
         />
       </div>
@@ -293,8 +295,7 @@ export const AnalyticsWorkspace: React.FC = () => {
       {/* 7. AI TELEMETRY STATUS BAR */}
       <AIStatusBar
         status={analyticsLoading ? 'thinking' : 'active'}
-        confidence={98.8}
-        lastUpdated="Loaded from your data"
+        provider="Your progress records"
       />
     </div>
   );

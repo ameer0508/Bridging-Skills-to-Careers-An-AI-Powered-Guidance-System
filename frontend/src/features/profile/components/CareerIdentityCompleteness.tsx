@@ -44,7 +44,7 @@ export const CareerIdentityCompleteness: React.FC<CareerIdentityCompletenessProp
       id: 'identity',
       title: 'Identity Foundation',
       description: hasName && hasLocation
-        ? 'Verified personal name, email, and location context.'
+        ? 'Name, email and location are filled in.'
         : 'Missing location or primary profile name.',
       isComplete: hasName && hasLocation,
       missingNote: !hasLocation ? 'Add location to enable regional job matching' : 'Add full name',
@@ -95,7 +95,7 @@ export const CareerIdentityCompleteness: React.FC<CareerIdentityCompletenessProp
       id: 'skills',
       title: 'Capability Map',
       description: totalSkills > 0
-        ? `${totalSkills} verified capability vectors extracted into intelligence matrix.`
+        ? `${totalSkills} skills on your profile.`
         : '0 skills cataloged. Add or verify skills to evaluate readiness.',
       isComplete: totalSkills > 0,
       missingNote: 'Verify skills to power role alignment & gap analysis',
@@ -108,7 +108,7 @@ export const CareerIdentityCompleteness: React.FC<CareerIdentityCompletenessProp
   const completedCount = pillars.filter((p) => p.isComplete).length;
 
   return (
-    <div className="w-full font-mono">
+    <div className="w-full tabular-nums">
       <GlassPanel className="p-6 sm:p-8 space-y-6 border-aurora-violet/25">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-aurora-line">
@@ -193,7 +193,7 @@ export const CareerIdentityCompleteness: React.FC<CareerIdentityCompletenessProp
 
                 <div className="pt-2 border-t border-aurora-line flex items-center justify-between">
                   <span className="text-[9px] text-aurora-muted uppercase">
-                    {pillar.isComplete ? 'Pillar Verified' : 'Incomplete Context'}
+                    {pillar.isComplete ? 'Complete' : 'Incomplete Context'}
                   </span>
                   <button
                     onClick={pillar.onClick}

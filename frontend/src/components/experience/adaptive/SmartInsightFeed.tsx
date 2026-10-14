@@ -21,11 +21,11 @@ export const SmartInsightFeed: React.FC<SmartInsightFeedProps> = ({
     },
     {
       id: 'i-2',
-      title: 'Your verified skill graph aligns 85% with Full Stack Engineer.',
+      title: 'Your skill graph aligns 85% with Full Stack Engineer.',
       category: 'Career Alignment',
       impactScore: 88,
       confidenceTier: 'High Confidence',
-      evidence: 'Derived from 6 verified competencies',
+      evidence: 'Derived from 6 skills',
       rank: 2,
     },
   ],

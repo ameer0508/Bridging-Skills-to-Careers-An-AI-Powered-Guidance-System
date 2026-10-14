@@ -31,7 +31,7 @@ export const OpportunityInspector: React.FC<OpportunityInspectorProps> = ({
 
   if (!opportunity) {
     return (
-      <div className="rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-8 shadow-aurora-md backdrop-blur-xl flex flex-col items-center justify-center h-[740px] text-center space-y-3">
+      <div className="rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-8 shadow-aurora-md flex flex-col items-center justify-center h-[740px] text-center space-y-3">
         <Building2 className="w-12 h-12 text-aurora-muted" />
         <h3 className="text-base font-bold text-aurora-muted">Select an Opportunity</h3>
         <p className="text-xs text-aurora-muted max-w-sm">
@@ -44,7 +44,7 @@ export const OpportunityInspector: React.FC<OpportunityInspectorProps> = ({
   const statusOptions = Object.entries(APPLICATION_STATUS_LABEL).map(([id, label]) => ({ id, label }));
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 md:p-8 shadow-aurora-md backdrop-blur-xl flex flex-col h-[740px] space-y-6">
+    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 md:p-8 shadow-aurora-md flex flex-col h-[740px] space-y-6">
       {/* Top Header & Employer Brand */}
       <div className="space-y-4 border-b border-aurora-line pb-5 shrink-0">
         <div className="flex items-start justify-between gap-4">

@@ -101,7 +101,7 @@ export const GitHubIntelligenceWorkspace: React.FC = () => {
     return 'developer';
   }, [handleInput, userProfile]);
 
-  // Derived Verified Skills Evidence
+  // Derived Skills on Profile Evidence
   const verifiedSkillsList: SkillEvidenceRecord[] = useMemo(() => {
     if (skillsData?.categories) {
       const allSkills: SkillEvidenceRecord[] = [];
@@ -199,7 +199,7 @@ export const GitHubIntelligenceWorkspace: React.FC = () => {
   if (isSkillsLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
+        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 flex flex-col items-center justify-center space-y-4 min-h-[260px]">
           <AIThinkingAnimation statusText="Connecting to GitHub Engineering Intelligence Agent..." />
         </div>
       </div>
@@ -213,10 +213,10 @@ export const GitHubIntelligenceWorkspace: React.FC = () => {
         greeting="GitHub Engineering Intelligence & Code Verification"
         userName={`@${candidateHandle}`}
         title="GitHub Intelligence Agent"
-        description="Transform GitHub repositories and production projects into verified engineering evidence powering career recommendations."
-        aiSummary={`Portfolio Score: ${portfolioStrength}/100 • ${verifiedSkillCount} Verified Skills • Architecture: ${architectureMaturityLabel}`}
+        description="Transform GitHub repositories and production projects into engineering evidence powering career recommendations."
+        aiSummary={`Portfolio Score: ${portfolioStrength}/100 • ${verifiedSkillCount} Skills on Profile • Architecture: ${architectureMaturityLabel}`}
         stats={[
-          { label: 'Portfolio Strength', value: `${portfolioStrength} / 100`, change: 'Verified Evidence', isPositive: portfolioStrength >= 70 },
+          { label: 'Portfolio Strength', value: `${portfolioStrength} / 100`, change: 'Evidence', isPositive: portfolioStrength >= 70 },
           { label: 'Verified Resume Skills', value: `${verifiedSkillCount} Verified`, change: 'Grounded Evidence', isPositive: verifiedSkillCount > 0 },
           { label: 'Technical Depth Score', value: `${technicalReadiness}%`, change: 'Evaluated Competency', isPositive: technicalReadiness >= 70 },
           { label: 'Architecture Maturity', value: architectureMaturityLabel, change: 'Production Standards', isPositive: true },
@@ -235,7 +235,7 @@ export const GitHubIntelligenceWorkspace: React.FC = () => {
               value={handleInput}
               onChange={(e) => setHandleInput(e.target.value)}
               placeholder={`GitHub handle (default: @${candidateHandle})...`}
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 tabular-nums"
             />
             <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
@@ -268,7 +268,7 @@ export const GitHubIntelligenceWorkspace: React.FC = () => {
 
         <GlassPanel className="p-4 space-y-2 border-emerald-200">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] text-aurora-muted uppercase">Verified Skills Count</span>
+            <span className="text-[11px] text-aurora-muted uppercase">Skills on Profile</span>
             <GitBranch className="w-4 h-4 text-emerald-700" />
           </div>
           <span className="text-xl font-bold text-emerald-700 block">
@@ -318,9 +318,9 @@ export const GitHubIntelligenceWorkspace: React.FC = () => {
               </button>
             </div>
 
-            <div className="space-y-3 max-h-[440px] overflow-y-auto pr-1" role="region" aria-label="Verified skills" tabIndex={0}>
+            <div className="space-y-3 max-h-[440px] overflow-y-auto pr-1" role="region" aria-label="Skills on profile" tabIndex={0}>
               {verifiedSkillsList.map((sk) => (
-                <div key={sk.skill} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2 text-xs font-mono">
+                <div key={sk.skill} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2 text-xs tabular-nums">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
@@ -410,11 +410,7 @@ export const GitHubIntelligenceWorkspace: React.FC = () => {
       </div>
 
       {/* BOTTOM STATUS BAR */}
-      <AIStatusBar
-        status={isAnalyzing ? 'thinking' : 'active'}
-        confidence={portfolioStrength}
-        lastUpdated="GitHub Intelligence Active"
-      />
+      <AIStatusBar status="idle" provider="Built-in sample content" />
     </div>
   );
 };

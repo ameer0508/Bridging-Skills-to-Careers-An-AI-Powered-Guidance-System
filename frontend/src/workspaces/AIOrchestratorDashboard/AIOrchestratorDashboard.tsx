@@ -65,7 +65,8 @@ export const AIOrchestratorDashboard: React.FC = () => {
 
   // Query 3: Top Career Matches for Default Goal Grounding
   const { data: matchesData } = useQuery({
-    queryKey: ['careers', 'matches'],
+    // The bare list is cached under its own key: ['careers', 'matches'] holds { matches }
+    queryKey: ['careers', 'matches', 'list'],
     queryFn: async () => {
       try {
         const response = await apiClient.get('/careers/matches');
@@ -157,16 +158,16 @@ export const AIOrchestratorDashboard: React.FC = () => {
 
   if (isAgentsLoading) {
     return (
-      <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4 font-mono">
-        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
-          <AIThinkingAnimation statusText="Connecting to Multi-Agent AI Control Plane..." />
+      <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4 tabular-nums">
+        <div className="p-12 rounded-2xl border border-aurora-line bg-aurora-canvas/60 flex flex-col items-center justify-center space-y-4 min-h-[260px]">
+          <AIThinkingAnimation statusText="Loading the module overview" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-8 pb-12 px-4 font-mono">
+    <div className="w-full max-w-7xl mx-auto space-y-8 pb-12 px-4 tabular-nums">
       {/* WORKSPACE HERO */}
       <WorkspaceHero
         greeting="Overview"
@@ -175,27 +176,15 @@ export const AIOrchestratorDashboard: React.FC = () => {
         aiSummary={`${activeAgentsCount} modules summarised`}
         stats={[
           {
-            label: 'Registered Agents',
-            value: `${activeAgentsCount} / ${agentsList.length} Active`,
-            change: '100% Registry Health',
+            label: 'Modules',
+            value: `${agentsList.length}`,
+            change: 'Each summarises one area of your data',
             isPositive: true,
           },
           {
-            label: 'Workflow Latency',
-            value: `${latestLatency}ms`,
-            change: 'Optimal Execution',
-            isPositive: true,
-          },
-          {
-            label: 'DAG Execution Status',
-            value: workflowStatus,
-            change: '4 Phases Synchronized',
-            isPositive: workflowStatus === 'COMPLETED',
-          },
-          {
-            label: 'Signal Arbitration',
-            value: 'OPTIMAL HARMONY',
-            change: 'Zero Contention',
+            label: 'Last summary',
+            value: !currentExecution ? 'Not run yet' : workflowStatus === 'RUNNING' ? 'Writing…' : 'Completed',
+            change: currentExecution ? `Took ${latestLatency} ms` : 'Write one below',
             isPositive: true,
           },
         ]}

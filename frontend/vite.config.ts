@@ -34,6 +34,11 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            // React and the store shims are needed by every page. Without their own chunk Rollup
+            // placed them inside vendor-recharts, so even the sign-in page downloaded the charts.
+            if (/\/node_modules\/(react|react-dom|scheduler|use-sync-external-store|react-is)\//.test(id)) {
+              return 'vendor-react';
+            }
             if (id.includes('recharts') || id.includes('d3-')) {
               return 'vendor-recharts';
             }

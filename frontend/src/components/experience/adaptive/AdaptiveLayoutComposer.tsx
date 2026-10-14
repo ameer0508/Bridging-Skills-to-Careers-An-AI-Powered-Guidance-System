@@ -62,7 +62,7 @@ export const AdaptiveLayoutComposer: React.FC<AdaptiveLayoutComposerProps> = ({
           <AdaptiveModuleContainer
             key="momentum"
             id="momentum-module"
-            title="Real-Time Career Momentum"
+            title="Career Momentum"
             isPrioritized={layoutConfig.highlightedSectionId === 'momentum-module'}
           >
             {momentumModule}

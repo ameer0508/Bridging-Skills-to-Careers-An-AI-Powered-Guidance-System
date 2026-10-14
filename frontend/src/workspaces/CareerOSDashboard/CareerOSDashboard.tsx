@@ -199,7 +199,7 @@ export const CareerOSDashboard: React.FC = () => {
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-aurora-ink flex items-center gap-2">
               <Workflow className="w-4 h-4 text-aurora-indigo" />
-              Real-Time Multi-Agent Activity Stream
+              Sample Multi-Agent Activity Stream
             </span>
 
             <div className="flex items-center gap-1.5 overflow-x-auto max-w-xs">
@@ -291,11 +291,7 @@ export const CareerOSDashboard: React.FC = () => {
       </GlassPanel>
 
       {/* BOTTOM STATUS BAR */}
-      <AIStatusBar
-        status="active"
-        confidence={98.2}
-        lastUpdated="SkillBridge CareerOS Active"
-      />
+      <AIStatusBar status="idle" provider="Built-in sample content" />
     </div>
   );
 };

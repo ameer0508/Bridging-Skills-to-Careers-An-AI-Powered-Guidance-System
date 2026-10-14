@@ -45,7 +45,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-aurora-canvas/60 backdrop-blur-xl">
+    <div className="flex-1 flex flex-col h-full overflow-hidden bg-aurora-canvas/60">
       {/* COCKPIT HEADER */}
       <div className="h-14 px-4 border-b border-aurora-line bg-aurora-canvas/60 flex items-center justify-between gap-3 shrink-0 select-none">
         <div className="flex items-center gap-3">
@@ -60,7 +60,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           )}
 
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-cyan-400 animate-ping shrink-0" />
+            <div className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
             <span className="font-display font-bold text-xs text-aurora-ink tracking-tight">
               AI Career Architect
             </span>
@@ -88,7 +88,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-full gap-3 text-aurora-muted">
             <RefreshCw className="w-6 h-6 animate-spin text-aurora-indigo" />
-            <span className="text-xs font-mono">Retrieving Intelligence History...</span>
+            <span className="text-xs tabular-nums">Retrieving Intelligence History...</span>
           </div>
         ) : messages.length === 0 ? (
           <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto space-y-4 p-6">
@@ -102,7 +102,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 SkillBridge AI Career Architect
               </h3>
               <p className="text-xs text-aurora-muted leading-relaxed">
-                Your AI advisor synthesizes your verified skill profile, readiness score, and active learning roadmap to deliver empirical career guidance.
+                Your AI advisor synthesizes your skill profile, readiness score, and active learning roadmap to deliver empirical career guidance.
               </p>
             </div>
           </div>
@@ -120,7 +120,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         {/* Sending Animation Indicator */}
         {isSending && (
           <div className="flex justify-start">
-            <div className="p-3 bg-aurora-canvas border border-aurora-line rounded-2xl rounded-bl-none flex items-center gap-2 text-aurora-muted text-xs font-mono">
+            <div className="p-3 bg-aurora-canvas border border-aurora-line rounded-2xl rounded-bl-none flex items-center gap-2 text-aurora-muted text-xs tabular-nums">
               <Sparkles className="w-4 h-4 text-aurora-violet animate-spin" />
               <span>AI Architect is analyzing telemetry...</span>
             </div>
@@ -171,8 +171,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             <Send className="w-3.5 h-3.5" />
           </button>
         </div>
-        <p className="text-[10px] text-center text-aurora-muted mt-2 font-mono">
-          Grounded strictly in verified platform data • Powered by SkillBridge AI Engine
+        <p className="text-[10px] text-center text-aurora-muted mt-2 tabular-nums">
+          Based on your SkillBridge data • answers can be wrong
         </p>
       </div>
     </div>

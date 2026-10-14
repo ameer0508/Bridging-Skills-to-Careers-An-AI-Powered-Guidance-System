@@ -33,7 +33,7 @@ const DIAGNOSTIC_STAGES: StageNode[] = [
     step: '02',
     title: 'Evidence Extraction',
     category: 'Normalization',
-    detail: 'Isolates verified skill entities, role tenures, and hands-on capstone implementations.',
+    detail: 'Isolates skill entities, role tenures, and hands-on capstone implementations.',
     evidenceSource: 'Entity Extraction Engine',
     icon: Cpu,
     accentColor: 'text-aurora-violet',
@@ -82,7 +82,7 @@ export const ReadinessDiagnosticPipelineVisual: React.FC = () => {
   const [activeStage, setActiveStage] = React.useState<string>('stage-3');
 
   return (
-    <div className="relative rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl p-6 sm:p-8 overflow-hidden shadow-2xl">
+    <div className="relative rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 sm:p-8 overflow-hidden shadow-2xl">
       {/* Background Ambience */}
       <div className="pointer-events-none absolute -top-24 left-1/4 w-96 h-96 rounded-full bg-aurora-violet/[0.06] blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 right-1/4 w-96 h-96 rounded-full bg-aurora-violet/[0.06] blur-3xl" />
@@ -98,9 +98,9 @@ export const ReadinessDiagnosticPipelineVisual: React.FC = () => {
           </h3>
         </div>
 
-        <div className="flex items-center gap-3 text-xs font-mono">
+        <div className="flex items-center gap-3 text-xs tabular-nums">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-aurora-line bg-aurora-canvas/60 text-aurora-muted">
-            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-cyan-400" />
             <span>STATE: AWAITING EVIDENCE</span>
           </div>
         </div>

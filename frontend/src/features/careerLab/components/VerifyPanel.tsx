@@ -125,7 +125,7 @@ export const VerifyPanel: React.FC = () => {
           )}
         </div>
 
-        <div className="sticky top-0 z-10 -mx-1 rounded-2xl border border-aurora-line bg-white/95 px-3 py-2.5 backdrop-blur" data-testid="assessment-progress">
+        <div className="sticky top-0 z-10 -mx-1 rounded-2xl border border-aurora-line bg-white/95 px-3 py-2.5" data-testid="assessment-progress">
           <div className="mb-1.5 flex items-center justify-between text-xs font-semibold text-aurora-muted">
             <span role="status">{answered} of {answers.length} answered</span>
             <nav aria-label="Jump to a question" className="flex gap-1">

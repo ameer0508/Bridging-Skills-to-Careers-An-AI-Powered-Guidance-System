@@ -166,7 +166,7 @@ export const RecommendationPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-16 rounded-3xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[300px]">
+        <div className="p-16 rounded-3xl border border-aurora-line bg-aurora-canvas/60 flex flex-col items-center justify-center space-y-4 min-h-[300px]">
           <AIThinkingAnimation statusText="Synthesizing High-Leverage Strategic Action Feeds..." />
         </div>
       </div>
@@ -177,8 +177,8 @@ export const RecommendationPage: React.FC = () => {
     return (
       <div className="max-w-7xl mx-auto pb-12 px-4">
         <PremiumErrorState
-          title="Action Intelligence Connection Error"
-          message={`Failed to connect to recommendation engine: ${(error as Error).message}`}
+          title="Recommendations could not be loaded"
+          message={(error as Error).message}
           onRetry={() => refetch()}
         />
       </div>
@@ -294,7 +294,7 @@ export const RecommendationPage: React.FC = () => {
       </PremiumSection>
 
       {/* SECTION 5 — LIVE AI STATUS TELEMETRY */}
-      <AIStatusBar status="active" confidence={96.8} lastUpdated="Just now (Live Synced)" />
+      <AIStatusBar status="active" provider="Your recommendation records" />
 
       {/* DEEP-DIVE ACTION INTELLIGENCE DRAWER */}
       <ActionIntelligenceDrawer

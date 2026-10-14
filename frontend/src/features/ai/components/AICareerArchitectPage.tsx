@@ -143,10 +143,10 @@ export const AICareerArchitectPage: React.FC = () => {
       <div className="flex-1 bg-aurora-canvas border border-aurora-line rounded-xl flex flex-col overflow-hidden relative">
         
         {/* Chat Header */}
-        <div className="h-16 border-b border-aurora-line flex items-center justify-between px-6 shrink-0 bg-aurora-canvas/60 backdrop-blur-sm z-10">
+        <div className="h-16 border-b border-aurora-line flex items-center justify-between px-6 shrink-0 bg-aurora-canvas/60 z-10">
           <div>
             <h2 className="text-lg font-bold text-aurora-ink">AI Career Architect</h2>
-            <p className="text-xs text-aurora-muted">Grounded in your verified platform intelligence</p>
+            <p className="text-xs text-aurora-muted">Based on your SkillBridge data</p>
           </div>
           
           {activeHistory?.conversation && careersData && (
@@ -172,7 +172,7 @@ export const AICareerArchitectPage: React.FC = () => {
               <div className="text-4xl mb-4">🧠</div>
               <h3 className="text-xl font-bold text-aurora-ink mb-2">SkillBridge AI Architect</h3>
               <p className="text-sm text-aurora-muted mb-8">
-                I am your personalized AI career advisor. My responses are dynamically grounded in your verified skills, readiness scores, roadmap progress, and analytical trends.
+                I am your personalized AI career advisor. My responses are dynamically grounded in your skills, readiness scores, roadmap progress, and analytical trends.
               </p>
               <button 
                 onClick={startNew}
@@ -199,7 +199,7 @@ export const AICareerArchitectPage: React.FC = () => {
                         <div className="flex items-center gap-2 mb-2 text-aurora-indigo font-bold text-xs uppercase tracking-wider">
                           <span>✨ AI Architect</span>
                           {msg.contextSnapshotId && (
-                            <span className="bg-aurora-violet/[0.06] px-1.5 py-0.5 rounded text-[9px]" title="Grounded in verified snapshot">Grounded</span>
+                            <span className="bg-aurora-violet/[0.06] px-1.5 py-0.5 rounded text-[9px]" title="Based on your profile snapshot">Grounded</span>
                           )}
                         </div>
                       )}
@@ -282,14 +282,11 @@ export const AICareerArchitectPage: React.FC = () => {
               </button>
             </div>
             <div className="text-center mt-2 text-[10px] text-aurora-muted mb-2">
-              AI Architect uses your verified platform data to provide personalized guidance. It cannot fabricate or guess information.
+              AI Architect uses your SkillBridge data to personalise guidance. Answers can be wrong; check them against the evidence they cite.
             </div>
             <AIStatusBar
               status={sendMessageMutation.isPending ? 'thinking' : sendMessageMutation.isError ? 'error' : 'active'}
-              confidence={99.4}
-              provider="AI Architect Chat Gateway"
-              latencyMs={160}
-              lastUpdated="Just now"
+              provider="Career assistant"
             />
           </div>
         )}

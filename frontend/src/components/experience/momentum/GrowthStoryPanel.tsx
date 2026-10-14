@@ -12,8 +12,8 @@ export const GrowthStoryPanel: React.FC<GrowthStoryPanelProps> = ({
   growthStory = {
     headline: 'Professional Growth Journey: Target Career Role',
     narrativeParagraph:
-      'Since initiating your learning journey, you have indexed verified skills, improved overall career readiness, and consistently completed foundational roadmap milestones.',
-    evidenceChips: ['6 Verified Skills', '85% Readiness Score', '40% Roadmap Complete'],
+      'Since initiating your learning journey, you have indexed skills, improved overall career readiness, and consistently completed foundational roadmap milestones.',
+    evidenceChips: ['6 Skills on Profile', '85% Readiness Score', '40% Roadmap Complete'],
   },
   className = '',
 }) => {
@@ -27,7 +27,7 @@ export const GrowthStoryPanel: React.FC<GrowthStoryPanelProps> = ({
           <div>
             <h3 className="text-base font-bold text-aurora-ink">Synthesized Growth Story</h3>
             <p className="text-xs text-aurora-muted">
-              Natural language summary derived strictly from verified telemetry
+              Summary written from your recorded progress
             </p>
           </div>
         </div>

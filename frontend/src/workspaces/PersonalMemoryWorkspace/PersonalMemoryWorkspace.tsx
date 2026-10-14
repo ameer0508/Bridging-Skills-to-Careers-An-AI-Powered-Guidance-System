@@ -60,7 +60,7 @@ export const PersonalMemoryWorkspace: React.FC = () => {
           timestamp: '2026-07-15',
           confidence: 0.990,
           agents: ['Opportunity Agent', 'Resume Agent'],
-          details: 'Verified milestone accomplishment for High-Throughput Vector Indexing.',
+          details: 'Milestone accomplishment for High-Throughput Vector Indexing.',
         },
       ],
       reasoning:
@@ -124,7 +124,7 @@ export const PersonalMemoryWorkspace: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search Memory Nodes..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 tabular-nums"
             />
             <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
@@ -178,7 +178,7 @@ export const PersonalMemoryWorkspace: React.FC = () => {
 
         <GlassPanel className="p-4 space-y-2 border-purple-500/30">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] text-aurora-muted uppercase">Verified Achievement</span>
+            <span className="text-[11px] text-aurora-muted uppercase">Achievement</span>
             <Award className="w-4 h-4 text-aurora-violet" />
           </div>
           <span className="text-xl font-bold text-aurora-ink block">Hackathon Winner</span>
@@ -263,7 +263,7 @@ export const PersonalMemoryWorkspace: React.FC = () => {
               </span>
             </div>
 
-            <p className="text-aurora-muted leading-relaxed text-[11px] font-mono">
+            <p className="text-aurora-muted leading-relaxed text-[11px] tabular-nums">
               {memoryMetrics.reasoning}
             </p>
           </GlassPanel>
@@ -271,11 +271,7 @@ export const PersonalMemoryWorkspace: React.FC = () => {
       </div>
 
       {/* BOTTOM STATUS BAR */}
-      <AIStatusBar
-        status="active"
-        confidence={98.5}
-        lastUpdated="Long-Term Memory Engine Active"
-      />
+      <AIStatusBar status="idle" provider="Built-in sample content" />
     </div>
   );
 };

@@ -72,7 +72,7 @@ export const ExperiencePreferencesDeck: React.FC = () => {
   ];
 
   return (
-    <div className="w-full font-mono">
+    <div className="w-full tabular-nums">
       <GlassPanel className="p-6 sm:p-8 space-y-8 border-aurora-violet/25">
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-4 pb-4 border-b border-aurora-line">

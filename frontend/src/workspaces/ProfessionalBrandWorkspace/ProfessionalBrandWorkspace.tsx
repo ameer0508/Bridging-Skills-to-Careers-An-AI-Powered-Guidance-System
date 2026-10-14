@@ -42,10 +42,10 @@ export const ProfessionalBrandWorkspace: React.FC = () => {
   );
 
   const crossPlatformStatus = [
-    { channel: 'Resume', status: 'Verified Harmonized', icon: FileText, score: 98 },
-    { channel: 'LinkedIn Profile', status: 'Verified Harmonized', icon: Briefcase, score: 96 },
-    { channel: 'GitHub Activity', status: 'Verified Code Evidence', icon: Code2, score: 99 },
-    { channel: 'Portfolio Website', status: 'Verified Live Showcases', icon: Globe, score: 95 },
+    { channel: 'Resume', status: 'Harmonized (sample)', icon: FileText, score: 98 },
+    { channel: 'LinkedIn Profile', status: 'Harmonized (sample)', icon: Briefcase, score: 96 },
+    { channel: 'GitHub Activity', status: 'Code evidence (sample)', icon: Code2, score: 99 },
+    { channel: 'Portfolio Website', status: 'Live showcases (sample)', icon: Globe, score: 95 },
   ];
 
   const handleAnalyzeBrand = () => {
@@ -91,7 +91,7 @@ export const ProfessionalBrandWorkspace: React.FC = () => {
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
               placeholder="Enter User ID..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
+              className="w-full pl-9 pr-4 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-indigo-500 tabular-nums"
             />
             <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-2.5" />
           </div>
@@ -166,7 +166,7 @@ export const ProfessionalBrandWorkspace: React.FC = () => {
             {crossPlatformStatus.map((chan) => {
               const Icon = chan.icon;
               return (
-                <div key={chan.channel} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between text-xs font-mono">
+                <div key={chan.channel} className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between text-xs tabular-nums">
                   <div className="flex items-center gap-2.5">
                     <Icon className="w-4 h-4 text-aurora-indigo" />
                     <span className="font-bold text-aurora-ink">{chan.channel}</span>
@@ -216,11 +216,7 @@ export const ProfessionalBrandWorkspace: React.FC = () => {
       </div>
 
       {/* BOTTOM STATUS BAR */}
-      <AIStatusBar
-        status="active"
-        confidence={97.1}
-        lastUpdated="Brand Intelligence Live"
-      />
+      <AIStatusBar status="idle" provider="Built-in sample content" />
     </div>
   );
 };

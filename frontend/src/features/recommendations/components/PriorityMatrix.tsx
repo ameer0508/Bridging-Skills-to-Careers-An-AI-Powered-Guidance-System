@@ -45,7 +45,7 @@ export const PriorityMatrix: React.FC<{ items?: MatrixItem[] }> = ({
         {/* QUADRANT 1: QUICK WINS */}
         <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5 font-mono">
+            <h4 className="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5 tabular-nums">
               <Zap className="w-4 h-4" />
               ⚡ Quick Wins (High Impact / Low Time)
             </h4>
@@ -67,7 +67,7 @@ export const PriorityMatrix: React.FC<{ items?: MatrixItem[] }> = ({
         {/* QUADRANT 2: MAJOR CAPSTONES */}
         <div className="p-4 bg-aurora-violet/[0.06] border border-aurora-violet/25 rounded-2xl space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold text-aurora-indigo uppercase tracking-wider flex items-center gap-1.5 font-mono">
+            <h4 className="text-xs font-bold text-aurora-indigo uppercase tracking-wider flex items-center gap-1.5 tabular-nums">
               <Award className="w-4 h-4" />
               🎯 Major Capstones (High Impact / High Time)
             </h4>

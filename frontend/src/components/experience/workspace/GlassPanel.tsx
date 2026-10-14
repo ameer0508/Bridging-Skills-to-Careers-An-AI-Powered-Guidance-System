@@ -33,19 +33,16 @@ export const GlassPanel: React.FC<GlassPanelProps> = ({
         },
       }
     : {};
-  // Separate layout/grid classes for outer element so grid and flex containers work reliably
+  // Classes that place the panel inside its parent's grid or flex row go on the outer element;
+  // everything else, including the panel's own flex direction, stays on the panel itself
+  const ITEM_CLASS = /^(col-span|col-start|col-end|row-span|row-start|row-end|order|self|justify-self|place-self|basis|grow|shrink|flex-(1|auto|initial|none)$)/;
   const classTokens = className.split(/\s+/).filter(Boolean);
   const layoutClasses: string[] = [];
   const innerClasses: string[] = [];
 
   classTokens.forEach((token) => {
-    if (
-      token.includes('col-span') ||
-      token.includes('row-span') ||
-      token.startsWith('flex-') ||
-      token.startsWith('order-') ||
-      token.startsWith('self-')
-    ) {
+    const utility = token.slice(token.lastIndexOf(':') + 1);
+    if (ITEM_CLASS.test(utility)) {
       layoutClasses.push(token);
     } else {
       innerClasses.push(token);
@@ -54,7 +51,7 @@ export const GlassPanel: React.FC<GlassPanelProps> = ({
 
   const content = (
     <div
-      className={`w-full relative overflow-hidden rounded-2xl border border-aurora-line bg-aurora-canvas/60 backdrop-blur-xl transition-all duration-300 group hover:border-aurora-line ${innerClasses.join(' ')}`}
+      className={`w-full relative overflow-hidden rounded-2xl border border-aurora-line bg-white shadow-aurora-sm transition-colors duration-300 group hover:border-aurora-lavender/60 ${innerClasses.join(' ')}`}
     >
       {/* Reflection Glow */}
       <div

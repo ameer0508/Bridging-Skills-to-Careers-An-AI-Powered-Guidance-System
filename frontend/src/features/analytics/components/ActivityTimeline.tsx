@@ -50,7 +50,7 @@ export const ActivityTimeline: React.FC<ActivityTimelineProps> = ({ events }) =>
                     <Badge variant="subtle" color="primary" size="sm">
                       {evt.eventType.replace(/_/g, ' ')}
                     </Badge>
-                    <span className="text-[10px] text-aurora-muted font-mono">
+                    <span className="text-[10px] text-aurora-muted tabular-nums">
                       {new Date(evt.createdAt).toLocaleString()}
                     </span>
                   </div>

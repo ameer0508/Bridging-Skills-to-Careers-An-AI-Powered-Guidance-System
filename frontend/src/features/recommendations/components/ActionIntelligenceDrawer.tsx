@@ -8,8 +8,9 @@ import {
   Bookmark,
   Trash2,
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { IRecommendation } from './IntelligenceStreamFeed';
+import { DialogFrame } from '../../../design/aurora/DialogFrame';
 
 export interface ActionIntelligenceDrawerProps {
   recommendation: IRecommendation | null;
@@ -29,24 +30,14 @@ export const ActionIntelligenceDrawer: React.FC<ActionIntelligenceDrawerProps> =
   const isHighest = recommendation.priority === 'Highest';
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50 overflow-hidden">
-        {/* Backdrop */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-          className="absolute inset-0 bg-aurora-canvas/60 backdrop-blur-md transition-opacity"
-        />
-
+    <DialogFrame onClose={onClose} label={recommendation.title || 'Recommendation details'} side="right">
         <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
           <motion.div
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="w-screen max-w-xl bg-aurora-canvas border-l border-aurora-line shadow-2xl p-6 sm:p-8 flex flex-col justify-between overflow-y-auto space-y-6"
+            className="w-screen max-w-xl bg-white border-l border-aurora-line shadow-2xl p-6 sm:p-8 flex flex-col justify-between overflow-y-auto space-y-6"
           >
             <div className="space-y-6">
               {/* Drawer Header */}
@@ -107,7 +98,7 @@ export const ActionIntelligenceDrawer: React.FC<ActionIntelligenceDrawerProps> =
               )}
 
               {/* Projected Impact & Specs Grid */}
-              <div className="grid grid-cols-3 gap-3 text-xs font-mono">
+              <div className="grid grid-cols-3 gap-3 text-xs tabular-nums">
                 <div className="p-3.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-center space-y-1">
                   <span className="text-[9px] text-aurora-muted uppercase block font-semibold">
                     Readiness Gain
@@ -138,13 +129,13 @@ export const ActionIntelligenceDrawer: React.FC<ActionIntelligenceDrawerProps> =
 
               {/* AI Explainability Section */}
               <div className="p-4 rounded-2xl bg-aurora-canvas/60 border border-aurora-line space-y-3">
-                <div className="flex items-center gap-2 text-aurora-indigo font-bold text-xs font-mono">
+                <div className="flex items-center gap-2 text-aurora-indigo font-bold text-xs tabular-nums">
                   <Sparkles className="w-4 h-4" />
                   <span className="uppercase tracking-wider">AI Explainability Trace</span>
                 </div>
 
                 <p className="text-xs text-aurora-muted leading-relaxed">
-                  💡 {recommendation.reason || 'Synthesized based on missing competency signals in your verified profile compared against competitive benchmarks for your target role.'}
+                  💡 {recommendation.reason || 'Synthesized based on missing competency signals in your profile compared against competitive benchmarks for your target role.'}
                 </p>
 
                 <div className="pt-2 border-t border-aurora-line space-y-1.5 text-xs text-aurora-muted">
@@ -152,7 +143,7 @@ export const ActionIntelligenceDrawer: React.FC<ActionIntelligenceDrawerProps> =
                     Observed Market Validation:
                   </span>
                   <ul className="list-disc list-inside space-y-1 font-sans text-xs">
-                    <li>Required in over 80% of verified job specifications in your target domain.</li>
+                    <li>Listed as a requirement for your target role.</li>
                     <li>Directly addresses an unfulfilled requirement in your active career roadmap.</li>
                     <li>Boosts estimated resume screening match rate by up to 28%.</li>
                   </ul>
@@ -244,8 +235,7 @@ export const ActionIntelligenceDrawer: React.FC<ActionIntelligenceDrawerProps> =
             </div>
           </motion.div>
         </div>
-      </div>
-    </AnimatePresence>
+    </DialogFrame>
   );
 };
 

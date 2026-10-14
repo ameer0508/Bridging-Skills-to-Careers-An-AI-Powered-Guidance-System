@@ -106,7 +106,7 @@ export const AnalyticsDashboardPage: React.FC = () => {
         </div>
 
         <div className="bg-aurora-canvas border border-aurora-line rounded-xl p-5 shadow-lg">
-          <p className="text-xs text-aurora-muted font-semibold uppercase mb-1">Total Verified Skills</p>
+          <p className="text-xs text-aurora-muted font-semibold uppercase mb-1">Total Skills on Profile</p>
           <div className="flex items-end gap-3">
             <h3 className="text-3xl font-black text-aurora-ink">{currentMetrics.totalSkills}</h3>
             <span className={`text-sm font-bold mb-1 ${trends.skillsAdded >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
@@ -223,10 +223,7 @@ export const AnalyticsDashboardPage: React.FC = () => {
       {/* AI STATUS BAR */}
       <AIStatusBar
         status={isLoading ? 'thinking' : error ? 'error' : 'active'}
-        confidence={98.9}
-        provider="Predictive AI Analytics Engine"
-        latencyMs={105}
-        lastUpdated="Just now"
+        provider="Your progress records"
       />
     </div>
   );

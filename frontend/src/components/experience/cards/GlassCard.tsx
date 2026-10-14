@@ -25,9 +25,9 @@ export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
     const prefersReducedMotion = useReducedMotion();
 
     const blurMap = {
-      sm: 'backdrop-blur-sm',
-      md: 'backdrop-blur-md',
-      lg: 'backdrop-blur-xl',
+      sm: '',
+      md: '',
+      lg: '',
     };
 
     return (

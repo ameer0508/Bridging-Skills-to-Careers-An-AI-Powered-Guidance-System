@@ -13,7 +13,7 @@ export const MomentumScoreBreakdown: React.FC<MomentumScoreBreakdownProps> = ({
   momentumScoreData = {
     overallScore: 68,
     recentDelta: 5,
-    confidence: 'High Confidence (Verified Data)',
+    confidence: 'Based on your recorded data',
     factors: [
       {
         name: 'Roadmap Execution',
@@ -23,11 +23,11 @@ export const MomentumScoreBreakdown: React.FC<MomentumScoreBreakdownProps> = ({
         evidence: '40% curriculum completed',
       },
       {
-        name: 'Verified Skill Graph',
+        name: 'Skill Evidence Graph',
         weightPercentage: 30,
         score: 60,
         contribution: 18,
-        evidence: '6 skills verified',
+        evidence: '6 skills on profile',
       },
       {
         name: 'Target Role Readiness',

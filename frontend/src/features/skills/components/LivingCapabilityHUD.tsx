@@ -38,7 +38,7 @@ export const LivingCapabilityHUD: React.FC<LivingCapabilityHUDProps> = ({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-3xl border border-aurora-line bg-gradient-to-br from-white via-aurora-surface to-aurora-sidebar p-6 sm:p-8 backdrop-blur-2xl shadow-2xl space-y-6 ${className}`}
+      className={`relative overflow-hidden rounded-3xl border border-aurora-line bg-gradient-to-br from-white via-aurora-surface to-aurora-sidebar p-6 sm:p-8 shadow-2xl space-y-6 ${className}`}
     >
       {/* Ambient background glows */}
       <div className="pointer-events-none absolute -top-24 -right-24 w-96 h-96 rounded-full bg-gradient-to-bl from-indigo-500/15 via-purple-500/10 to-transparent blur-3xl -z-10" />
@@ -53,9 +53,9 @@ export const LivingCapabilityHUD: React.FC<LivingCapabilityHUDProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold tracking-wider uppercase text-aurora-indigo">
-                Verified Capability Architecture
+                Capability Architecture
               </span>
-              <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-cyan-400" />
             </div>
             <h2 className="text-sm font-semibold text-aurora-muted">
               Personalized Skill Graph & Multi-Source Evidence Records
@@ -102,17 +102,17 @@ export const LivingCapabilityHUD: React.FC<LivingCapabilityHUDProps> = ({
             Matrix
           </h1>
           <p className="text-xs sm:text-sm text-aurora-muted max-w-xl leading-relaxed">
-            Your living capability map. Understand the exact competencies you possess, their verified
+            Your living capability map. Understand the exact competencies you possess, their
             evidence trail, and how they align with your target career goals.
           </p>
         </div>
 
         {/* Right Column: 4 Real Telemetry Metrics */}
         <div className="lg:col-span-6 grid grid-cols-2 sm:grid-cols-4 gap-3 w-full">
-          {/* Metric 1: Total Verified Skills */}
+          {/* Metric 1: Total Skills on Profile */}
           <div className="p-4 rounded-2xl bg-aurora-canvas/60 border border-aurora-line text-center space-y-1 shadow-sm">
             <span className="text-[10px] font-bold text-aurora-muted uppercase tracking-wider block">
-              Verified Skills
+              Skills on Profile
             </span>
             <span className="font-display text-2xl font-black text-aurora-violet">
               {totalSkills}

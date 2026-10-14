@@ -44,7 +44,7 @@ export const AIWorkspaceHeader: React.FC<AIWorkspaceHeaderProps> = ({
             </Badge>
           </div>
           <p className="text-[10px] text-aurora-muted truncate">
-            Advisory grounded strictly in your verified platform data
+            Advice based on your SkillBridge data
           </p>
         </div>
       </div>

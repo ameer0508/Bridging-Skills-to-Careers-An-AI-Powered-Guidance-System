@@ -73,7 +73,7 @@ export const CareerJourneyProgressionTimeline: React.FC<CareerJourneyProgression
     {
       id: 'skills',
       label: 'SKILL ENGINE',
-      subtitle: totalSkills > 0 ? `${totalSkills} Verified` : 'No Skills Yet',
+      subtitle: totalSkills > 0 ? `${totalSkills} on profile` : 'No Skills Yet',
       icon: Cpu,
       status: totalSkills > 0 ? ('COMPLETED' as const) : ('NOT_STARTED' as const),
       route: '/skills',
@@ -140,7 +140,7 @@ export const CareerJourneyProgressionTimeline: React.FC<CareerJourneyProgression
             <span className="px-2.5 py-0.5 rounded text-[10px] font-bold bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25">
               CAREER PIPELINE VISUALIZATION
             </span>
-            <span className="text-xs text-aurora-muted font-mono">
+            <span className="text-xs text-aurora-muted tabular-nums">
               Domain: <strong className="text-aurora-violet">{primaryDomain || 'General'}</strong>
             </span>
           </div>
@@ -169,7 +169,7 @@ export const CareerJourneyProgressionTimeline: React.FC<CareerJourneyProgression
       </div>
 
       {/* HORIZONTAL STEP NODES GRID */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2 font-mono">
+      <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2 tabular-nums">
         {steps.map((step) => {
           const Icon = step.icon;
           const isCompleted = step.status === 'COMPLETED';

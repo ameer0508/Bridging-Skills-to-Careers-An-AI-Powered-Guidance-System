@@ -73,7 +73,7 @@ export const AIOperationsCenterWorkspace: React.FC = () => {
       {/* HERO SECTION */}
       <WorkspaceHero
         title="SkillBridge AI Operations & Observability Center"
-        subtitle="CENTRALIZED GOVERNANCE, REAL-TIME DISTRIBUTED TRACING, SLO TRACKING, & A/B EXPERIMENTATION"
+        subtitle="SAMPLE OPERATIONS CONSOLE: GOVERNANCE, TRACING, SLO TRACKING AND EXPERIMENTS (ILLUSTRATIVE)"
         badge="AI Operations"
         badgeColor="indigo"
         metrics={[
@@ -124,7 +124,7 @@ export const AIOperationsCenterWorkspace: React.FC = () => {
                     ● {pipe.status}
                   </span>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                <div className="grid grid-cols-2 gap-2 text-xs tabular-nums">
                   <div className="p-2 rounded-lg bg-aurora-canvas border border-aurora-line space-y-0.5">
                     <span className="text-[9px] text-aurora-muted block">LATENCY</span>
                     <span className="text-aurora-ink font-bold">{pipe.latency}</span>
@@ -145,7 +145,7 @@ export const AIOperationsCenterWorkspace: React.FC = () => {
                 <BarChart3 className="w-4 h-4 text-aurora-violet" />
                 AI Inference Latency & Cost Telemetry
               </span>
-              <span className="text-[10px] text-aurora-muted">Live Telemetry</span>
+              <span className="text-[10px] text-aurora-muted">Sample data</span>
             </div>
 
             <div className="h-64 w-full pt-2">
@@ -273,9 +273,8 @@ export const AIOperationsCenterWorkspace: React.FC = () => {
 
       {/* BOTTOM STATUS BAR */}
       <AIStatusBar
-        status="active"
-        confidence={99.95}
-        lastUpdated="Operations Live"
+        status="idle"
+        provider="Built-in sample content"
       />
     </div>
   );

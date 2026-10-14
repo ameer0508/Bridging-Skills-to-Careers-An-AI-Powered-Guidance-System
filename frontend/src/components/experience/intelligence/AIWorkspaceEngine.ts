@@ -44,7 +44,7 @@ export const AIWorkspaceEngine = {
         topMatch.missingSkills?.slice(0, 2).join(' and ') || 'core milestones'
       } will yield the highest readiness impact.`;
     } else {
-      conversationalSummary = `Your skill graph contains ${totalSkills} verified competencies. Select a target career path to compute alignment.`;
+      conversationalSummary = `Your skill graph contains ${totalSkills} skills. Select a target career path to compute alignment.`;
     }
 
     const safeRecs: RecommendationItem[] = listFrom<RecommendationItem>(recommendations, 'recommendations');

@@ -39,12 +39,12 @@ export const AuthIntelligenceField: React.FC<AuthIntelligenceFieldProps> = ({ ac
     window.addEventListener('resize', handleResize);
 
     const nodes: Node[] = [
-      { id: '1', label: 'Skill Vectors', x: 0, y: 0, baseAngle: 0, distance: 130, speed: 0.003, color: '#22D3EE' },
-      { id: '2', label: 'NLP Resume', x: 0, y: 0, baseAngle: Math.PI / 3, distance: 160, speed: 0.002, color: '#818CF8' },
-      { id: '3', label: 'Career OS', x: 0, y: 0, baseAngle: (2 * Math.PI) / 3, distance: 120, speed: 0.004, color: '#A855F7' },
-      { id: '4', label: 'Market Demand', x: 0, y: 0, baseAngle: Math.PI, distance: 170, speed: 0.0025, color: '#34D399' },
+      { id: '1', label: 'Skills', x: 0, y: 0, baseAngle: 0, distance: 130, speed: 0.003, color: '#22D3EE' },
+      { id: '2', label: 'Resume parsing', x: 0, y: 0, baseAngle: Math.PI / 3, distance: 160, speed: 0.002, color: '#818CF8' },
+      { id: '3', label: 'Career matches', x: 0, y: 0, baseAngle: (2 * Math.PI) / 3, distance: 120, speed: 0.004, color: '#A855F7' },
+      { id: '4', label: 'Market evidence', x: 0, y: 0, baseAngle: Math.PI, distance: 170, speed: 0.0025, color: '#34D399' },
       { id: '5', label: 'Adaptive Roadmap', x: 0, y: 0, baseAngle: (4 * Math.PI) / 3, distance: 140, speed: 0.0035, color: '#F472B6' },
-      { id: '6', label: 'Readiness Index', x: 0, y: 0, baseAngle: (5 * Math.PI) / 3, distance: 180, speed: 0.002, color: '#FBBF24' },
+      { id: '6', label: 'Readiness', x: 0, y: 0, baseAngle: (5 * Math.PI) / 3, distance: 180, speed: 0.002, color: '#FBBF24' },
     ];
 
     let angleOffset = 0;

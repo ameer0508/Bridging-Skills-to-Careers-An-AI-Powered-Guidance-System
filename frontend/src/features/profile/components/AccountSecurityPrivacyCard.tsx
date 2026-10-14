@@ -8,6 +8,7 @@ import {
   X
 } from 'lucide-react';
 import { GlassPanel } from '../../../components/experience/workspace';
+import { DialogFrame } from '../../../design/aurora/DialogFrame';
 
 export interface AccountSecurityPrivacyCardProps {
   userId: string;
@@ -42,7 +43,7 @@ export const AccountSecurityPrivacyCard: React.FC<AccountSecurityPrivacyCardProp
           <div className="space-y-1">
             <span className="text-xs font-bold uppercase tracking-wider text-aurora-indigo flex items-center gap-2">
               <Lock className="w-4 h-4 text-aurora-indigo" />
-              Account Security & Identity Verification
+              Account and security
             </span>
             <p className="text-[11px] text-aurora-muted">
               Identity parameters, authentication credentials, and cryptographic session protection.
@@ -73,9 +74,9 @@ export const AccountSecurityPrivacyCard: React.FC<AccountSecurityPrivacyCardProp
           <div className="p-3.5 rounded-2xl bg-aurora-canvas border border-aurora-line space-y-1">
             <span className="text-[10px] text-aurora-muted uppercase block">Account Created</span>
             <strong className="text-aurora-ink text-xs block">
-              {createdAt ? new Date(createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Verified Session'}
+              {createdAt ? new Date(createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Date not available'}
             </strong>
-            <span className="text-[9px] text-aurora-muted block font-mono">{maskedId}</span>
+            <span className="text-[9px] text-aurora-muted block tabular-nums">{maskedId}</span>
           </div>
         </div>
 
@@ -138,8 +139,8 @@ export const AccountSecurityPrivacyCard: React.FC<AccountSecurityPrivacyCardProp
 
       {/* Logout Confirmation Dialog */}
       {isConfirmModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-aurora-canvas/60 backdrop-blur-md animate-fade-in font-mono">
-          <div className="relative w-full max-w-md p-6 rounded-3xl bg-aurora-canvas border border-rose-200 shadow-2xl space-y-5 text-xs">
+        <DialogFrame onClose={() => setIsConfirmModalOpen(false)} label="Confirm sign out">
+          <div className="relative w-full max-w-md max-h-[92vh] overflow-y-auto p-6 rounded-t-3xl sm:rounded-3xl bg-white border border-rose-200 shadow-aurora-lg space-y-5 text-xs">
             <div className="flex items-center justify-between border-b border-aurora-line pb-3">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-rose-700" />
@@ -181,7 +182,7 @@ export const AccountSecurityPrivacyCard: React.FC<AccountSecurityPrivacyCardProp
               </button>
             </div>
           </div>
-        </div>
+        </DialogFrame>
       )}
     </div>
   );

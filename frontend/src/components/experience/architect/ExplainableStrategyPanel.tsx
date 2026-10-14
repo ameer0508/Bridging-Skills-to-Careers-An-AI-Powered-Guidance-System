@@ -20,7 +20,7 @@ export const ExplainableStrategyPanel: React.FC<ExplainableStrategyPanelProps> =
     potentialBlockers: ['Unresolved skill gaps in production scalability'],
     estimatedTotalEffort: '2-4 Weeks',
     confidenceTier: 'High Confidence',
-    evidence: ['85% match model alignment', 'Verified skill graph'],
+    evidence: ['85% match model alignment', 'Skill evidence graph'],
   },
   className = '',
 }) => {
@@ -87,7 +87,7 @@ export const ExplainableStrategyPanel: React.FC<ExplainableStrategyPanelProps> =
               Why This Strategy Was Selected:
             </span>
             <p className="text-aurora-ink leading-relaxed">
-              Your profile exhibits high alignment with {recommendedRoleTitle}. This path maximizes your existing verified strengths while addressing minimal remaining skill gaps in the shortest estimated timeframe ({estimatedTotalEffort}).
+              Your profile exhibits high alignment with {recommendedRoleTitle}. This path maximizes your existing strengths while addressing minimal remaining skill gaps in the shortest estimated timeframe ({estimatedTotalEffort}).
             </p>
           </div>
 

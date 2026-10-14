@@ -154,7 +154,7 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
                 <DollarSign className="w-5 h-5" />
               </span>
               <h3 className="text-xl font-bold text-aurora-ink tracking-tight">
-                Real-Time Salary Intelligence & Forecasting
+                Salary Illustration (Sample Figures)
               </h3>
               <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold">
                 Multi-Provider Synced
@@ -206,7 +206,7 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
         <GlassPanel className="lg:col-span-7 p-6 space-y-6 border-aurora-violet/25 relative overflow-hidden flex flex-col justify-between">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-aurora-muted uppercase tracking-wider font-mono">
+              <span className="text-xs font-bold text-aurora-muted uppercase tracking-wider tabular-nums">
                 Simulated Market Value Benchmark
               </span>
               <span className="px-2.5 py-1 rounded-lg bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-indigo text-xs font-bold">
@@ -218,7 +218,7 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
               <span className="text-4xl sm:text-5xl font-extrabold text-aurora-ink tracking-tight">
                 ${calculatedSalary.toLocaleString()}
               </span>
-              <span className="text-sm font-bold text-emerald-700 font-mono">
+              <span className="text-sm font-bold text-emerald-700 tabular-nums">
                 USD / year
               </span>
             </div>
@@ -321,7 +321,7 @@ export const SalaryIntelligencePanel: React.FC<SalaryIntelligencePanelProps> = (
             </div>
 
             {/* ROI GAUGE */}
-            <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between text-xs font-mono">
+            <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between text-xs tabular-nums">
               <span className="text-aurora-muted flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-aurora-indigo" />
                 Estimated Payback Timeline:

@@ -17,7 +17,7 @@ const Metric: React.FC<{ label: string; value: number | null; unmeasured: string
   <Link
     to={to}
     data-testid={testId}
-    className="group flex items-center gap-3 rounded-3xl border border-aurora-line bg-white/85 p-3 shadow-aurora-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:shadow-aurora-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora-violet motion-reduce:transform-none"
+    className="group flex items-center gap-3 rounded-3xl border border-aurora-line bg-white/85 p-3 shadow-aurora-sm transition-all hover:-translate-y-0.5 hover:shadow-aurora-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora-violet motion-reduce:transform-none"
   >
     <span className="shrink-0">
       <Ring value={value} size={52} stroke={6} label={label} tone={tone} />
@@ -58,7 +58,7 @@ export const CommandHero: React.FC<{ name: string; snapshot: UnifiedCareerSnapsh
               </p>
             )}
           </div>
-          <div className="max-w-xl rounded-3xl border border-aurora-violet/15 bg-white/90 p-4 shadow-aurora-sm backdrop-blur sm:p-5" data-testid="home-best-action">
+          <div className="max-w-xl rounded-3xl border border-aurora-violet/15 bg-white/90 p-4 shadow-aurora-sm sm:p-5" data-testid="home-best-action">
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-aurora-violet">Next best action</p>
             <p className="mt-1 font-heading text-lg font-bold text-aurora-ink">{best.title}</p>
             <p className="mt-1 text-sm text-aurora-muted">{best.why}</p>
@@ -73,7 +73,7 @@ export const CommandHero: React.FC<{ name: string; snapshot: UnifiedCareerSnapsh
           <Link
             to="/skills"
             data-testid="home-skills"
-            className="flex flex-col justify-center rounded-3xl border border-aurora-line bg-white/85 p-4 shadow-aurora-sm backdrop-blur transition-all hover:-translate-y-0.5 hover:shadow-aurora-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora-violet motion-reduce:transform-none"
+            className="flex flex-col justify-center rounded-3xl border border-aurora-line bg-white/85 p-4 shadow-aurora-sm transition-all hover:-translate-y-0.5 hover:shadow-aurora-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora-violet motion-reduce:transform-none"
           >
             <span className="text-xs font-semibold text-aurora-muted">From your resume and profile</span>
             <span className="font-heading text-lg font-extrabold text-aurora-ink">

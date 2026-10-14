@@ -33,7 +33,7 @@ export const RecommendationSpotlight: React.FC<RecommendationSpotlightProps> = (
       <div className="flex items-center justify-between border-b border-aurora-line pb-4">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-aurora-violet/[0.06] text-aurora-indigo rounded-xl">
-            <Sparkles className="w-5 h-5 animate-pulse" />
+            <Sparkles className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -80,19 +80,19 @@ export const RecommendationSpotlight: React.FC<RecommendationSpotlightProps> = (
         {/* METRICS & ACTION COLUMN */}
         <div className="md:col-span-4 p-4 bg-aurora-canvas/60 border border-aurora-line rounded-2xl flex flex-col justify-between space-y-4">
           <div className="space-y-3">
-            <div className="flex justify-between items-center text-xs font-mono">
+            <div className="flex justify-between items-center text-xs tabular-nums">
               <span className="text-aurora-muted">Gap impact:</span>
               <span className="font-bold text-emerald-700">{estimatedReadinessBoost}/100</span>
             </div>
-            <div className="flex justify-between items-center text-xs font-mono">
+            <div className="flex justify-between items-center text-xs tabular-nums">
               <span className="text-aurora-muted">Match Gain:</span>
               <span className="font-bold text-aurora-violet">+{estimatedMatchBoost}%</span>
             </div>
-            <div className="flex justify-between items-center text-xs font-mono">
+            <div className="flex justify-between items-center text-xs tabular-nums">
               <span className="text-aurora-muted">Time Commitment:</span>
               <span className="font-bold text-aurora-ink">{learningTime}</span>
             </div>
-            <div className="flex justify-between items-center text-xs font-mono">
+            <div className="flex justify-between items-center text-xs tabular-nums">
               <span className="text-aurora-muted">Difficulty:</span>
               <span className="font-bold text-aurora-violet">{difficulty}</span>
             </div>

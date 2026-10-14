@@ -27,7 +27,7 @@ export const PersonalRelevanceMatrix: React.FC<PersonalRelevanceMatrixProps> = (
 
   if (!opportunity) {
     return (
-      <div className="rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-8 shadow-aurora-md backdrop-blur-xl flex flex-col items-center justify-center h-[740px] text-center space-y-3">
+      <div className="rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-8 shadow-aurora-md flex flex-col items-center justify-center h-[740px] text-center space-y-3">
         <Target className="w-12 h-12 text-aurora-muted" />
         <h3 className="text-base font-bold text-aurora-muted">Relevance Matrix</h3>
         <p className="text-xs text-aurora-muted max-w-xs">
@@ -52,7 +52,7 @@ export const PersonalRelevanceMatrix: React.FC<PersonalRelevanceMatrixProps> = (
   const tier = getTier(matchScore);
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 md:p-7 shadow-aurora-md backdrop-blur-xl flex flex-col h-[740px] space-y-5">
+    <div className="relative overflow-hidden rounded-3xl border border-aurora-line bg-aurora-canvas/60 p-6 md:p-7 shadow-aurora-md flex flex-col h-[740px] space-y-5">
       {/* Header */}
       <div className="border-b border-aurora-line pb-4 shrink-0 space-y-1">
         <div className="flex items-center gap-2">

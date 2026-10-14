@@ -4,15 +4,15 @@ import { createPortal } from 'react-dom';
 export interface PortalProps {
   children: React.ReactNode;
   containerId?: string;
-  /** The design the portal content belongs to: still-dark screens, or Aurora Elite (light). */
-  theme?: 'legacy-dark' | 'aurora';
+  /** Accepted for compatibility; every portal renders in the light Aurora Elite design. */
+  theme?: 'aurora';
 }
 
-export const Portal: React.FC<PortalProps> = ({ children, containerId, theme = 'legacy-dark' }) => {
+export const Portal: React.FC<PortalProps> = ({ children, containerId }) => {
   const [mounted, setMounted] = useState(false);
   const [targetElement, setTargetElement] = useState<HTMLElement | null>(null);
 
-  const id = containerId ?? (theme === 'aurora' ? 'aurora-portal-root' : 'portal-root');
+  const id = containerId ?? 'portal-root';
 
   useEffect(() => {
     setMounted(true);
@@ -22,7 +22,6 @@ export const Portal: React.FC<PortalProps> = ({ children, containerId, theme = '
     if (!el) {
       el = document.createElement('div');
       el.id = id;
-      // Portal content keeps its own (dark) design inside the Aurora shell: see main.css
       el.className = 'sb-aurora';
       document.body.appendChild(el);
       created = true;
@@ -35,7 +34,7 @@ export const Portal: React.FC<PortalProps> = ({ children, containerId, theme = '
         el.parentNode.removeChild(el);
       }
     };
-  }, [id, theme]);
+  }, [id]);
 
   if (!mounted || !targetElement) {
     return null;

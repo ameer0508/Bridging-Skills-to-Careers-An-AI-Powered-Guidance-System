@@ -6,6 +6,7 @@ import {
   CAREER_DOMAINS,
   SECONDARY_INTEREST_TAGS
 } from '../../onboarding/careerDomains';
+import { DialogFrame } from '../../../design/aurora/DialogFrame';
 
 export interface CareerPreferencesEditorProps {
   isOpen: boolean;
@@ -82,8 +83,8 @@ export const CareerPreferencesEditor: React.FC<CareerPreferencesEditorProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-aurora-canvas/60 backdrop-blur-md animate-fade-in font-mono">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 sm:p-8 rounded-3xl bg-aurora-canvas border border-aurora-line shadow-2xl space-y-6 text-xs custom-scrollbar">
+    <DialogFrame onClose={onClose} label="Career preferences">
+      <div className="relative w-full max-w-2xl max-h-[92vh] overflow-y-auto p-6 sm:p-8 rounded-t-3xl sm:rounded-3xl bg-white border border-aurora-line shadow-aurora-lg space-y-6 text-xs custom-scrollbar">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-aurora-line pb-4">
           <div>
@@ -92,7 +93,7 @@ export const CareerPreferencesEditor: React.FC<CareerPreferencesEditorProps> = (
               Configure Career Direction & Preferences
             </h3>
             <p className="text-[11px] text-aurora-muted">
-              Your choices recalibrate skill gap analysis, recommendations, and live job matching.
+              Your choices recalibrate skill gap analysis, recommendations, and job matching.
             </p>
           </div>
           <button
@@ -234,6 +235,6 @@ export const CareerPreferencesEditor: React.FC<CareerPreferencesEditorProps> = (
           </div>
         </form>
       </div>
-    </div>
+    </DialogFrame>
   );
 };

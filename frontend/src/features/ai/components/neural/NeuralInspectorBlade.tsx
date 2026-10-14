@@ -53,13 +53,13 @@ export const NeuralInspectorBlade: React.FC<NeuralInspectorBladeProps> = ({
                   v{agent.version}
                 </span>
               </div>
-              <span className="text-xs text-aurora-muted font-mono">{agent.category}</span>
+              <span className="text-xs text-aurora-muted tabular-nums">{agent.category}</span>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               <span>{agent.status}</span>
             </div>
             <button
@@ -101,7 +101,7 @@ export const NeuralInspectorBlade: React.FC<NeuralInspectorBladeProps> = ({
         <div className="flex items-center justify-between gap-3 pt-3 border-t border-aurora-line">
           <div className="flex items-center gap-2 text-[11px] text-aurora-muted">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
-            <span>Telemetry Synchronized with AI Orchestrator</span>
+            <span>Figures from your own records</span>
           </div>
 
           <button
