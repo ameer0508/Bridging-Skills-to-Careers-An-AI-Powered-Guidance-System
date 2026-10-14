@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom';
 import apiClient from '../../../lib/axios';
 import type { CareerMarketEvidence } from '../../careerLab/careerLabApi';
 import { fetchSalaryInsights, PERIOD_LABEL, SALARY_REASON_TEXT, type SalaryInsights } from '../../market/marketApi';
-import { ErrorNote, Loading, Note } from '../../careerLab/components/labUi';
-import { errorText, formatDate, labelClass, panelClass, quietButton } from '../../careerLab/components/labStyles';
+import { ErrorNote, Loading, Note } from '../../../design/aurora/labUi';
+import { errorText, formatDate, labelClass, panelClass, quietButton } from '../../../design/aurora/labStyles';
 
 /**
  * What SkillBridge actually knows about the job market for a career, on the Careers page.
@@ -24,8 +24,8 @@ export const CareerDemandPanel: React.FC<{ careerId: string; careerTitle: string
     <section className={panelClass} aria-labelledby="career-demand-heading" data-testid="career-demand" data-state={evidence.data?.state ?? ''}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
-          <h3 id="career-demand-heading" className="text-base font-bold text-white">Job postings for {careerTitle}</h3>
-          <p className="text-xs text-slate-400">From licensed job-market sources only. Postings describe the market; they say nothing about your own chances.</p>
+          <h3 id="career-demand-heading" className="text-base font-bold text-aurora-ink">Job postings for {careerTitle}</h3>
+          <p className="text-xs text-aurora-muted">From licensed job-market sources only. Postings describe the market; they say nothing about your own chances.</p>
         </div>
         <Link to="/market" className={quietButton}>Open Market Evidence</Link>
       </div>
@@ -38,18 +38,18 @@ export const CareerDemandPanel: React.FC<{ careerId: string; careerTitle: string
         </>
       ) : evidence.data.usable && evidence.data.evidence ? (
         <div className="space-y-1">
-          <p className="text-xl font-extrabold text-white">{evidence.data.evidence.distinctPostings} postings</p>
-          <p className="text-xs text-slate-300">
+          <p className="text-xl font-extrabold text-aurora-ink">{evidence.data.evidence.distinctPostings} postings</p>
+          <p className="text-xs text-aurora-muted">
             {evidence.data.evidence.location}, {evidence.data.evidence.period.from} to {evidence.data.evidence.period.to}, in {evidence.data.evidence.monthsWithPostings} months.
             Source: {evidence.data.evidence.sources.map((s) => `${s.name} (${s.licence})`).join('; ')}.
             {evidence.data.evidence.latestRetrievedAt ? ` Collected ${formatDate(evidence.data.evidence.latestRetrievedAt)}.` : ''}
           </p>
-          <p className="text-[11px] text-slate-400">{evidence.data.evidence.matchingRule}</p>
+          <p className="text-[11px] text-aurora-muted">{evidence.data.evidence.matchingRule}</p>
         </div>
       ) : (
         <div className="space-y-1">
-          <p className="text-sm font-bold text-white">Market data unavailable</p>
-          <p className="text-xs text-slate-300">{evidence.data.detail}</p>
+          <p className="text-sm font-bold text-aurora-ink">Market data unavailable</p>
+          <p className="text-xs text-aurora-muted">{evidence.data.detail}</p>
         </div>
       )}
       <Note>No demand score, growth rate or forecast is shown here, because none can be supported without sourced records.</Note>
@@ -66,8 +66,8 @@ export const CareerSalaryPanel: React.FC = () => {
     <section className={panelClass} aria-labelledby="career-salary-heading" data-testid="career-salary" data-status={data?.status ?? ''}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="space-y-1">
-          <h3 id="career-salary-heading" className="text-base font-bold text-white">Advertised salaries</h3>
-          <p className="text-xs text-slate-400">Only salaries stated in sourced postings, per country, currency and pay period. Amounts are never converted or estimated.</p>
+          <h3 id="career-salary-heading" className="text-base font-bold text-aurora-ink">Advertised salaries</h3>
+          <p className="text-xs text-aurora-muted">Only salaries stated in sourced postings, per country, currency and pay period. Amounts are never converted or estimated.</p>
         </div>
         <Link to="/market/salaries" className={quietButton}>Open Salary Insights</Link>
       </div>
@@ -80,19 +80,19 @@ export const CareerSalaryPanel: React.FC = () => {
         </>
       ) : groups.length === 0 ? (
         <div className="space-y-1">
-          <p className="text-sm font-bold text-white">Salary data unavailable</p>
-          <p className="text-xs text-slate-300">
+          <p className="text-sm font-bold text-aurora-ink">Salary data unavailable</p>
+          <p className="text-xs text-aurora-muted">
             {data.reasons.length > 0 ? data.reasons.map((reason) => SALARY_REASON_TEXT[reason](data)).join(' ') : 'No group of sourced postings has enough stated salaries to report a figure.'}
           </p>
         </div>
       ) : (
         <ul className="space-y-2">
           {groups.slice(0, 5).map((group) => (
-            <li key={group.key} className="p-3 rounded-2xl bg-slate-900/50 border border-white/10 space-y-1">
-              <p className="text-sm font-bold text-white">
+            <li key={group.key} className="p-3 rounded-2xl bg-aurora-canvas/60 border border-aurora-line space-y-1">
+              <p className="text-sm font-bold text-aurora-ink">
                 {group.country}: median {group.completeRanges.midpointQuartiles!.median.toLocaleString()} {group.currency} {PERIOD_LABEL[group.period]}
               </p>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-aurora-muted">
                 Middle half {group.completeRanges.midpointQuartiles!.p25.toLocaleString()} to {group.completeRanges.midpointQuartiles!.p75.toLocaleString()}, from {group.completeRanges.count} postings with a full range.
                 Source: {group.sources.map((s) => `${s.name} (${s.licence})`).join('; ')}. Collected up to {formatDate(group.collection.latestRetrievedAt)}.
               </p>
@@ -110,8 +110,8 @@ export const JobListingsPointer: React.FC = () => (
   <section className={panelClass} aria-labelledby="job-listings-heading" data-testid="job-listings-pointer">
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="space-y-1">
-        <h3 id="job-listings-heading" className="text-base font-bold text-white">Job listings</h3>
-        <p className="text-xs text-slate-400">
+        <h3 id="job-listings-heading" className="text-base font-bold text-aurora-ink">Job listings</h3>
+        <p className="text-xs text-aurora-muted">
           Listings are on the job search page, where each one is scored against your skills and every built-in sample listing is labelled as a sample.
         </p>
       </div>

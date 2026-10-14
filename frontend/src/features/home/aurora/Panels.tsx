@@ -19,7 +19,7 @@ import type { StudyPlanSchedule } from '../../roadmaps/components/StudyPlan';
 import { rangeText } from '../../roadmaps/components/scheduleText';
 import { auroraButtonClass } from '../../../design/aurora/buttonStyles';
 import type { ActivityOverview, SkillsSummary, UnifiedCareerSnapshot } from './types';
-import { Bar, CardHeader, EmptyNote, Ring, cardClass } from './ui';
+import { Bar, CardHeader, EmptyNote, Ring, cardClass } from '../../../design/aurora/ui';
 
 type Snap = { snapshot: UnifiedCareerSnapshot };
 type StageState = 'done' | 'active' | 'todo';

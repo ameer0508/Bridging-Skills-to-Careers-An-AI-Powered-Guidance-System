@@ -6,7 +6,7 @@ import { auroraButtonClass } from '../../../design/aurora/buttonStyles';
 import { Eyebrow } from '../../../design/aurora/primitives';
 import type { UnifiedCareerSnapshot } from './types';
 import { bestActionFor } from './bestAction';
-import { Ring } from './ui';
+import { Ring } from '../../../design/aurora/ui';
 
 const greeting = () => {
   const hour = new Date().getHours();

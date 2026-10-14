@@ -8,8 +8,8 @@ import {
   type AssessmentOverview,
   type AssessmentResult,
 } from '../careerLabApi';
-import { EmptyState, ErrorNote, Loading, Note } from './labUi';
-import { errorText, formatDate, formatDateTime, labelClass, panelClass, primaryButton, quietButton } from './labStyles';
+import { EmptyState, ErrorNote, Loading, Note } from '../../../design/aurora/labUi';
+import { errorText, formatDate, formatDateTime, labelClass, panelClass, primaryButton, quietButton } from '../../../design/aurora/labStyles';
 
 const HISTORY_STATUS: Record<string, string> = {
   in_progress: 'In progress',
@@ -58,8 +58,8 @@ export const VerifyPanel: React.FC = () => {
 
   const heading = (
     <div className="space-y-1">
-      <h2 id="verify-heading" className="text-base font-bold text-white">Verify skills</h2>
-      <p className="text-xs text-slate-400">
+      <h2 id="verify-heading" className="font-heading text-lg font-bold text-aurora-ink">Verify skills</h2>
+      <p className="text-sm text-aurora-muted">
         Answer a short quiz to show a skill instead of only stating it. A pass is recorded as verified by a SkillBridge skill check. It is not a professional certification.
       </p>
     </div>
@@ -81,8 +81,8 @@ export const VerifyPanel: React.FC = () => {
     return (
       <section className={panelClass} aria-labelledby="verify-heading" data-testid="assessment-attempt" data-skill={attempt.skill}>
         <div className="space-y-1">
-          <h2 id="verify-heading" className="text-base font-bold text-white">{attempt.skill} skill check</h2>
-          <p className="text-xs text-slate-400">
+          <h2 id="verify-heading" className="font-heading text-lg font-bold text-aurora-ink">{attempt.skill} skill check</h2>
+          <p className="text-sm text-aurora-muted">
             {attempt.questions.length} questions. {attempt.passMark} correct answers are needed to pass. Submit before {formatDateTime(attempt.expiresAt)}.
             {attempt.resumed ? ' You started this attempt earlier; it continues with the same questions.' : ''}
           </p>
@@ -96,15 +96,15 @@ export const VerifyPanel: React.FC = () => {
           }}
         >
           {attempt.questions.map((question, index) => (
-            <fieldset key={question.prompt} className="p-4 rounded-2xl bg-slate-900/50 border border-white/10 space-y-3" data-testid="assessment-question">
-              <legend className="text-sm font-semibold text-white px-1">{index + 1}. {question.prompt}</legend>
+            <fieldset key={question.prompt} className="p-4 rounded-2xl bg-aurora-canvas/60 border border-aurora-line space-y-3" data-testid="assessment-question">
+              <legend className="text-sm font-semibold text-aurora-ink px-1">{index + 1}. {question.prompt}</legend>
               <div className="space-y-2">
                 {question.options.map((option, position) => (
-                  <label key={option} className="flex items-start gap-2 text-xs text-slate-200 cursor-pointer">
+                  <label key={option} className="flex items-start gap-2 text-xs text-aurora-ink cursor-pointer">
                     <input
                       type="radio"
                       name={`question-${index}`}
-                      className="mt-0.5 accent-indigo-500"
+                      className="mt-0.5 accent-[#5540f5]"
                       checked={answers[index] === position}
                       onChange={() => setAnswers((current) => current.map((a, i) => (i === index ? position : a)))}
                     />
@@ -117,7 +117,7 @@ export const VerifyPanel: React.FC = () => {
           <div className="flex flex-wrap items-center gap-3">
             <button type="submit" className={primaryButton} disabled={submit.isPending}>Submit answers</button>
             <button type="button" className={quietButton} onClick={() => { setAttempt(null); submit.reset(); }}>Leave for now</button>
-            {unanswered > 0 && <span className="text-[11px] text-amber-300" role="status">{unanswered} unanswered. Unanswered questions count as wrong.</span>}
+            {unanswered > 0 && <span className="text-[11px] text-amber-700" role="status">{unanswered} unanswered. Unanswered questions count as wrong.</span>}
           </div>
         </form>
         <Note>Leaving does not cancel the attempt: it still counts towards today's attempts and can be continued until its time runs out.</Note>
@@ -127,18 +127,18 @@ export const VerifyPanel: React.FC = () => {
 
   // ---- Result of the attempt just submitted -------------------------------------------------
   const resultView = result && (
-    <div className="p-4 rounded-2xl border border-white/10 bg-slate-900/60 space-y-4" data-testid="assessment-result" data-passed={result.passed}>
+    <div className="p-4 rounded-2xl border border-aurora-line bg-aurora-canvas/60 space-y-4" data-testid="assessment-result" data-passed={result.passed}>
       <div className="flex items-start gap-3" role="status">
         {result.passed
-          ? <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" aria-hidden="true" />
-          : <XCircle className="w-5 h-5 text-rose-400 shrink-0" aria-hidden="true" />}
+          ? <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0" aria-hidden="true" />
+          : <XCircle className="w-5 h-5 text-rose-700 shrink-0" aria-hidden="true" />}
         <div className="space-y-1">
-          <p className="text-sm font-bold text-white">
+          <p className="text-sm font-bold text-aurora-ink">
             {result.skill}: {result.correct} of {result.of} correct. {result.passed ? 'Passed.' : `Not passed (${result.passMark} needed).`}
           </p>
-          <p className="text-xs text-slate-300">{result.note}</p>
+          <p className="text-xs text-aurora-muted">{result.note}</p>
           {result.evidence && result.evidence.added && (
-            <p className="text-xs text-slate-300" data-testid="assessment-evidence">
+            <p className="text-xs text-aurora-muted" data-testid="assessment-evidence">
               Evidence score for {result.skill}: {result.evidence.evidenceScoreBefore ?? 0} to {result.evidence.evidenceScoreAfter}.
               {result.recalculation?.status === 'completed' ? ' Your matches, readiness and recommendations were recalculated.' : ''}
             </p>
@@ -148,11 +148,11 @@ export const VerifyPanel: React.FC = () => {
       <ol className="space-y-3">
         {result.review.map((item, index) => (
           <li key={item.prompt} className="space-y-1" data-testid="assessment-review" data-correct={item.correct}>
-            <p className="text-xs font-semibold text-white">{index + 1}. {item.prompt}</p>
-            <p className={`text-xs ${item.correct ? 'text-emerald-300' : 'text-rose-300'}`}>
+            <p className="text-xs font-semibold text-aurora-ink">{index + 1}. {item.prompt}</p>
+            <p className={`text-xs ${item.correct ? 'text-emerald-700' : 'text-rose-700'}`}>
               {item.chosen === null ? 'Not answered.' : `Your answer: ${item.options[item.chosen]}.`} {item.correct ? 'Correct.' : `Correct answer: ${item.options[item.correctOption]}.`}
             </p>
-            <p className="text-[11px] text-slate-400">{item.explanation}</p>
+            <p className="text-[11px] text-aurora-muted">{item.explanation}</p>
           </li>
         ))}
       </ol>
@@ -177,11 +177,11 @@ export const VerifyPanel: React.FC = () => {
       ) : (
         <ul className="grid gap-3 sm:grid-cols-2">
           {data.skills.map((skill) => (
-            <li key={skill.skill} className="p-4 rounded-2xl bg-slate-900/50 border border-white/10 space-y-2" data-testid="assessable-skill" data-skill={skill.skill} data-verified={skill.verified}>
+            <li key={skill.skill} className="p-4 rounded-2xl bg-aurora-canvas/60 border border-aurora-line space-y-2" data-testid="assessable-skill" data-skill={skill.skill} data-verified={skill.verified}>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-bold text-white">{skill.skill}</span>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${skill.verified ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30' : 'bg-slate-900 text-slate-300 border-white/10'}`}>
+                  <span className="text-sm font-bold text-aurora-ink">{skill.skill}</span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${skill.verified ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-aurora-canvas text-aurora-muted border-aurora-line'}`}>
                     {skill.verified ? 'Verified by skill check' : skill.onProfile ? 'Stated, not verified' : 'Not on your profile'}
                   </span>
                 </div>
@@ -195,12 +195,12 @@ export const VerifyPanel: React.FC = () => {
                   {action(skill)}
                 </button>
               </div>
-              <p className="text-xs text-slate-300">
+              <p className="text-xs text-aurora-muted">
                 {skill.questionCount} questions, {skill.passMark} to pass.
                 {skill.verified && skill.verifiedAt ? ` Passed ${formatDate(skill.verifiedAt)}.` : ''}
                 {skill.lastResult && !skill.lastResult.passed ? ` Last attempt: ${skill.lastResult.correct} of ${skill.lastResult.of}.` : ''}
               </p>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-aurora-muted">
                 {skill.attemptsRemaining > 0
                   ? `${skill.attemptsRemaining} of ${data.policy.attemptsPerDay} attempts left today.`
                   : `No attempts left today. Available again ${formatDateTime(skill.nextAttemptAt)}.`}
@@ -213,12 +213,12 @@ export const VerifyPanel: React.FC = () => {
       <div className="space-y-2">
         <h3 className={labelClass}>Your attempts</h3>
         {data.history.length === 0 ? (
-          <p className="text-xs text-slate-400" data-testid="assessment-history-empty">You have not taken a skill check yet.</p>
+          <p className="text-xs text-aurora-muted" data-testid="assessment-history-empty">You have not taken a skill check yet.</p>
         ) : (
           <ul className="space-y-1" data-testid="assessment-history">
             {data.history.map((item) => (
-              <li key={item.attemptId} className="text-xs text-slate-300 flex flex-wrap gap-x-3">
-                <span className="font-semibold text-white">{item.skill}</span>
+              <li key={item.attemptId} className="text-xs text-aurora-muted flex flex-wrap gap-x-3">
+                <span className="font-semibold text-aurora-ink">{item.skill}</span>
                 <span>{formatDateTime(item.submittedAt || item.startedAt)}</span>
                 <span>
                   {item.status === 'submitted'

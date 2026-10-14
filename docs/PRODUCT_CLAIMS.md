@@ -65,6 +65,25 @@ The signed-in shell (sidebar, top bar, account menu, phone drawer) and the Comma
 - **The assistant card states the AI status.** It says whether a language model is reachable. When none is, it says that answers come from the built-in rules and are labelled.
 - **The next best action follows the server's rule** (resume → skills → goal → gap → practice → jobs), worded plainly.
 
+## Stage D group 1: Resume, Careers, Readiness, Career Lab (2026-10-14)
+
+`/resume`, `/careers`, `/readiness` and `/career-lab` were rebuilt in Aurora Elite and added to `AURORA_ROUTES`. API calls, scoring and workflows are unchanged.
+
+- **Resume Intelligence.**
+  - **Removed claims:** "Transformer NLP Engine Active", "Executing 14-stage section classification", a hard-coded "all-MiniLM-L6-v2" model, and a page count and column layout that were never measured.
+  - **Skills grouped by their strongest stored evidence:** assessed, applied (role, project or portfolio), studied or certified, confirmed by you, or listed only. Each skill opens to show its sources and the points each one earned. "Inferred" is explained as a career-requirement status.
+  - **Sections:** shown as found or not found, in the parser's own words, plus the completeness check. No percentage per section, and nothing presented as an ATS prediction.
+- **Career Intelligence.**
+  - The explorer shows the stored matches. The careers in the catalogue that have no match are listed as such, with no score.
+  - Each match is explained requirement by requirement: importance, the evidence status (applied, listed, inferred or missing) and the points earned.
+  - The O*NET note stays on every O*NET-informed card.
+  - **Removed:** the "100% Verified" and "High Impact" badges, and the claim that completing gaps "will elevate your match score".
+- **Career Readiness.**
+  - Shows the stored tier, with its score boundaries, and the four weighted dimensions, each with the points it adds.
+  - Explains how match and readiness differ for the same career. The page says readiness is not a probability of being hired.
+  - **Removed:** the invented "Impact: -30%" and "-15%" fallbacks. Gap priority is shown as the stored priority out of 100.
+- **Career Lab.** Same panels and figures. What-if results now animate from the current score to the scenario score and stay labelled "Hypothetical". Live listings stay labelled with their source.
+
 ## Pages inside the app
 
 Pages whose content is built-in sample content are wrapped in `DemoWorkspace`, which shows the "Illustrative sample data" notice:

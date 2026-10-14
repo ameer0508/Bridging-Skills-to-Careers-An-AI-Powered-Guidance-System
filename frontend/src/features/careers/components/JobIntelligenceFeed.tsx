@@ -14,7 +14,7 @@ import {
   Clock,
   Zap,
 } from 'lucide-react';
-import { CareerMatchData } from './CareerMatchCard';
+import type { CareerMatchData } from '../aurora/types';
 import { GlassPanel } from '../../../components/experience/workspace';
 import { useToast } from '../../../components/composite/Toast';
 

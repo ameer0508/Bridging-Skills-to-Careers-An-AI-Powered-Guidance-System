@@ -1,102 +1,61 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { messageOf } from '../../lib/collections';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import {
-  Brain,
-  FileText,
-  Target,
-  Layers,
-  Award,
-  CheckCircle2,
-  ShieldCheck,
-  Compass,
-} from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { Compass, GitCompare, LineChart, Search, Target } from 'lucide-react';
 import apiClient from '../../lib/axios';
-import { useAuthStore } from '../../store/authStore';
-
-// Feature Components
-import { CareerMatchCard, CareerMatchData } from '../../features/careers/components/CareerMatchCard';
-import { CareerComparisonModal } from '../../features/careers/components/CareerComparisonModal';
+import { messageOf } from '../../lib/collections';
+import type { CareerMatchData } from '../../features/careers/aurora/types';
 import { CareerDemandPanel, CareerSalaryPanel, JobListingsPointer } from '../../features/careers/components/CareerMarketFacts';
-import { CareerAlignmentLabView } from '../../features/careers/components/CareerAlignmentLabView';
+import { CareerCard, CareerDetailDialog, CompareDialog, ScoreBreakdown, SourceNote } from '../../features/careers/aurora/CareerParts';
+import { UploadCard } from '../../features/resume/aurora/ResumeParts';
+import { Disclosure, Notice, PageHeader, PageSkeleton, Pill, StatTile, fieldClass } from '../../design/aurora/kit';
+import { CardHeader, Ring, cardClass } from '../../design/aurora/ui';
+import { auroraButtonClass } from '../../design/aurora/buttonStyles';
+import { auroraEase } from '../../design/aurora/motion';
 
-// Design System 2.0 Components
-import {
-  WorkspaceHero,
-  AIInsightBanner,
-  QuickActionGrid,
-  WorkspaceSpotlight,
-  AIStatusBar,
-  WorkspaceDivider,
-  PremiumSection,
-  GlassPanel,
-  WorkspaceToolbar,
-  PremiumErrorState,
-} from '../../components/experience/workspace';
-import { AIThinkingAnimation } from '../../components/experience';
-
-interface MatchBreakdownRow {
-  skillName: string;
-  importance: 'required' | 'preferred' | 'supporting';
-  status: 'applied' | 'listed' | 'inferred' | 'missing';
-  matchedVia?: string;
-  pointsEarned: number;
-  pointsPossible: number;
+interface CatalogueCareer {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
 }
 
-const BREAKDOWN_STATUS_LABEL: Record<MatchBreakdownRow['status'], string> = {
-  applied: 'Used in a role or project',
-  listed: 'Listed only',
-  inferred: 'Inferred from a related skill',
-  missing: 'Not found',
-};
+type SortKey = 'match' | 'practice' | 'title';
+const SORT_LABEL: Record<SortKey, string> = { match: 'Match score', practice: 'Shown in practice', title: 'Title (A to Z)' };
 
+/** Career Intelligence: every catalogue career, ranked by the evidence in the student's resume. */
 export const CareerIntelligenceWorkspace: React.FC = () => {
-  const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
-
-  // Filter & Sort State
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-   
-  const [sortBy] = useState<string>('matchScore-desc');
-  const [comparedIds, setComparedIds] = useState<string[]>([]);
-  const [isCompareModalOpen, setIsCompareModalOpen] = useState(false);
-
+  const reduce = useReducedMotion();
   const queryClient = useQueryClient();
+  const [category, setCategory] = useState('all');
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState<SortKey>('match');
+  const [comparedIds, setComparedIds] = useState<string[]>([]);
+  const [compareOpen, setCompareOpen] = useState(false);
+  const [detail, setDetail] = useState<CareerMatchData | null>(null);
 
-  // Resume status query to monitor real-time background parsing
+  // Resume status, so a just-uploaded resume refreshes the matches when it finishes
   const { data: resumeData } = useQuery({
     queryKey: ['resumes', 'me'],
     queryFn: async () => {
       try {
-        const response = await apiClient.get('/resumes/me');
-        return response.data?.data?.resume || null;
+        return (await apiClient.get('/resumes/me')).data?.data?.resume || null;
       } catch {
         return null;
       }
     },
-    refetchInterval: (query) => {
+    refetchInterval: query => {
       const status = query.state.data?.parsingStatus;
-      if (status === 'pending' || status === 'processing') {
-        return 2000;
-      }
-      return false;
+      return status === 'pending' || status === 'processing' ? 2000 : false;
     },
   });
 
-  // Resume upload mutation
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append('resume', file);
-      const response = await apiClient.post('/resumes/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-      return response.data;
+      return (await apiClient.post('/resumes/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } })).data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['resumes', 'me'] });
@@ -105,425 +64,257 @@ export const CareerIntelligenceWorkspace: React.FC = () => {
     },
   });
 
-  // Fetch Career Matches Query
   const { data, isLoading, error, refetch } = useQuery<{ matches: CareerMatchData[] }>({
     queryKey: ['careers', 'matches'],
-    queryFn: async () => {
-      const response = await apiClient.get('/careers/matches');
-      return response.data.data;
-    },
+    queryFn: async () => (await apiClient.get('/careers/matches')).data.data,
+  });
+  const catalogue = useQuery<CatalogueCareer[]>({
+    queryKey: ['careers', 'catalog'],
+    queryFn: async () => (await apiClient.get('/careers/catalog')).data.data.careers,
+    staleTime: 5 * 60_000,
   });
 
   const rawMatches = data?.matches;
   const matches = useMemo(() => rawMatches || [], [rawMatches]);
 
-  // When parsing transitions to completed, refetch matches automatically
   useEffect(() => {
     if (resumeData?.parsingStatus === 'completed' && matches.length === 0) {
       queryClient.invalidateQueries({ queryKey: ['careers', 'matches'] });
     }
   }, [resumeData?.parsingStatus, matches.length, queryClient]);
 
-  // Extract Categories
-  const categories = useMemo(() => {
-    const set = new Set(matches.map((m) => m.careerId.category));
-    return ['all', ...Array.from(set)];
-  }, [matches]);
+  const categories = useMemo(() => ['all', ...Array.from(new Set(matches.map(m => m.careerId.category)))], [matches]);
 
-  // Derived Overview Stats
-
-
-  // Filtered & Sorted Matches
-  const filteredMatches = useMemo(() => {
-    let list = [...matches];
-
-    // Category filter
-    if (selectedCategory !== 'all') {
-      list = list.filter((m) => m.careerId.category === selectedCategory);
-    }
-
-    // Search query filter
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(
-        (m) =>
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const list = matches.filter(
+      m =>
+        (category === 'all' || m.careerId.category === category) &&
+        (!q ||
           m.careerId.title.toLowerCase().includes(q) ||
           m.careerId.category.toLowerCase().includes(q) ||
-          m.matchingSkills.some((s) => s.toLowerCase().includes(q)) ||
-          m.missingSkills.some((s) => s.toLowerCase().includes(q))
-      );
-    }
-
-    // Sorting
-    list.sort((a, b) => {
-      if (sortBy === 'matchScore-desc') return b.matchScore - a.matchScore;
-      if (sortBy === 'confidence-desc') return (b.confidence || 0) - (a.confidence || 0);
-      if (sortBy === 'title-asc') return a.careerId.title.localeCompare(b.careerId.title);
-      return 0;
-    });
-
-    return list;
-  }, [matches, selectedCategory, searchQuery, sortBy]);
-
-  const toggleCompare = (id: string) => {
-    if (comparedIds.includes(id)) {
-      setComparedIds(comparedIds.filter((i) => i !== id));
-    } else {
-      if (comparedIds.length >= 3) return;
-      setComparedIds([...comparedIds, id]);
-    }
-  };
-
-  const selectedMatchesForCompare = useMemo(() => {
-    return matches.filter((m) => comparedIds.includes(m.id));
-  }, [matches, comparedIds]);
-
-  if (isLoading) {
-    return (
-      <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-65">
-          <AIThinkingAnimation statusText="Analyzing Market Intelligence Telemetry & Vector Matches..." />
-        </div>
-      </div>
+          m.matchingSkills.some(s => s.toLowerCase().includes(q)) ||
+          m.missingSkills.some(s => s.toLowerCase().includes(q)))
     );
-  }
+    return [...list].sort((a, b) =>
+      sortBy === 'title' ? a.careerId.title.localeCompare(b.careerId.title) : sortBy === 'practice' ? (b.confidence || 0) - (a.confidence || 0) : b.matchScore - a.matchScore
+    );
+  }, [matches, category, search, sortBy]);
+
+  const unmatched = useMemo(() => {
+    const matched = new Set(matches.map(m => m.careerId._id));
+    return (catalogue.data ?? []).filter(c => !matched.has(c.id));
+  }, [catalogue.data, matches]);
+
+  const toggleCompare = (id: string) => setComparedIds(ids => (ids.includes(id) ? ids.filter(i => i !== id) : ids.length >= 3 ? ids : [...ids, id]));
+  const compared = matches.filter(m => comparedIds.includes(m.id));
+
+  if (isLoading) return <PageSkeleton label="Loading your career matches" />;
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto pb-12 px-4">
-        <PremiumErrorState
-          title="Career Intelligence Telemetry Error"
-          message={`Failed to fetch career matches: ${(error as Error).message}`}
-          onRetry={() => refetch()}
-        />
+      <div className="mx-auto max-w-3xl px-4 pt-8 sm:px-6">
+        <Notice tone="error" title="Your career matches could not be loaded." action={<button type="button" className={auroraButtonClass('secondary', 'md')} onClick={() => refetch()}>Try again</button>}>
+          {messageOf(error, 'Please try again.')}
+        </Notice>
       </div>
     );
   }
 
   if (matches.length === 0) {
-    const uploadStatus: 'idle' | 'uploading' | 'processing' | 'completed' | 'error' =
-      uploadMutation.isPending
-        ? 'uploading'
-        : resumeData?.parsingStatus === 'processing' || resumeData?.parsingStatus === 'pending'
-          ? 'processing'
-          : resumeData?.parsingStatus === 'completed'
-            ? 'completed'
-            : uploadMutation.isError || resumeData?.parsingStatus === 'failed'
-              ? 'error'
-              : 'idle';
-
-    const errorMessage = uploadMutation.error
-      ? messageOf(uploadMutation.error, 'The upload failed.')
-      : resumeData?.parsingStatus === 'failed'
-        ? 'Resume evidence extraction failed. Please ensure the document is not password-protected or corrupted.'
-        : undefined;
-
+    const processing = resumeData?.parsingStatus === 'processing' || resumeData?.parsingStatus === 'pending';
+    const failed = uploadMutation.isError || resumeData?.parsingStatus === 'failed';
     return (
-      <div className="max-w-7xl mx-auto space-y-8 pb-16 px-4">
-        <CareerAlignmentLabView
-          onUpload={(file: File) => uploadMutation.mutate(file)}
-          isUploading={uploadStatus === 'uploading'}
-          parsingStatus={uploadStatus === 'processing' ? 'processing' : uploadStatus === 'completed' ? 'completed' : null}
-          validationError={uploadStatus === 'error' ? errorMessage : null}
+      <div className="mx-auto max-w-7xl space-y-6 px-4 pb-16 pt-6 sm:px-6">
+        <PageHeader
+          eyebrow="Career Intelligence"
+          icon={<Compass className="h-7 w-7" aria-hidden="true" />}
+          title="Which careers does your evidence fit?"
+          lead={`SkillBridge compares your skills with the requirements of ${catalogue.data?.length ?? 'its'} careers and explains every point of every score. It starts from your resume.`}
         />
+        {processing && <Notice title="Reading your resume.">Your matches appear here as soon as it finishes.</Notice>}
+        {failed && (
+          <Notice tone="error" title="Your resume could not be processed.">
+            {uploadMutation.error ? messageOf(uploadMutation.error, 'The upload failed.') : 'Please make sure the document is not password-protected or damaged, then try again.'}
+          </Notice>
+        )}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <UploadCard hasResume={!!resumeData} uploadProgress={uploadMutation.isPending ? 0 : null} validationError={null} onFileSelect={file => uploadMutation.mutate(file)} />
+          <section className={cardClass} aria-labelledby="how-heading">
+            <CardHeader id="how-heading" icon={<Target className="h-5 w-5" aria-hidden="true" />} title="How matches are scored" />
+            <ul className="space-y-2 text-sm text-aurora-muted">
+              <li>Each career lists required, preferred and supporting skills.</li>
+              <li>A skill used in a role or project earns more than one that is only listed; a related skill can count as inferred.</li>
+              <li>The score is the share of the career’s points your evidence earns. It is not a hiring prediction.</li>
+            </ul>
+          </section>
+        </div>
       </div>
     );
   }
 
-  const topMatch = matches[0];
-
-  // Quick Action Grid Items
-  const quickActions = [
-    {
-      id: 'compare',
-      title: 'Compare Careers',
-      subtitle: 'Side-by-side role breakdown',
-      icon: Compass,
-      shortcut: '⌘1',
-      color: 'text-indigo-400',
-      onClick: () => setIsCompareModalOpen(true),
-    },
-    {
-      id: 'strategy',
-      title: 'Generate Strategy',
-      subtitle: 'Launch AI Career Architect',
-      icon: Brain,
-      shortcut: '⌘2',
-      color: 'text-cyan-400',
-      onClick: () => navigate('/ai'),
-    },
-    {
-      id: 'roadmap',
-      title: 'View Roadmap',
-      subtitle: '7-week milestone curriculum',
-      icon: Layers,
-      shortcut: '⌘3',
-      color: 'text-purple-400',
-      onClick: () => navigate('/roadmap'),
-    },
-    {
-      id: 'resume',
-      title: 'Resume Analysis',
-      subtitle: 'Update ATS skill index',
-      icon: FileText,
-      shortcut: '⌘4',
-      color: 'text-amber-400',
-      onClick: () => navigate('/resume'),
-    },
-    {
-      id: 'analytics',
-      title: 'Skill Intelligence',
-      subtitle: 'Skill vector gap audit',
-      icon: Target,
-      shortcut: '⌘5',
-      color: 'text-emerald-400',
-      onClick: () => navigate('/analytics'),
-    },
-    {
-      id: 'architect',
-      title: 'Career Architect',
-      subtitle: 'Scenario simulation studio',
-      icon: Award,
-      shortcut: '⌘6',
-      color: 'text-rose-400',
-      onClick: () => navigate('/ai'),
-    },
-  ];
+  const top = matches[0];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 pb-16 px-4">
-      {/* SECTION 1 — WORKSPACE HERO */}
-      <WorkspaceHero
-        greeting="Career matches"
-        userName={user?.fullName || user?.email?.split('@')[0]}
-        title="Career Intelligence"
-        description="Careers ranked by how much of each role's skill baseline your resume evidences. Scores are calculated from your resume only and are not predictions of hiring outcomes."
-        aiSummary={`${matches.length} career${matches.length === 1 ? '' : 's'} matched from your resume evidence`}
-        stats={[
-          { label: 'Career Matches', value: matches.length },
-          { label: 'Top Match', value: `${topMatch?.matchScore ?? 0}%`, change: topMatch?.careerId?.title },
-          { label: 'Skills Evidenced', value: topMatch?.matchingSkills?.length ?? 0, change: 'for the top match' },
-          { label: 'Skills Missing', value: topMatch?.missingSkills?.length ?? 0, change: 'for the top match', isPositive: false },
-        ]}
-        primaryAction={{
-          label: 'Compare Top Careers',
-          onClick: () => setIsCompareModalOpen(true),
-        }}
-      />
-
-      {/* SECTION 11 — COMMAND TOOLBAR */}
-      <WorkspaceToolbar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        searchPlaceholder="Filter careers by title, category, or skill..."
-        filterOptions={categories.map((c) => ({
-          id: c,
-          label: c === 'all' ? 'All Sectors' : c,
-        }))}
-        activeFilter={selectedCategory}
-        onFilterChange={setSelectedCategory}
-        onCommandPaletteOpen={() => alert('Command Palette triggered (⌘K).')}
-      />
-
-      {/* SECTION 2 — TOP MATCH EXPLANATION */}
-      <AIInsightBanner
-        title={`Top match: ${topMatch?.careerId?.title ?? 'none yet'} (${topMatch?.matchScore ?? 0}%)`}
-        description={
-          topMatch?.summary ||
-          'The match score is the weighted share of this career\'s skills that your resume evidences.'
+    <div className="mx-auto max-w-7xl space-y-6 px-4 pb-16 pt-6 sm:px-6">
+      <PageHeader
+        eyebrow="Career Intelligence"
+        icon={<Compass className="h-7 w-7" aria-hidden="true" />}
+        title="Careers ranked by your evidence"
+        lead="Each score is the share of a career’s skill requirements your resume evidences. Scores are calculated from your resume only and are not predictions of hiring outcomes."
+        actions={
+          <button type="button" className={auroraButtonClass('primary', 'md')} onClick={() => setCompareOpen(true)} disabled={compared.length < 2}>
+            <GitCompare className="h-4 w-4" aria-hidden="true" /> Compare {compared.length >= 2 ? `(${compared.length})` : 'careers'}
+          </button>
         }
-        confidence={typeof topMatch?.confidence === 'number' ? topMatch.confidence : undefined}
-        priority="high"
-        evidence={(topMatch?.strengths || []).slice(0, 3)}
-        actionLabel="See readiness and gaps"
-        onAction={() => navigate('/readiness')}
-      />
-
-      {Array.isArray(topMatch?.breakdown) && topMatch.breakdown.length > 0 && (
-        <PremiumSection
-          title="How this score was calculated"
-          subtitle="Each skill the career expects, and the evidence found for it on your resume"
-          badge="Explanation"
-        >
-          <div className="overflow-x-auto rounded-xl border border-white/10">
-            <table className="w-full text-left text-xs text-slate-200">
-              <thead className="bg-slate-900/80 text-[10px] uppercase tracking-wider text-slate-400">
-                <tr>
-                  <th scope="col" className="px-3 py-2">Skill</th>
-                  <th scope="col" className="px-3 py-2">Importance</th>
-                  <th scope="col" className="px-3 py-2">Evidence on your resume</th>
-                  <th scope="col" className="px-3 py-2 text-right">Points</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topMatch.breakdown.map((row: MatchBreakdownRow, index: number) => (
-                  <tr key={`${row.skillName}-${index}`} className="border-t border-white/5">
-                    <td className="px-3 py-2 font-semibold text-white">{row.skillName}</td>
-                    <td className="px-3 py-2 capitalize">{row.importance}</td>
-                    <td className="px-3 py-2">{BREAKDOWN_STATUS_LABEL[row.status]}{row.status === 'inferred' && row.matchedVia ? ` (${row.matchedVia})` : ''}</td>
-                    <td className="px-3 py-2 text-right font-mono">{row.pointsEarned} / {row.pointsPossible}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </PremiumSection>
-      )}
-
-      <WorkspaceDivider label="Job Market Evidence" />
-
-      {/* SECTION 4 — WHAT IS ACTUALLY KNOWN ABOUT THE MARKET: sourced records or "unavailable" */}
-      <PremiumSection
-        title="Job Market Evidence"
-        subtitle="Posting counts and advertised salaries from licensed sources only. Where none exist, this says so instead of showing a figure."
-        badge="Sourced Data Only"
       >
-        <div className="space-y-4">
-          {topMatch?.careerId?._id && <CareerDemandPanel careerId={topMatch.careerId._id} careerTitle={topMatch.careerId.title} />}
-          <CareerSalaryPanel />
-          <JobListingsPointer />
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatTile label="Careers matched" value={`${matches.length} of ${catalogue.data?.length ?? matches.length}`} />
+          <StatTile label="Closest match" value={`${top.matchScore}%`} hint={top.careerId.title} accent />
+          <StatTile label="Skills evidenced" value={top.matchingSkills.length} hint="for the closest match" />
+          <StatTile label="Skills missing" value={top.missingSkills.length} hint="for the closest match" />
         </div>
-      </PremiumSection>
+      </PageHeader>
 
-      <WorkspaceDivider label="Career Comparison Studio" />
+      <section className={cardClass} aria-labelledby="top-heading" data-testid="top-match">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
+          <div className="flex flex-col gap-4 min-[420px]:flex-row min-[420px]:items-start lg:w-80 lg:shrink-0">
+            <span className="relative inline-flex shrink-0 items-center justify-center">
+              <Ring value={top.matchScore} size={92} stroke={9} label={`${top.careerId.title} match`} />
+              <span aria-hidden="true" className="absolute font-heading text-xl font-extrabold text-aurora-ink">
+                {top.matchScore}%
+              </span>
+            </span>
+            <div className="min-w-0 space-y-1.5">
+              <Pill tone="mint">Closest match</Pill>
+              <h2 id="top-heading" className="font-heading text-xl font-bold text-aurora-ink">
+                Top match: {top.careerId.title} ({top.matchScore}%)
+              </h2>
+              <p className="text-sm text-aurora-muted">{top.summary || 'The match score is the weighted share of this career’s skills that your resume evidences.'}</p>
+              <SourceNote career={top.careerId} />
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Link to="/readiness" className={auroraButtonClass('secondary', 'md')}>
+                  See readiness and gaps
+                </Link>
+              </div>
+            </div>
+          </div>
+          {Array.isArray(top.breakdown) && top.breakdown.length > 0 && (
+            <div className="min-w-0 flex-1">
+              <h3 className="mb-1 font-heading text-base font-bold text-aurora-ink">How this score was calculated</h3>
+              <p className="mb-3 text-sm text-aurora-muted">Each skill the career expects, and the evidence found for it on your resume.</p>
+              <div className="rounded-2xl border border-aurora-line">
+                <ScoreBreakdown rows={top.breakdown} testId="top-breakdown" />
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
 
-      {/* SECTION 5 — CAREER COMPARISON STUDIO */}
-      <PremiumSection
-        title="Matched Career Opportunities"
-        subtitle={`Showing ${filteredMatches.length} AI-evaluated career paths matching your profile`}
-        badge="Comparison Studio"
-        headerAction={
-          comparedIds.length > 0 && (
+      <section aria-labelledby="explorer-heading" className="space-y-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h2 id="explorer-heading" className="font-heading text-2xl font-extrabold tracking-tight text-aurora-ink">
+              Career explorer
+            </h2>
+            <p className="text-sm text-aurora-muted">
+              Showing {filtered.length} of {matches.length} matched careers. Tick up to three to compare.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <label className="relative block sm:w-72">
+              <span className="sr-only">Filter careers by title, category or skill</span>
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-aurora-muted" aria-hidden="true" />
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Filter by title, category or skill" className={`${fieldClass} pl-10`} />
+            </label>
+            <label className="flex items-center gap-2 text-sm text-aurora-muted">
+              <span className="shrink-0">Sort by</span>
+              <select value={sortBy} onChange={e => setSortBy(e.target.value as SortKey)} className={`${fieldClass} w-auto`} aria-label="Sort careers">
+                {(Object.keys(SORT_LABEL) as SortKey[]).map(k => (
+                  <option key={k} value={k}>
+                    {SORT_LABEL[k]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Filter by category">
+          {categories.map(c => (
             <button
-              onClick={() => setIsCompareModalOpen(true)}
-              className="py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-indigo-600/30"
+              key={c}
+              type="button"
+              aria-pressed={category === c}
+              onClick={() => setCategory(c)}
+              className={`rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora-violet ${
+                category === c ? 'border-transparent text-white [background:var(--aurora-gradient-action)]' : 'border-aurora-line bg-white text-aurora-muted hover:text-aurora-ink'
+              }`}
             >
-              <Compass className="w-4 h-4" />
-              <span>Compare Selected ({comparedIds.length})</span>
+              {c === 'all' ? 'All categories' : c}
             </button>
-          )
-        }
-      >
-        <div className="space-y-4">
-          {filteredMatches.map((match) => (
-            <CareerMatchCard
-              key={match.id}
-              match={match}
-              isCompared={comparedIds.includes(match.id)}
-              onToggleCompare={() => toggleCompare(match.id)}
-            />
           ))}
         </div>
-      </PremiumSection>
+        {filtered.length === 0 ? (
+          <Notice>No matched career fits that filter.</Notice>
+        ) : (
+          <motion.div layout={!reduce} className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <AnimatePresence initial={false}>
+              {filtered.map((m, i) => (
+                <motion.div
+                  key={m.id}
+                  layout={!reduce}
+                  initial={reduce ? false : { opacity: 0, y: 14 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={reduce ? undefined : { opacity: 0, scale: 0.97 }}
+                  transition={{ duration: 0.35, ease: auroraEase, delay: reduce ? 0 : Math.min(i, 8) * 0.04 }}
+                  className="flex"
+                >
+                  <div className="flex w-full">
+                    <CareerCard
+                      match={m}
+                      rank={matches.indexOf(m) + 1}
+                      compared={comparedIds.includes(m.id)}
+                      compareDisabled={comparedIds.length >= 3}
+                      onToggleCompare={() => toggleCompare(m.id)}
+                      onOpen={() => setDetail(m)}
+                    />
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
+        {unmatched.length > 0 && (
+          <Disclosure summary={`${unmatched.length} more career${unmatched.length === 1 ? '' : 's'} with no match yet`} testId="unmatched-careers">
+            <p className="mb-3">None of their skills appear in your evidence yet, so no score is shown for them.</p>
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {unmatched.map(c => (
+                <li key={c.id} className="rounded-2xl border border-aurora-line px-3 py-2">
+                  <span className="block text-sm font-semibold text-aurora-ink">{c.title}</span>
+                  <span className="text-xs">{c.category}</span>
+                </li>
+              ))}
+            </ul>
+          </Disclosure>
+        )}
+      </section>
 
-      {/* SECTION 7 — SKILL ALIGNMENT & GAP ANALYSIS */}
-      <PremiumSection
-        title="Skill Alignment & Gap Vector Analysis"
-        subtitle="Direct comparison of verified mastered skills vs remaining target role gaps"
-        badge="Skill Audit"
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Matched Skills */}
-          <GlassPanel className="p-6 space-y-4 border-emerald-500/30">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-white flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                Verified Mastered Skills ({topMatch?.matchingSkills?.length || 0})
-              </span>
-              <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold">
-                100% Verified
-              </span>
-            </div>
-
-            {(!topMatch?.matchingSkills || topMatch.matchingSkills.length === 0) ? (
-              <div className="p-4 text-center text-xs text-slate-400 italic bg-slate-950/60 rounded-lg">
-                No matching skills identified for this role yet. Upload a resume or add skills in Skill Intelligence.
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {topMatch.matchingSkills.map((skill, i) => (
-                  <span
-                    key={i}
-                    className="px-2.5 py-1 rounded-lg bg-slate-950 border border-white/10 text-xs font-mono text-slate-200"
-                  >
-                    ✓ {skill}
-                  </span>
-                ))}
-              </div>
-            )}
-          </GlassPanel>
-
-          {/* Missing Skills */}
-          <GlassPanel className="p-6 space-y-4 border-rose-500/30">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-bold text-white flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-rose-400" />
-                Target Role Skill Gaps ({topMatch?.missingSkills?.length || 0})
-              </span>
-              <span className="px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 font-mono text-[10px] font-bold">
-                High Impact
-              </span>
-            </div>
-
-            {(!topMatch?.missingSkills || topMatch.missingSkills.length === 0) ? (
-              <div className="p-4 text-center text-xs text-slate-400 italic bg-slate-950/60 rounded-lg">
-                No critical skill gaps identified for this role.
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {topMatch.missingSkills.map((skill, i) => (
-                  <span
-                    key={i}
-                    className="px-2.5 py-1 rounded-lg bg-rose-950/40 border border-rose-500/30 text-xs font-mono text-rose-300"
-                  >
-                    ⚡ {skill}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {topMatch?.missingSkills && topMatch.missingSkills.length > 0 && (
-              <p className="text-xs text-slate-400 leading-relaxed pt-2 border-t border-white/5">
-                Completing these {topMatch.missingSkills.length} skill gap modules will elevate your match score from {topMatch.matchScore}%.
-              </p>
-            )}
-          </GlassPanel>
+      <section className="space-y-4" aria-labelledby="market-heading">
+        <div>
+          <h2 id="market-heading" className="flex items-center gap-2 font-heading text-2xl font-extrabold tracking-tight text-aurora-ink">
+            <LineChart className="h-6 w-6 text-aurora-violet" aria-hidden="true" /> Job market evidence
+          </h2>
+          <p className="text-sm text-aurora-muted">Posting counts and advertised salaries from licensed sources only. Where none exist, this says so instead of showing a figure.</p>
         </div>
-      </PremiumSection>
+        <div className="grid gap-4 lg:grid-cols-2">
+          {top.careerId._id && <CareerDemandPanel careerId={top.careerId._id} careerTitle={top.careerId.title} />}
+          <CareerSalaryPanel />
+        </div>
+        <JobListingsPointer />
+      </section>
 
-      {/* SECTION 8 — STRONGEST MATCH: the stored score and where to explore it, nothing estimated */}
-      <WorkspaceSpotlight
-        badge="Your strongest match"
-        title={topMatch?.careerId?.title || 'No match yet'}
-        description={`This is the career your resume evidence covers best. ${topMatch?.missingSkills?.length ?? 0} of its skills are not on your profile yet. The Career Lab shows what would change the score; no salary or hiring figure is attached because none is sourced.`}
-        impactScore={`${topMatch?.matchScore ?? 0}% match`}
-        actionLabel="Open Career Lab"
-        onAction={() => navigate('/career-lab')}
-      />
-
-      {/* SECTION 9 — QUICK ACTIONS GRID */}
-      <PremiumSection
-        title="Career Operations Shortcuts"
-        subtitle="Quick access to analysis tools and career engines"
-        badge="Shortcuts"
-      >
-        <QuickActionGrid actions={quickActions} columns={3} />
-      </PremiumSection>
-
-      {/* SECTION 10 — AI STATUS BAR */}
-      <AIStatusBar
-        status={isLoading ? 'thinking' : 'active'}
-        
-        lastUpdated="Just now"
-      />
-
-      {/* COMPARISON MODAL */}
-      <CareerComparisonModal
-        isOpen={isCompareModalOpen}
-        onClose={() => setIsCompareModalOpen(false)}
-        selectedMatches={selectedMatchesForCompare}
-      />
-
+      <CareerDetailDialog match={detail} onClose={() => setDetail(null)} />
+      <CompareDialog open={compareOpen} onClose={() => setCompareOpen(false)} matches={compared} />
     </div>
   );
 };

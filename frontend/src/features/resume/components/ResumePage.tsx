@@ -1,24 +1,22 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
-import { Brain, Target, Compass } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Compass, FileText, Sparkles, Target } from 'lucide-react';
 import apiClient from '../../../lib/axios';
-import { ResumeStudioHeader } from './ResumeStudioHeader';
-import { ResumeDropzoneCard } from './ResumeDropzoneCard';
-import { ExtractedSkillMatrix } from './ExtractedSkillMatrix';
-import { AIResumeInsightsPanel } from './AIResumeInsightsPanel';
-import { SectionHealthCards } from './SectionHealthCards';
-import { ExtractionQualityMetrics } from './ExtractionQualityMetrics';
-import { ResumeStatusPanel, type ResumeSkillChanges } from './ResumeStatusPanel';
-
-// Design System 2.0 Components
+import { PageHeader, PageSkeleton, Pill } from '../../../design/aurora/kit';
+import { Reveal, RevealItem } from '../../../design/aurora/primitives';
+import { CardHeader, cardClass } from '../../../design/aurora/ui';
 import {
-  QuickActionGrid,
-  AIStatusBar,
-  WorkspaceDivider,
-  PremiumSection,
-} from '../../../components/experience/workspace';
-import { AIThinkingAnimation } from '../../../components/experience';
+  EvidenceSkills,
+  ProcessingNotices,
+  ResumeActions,
+  SectionsFound,
+  Suggestions,
+  UploadCard,
+  type SectionHealth,
+  type SkillChanges,
+} from '../aurora/ResumeParts';
+import type { ProfileSkill } from '../aurora/skillEvidence';
 
 interface ResumeMetadata {
   id: string;
@@ -33,8 +31,8 @@ interface ResumeMetadata {
   uploadedAt: string;
   atsScore?: number;
   isStuck?: boolean;
-  skillChanges?: ResumeSkillChanges | null;
-  sectionHealth?: React.ComponentProps<typeof SectionHealthCards>['sections'];
+  skillChanges?: SkillChanges | null;
+  sectionHealth?: SectionHealth[];
   personalInfo?: Partial<Record<'fullName' | 'email' | 'phone' | 'linkedin' | 'github', ExtractedField | null>>;
   experience?: unknown[];
   projects?: unknown[];
@@ -53,7 +51,6 @@ const fieldValue = (field?: ExtractedField | null): string | undefined => {
 
 export const ResumePage: React.FC = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -100,7 +97,7 @@ export const ResumePage: React.FC = () => {
 
   // Fetch Extracted Skills for skill matrix
   const { data: skillsData } = useQuery<{
-    categories?: Record<string, Array<{ id?: string; name: string; category?: string; evidenceScore?: number }>>;
+    categories?: Record<string, ProfileSkill[]>;
     totalSkills: number;
   }>({
     queryKey: ['skills', 'me'],
@@ -112,7 +109,7 @@ export const ResumePage: React.FC = () => {
 
   const extractedSkills = useMemo(() => {
     if (!skillsData?.categories) return [];
-    return Object.values(skillsData.categories).flatMap((items) => items);
+    return Object.entries(skillsData.categories).flatMap(([category, items]) => items.map((item) => ({ ...item, category: item.category ?? category })));
   }, [skillsData]);
 
   // Derive dynamic insights from actual parsed resume
@@ -263,139 +260,96 @@ export const ResumePage: React.FC = () => {
 
   const isInFlight = resume?.parsingStatus === 'pending' || resume?.parsingStatus === 'processing';
 
-  if (isResumeLoading) {
-    return (
-      <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
-          <AIThinkingAnimation statusText="Loading your resume..." />
-        </div>
-      </div>
-    );
-  }
+  if (isResumeLoading) return <PageSkeleton label="Loading your resume" />;
 
-  // Quick Action Navigation Shortcuts
-  const quickActions = [
-    {
-      id: 'ai',
-      title: 'Ask AI Architect',
-      subtitle: 'Analyze resume against target role',
-      icon: Brain,
-      shortcut: '⌘1',
-      color: 'text-cyan-400',
-      onClick: () => navigate('/ai'),
-    },
-    {
-      id: 'careers',
-      title: 'Career Matches',
-      subtitle: 'Vector match leaderboard',
-      icon: Target,
-      shortcut: '⌘2',
-      color: 'text-indigo-400',
-      onClick: () => navigate('/careers'),
-    },
-    {
-      id: 'readiness',
-      title: 'Career Readiness',
-      subtitle: 'Dimensional skill gaps',
-      icon: Compass,
-      shortcut: '⌘3',
-      color: 'text-emerald-400',
-      onClick: () => navigate('/readiness'),
-    },
+  const candidateName = fieldValue(resume?.personalInfo?.fullName);
+  const links = [
+    { to: '/careers', label: 'Career matches', icon: <Target className="h-4 w-4" aria-hidden="true" /> },
+    { to: '/readiness', label: 'Career readiness', icon: <Compass className="h-4 w-4" aria-hidden="true" /> },
+    { to: '/ai', label: 'Ask the assistant', icon: <Sparkles className="h-4 w-4" aria-hidden="true" /> },
   ];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-10 pb-16 px-4">
-      {/* SECTION 1 — RESUME STUDIO HEADER */}
-      <ResumeStudioHeader
-        hasActiveResume={!!resume}
-        originalFileName={resume?.originalFileName}
-        candidateName={fieldValue(resume?.personalInfo?.fullName)}
-        isProcessing={isInFlight && !resume?.isStuck}
-        isReprocessing={reprocessMutation.isPending}
-        isDeleting={deleteMutation.isPending}
-        onDownload={handleDownload}
-        onDelete={() => deleteMutation.mutate()}
-        onReprocess={() => reprocessMutation.mutate()}
-        onRefresh={() => refetch()}
+    <div className="mx-auto max-w-7xl space-y-6 px-4 pb-16 pt-6 sm:px-6">
+      <PageHeader
+        eyebrow="Resume Intelligence"
+        icon={<FileText className="h-7 w-7" aria-hidden="true" />}
+        title={resume ? 'Your resume, read as evidence' : 'Start with your resume'}
+        lead={
+          resume ? (
+            <div className="space-y-1">
+              <p>
+                Active file: <span className="font-semibold text-aurora-ink">{resume.originalFileName}</span>{' '}
+                <Pill tone="violet" className="ml-1 align-middle">Rule-based parser</Pill>
+              </p>
+              {candidateName && (
+                <p>
+                  Candidate: <span className="font-semibold text-aurora-ink" data-testid="resume-candidate-name">{candidateName}</span>
+                </p>
+              )}
+            </div>
+          ) : (
+            'Upload a PDF or Word resume. SkillBridge reads its roles, projects, education and skills, and shows the evidence behind every skill it finds.'
+          )
+        }
+        actions={
+          <ResumeActions
+            fileName={resume?.originalFileName}
+            hasResume={!!resume}
+            busy={(isInFlight && !resume?.isStuck) || reprocessMutation.isPending}
+            isDeleting={deleteMutation.isPending}
+            onRefresh={() => refetch()}
+            onReprocess={() => reprocessMutation.mutate()}
+            onDownload={handleDownload}
+            onDelete={() => deleteMutation.mutate()}
+          />
+        }
       />
 
       {(resume || actionError) && (
-        <ResumeStatusPanel
-          parsingStatus={resume?.parsingStatus}
-          parsingError={resume?.parsingError}
+        <ProcessingNotices
+          status={resume?.parsingStatus}
+          error={resume?.parsingError}
           isStuck={resume?.isStuck}
-          skillChanges={resume?.skillChanges}
+          changes={resume?.skillChanges}
           actionError={actionError}
           isReprocessing={reprocessMutation.isPending}
           onReprocess={() => reprocessMutation.mutate()}
         />
       )}
 
-      {/* SECTION 2 — 2-COLUMN STUDIO WORKSPACE */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* LEFT COLUMN: DROPZONE & DOCUMENT STATUS */}
-        <div className="lg:col-span-5 space-y-6">
-          <PremiumSection
-            title="Document Studio"
-            subtitle="Upload or replace your active resume file"
-            badge="Dropzone"
-          >
-            <ResumeDropzoneCard
-              hasActiveResume={!!resume}
-              parsingStatus={resume?.parsingStatus}
-              uploadProgress={uploadProgress}
-              validationError={validationError}
-              onFileSelect={handleFileSelect}
-            />
-          </PremiumSection>
-
-          <ExtractionQualityMetrics
-            extractionQualityScore={resume?.atsScore || 0}
-          />
+      <div className="grid items-start gap-6 lg:grid-cols-12">
+        <div className="space-y-6 lg:col-span-5">
+          <UploadCard hasResume={!!resume} uploadProgress={uploadProgress} validationError={validationError} onFileSelect={handleFileSelect} />
+          <SectionsFound sections={resume?.sectionHealth} completeness={resume && typeof resume.atsScore === 'number' ? resume.atsScore : null} />
         </div>
-
-        {/* RIGHT COLUMN: EXTRACTED INTELLIGENCE & HEALTH */}
-        <div className="lg:col-span-7 space-y-6">
-          <SectionHealthCards sections={resume?.sectionHealth} />
-
-          <PremiumSection
-            title="Skill Extraction Matrix"
-            subtitle="Skills recognised in your resume text"
-            badge="Taxonomy"
-          >
-            <ExtractedSkillMatrix
-              skills={extractedSkills}
-              totalSkills={skillsData?.totalSkills}
-            />
-          </PremiumSection>
+        <div className="space-y-6 lg:col-span-7">
+          <EvidenceSkills skills={extractedSkills} total={skillsData?.totalSkills} />
         </div>
       </div>
 
-      <WorkspaceDivider label="AI Insights & Action Shortcuts" />
-
-      {/* SECTION 3 — AI RESUME INSIGHTS */}
-      <AIResumeInsightsPanel
-        topStrengths={aiInsights.topStrengths}
-        weakSections={aiInsights.weakSections}
-        missingSections={aiInsights.missingSections}
-        recommendedImprovements={aiInsights.recommendedImprovements}
-      />
-
-      {/* SECTION 4 — COMMAND CENTER SHORTCUTS */}
-      <PremiumSection
-        title="Intelligence Shortcuts"
-        subtitle="Execute downstream career analysis"
-        badge="Actions"
-      >
-        <QuickActionGrid actions={quickActions} columns={3} />
-      </PremiumSection>
-
-      {/* SECTION 5 — LIVE AI STATUS FOOTER */}
-      <AIStatusBar
-        status={resume?.parsingStatus === 'processing' ? 'thinking' : 'active'}
-        lastUpdated="Just now"
-      />
+      {resume && (
+        <Reveal className="grid gap-6 lg:grid-cols-3">
+          <RevealItem className="lg:col-span-2">
+            <Suggestions strengths={aiInsights.topStrengths} gaps={[...aiInsights.weakSections, ...aiInsights.missingSections.map((m) => `No ${m.replace(/ Section$/, '').toLowerCase()} section was found.`)]} tips={aiInsights.recommendedImprovements} />
+          </RevealItem>
+          <RevealItem>
+            <section className={cardClass} aria-labelledby="next-heading">
+              <CardHeader id="next-heading" icon={<Target className="h-5 w-5" aria-hidden="true" />} title="Where your skills are used" />
+              <ul className="space-y-2">
+                {links.map((link) => (
+                  <li key={link.to}>
+                    <Link to={link.to} className="flex items-center gap-3 rounded-2xl border border-aurora-line px-3 py-2.5 text-sm font-semibold text-aurora-ink transition-colors hover:border-aurora-lavender hover:bg-aurora-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-aurora-violet">
+                      <span className="text-aurora-violet">{link.icon}</span>
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </RevealItem>
+        </Reveal>
+      )}
     </div>
   );
 };

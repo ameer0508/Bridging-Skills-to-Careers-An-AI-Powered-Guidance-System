@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import { auroraEase } from '../../../design/aurora/motion';
+import { auroraEase } from './motion';
 
 /** Shared pieces of the Command Center: cards, headers, rings and bars, all on the Aurora tokens. */
 

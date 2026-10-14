@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { careerLabApi, type CareerOption, type TransitionPlan } from '../careerLabApi';
-import { EmptyState, ErrorNote, Loading, Note, SkillChips } from './labUi';
-import { errorText, fieldClass, formatDate, labelClass, panelClass, primaryButton, quietButton } from './labStyles';
+import { EmptyState, ErrorNote, Loading, Note, SkillChips } from '../../../design/aurora/labUi';
+import { errorText, fieldClass, formatDate, labelClass, panelClass, primaryButton, quietButton } from '../../../design/aurora/labStyles';
 
 interface TransitionPanelProps {
   careers: CareerOption[];
@@ -22,8 +22,8 @@ export const TransitionPanel: React.FC<TransitionPanelProps> = ({ careers }) => 
   return (
     <section className={panelClass} aria-labelledby="transition-heading">
       <div className="space-y-1">
-        <h2 id="transition-heading" className="text-base font-bold text-white">Transition plan</h2>
-        <p className="text-xs text-slate-400">
+        <h2 id="transition-heading" className="font-heading text-lg font-bold text-aurora-ink">Transition plan</h2>
+        <p className="text-sm text-aurora-muted">
           A route to a target career in stages. Earlier stages are careers closer to your current evidence whose missing skills also count towards the target.
         </p>
       </div>
@@ -58,12 +58,12 @@ export const TransitionPanel: React.FC<TransitionPanelProps> = ({ careers }) => 
       )}
 
       {plans.data?.map((plan) => (
-        <article key={plan.id} className="p-4 rounded-2xl bg-slate-900/50 border border-white/10 space-y-4" data-testid="transition-plan" aria-label={`Plan to ${plan.targetCareerTitle}`}>
+        <article key={plan.id} className="p-4 rounded-2xl bg-aurora-canvas/60 border border-aurora-line space-y-4" data-testid="transition-plan" aria-label={`Plan to ${plan.targetCareerTitle}`}>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-sm font-bold text-white flex flex-wrap items-center gap-1.5">
+            <h3 className="text-sm font-bold text-aurora-ink flex flex-wrap items-center gap-1.5">
               {plan.stages.map((stage, index) => (
                 <React.Fragment key={stage.careerId}>
-                  {index > 0 && <ArrowRight className="w-3.5 h-3.5 text-slate-500" aria-hidden="true" />}
+                  {index > 0 && <ArrowRight className="w-3.5 h-3.5 text-aurora-muted" aria-hidden="true" />}
                   <span>{stage.careerTitle}</span>
                 </React.Fragment>
               ))}
@@ -71,17 +71,17 @@ export const TransitionPanel: React.FC<TransitionPanelProps> = ({ careers }) => 
             <button type="button" className={quietButton} disabled={remove.isPending} onClick={() => remove.mutate(plan.id)}>Remove plan</button>
           </div>
           {plan.outdated && (
-            <p className="text-xs text-amber-200" role="status">This plan was made with earlier scoring rules or career data. Build it again to refresh the figures.</p>
+            <p className="text-xs text-amber-700" role="status">This plan was made with earlier scoring rules or career data. Build it again to refresh the figures.</p>
           )}
           <ol className="space-y-3">
             {plan.stages.map((stage) => (
-              <li key={stage.careerId} className="p-3 rounded-xl bg-slate-950/60 border border-white/10 space-y-2" data-testid="transition-stage">
+              <li key={stage.careerId} className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2" data-testid="transition-stage">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <span className="text-xs font-bold text-aurora-ink flex items-center gap-1.5">
                     Stage {stage.order}: {stage.careerTitle}
-                    {stage.reached && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" aria-label="Reached" />}
+                    {stage.reached && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" aria-label="Reached" />}
                   </span>
-                  <span className="text-xs text-slate-300">
+                  <span className="text-xs text-aurora-muted">
                     Match now {stage.currentScore ?? stage.scoreAtCreation}% → {stage.projectedScore}% once this stage's skills are used in a project
                   </span>
                 </div>

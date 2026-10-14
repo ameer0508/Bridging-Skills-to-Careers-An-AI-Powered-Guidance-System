@@ -10,8 +10,8 @@ import {
   type ScenarioChangeType,
   type WhatIfResult,
 } from '../careerLabApi';
-import { Delta, EmptyState, ErrorNote, Loading, Note } from './labUi';
-import { errorText, fieldClass, labelClass, panelClass, primaryButton, quietButton } from './labStyles';
+import { BeforeAfter, Delta, EmptyState, ErrorNote, Loading, Note } from '../../../design/aurora/labUi';
+import { errorText, fieldClass, labelClass, panelClass, primaryButton, quietButton } from '../../../design/aurora/labStyles';
 
 interface WhatIfPanelProps {
   careers: CareerOption[];
@@ -70,8 +70,8 @@ export const WhatIfPanel: React.FC<WhatIfPanelProps> = ({ careers }) => {
   return (
     <section className={panelClass} aria-labelledby="whatif-heading">
       <div className="space-y-1">
-        <h2 id="whatif-heading" className="text-base font-bold text-white">What would change my score?</h2>
-        <p className="text-xs text-slate-400">
+        <h2 id="whatif-heading" className="font-heading text-lg font-bold text-aurora-ink">What would change my score?</h2>
+        <p className="text-sm text-aurora-muted">
           Pick a career to see which changes would raise your match score most, then try a scenario of your own.
         </p>
       </div>
@@ -91,9 +91,9 @@ export const WhatIfPanel: React.FC<WhatIfPanelProps> = ({ careers }) => {
 
       {explained && (
         <div className="space-y-4" data-testid="counterfactuals">
-          <p className="text-sm text-slate-200">
-            Your current match with <span className="font-bold text-white">{explained.careerTitle}</span> is{' '}
-            <span className="font-bold text-white" data-testid="counterfactual-baseline">{explained.baseline.score}%</span>
+          <p className="text-sm text-aurora-ink">
+            Your current match with <span className="font-bold text-aurora-ink">{explained.careerTitle}</span> is{' '}
+            <span className="font-bold text-aurora-ink" data-testid="counterfactual-baseline">{explained.baseline.score}%</span>
             {explained.baseline.missingRequired > 0 && <> with {explained.baseline.missingRequired} required skill{explained.baseline.missingRequired === 1 ? '' : 's'} missing</>}.
           </p>
 
@@ -102,9 +102,9 @@ export const WhatIfPanel: React.FC<WhatIfPanelProps> = ({ careers }) => {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left min-w-[560px]">
-                <caption className="text-left text-slate-300 font-semibold pb-2">Single changes, most effective first</caption>
+                <caption className="text-left text-aurora-muted font-semibold pb-2">Single changes, most effective first</caption>
                 <thead>
-                  <tr className="text-slate-400">
+                  <tr className="text-aurora-muted">
                     <th scope="col" className="py-2 pr-3 font-semibold">Skill</th>
                     <th scope="col" className="py-2 px-3 font-semibold">Now</th>
                     <th scope="col" className="py-2 px-3 font-semibold">Change</th>
@@ -112,12 +112,12 @@ export const WhatIfPanel: React.FC<WhatIfPanelProps> = ({ careers }) => {
                     <th scope="col" className="py-2 pl-3 font-semibold"><span className="sr-only">Add to scenario</span></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5 text-slate-200">
+                <tbody className="divide-y divide-aurora-line text-aurora-ink">
                   {explained.singleChanges.slice(0, 8).map((change) => (
                     <tr key={change.skillName} data-testid="counterfactual-row">
-                      <th scope="row" className="py-2 pr-3 font-bold text-white">
+                      <th scope="row" className="py-2 pr-3 font-bold text-aurora-ink">
                         {change.skillName}
-                        <span className="block font-normal text-slate-400">{change.importance}</span>
+                        <span className="block font-normal text-aurora-muted">{change.importance}</span>
                       </th>
                       <td className="py-2 px-3">{STATUS_LABEL[change.currentStatus] || change.currentStatus}</td>
                       <td className="py-2 px-3">{change.action}</td>
@@ -138,14 +138,14 @@ export const WhatIfPanel: React.FC<WhatIfPanelProps> = ({ careers }) => {
 
           {explained.pathToTarget.steps.length > 0 && (
             <div className="space-y-2" data-testid="counterfactual-path">
-              <p className="text-xs font-semibold text-slate-300">
+              <p className="text-xs font-semibold text-aurora-muted">
                 Shortest route found to {explained.pathToTarget.targetScore}%:{' '}
                 {explained.pathToTarget.reached ? `reached at ${explained.pathToTarget.finalScore}%` : `not reachable; these steps get to ${explained.pathToTarget.finalScore}%`}
               </p>
-              <ol className="space-y-1 text-xs text-slate-200 list-decimal list-inside">
+              <ol className="space-y-1 text-xs text-aurora-ink list-decimal list-inside">
                 {explained.pathToTarget.steps.map((step) => (
                   <li key={step.step}>
-                    <span className="font-bold text-white">{step.skillName}</span>: {step.action.toLowerCase()} → {step.scoreAfter}% (<Delta value={step.scoreDelta} />)
+                    <span className="font-bold text-aurora-ink">{step.skillName}</span>: {step.action.toLowerCase()} → {step.scoreAfter}% (<Delta value={step.scoreDelta} />)
                   </li>
                 ))}
               </ol>
@@ -155,8 +155,8 @@ export const WhatIfPanel: React.FC<WhatIfPanelProps> = ({ careers }) => {
         </div>
       )}
 
-      <div className="pt-4 border-t border-white/10 space-y-4">
-        <h3 className="text-sm font-bold text-white">Try a scenario</h3>
+      <div className="pt-4 border-t border-aurora-line space-y-4">
+        <h3 className="text-sm font-bold text-aurora-ink">Try a scenario</h3>
         <form
           className="flex flex-wrap items-end gap-3"
           onSubmit={(e) => {
@@ -182,9 +182,9 @@ export const WhatIfPanel: React.FC<WhatIfPanelProps> = ({ careers }) => {
         {drafts.length > 0 && (
           <ul className="space-y-1.5" data-testid="scenario-changes">
             {drafts.map((draft) => (
-              <li key={draft.key} className="flex items-center justify-between gap-3 p-2 rounded-xl bg-slate-900/60 border border-white/10 text-xs text-slate-200">
-                <span><span className="font-bold text-white">{draft.skill}</span>: {CHANGE_LABEL[draft.type].toLowerCase()}</span>
-                <button type="button" onClick={() => setDrafts((current) => current.filter((d) => d.key !== draft.key))} aria-label={`Remove ${draft.skill} from the scenario`} className="text-slate-400 hover:text-white cursor-pointer">
+              <li key={draft.key} className="flex items-center justify-between gap-3 p-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-xs text-aurora-ink">
+                <span><span className="font-bold text-aurora-ink">{draft.skill}</span>: {CHANGE_LABEL[draft.type].toLowerCase()}</span>
+                <button type="button" onClick={() => setDrafts((current) => current.filter((d) => d.key !== draft.key))} aria-label={`Remove ${draft.skill} from the scenario`} className="text-aurora-muted hover:text-aurora-indigo cursor-pointer">
                   <X className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
               </li>
@@ -205,26 +205,41 @@ export const WhatIfPanel: React.FC<WhatIfPanelProps> = ({ careers }) => {
 
         {result && (
           <div className="space-y-4" data-testid="whatif-result">
-            <p className="text-xs font-bold text-amber-200" data-testid="whatif-hypothetical-label">Hypothetical result. Nothing was saved and your real scores are unchanged.</p>
+            <p className="rounded-2xl border border-amber-200 bg-amber-50 px-3.5 py-2 text-sm font-semibold text-amber-800" data-testid="whatif-hypothetical-label">Hypothetical result. Nothing was saved and your real scores are unchanged.</p>
+
+            <div className="grid gap-3 md:grid-cols-2" data-testid="whatif-transitions">
+              {[...result.careers]
+                .sort((a, b) => (a.careerId === careerId ? -1 : b.careerId === careerId ? 1 : b.scoreDelta - a.scoreDelta))
+                .slice(0, 4)
+                .map((career) => (
+                  <div key={career.careerId} className="rounded-2xl border border-aurora-line bg-aurora-canvas/50 p-3.5">
+                    <p className="mb-2 flex items-center justify-between gap-2 text-sm font-semibold text-aurora-ink">
+                      <span className="truncate">{career.careerTitle}</span>
+                      <Delta value={career.scoreDelta} />
+                    </p>
+                    <BeforeAfter before={career.scoreBefore} after={career.scoreAfter} label={`${career.careerTitle} match`} />
+                  </div>
+                ))}
+            </div>
 
             {selectedResult && selectedResult.requirementChanges.length > 0 && (
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left min-w-[520px]">
-                  <caption className="text-left text-slate-300 font-semibold pb-2">
+                  <caption className="text-left text-aurora-muted font-semibold pb-2">
                     {selectedResult.careerTitle}: {selectedResult.scoreBefore}% → {selectedResult.scoreAfter}% (<Delta value={selectedResult.scoreDelta} />)
                   </caption>
                   <thead>
-                    <tr className="text-slate-400">
+                    <tr className="text-aurora-muted">
                       <th scope="col" className="py-2 pr-3 font-semibold">Requirement</th>
                       <th scope="col" className="py-2 px-3 font-semibold">Before</th>
                       <th scope="col" className="py-2 px-3 font-semibold">After</th>
                       <th scope="col" className="py-2 px-3 font-semibold">Points</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5 text-slate-200">
+                  <tbody className="divide-y divide-aurora-line text-aurora-ink">
                     {selectedResult.requirementChanges.map((row) => (
                       <tr key={row.skillName}>
-                        <th scope="row" className="py-2 pr-3 font-bold text-white">{row.skillName}</th>
+                        <th scope="row" className="py-2 pr-3 font-bold text-aurora-ink">{row.skillName}</th>
                         <td className="py-2 px-3">{STATUS_LABEL[row.statusBefore] || row.statusBefore}</td>
                         <td className="py-2 px-3">{STATUS_LABEL[row.statusAfter] || row.statusAfter}</td>
                         <td className="py-2 px-3">{row.pointsBefore} → {row.pointsAfter} of {row.pointsPossible} (<Delta value={row.pointsDelta} />)</td>
@@ -237,19 +252,19 @@ export const WhatIfPanel: React.FC<WhatIfPanelProps> = ({ careers }) => {
 
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left min-w-[420px]">
-                <caption className="text-left text-slate-300 font-semibold pb-2">Effect on every career</caption>
+                <caption className="text-left text-aurora-muted font-semibold pb-2">Effect on every career</caption>
                 <thead>
-                  <tr className="text-slate-400">
+                  <tr className="text-aurora-muted">
                     <th scope="col" className="py-2 pr-3 font-semibold">Career</th>
                     <th scope="col" className="py-2 px-3 font-semibold">Now</th>
                     <th scope="col" className="py-2 px-3 font-semibold">In this scenario</th>
                     <th scope="col" className="py-2 px-3 font-semibold">Change</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5 text-slate-200">
+                <tbody className="divide-y divide-aurora-line text-aurora-ink">
                   {result.careers.map((career) => (
                     <tr key={career.careerId} data-testid="whatif-career-row">
-                      <th scope="row" className="py-2 pr-3 font-bold text-white">{career.careerTitle}</th>
+                      <th scope="row" className="py-2 pr-3 font-bold text-aurora-ink">{career.careerTitle}</th>
                       <td className="py-2 px-3">{career.scoreBefore}%</td>
                       <td className="py-2 px-3">{career.scoreAfter}%</td>
                       <td className="py-2 px-3"><Delta value={career.scoreDelta} /></td>
