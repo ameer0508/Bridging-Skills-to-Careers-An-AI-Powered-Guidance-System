@@ -16,14 +16,14 @@ export const JobSearchAgentStatusBar: React.FC<JobSearchAgentStatusBarProps> = (
 }) => {
   const stages = [
     { id: 'query', label: 'Intent Query' },
-    { id: 'collect', label: 'Collecting Feeds' },
+    { id: 'collect', label: 'Reading sources' },
     { id: 'normalize', label: 'Deduplicating' },
     { id: 'enrich', label: 'Skill Match Scoring' },
     { id: 'rank', label: 'Ranked Pipeline' },
   ];
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/80 p-4 shadow-lg backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div className="rounded-2xl border border-aurora-line bg-aurora-canvas/60 p-4 shadow-lg backdrop-blur-md flex flex-col sm:flex-row items-center justify-between gap-4">
       {/* Left: Agent Status Badge */}
       <div className="flex items-center gap-3 w-full sm:w-auto">
         <div className="relative">
@@ -40,36 +40,36 @@ export const JobSearchAgentStatusBar: React.FC<JobSearchAgentStatusBarProps> = (
         </div>
 
         <div className="text-xs">
-          <span className="font-bold text-white block">
-            {isSearching ? 'Job Search Agent Active' : 'Agent Ready'}
+          <span className="font-bold text-aurora-ink block">
+            {isSearching ? 'Searching…' : 'Ready'}
           </span>
-          <span className="text-[10px] font-mono text-slate-400">
+          <span className="text-[10px] text-aurora-muted">
             {isSearching ? 'Fetching and ranking opportunities...' : `Showing ${totalFound} ${totalFound === 1 ? 'opportunity' : 'opportunities'}`}
           </span>
         </div>
       </div>
 
       {/* Middle: Stepper */}
-      <div className="hidden lg:flex items-center gap-1 text-[11px] font-mono text-slate-400">
+      <div className="hidden lg:flex items-center gap-1 text-[11px] text-aurora-muted">
         {stages.map((stg, idx) => (
           <React.Fragment key={stg.id}>
             <span
               className={`px-2 py-0.5 rounded ${
                 isSearching
-                  ? 'bg-indigo-500/20 text-indigo-300 font-semibold'
-                  : 'bg-white/5 text-slate-400'
+                  ? 'bg-aurora-violet/[0.06] text-aurora-indigo font-semibold'
+                  : 'bg-aurora-canvas text-aurora-muted'
               }`}
             >
               {stg.label}
             </span>
-            {idx < stages.length - 1 && <span className="text-slate-600">→</span>}
+            {idx < stages.length - 1 && <span className="text-aurora-muted">→</span>}
           </React.Fragment>
         ))}
       </div>
 
       {/* Right: Telemetry Attribution */}
-      <div className="flex items-center gap-2 text-xs font-mono text-slate-400 shrink-0">
-        <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+      <div className="flex items-center gap-2 text-xs text-aurora-muted shrink-0">
+        <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
         <span>Source: {providerStatus}</span>
       </div>
     </div>

@@ -32,11 +32,11 @@ export const SkillTrendsSection: React.FC<{ filters: MarketHistoryFilters }> = (
   return (
     <section aria-labelledby="skill-trends-heading" data-testid="skill-trends" className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <h2 id="skill-trends-heading" className="text-lg font-bold font-display text-[var(--color-text-primary)]">Skills mentioned in postings</h2>
-        <label className="flex flex-col gap-1 text-xs font-medium text-[var(--color-text-secondary)]">
+        <h2 id="skill-trends-heading" className="text-lg font-bold font-display text-aurora-ink">Skills mentioned in postings</h2>
+        <label className="flex flex-col gap-1 text-xs font-medium text-aurora-muted">
           Group by
           <select
-            className="rounded-[var(--radius-md)] border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)]"
+            className="rounded-2xl border border-aurora-line bg-white px-3 py-2 text-sm text-aurora-ink"
             value={granularity}
             onChange={e => setGranularity(e.target.value as 'month' | 'quarter')}
           >
@@ -46,9 +46,9 @@ export const SkillTrendsSection: React.FC<{ filters: MarketHistoryFilters }> = (
         </label>
       </div>
 
-      {query.isPending && <p role="status" className="text-sm text-[var(--color-text-secondary)]">Loading skill trends…</p>}
+      {query.isPending && <p role="status" className="text-sm text-aurora-muted">Loading skill trends…</p>}
       {query.isError && (
-        <div role="alert" className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[var(--color-status-error,#dc2626)] p-3 text-sm">
+        <div role="alert" className="flex items-center gap-2 rounded-2xl border border-rose-300 p-3 text-sm">
           <AlertTriangle size={16} aria-hidden="true" /> Skill trends could not be loaded: {messageOf(query.error, 'the server did not respond.')}
         </div>
       )}
@@ -60,7 +60,7 @@ export const SkillTrendsSection: React.FC<{ filters: MarketHistoryFilters }> = (
 const TrendsView: React.FC<{ data: SkillTrends }> = ({ data }) => {
   if (data.totals.distinctPostings === 0) {
     return (
-      <div data-testid="skill-trends-empty" className="rounded-[var(--radius-md)] border border-[var(--color-border-default)] p-4 text-sm text-[var(--color-text-secondary)]">
+      <div data-testid="skill-trends-empty" className="rounded-2xl border border-aurora-line p-4 text-sm text-aurora-muted">
         {data.sufficiency.reasons.map(r => <p key={r}>{TREND_REASON_TEXT[r](data)}</p>)}
       </div>
     );
@@ -70,16 +70,16 @@ const TrendsView: React.FC<{ data: SkillTrends }> = ({ data }) => {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm text-[var(--color-text-secondary)]" data-testid="skill-trends-scope">
+      <p className="text-sm text-aurora-muted" data-testid="skill-trends-scope">
         Shares are out of {data.totals.distinctPostings} dated posting{data.totals.distinctPostings === 1 ? '' : 's'}
         {' '}({data.totals.postingsWithoutRecognisedSkills} with no recognised skill; {data.totals.undatedExcluded} undated not counted).
         {' '}Periods: {data.periods.map(p => `${p.period} (${p.postings})`).join(', ')}.
       </p>
 
       {!data.sufficiency.sufficient && (
-        <div data-testid="skill-trends-insufficient" className="rounded-[var(--radius-md)] border border-[var(--color-border-default)] bg-[var(--color-bg-surface-raised)] p-3 text-sm">
-          <strong className="text-[var(--color-text-primary)]">Counts only, no change over time is stated:</strong>
-          <ul className="mt-1 list-disc pl-5 text-[var(--color-text-secondary)]">
+        <div data-testid="skill-trends-insufficient" className="rounded-2xl border border-aurora-line bg-white p-3 text-sm">
+          <strong className="text-aurora-ink">Counts only, no change over time is stated:</strong>
+          <ul className="mt-1 list-disc pl-5 text-aurora-muted">
             {data.sufficiency.reasons.map(r => <li key={r}>{TREND_REASON_TEXT[r](data)}</li>)}
           </ul>
         </div>
@@ -88,12 +88,12 @@ const TrendsView: React.FC<{ data: SkillTrends }> = ({ data }) => {
       {chart.length > 0 && (
         <div className="h-64 w-full" aria-hidden="true">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chart} layout="vertical" margin={{ top: 0, right: 16, left: 24, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" horizontal={false} />
-              <XAxis type="number" unit="%" stroke="var(--color-text-tertiary)" fontSize={11} />
-              <YAxis type="category" dataKey="skill" width={110} stroke="var(--color-text-tertiary)" fontSize={11} />
+            <BarChart accessibilityLayer={false} data={chart} layout="vertical" margin={{ top: 0, right: 16, left: 24, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e6eaf6" horizontal={false} />
+              <XAxis type="number" unit="%" stroke="#515b80" fontSize={11} />
+              <YAxis type="category" dataKey="skill" width={110} stroke="#515b80" fontSize={11} />
               <Tooltip formatter={v => `${v}%`} />
-              <Bar dataKey="share" name="Share of postings" fill="var(--color-interactive-primary)" />
+              <Bar dataKey="share" name="Share of postings" fill="#5540f5" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -103,7 +103,7 @@ const TrendsView: React.FC<{ data: SkillTrends }> = ({ data }) => {
         <table className="w-full min-w-[640px] text-left text-sm" data-testid="skill-trends-table">
           <caption className="sr-only">Postings mentioning each skill, its share and the change between the halves of the period</caption>
           <thead>
-            <tr className="text-xs text-[var(--color-text-secondary)]">
+            <tr className="text-xs text-aurora-muted">
               <th scope="col" className="py-2 pr-3">Skill</th>
               <th scope="col" className="py-2 pr-3">Postings mentioning</th>
               <th scope="col" className="py-2 pr-3">Earlier half</th>
@@ -113,19 +113,19 @@ const TrendsView: React.FC<{ data: SkillTrends }> = ({ data }) => {
           </thead>
           <tbody>
             {data.skills.map(s => (
-              <tr key={s.skill} className="border-t border-[var(--color-border-subtle)] align-top">
-                <th scope="row" className="py-2 pr-3 font-semibold text-[var(--color-text-primary)]">{s.skill}</th>
+              <tr key={s.skill} className="border-t border-aurora-line align-top">
+                <th scope="row" className="py-2 pr-3 font-semibold text-aurora-ink">{s.skill}</th>
                 <td className="py-2 pr-3">{s.mentions} of {data.totals.distinctPostings} ({pct(s.share)})</td>
                 <td className="py-2 pr-3">{s.change.earlier.mentions} of {s.change.earlier.postings} ({pct(s.change.earlier.share)})</td>
                 <td className="py-2 pr-3">{s.change.recent.mentions} of {s.change.recent.postings} ({pct(s.change.recent.share)})</td>
-                <td className="py-2 text-[var(--color-text-secondary)]">{changeText(s, data)}</td>
+                <td className="py-2 text-aurora-muted">{changeText(s, data)}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      <ul className="list-disc space-y-1 pl-5 text-xs text-[var(--color-text-secondary)]">
+      <ul className="list-disc space-y-1 pl-5 text-xs text-aurora-muted">
         {data.caveats.map(c => <li key={c}>{c}</li>)}
       </ul>
     </div>

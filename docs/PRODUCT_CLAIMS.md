@@ -145,6 +145,31 @@ The signed-in shell (sidebar, top bar, account menu, phone drawer) and the Comma
 - GATE CS with the navigator, the submit confirmation and per-question results; an SSC CGL timed set with a running server timer;
 - axe on every screen and the consent panel; reduced motion; no sideways scrolling at five widths; a clean console.
 
+## Stage D group 4: Jobs, Applications, Outcomes, Market, Salaries (2026-10-14)
+
+`/job-agent`, `/opportunities`, `/applications`, `/application-outcomes`, `/market` and `/market/salaries` were rebuilt in Aurora Elite and added to `AURORA_ROUTES`. All of the following are unchanged:
+- search, saving, status, notes, reminders and history;
+- the outcome denominators and minimum samples;
+- market sufficiency, source registration, synthetic separation and the five-employer rule;
+- salary grouping by country, currency and period.
+
+- **Claims corrected.**
+  - On `/opportunities`, removed "Autonomous AI Opportunity Discovery", "RapidAPI JSearch Feed" (shown regardless of the actual source), "Verified Skills" for resume skills, "Executing live provider query" and "real-time telemetry". The header now says that sample listings are labelled and that a match score is not a hiring prediction.
+  - On `/job-agent`, "Verified Competencies", "Skills Verified" and "Live Opportunity Inspection" now read as skills on your profile and listing details.
+- **Unavailable is not zero.** With no registered market source, Market Evidence shows "Unavailable" for postings, months and undated counts (it previously showed 0), and "No source" for the retrieval date. Salary Insights shows "Data unavailable" and no figure.
+- **Charts** use the light palette and keep their text tables. Their focus layer is off, so keyboard focus no longer lands inside chart wrappers that are hidden from screen readers.
+
+`e2e/tests/group4.mjs` (15 browser steps) checks:
+- signed-out access to the screens and the private endpoints is refused;
+- outcomes are empty before any application, and never show 0%;
+- sample listings are labelled, with no invented claims;
+- a saved job keeps its notes and reminder after a reload;
+- a saved job is not counted as applied; empty-form validation; a manual application is labelled "Added by you";
+- outcomes count only applications and flag the small sample;
+- market evidence is unavailable rather than zero, and synthetic data is labelled; salaries are unavailable;
+- the honest header on `/opportunities`;
+- keyboard filters; axe on every screen; reduced motion; no sideways scrolling at five widths; a clean console.
+
 ## Pages inside the app
 
 Pages whose content is built-in sample content are wrapped in `DemoWorkspace`, which shows the "Illustrative sample data" notice:

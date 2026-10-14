@@ -59,12 +59,12 @@ export const SearchResultsNotice: React.FC<SearchResultsNoticeProps> = ({ meta, 
 
   if (meta.source === 'unavailable' && meta.unavailableReason === 'quota_exhausted') {
     return (
-      <div role="alert" className="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex items-start gap-3" data-testid="job-source-notice" data-source="unavailable" data-reason="quota_exhausted">
-        <AlertTriangle className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" />
+      <div role="alert" className="p-4 rounded-2xl border border-amber-200 bg-amber-50 flex items-start gap-3" data-testid="job-source-notice" data-source="unavailable" data-reason="quota_exhausted">
+        <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <p className="text-xs font-bold text-white">Today's limit of job searches has been reached, so no new search was made.</p>
-          <p className="text-xs text-amber-100">{providerMessage || 'New searches are possible tomorrow.'}</p>
-          <p className="text-xs text-slate-300">Searches you already ran today are still shown from memory. Demo listings are not shown in their place. Your saved jobs are unaffected.</p>
+          <p className="text-xs font-bold text-aurora-ink">Today's limit of job searches has been reached, so no new search was made.</p>
+          <p className="text-xs text-amber-700">{providerMessage || 'New searches are possible tomorrow.'}</p>
+          <p className="text-xs text-aurora-muted">Searches you already ran today are still shown from memory. Demo listings are not shown in their place. Your saved jobs are unaffected.</p>
         </div>
       </div>
     );
@@ -72,16 +72,16 @@ export const SearchResultsNotice: React.FC<SearchResultsNoticeProps> = ({ meta, 
 
   if (meta.source === 'unavailable') {
     return (
-      <div role="alert" className="p-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3" data-testid="job-source-notice" data-source="unavailable">
+      <div role="alert" className="p-4 rounded-2xl border border-rose-200 bg-rose-50 flex flex-col sm:flex-row sm:items-center justify-between gap-3" data-testid="job-source-notice" data-source="unavailable">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="w-4 h-4 text-rose-300 shrink-0 mt-0.5" />
+          <AlertTriangle className="w-4 h-4 text-rose-700 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <p className="text-xs font-bold text-white">The job provider could not be reached, so no listings are shown.</p>
-            <p className="text-xs text-rose-100">{providerMessage || 'The provider did not respond.'}</p>
-            <p className="text-xs text-slate-300">Demo listings are not shown in place of live results. Your saved jobs are unaffected.</p>
+            <p className="text-xs font-bold text-aurora-ink">The job provider could not be reached, so no listings are shown.</p>
+            <p className="text-xs text-rose-700">{providerMessage || 'The provider did not respond.'}</p>
+            <p className="text-xs text-aurora-muted">Demo listings are not shown in place of live results. Your saved jobs are unaffected.</p>
           </div>
         </div>
-        <button type="button" onClick={onRetry} className="py-2 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-100 text-xs font-bold cursor-pointer shrink-0">
+        <button type="button" onClick={onRetry} className="py-2 px-4 rounded-xl bg-aurora-canvas hover:bg-aurora-canvas border border-aurora-line text-aurora-ink text-xs font-bold cursor-pointer shrink-0">
           Try again
         </button>
       </div>
@@ -91,23 +91,23 @@ export const SearchResultsNotice: React.FC<SearchResultsNoticeProps> = ({ meta, 
   const isSample = meta.source === 'sample';
   return (
     <div
-      className={`p-4 rounded-2xl border flex items-start gap-3 ${isSample ? 'border-amber-500/30 bg-amber-500/10' : 'border-emerald-500/25 bg-emerald-500/5'}`}
+      className={`p-4 rounded-2xl border flex items-start gap-3 ${isSample ? 'border-amber-200 bg-amber-50' : 'border-emerald-200 bg-emerald-50'}`}
       data-testid="job-source-notice"
       data-source={meta.source}
     >
-      {isSample ? <FlaskConical className="w-4 h-4 text-amber-300 shrink-0 mt-0.5" /> : <Radio className="w-4 h-4 text-emerald-300 shrink-0 mt-0.5" />}
+      {isSample ? <FlaskConical className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" /> : <Radio className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />}
       <div className="space-y-1">
-        <p className="text-xs font-bold text-white">
+        <p className="text-xs font-bold text-aurora-ink">
           {isSample
             ? 'Demo listings: no live job provider is configured.'
             : `Live listings${meta.fetchedAt ? `, fetched ${formatDateTime(meta.fetchedAt)}` : ''}${meta.stale ? ` (${Math.round((meta.resultAgeSeconds ?? 0) / 60)} minutes old: today's search limit is used up, so they could not be refreshed)` : meta.fromCache ? ' (from the last 15 minutes)' : ''}.`}
         </p>
-        <p className="text-xs text-slate-300">
+        <p className="text-xs text-aurora-muted">
           {isSample
             ? 'These are built-in examples for trying search, matching and tracking. They are not real vacancies and their links open a web search.'
             : 'Match scores are calculated from the skills each posting names and the skills on your resume.'}
         </p>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-aurora-muted">
           Showing {shown} of {meta.total} matching posting{meta.total === 1 ? '' : 's'}.{notes.length > 0 ? ` ${notes.join(' ')}` : ''}
         </p>
       </div>

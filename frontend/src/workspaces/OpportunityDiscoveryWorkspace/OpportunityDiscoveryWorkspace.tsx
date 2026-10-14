@@ -28,10 +28,8 @@ import {
   Layers,
 } from 'lucide-react';
 import apiClient from '../../lib/axios';
-import { GlassPanel } from '../../components/experience/workspace';
-import { WorkspaceHero, AIStatusBar } from '../../components/experience/workspace';
+import { Panel as GlassPanel, PageHeader, PageSkeleton, StatTile } from '../../design/aurora/kit';
 import { useToast } from '../../components/composite/Toast';
-import { AIThinkingAnimation } from '../../components/experience';
 import { primaryReadiness } from '../../lib/readiness';
 
 export interface OpportunityItem {
@@ -231,7 +229,6 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
   // Best real score among the listed postings; null when none could be scored
   const scoredOpportunity = liveOpportunities.find((o) => typeof o.skillbridgeMatchScore === 'number');
   const topMatchScore: number | null = scoredOpportunity?.skillbridgeMatchScore ?? null;
-  const topMatchLabel = topMatchScore === null ? 'Not scored' : `${topMatchScore}%`;
   const readinessScore = primaryReadiness(readinessData)?.overallScore ?? 0;
 
   const userSkillNames = useMemo(() => {
@@ -252,9 +249,9 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
 
   const explainableReasoning = useMemo(() => {
     if (liveOpportunities.length > 0 && liveOpportunities[0]?.matchedSkills?.length > 0) {
-      return `Target role pathway [${targetRoleTitle}] matched based on verified skills (${liveOpportunities[0].matchedSkills.join(', ')}) against live JSearch employer requirements.`;
+      return `Target role pathway [${targetRoleTitle}] compared with the listing using skills on your profile (${liveOpportunities[0].matchedSkills.join(', ')}).`;
     }
-    return `Target role pathway [${targetRoleTitle}] aligned with candidate skill matrix. Execute live discovery to update real-time telemetry.`;
+    return `Target role pathway [${targetRoleTitle}] compared with the skills on your profile. Search listings to compare them with current postings.`;
   }, [liveOpportunities, targetRoleTitle]);
 
   // Save / Bookmark Actions
@@ -314,7 +311,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
     setIsAnalyzing(true);
     addToast({
       type: 'info',
-      message: `Executing live provider query for [${searchKeyword || targetRoleTitle}]...`,
+      message: `Searching listings for ${searchKeyword || targetRoleTitle}`,
     });
 
     try {
@@ -338,96 +335,88 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
     }
   };
 
-  if (isOpportunitiesLoading && liveOpportunities.length === 0) {
-    return (
-      <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-12 rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[260px]">
-          <AIThinkingAnimation statusText="Executing Live External Opportunity Provider Search..." />
-        </div>
-      </div>
-    );
-  }
+  if (isOpportunitiesLoading && liveOpportunities.length === 0) return <PageSkeleton label="Loading opportunities" />;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-12 px-4">
+    <div className="mx-auto max-w-7xl space-y-6 px-4 pb-16 pt-6 sm:px-6">
       {/* WORKSPACE HERO */}
-      <WorkspaceHero
-        greeting="Autonomous AI Opportunity Discovery Command Center"
-        userName={targetRoleTitle}
-        title="Opportunity Discovery Agent"
-        description="Multi-modal opportunity discovery across verified career roles, research grants, skill fellowships, and high-impact industry programs."
-        aiSummary={`Top Match: ${topMatchLabel} • Eligibility: ${eligibilityPercent}% • Discovered: ${liveOpportunities.length} Live Opportunities`}
-        stats={[
-          { label: 'Top Match Score', value: topMatchScore === null ? 'Not scored' : `${topMatchScore} / 100`, change: targetRoleTitle, isPositive: topMatchScore !== null && topMatchScore >= 80 },
-          { label: 'Skill Eligibility Rate', value: `${eligibilityPercent}%`, change: `${userSkillNames.length} Verified Skills`, isPositive: eligibilityPercent >= 60 },
-          { label: 'Live Discovered', value: `${liveOpportunities.length} Jobs`, change: 'RapidAPI JSearch Feed', isPositive: true },
-          { label: 'Pipeline Saved', value: `${savedOpportunities.length} Bookmarks`, change: 'Persisted Records', isPositive: true },
-        ]}
-      />
+      <PageHeader
+        eyebrow="Opportunities"
+        icon={<Briefcase className="h-7 w-7" aria-hidden="true" />}
+        title={targetRoleTitle ? `Opportunities for ${targetRoleTitle}` : 'Opportunities'}
+        lead="Listings come from the job search sources configured for SkillBridge. Built-in sample listings are labelled as samples; a match score compares a listing with your skills and is not a hiring prediction."
+      >
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatTile label="Top match score" value={topMatchScore === null ? null : `${topMatchScore} / 100`} unmeasured="Not scored" hint={targetRoleTitle} accent />
+          <StatTile label="Listings you meet the skills for" value={`${eligibilityPercent}%`} hint={`${userSkillNames.length} skills on your profile`} />
+          <StatTile label="Listings shown" value={`${liveOpportunities.length}`} hint="From the current search" />
+          <StatTile label="Saved" value={`${savedOpportunities.length}`} hint="Jobs you saved" />
+        </div>
+      </PageHeader>
 
       {/* TOP PIPELINE TELEMETRY METRIC CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <GlassPanel className="p-4 space-y-1.5 border-indigo-500/30">
+        <GlassPanel className="p-4 space-y-1.5 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Live Discovered</span>
-            <Compass className="w-4 h-4 text-indigo-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Live Discovered</span>
+            <Compass className="w-4 h-4 text-aurora-indigo" />
           </div>
-          <span className="text-xl font-bold text-white font-mono block">
+          <span className="text-xl font-bold text-aurora-ink block">
             {liveOpportunities.length} Jobs
           </span>
-          <span className="text-[11px] font-mono text-indigo-300">Provider Source: JSearch</span>
+          <span className="text-[11px] text-aurora-indigo">Provider Source: JSearch</span>
         </GlassPanel>
 
-        <GlassPanel className="p-4 space-y-1.5 border-cyan-500/30">
+        <GlassPanel className="p-4 space-y-1.5 border-aurora-violet/25">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Saved Pipeline</span>
-            <Bookmark className="w-4 h-4 text-cyan-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Saved Pipeline</span>
+            <Bookmark className="w-4 h-4 text-aurora-violet" />
           </div>
-          <span className="text-xl font-bold text-cyan-400 font-mono block">
+          <span className="text-xl font-bold text-aurora-violet block">
             {telemetryData?.savedCount || savedOpportunities.length} Saved
           </span>
-          <span className="text-[11px] font-mono text-cyan-300">Persisted Records</span>
+          <span className="text-[11px] text-aurora-violet">Persisted Records</span>
         </GlassPanel>
 
-        <GlassPanel className="p-4 space-y-1.5 border-emerald-500/30">
+        <GlassPanel className="p-4 space-y-1.5 border-emerald-200">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Applications Sent</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Applications Sent</span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-700" />
           </div>
-          <span className="text-xl font-bold text-emerald-400 font-mono block">
+          <span className="text-xl font-bold text-emerald-700 block">
             {telemetryData?.appliedCount || 0} Applied
           </span>
-          <span className="text-[11px] font-mono text-emerald-300">Active Applications</span>
+          <span className="text-[11px] text-emerald-700">Active Applications</span>
         </GlassPanel>
 
         <GlassPanel className="p-4 space-y-1.5 border-purple-500/30">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Interview Stage</span>
-            <Award className="w-4 h-4 text-purple-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Interview Stage</span>
+            <Award className="w-4 h-4 text-aurora-violet" />
           </div>
-          <span className="text-xl font-bold text-purple-400 font-mono block">
+          <span className="text-xl font-bold text-aurora-violet block">
             {telemetryData?.interviewingCount || 0} Interviewing
           </span>
-          <span className="text-[11px] font-mono text-purple-300">In Progress</span>
+          <span className="text-[11px] text-aurora-violet">In Progress</span>
         </GlassPanel>
 
-        <GlassPanel className="p-4 space-y-1.5 border-amber-500/30">
+        <GlassPanel className="p-4 space-y-1.5 border-amber-200">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 uppercase">Offers Received</span>
-            <Trophy className="w-4 h-4 text-amber-400" />
+            <span className="text-[11px] text-aurora-muted uppercase">Offers Received</span>
+            <Trophy className="w-4 h-4 text-amber-700" />
           </div>
-          <span className="text-xl font-bold text-amber-400 font-mono block">
+          <span className="text-xl font-bold text-amber-700 block">
             {telemetryData?.offerCount || 0} Offers
           </span>
-          <span className="text-[11px] font-mono text-amber-300">Success Outcomes</span>
+          <span className="text-[11px] text-amber-700">Success Outcomes</span>
         </GlassPanel>
       </div>
 
       {/* SEARCH CONTROLS PANEL */}
-      <GlassPanel className="p-5 space-y-4 border-indigo-500/30">
+      <GlassPanel className="p-5 space-y-4 border-aurora-violet/25">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-xs font-mono font-bold text-white uppercase tracking-wider">
-            <Filter className="w-4 h-4 text-indigo-400" />
+          <div className="flex items-center gap-2 text-xs font-bold text-aurora-ink uppercase tracking-wider">
+            <Filter className="w-4 h-4 text-aurora-indigo" />
             Live Search & Filter Controls
           </div>
 
@@ -435,39 +424,39 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
             <button
               onClick={handleRunDiscovery}
               disabled={isAnalyzing}
-              className="py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              className="py-2 px-4 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-xs font-bold text-aurora-ink shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition-all cursor-pointer disabled:opacity-50"
             >
               <RefreshCw className={`w-4 h-4 ${isAnalyzing ? 'animate-spin' : ''}`} />
-              <span>{isAnalyzing ? 'Scanning...' : 'Run Autonomous Discovery'}</span>
+              <span>{isAnalyzing ? 'Scanning...' : 'Search listings'}</span>
             </button>
           </div>
         </div>
 
         {/* INPUT FILTERS GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 font-mono text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
           {/* Keyword Input */}
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <Search className="w-4 h-4 text-aurora-muted absolute left-3 top-3" />
             <input
               type="text"
               aria-label="Role or keyword"
               placeholder={`Role / Keyword (Default: ${targetRoleTitle})`}
               value={searchKeyword}
               onChange={(e) => { setSearchKeyword(e.target.value); setPage(1); }}
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50"
+              className="w-full pl-9 pr-3 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-aurora-violet/25"
             />
           </div>
 
           {/* Location Input */}
           <div className="relative">
-            <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+            <MapPin className="w-4 h-4 text-aurora-muted absolute left-3 top-3" />
             <input
               type="text"
               aria-label="Location"
               placeholder="City, State, or Country"
               value={searchLocation}
               onChange={(e) => { setSearchLocation(e.target.value); setPage(1); }}
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500/50"
+              className="w-full pl-9 pr-3 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-aurora-ink placeholder-slate-500 focus:outline-none focus:border-aurora-violet/25"
             />
           </div>
 
@@ -477,7 +466,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
               aria-label="Employment type"
               value={employmentType}
               onChange={(e) => { setEmploymentType(e.target.value); setPage(1); }}
-              className="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-slate-300 focus:outline-none focus:border-indigo-500/50"
+              className="w-full px-3 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-aurora-muted focus:outline-none focus:border-aurora-violet/25"
             >
               <option value="ALL">All Employment Types</option>
               <option value="FULLTIME">Full-time</option>
@@ -493,7 +482,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
               aria-label="Date posted"
               value={datePosted}
               onChange={(e) => { setDatePosted(e.target.value); setPage(1); }}
-              className="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-white/10 text-slate-300 focus:outline-none focus:border-indigo-500/50"
+              className="w-full px-3 py-2 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-aurora-muted focus:outline-none focus:border-aurora-violet/25"
             >
               <option value="all">Any Date Posted</option>
               <option value="today">Past 24 Hours</option>
@@ -505,7 +494,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
         </div>
 
         {/* SECONDARY CONTROLS (SORT, MIN SCORE, REMOTE TOGGLE) */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-white/5 font-mono text-xs text-slate-300">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-aurora-line text-xs text-aurora-muted">
           <div className="flex items-center gap-4 flex-wrap w-full sm:w-auto">
             {/* Remote Only Toggle */}
             <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -513,14 +502,14 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                 type="checkbox"
                 checked={remoteOnly}
                 onChange={(e) => { setRemoteOnly(e.target.checked); setPage(1); }}
-                className="w-4 h-4 rounded bg-slate-950 border-white/20 text-indigo-600 focus:ring-0 cursor-pointer"
+                className="w-4 h-4 rounded bg-aurora-canvas border-aurora-line text-indigo-600 focus:ring-0 cursor-pointer"
               />
               <span>Remote Jobs Only</span>
             </label>
 
             {/* Minimum Match Slider */}
             <div className="flex items-center gap-2">
-              <span className="text-slate-400">Min Match:</span>
+              <span className="text-aurora-muted">Min Match:</span>
               <input
                 type="range"
                 aria-label="Minimum match"
@@ -529,20 +518,20 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                 step="5"
                 value={minScore}
                 onChange={(e) => setMinScore(Number(e.target.value))}
-                className="w-24 accent-indigo-500 cursor-pointer"
+                className="w-24 accent-[#5540f5] cursor-pointer"
               />
-              <span className="font-bold text-indigo-400">{minScore}%</span>
+              <span className="font-bold text-aurora-indigo">{minScore}%</span>
             </div>
           </div>
 
           {/* Sort Selector */}
           <div className="flex items-center gap-2 shrink-0">
-            <span className="text-slate-400">Sort By:</span>
+            <span className="text-aurora-muted">Sort By:</span>
             <select
               aria-label="Sort by"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as 'match' | 'date' | 'salary' | 'relevance')}
-              className="px-3 py-1.5 rounded-xl bg-slate-950/80 border border-white/10 text-white focus:outline-none focus:border-indigo-500/50"
+              className="px-3 py-1.5 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-aurora-ink focus:outline-none focus:border-aurora-violet/25"
             >
               <option value="match">SkillBridge Match Score</option>
               <option value="date">Newest Posted</option>
@@ -555,7 +544,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
 
       {/* PROVIDER HEALTH & STATUS BANNER */}
       {providerHealth.status === 'DOWN' && (
-        <div className="p-4 rounded-xl border border-red-500/30 bg-red-950/30 text-red-300 font-mono text-xs flex items-center justify-between gap-3">
+        <div className="p-4 rounded-xl border border-red-500/30 bg-rose-50 text-red-300 text-xs flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
             <span>
@@ -564,7 +553,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
           </div>
           <button
             onClick={() => refetchOpportunities()}
-            className="px-3 py-1 rounded bg-red-800/40 hover:bg-red-800/60 text-white font-bold text-[11px]"
+            className="px-3 py-1 rounded bg-red-800/40 hover:bg-red-800/60 text-aurora-ink font-bold text-[11px]"
           >
             Retry Query
           </button>
@@ -572,17 +561,17 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
       )}
 
       {/* CATEGORY & TAB SELECTION */}
-      <div className="flex items-center justify-between border-b border-white/10 pb-3 flex-wrap gap-3 font-mono text-xs">
+      <div className="flex items-center justify-between border-b border-aurora-line pb-3 flex-wrap gap-3 text-xs">
         <div className="flex items-center gap-2 overflow-x-auto">
           <button
             onClick={() => setActiveTab('LIVE')}
             className={`py-2 px-4 rounded-xl font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
               activeTab === 'LIVE'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                : 'bg-slate-950/80 border border-white/10 text-slate-400 hover:text-white'
+                ? 'text-aurora-ink [background:var(--aurora-gradient-action)] shadow-aurora-md'
+                : 'bg-aurora-canvas/60 border border-aurora-line text-aurora-muted hover:text-aurora-indigo'
             }`}
           >
-            <Sparkles className="w-4 h-4 text-cyan-400" />
+            <Sparkles className="w-4 h-4 text-aurora-violet" />
             DISCOVER (LIVE OPPORTUNITIES) [{liveOpportunities.length}]
           </button>
 
@@ -590,11 +579,11 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
             onClick={() => setActiveTab('SAVED')}
             className={`py-2 px-4 rounded-xl font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
               activeTab === 'SAVED'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                : 'bg-slate-950/80 border border-white/10 text-slate-400 hover:text-white'
+                ? 'text-aurora-ink [background:var(--aurora-gradient-action)] shadow-aurora-md'
+                : 'bg-aurora-canvas/60 border border-aurora-line text-aurora-muted hover:text-aurora-indigo'
             }`}
           >
-            <Bookmark className="w-4 h-4 text-amber-400" />
+            <Bookmark className="w-4 h-4 text-amber-700" />
             SAVED PIPELINE [{savedOpportunities.length}]
           </button>
 
@@ -602,11 +591,11 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
             onClick={() => setActiveTab('CAREER')}
             className={`py-2 px-4 rounded-xl font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
               activeTab === 'CAREER'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                : 'bg-slate-950/80 border border-white/10 text-slate-400 hover:text-white'
+                ? 'text-aurora-ink [background:var(--aurora-gradient-action)] shadow-aurora-md'
+                : 'bg-aurora-canvas/60 border border-aurora-line text-aurora-muted hover:text-aurora-indigo'
             }`}
           >
-            <Layers className="w-4 h-4 text-purple-400" />
+            <Layers className="w-4 h-4 text-aurora-violet" />
             CAREER TAXONOMY [{matches.length}]
           </button>
 
@@ -614,18 +603,18 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
             onClick={() => setActiveTab('AI')}
             className={`py-2 px-4 rounded-xl font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
               activeTab === 'AI'
-                ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
-                : 'bg-slate-950/80 border border-white/10 text-slate-400 hover:text-white'
+                ? 'text-aurora-ink [background:var(--aurora-gradient-action)] shadow-aurora-md'
+                : 'bg-aurora-canvas/60 border border-aurora-line text-aurora-muted hover:text-aurora-indigo'
             }`}
           >
-            <Lightbulb className="w-4 h-4 text-emerald-400" />
+            <Lightbulb className="w-4 h-4 text-emerald-700" />
             AI PATHWAYS [{(recommendationsData || []).length}]
           </button>
         </div>
 
         <button
           onClick={() => navigate('/careers')}
-          className="text-xs text-indigo-400 hover:text-indigo-300 font-mono font-bold"
+          className="text-xs text-aurora-indigo hover:text-aurora-indigo font-bold"
         >
           Career Intelligence Taxonomy →
         </button>
@@ -635,27 +624,27 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
       {activeTab === 'LIVE' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* LIVE OPPORTUNITY FEED (8 COLS) */}
-          <GlassPanel className="lg:col-span-8 p-6 space-y-4 border-indigo-500/30">
-            <div className="flex items-center justify-between font-mono text-xs">
-              <span className="font-bold text-white flex items-center gap-2">
-                <Compass className="w-4 h-4 text-indigo-400" />
+          <GlassPanel className="lg:col-span-8 p-6 space-y-4 border-aurora-violet/25">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold text-aurora-ink flex items-center gap-2">
+                <Compass className="w-4 h-4 text-aurora-indigo" />
                 Live External Opportunities ({liveOpportunities.length})
               </span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-aurora-violet/[0.06] text-aurora-indigo border border-aurora-violet/25">
                 LIVE EXTERNAL DATA • SOURCE: JSEARCH
               </span>
             </div>
 
             {liveOpportunities.length === 0 ? (
-              <div className="p-12 text-center space-y-3 bg-slate-950/60 rounded-xl border border-white/5 font-mono text-xs">
-                <Briefcase className="w-10 h-10 text-slate-500 mx-auto" />
-                <p className="text-slate-300 font-bold">No Live External Opportunities Found</p>
-                <p className="text-slate-500 max-w-md mx-auto">
-                  Try broadening search keywords or location filters. Autonomous Discovery queries the live RapidAPI JSearch provider directly.
+              <div className="p-12 text-center space-y-3 bg-aurora-canvas/60 rounded-xl border border-aurora-line text-xs">
+                <Briefcase className="w-10 h-10 text-aurora-muted mx-auto" />
+                <p className="text-aurora-muted font-bold">No listings found</p>
+                <p className="text-aurora-muted max-w-md mx-auto">
+                  Try broader keywords or location filters. Without a configured job source, only the built-in sample listings are searched.
                 </p>
               </div>
             ) : (
-              <div className="space-y-4 font-mono text-xs">
+              <div className="space-y-4 text-xs">
                 {liveOpportunities.map((opp) => {
                   const isSaved = savedExternalIds.has(opp.externalId);
                   const salaryStr = opp.salary?.min && opp.salary?.max
@@ -665,32 +654,32 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                   return (
                     <div
                       key={opp.externalId}
-                      className="p-5 rounded-xl bg-slate-950/80 border border-white/10 space-y-3 hover:border-indigo-500/40 transition-all shadow-md"
+                      className="p-5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-3 hover:border-aurora-violet/25 transition-all shadow-md"
                     >
                       {/* HEADER ROW */}
                       <div className="flex items-start justify-between gap-3 flex-wrap">
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-bold text-white text-base hover:text-indigo-300 transition-colors">
+                            <h3 className="font-bold text-aurora-ink text-base hover:text-aurora-indigo transition-colors">
                               {opp.title}
                             </h3>
-                            <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
+                            <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-aurora-violet/[0.06] text-aurora-violet border border-aurora-violet/25">
                               LIVE EXTERNAL • JSEARCH
                             </span>
                             {opp.remote && (
-                              <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                              <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                 REMOTE
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-3 text-slate-400 text-xs flex-wrap">
-                            <span className="flex items-center gap-1 text-indigo-300 font-bold">
+                          <div className="flex items-center gap-3 text-aurora-muted text-xs flex-wrap">
+                            <span className="flex items-center gap-1 text-aurora-indigo font-bold">
                               <Building2 className="w-3.5 h-3.5" /> {opp.company}
                             </span>
-                            <span className="flex items-center gap-1 text-slate-300">
-                              <MapPin className="w-3.5 h-3.5 text-slate-400" /> {opp.location}
+                            <span className="flex items-center gap-1 text-aurora-muted">
+                              <MapPin className="w-3.5 h-3.5 text-aurora-muted" /> {opp.location}
                             </span>
-                            <span className="flex items-center gap-1 text-emerald-400 font-bold">
+                            <span className="flex items-center gap-1 text-emerald-700 font-bold">
                               <DollarSign className="w-3.5 h-3.5" /> {salaryStr}
                             </span>
                           </div>
@@ -698,7 +687,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
 
                         {/* MATCH SCORE BADGE & SAVE BUTTON */}
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-emerald-400 font-bold text-xs flex items-center gap-1 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/30">
+                          <span className="text-emerald-700 font-bold text-xs flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
                             <Sparkles className="w-3.5 h-3.5" /> SkillBridge Match: {opp.skillbridgeMatchScore === null ? 'Not scored' : `${opp.skillbridgeMatchScore}%`}
                           </span>
 
@@ -707,8 +696,8 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                             title={isSaved ? 'Remove from Saved' : 'Save to Pipeline'}
                             className={`p-2 rounded-lg border transition-all cursor-pointer ${
                               isSaved
-                                ? 'bg-amber-500/20 border-amber-500/50 text-amber-400'
-                                : 'bg-slate-900 border-white/10 text-slate-400 hover:text-white'
+                                ? 'bg-amber-50 border-amber-200 text-amber-700'
+                                : 'bg-aurora-canvas border-aurora-line text-aurora-muted hover:text-aurora-indigo'
                             }`}
                           >
                             {isSaved ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
@@ -720,9 +709,9 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                       <div className="space-y-1.5 pt-1">
                         {opp.matchedSkills.length > 0 && (
                           <div className="flex items-center gap-1.5 flex-wrap text-[10px]">
-                            <span className="text-slate-400 font-bold">MATCHED SKILLS:</span>
+                            <span className="text-aurora-muted font-bold">MATCHED SKILLS:</span>
                             {opp.matchedSkills.map((sk) => (
-                              <span key={sk} className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold">
+                              <span key={sk} className="px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold">
                                 ✓ {sk}
                               </span>
                             ))}
@@ -731,9 +720,9 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
 
                         {opp.missingSkills.length > 0 && (
                           <div className="flex items-center gap-1.5 flex-wrap text-[10px]">
-                            <span className="text-slate-400 font-bold">MISSING SKILLS:</span>
+                            <span className="text-aurora-muted font-bold">MISSING SKILLS:</span>
                             {opp.missingSkills.map((sk) => (
-                              <span key={sk} className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold">
+                              <span key={sk} className="px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-700 font-bold">
                                 + {sk}
                               </span>
                             ))}
@@ -742,15 +731,15 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                       </div>
 
                       {/* CARD FOOTER ACTIONS */}
-                      <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-white/5 flex-wrap gap-2">
-                        <span className="flex items-center gap-1 text-slate-500">
-                          <Clock className="w-3.5 h-3.5" /> Posted: {opp.postedAt ? new Date(opp.postedAt).toLocaleDateString() : 'Recent'} • Provider: <strong className="text-purple-300">{opp.provider}</strong>
+                      <div className="flex items-center justify-between text-[11px] text-aurora-muted pt-2 border-t border-aurora-line flex-wrap gap-2">
+                        <span className="flex items-center gap-1 text-aurora-muted">
+                          <Clock className="w-3.5 h-3.5" /> Posted: {opp.postedAt ? new Date(opp.postedAt).toLocaleDateString() : 'Recent'} • Provider: <strong className="text-aurora-violet">{opp.provider}</strong>
                         </span>
 
                         <div className="flex items-center gap-3">
                           <button
                             onClick={() => setSelectedOpportunity(opp)}
-                            className="text-xs text-indigo-400 hover:text-indigo-300 font-bold underline cursor-pointer"
+                            className="text-xs text-aurora-indigo hover:text-aurora-indigo font-bold underline cursor-pointer"
                           >
                             Inspect Details
                           </button>
@@ -764,10 +753,10 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                                 },
                               })
                             }
-                            className="py-1 px-2.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-300 font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
-                            title="Analyze this opportunity in Autonomous Job Search Agent"
+                            className="py-1 px-2.5 rounded-lg bg-aurora-violet/[0.06] hover:bg-aurora-violet/[0.06] border border-aurora-violet/25 text-aurora-violet font-bold text-xs flex items-center gap-1 transition-all cursor-pointer"
+                            title="Open this listing in Job Search"
                           >
-                            <Briefcase className="w-3.5 h-3.5 text-cyan-400" />
+                            <Briefcase className="w-3.5 h-3.5 text-aurora-violet" />
                             <span>Job Search Agent</span>
                           </button>
 
@@ -775,7 +764,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                             href={opp.applicationUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="py-1.5 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1 transition-all"
+                            className="py-1.5 px-3 rounded-lg [background:var(--aurora-gradient-action)] hover:brightness-110 text-aurora-ink font-bold text-xs flex items-center gap-1 transition-all"
                           >
                             <span>VIEW OPPORTUNITY</span>
                             <ExternalLink className="w-3.5 h-3.5" />
@@ -787,21 +776,21 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                 })}
 
                 {/* PAGINATION CONTROLS */}
-                <div className="flex items-center justify-between pt-4 border-t border-white/10 font-mono text-xs">
+                <div className="flex items-center justify-between pt-4 border-t border-aurora-line text-xs">
                   <button
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    className="py-1.5 px-3 rounded-lg bg-slate-900 border border-white/10 text-slate-300 hover:text-white disabled:opacity-40 flex items-center gap-1 cursor-pointer"
+                    className="py-1.5 px-3 rounded-lg bg-aurora-canvas border border-aurora-line text-aurora-muted hover:text-aurora-indigo disabled:opacity-40 flex items-center gap-1 cursor-pointer"
                   >
                     <ChevronLeft className="w-4 h-4" /> Previous
                   </button>
-                  <span className="text-slate-400">
-                    Page <strong className="text-white">{page}</strong> • {liveOpportunities.length} Results
+                  <span className="text-aurora-muted">
+                    Page <strong className="text-aurora-ink">{page}</strong> • {liveOpportunities.length} Results
                   </span>
                   <button
                     onClick={() => setPage((p) => p + 1)}
                     disabled={liveOpportunities.length < 10}
-                    className="py-1.5 px-3 rounded-lg bg-slate-900 border border-white/10 text-slate-300 hover:text-white disabled:opacity-40 flex items-center gap-1 cursor-pointer"
+                    className="py-1.5 px-3 rounded-lg bg-aurora-canvas border border-aurora-line text-aurora-muted hover:text-aurora-indigo disabled:opacity-40 flex items-center gap-1 cursor-pointer"
                   >
                     Next <ChevronRight className="w-4 h-4" />
                   </button>
@@ -811,47 +800,47 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
           </GlassPanel>
 
           {/* RIGHT TELEMETRY & REASONING PANEL (4 COLS) */}
-          <div className="lg:col-span-4 space-y-6 font-mono text-xs">
-            <GlassPanel className="p-6 space-y-4 border-cyan-500/30">
+          <div className="lg:col-span-4 space-y-6 text-xs">
+            <GlassPanel className="p-6 space-y-4 border-aurora-violet/25">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-white flex items-center gap-2">
-                  <Lightbulb className="w-4 h-4 text-cyan-400" />
-                  Explainable Match Telemetry
+                <span className="font-bold text-aurora-ink flex items-center gap-2">
+                  <Lightbulb className="w-4 h-4 text-aurora-violet" />
+                  Why this match
                 </span>
               </div>
-              <p className="text-slate-300 leading-relaxed text-[11px]">
+              <p className="text-aurora-muted leading-relaxed text-[11px]">
                 {explainableReasoning}
               </p>
             </GlassPanel>
 
             <GlassPanel className="p-6 space-y-4 border-purple-500/30">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-white flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-purple-400" />
+                <span className="font-bold text-aurora-ink flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-aurora-violet" />
                   Live Provider Health
                 </span>
               </div>
 
-              <div className="space-y-2.5 text-slate-300">
-                <div className="p-3 rounded-xl bg-slate-950/80 border border-white/10 flex items-center justify-between">
+              <div className="space-y-2.5 text-aurora-muted">
+                <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between">
                   <span>Provider Name:</span>
-                  <strong className="text-indigo-300">{providerHealth.provider}</strong>
+                  <strong className="text-aurora-indigo">{providerHealth.provider}</strong>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-950/80 border border-white/10 flex items-center justify-between">
+                <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between">
                   <span>Status:</span>
                   <span className={`font-bold px-2 py-0.5 rounded text-[10px] ${
-                    providerHealth.status === 'UP' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/10 text-red-400 border border-red-500/30'
+                    providerHealth.status === 'UP' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-500/10 text-red-400 border border-red-500/30'
                   }`}>
                     {providerHealth.status}
                   </span>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-950/80 border border-white/10 flex items-center justify-between">
+                <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between">
                   <span>Verified User Skills:</span>
-                  <strong className="text-cyan-400">{userSkillNames.length} Skills</strong>
+                  <strong className="text-aurora-violet">{userSkillNames.length} Skills</strong>
                 </div>
-                <div className="p-3 rounded-xl bg-slate-950/80 border border-white/10 flex items-center justify-between">
+                <div className="p-3 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between">
                   <span>Readiness Benchmark:</span>
-                  <strong className="text-emerald-400">{readinessScore}%</strong>
+                  <strong className="text-emerald-700">{readinessScore}%</strong>
                 </div>
               </div>
             </GlassPanel>
@@ -861,19 +850,19 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
 
       {/* SAVED PIPELINE TAB */}
       {activeTab === 'SAVED' && (
-        <GlassPanel className="p-6 space-y-6 border-amber-500/30 font-mono text-xs">
+        <GlassPanel className="p-6 space-y-6 border-amber-200 text-xs">
           <div className="flex items-center justify-between">
-            <span className="font-bold text-white text-sm flex items-center gap-2">
-              <Bookmark className="w-4 h-4 text-amber-400" />
+            <span className="font-bold text-aurora-ink text-sm flex items-center gap-2">
+              <Bookmark className="w-4 h-4 text-amber-700" />
               Persisted Opportunity Application Pipeline ({savedOpportunities.length})
             </span>
           </div>
 
           {savedOpportunities.length === 0 ? (
-            <div className="p-12 text-center space-y-3 bg-slate-950/60 rounded-xl border border-white/5">
-              <Bookmark className="w-10 h-10 text-slate-500 mx-auto" />
-              <p className="text-slate-300 font-bold">No Saved Opportunities Yet</p>
-              <p className="text-slate-500">
+            <div className="p-12 text-center space-y-3 bg-aurora-canvas/60 rounded-xl border border-aurora-line">
+              <Bookmark className="w-10 h-10 text-aurora-muted mx-auto" />
+              <p className="text-aurora-muted font-bold">No Saved Opportunities Yet</p>
+              <p className="text-aurora-muted">
                 Click the bookmark icon on any live opportunity card to save it to your pipeline.
               </p>
             </div>
@@ -882,18 +871,18 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
               {savedOpportunities.map((item) => (
                 <div
                   key={item.externalId}
-                  className="p-5 rounded-xl bg-slate-950/80 border border-white/10 space-y-3 hover:border-amber-500/40 transition-all"
+                  className="p-5 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-3 hover:border-amber-200 transition-all"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <h4 className="font-bold text-white text-sm">{item.title}</h4>
-                      <p className="text-indigo-300 text-xs font-bold">{item.company} • {item.location}</p>
+                      <h4 className="font-bold text-aurora-ink text-sm">{item.title}</h4>
+                      <p className="text-aurora-indigo text-xs font-bold">{item.company} • {item.location}</p>
                     </div>
 
                     <select
                       value={item.status}
                       onChange={(e) => handleUpdateStatus(item.externalId, e.target.value as SavedOpportunityItem['status'])}
-                      className="px-2.5 py-1 rounded-lg bg-slate-900 border border-white/20 text-xs font-bold text-amber-400 focus:outline-none cursor-pointer"
+                      className="px-2.5 py-1 rounded-lg bg-aurora-canvas border border-aurora-line text-xs font-bold text-amber-700 focus:outline-none cursor-pointer"
                     >
                       <option value="saved">SAVED</option>
                       <option value="applied">APPLIED</option>
@@ -904,7 +893,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                     </select>
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-white/5">
+                  <div className="flex items-center justify-between text-[11px] text-aurora-muted pt-2 border-t border-aurora-line">
                     <span>Saved: {new Date(item.savedAt).toLocaleDateString()}</span>
                     <div className="flex items-center gap-3">
                       <button
@@ -915,7 +904,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                       </button>
                       <button
                         onClick={() => navigate('/interviews')}
-                        className="py-1 px-2.5 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] flex items-center gap-1 cursor-pointer"
+                        className="py-1 px-2.5 rounded bg-emerald-600 hover:bg-emerald-500 text-aurora-ink font-bold text-[11px] flex items-center gap-1 cursor-pointer"
                       >
                         Prepare Interview →
                       </button>
@@ -923,7 +912,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                         href={item.applicationUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="py-1 px-2.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[11px] flex items-center gap-1"
+                        className="py-1 px-2.5 rounded [background:var(--aurora-gradient-action)] hover:brightness-110 text-aurora-ink font-bold text-[11px] flex items-center gap-1"
                       >
                         Apply <ExternalLink className="w-3 h-3" />
                       </a>
@@ -938,13 +927,13 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
 
       {/* CAREER TAXONOMY TAB */}
       {activeTab === 'CAREER' && (
-        <GlassPanel className="p-6 space-y-4 border-purple-500/30 font-mono text-xs">
+        <GlassPanel className="p-6 space-y-4 border-purple-500/30 text-xs">
           <div className="flex items-center justify-between">
-            <span className="font-bold text-white text-sm flex items-center gap-2">
-              <Layers className="w-4 h-4 text-purple-400" />
+            <span className="font-bold text-aurora-ink text-sm flex items-center gap-2">
+              <Layers className="w-4 h-4 text-aurora-violet" />
               SkillBridge Career Matches (MongoDB Career Taxonomy)
             </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-300 border border-purple-500/30">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-violet-500/10 text-aurora-violet border border-purple-500/30">
               CAREER MATCH ROLE • SOURCE: SKILLBRIDGE CAREER ENGINE
             </span>
           </div>
@@ -957,12 +946,12 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
               const score = typeof m.matchScore === 'number' ? m.matchScore : null;
 
               return (
-                <div key={m._id || idx} className="p-4 rounded-xl bg-slate-950/80 border border-white/10 flex items-center justify-between gap-3">
+                <div key={m._id || idx} className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line flex items-center justify-between gap-3">
                   <div>
-                    <h4 className="font-bold text-white text-sm">{title}</h4>
-                    <p className="text-slate-400">{industry} Industry Pathway • Global Taxonomy</p>
+                    <h4 className="font-bold text-aurora-ink text-sm">{title}</h4>
+                    <p className="text-aurora-muted">{industry} Industry Pathway • Global Taxonomy</p>
                   </div>
-                  <span className="text-purple-400 font-bold text-xs bg-purple-500/10 px-3 py-1 rounded-lg border border-purple-500/30">
+                  <span className="text-aurora-violet font-bold text-xs bg-violet-500/10 px-3 py-1 rounded-lg border border-purple-500/30">
                     {score === null ? 'Not scored' : `SkillBridge Match: ${score}%`}
                   </span>
                 </div>
@@ -974,25 +963,25 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
 
       {/* AI RECOMMENDATION PATHWAY TAB */}
       {activeTab === 'AI' && (
-        <GlassPanel className="p-6 space-y-4 border-emerald-500/30 font-mono text-xs">
+        <GlassPanel className="p-6 space-y-4 border-emerald-200 text-xs">
           <div className="flex items-center justify-between">
-            <span className="font-bold text-white text-sm flex items-center gap-2">
-              <Lightbulb className="w-4 h-4 text-emerald-400" />
+            <span className="font-bold text-aurora-ink text-sm flex items-center gap-2">
+              <Lightbulb className="w-4 h-4 text-emerald-700" />
               High Priority AI Guidance Pathways
             </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30">
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
               AI RECOMMENDATION PATHWAY • SOURCE: SKILLBRIDGE RECOMMENDATION ENGINE
             </span>
           </div>
 
           <div className="space-y-3">
             {(recommendationsData || []).map((rec: { _id: string; title: string; reasoning: string; actionType: string }, idx: number) => (
-              <div key={rec._id || idx} className="p-4 rounded-xl bg-slate-950/80 border border-white/10 space-y-2">
+              <div key={rec._id || idx} className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line space-y-2">
                 <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-white text-sm">{rec.title}</h4>
-                  <span className="text-emerald-400 font-bold text-xs">Recommended Action</span>
+                  <h4 className="font-bold text-aurora-ink text-sm">{rec.title}</h4>
+                  <span className="text-emerald-700 font-bold text-xs">Recommended Action</span>
                 </div>
-                <p className="text-slate-300 text-xs">{rec.reasoning}</p>
+                <p className="text-aurora-muted text-xs">{rec.reasoning}</p>
               </div>
             ))}
           </div>
@@ -1005,14 +994,14 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
           role="dialog"
           aria-modal="true"
           aria-labelledby="opportunity-drawer-title"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-aurora-canvas/60 backdrop-blur-md"
         >
-          <GlassPanel className="max-w-2xl w-full p-6 space-y-6 border-indigo-500/50 relative max-h-[90vh] overflow-y-auto font-mono text-xs shadow-2xl shadow-indigo-950/50">
+          <GlassPanel className="max-w-2xl w-full p-6 space-y-6 border-aurora-violet/25 relative max-h-[90vh] overflow-y-auto text-xs shadow-aurora-lg">
             {/* CLOSE BUTTON */}
             <button
               onClick={() => setSelectedOpportunity(null)}
               aria-label="Close opportunity details modal"
-              className="absolute top-4 right-4 p-2 rounded-lg bg-slate-900 border border-white/10 text-slate-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+              className="absolute top-4 right-4 p-2 rounded-lg bg-aurora-canvas border border-aurora-line text-aurora-muted hover:text-aurora-indigo focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -1020,51 +1009,51 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
             {/* HEADER */}
             <div className="space-y-2">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="px-2.5 py-1 rounded text-[10px] font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">
+                <span className="px-2.5 py-1 rounded text-[10px] font-bold bg-aurora-violet/[0.06] text-aurora-violet border border-aurora-violet/25">
                   LIVE EXTERNAL DATA • JSEARCH
                 </span>
-                <span className="text-emerald-400 font-bold text-xs bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/30">
+                <span className="text-emerald-700 font-bold text-xs bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">
                   Match Score: {selectedOpportunity.skillbridgeMatchScore === null ? 'Not scored' : `${selectedOpportunity.skillbridgeMatchScore}%`}
                 </span>
               </div>
-              <h2 id="opportunity-drawer-title" className="text-xl font-bold text-white">
+              <h2 id="opportunity-drawer-title" className="text-xl font-bold text-aurora-ink">
                 {selectedOpportunity.title}
               </h2>
-              <p className="text-indigo-300 text-sm font-bold">
+              <p className="text-aurora-indigo text-sm font-bold">
                 {selectedOpportunity.company} • {selectedOpportunity.location}
               </p>
             </div>
 
             {/* METRICS GRID */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-slate-950/80 border border-white/10">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line">
               <div>
-                <span className="text-slate-500 block text-[10px]">EMPLOYMENT TYPE</span>
-                <strong className="text-white">{selectedOpportunity.employmentType || 'FULL_TIME'}</strong>
+                <span className="text-aurora-muted block text-[10px]">EMPLOYMENT TYPE</span>
+                <strong className="text-aurora-ink">{selectedOpportunity.employmentType || 'FULL_TIME'}</strong>
               </div>
               <div>
-                <span className="text-slate-500 block text-[10px]">LOCATION</span>
-                <strong className="text-slate-300">{selectedOpportunity.location}</strong>
+                <span className="text-aurora-muted block text-[10px]">LOCATION</span>
+                <strong className="text-aurora-muted">{selectedOpportunity.location}</strong>
               </div>
               <div>
-                <span className="text-slate-500 block text-[10px]">POSTED DATE</span>
-                <strong className="text-indigo-300">
+                <span className="text-aurora-muted block text-[10px]">POSTED DATE</span>
+                <strong className="text-aurora-indigo">
                   {selectedOpportunity.postedAt ? new Date(selectedOpportunity.postedAt).toLocaleDateString() : 'Recent'}
                 </strong>
               </div>
             </div>
 
             {/* SKILLS MATCH BREAKDOWN */}
-            <div className="space-y-3 p-4 rounded-xl bg-slate-950/80 border border-white/10">
-              <span className="font-bold text-white flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" /> Grounded Competency Match
+            <div className="space-y-3 p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line">
+              <span className="font-bold text-aurora-ink flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-emerald-700" /> Grounded Competency Match
               </span>
 
               {selectedOpportunity.matchedSkills.length > 0 && (
                 <div className="space-y-1">
-                  <span className="text-slate-400 text-[10px] font-bold block">VERIFIED MATCHED SKILLS:</span>
+                  <span className="text-aurora-muted text-[10px] font-bold block">VERIFIED MATCHED SKILLS:</span>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {selectedOpportunity.matchedSkills.map((sk) => (
-                      <span key={sk} className="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold">
+                      <span key={sk} className="px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold">
                         ✓ {sk}
                       </span>
                     ))}
@@ -1074,10 +1063,10 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
 
               {selectedOpportunity.missingSkills.length > 0 && (
                 <div className="space-y-1 pt-1">
-                  <span className="text-slate-400 text-[10px] font-bold block">RECOMMENDED SKILL GAPS:</span>
+                  <span className="text-aurora-muted text-[10px] font-bold block">RECOMMENDED SKILL GAPS:</span>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {selectedOpportunity.missingSkills.map((sk) => (
-                      <span key={sk} className="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold">
+                      <span key={sk} className="px-2 py-0.5 rounded bg-amber-50 border border-amber-200 text-amber-700 font-bold">
                         + {sk}
                       </span>
                     ))}
@@ -1088,22 +1077,22 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
 
             {/* SANITIZED DESCRIPTION */}
             <div className="space-y-2">
-              <span className="font-bold text-slate-300">Sanitized Opportunity Description</span>
-              <div className="p-4 rounded-xl bg-slate-950/90 border border-white/10 text-slate-300 leading-relaxed text-xs max-h-48 overflow-y-auto whitespace-pre-line">
+              <span className="font-bold text-aurora-muted">Sanitized Opportunity Description</span>
+              <div className="p-4 rounded-xl bg-aurora-canvas/60 border border-aurora-line text-aurora-muted leading-relaxed text-xs max-h-48 overflow-y-auto whitespace-pre-line">
                 {selectedOpportunity.description || 'No description provided by external employer.'}
               </div>
             </div>
 
             {/* FOOTER ACTIONS */}
-            <div className="flex items-center justify-between pt-4 border-t border-white/10 flex-wrap gap-3">
+            <div className="flex items-center justify-between pt-4 border-t border-aurora-line flex-wrap gap-3">
               <button
                 onClick={() => {
                   handleToggleSave(selectedOpportunity);
                   setSelectedOpportunity(null);
                 }}
-                className="py-2 px-4 rounded-xl bg-slate-900 border border-white/20 text-white font-bold flex items-center gap-2 hover:bg-slate-800 cursor-pointer"
+                className="py-2 px-4 rounded-xl bg-aurora-canvas border border-aurora-line text-aurora-ink font-bold flex items-center gap-2 hover:bg-aurora-canvas cursor-pointer"
               >
-                <Bookmark className="w-4 h-4 text-amber-400" />
+                <Bookmark className="w-4 h-4 text-amber-700" />
                 {savedExternalIds.has(selectedOpportunity.externalId) ? 'Remove Bookmark' : 'Save Opportunity'}
               </button>
 
@@ -1117,9 +1106,9 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                       },
                     });
                   }}
-                  className="py-2 px-4 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/60 border border-cyan-500/40 text-cyan-300 font-bold flex items-center gap-2 transition cursor-pointer"
+                  className="py-2 px-4 rounded-xl bg-cyan-50 hover:bg-sky-100 border border-aurora-violet/25 text-aurora-violet font-bold flex items-center gap-2 transition cursor-pointer"
                 >
-                  <Briefcase className="w-4 h-4 text-cyan-400" />
+                  <Briefcase className="w-4 h-4 text-aurora-violet" />
                   <span>Job Search Agent</span>
                 </button>
 
@@ -1127,7 +1116,7 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
                   href={selectedOpportunity.applicationUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="py-2 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold flex items-center gap-2 shadow-lg shadow-indigo-600/30"
+                  className="py-2 px-5 rounded-xl [background:var(--aurora-gradient-action)] hover:brightness-110 text-aurora-ink font-bold flex items-center gap-2 shadow-lg shadow-indigo-600/30"
                 >
                   <span>VIEW OPPORTUNITY</span>
                   <ExternalLink className="w-4 h-4" />
@@ -1138,12 +1127,6 @@ export const OpportunityDiscoveryWorkspace: React.FC = () => {
         </div>
       )}
 
-      {/* BOTTOM STATUS BAR */}
-      <AIStatusBar
-        status={isAnalyzing ? 'thinking' : 'active'}
-        confidence={topMatchScore ?? 0}
-        lastUpdated="Opportunity Agent Active"
-      />
     </div>
   );
 };

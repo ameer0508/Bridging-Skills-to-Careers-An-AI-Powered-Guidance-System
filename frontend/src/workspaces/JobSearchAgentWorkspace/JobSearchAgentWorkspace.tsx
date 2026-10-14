@@ -3,8 +3,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
 import apiClient from '../../lib/axios';
 import { useToast } from '../../components/composite/Toast';
-import { AIThinkingAnimation } from '../../components/experience';
-import { PremiumErrorState } from '../../components/experience/workspace';
+import { Notice, PageSkeleton } from '../../design/aurora/kit';
+import { auroraButtonClass } from '../../design/aurora/buttonStyles';
 
 // Feature Components
 import {
@@ -288,30 +288,20 @@ export const JobSearchAgentWorkspace: React.FC = () => {
     setSelectedId(currentList[0]?.externalId ?? null);
   }, [currentList, selectedId, handoffId, handoffOpp]);
 
-  if (isOpportunitiesLoading && liveOpportunities.length === 0) {
-    return (
-      <div className="max-w-7xl mx-auto space-y-6 pb-12 px-4">
-        <div className="p-16 rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur-xl flex flex-col items-center justify-center space-y-4 min-h-[320px]">
-          <AIThinkingAnimation statusText="Loading job listings..." />
-        </div>
-      </div>
-    );
-  }
+  if (isOpportunitiesLoading && liveOpportunities.length === 0) return <PageSkeleton label="Loading job listings" />;
 
   if (opportunitiesError && !opportunitiesData) {
     return (
-      <div className="max-w-7xl mx-auto pb-12 px-4">
-        <PremiumErrorState
-          title="Job listings could not be loaded"
-          message={errorMessage(opportunitiesError, 'The request failed.')}
-          onRetry={() => refetchOpportunities()}
-        />
+      <div className="mx-auto max-w-3xl px-4 pt-8 sm:px-6">
+        <Notice tone="error" title="Job listings could not be loaded" action={<button type="button" className={auroraButtonClass('secondary', 'md')} onClick={() => refetchOpportunities()}>Try again</button>}>
+          {errorMessage(opportunitiesError, 'The request failed.')}
+        </Notice>
       </div>
     );
   }
 
   const isSearching = isCycleRunning || isOpportunitiesFetching;
-  const fieldClass = 'rounded-xl bg-slate-950/80 border border-white/10 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/60';
+  const fieldClass = 'rounded-xl bg-aurora-canvas/60 border border-aurora-line px-3 py-2 text-xs text-aurora-ink placeholder:text-aurora-muted focus:outline-none focus:border-aurora-violet/25';
 
   return (
     <div className="max-w-7xl mx-auto space-y-7 pb-16 px-4">
@@ -337,7 +327,7 @@ export const JobSearchAgentWorkspace: React.FC = () => {
 
       {/* 1b. MORE FILTERS */}
       <form
-        className="rounded-2xl border border-white/10 bg-slate-950/60 p-4 flex flex-wrap items-end gap-4"
+        className="rounded-2xl border border-aurora-line bg-aurora-canvas/60 p-4 flex flex-wrap items-end gap-4"
         aria-label="More filters"
         onSubmit={(e) => {
           e.preventDefault();
@@ -345,7 +335,7 @@ export const JobSearchAgentWorkspace: React.FC = () => {
         }}
       >
         <div className="flex flex-col gap-1">
-          <label htmlFor="job-date-posted" className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Date posted</label>
+          <label htmlFor="job-date-posted" className="text-[10px] font-bold uppercase tracking-wider text-aurora-muted">Date posted</label>
           <select id="job-date-posted" value={datePosted} onChange={(e) => { setDatePosted(e.target.value); setPageSize(PAGE_SIZE); }} className={fieldClass}>
             <option value="all">Any time</option>
             <option value="today">Last 24 hours</option>
@@ -355,7 +345,7 @@ export const JobSearchAgentWorkspace: React.FC = () => {
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <label htmlFor="job-salary-min" className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Minimum yearly salary</label>
+          <label htmlFor="job-salary-min" className="text-[10px] font-bold uppercase tracking-wider text-aurora-muted">Minimum yearly salary</label>
           <input
             id="job-salary-min"
             type="number"
@@ -369,13 +359,13 @@ export const JobSearchAgentWorkspace: React.FC = () => {
             className={`${fieldClass} w-44`}
           />
         </div>
-        <button type="submit" className="py-2 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-100 text-xs font-bold cursor-pointer">
+        <button type="submit" className="py-2 px-4 rounded-xl bg-aurora-canvas hover:bg-aurora-canvas border border-aurora-line text-aurora-ink text-xs font-bold cursor-pointer">
           Apply
         </button>
-        <button type="button" onClick={handleResetFilters} className="py-2 px-3 text-xs font-bold text-slate-300 hover:text-white cursor-pointer">
+        <button type="button" onClick={handleResetFilters} className="py-2 px-3 text-xs font-bold text-aurora-muted hover:text-aurora-indigo cursor-pointer">
           Reset all filters
         </button>
-        <p id="job-salary-hint" className="text-[11px] text-slate-400 basis-full">
+        <p id="job-salary-hint" className="text-[11px] text-aurora-muted basis-full">
           The salary filter only keeps postings that state a yearly salary, in the posting&apos;s own currency. Many postings do not state one.
         </p>
       </form>
@@ -390,9 +380,9 @@ export const JobSearchAgentWorkspace: React.FC = () => {
       />
 
       {savedError && (
-        <div role="alert" className="p-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 flex items-center justify-between gap-3">
-          <p className="text-xs text-rose-100">Your tracked jobs could not be loaded: {errorMessage(savedError, 'the request failed')}.</p>
-          <button type="button" onClick={() => refetchSaved()} className="py-1.5 px-3 rounded-lg bg-slate-900 border border-white/10 text-slate-100 text-xs font-bold cursor-pointer">
+        <div role="alert" className="p-4 rounded-2xl border border-rose-200 bg-rose-50 flex items-center justify-between gap-3">
+          <p className="text-xs text-rose-700">Your tracked jobs could not be loaded: {errorMessage(savedError, 'the request failed')}.</p>
+          <button type="button" onClick={() => refetchSaved()} className="py-1.5 px-3 rounded-lg bg-aurora-canvas border border-aurora-line text-aurora-ink text-xs font-bold cursor-pointer">
             Try again
           </button>
         </div>
@@ -423,7 +413,7 @@ export const JobSearchAgentWorkspace: React.FC = () => {
               isLoading={isOpportunitiesFetching}
             />
             {currentList.length === 0 && (
-              <p className="text-xs text-slate-400 px-1" data-testid="job-list-empty">
+              <p className="text-xs text-aurora-muted px-1" data-testid="job-list-empty">
                 {activeTab === 'SAVED'
                   ? 'You are not tracking any jobs yet. Save a listing to track your application here.'
                   : 'No listings match these filters. Change or reset the filters to see more.'}
@@ -434,7 +424,7 @@ export const JobSearchAgentWorkspace: React.FC = () => {
                 type="button"
                 onClick={() => setPageSize((size) => Math.min(MAX_PAGE_SIZE, size + PAGE_SIZE))}
                 disabled={isOpportunitiesFetching}
-                className="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/10 text-slate-100 text-xs font-bold cursor-pointer disabled:opacity-50"
+                className="w-full py-2 rounded-xl bg-aurora-canvas hover:bg-aurora-canvas border border-aurora-line text-aurora-ink text-xs font-bold cursor-pointer disabled:opacity-50"
               >
                 {isOpportunitiesFetching ? 'Loading...' : 'Show more listings'}
               </button>

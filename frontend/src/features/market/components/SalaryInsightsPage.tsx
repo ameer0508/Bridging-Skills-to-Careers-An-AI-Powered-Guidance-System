@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, Ban, Database, FlaskConical, RotateCw } from 'lucide-react';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { Card, CardBody, CardHeader } from '../../../components/base/Card';
+import { Card, CardBody, CardHeader } from '../../../design/aurora/cards';
 import { messageOf } from '../../../lib/collections';
 import {
   EXCLUSION_TEXT,
@@ -23,7 +23,7 @@ const countryName = (code: string) => COUNTRY_NAMES[code] ?? code;
 const PERIODS: SalaryPeriod[] = ['YEAR', 'MONTH', 'WEEK', 'DAY', 'HOUR'];
 
 const inputClass =
-  'w-full rounded-[var(--radius-md)] border border-[var(--color-border-default)] bg-[var(--color-bg-surface)] px-3 py-2 text-sm text-[var(--color-text-primary)]';
+  'w-full rounded-2xl border border-aurora-line bg-white px-3 py-2 text-sm text-aurora-ink';
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
@@ -64,10 +64,11 @@ export const SalaryInsightsPage: React.FC = () => {
   const currencyOptions = [...new Set([...(available?.currencies ?? []), ...(draft.currency ? [draft.currency] : [])])].sort();
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6">
-      <header className="flex flex-col gap-2">
-        <h1 className="text-2xl font-bold font-display text-[var(--color-text-primary)]">Salary Insights</h1>
-        <p className="max-w-3xl text-sm text-[var(--color-text-secondary)]">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 pb-16 pt-6 sm:px-6">
+      <header className="relative flex flex-col gap-2 overflow-hidden rounded-[32px] border border-aurora-line bg-white p-5 shadow-aurora-md [background-image:var(--aurora-gradient-canvas)] sm:p-8">
+        <p className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-aurora-violet"><span aria-hidden="true" className="h-1.5 w-1.5 rounded-full [background:var(--aurora-gradient-action)]" />Market</p>
+        <h1 className="font-heading text-2xl font-extrabold tracking-tight text-aurora-ink sm:text-3xl lg:text-4xl">Salary Insights</h1>
+        <p className="max-w-3xl text-sm leading-relaxed text-aurora-muted sm:text-base">
           Salaries stated in job postings SkillBridge holds from registered sources. Each country, currency and pay period
           is summarised on its own. Amounts are never converted, and nothing is estimated where postings give no figure.
         </p>
@@ -84,10 +85,10 @@ export const SalaryInsightsPage: React.FC = () => {
             role="radio"
             aria-checked={filters.dataset === value}
             onClick={() => setDataset(value)}
-            className={`inline-flex items-center gap-2 rounded-[var(--radius-md)] border px-3 py-2 text-sm font-medium ${
+            className={`inline-flex items-center gap-2 rounded-2xl border px-3 py-2 text-sm font-medium ${
               filters.dataset === value
-                ? 'border-[var(--color-interactive-primary)] bg-[var(--color-interactive-primary)] text-white'
-                : 'border-[var(--color-border-default)] text-[var(--color-text-primary)]'
+                ? 'border-aurora-violet [background:var(--aurora-gradient-action)] text-aurora-ink'
+                : 'border-aurora-line text-aurora-ink'
             }`}
           >
             <Icon size={16} aria-hidden="true" /> {label}
@@ -103,46 +104,46 @@ export const SalaryInsightsPage: React.FC = () => {
           setFilters(draft);
         }}
       >
-        <label className="flex flex-col gap-1 text-xs font-medium text-[var(--color-text-secondary)]">
+        <label className="flex flex-col gap-1 text-xs font-medium text-aurora-muted">
           Country
           <select className={inputClass} value={draft.country} onChange={e => setDraft({ ...draft, country: e.target.value })}>
             <option value="">All countries (shown separately)</option>
             {countryOptions.map(c => <option key={c} value={c}>{countryName(c)}</option>)}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs font-medium text-[var(--color-text-secondary)]">
+        <label className="flex flex-col gap-1 text-xs font-medium text-aurora-muted">
           Currency
           <select className={inputClass} value={draft.currency} onChange={e => setDraft({ ...draft, currency: e.target.value })}>
             <option value="">All currencies (shown separately)</option>
             {currencyOptions.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs font-medium text-[var(--color-text-secondary)]">
+        <label className="flex flex-col gap-1 text-xs font-medium text-aurora-muted">
           Pay period
           <select className={inputClass} value={draft.period} onChange={e => setDraft({ ...draft, period: e.target.value as SalaryPeriod | '' })}>
             <option value="">All periods (shown separately)</option>
             {PERIODS.map(p => <option key={p} value={p}>{PERIOD_LABEL[p]}</option>)}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs font-medium text-[var(--color-text-secondary)]">
+        <label className="flex flex-col gap-1 text-xs font-medium text-aurora-muted">
           Skill
           <input className={inputClass} value={draft.skill} placeholder="e.g. Python" maxLength={80} onChange={e => setDraft({ ...draft, skill: e.target.value })} />
         </label>
-        <label className="flex flex-col gap-1 text-xs font-medium text-[var(--color-text-secondary)]">
+        <label className="flex flex-col gap-1 text-xs font-medium text-aurora-muted">
           From
           <input type="month" className={inputClass} value={draft.from} onChange={e => setDraft({ ...draft, from: e.target.value })} />
         </label>
-        <label className="flex flex-col gap-1 text-xs font-medium text-[var(--color-text-secondary)]">
+        <label className="flex flex-col gap-1 text-xs font-medium text-aurora-muted">
           To
           <input type="month" className={inputClass} value={draft.to} onChange={e => setDraft({ ...draft, to: e.target.value })} />
         </label>
         <div className="flex items-end gap-2 lg:col-span-2">
-          <button type="submit" className="flex-1 rounded-[var(--radius-md)] bg-[var(--color-interactive-primary)] px-4 py-2 text-sm font-semibold text-white">
+          <button type="submit" className="flex-1 rounded-2xl [background:var(--aurora-gradient-action)] px-4 py-2 text-sm font-semibold text-aurora-ink">
             Show salaries
           </button>
           <button
             type="button"
-            className="rounded-[var(--radius-md)] border border-[var(--color-border-default)] px-4 py-2 text-sm font-medium text-[var(--color-text-primary)]"
+            className="rounded-2xl border border-aurora-line px-4 py-2 text-sm font-medium text-aurora-ink"
             onClick={() => {
               const reset = { ...blank, dataset: draft.dataset };
               setDraft(reset);
@@ -155,9 +156,9 @@ export const SalaryInsightsPage: React.FC = () => {
       </form>
 
       <div aria-live="polite">
-        {query.isPending && <p role="status" className="text-sm text-[var(--color-text-secondary)]">Loading salary insights…</p>}
+        {query.isPending && <p role="status" className="text-sm text-aurora-muted">Loading salary insights…</p>}
         {query.isError && (
-          <div role="alert" className="flex flex-wrap items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-status-error,#dc2626)] p-4 text-sm">
+          <div role="alert" className="flex flex-wrap items-center gap-3 rounded-2xl border border-rose-300 p-4 text-sm">
             <AlertTriangle size={18} aria-hidden="true" />
             <span>Salary insights could not be loaded: {messageOf(query.error, 'the server did not respond.')}</span>
             <button type="button" onClick={() => query.refetch()} className="inline-flex items-center gap-1 font-semibold underline">
@@ -174,14 +175,14 @@ export const SalaryInsightsPage: React.FC = () => {
 const InsightsView: React.FC<{ data: SalaryInsights }> = ({ data }) => {
   if (data.status === 'data_unavailable') {
     return (
-      <section aria-labelledby="salary-unavailable-heading" data-testid="salary-unavailable" className="rounded-[var(--radius-md)] border-2 border-[var(--color-border-default)] bg-[var(--color-bg-surface-raised)] p-5">
-        <h2 id="salary-unavailable-heading" className="mb-2 flex items-center gap-2 text-base font-bold text-[var(--color-text-primary)]">
+      <section aria-labelledby="salary-unavailable-heading" data-testid="salary-unavailable" className="rounded-2xl border-2 border-aurora-line bg-white p-5">
+        <h2 id="salary-unavailable-heading" className="mb-2 flex items-center gap-2 text-base font-bold text-aurora-ink">
           <Ban size={18} aria-hidden="true" /> DATA UNAVAILABLE
         </h2>
-        <ul className="list-disc space-y-1 pl-5 text-sm text-[var(--color-text-secondary)]">
+        <ul className="list-disc space-y-1 pl-5 text-sm text-aurora-muted">
           {data.reasons.map(r => <li key={r}>{SALARY_REASON_TEXT[r](data)}</li>)}
         </ul>
-        <p className="mt-3 text-sm text-[var(--color-text-secondary)]">
+        <p className="mt-3 text-sm text-aurora-muted">
           The synthetic demonstration shows how this screen works with generated postings. It says nothing about real pay.
         </p>
       </section>
@@ -192,7 +193,7 @@ const InsightsView: React.FC<{ data: SalaryInsights }> = ({ data }) => {
   return (
     <div className="flex flex-col gap-6">
       {data.isSynthetic && (
-        <div role="note" data-testid="synthetic-banner" className="flex items-start gap-3 rounded-[var(--radius-md)] border-2 border-dashed border-amber-500 bg-amber-50 p-4 text-sm text-amber-900">
+        <div role="note" data-testid="synthetic-banner" className="flex items-start gap-3 rounded-2xl border-2 border-dashed border-amber-500 bg-amber-50 p-4 text-sm text-amber-900">
           <FlaskConical size={18} aria-hidden="true" className="mt-0.5 shrink-0" />
           <span><strong>SYNTHETIC TEST DATA — demonstration mode.</strong> These salaries were generated to test this screen. They describe no real jobs and no real pay.</span>
         </div>
@@ -206,9 +207,9 @@ const InsightsView: React.FC<{ data: SalaryInsights }> = ({ data }) => {
       </dl>
 
       {data.reasons.length > 0 && (
-        <section aria-labelledby="salary-insufficient-heading" data-testid="salary-insufficient" className="rounded-[var(--radius-md)] border border-[var(--color-border-default)] bg-[var(--color-bg-surface-raised)] p-4">
-          <h2 id="salary-insufficient-heading" className="mb-2 text-sm font-bold text-[var(--color-text-primary)]">Not enough salary data</h2>
-          <ul className="list-disc space-y-1 pl-5 text-sm text-[var(--color-text-secondary)]">
+        <section aria-labelledby="salary-insufficient-heading" data-testid="salary-insufficient" className="rounded-2xl border border-aurora-line bg-white p-4">
+          <h2 id="salary-insufficient-heading" className="mb-2 text-sm font-bold text-aurora-ink">Not enough salary data</h2>
+          <ul className="list-disc space-y-1 pl-5 text-sm text-aurora-muted">
             {data.reasons.map(r => <li key={r}>{SALARY_REASON_TEXT[r](data)}</li>)}
           </ul>
         </section>
@@ -217,7 +218,7 @@ const InsightsView: React.FC<{ data: SalaryInsights }> = ({ data }) => {
       {data.groups.map(g => <GroupCard key={g.key} group={g} minimums={data.minimums} />)}
 
       <section aria-labelledby="exclusions-heading" data-testid="salary-exclusions">
-        <h2 id="exclusions-heading" className="mb-2 text-sm font-bold text-[var(--color-text-primary)]">Left out of the figures</h2>
+        <h2 id="exclusions-heading" className="mb-2 text-sm font-bold text-aurora-ink">Left out of the figures</h2>
         <table className="w-full max-w-lg text-left text-sm">
           <caption className="sr-only">Postings excluded from salary statistics, by reason</caption>
           <thead><tr><th scope="col" className="py-1 pr-4">Reason</th><th scope="col" className="py-1">Postings</th></tr></thead>
@@ -229,13 +230,13 @@ const InsightsView: React.FC<{ data: SalaryInsights }> = ({ data }) => {
           </tbody>
         </table>
         {data.totals.scanLimitReached && (
-          <p className="mt-2 text-xs text-[var(--color-text-secondary)]">Only the earliest 50,000 postings in the period were read. Narrow the filters to include the rest.</p>
+          <p className="mt-2 text-xs text-aurora-muted">Only the earliest 50,000 postings in the period were read. Narrow the filters to include the rest.</p>
         )}
       </section>
 
       <section aria-labelledby="salary-method-heading">
-        <h2 id="salary-method-heading" className="mb-2 text-sm font-bold text-[var(--color-text-primary)]">How these figures are made</h2>
-        <ul className="list-disc space-y-1 pl-5 text-xs text-[var(--color-text-secondary)]">
+        <h2 id="salary-method-heading" className="mb-2 text-sm font-bold text-aurora-ink">How these figures are made</h2>
+        <ul className="list-disc space-y-1 pl-5 text-xs text-aurora-muted">
           {data.method.map(m => <li key={m}>{m}</li>)}
           {data.caveats.map(c => <li key={c}>{c}</li>)}
         </ul>
@@ -253,8 +254,8 @@ const GroupCard: React.FC<{ group: SalaryGroup; minimums: SalaryInsights['minimu
   return (
     <Card variant="default">
       <CardHeader>
-        <h2 className="text-base font-bold font-display text-[var(--color-text-primary)]" data-testid="salary-group-title">{groupTitle(g)}</h2>
-        <p className="text-xs text-[var(--color-text-secondary)]">
+        <h2 className="text-base font-bold font-display text-aurora-ink" data-testid="salary-group-title">{groupTitle(g)}</h2>
+        <p className="text-xs text-aurora-muted">
           {g.postings} posting{g.postings === 1 ? '' : 's'} with a salary from {g.employers.distinct} employer{g.employers.distinct === 1 ? '' : 's'}
           {!g.employers.sufficient && <span data-testid="salary-employer-limit"> (too few employers, or one dominates: no figure given)</span>} · {g.remotePostings} remote · published {formatDate(g.postedBetween.earliest)} to {formatDate(g.postedBetween.latest)}
         </p>
@@ -303,20 +304,20 @@ const GroupCard: React.FC<{ group: SalaryGroup; minimums: SalaryInsights['minimu
 
         {chartData.length > 0 && (
           <div className="mt-4">
-            <h3 className="mb-2 text-sm font-semibold text-[var(--color-text-primary)]">Range midpoints, by band</h3>
+            <h3 className="mb-2 text-sm font-semibold text-aurora-ink">Range midpoints, by band</h3>
             <div className="h-64 w-full" aria-hidden="true">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border-subtle)" vertical={false} />
-                  <XAxis dataKey="label" stroke="var(--color-text-tertiary)" fontSize={10} tickLine={false} interval={0} />
-                  <YAxis stroke="var(--color-text-tertiary)" fontSize={11} allowDecimals={false} tickLine={false} />
+                <BarChart accessibilityLayer={false} data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e6eaf6" vertical={false} />
+                  <XAxis dataKey="label" stroke="#515b80" fontSize={10} tickLine={false} interval={0} />
+                  <YAxis stroke="#515b80" fontSize={11} allowDecimals={false} tickLine={false} />
                   <Tooltip />
-                  <Bar dataKey="postings" name="Postings" fill="var(--color-interactive-primary)" />
+                  <Bar dataKey="postings" name="Postings" fill="#5540f5" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
             <details className="mt-2 text-sm">
-              <summary className="cursor-pointer font-medium text-[var(--color-text-secondary)]">View bands as a table</summary>
+              <summary className="cursor-pointer font-medium text-aurora-muted">View bands as a table</summary>
               <table className="mt-2 w-full text-left text-sm" data-testid="salary-distribution-table">
                 <caption className="sr-only">Postings per midpoint band for {groupTitle(g)}</caption>
                 <thead><tr><th scope="col" className="py-1 pr-4">Midpoint band</th><th scope="col" className="py-1">Postings</th></tr></thead>
@@ -328,13 +329,13 @@ const GroupCard: React.FC<{ group: SalaryGroup; minimums: SalaryInsights['minimu
           </div>
         )}
 
-        <div className="mt-4 text-xs text-[var(--color-text-secondary)]" data-testid="salary-provenance">
+        <div className="mt-4 text-xs text-aurora-muted" data-testid="salary-provenance">
           <p>Collected {formatDate(g.collection.firstRetrievedAt)} to {formatDate(g.collection.latestRetrievedAt)}.</p>
           <ul className="mt-1 space-y-1">
             {g.sources.map(s => (
               <li key={s.id}>
-                <span className="font-semibold text-[var(--color-text-primary)]">{s.name}</span> · {s.postings} posting{s.postings === 1 ? '' : 's'} · Licence: {s.licence}
-                {s.url && <> · <a className="break-all text-[var(--color-interactive-primary)] underline" href={s.url} target="_blank" rel="noreferrer noopener">source</a></>}
+                <span className="font-semibold text-aurora-ink">{s.name}</span> · {s.postings} posting{s.postings === 1 ? '' : 's'} · Licence: {s.licence}
+                {s.url && <> · <a className="break-all text-aurora-violet underline" href={s.url} target="_blank" rel="noreferrer noopener">source</a></>}
               </li>
             ))}
           </ul>
@@ -345,9 +346,9 @@ const GroupCard: React.FC<{ group: SalaryGroup; minimums: SalaryInsights['minimu
 };
 
 const Stat: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <div className="rounded-[var(--radius-md)] border border-[var(--color-border-default)] p-3">
-    <dt className="text-xs text-[var(--color-text-secondary)]">{label}</dt>
-    <dd className="text-lg font-bold text-[var(--color-text-primary)]">{value}</dd>
+  <div className="rounded-2xl border border-aurora-line p-3">
+    <dt className="text-xs text-aurora-muted">{label}</dt>
+    <dd className="text-lg font-bold text-aurora-ink">{value}</dd>
   </div>
 );
 
