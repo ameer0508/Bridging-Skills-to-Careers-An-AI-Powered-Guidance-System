@@ -26,6 +26,26 @@ SkillBridge shows no invented endorsements, user counts, outcomes or technical c
 
 `HeroSection`, `FeatureShowcase`, `StatisticsSection`, `TestimonialsSection`, `WhySkillBridge`, `TechShowcase`, `FinalCTASection`, `FAQSection`, `Footer`, `Navbar`, `InteractiveCareerJourney`.
 
+## Aurora Elite landing page (2026-10-14)
+
+The landing page was rebuilt in the Aurora Elite visual language (`frontend/src/features/landing/aurora/`, primitives in `frontend/src/design/aurora/`). It keeps every rule above:
+
+- **Headline and promises:**
+  - "Turn Your Skills Into Meaningful Careers."
+  - "Free to use. No paid AI required."
+  - "Every score explained from your evidence."
+  - "You can delete everything, any time."
+- **Numbers.** Every figure stated is a property of the product: 20 careers, 148 skills, 5 MB, eight skill checks, 21 project briefs. The sample screens (next best action, resume lines, career match, readiness, the what-if simulation, roadmap, interview, applications) carry an "Illustrative demo" or "Simulation with sample data" label. None claims users, outcomes, partners, a paid plan or a hiring prediction.
+- **Honest limits on the page:**
+  - Job listings are labelled demos unless a source is on.
+  - Market figures say "unavailable" until a licensed source exists.
+  - OCR values are guesses with their confidence.
+  - Unsupported languages are refused.
+  - Readiness "does not predict hiring".
+  - Portfolios are public only when shared.
+- **The signature scene** (`JourneyScene`, an original inline SVG of a path through mountains at sunrise) has an accessible name listing the five stages. Its motion stops under reduced motion.
+- **Removed.** The sixteen previous landing components were removed with the page that used them (`AgentConstellation`, `CareerOSReveal`, `CareerTransformation`, `CareerUniverse`, `CinematicCTA`, `DigitalTwinSection`, `ExampleScenarios`, `ImmersiveFooter`, `ImmersiveNavbar`, `IntelligenceFAQ`, `IntelligenceHero`, `IntelligencePipeline`, `IntelligenceTrust`, `InteractiveComparison`, `LiveAIExperience`, `MarketIntelligence`). The shared `effects/` helpers stay.
+
 ## Pages inside the app
 
 Pages whose content is built-in sample content are wrapped in `DemoWorkspace`, which shows the "Illustrative sample data" notice:
@@ -37,10 +57,16 @@ The home, analytics, learning and AI architect pages draw on the user's own data
 
 ## Test
 
-`e2e/tests/landing.mjs`, 6 browser steps, run as a visitor:
-- the page loads;
-- none of the removed claims is present after scrolling through every section, and there are no stock portraits;
-- the scenarios carry their note and show no faces;
-- the sample screens are labelled;
-- the 390 px layout fits;
+`e2e/tests/landing.mjs`, 10 browser steps, run as a visitor:
+- the headline, both calls to action and the scene's accessible name;
+- none of the forbidden claims after scrolling every section, now including paid plans, "verified employer", hiring probabilities and placement rates; no stock portraits;
+- the scenarios note, with no faces;
+- at least six sample labels and the simulation label;
+- the what-if demo responds, exposes its toggle state and announces its result;
+- Explore Careers scrolls to discovery; Start Your Journey and Sign in open their pages;
+- keyboard: the skip link comes first with visible focus, and the main action is reachable;
+- reduced motion: the headline is visible at once and the route is not drawn;
+- 390, 360 and 768 px fit, and the phone menu navigates and closes;
 - the console is clean.
+
+`e2e/tests/accessibility.mjs` also runs axe on the page (0 serious or critical issues).

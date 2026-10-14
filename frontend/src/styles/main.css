@@ -13,6 +13,34 @@
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-display: 'Outfit', 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+  --font-heading: 'Manrope', 'Inter', system-ui, sans-serif;
+
+  /* Aurora Elite: the light, porcelain-and-violet visual language (utilities: bg-aurora-canvas,
+     text-aurora-ink, border-aurora-line, …). Contrast on white: ink 17.5:1, muted 6.8:1,
+     violet 6.1:1, indigo 9.0:1, mint-ink 5.6:1. Mint, sky and lavender are accents, never text. */
+  --color-aurora-canvas: #f5f7ff;
+  --color-aurora-sidebar: #f0f2ff;
+  --color-aurora-surface: #ffffff;
+  --color-aurora-ink: #10153b;
+  --color-aurora-muted: #515b80;
+  --color-aurora-line: #e6eaf6;
+  --color-aurora-violet: #5540f5;
+  --color-aurora-indigo: #3929c9;
+  --color-aurora-lavender: #a78bfa;
+  --color-aurora-sky: #5d96ff;
+  --color-aurora-mint: #12c9a7;
+  --color-aurora-mint-ink: #08765f;
+
+  --shadow-aurora-sm: 0 1px 2px rgb(16 21 59 / 0.04), 0 2px 8px rgb(85 64 245 / 0.05);
+  --shadow-aurora-md: 0 2px 4px rgb(16 21 59 / 0.04), 0 12px 32px -8px rgb(85 64 245 / 0.14);
+  --shadow-aurora-lg: 0 4px 8px rgb(16 21 59 / 0.05), 0 28px 64px -16px rgb(70 49 236 / 0.24);
+}
+
+/* The primary action gradient and the soft canvas wash, used by the Aurora Elite primitives */
+:root {
+  --aurora-gradient-action: linear-gradient(110deg, #6e4bff 0%, #4631ec 100%);
+  --aurora-gradient-canvas: radial-gradient(1200px 600px at 85% -10%, rgb(167 139 250 / 0.22), transparent 60%),
+    radial-gradient(900px 500px at -10% 10%, rgb(93 150 255 / 0.16), transparent 60%), #f5f7ff;
 }
 
 /* ──────────────────────────────────────────────────────────
