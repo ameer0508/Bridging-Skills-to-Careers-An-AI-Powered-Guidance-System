@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import { devProxyOrigin } from './devProxyOrigin';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 
@@ -65,6 +66,14 @@ export default defineConfig({
       '/api': {
         target: 'http://127.0.0.1:5000',
         changeOrigin: true,
+        // Same-origin calls from the dev frontend (also when opened by LAN IP) are forwarded with
+        // the origin the backend allowlists; any other origin is left for the backend to refuse.
+        configure: (proxy) => {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            const forwarded = devProxyOrigin(req.headers.origin, req.headers.host);
+            if (forwarded && forwarded !== req.headers.origin) proxyReq.setHeader('origin', forwarded);
+          });
+        },
       },
     },
   },

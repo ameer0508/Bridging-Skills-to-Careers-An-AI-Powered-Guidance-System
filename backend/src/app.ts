@@ -3,7 +3,7 @@ import cors from 'cors';
 import mongoose from 'mongoose';
 import helmet from 'helmet';
 import requestLogger from './middlewares/requestLogger.js';
-import errorHandler from './middlewares/errorHandler.js';
+import errorHandler, { AppError } from './middlewares/errorHandler.js';
 import authRouter from './routes/auth.js';
 import userRouter from './routes/user.js';
 import resumeRouter from './routes/resume.js';
@@ -63,7 +63,8 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error('CORS policy does not allow access from this origin.'));
+        // A refusal, not a server fault: 403 with a stable code (it used to surface as a 500)
+        callback(new AppError('CORS policy does not allow access from this origin.', 403, 'ORIGIN_NOT_ALLOWED'));
       }
     },
     credentials: true,
