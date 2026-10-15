@@ -1,8 +1,7 @@
 from typing import List, Optional
-from dotenv import load_dotenv
-load_dotenv()
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from app import AI_ENV_PATH, dotenv_disabled
 
 # Development-only default so a fresh checkout runs without extra setup.
 # The backend ships the same default; both refuse to start with it in production.
@@ -35,9 +34,10 @@ class Settings(BaseSettings):
     GEMINI_TIMEOUT_SECONDS: float = 20.0
     USE_MOCK_PROVIDER: bool = False
 
-    # Configuration binding to read from environment and local .env
+    # Read from the environment and ai/.env only: never a .env found by searching parent
+    # directories or the working directory (the repository-root .env is Docker Compose's)
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=None if dotenv_disabled() else AI_ENV_PATH,
         env_file_encoding="utf-8",
         extra="ignore"
     )
