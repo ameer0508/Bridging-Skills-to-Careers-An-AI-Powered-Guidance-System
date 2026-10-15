@@ -16,8 +16,13 @@ class CostTracker:
         "mock/mock-v1": (0.0, 0.0),
     }
 
+    # Run on this machine: nothing is billed, whatever the model
+    FREE_PROVIDERS = {"local", "mock"}
+
     @classmethod
     def calculate_cost(cls, provider: str, model: str, prompt_tokens: int, completion_tokens: int) -> float:
+        if provider in cls.FREE_PROVIDERS:
+            return 0.0
         key = f"{provider}/{model}"
         pricing = cls.PRICING_TABLE.get(key, (0.0001, 0.0003))
         

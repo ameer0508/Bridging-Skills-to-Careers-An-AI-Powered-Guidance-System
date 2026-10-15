@@ -37,10 +37,12 @@ export interface ChatReply {
 }
 
 /**
- * Longest the backend waits for one chat reply. The chain is ordered so the innermost timeout
- * fires first: Gemini request (20s, GEMINI_TIMEOUT_SECONDS) < this (25s) < browser request (40s).
+ * Longest the backend waits for one chat reply. Chat carries personal data, so only the local
+ * model answers it; on CPU a reply measured 40-115s. The chain is ordered so the innermost timeout
+ * fires first: local model (120s, LOCAL_MODEL_TIMEOUT_SECONDS) < this (130s) < nginx (150s)
+ * < browser request (160s).
  */
-export const chatAiTimeoutMs = (): number => Number(process.env.CHAT_AI_TIMEOUT_MS) || 25000;
+export const chatAiTimeoutMs = (): number => Number(process.env.CHAT_AI_TIMEOUT_MS) || 130000;
 
 class AIClientService {
   /**
@@ -202,6 +204,17 @@ class AIClientService {
       const response = await aiHttp.get(`/api/v1/health`, { timeout: 2000 });
       if (response.data && response.data.status === 'healthy') {
         const providers = response.data.providers || {};
+        // The AI service reports the local model available only once it is downloaded and allowed.
+        // It answers chat and every personal-data feature, so it is named first.
+        if (providers.local?.available) {
+          const modelName = String(providers.local?.default_model || 'local');
+          return {
+            isOnline: true,
+            isLive: true,
+            primaryProvider: `Local Ollama (${modelName})`,
+            model: modelName,
+          };
+        }
         const geminiAvailable = Boolean(providers.gemini?.available);
         const openaiAvailable = Boolean(providers.openai?.available);
         if (geminiAvailable) {

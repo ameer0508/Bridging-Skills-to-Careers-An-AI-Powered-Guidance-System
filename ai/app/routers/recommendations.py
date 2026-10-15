@@ -7,7 +7,7 @@ router = APIRouter(prefix="/api/v1/recommendations", tags=["Recommendations"])
 
 @router.post("/generate")
 @router.post("/explain")
-async def generate_recommendations(request: RecommendationRequest):
+def generate_recommendations(request: RecommendationRequest):
     """
     Generates explainable, personalized recommendations across 10 categories
     (Courses, Projects, Certifications, Skills, Technologies, Interview Prep, Resume, Portfolio, GitHub, Networking).

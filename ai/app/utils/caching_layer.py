@@ -32,11 +32,14 @@ class AICachingLayer:
             if entry.is_expired():
                 del self._cache[key]
                 return None
-            # Return cached response with metadata mark
-            cached_resp = entry.data.model_copy()
+            # A deep copy, so marking it (or a caller changing it) never alters the stored entry
+            cached_resp = entry.data.model_copy(deep=True)
             cached_resp.metadata["cached"] = True
             return cached_resp
         return None
+
+    def delete(self, service_name: str, payload: Any) -> None:
+        self._cache.pop(self._hash_key(service_name, payload), None)
 
     def set(self, service_name: str, payload: Any, response: UnifiedAIResponse, ttl: Optional[int] = None) -> None:
         if not response.success:
@@ -56,7 +59,7 @@ class AICachingLayer:
 
         key = self._hash_key(service_name, payload)
         effective_ttl = ttl if ttl is not None else self.default_ttl
-        self._cache[key] = CacheEntry(response, effective_ttl)
+        self._cache[key] = CacheEntry(response.model_copy(deep=True), effective_ttl)
 
     def clear(self) -> None:
         self._cache.clear()

@@ -54,8 +54,11 @@ class AIConfig(BaseModel):
         "local": ProviderConfig(
             name="local",
             enabled=os.getenv("ENABLE_LOCAL_MODEL", "false").lower() == "true",
-            default_model="llama3",
+            default_model=os.getenv("LOCAL_MODEL_NAME", "llama3"),
             base_url=os.getenv("LOCAL_MODEL_ENDPOINT", "http://localhost:11434/api/generate"),
+            # The request timeout is LOCAL_MODEL_TIMEOUT_SECONDS, read by the adapter.
+            # One attempt: a local generation that failed or timed out is not worth repeating
+            max_retries=1,
             rate_limit_rpm=120,
         ),
         "mock": ProviderConfig(

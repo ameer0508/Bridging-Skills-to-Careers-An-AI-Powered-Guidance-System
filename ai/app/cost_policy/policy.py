@@ -6,19 +6,26 @@ The policy fails closed: an unknown, unverified or blocked provider, a missing f
 credential, personal data bound for a provider that may not receive it, or a used-up quota all
 refuse the call. Refusals never name a secret, and nothing here ever picks another provider.
 """
+import ipaddress
 import json
 import os
+import socket
 import threading
 import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Mapping, Optional
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional
 from urllib.parse import urlparse
 
 REGISTRY_PATH = Path(__file__).with_name("provider_registry.json")
 
 LOOPBACK_HOSTS = {"localhost", "127.0.0.1", "::1"}
+# The Ollama service in docker-compose.yml, reachable only on its internal-only network. Fixed here
+# rather than read from the environment, so configuration cannot widen it to another host.
+DOCKER_LOCAL_MODEL_HOSTS = {"ollama"}
+DOCKER_LOCAL_MODEL_PORT = 11434
+DOCKER_LOCAL_MODEL_PATHS = {"/api/generate", "/api/chat"}
 TRUE_VALUES = {"1", "true", "yes"}
 
 # Names the AI gateway uses for providers registered under a more specific id
@@ -229,11 +236,52 @@ class CostPolicy:
         return text
 
 
-def validate_local_model_endpoint(url: str) -> None:
-    """A 'local' model endpoint must be on this machine; anything else could be a hosted service."""
-    host = (urlparse(url).hostname or "").lower()
-    if host not in LOOPBACK_HOSTS:
-        raise ValueError(f"Local model endpoint must be a loopback address, not '{host or url}'.")
+def _resolve_tcp(host: str, port: int) -> List[str]:
+    return [info[4][0] for info in socket.getaddrinfo(host, port, proto=socket.IPPROTO_TCP)]
+
+
+def validate_local_model_endpoint(url: str, resolve: Optional[Callable[[str, int], List[str]]] = _resolve_tcp) -> List[str]:
+    """
+    A 'local' model endpoint must be on this machine; anything else could be a hosted service.
+
+    Loopback is accepted as before. The only other host is the Ollama service of this project's
+    Docker Compose stack, and only in its exact form (http, port 11434, an Ollama API path, no
+    credentials, query or fragment) and only while every address the name resolves to is a private
+    one. The validated addresses are returned so the caller can connect to one of them directly
+    instead of resolving the name a second time. `resolve=None` checks the form only (for the
+    static environment audit, which may run where the Docker name does not resolve).
+    """
+    parsed = urlparse(url)
+    host = (parsed.hostname or "").lower()
+    if host in LOOPBACK_HOSTS:
+        return []
+    if host not in DOCKER_LOCAL_MODEL_HOSTS:
+        raise ValueError(
+            f"Local model endpoint must be a loopback address or the Docker '{'/'.join(sorted(DOCKER_LOCAL_MODEL_HOSTS))}' service, not '{host or url}'."
+        )
+    try:
+        port = parsed.port
+    except ValueError:
+        port = None
+    if (parsed.scheme != "http" or port != DOCKER_LOCAL_MODEL_PORT or parsed.username or parsed.password
+            or parsed.path not in DOCKER_LOCAL_MODEL_PATHS or parsed.params or parsed.query or parsed.fragment):
+        raise ValueError(
+            f"The Docker local model endpoint must be exactly http://{host}:{DOCKER_LOCAL_MODEL_PORT}"
+            f" followed by one of {sorted(DOCKER_LOCAL_MODEL_PATHS)}."
+        )
+    if resolve is None:
+        return []
+    try:
+        addresses = resolve(host, DOCKER_LOCAL_MODEL_PORT)
+    except OSError as exc:
+        raise ValueError(f"Docker local model host '{host}' does not resolve here ({exc.__class__.__name__}).") from exc
+    if not addresses:
+        raise ValueError(f"Docker local model host '{host}' does not resolve here.")
+    for address in addresses:
+        ip = ipaddress.ip_address(address.split("%", 1)[0])
+        if not ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_unspecified or ip.is_multicast:
+            raise ValueError(f"Docker local model host '{host}' resolves to a non-private address; refused.")
+    return addresses
 
 
 def validate_ollama_model(name: str) -> None:

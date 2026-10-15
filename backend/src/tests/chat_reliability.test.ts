@@ -48,10 +48,10 @@ export async function runChatReliabilityTests() {
     const bob = await h.registerUser('bob');
     await uploadAndWait(h, alice.token);
 
-    // The timeout chain is ordered: provider < backend < browser
+    // The timeout chain is ordered: local model < backend < nginx < browser
     delete process.env.CHAT_AI_TIMEOUT_MS;
-    assert.equal(chatAiTimeoutMs(), 25000);
-    assert.ok(20000 < chatAiTimeoutMs() && chatAiTimeoutMs() < 40000, 'Gemini 20s < backend 25s < browser 40s');
+    assert.equal(chatAiTimeoutMs(), 130000);
+    assert.ok(120000 < chatAiTimeoutMs() && chatAiTimeoutMs() < 150000, 'local model 120s < backend 130s < nginx 150s < browser 160s');
 
     const created = await h.api('POST', '/ai', { token: alice.token, json: {} });
     assert.equal(created.status, 201);

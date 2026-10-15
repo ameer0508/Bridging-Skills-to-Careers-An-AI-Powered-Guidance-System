@@ -104,16 +104,22 @@ class AIGateway:
     ) -> UnifiedAIResponse:
         start_total = time.time()
 
-        # 1. Check Caching Layer
+        personal = carries_personal_data(service_name)
+
+        # 1. Check Caching Layer. A cached answer is only served while the provider that produced
+        # it is still cleared for this kind of data, so the cache never outlives a policy change.
         if use_cache:
             cached_resp = ai_cache.get(service_name, payload)
             if cached_resp:
-                logger.info(f"[AI Gateway] Cache HIT for service '{service_name}'")
-                audit_log.record("cache_hit", service_name, personal_data=carries_personal_data(service_name))
-                return cached_resp
+                decision = runtime_policy.check(cached_resp.provider, personal)
+                if decision.allowed:
+                    logger.info(f"[AI Gateway] Cache HIT for service '{service_name}'")
+                    audit_log.record("cache_hit", service_name, cached_resp.provider, personal_data=personal)
+                    return cached_resp
+                ai_cache.delete(service_name, payload)
+                audit_log.record("policy_refused", service_name, cached_resp.provider, reason=decision.reason.value, personal_data=personal)
 
         # 2. Resolve Provider Fallback Chain
-        personal = carries_personal_data(service_name)
         try:
             if personal:
                 provider_chain = self.get_provider_chain(requested_provider)

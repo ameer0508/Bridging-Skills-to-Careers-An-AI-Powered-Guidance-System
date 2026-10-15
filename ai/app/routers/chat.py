@@ -25,13 +25,16 @@ def _unavailable() -> JSONResponse:
 
 
 @router.post("")
-async def generate_chat_response(request: ChatRequest):
+def generate_chat_response(request: ChatRequest):
     """
     Generates a chat reply using a real AI provider.
 
     The development mock provider is never allowed to answer here: its canned text would be
     stored and shown to the user as if it were an AI reply. Without a real provider, or when the
     provider fails, this returns 503 and the backend shows its own clearly labelled fallback.
+
+    Synchronous on purpose: FastAPI runs it in a worker thread, so a slow local model does not
+    hold up the event loop (other requests and the health check).
     """
     try:
         chain = ai_gateway.get_provider_chain()

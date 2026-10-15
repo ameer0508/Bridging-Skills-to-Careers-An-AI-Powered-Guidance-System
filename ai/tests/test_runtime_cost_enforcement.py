@@ -180,6 +180,8 @@ def test_local_adapter_is_local_only(monkeypatch, env, available):
     monkeypatch.delenv("OLLAMA_API_KEY", raising=False)
     for name, value in env.items():
         monkeypatch.setenv(name, value)
+    # Whether the model is downloaded is covered in test_local_model_integration.py
+    monkeypatch.setattr(LocalModelAdapter, "_model_downloaded", lambda self, addresses: True)
     adapter = LocalModelAdapter()
     assert adapter.is_available() is available
     if not available:

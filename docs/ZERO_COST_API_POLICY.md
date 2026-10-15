@@ -39,7 +39,7 @@ All entries were verified on **2026-10-12** from the sources listed. "Code" show
 | Provider | Code today | Licence | Notes and conditions |
 |---|---|---|---|
 | Development mock provider | `ai/app/providers/mock_adapter.py` | — | Dev/test only. Never answers chat, interview questions or interview scoring. |
-| **Ollama** (local models) | `ai/app/providers/local_adapter.py` (`ENABLE_LOCAL_MODEL`) | MIT ([github.com/ollama/ollama](https://github.com/ollama/ollama)) | The endpoint must be loopback. **Ollama cloud models** (`gemma4:cloud`, `*-cloud`, or the ollama.com API) need an account and are not free ([docs.ollama.com/cloud](https://docs.ollama.com/cloud)), so they are rejected. |
+| **Ollama** (local models) | `ai/app/providers/local_adapter.py` (`ENABLE_LOCAL_MODEL`) | MIT ([github.com/ollama/ollama](https://github.com/ollama/ollama)) | The endpoint must be loopback, or exactly `http://ollama:11434/api/generate`: the Compose `ollama` service on the internal-only `skillbridge-ai-local` network (no published port, no internet route, `OLLAMA_NO_CLOUD=1`), accepted only while every address it resolves to is private. The adapter connects to the validated address, follows no redirects and ignores proxy variables. It reports itself available only once the configured model is downloaded (`/api/tags`). Section 8 has the setup. **Ollama cloud models** (`gemma4:cloud`, `*-cloud`, or the ollama.com API) need an account and are not free ([docs.ollama.com/cloud](https://docs.ollama.com/cloud)), so they are rejected. |
 | **Sentence Transformers** | `ai/app/resume_intelligence/transformer_parser.py` (optional; package not installed) | Apache-2.0 | Weights download once from the public Hugging Face Hub. After that, run with `HF_HUB_OFFLINE=1`. |
 | **spaCy** | same, `TRANSFORMER_PROVIDER=spacy` (not installed) | MIT | — |
 | **Tesseract OCR** | not used yet | Apache-2.0 | Candidate for scanned resumes. |
@@ -101,7 +101,7 @@ Other outbound references: Google Fonts (`fonts.googleapis.com`) appears only in
 | Provider registry | `ai/app/cost_policy/provider_registry.json` | Status, verification source and date, credentials, enable flags, attestations, caps and privacy for every provider. |
 | `CostPolicy.check` / `require` | `ai/app/cost_policy/policy.py` | Fails closed with one of: `unknown_provider`, `blocked`, `unverified`, `not_enabled`, `not_attested`, `missing_credentials`, `personal_data_not_allowed`, `quota_exhausted`. `require` raises `ProviderBlockedError` / `QuotaExhaustedError` and counts the call. |
 | Unavailable-feature response | `Decision.as_unavailable(feature)` | `{available: false, reason, message, data: null}`: a clear indicator, never invented data. |
-| Local-model checks | `validate_local_model_endpoint`, `validate_ollama_model` | Loopback endpoints only. Cloud model names are rejected. |
+| Local-model checks | `validate_local_model_endpoint`, `validate_ollama_model` | Loopback endpoints, or the exact Docker `ollama` endpoint resolving only to private addresses. Cloud model names are rejected. |
 | Secret redaction | `CostPolicy.redact` (Python), `redactSecrets` (TypeScript) | Removes every configured credential value from text. |
 | Network tripwire | `ai/app/cost_policy/network_guard.py` | Within `block_external_network()`, any non-loopback connect or DNS lookup raises and is recorded. |
 | Environment audit | `python -m app.cost_policy.audit [.env]` (run from `ai/`) | Prints variable names only. Exits 1 when a key is set for a blocked or unverified provider, or a local model points at a remote or cloud endpoint. |
@@ -136,6 +136,7 @@ Other outbound references: Google Fonts (`fonts.googleapis.com`) appears only in
 | spaCy `en_core_web_sm` | ~15 MB | < 1 GB RAM | approximate |
 | Tesseract + one language pack | ~30–50 MB | small | approximate |
 | Ollama 7–8B model, 4-bit | ~4–5 GB | ~8 GB RAM | approximate; not stated on the current README |
+| Ollama `qwen3:4b-instruct-2507-q4_K_M` (in use) | 2.50 GB | 4.75 GiB in the container at an 8192-token context, CPU only | measured 2026-10-15 |
 
 The development machine has about 222 GB free on E:, where the repository lives. No model was downloaded while writing this policy. Check free RAM before pulling any model larger than 1 GB.
 
@@ -151,7 +152,8 @@ Every known outbound entry point is guarded by the policy itself, not only by th
 | Personal data | Every service except `skill_normalization` is treated as personal, unknown services included. Personal services reach only providers with `allows_personal_data` (local ones). |
 | OpenAI / Hugging Face adapters | `is_available()` is false and the HTTP call raises before `urlopen`, even with a key and even when called directly. |
 | Gemini adapter | Checked on every call (`_get_client`), even when a client object already exists. `is_available()` needs the enable flag, the attestation and a key. |
-| Local adapter | Loopback endpoint only, no `:cloud` / `-cloud` models, no `OLLAMA_API_KEY`. Checked in `is_available()` and again before each request. |
+| Local adapter | Loopback or the exact Docker `ollama` endpoint (private addresses only, pinned per request, no redirects, no proxies), no `:cloud` / `-cloud` models, no `OLLAMA_API_KEY`, model downloaded. Checked in `is_available()` and again before each request. Structured output that does not validate against its schema, or is cut off, is a failure. |
+| Response cache | A cached answer is served only while the provider that produced it is still cleared for the request's data class. Chat replies are never cached. |
 | Career agent (`google.antigravity`) | Previously called `gemini-2.5-pro` directly whenever a key was set. Now it runs the deterministic pipeline unless the policy clears Gemini for personal data, which it never does on the free tier. |
 | `ai/app/services/gemini.py` | Removed. It was unused and created `genai.Client()` with no key, which can select billed Vertex AI. |
 | `auth_manager.py` | Placeholder credentials removed; unset keys are `None`. |
@@ -160,7 +162,7 @@ Every known outbound entry point is guarded by the policy itself, not only by th
 | JSearch (`backend/.../JSearchProvider.ts`) | A key only changes the health status to `BLOCKED_BY_POLICY`, never `UP`. Search returns the labelled demo listings. The live branch is reachable only through `guardedFetch`. |
 | Tests | Every AI test runs inside a session-wide network tripwire that fails the run on any live connection attempt. |
 
-**Consequence:** with only a free Gemini key, chat, resume AI parsing, interview questions and interview scoring use a local model if one is enabled, and otherwise report themselves unavailable with their existing labelled fallbacks. The deterministic features are unchanged.
+**Consequence:** with only a free Gemini key, chat and the personal structured services (career matching, readiness, recommendations, roadmap, resume intelligence) use the local model if one is enabled, and otherwise report themselves unavailable with their existing labelled fallbacks. Interview questions and interview scoring need a provider that implements them, which the local adapter does not, so they stay unavailable. The deterministic features are unchanged.
 
 **Remaining known gaps:**
 - Model weight downloads by `sentence-transformers` / `transformers` if those optional packages are installed. They are not installed today. Set `HF_HUB_OFFLINE=1` before installing them.
@@ -179,3 +181,16 @@ Every known outbound entry point is guarded by the policy itself, not only by th
 3. No billing account is linked to the credential's project. The provider's own usage page is checked after the first day.
 4. Caching, self-imposed caps and attribution are in place, and the feature shows an unavailable state when refused.
 5. `python -m app.cost_policy.audit` passes.
+
+## 8. Local model in Docker (added 2026-10-15)
+
+| Item | Value |
+|---|---|
+| Image | `ollama/ollama:0.35.1@sha256:292ee7945dfc3d5840a181f3ab86fedb1e66703e02c8af98b50f4da56b7e278c` (Docker Hub digest checked) |
+| Model | `qwen3:4b-instruct-2507-q4_K_M`, Apache-2.0, 2.50 GB, model blob `sha256:85e4a5b7b8ef…` matching the registry manifest |
+| Download (once) | `docker compose --profile setup run --rm ollama-pull`: the only service with internet access, model name fixed in the file |
+| Network | `ollama` is only on `skillbridge-ai-local` (`internal: true`), shared with `ai-service`. Not published to the host. The backend, frontend and MongoDB cannot resolve it. |
+| Switch | `ENABLE_LOCAL_MODEL=true` and `LOCAL_MODEL_NAME` in `.env`. Off by default. |
+| Measured on CPU (16 vCPU) | Prompt ~100 tokens/s; generation 8.5–15 tokens/s; first load 17 s; chat 27–42 s end to end; career match 8 s; resume intelligence 41 s |
+| Timeout chain | `LOCAL_MODEL_TIMEOUT_SECONDS` 120 s < backend `CHAT_AI_TIMEOUT_MS` 130 s < nginx `proxy_read_timeout` 150 s < browser 160 s |
+| Limits | `LOCAL_MODEL_NUM_CTX` 8192 (a prompt that does not fit is a failure, not silently truncated), `LOCAL_MODEL_MAX_TOKENS` 384 for chat (a reply that hits it is flagged `truncated`), `LOCAL_MODEL_STRUCTURED_MAX_TOKENS` 768 |

@@ -6,5 +6,7 @@ def generate_chat_via_ai(prompt: str) -> UnifiedAIResponse:
         service_name="chat_architect",
         method_name="generate_content",
         payload=prompt,
-        prompt=prompt
+        prompt=prompt,
+        # A conversation reply is personal and one-off; it is never stored in or served from the cache
+        use_cache=False,
     )

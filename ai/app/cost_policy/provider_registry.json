@@ -33,7 +33,8 @@
       "allows_personal_data": true,
       "billing_risk": "Ollama cloud models (names ending ':cloud' or '-cloud', or the ollama.com API) need an account and are not free; they are rejected.",
       "conditions": [
-        "LOCAL_MODEL_ENDPOINT must be a loopback address.",
+        "LOCAL_MODEL_ENDPOINT must be a loopback address, or exactly http://ollama:11434/api/generate (the Docker Compose service on the internal-only network) with every resolved address private.",
+        "The model must be downloaded on the local server before the provider reports itself available.",
         "Model names ending in ':cloud' or '-cloud' are rejected.",
         "OLLAMA_API_KEY must not be set."
       ]

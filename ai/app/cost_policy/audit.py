@@ -42,7 +42,9 @@ def audit_environment(env: Optional[Mapping[str, str]] = None) -> List[Finding]:
 
     if env.get("ENABLE_LOCAL_MODEL", "").lower() == "true":
         try:
-            validate_local_model_endpoint(env.get("LOCAL_MODEL_ENDPOINT", "http://localhost:11434/api/generate"))
+            # Form only: the Docker service name resolves inside the Compose network, where the
+            # adapter checks its addresses again before every call
+            validate_local_model_endpoint(env.get("LOCAL_MODEL_ENDPOINT", "http://localhost:11434/api/generate"), resolve=None)
         except ValueError as exc:
             findings.append(Finding("violation", "ollama", str(exc)))
     for var in ("LOCAL_MODEL_NAME", "OLLAMA_MODEL"):

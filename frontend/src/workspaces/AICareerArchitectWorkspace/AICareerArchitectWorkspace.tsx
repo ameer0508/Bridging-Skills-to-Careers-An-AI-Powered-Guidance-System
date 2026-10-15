@@ -23,8 +23,11 @@ import {
 } from '../../components/experience';
 import { ChatMessage } from '../../features/ai/components/MessageBubble';
 
-/** Longer than the server's own 25s wait for the AI provider, so the server's answer always arrives first. */
-const CHAT_REQUEST_TIMEOUT_MS = 40000;
+/**
+ * Longer than the server's own 130s wait for the local model (and nginx's 150s), so the server's
+ * answer, or its labelled fallback, always arrives first. CPU replies measured 40-115s.
+ */
+const CHAT_REQUEST_TIMEOUT_MS = 160000;
 
 export const AICareerArchitectWorkspace: React.FC = () => {
   const queryClient = useQueryClient();
@@ -174,7 +177,7 @@ export const AICareerArchitectWorkspace: React.FC = () => {
 
   // Mutation 2: Send Message. The conversation id is passed in explicitly, so the first message of
   // a conversation created a moment ago is sent to it rather than dropped.
-  // The request may wait for the provider: provider 20s < server 25s < this 40s.
+  // The request may wait for the local model: model 120s < server 130s < nginx 150s < this 160s.
   const sendMessageMutation = useMutation({
     mutationFn: async ({ conversationId, content }: { conversationId: string; content: string }) => {
       const response = await apiClient.post(`/ai/${conversationId}/messages`, { content }, { timeout: CHAT_REQUEST_TIMEOUT_MS });
