@@ -132,6 +132,58 @@ def test_owner_access_is_allowed(client):
     assert res.status_code == 200
 
 
+# --- Routes that name the user in the request body ------------------------------------
+
+BODY_USER_FIELDS = ("user_id", "entity_id")
+_PLACEHOLDERS = {"string": "synthetic", "integer": 1, "number": 1.0, "boolean": False, "array": [], "object": {}}
+
+
+def _body_user_routes():
+    """(path, method, minimal body) for every operation whose JSON body carries a user id."""
+    spec = app.openapi()
+    schemas = spec.get("components", {}).get("schemas", {})
+    found = []
+    for path, operations in spec["paths"].items():
+        for method, op in operations.items():
+            ref = op.get("requestBody", {}).get("content", {}).get("application/json", {}).get("schema", {}).get("$ref")
+            if not ref:
+                continue
+            schema = schemas[ref.rsplit("/", 1)[-1]]
+            field = next((f for f in BODY_USER_FIELDS if f in schema.get("properties", {})), None)
+            if field is None:
+                continue
+            body = {name: _PLACEHOLDERS.get(schema["properties"][name].get("type"), "synthetic")
+                    for name in schema.get("required", [])}
+            found.append((path, method.upper(), field, body))
+    return found
+
+
+def test_body_user_routes_exist():
+    paths = {p for p, *_ in _body_user_routes()}
+    assert {"/api/v1/analytics/insights", "/api/v1/analytics/simulate"} <= paths
+
+
+@pytest.mark.parametrize("acting_user", [None, "", USER_B])
+def test_body_user_id_must_be_the_acting_user(client, acting_user):
+    """Missing, empty or another user's identity: the body cannot name someone else."""
+    for path, method, field, body in _body_user_routes():
+        headers = {} if acting_user is None else {ACTING_USER_HEADER: acting_user}
+        res = client.request(method, path, json={**body, field: USER_A}, headers=headers)
+        assert res.status_code == 403, f"{method} {path} accepted {field}={USER_A} acting as {acting_user!r}"
+
+
+def test_body_user_id_matching_the_acting_user_is_served(client):
+    for path, method, field, body in _body_user_routes():
+        res = client.request(method, path, json={**body, field: USER_A}, headers={ACTING_USER_HEADER: USER_A})
+        assert res.status_code == 200, f"{method} {path} refused its own user ({res.status_code})"
+
+
+def test_body_user_routes_still_need_the_service_key(anonymous_client):
+    for path, method, field, body in _body_user_routes():
+        res = anonymous_client.request(method, path, json={**body, field: USER_A}, headers={ACTING_USER_HEADER: USER_A})
+        assert res.status_code == 401, f"{method} {path} served without the service key"
+
+
 # --- CORS ---------------------------------------------------------------------------
 
 

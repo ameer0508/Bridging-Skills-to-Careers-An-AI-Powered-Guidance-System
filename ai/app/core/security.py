@@ -53,3 +53,17 @@ async def verify_internal_request_in_production(request: Request) -> None:
     """For the developer status pages: open locally, protected once deployed."""
     if settings.is_production:
         await verify_internal_request(request)
+
+
+def require_acting_user(request: Request, claimed_user_id: str) -> None:
+    """
+    For routes that name the user in the request body rather than the path: the body's user id
+    must be the authenticated user the backend says it acts for (403 otherwise), so a body field
+    cannot be used to act as someone else.
+    """
+    acting_user = request.headers.get(ACTING_USER_HEADER, "")
+    if not acting_user or not claimed_user_id or not _constant_time_equals(acting_user, str(claimed_user_id)):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access another user's data.",
+        )

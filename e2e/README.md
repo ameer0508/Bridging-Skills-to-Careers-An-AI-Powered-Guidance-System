@@ -55,6 +55,10 @@ fails; Command Center values against stored data; reload
 persistence; sign-out and protected routes; nine cross-account requests; the not-found page;
 phone-width layout and accessible names on the main pages.
 
+`E2E_TEST_FILE=./tests/sessionRefresh.mjs` covers the session lifecycle: an expired access token
+is refreshed without leaving the page, a tampered one ends the session, and after signing out the
+old refresh token is refused.
+
 ## What it does not cover
 
 - The real AI service and real PDF/DOCX parsing (covered by `ai/tests` with pytest).

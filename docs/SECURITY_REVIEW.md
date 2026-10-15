@@ -44,6 +44,13 @@ This review covers every route the backend serves. The routes are read from the 
    - Market-wide, the employer-diversity rule: no figure unless postings come from at least 5 employers and none supplies over half.
    - The security sweep covers its sign-in, parameter and exposure checks (165 routes); `employer_postings` covers isolation and abuse.
 
+### Added 2026-10-15
+
+- **Refused browser origins returned HTTP 500.** The CORS callback passed a plain error, which the error handler treats as a server fault. It now answers 403 `ORIGIN_NOT_ALLOWED` before any route runs; the allowlist is unchanged. Suite `cors_origin`.
+- **The Vite dev proxy removed the Origin header from every request**, so any website could make a visitor's browser submit simple form posts through the dev server. Only same-origin requests are relabelled now (`frontend/devProxyOrigin.ts`, with unit tests).
+- **The AI service's analytics routes took the user from the request body unchecked.** The acting-user check covered path parameters only. `/api/v1/analytics/insights` and `/simulate` now require the body `user_id` to equal `X-Acting-User-Id` (403 otherwise), and the backend client sends it. An OpenAPI-driven test (`test_security.py`) applies the same check to every route whose body names a user, so a new one cannot skip it. The backend's own `/api/v1/analytics` takes the user from the verified token only; suite `analytics_authorization` covers forged, tampered and unsigned tokens and user ids in the query or a header.
+- **AI tests could inherit real provider flags** from the repository-root `.env`. Fixed in the AI service's environment loading; `test_env_isolation.py`.
+
 ## Covered by other suites, re-run here
 
 - **Voice recordings** (`voice_interviews`, `voice_retention`):

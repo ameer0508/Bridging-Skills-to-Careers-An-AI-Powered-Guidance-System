@@ -1,4 +1,4 @@
-import { aiHttp } from './aiHttp.js';
+import { aiHttp, actingUser } from './aiHttp.js';
 import path from 'path';
 import FormData from 'form-data';
 import logger from '../config/logger.js';
@@ -173,10 +173,12 @@ class AIClientService {
    * Invokes Analytics Engine AI Service.
    */
   async generateAnalytics(userId: string, skillsTrend: Array<Record<string, unknown>> = []): Promise<IUnifiedAIResponse> {
+    // userId must be the authenticated user: the AI service refuses a body user_id that differs
+    // from the acting user named here
     const response = await aiHttp.post(`/api/v1/analytics/insights`, {
       user_id: userId,
       skills_trend: skillsTrend
-    });
+    }, { headers: actingUser(userId) });
     return response.data;
   }
 
