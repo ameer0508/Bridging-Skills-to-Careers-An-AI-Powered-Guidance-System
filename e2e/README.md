@@ -77,6 +77,10 @@ COMPOSE_PROJECT_NAME=skillbridge-ci-local-1 SB_CI_WEB_PORT=13000 SB_CI_API_PORT=
 - It generates synthetic secrets for the run; the repository's `.env` is never read.
 - `verify` proves every container, volume, network and mount belongs to the project. `down`
   records everything outside the project beforehand and fails if any of it is gone afterwards.
+- `node e2e/docker-smoke.mjs` takes `SMOKE_AI_MODE`: `none` (the labelled fallback is required, as
+  in CI, where no model is downloaded), `local` (the local Ollama model must answer, labelled with
+  it; set `SMOKE_LOCAL_MODEL` to the expected model) or `auto`. An external provider answering
+  chat always fails.
 
 ## What it does not cover
 

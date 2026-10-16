@@ -35,6 +35,8 @@ jobs:
       COMPOSE_PROJECT_NAME: skillbridge-ci-${{ github.run_id }}-${{ github.run_attempt }}
       COMPOSE_FILE: docker-compose.yml:docker-compose.ci.yml
       SB_CI_ENV_FILE: .env
+      # No model is downloaded in CI: chat must give its labelled fallback, never an AI reply
+      SMOKE_AI_MODE: none
     steps:
       - uses: actions/checkout@v4
 

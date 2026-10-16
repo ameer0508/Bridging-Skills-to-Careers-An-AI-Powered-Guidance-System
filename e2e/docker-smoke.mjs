@@ -8,6 +8,8 @@
 // WEB_URL   where nginx serves the app   (default http://localhost:3000)
 // API_URL   where the backend is published (default http://localhost:5000)
 // SMOKE_STATE  file used to pass the synthetic account from the first run to --verify
+// SMOKE_AI_MODE  none | local | auto (default): which chat outcome is required (see the chat check)
+// SMOKE_LOCAL_MODEL  with a local model, the model name the reply must carry
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -181,16 +183,41 @@ async function fullRun() {
     expect(res.status === 200 && bytes.equals(makeTextPdf(RESUME_LINES)), `download ${res.status}, ${bytes.length} bytes`);
   });
 
-  await check('without provider keys AI features use labelled fallbacks, not invented output', async () => {
+  // SMOKE_AI_MODE says which chat outcome is required: "none" (no permitted provider: the
+  // labelled fallback, as in CI), "local" (the local Ollama model must answer, labelled with it),
+  // or "auto" (either, each correctly labelled). In every mode an external provider answering
+  // fails: chat carries personal data and may only reach a local model.
+  const aiMode = (process.env.SMOKE_AI_MODE || 'auto').toLowerCase();
+  const localModel = process.env.SMOKE_LOCAL_MODEL || '';
+  await check(`chat is answered honestly (${aiMode})`, async () => {
     const conversation = (await call('POST', `${API}/ai`, { token, json: {} })).body.data;
-    const reply = (await call('POST', `${API}/ai/${conversation._id}/messages`, { token, json: { content: 'What should I learn next?' } })).body.data;
-    expect(reply.isFallback === true && reply.source === 'fallback', `chat reply source is ${reply.source}`);
+    const res = await call('POST', `${API}/ai/${conversation._id}/messages`, { token, json: { content: 'What should I learn next?' } });
+    expect(res.status === 200, `chat answered ${res.status}`);
+    const reply = res.body.data;
+    expect(!['gemini', 'openai', 'huggingface'].includes(reply.aiProvider), `chat was answered by the external provider ${reply.aiProvider}`);
+    if (reply.source === 'ai') {
+      expect(aiMode !== 'none', 'an AI reply arrived although no provider is permitted');
+      expect(reply.isFallback === false && reply.aiProvider === 'local', `AI reply attributed to ${reply.aiProvider}`);
+      expect(reply.aiModel && (!localModel || reply.aiModel === localModel), `AI reply model ${reply.aiModel}, expected ${localModel || 'a model name'}`);
+      expect(reply.content.trim().length > 0 && !/Mock AI|not an AI-generated answer/i.test(reply.content), 'the AI reply is empty, canned or labelled as a fallback');
+      return `answered by ${reply.aiProvider} / ${reply.aiModel}`;
+    }
+    expect(aiMode !== 'local', `the local model did not answer (source ${reply.source}, reason ${reply.fallbackReason})`);
+    expect(reply.source === 'fallback' && reply.isFallback === true && !reply.aiProvider, `chat reply source is ${reply.source}`);
     expect(/not an AI-generated answer/.test(reply.content) && !/Mock AI/.test(reply.content), 'the fallback is not labelled');
+    return `labelled fallback (${reply.fallbackReason})`;
+  });
+
+  await check('interview questions come from the labelled question bank', async () => {
     const session = (await call('POST', `${API}/interviews`, { token, json: { mode: 'mixed', questionCount: 3 } })).body.data;
     expect(session.questionSource === 'question_bank' && session.questions.length === 3, `interview source ${session.questionSource}`);
+    return '3 question-bank questions';
+  });
+
+  await check('job listings without a provider are labelled demo data', async () => {
     const jobs = (await call('GET', `${API}/opportunities?search=Developer`, { token })).body.data;
     expect(jobs.meta.source === 'sample' && jobs.opportunities.every((o) => o.isSample), 'job listings are not labelled as demo');
-    return 'chat fallback, question-bank interview, demo job listings';
+    return `${jobs.opportunities.length} sample listings`;
   });
 
   await check('a second user sees none of the first user\'s data', async () => {

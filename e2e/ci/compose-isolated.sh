@@ -105,8 +105,9 @@ verify() {
 }
 
 smoke() {
+  # The isolated project never has a model (ENABLE_LOCAL_MODEL=false), so chat must fall back
   WEB_URL="http://localhost:${SB_CI_WEB_PORT}" API_URL="http://localhost:${SB_CI_API_PORT}" \
-    SMOKE_STATE="$STATE_DIR/smoke-state.json" node e2e/docker-smoke.mjs
+    SMOKE_AI_MODE="${SMOKE_AI_MODE:-none}" SMOKE_STATE="$STATE_DIR/smoke-state.json" node e2e/docker-smoke.mjs
 }
 
 down() {
