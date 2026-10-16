@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Sparkles, RefreshCw, MessageSquarePlus, History, MessageSquare } from 'lucide-react';
 import { MessageBubble, ChatMessage } from '../MessageBubble';
+import { AIPendingIndicator } from '../AIPendingIndicator';
 import { DialogFrame } from '../../../../design/aurora/DialogFrame';
 
 interface ConversationItem {
@@ -154,12 +155,7 @@ export const NeuralConversationDrawer: React.FC<NeuralConversationDrawerProps> =
                   isRetrying={isRetryingReply}
                 />
               ))}
-              {(isSending || isRetryingReply) && (
-                <div className="flex items-center gap-2 text-xs text-aurora-muted" role="status" aria-live="polite" data-testid="chat-pending">
-                  <RefreshCw className="w-4 h-4 animate-spin text-aurora-violet" />
-                  <span>Waiting for the assistant. This can take up to 40 seconds.</span>
-                </div>
-              )}
+              {(isSending || isRetryingReply) && <AIPendingIndicator />}
               {sendError && !isSending && (
                 <div role="alert" className="p-3 rounded-xl border border-rose-200 bg-rose-50 flex flex-wrap items-center justify-between gap-2" data-testid="chat-send-error">
                   <span className="text-xs text-rose-700">Your message was not sent: {sendError}</span>

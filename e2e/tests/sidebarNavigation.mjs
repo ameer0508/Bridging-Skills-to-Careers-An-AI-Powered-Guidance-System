@@ -1,4 +1,4 @@
-// Sidebar navigation without page refreshes.
+// Sidebar navigation without page refreshes, and the AI waiting indicator.
 //
 //   E2E_TEST_FILE=./tests/sidebarNavigation.mjs pnpm test:e2e
 //
@@ -225,6 +225,31 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       await page.setViewportSize({ width: 1366, height: 900 });
       await page.waitForTimeout(800);
       return '3 taps through the drawer; closed and out of the way after each';
+    });
+
+    await t.step('AI chat: an honest waiting indicator with elapsed time, gone when the reply arrives', async () => {
+      await aiControl({ chat: { mode: 'slow', delayMs: 3500, reply: 'A reply after a wait.' } });
+      await go('/ai');
+      const input = page.locator('textarea[placeholder^="Ask your AI Career Architect"]');
+      await input.fill('What should I learn next?');
+      await input.press('Enter');
+      const pending = page.getByTestId('chat-pending');
+      await pending.waitFor({ timeout: 10_000 });
+      const text = await pending.innerText();
+      expect(/AI is thinking\.\.\. Running locally\. Responses may take longer depending on system load\./.test(text), `indicator text: ${text}`);
+      expect(!/40 seconds/.test(text), 'the old fixed promise is still shown');
+      await page.waitForTimeout(2200);
+      const seconds = Number(await page.getByTestId('chat-pending-elapsed').getAttribute('data-seconds'));
+      expect(seconds >= 2, `elapsed time did not advance (${seconds} s)`);
+      await page.locator('[data-testid="chat-message"][data-source="ai"]').first().waitFor({ timeout: 20_000 });
+      expect((await pending.count()) === 0, 'the indicator is still shown after the reply');
+      await aiControl({ chat: { mode: 'unavailable' } });
+      await input.fill('And after that?');
+      await input.press('Enter');
+      await page.locator('[data-testid="chat-message"][data-source="fallback"]').first().waitFor({ timeout: 20_000 });
+      expect((await pending.count()) === 0, 'the indicator is still shown after a failure');
+      await aiControl({ chat: { mode: 'ok' } });
+      return `indicator shown with ${seconds}+ s elapsed; removed after the reply and after a failure`;
     });
 
     await t.step('when shared code also failed, the next visit recovers with a single automatic reload', async () => {

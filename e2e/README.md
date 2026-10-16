@@ -64,7 +64,8 @@ old refresh token is refused.
 - direct URLs, an expired session, a slow API, empty states and the phone drawer;
 - pages whose code chunk fails to download: the error card's "Try again" recovers without a reload;
   a page that cannot load stays contained; a failure that also hit shared chunks recovers on the
-  next visit with one automatic reload.
+  next visit with one automatic reload;
+- the AI waiting indicator with its elapsed time.
 
 Run it with `E2E_FRONTEND=preview` too, so chunk names match a production build.
 
