@@ -170,9 +170,11 @@ class AIClientService {
   }
 
   /**
-   * Invokes Analytics Engine AI Service.
+   * Asks the AI service for predictive analytics. It answers that they are unavailable
+   * (`available: false`, `status: 'insufficient_evidence'`) and produces no forecast, salary or
+   * growth figure: no licensed data exists to ground them. Not used by any product screen.
    */
-  async generateAnalytics(userId: string, skillsTrend: Array<Record<string, unknown>> = []): Promise<IUnifiedAIResponse> {
+  async generateAnalytics(userId: string, skillsTrend: Array<Record<string, unknown>> = []): Promise<Record<string, unknown>> {
     // userId must be the authenticated user: the AI service refuses a body user_id that differs
     // from the acting user named here
     const response = await aiHttp.post(`/api/v1/analytics/insights`, {
