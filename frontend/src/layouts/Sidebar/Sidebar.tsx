@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   Activity,
   Award,
@@ -53,6 +53,9 @@ interface NavItem {
 const icon = (Icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>) => <Icon className="h-[18px] w-[18px]" aria-hidden />;
 
 /** Every destination, grouped along the journey. Labels are the pages' names and are kept stable. */
+// How long the phone drawer takes to slide open or closed
+const DRAWER_SECONDS = 0.25;
+
 const buildGroups = (isAdmin: boolean): Array<{ title: string; items: NavItem[] }> => [
   {
     title: 'Overview',
@@ -207,29 +210,41 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, onToggleCollapse,
   return (
     <>
       <div className="sticky top-0 z-40 hidden h-screen shrink-0 lg:block">{content(isCollapsed, false)}</div>
-      <AnimatePresence>
-        {isMobileOpen && (
-          <div className="fixed inset-0 z-50 flex lg:hidden" role="dialog" aria-modal="true" aria-label="Navigation">
-            <motion.div
-              initial={reduce ? undefined : { opacity: 0 }}
-              animate={reduce ? undefined : { opacity: 1 }}
-              exit={reduce ? undefined : { opacity: 0 }}
-              onClick={onCloseMobile}
-              className="fixed inset-0 bg-aurora-ink/30 backdrop-blur-sm"
-            />
-            <motion.div
-              ref={drawerRef}
-              initial={reduce ? undefined : { x: '-100%' }}
-              animate={reduce ? undefined : { x: 0 }}
-              exit={reduce ? undefined : { x: '-100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 260 }}
-              className="relative z-10 h-full shadow-aurora-lg"
-            >
-              {content(false, true)}
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/*
+        The phone drawer stays mounted and is animated open and closed. It used to be unmounted by
+        AnimatePresence after its exit animation, but when the drawer was closed by tapping a link
+        (closing and navigating in one click) that removal never happened: the invisible backdrop
+        stayed over the page and swallowed every tap until a refresh. Now a closed drawer is inert,
+        ignores the pointer from the moment it starts closing, and is hidden once it has slid away,
+        whether or not any animation completes.
+      */}
+      <div
+        className={`fixed inset-0 z-50 flex lg:hidden ${isMobileOpen ? '' : 'pointer-events-none'}`}
+        style={{ visibility: isMobileOpen ? 'visible' : 'hidden', transition: `visibility 0s linear ${isMobileOpen || reduce ? '0s' : `${DRAWER_SECONDS + 0.05}s`}` }}
+        data-testid="mobile-navigation"
+        data-open={isMobileOpen}
+        inert={!isMobileOpen}
+        {...(isMobileOpen
+          ? { role: 'dialog', 'aria-modal': true, 'aria-label': 'Navigation' }
+          : { 'aria-hidden': true })}
+      >
+        <motion.div
+          initial={false}
+          animate={{ opacity: isMobileOpen ? 1 : 0 }}
+          transition={{ duration: reduce ? 0 : DRAWER_SECONDS }}
+          onClick={onCloseMobile}
+          className="fixed inset-0 bg-aurora-ink/30 backdrop-blur-sm"
+        />
+        <motion.div
+          ref={drawerRef}
+          initial={false}
+          animate={{ x: isMobileOpen ? 0 : '-100%' }}
+          transition={{ duration: reduce ? 0 : DRAWER_SECONDS, ease: [0.22, 1, 0.36, 1] }}
+          className="relative z-10 h-full shadow-aurora-lg"
+        >
+          {content(false, true)}
+        </motion.div>
+      </div>
     </>
   );
 };

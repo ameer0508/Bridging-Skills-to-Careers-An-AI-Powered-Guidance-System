@@ -1,5 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { isChunkLoadError, resetFailedLazyPages } from '../../routes/lazyWithRetry';
 
 interface Props {
   children: ReactNode;
@@ -25,13 +26,20 @@ export class ErrorBoundary extends Component<Props, State> {
     console.error('SkillBridge ErrorBoundary caught an exception:', error, errorInfo);
   }
 
-  private handleReset = () => {
+  // Renders the page again. Lazy pages (lazyWithRetry) fetch their code afresh, so a page whose
+  // download failed recovers without reloading the whole app.
+  private handleRetry = () => {
+    resetFailedLazyPages();
     this.setState({ hasError: false, error: null });
+  };
+
+  private handleReload = () => {
     window.location.reload();
   };
 
   public render() {
     if (this.state.hasError) {
+      const chunkFailed = isChunkLoadError(this.state.error);
       return (
         <div role="alert" data-testid="error-boundary" className="min-h-87.5 p-8 rounded-2xl border border-rose-500/30 bg-aurora-canvas/60 flex flex-col items-center justify-center space-y-4 text-center">
 
@@ -40,11 +48,13 @@ export class ErrorBoundary extends Component<Props, State> {
           </div>
 
           <div className="space-y-2 max-w-lg">
-            <h3 className="text-lg font-bold text-white">
-              {this.props.fallbackTitle || 'Workspace Recovered From Exception'}
+            <h3 className="text-lg font-bold text-aurora-ink">
+              {chunkFailed ? 'This page could not be loaded' : this.props.fallbackTitle || 'Workspace Recovered From Exception'}
             </h3>
-            <p className="text-xs text-aurora-muted">
-              An unexpected error stopped this page from showing. Your saved data is not affected.
+            <p className="text-xs text-aurora-muted" data-testid="error-boundary-reason" data-reason={chunkFailed ? 'chunk' : 'error'}>
+              {chunkFailed
+                ? "Part of the app could not be downloaded, usually because of a brief connection problem. Your saved data is not affected."
+                : 'An unexpected error stopped this page from showing. Your saved data is not affected.'}
             </p>
             {/* Technical details only while developing: users never see stack traces */}
             {import.meta.env.DEV && this.state.error && (
@@ -57,13 +67,23 @@ export class ErrorBoundary extends Component<Props, State> {
             )}
           </div>
 
-          <button
-            onClick={this.handleReset}
-            className="px-4 py-2 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white transition-colors flex items-center gap-1.5 cursor-pointer shadow-lg shadow-rose-600/20"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Reload Workspace</span>
-          </button>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <button
+              type="button"
+              onClick={this.handleRetry}
+              className="px-4 py-2 rounded-lg text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white transition-colors flex items-center gap-1.5 cursor-pointer shadow-lg shadow-rose-600/20"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              <span>Try again</span>
+            </button>
+            <button
+              type="button"
+              onClick={this.handleReload}
+              className="px-4 py-2 rounded-lg text-xs font-semibold border border-aurora-line bg-white text-aurora-ink hover:bg-aurora-canvas transition-colors cursor-pointer"
+            >
+              Reload page
+            </button>
+          </div>
         </div>
       );
     }

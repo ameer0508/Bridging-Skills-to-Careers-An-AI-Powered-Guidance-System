@@ -59,6 +59,15 @@ phone-width layout and accessible names on the main pages.
 is refreshed without leaving the page, a tampered one ends the session, and after signing out the
 old refresh token is refused.
 
+`E2E_TEST_FILE=./tests/sidebarNavigation.mjs` covers navigation without refreshes:
+- every sidebar destination on its first click, repeated switching, rapid clicks, back and forward;
+- direct URLs, an expired session, a slow API, empty states and the phone drawer;
+- pages whose code chunk fails to download: the error card's "Try again" recovers without a reload;
+  a page that cannot load stays contained; a failure that also hit shared chunks recovers on the
+  next visit with one automatic reload.
+
+Run it with `E2E_FRONTEND=preview` too, so chunk names match a production build.
+
 ## Docker Compose checks, isolated
 
 `e2e/ci/compose-isolated.sh` runs the Compose stack as a throwaway project named
