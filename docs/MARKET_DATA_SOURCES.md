@@ -132,6 +132,23 @@ The request in §5 asks for exactly those uses.
 
 **Not used under any circumstances:** Naukri, LinkedIn, Indeed, Foundit and similar sites, whose terms forbid scraping.
 
+### 2d. Fifth check (2026-10-16)
+
+Pages re-read and searches re-run on 2026-10-16. **Nothing has changed that would unblock C1–C5 or R4.**
+
+| Source | What was found on 2026-10-16 | Verdict |
+|---|---|---|
+| [OnJob.io feed licence](https://onjob.io/for-job-boards/) | Unchanged: "OnJob.io's live listings are free to crawl, ingest and republish"; "Only ask: link each role back to its OnJob.io url to apply". Storing closed listings, counts, salary statistics, skill mining and forecasting are not mentioned. Permission route: "Contact us" (`/contact/`) | Still the only grant: live republishing (A1) |
+| [OnJob.io terms](https://onjob.io/terms/) ("Last updated: June 2026") | Unchanged: you agree not to "use automated tools to access the service without our written permission". Contact address shown behind Cloudflare e-mail protection (decodes to `legal@onjob.io`; to be confirmed by the owner before sending) | Written permission still required for uses 1–6 |
+| [JobTether research](https://jobtether.com/research) | Still one CC BY 4.0 snapshot (26 September 2026; 29,815 postings, 1,057 boards); tables per company, ATS, metro and experience bucket only; no role or skill table, no time series. It invites requests: "For a breakdown we have not published, a city or sector cut … write to Pranav Kaushik" | Unchanged: national context only. A possible second request, but aggregates per snapshot cannot meet C1's posting-record definition |
+| [Adzuna API terms](https://developer.adzuna.com/docs/terms_of_service) | Data may not be used "in aggregation" (vacancy counts, average salaries) without written consent; a 14-day trial for other organisations | Unchanged: blocked without written consent |
+| Searches for new India posting datasets and APIs | Only scraped Naukri copies (unknown, NC or "No Resale" licences), paid feeds (Techmap, TheirStack, Apify scraping actors) and multi-country CC0 sets without Indian role detail | None usable under the ₹0 and no-scraping rules |
+
+**Conclusion.**
+- OnJob.io remains the most promising provider: dated India postings with skills and INR pay already flow through its feed.
+- Only its written permission can unblock C1, C3, C4, C5 and R4. C2 additionally needs 24 months of history (the forecasting minimums), however soon permission arrives.
+- The refined request is in §5. It has not been sent; only the owner can send it.
+
 ## 3. Decision per item
 
 | Item | Points | Decision | Why |
@@ -153,25 +170,38 @@ The request in §5 asks for exactly those uses.
 
 ## 5. Permission request (for the owner to send; no answer has been received)
 
-> **To:** OnJob.io (contact address on https://onjob.io/terms/)
-> **Subject:** Permission request: academic, non-commercial use of OnJob.io listings for market statistics
+Refined on 2026-10-16. Send it through OnJob's contact form (https://onjob.io/contact/) or to the address in its terms, after confirming that address. Not sent: only the owner can make this request.
+
+> **Subject:** Permission request: academic, non-commercial use of OnJob.io India listings for anonymised market statistics
 >
 > Hello,
 >
-> I am building SkillBridge, an academic career-guidance project for students in India. It is non-commercial and has no paid features. Following your jobs-feed licence, SkillBridge republishes your live India listings, each linking back to its OnJob.io page to apply.
+> I am [owner's name], and I build SkillBridge, an academic, non-commercial career-guidance project for students in India. It has no paid features and no advertising. Under your jobs-feed licence, SkillBridge already republishes your live India listings, each linking back to its OnJob.io page so candidates apply with you.
 >
-> I would like to ask for permanent, royalty-free permission for the following, for academic use, with "Source: OnJob.io" attribution and a link on every figure:
+> I would like to ask for written permission for the following uses of the listings in your public feed, for this academic project only:
 >
-> 1. keeping a dated record of listings from the daily feed after they close (title, employer, city, posting date, and listed skills; no descriptions or personal data);
-> 2. publishing counts of listings per role and city over time;
-> 3. publishing advertised-salary medians and ranges by role and city, with sample sizes;
-> 4. computing skill frequencies from the listed skills;
-> 5. training and evaluating simple demand forecasts on that history;
-> 6. using these statistics to adjust the career recommendations shown to signed-in students.
+> 1. **Keeping a dated record** of each listing after it closes: title, employer name, city, posting date, listed skills and the advertised pay range. No descriptions, no candidate data, no personal data of any kind.
+> 2. **Publishing counts** of listings per role and city by month.
+> 3. **Publishing advertised-pay medians and ranges** by role and city, always with the number of listings behind them.
+> 4. **Computing how often listed skills appear** per role over time.
+> 5. **Testing simple demand forecasts** on that history (shown only after at least 24 months of data).
+> 6. **Using these statistics in the career recommendations** shown to signed-in students.
 >
-> We fetch the feed at most a few times a day. If any of these uses is not acceptable, or you prefer different attribution wording, please tell me and we will follow it.
+> Safeguards we already apply:
+> - Every figure says "Source: OnJob.io" with a link.
+> - A figure is shown only when it rests on enough listings from at least five different employers, none supplying more than half; otherwise it reads "unavailable".
+> - We fetch the feed at most a few times a day.
+> - Your listings are never resold or passed to anyone else, and no AI service outside our own servers receives them.
+> - We will delete the stored history if you withdraw permission.
 >
-> Thank you,
-> [Owner's name], SkillBridge
+> If only some of these uses are acceptable, a partial permission would still help (for example, uses 1, 2 and 4 alone). If you prefer other attribution wording or limits, we will follow them. A reply by e-mail is enough for our records.
+>
+> Thank you for considering this,
+> [Owner's name]
+> SkillBridge (academic project)
 
-If OnJob grants uses 1–6 in writing, the existing market module (registered sources, licence checks, de-duplication, history, freshness and the "unavailable" states) can store the feed as a registered source. C1 and C4 could then be built first, then C3 (with role-validity checks), C5 and R4, and C2 once enough months exist.
+If OnJob grants uses 1–6 in writing, the existing market module can register the feed as a source, recording the permission and the date it was granted. That module already provides registered sources, licence checks, de-duplication, history, freshness and the "unavailable" states. The order would then be:
+- **C1 and C4 first**, once their minimums are met: 30 postings over 3 months for history; 6 months and 30 postings in each half for skill trends.
+- **C3** with role-validity checks: 10 listings for a median, 20 for a distribution.
+- **C5 and R4** once those statistics are valid and stable.
+- **C2** only after 24 months of history.

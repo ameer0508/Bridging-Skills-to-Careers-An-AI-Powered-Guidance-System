@@ -140,3 +140,36 @@ The 12 `voiceRealCodec.mjs` steps:
 Edge and Firefox are complete by the owner's hand.
 
 **Consequence.** D1 (3 points) and D2 (2 points) stay pending. The award rule is unchanged, and no further manual testing is requested. Only a person in Chrome can close these steps: a physical microphone for A4 and A5, a human voice for B2 to B4, and a screen reader for C2 to C4.
+
+## 5. The remaining Chrome steps (checklist for a human tester)
+
+**Status on 2026-10-16.**
+- Not run. The owner has chosen not to test Chrome by hand; anyone else may run this only with the owner's consent.
+- No Chrome is installed or extracted on the development machine now. The earlier automated Chrome runs (§2a) used a scratch copy that no longer exists.
+- Regression on the current code (`96a2ad2`): `voiceRealCodec.mjs` 12/12 in Edge 155 with the browser's fake capture device. That re-checks the capture, codec and storage path. It is not evidence for the steps below.
+
+**What is needed:**
+- Google Chrome (current stable), a physical microphone, headphones;
+- Narrator (Windows + Ctrl + Enter) or NVDA;
+- the Docker stack at `http://localhost:3000`;
+- two fresh test accounts with synthetic details;
+- about 15 minutes.
+
+Speak only sample sentences, never personal information. Record `chrome://version` and the date.
+
+| # | Step (full wording in `MANUAL_VOICE_TEST_PLAN.md`) | Pass when |
+|---|---|---|
+| A4 | Interview Studio → Record spoken answers → allow for 7 days → Record answer → allow the prompt → speak 10–20 s → Stop recording | "Recording saved (N s)…" appears and Chrome's microphone indicator turns off after stopping |
+| A5 | Listen | Your own voice plays, audible and complete, nothing clipped at the start or end |
+| B2 | Enable voice dictation → Allow my browser's speech service → Dictate → speak two sentences | The words appear in the answer box |
+| B3 | Edit the dictated text by hand → submit | The edited text is what is stored and scored; the answer is labelled dictated or mixed |
+| B4 | Dictate: "I used Redis and PostgreSQL with a token bucket rate limiter in Kubernetes" | Write down how many of the 5 technical terms were right (mistakes are expected; the text stays editable) |
+| C2 | Screen reader on → open the recording and the dictation consent panels | Each panel's title and text are read |
+| C3 | Screen reader on → block the microphone (lock icon) → Record answer, then Dictate | Both error messages are announced without moving focus by hand |
+| C4 | Screen reader on → record and stop | "Record answer", "Stop recording (N s / 180 s)" and "Listen" are read |
+
+**Award rule (unchanged).**
+- D1 (3 points) needs A4, A5 and C2–C4 to pass in Chrome.
+- D2 (2 points) needs B2–B4 to pass in Chrome.
+- Each fix any failure needs comes first.
+- Edge and Firefox results (§2) are already complete. Results reported by the tester are recorded as reported.
