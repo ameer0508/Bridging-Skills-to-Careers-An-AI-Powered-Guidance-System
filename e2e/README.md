@@ -59,6 +59,25 @@ phone-width layout and accessible names on the main pages.
 is refreshed without leaving the page, a tampered one ends the session, and after signing out the
 old refresh token is refused.
 
+## Docker Compose checks, isolated
+
+`e2e/ci/compose-isolated.sh` runs the Compose stack as a throwaway project named
+`skillbridge-ci-<id>`, beside a running development stack, and removes only what that project
+created. The CI workflow uses it, and it is the safe way to run the Docker checks locally:
+
+```bash
+COMPOSE_PROJECT_NAME=skillbridge-ci-local-1 SB_CI_WEB_PORT=13000 SB_CI_API_PORT=15000 \
+  bash e2e/ci/compose-isolated.sh all
+```
+
+- It refuses any project name that does not match `skillbridge-ci-<id>`, so it can never act on
+  a development stack such as `skillbridge-parallel`.
+- `docker-compose.ci.yml` removes the base file's fixed container names and moves the published
+  ports; volumes, networks and built images are named for the project.
+- It generates synthetic secrets for the run; the repository's `.env` is never read.
+- `verify` proves every container, volume, network and mount belongs to the project. `down`
+  records everything outside the project beforehand and fails if any of it is gone afterwards.
+
 ## What it does not cover
 
 - The real AI service and real PDF/DOCX parsing (covered by `ai/tests` with pytest).

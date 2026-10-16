@@ -51,6 +51,8 @@ This review covers every route the backend serves. The routes are read from the 
 - **The AI service's analytics routes took the user from the request body unchecked.** The acting-user check covered path parameters only. `/api/v1/analytics/insights` and `/simulate` now require the body `user_id` to equal `X-Acting-User-Id` (403 otherwise), and the backend client sends it. An OpenAPI-driven test (`test_security.py`) applies the same check to every route whose body names a user, so a new one cannot skip it. The backend's own `/api/v1/analytics` takes the user from the verified token only; suite `analytics_authorization` covers forged, tampered and unsigned tokens and user ids in the query or a header.
 - **AI tests could inherit real provider flags** from the repository-root `.env`. Fixed in the AI service's environment loading; `test_env_isolation.py`.
 - **The AI analytics routes returned fixed salary tables, a "+38% compensation growth" claim and hard-coded readiness and match figures** as if they were forecasts. The forecasting code is removed; both routes answer "insufficient evidence" with no figures (`test_analytics_integrity.py`).
+- **Ollama ran as root with write access to its model volume.** It now runs as uid 10002 with the volume read-only; only the one-off download service writes to it.
+- **The CI Docker workflow's `docker compose down -v` acted on whatever project the shell named**, and the base file's fixed container names would collide with a local stack. CI now runs as its own `skillbridge-ci-<run>` project through `e2e/ci/compose-isolated.sh`, which refuses other names and proves that nothing outside the project was removed.
 
 ## Covered by other suites, re-run here
 

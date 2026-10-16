@@ -39,7 +39,7 @@ All entries were verified on **2026-10-12** from the sources listed. "Code" show
 | Provider | Code today | Licence | Notes and conditions |
 |---|---|---|---|
 | Development mock provider | `ai/app/providers/mock_adapter.py` | — | Dev/test only. Never answers chat, interview questions or interview scoring. |
-| **Ollama** (local models) | `ai/app/providers/local_adapter.py` (`ENABLE_LOCAL_MODEL`) | MIT ([github.com/ollama/ollama](https://github.com/ollama/ollama)) | The endpoint must be loopback, or exactly `http://ollama:11434/api/generate`: the Compose `ollama` service on the internal-only `skillbridge-ai-local` network (no published port, no internet route, `OLLAMA_NO_CLOUD=1`), accepted only while every address it resolves to is private. The adapter connects to the validated address, follows no redirects and ignores proxy variables. It reports itself available only once the configured model is downloaded (`/api/tags`). Section 8 has the setup. **Ollama cloud models** (`gemma4:cloud`, `*-cloud`, or the ollama.com API) need an account and are not free ([docs.ollama.com/cloud](https://docs.ollama.com/cloud)), so they are rejected. |
+| **Ollama** (local models) | `ai/app/providers/local_adapter.py` (`ENABLE_LOCAL_MODEL`) | MIT ([github.com/ollama/ollama](https://github.com/ollama/ollama)) | The endpoint must be loopback, or exactly `http://ollama:11434/api/generate`: the Compose `ollama` service on the internal-only `skillbridge-ai-local` network (no published port, no internet route, `OLLAMA_NO_CLOUD=1`), accepted only while every address it resolves to is private. The adapter connects to the validated address, follows no redirects and ignores proxy variables. It reports itself available only once the configured model is downloaded (`/api/tags`). Section 9 has the setup. **Ollama cloud models** (`gemma4:cloud`, `*-cloud`, or the ollama.com API) need an account and are not free ([docs.ollama.com/cloud](https://docs.ollama.com/cloud)), so they are rejected. |
 | **Sentence Transformers** | `ai/app/resume_intelligence/transformer_parser.py` (optional; package not installed) | Apache-2.0 | Weights download once from the public Hugging Face Hub. After that, run with `HF_HUB_OFFLINE=1`. |
 | **spaCy** | same, `TRANSFORMER_PROVIDER=spacy` (not installed) | MIT | — |
 | **Tesseract OCR** | not used yet | Apache-2.0 | Candidate for scanned resumes. |
@@ -182,7 +182,7 @@ Every known outbound entry point is guarded by the policy itself, not only by th
 4. Caching, self-imposed caps and attribution are in place, and the feature shows an unavailable state when refused.
 5. `python -m app.cost_policy.audit` passes.
 
-## 8. Local model in Docker (added 2026-10-15)
+## 9. Local model in Docker (added 2026-10-15)
 
 | Item | Value |
 |---|---|
@@ -194,3 +194,4 @@ Every known outbound entry point is guarded by the policy itself, not only by th
 | Measured on CPU (16 vCPU) | Prompt ~100 tokens/s; generation 8.5–15 tokens/s; first load 17 s; chat 27–42 s end to end; career match 8 s; resume intelligence 41 s |
 | Timeout chain | `LOCAL_MODEL_TIMEOUT_SECONDS` 120 s < backend `CHAT_AI_TIMEOUT_MS` 130 s < nginx `proxy_read_timeout` 150 s < browser 160 s |
 | Limits | `LOCAL_MODEL_NUM_CTX` 8192 (a prompt that does not fit is a failure, not silently truncated), `LOCAL_MODEL_MAX_TOKENS` 384 for chat (a reply that hits it is flagged `truncated`), `LOCAL_MODEL_STRUCTURED_MAX_TOKENS` 768 |
+| Runs as | uid 10002, with the model volume mounted read-only (it can serve the model but not change it). `ollama-init` creates the empty model directories on a fresh volume as root, without network and without changing ownership; `ollama-pull` stays root and is the only writer |

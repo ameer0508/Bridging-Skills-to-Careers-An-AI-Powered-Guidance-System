@@ -1,0 +1,27 @@
+# Isolation overlay for CI and local CI validation. Never used by the normal stack.
+#
+#   COMPOSE_PROJECT_NAME=skillbridge-ci-<unique id>
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.ci.yml   (Windows: ';' as the separator)
+#
+# Everything Compose creates is then named and labelled for that project only: containers,
+# volumes (<project>_mongo-data, ...), networks and built images. The base file's fixed
+# container names are removed, because they would collide with (and could be mistaken for) a
+# developer's running stack, and the published ports can be moved off 3000/5000 for a local run
+# beside that stack. e2e/ci/compose-isolated.sh checks all of this before and after the run.
+
+services:
+  mongodb:
+    container_name: !reset null
+  ai-service:
+    container_name: !reset null
+  backend:
+    container_name: !reset null
+    ports: !override
+      - "${SB_CI_API_PORT:-5000}:5000"
+  frontend:
+    container_name: !reset null
+    ports: !override
+      - "${SB_CI_WEB_PORT:-3000}:80"
+  ollama:
+    container_name: !reset null
+  # ollama-init has no fixed name in the base file, so it needs no override
