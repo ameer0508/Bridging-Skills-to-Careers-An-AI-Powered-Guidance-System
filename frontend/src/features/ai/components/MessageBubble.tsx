@@ -11,7 +11,9 @@ export interface ChatMessage {
   /** True when the AI was unavailable and a labelled summary of stored data was shown instead. */
   isFallback?: boolean;
   source?: 'ai' | 'fallback';
-  fallbackReason?: 'unavailable' | 'timeout' | 'error';
+  fallbackReason?: 'unavailable' | 'timeout' | 'error' | 'busy';
+  /** Set when older history was left out so the prompt fit the model's context window. */
+  contextTrimmed?: { droppedMessages: number; keptMessages: number };
   /** Provider and model that wrote an AI reply, as recorded by the server. */
   aiProvider?: string;
   aiModel?: string;
@@ -96,7 +98,7 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         {!isUser && isFallback && (
           <div className="flex items-center gap-1.5 pb-2 border-b border-amber-200 text-xs font-bold text-amber-700">
             <AlertTriangle className="w-3.5 h-3.5" />
-            <span>Not an AI reply: the assistant {message.fallbackReason === 'timeout' ? 'timed out' : 'is unavailable'}</span>
+            <span>Not an AI reply: the assistant {message.fallbackReason === 'timeout' ? 'timed out' : message.fallbackReason === 'busy' ? 'is busy' : 'is unavailable'}</span>
           </div>
         )}
         {!isUser && !isFallback && (
@@ -164,6 +166,13 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({
         {!isUser && !isFallback && (message.aiProvider || message.aiModel) && (
           <p className="pt-2 border-t border-aurora-line text-[10px] text-aurora-muted" data-testid="chat-reply-source">
             Written by {[message.aiProvider, message.aiModel].filter(Boolean).join(' / ')}
+          </p>
+        )}
+
+        {/* Older history was left out of this reply's prompt; the stored conversation is unchanged */}
+        {!isUser && message.contextTrimmed && message.contextTrimmed.droppedMessages > 0 && (
+          <p className="text-[10px] text-aurora-muted" data-testid="chat-context-trimmed">
+            Based on your profile and the latest {message.contextTrimmed.keptMessages} message{message.contextTrimmed.keptMessages === 1 ? '' : 's'}; {message.contextTrimmed.droppedMessages} earlier message{message.contextTrimmed.droppedMessages === 1 ? ' was' : 's were'} left out to fit the model.
           </p>
         )}
 

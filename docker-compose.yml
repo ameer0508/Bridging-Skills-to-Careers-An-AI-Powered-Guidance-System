@@ -49,6 +49,8 @@ services:
       - LOCAL_MODEL_NUM_CTX=${LOCAL_MODEL_NUM_CTX:-8192}
       - LOCAL_MODEL_MAX_TOKENS=${LOCAL_MODEL_MAX_TOKENS:-384}
       - LOCAL_MODEL_STRUCTURED_MAX_TOKENS=${LOCAL_MODEL_STRUCTURED_MAX_TOKENS:-768}
+      # Local generations running or waiting at once; beyond it a request is refused as busy
+      - LOCAL_MODEL_MAX_PENDING=${LOCAL_MODEL_MAX_PENDING:-2}
       - CORS_ALLOWED_ORIGINS=
       # AI observability (X11): codes and timings only, owner-only files, purged after the retention period
       - AI_AUDIT_DIR=/app/storage/ai-audit
@@ -146,6 +148,11 @@ services:
       - OLLAMA_MAX_LOADED_MODELS=1
       - OLLAMA_KEEP_ALIVE=30m
       - OLLAMA_NO_CLOUD=1
+      # llama.cpp keeps earlier prompts' state in RAM so a follow-up turn skips re-reading the
+      # conversation. Its default limit (8192 MiB) exceeds this container's 6 GiB cap: four
+      # concurrent synthetic chats took the container from 3.7 to 5.8 GiB. Model, KV cache and
+      # buffers take about 3.7 GiB, so 1024 MiB of prompt cache keeps the total near 4.7 GiB.
+      - LLAMA_ARG_CACHE_RAM=1024
     volumes:
       - ollama-models:/models:ro
     depends_on:

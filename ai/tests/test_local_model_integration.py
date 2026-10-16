@@ -345,3 +345,83 @@ def test_slow_model_does_not_block_other_requests(monkeypatch, service_headers):
     assert chat_r.status_code == 200 and health_r.status_code == 200
     assert health_done - started < 1.0, "health check waited for the model"
     assert health_done < chat_done
+
+
+# --- Capacity: explicit busy instead of a queue that can only time out ---------------------
+
+def test_busy_when_capacity_is_used_up(ollama, monkeypatch):
+    from app.providers import local_adapter as la
+    monkeypatch.setattr(la, "_capacity", threading.BoundedSemaphore(1))
+    la._capacity.acquire()  # someone else holds the only slot
+    sent = len(ollama.generate_requests)
+    resp = LocalModelAdapter().generate_content("hello")
+    assert resp.success is False and la.BUSY_MARKER in resp.errors[0]
+    assert len(ollama.generate_requests) == sent, "a busy refusal must not reach the model"
+    la._capacity.release()
+    assert LocalModelAdapter().generate_content("hello").success is True
+
+
+def test_capacity_is_released_after_failures(ollama, monkeypatch):
+    from app.providers import local_adapter as la
+    monkeypatch.setattr(la, "_capacity", threading.BoundedSemaphore(1))
+    ollama.models = []  # the model server answers 404: a failure inside the guarded section
+    for _ in range(3):
+        assert LocalModelAdapter().generate_content("hello").success is False
+    ollama.models = [MODEL]
+    assert LocalModelAdapter().generate_content("hello").success is True, "a failure leaked a capacity slot"
+
+
+def test_concurrent_requests_beyond_capacity_are_refused_at_once(ollama, monkeypatch):
+    from app.providers import local_adapter as la
+    monkeypatch.setattr(la, "_capacity", threading.BoundedSemaphore(2))
+    results, timings = [None] * 3, [None] * 3
+
+    def worker(i):
+        t0 = time.time()
+        results[i] = LocalModelAdapter().generate_content("hello")
+        timings[i] = time.time() - t0
+
+    real_request = LocalModelAdapter._request
+
+    # Each generation takes a second, so the three requests overlap
+    def delayed_request(self, path, addresses, timeout, payload=None):
+        if path == "/api/generate":
+            time.sleep(1.0)
+        return real_request(self, path, addresses, timeout, payload)
+
+    monkeypatch.setattr(LocalModelAdapter, "_request", delayed_request)
+    threads = [threading.Thread(target=worker, args=(i,)) for i in range(3)]
+    for t in threads:
+        t.start()
+        time.sleep(0.05)
+    for t in threads:
+        t.join()
+    busy = [r for r in results if not r.success and la.BUSY_MARKER in r.errors[0]]
+    served = [r for r in results if r.success]
+    assert len(served) == 2 and len(busy) == 1, [r.errors for r in results]
+    assert min(timings) < 0.5, "the refused request should be answered at once, not after waiting"
+
+
+def test_chat_route_says_busy_explicitly(monkeypatch, service_headers):
+    from fastapi.testclient import TestClient
+    from app.main import app
+    from app.routers import chat as chat_router
+    from app.providers.local_adapter import BUSY_MARKER
+
+    class Local:
+        provider_name = "local"
+
+    monkeypatch.setattr(chat_router.ai_gateway, "get_provider_chain", lambda *a, **k: [Local()])
+    monkeypatch.setattr(chat_router, "generate_chat_via_ai", lambda prompt: UnifiedAIResponse(
+        success=False, provider="gateway", model="none", errors=[f"All AI Providers failed: local: {BUSY_MARKER}: busy"]))
+    res = TestClient(app).post("/api/v1/chat", json={"prompt": "hi"}, headers=service_headers)
+    assert res.status_code == 503 and res.json()["code"] == "AI_BUSY"
+    assert res.headers.get("retry-after") == "60"
+    assert "data" not in res.json(), "a busy answer carries no reply"
+
+
+def test_busy_is_its_own_failure_category():
+    from app.observability import categorize_failure
+    from app.providers.local_adapter import BUSY_MARKER
+    assert categorize_failure(f"{BUSY_MARKER}: the local model is already handling 2 requests.") == "busy"
+    assert categorize_failure("timed out") == "timeout"

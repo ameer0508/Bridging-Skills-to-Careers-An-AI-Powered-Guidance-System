@@ -122,7 +122,7 @@ export interface FakeAiService {
    */
   questions: { mode: 'unavailable' | 'ok' | 'short'; set: Array<Record<string, unknown>>; payloads: Array<Record<string, any>> };
   /** How /api/v1/chat behaves. Defaults to 'ok' (a deterministic reply from a named fake provider). */
-  chat: { mode: 'ok' | 'unavailable' | 'slow' | 'error'; reply: string; delayMs: number; prompts: string[] };
+  chat: { mode: 'ok' | 'unavailable' | 'busy' | 'slow' | 'error'; reply: string; delayMs: number; prompts: string[] };
   /** How /api/v1/extract behaves: 'ok', 'fail' (500) or 'slow' (answers after `delayMs`). */
   extract: { mode: 'ok' | 'fail' | 'slow'; delayMs: number };
   /** Paths requested since start, e.g. "POST /api/v1/extract". */
@@ -297,6 +297,7 @@ export async function startFakeAiService(serviceKey: string, listenPort = 0): Pr
       if (path === '/api/v1/chat') {
         chat.prompts.push(String((JSON.parse(raw.toString('utf8') || '{}') as { prompt?: string }).prompt || ''));
         if (chat.mode === 'unavailable') return send(503, { success: false, code: 'AI_UNAVAILABLE', error: 'AI chat is unavailable.' });
+        if (chat.mode === 'busy') return send(503, { success: false, code: 'AI_BUSY', error: 'AI chat is busy; try again shortly.' });
         if (chat.mode === 'error') return send(500, { detail: 'Internal Server Error' });
         const reply = () => send(200, { success: true, data: chat.reply, provider: 'fake_ai_service', model: 'fake-chat-model' });
         if (chat.mode === 'slow') {

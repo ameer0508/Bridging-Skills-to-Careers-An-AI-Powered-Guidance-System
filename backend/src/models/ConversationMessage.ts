@@ -14,8 +14,10 @@ export interface IConversationMessage extends Document<Types.ObjectId> {
   /** Provider and model that wrote an AI reply; absent for fallbacks and user messages. */
   aiProvider?: string;
   aiModel?: string;
-  /** Why a fallback was shown. */
-  fallbackReason?: 'unavailable' | 'timeout' | 'error';
+  /** Why a fallback was shown. 'busy': the local model was at capacity and refused at once. */
+  fallbackReason?: 'unavailable' | 'timeout' | 'error' | 'busy';
+  /** Set when older history was left out so the prompt fits the model's context window. */
+  contextTrimmed?: { droppedMessages: number; keptMessages: number };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -35,7 +37,11 @@ const ConversationMessageSchema = new Schema<IConversationMessage>(
     source: { type: String, enum: ['ai', 'fallback'] },
     aiProvider: { type: String },
     aiModel: { type: String },
-    fallbackReason: { type: String, enum: ['unavailable', 'timeout', 'error'] }
+    fallbackReason: { type: String, enum: ['unavailable', 'timeout', 'error', 'busy'] },
+    contextTrimmed: {
+      type: new Schema({ droppedMessages: { type: Number, required: true }, keptMessages: { type: Number, required: true } }, { _id: false }),
+      default: undefined
+    }
   },
   { timestamps: true }
 );

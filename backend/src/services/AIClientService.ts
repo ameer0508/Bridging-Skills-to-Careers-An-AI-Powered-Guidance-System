@@ -24,7 +24,7 @@ export interface IUnifiedAIResponse<T = unknown> {
 
 /** Raised when no AI reply could be obtained. Callers show their own labelled fallback. */
 export class AiUnavailableError extends Error {
-  constructor(message: string, public readonly reason: 'unavailable' | 'timeout' | 'error') {
+  constructor(message: string, public readonly reason: 'unavailable' | 'timeout' | 'error' | 'busy') {
     super(message);
     this.name = 'AiUnavailableError';
   }
@@ -102,13 +102,17 @@ class AIClientService {
         throw new AiUnavailableError('The AI service returned no reply.', 'error');
       } catch (error: unknown) {
         if (error instanceof AiUnavailableError) throw error;
-        const err = error as { code?: string; message?: string; response?: { status?: number } };
+        const err = error as { code?: string; message?: string; response?: { status?: number; data?: unknown } };
         const status = err.response?.status;
         const timedOut = err.code === 'ECONNABORTED' || /timeout/i.test(err.message || '');
         logger.warn(`AI chat attempt ${attempt} failed: ${status ? `HTTP ${status}` : err.code || err.message}`);
 
         if (timedOut) throw new AiUnavailableError('The AI service did not answer in time.', 'timeout');
         if (status) {
+          // AI_BUSY: the local model is at capacity and refused at once; nothing was generated
+          if (status === 503 && (err.response as { data?: { code?: string } } | undefined)?.data?.code === 'AI_BUSY') {
+            throw new AiUnavailableError('The AI service is busy with other requests.', 'busy');
+          }
           throw new AiUnavailableError('The AI service has no provider available.', status === 503 ? 'unavailable' : 'error');
         }
         // No HTTP response at all: the connection failed. Worth one more try if time remains.

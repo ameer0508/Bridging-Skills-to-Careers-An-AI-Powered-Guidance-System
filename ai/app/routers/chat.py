@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from app.core.logging import logger
 from app.gateway.ai_gateway import ai_gateway
+from app.providers.local_adapter import BUSY_MARKER
 from app.services.chat_service import generate_chat_via_ai
 
 router = APIRouter(prefix="/api/v1/chat", tags=["chat"])
@@ -21,6 +22,15 @@ def _unavailable() -> JSONResponse:
     return JSONResponse(
         status_code=503,
         content={"success": False, "code": "AI_UNAVAILABLE", "error": "AI chat is unavailable."},
+    )
+
+
+def _busy() -> JSONResponse:
+    # The local model is at capacity: refused at once, nothing generated, cached or invented
+    return JSONResponse(
+        status_code=503,
+        headers={"Retry-After": "60"},
+        content={"success": False, "code": "AI_BUSY", "error": "AI chat is busy; try again shortly."},
     )
 
 
@@ -56,6 +66,8 @@ def generate_chat_response(request: ChatRequest):
     if not ai_resp.success or ai_resp.provider == MOCK_PROVIDER or not text or not text.strip():
         if not ai_resp.success:
             logger.warning(f"[Chat] AI provider returned an error: {'; '.join(ai_resp.errors)}")
+            if any(BUSY_MARKER in e for e in ai_resp.errors):
+                return _busy()
         return _unavailable()
 
     # Only fields that were actually measured or reported are returned: no confidence figure

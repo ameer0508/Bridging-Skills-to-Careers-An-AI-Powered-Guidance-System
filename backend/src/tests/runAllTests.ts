@@ -22,6 +22,7 @@ import { runOpportunityTrackingTests } from './opportunity_tracking.test.js';
 import { runChatReliabilityTests } from './chat_reliability.test.js';
 import { runCorsOriginTests } from './cors_origin.test.js';
 import { runAnalyticsAuthorizationTests } from './analytics_authorization.test.js';
+import { runChatCapacityTests } from './chat_capacity.test.js';
 import { runInputValidationTests } from './input_validation.test.js';
 import { runDiagnosticsAccessTests } from './diagnostics_access.test.js';
 import { runCareerLabTests } from './career_lab.test.js';
@@ -105,6 +106,7 @@ async function runAll() {
     await runChatReliabilityTests();
     await runCorsOriginTests();
     await runAnalyticsAuthorizationTests();
+    await runChatCapacityTests();
     await runInputValidationTests();
     await runDiagnosticsAccessTests();
     await runCareerLabTests();

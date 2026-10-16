@@ -23,6 +23,27 @@ MODEL_CHECK_TIMEOUT_SECONDS = 2.0
 
 THINK_BLOCK = re.compile(r"<think>.*?</think>", re.DOTALL)
 
+# Marks a refusal for lack of capacity, so callers can say "busy" rather than "unavailable"
+BUSY_MARKER = "LOCAL_MODEL_BUSY"
+
+
+def _max_pending() -> int:
+    try:
+        return max(1, int(os.getenv("LOCAL_MODEL_MAX_PENDING", "2")))
+    except ValueError:
+        return 2
+
+
+# Global limit on local generations in progress or waiting, shared by every route. The Ollama
+# server answers one request at a time (OLLAMA_NUM_PARALLEL=1) at about 37 s for a typical chat on
+# this CPU, so a third waiting request finishes near the 120 s timeout and a fourth always times
+# out (measured). Beyond the limit a request is refused at once as busy instead of waiting to fail.
+_capacity = threading.BoundedSemaphore(_max_pending())
+
+
+class LocalModelBusy(RuntimeError):
+    pass
+
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
     """A local model server has no reason to redirect; following one could leave this machine."""
@@ -168,7 +189,12 @@ class LocalModelAdapter(BaseAIProvider):
         }
         if response_format is not None:
             payload["format"] = response_format
-        data = self._request("/api/generate", addresses, self.timeout_seconds(), payload)
+        if not _capacity.acquire(blocking=False):
+            raise LocalModelBusy(f"{BUSY_MARKER}: the local model is already handling {_max_pending()} requests.")
+        try:
+            data = self._request("/api/generate", addresses, self.timeout_seconds(), payload)
+        finally:
+            _capacity.release()
         if data.get("error"):
             raise RuntimeError(f"Local model error: {data['error']}")
         text = data.get("response")

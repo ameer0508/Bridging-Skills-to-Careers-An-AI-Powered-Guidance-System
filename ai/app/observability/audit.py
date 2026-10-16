@@ -39,7 +39,7 @@ EVENT_KINDS = {
     "all_failed",          # every provider in the chain failed
 }
 
-FAILURE_CATEGORIES = ("quota", "timeout", "rate_limited", "auth", "network", "invalid_output", "server_error", "other")
+FAILURE_CATEGORIES = ("quota", "busy", "timeout", "rate_limited", "auth", "network", "invalid_output", "server_error", "other")
 
 MAX_EVENTS = 5000
 MAX_FILE_EVENTS = 200_000
@@ -55,6 +55,9 @@ def categorize_failure(message: str) -> str:
     text = (message or "").lower()
     if is_quota_error(message or ""):
         return "quota"
+    # The local model refused for lack of capacity (local_adapter.BUSY_MARKER)
+    if "local_model_busy" in text:
+        return "busy"
     if "timeout" in text or "timed out" in text:
         return "timeout"
     if "rate limit" in text:

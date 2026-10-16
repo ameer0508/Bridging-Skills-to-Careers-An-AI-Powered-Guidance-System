@@ -10,6 +10,49 @@ import type { IConversationMessage } from '../models/ConversationMessage.js';
 import logger from '../config/logger.js';
 import { AppError } from '../middlewares/errorHandler.js';
 
+/**
+ * Longest prompt, in characters, sent for a chat reply. The local model has an 8192-token context
+ * and may write up to 384 tokens; the chat prompt measured 3.12 characters per token, so 3 per
+ * token with a 256-token margin leaves about 22,000 characters. Older history is left out first.
+ */
+export const chatPromptMaxChars = (): number => Number(process.env.CHAT_PROMPT_MAX_CHARS) || 22000;
+
+export interface BuiltChatPrompt {
+  prompt: string;
+  droppedMessages: number;
+  keptMessages: number;
+}
+
+/**
+ * The chat prompt: the system instructions with the user's own verified context, the most recent
+ * history that fits, and the latest message. The instructions, the context and the latest message
+ * are always kept; only older history is dropped, oldest first, and the count is reported. If even
+ * those do not fit, the prompt is sent whole and the AI service refuses it as too long, so the
+ * user gets a labelled fallback rather than an answer based on a silently shortened prompt.
+ */
+export function buildChatPrompt(
+  contextData: Record<string, unknown>,
+  history: Array<{ role: string; content: string }>,
+  maxChars = chatPromptMaxChars()
+): BuiltChatPrompt {
+  const head = `${PromptBuilder.buildSystemPrompt(contextData)}\n\n=== CONVERSATION HISTORY ===\n`;
+  const tail = `\n[ASSISTANT]: `;
+  const lines = history.map(m => `[${m.role === 'assistant' ? 'MODEL' : 'USER'}]: ${m.content}\n`);
+  let start = 0;
+  let size = head.length + tail.length + lines.reduce((n, l) => n + l.length, 0);
+  // Never drop the latest message (the last line)
+  while (size > maxChars && start < lines.length - 1) {
+    size -= lines[start].length;
+    start += 1;
+  }
+  return { prompt: head + lines.slice(start).join('') + tail, droppedMessages: start, keptMessages: lines.length - start };
+}
+
+// Users with a chat reply being written right now. In process, like the other per-user limits
+// (docs/SECURITY_REVIEW.md): one reply at a time per user, so one account cannot queue several
+// slow local generations and crowd out everyone else.
+const repliesInProgress = new Set<string>();
+
 export class ConversationService {
   
   public async getConversations(userId: string) {
@@ -53,6 +96,10 @@ export class ConversationService {
 
   public async sendMessage(conversationId: string, userId: string, messageContent: string): Promise<IConversationMessage> {
     const conv = await this.findOwnedConversation(conversationId, userId);
+    return this.oneReplyAtATime(userId, () => this.storeAndAnswer(conv, userId, messageContent));
+  }
+
+  private async storeAndAnswer(conv: IConversation, userId: string, messageContent: string): Promise<IConversationMessage> {
 
     await ConversationMessage.create({
       conversationId: conv._id,
@@ -84,11 +131,26 @@ export class ConversationService {
       throw new AppError('There is no failed reply to retry in this conversation.', 409, 'NOTHING_TO_RETRY');
     }
 
-    await ConversationMessage.deleteOne({ _id: last._id });
-    const reply = await this.generateReply(conv, userId);
-    conv.updatedAt = new Date();
-    await conv.save();
-    return reply;
+    return this.oneReplyAtATime(userId, async () => {
+      await ConversationMessage.deleteOne({ _id: last._id });
+      const reply = await this.generateReply(conv, userId);
+      conv.updatedAt = new Date();
+      await conv.save();
+      return reply;
+    });
+  }
+
+  /** Refuses (409) while a reply for this user is still being written; nothing is stored then. */
+  private async oneReplyAtATime<T>(userId: string, work: () => Promise<T>): Promise<T> {
+    if (repliesInProgress.has(userId)) {
+      throw new AppError('A reply to your previous message is still being written. Please wait for it.', 409, 'REPLY_IN_PROGRESS');
+    }
+    repliesInProgress.add(userId);
+    try {
+      return await work();
+    } finally {
+      repliesInProgress.delete(userId);
+    }
   }
 
   private async findOwnedConversation(conversationId: string, userId: string): Promise<IConversation> {
@@ -123,14 +185,16 @@ export class ConversationService {
       .lean();
     recentMessages.reverse();
 
-    let fullPrompt = `${PromptBuilder.buildSystemPrompt(contextData)}\n\n=== CONVERSATION HISTORY ===\n`;
-    for (const m of recentMessages) {
-      fullPrompt += `[${m.role === 'assistant' ? 'MODEL' : 'USER'}]: ${m.content}\n`;
+    const built = buildChatPrompt(contextData, recentMessages);
+    const contextTrimmed = built.droppedMessages > 0
+      ? { droppedMessages: built.droppedMessages, keptMessages: built.keptMessages }
+      : undefined;
+    if (contextTrimmed) {
+      logger.info(`Chat prompt: left out the ${built.droppedMessages} oldest history message(s) to fit the model's context.`);
     }
-    fullPrompt += `\n[ASSISTANT]: `;
 
     try {
-      const reply = await AIClientService.generateChat(fullPrompt);
+      const reply = await AIClientService.generateChat(built.prompt);
       return await ConversationMessage.create({
         conversationId: conv._id,
         role: 'assistant',
@@ -139,7 +203,8 @@ export class ConversationService {
         isFallback: false,
         source: 'ai',
         aiProvider: reply.provider,
-        aiModel: reply.model
+        aiModel: reply.model,
+        contextTrimmed
       });
     } catch (error) {
       const reason = error instanceof AiUnavailableError ? error.reason : 'error';
@@ -151,7 +216,8 @@ export class ConversationService {
         contextSnapshotId: snapshot._id,
         isFallback: true,
         source: 'fallback',
-        fallbackReason: reason
+        fallbackReason: reason,
+        contextTrimmed
       });
     }
   }
@@ -161,12 +227,14 @@ export class ConversationService {
  * The reply shown when no AI answer could be obtained. It says so plainly and lists only
  * figures already stored for the user; it does not attempt to answer the question.
  */
-export function buildFallbackReply(context: Record<string, unknown>, reason: 'unavailable' | 'timeout' | 'error'): string {
+export function buildFallbackReply(context: Record<string, unknown>, reason: 'unavailable' | 'timeout' | 'error' | 'busy'): string {
   const lines: string[] = [];
   lines.push(
     reason === 'timeout'
       ? 'The AI assistant did not respond in time, so this is not an AI-generated answer.'
-      : 'The AI assistant is unavailable right now, so this is not an AI-generated answer.'
+      : reason === 'busy'
+        ? 'The AI assistant is busy with other requests right now, so this is not an AI-generated answer. Try again in a minute.'
+        : 'The AI assistant is unavailable right now, so this is not an AI-generated answer.'
   );
 
   const facts: string[] = [];
