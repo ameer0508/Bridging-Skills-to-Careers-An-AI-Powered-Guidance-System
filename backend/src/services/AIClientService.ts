@@ -177,8 +177,16 @@ class AIClientService {
    * retried: a repeat would only add a slow generation.
    */
   async explainCareerMatch(facts: CareerMatchExplanationFacts): Promise<ExplanationReply> {
+    return this.explainFacts('career-match', facts);
+  }
+
+  /**
+   * Asks the local model to explain one subject's facts (career-match, readiness, skill-gap,
+   * next-action), with the same guarantees as explainCareerMatch.
+   */
+  async explainFacts(subjectPath: string, facts: object): Promise<ExplanationReply> {
     try {
-      const response = await aiHttp.post(`/api/v1/explain/career-match`, { facts }, { timeout: explanationAiTimeoutMs() });
+      const response = await aiHttp.post(`/api/v1/explain/${subjectPath}`, { facts }, { timeout: explanationAiTimeoutMs() });
       const body = response.data ?? {};
       const text = body.data?.text;
       if (!body.success || typeof text !== 'string' || !text.trim()) {

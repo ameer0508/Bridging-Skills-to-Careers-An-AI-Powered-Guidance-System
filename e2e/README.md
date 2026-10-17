@@ -113,3 +113,12 @@ COMPOSE_PROJECT_NAME=skillbridge-ci-local-1 SB_CI_WEB_PORT=13000 SB_CI_API_PORT=
 - `lib/harness.mjs` has the browser helpers and the step reporter.
 - `tests/smoke.mjs` is the journey itself. Add a step with `t.step('name', async () => { ... })`
   and throw (or use `expect`) to fail it.
+
+`E2E_TEST_FILE=./tests/guidanceExplanations.mjs` covers the Phase 2 explanations: readiness and skill
+gaps on the readiness page, and the next step on the dashboard. It checks that:
+- opening or navigating the pages never asks the model;
+- generating by keyboard is labelled, with the warning and the facts given to the model;
+- gaps keep the engine's order;
+- the ranking, readiness and gaps are unchanged;
+- a rejected answer shows its own message;
+- the panels fit at phone width.

@@ -17,6 +17,8 @@ const RESUME = syntheticResume([
   'Python, Flask, SQL, PostgreSQL, Git, JavaScript, React',
 ]);
 const EXPLANATION = 'Your match reflects which requirements are evidenced and which are missing. Adding the missing ones first would raise it most.';
+// Local-AI wording is off by default; run this suite also with ENABLE_LOCAL_AI_EXPLANATIONS=true
+const AI_ON = ['1', 'true', 'on', 'yes'].includes((process.env.ENABLE_LOCAL_AI_EXPLANATIONS || '').trim().toLowerCase());
 
 export async function run({ webUrl, apiUrl, aiControl }) {
   const t = new Reporter();
@@ -38,7 +40,8 @@ export async function run({ webUrl, apiUrl, aiControl }) {
     await page.getByRole('button', { name: `Explain ${title}` }).first().click();
     const dialog = page.getByRole('dialog');
     await dialog.waitFor({ timeout: 10_000 });
-    await dialog.getByTestId('career-explanation').waitFor({ timeout: 10_000 });
+    if (AI_ON) await dialog.getByTestId('career-explanation').waitFor({ timeout: 10_000 });
+    else await dialog.getByRole('heading').first().waitFor({ timeout: 10_000 });
     return dialog;
   };
   const closeDialog = async () => {
@@ -67,6 +70,24 @@ export async function run({ webUrl, apiUrl, aiControl }) {
 
     const first = () => matches[0];
     const second = () => matches[1];
+
+    if (!AI_ON) {
+      await t.step('AI wording off (default): the career dialog shows the verified breakdown and no AI panel', async () => {
+        const dialog = await openDetails(first().careerId.title);
+        expect((await dialog.getByRole('heading').first().innerText()).includes(`${first().matchScore}% match`), 'the verified score is shown');
+        await page.waitForTimeout(1000);
+        expect((await dialog.getByTestId('career-explanation').count()) === 0, 'no explanation panel');
+        expect((await dialog.getByRole('button', { name: 'Explain with local AI' }).count()) === 0, 'no AI button');
+        await closeDialog();
+        expect((await modelCalls()) === 0 && posts.length === 0, 'nothing requested');
+      });
+      await t.step('AI wording off: a direct request is refused by the server', async () => {
+        const res = await api('POST', `/careers/${first().careerId._id}/explanation`);
+        expect(res.status === 403 && res.json?.error?.code === 'AI_EXPLANATIONS_DISABLED', `${res.status} ${res.json?.error?.code}`);
+        expect((await api('GET', `/careers/${first().careerId._id}/explanation`)).data?.explanation === null, 'no AI text returned');
+        expect((await modelCalls()) === 0, 'the model was never asked');
+      });
+    } else {
 
     await t.step('opening a match shows the optional button and never asks the model', async () => {
       const dialog = await openDetails(first().careerId.title);
@@ -133,7 +154,7 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       ['busy', 'The local AI is busy.'],
       ['unavailable', 'The local AI is not available right now.'],
       ['timeout', 'The local AI took too long to answer.'],
-      ['rejected', 'The explanation was not shown.'],
+      ['rejected', 'The AI wording was not shown.'],
     ]) {
       await t.step(`${mode}: a distinct, announced message, nothing shown as an explanation`, async () => {
         await aiControl({ explain: { mode } });
@@ -164,13 +185,14 @@ export async function run({ webUrl, apiUrl, aiControl }) {
       await closeDialog();
       await page.setViewportSize({ width: 1366, height: 900 });
     });
+    }
 
     await t.step('no unexpected errors', async () => {
       const unexpected = log.failed.filter((f) => !/\/explanation$/.test(f));
       expect(unexpected.length === 0, `failed requests: ${unexpected.join('; ')}`);
       // The failures this test provoked on purpose, as the browser and the dev-mode API client log them
-      const consoleErrors = log.console.filter((c) => !/status of (422|503|504)/.test(c)
-        && !/\[API Error\].*code: (AI_BUSY|AI_UNAVAILABLE|AI_TIMEOUT|EXPLANATION_REJECTED)/.test(c));
+      const consoleErrors = log.console.filter((c) => !/status of (403|422|503|504)/.test(c)
+        && !/\[API Error\].*code: (AI_BUSY|AI_UNAVAILABLE|AI_TIMEOUT|EXPLANATION_REJECTED|AI_EXPLANATIONS_DISABLED)/.test(c));
       expect(consoleErrors.length === 0, `console errors: ${consoleErrors.join('; ')}`);
     });
   } finally {

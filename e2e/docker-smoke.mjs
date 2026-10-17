@@ -233,7 +233,7 @@ async function fullRun() {
   });
 
   // The optional local-AI explanation of a match (docs/AI_EXPLANATIONS.md): owner only, reading never
-  // generates, and with no model (CI) generating gives the labelled AI_UNAVAILABLE and stores nothing
+  // generates, and in CI (no model, AI wording off by default) generating is refused with a label and stores nothing
   await check(`career explanation is answered honestly (${aiMode})`, () =>
     checkCareerExplanation({ api: API, call, token, otherToken, aiMode, localModel }));
 

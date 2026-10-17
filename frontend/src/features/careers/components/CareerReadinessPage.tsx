@@ -6,6 +6,7 @@ import { AlertTriangle, ArrowRight, Briefcase, CheckCircle2, Cpu, FolderGit2, Ga
 import apiClient from '../../../lib/axios';
 import { messageOf } from '../../../lib/collections';
 import { EvidenceBasisPanel, type EvidenceBasis } from './EvidenceBasisPanel';
+import { ReadinessExplanationPanel, SkillGapExplanationPanel } from '../aurora/GuidanceExplanationPanels';
 import { UploadCard } from '../../resume/aurora/ResumeParts';
 import type { CareerMatchData } from '../aurora/types';
 import { Notice, PageHeader, PageSkeleton, Pill, type PillTone } from '../../../design/aurora/kit';
@@ -281,6 +282,8 @@ export const CareerReadinessPage: React.FC = () => {
 
       <EvidenceBasisPanel basis={active.evidenceBasis} careerTitle={active.careerId.title} />
 
+      <ReadinessExplanationPanel key={`readiness-${active.careerId._id}`} careerId={active.careerId._id} />
+
       <div className="grid gap-6 lg:grid-cols-2">
         <section className={cardClass} aria-labelledby="gaps-heading">
           <CardHeader id="gaps-heading" icon={<AlertTriangle className="h-5 w-5" aria-hidden="true" />} title="Gaps to close" lead="Ordered by the server’s priority for this career." action={{ to: '/roadmap', label: 'Roadmap' }} />
@@ -327,6 +330,8 @@ export const CareerReadinessPage: React.FC = () => {
           )}
         </section>
       </div>
+
+      <SkillGapExplanationPanel key={`gaps-${active.careerId._id}`} careerId={active.careerId._id} />
     </div>
   );
 };

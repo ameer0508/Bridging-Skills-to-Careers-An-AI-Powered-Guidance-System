@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ListChecks } from 'lucide-react';
 import apiClient from '../../lib/axios';
 import { messageOf } from '../../lib/collections';
+import { NextActionExplanationPanel } from '../careers/aurora/GuidanceExplanationPanels';
 
 // Aurora Elite styling for the dashboard
 const panelClass = 'rounded-[28px] border border-aurora-line bg-white p-5 shadow-aurora-md sm:p-6 space-y-4';
@@ -153,6 +154,9 @@ export const NextStepsPanel: React.FC = () => {
             </li>
           ))}
         </ol>
+      )}
+      {data.hasProfile && data.career && data.actions.length > 0 && (
+        <NextActionExplanationPanel key={`next-${data.career.id}`} careerId={data.career.id} />
       )}
       {data.hasProfile && data.totalCandidates > data.actions.length && (
         <p className={labelClass}>{data.actions.length} of {data.totalCandidates} possible actions shown</p>

@@ -1,20 +1,23 @@
 import mongoose, { Schema, Document, Model, Types } from 'mongoose';
-import type { CareerMatchExplanationFacts } from '../services/AIClientService.js';
 
 /**
- * The latest local-AI explanation of one of a user's results (one per user, subject and career).
+ * The latest local-AI explanation of one of a user's results (one per user, subject and career):
+ * a career match, readiness, skill gaps or the next-best action.
  *
  * It keeps the exact facts the model was given, so the user can see what the text was based on, and
  * their hash, so the explanation is shown as out of date once the result changes. The facts are the
  * minimal sheet built from the stored match (skill names, statuses and counts); no resume text.
  * Removed with the account (AccountDeletionService finds every model with a userId).
  */
+export const EXPLANATION_SUBJECTS = ['career_match', 'readiness', 'skill_gap', 'next_action'] as const;
+export type ExplanationSubject = (typeof EXPLANATION_SUBJECTS)[number];
+
 export interface IAIExplanation extends Document<Types.ObjectId> {
   userId: Types.ObjectId;
-  subject: 'career_match';
+  subject: ExplanationSubject;
   careerId: Types.ObjectId;
   factsHash: string;
-  facts: CareerMatchExplanationFacts;
+  facts: Record<string, unknown>;
   text: string;
   aiProvider: string;
   aiModel: string;
@@ -28,7 +31,7 @@ export interface IAIExplanation extends Document<Types.ObjectId> {
 const AIExplanationSchema = new Schema<IAIExplanation>(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    subject: { type: String, enum: ['career_match'], required: true },
+    subject: { type: String, enum: EXPLANATION_SUBJECTS, required: true },
     careerId: { type: Schema.Types.ObjectId, ref: 'Career', required: true },
     factsHash: { type: String, required: true },
     facts: { type: Schema.Types.Mixed, required: true },

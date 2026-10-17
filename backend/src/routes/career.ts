@@ -24,5 +24,7 @@ router.get('/:careerId/market-evidence', CareerLabController.marketEvidence);
 // Optional local-AI explanation of a match (the score itself never changes); GET never runs the model
 router.get('/:careerId/explanation', CareerExplanationController.get);
 router.post('/:careerId/explanation', CareerExplanationController.generate);
+router.get('/:careerId/explanations/:subject', CareerExplanationController.getSubject);
+router.post('/:careerId/explanations/:subject', CareerExplanationController.generateSubject);
 
 export default router;

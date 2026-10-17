@@ -4,8 +4,81 @@ SkillBridge's scores come from deterministic, rule-based engines (docs/SCORING.m
 explanation puts one of those results into plain words. It never changes a score, a requirement or
 progress, and it is never generated unless the user asks for it.
 
-Phase 1 covers **career matches**. Readiness, skill gaps, roadmaps and next actions are not yet
-explained.
+Four results can be explained, each on the page that shows it:
+
+| Subject | Where | Source of truth | Phase |
+|---|---|---|---|
+| Career match | Careers → "Explain this match" dialog | CareerScoringEngine (stored match and breakdown) | 1 |
+| Readiness | Readiness page, "Readiness in plain words" | ReadinessCalculator (score, tier, dimensions, evidence basis) | 2 |
+| Skill gaps | Readiness page, "Your gaps in plain words" | GapPrioritizer (gaps, order, impact), with each skill's importance and status from the match | 2 |
+| Next-best action | Dashboard, "Why this step comes first" | NextBestAction ranking (the first action and its factors) | 2 |
+
+Roadmaps are not explained.
+
+## Verified summaries first, AI wording off by default
+
+Testing showed that the local model can write plausible but wrong conclusions, and that pattern
+checks cannot catch them. In an offline probe, 9 of 9 such statements got through the checks:
+- comparisons ("nearly as important as");
+- emphasis ("held back mainly by");
+- advice that contradicts the weights;
+- false limits ("cannot go above");
+- unsupported superlatives ("the quickest way").
+
+So each explanation has two parts.
+
+1. **Verified summary**, always shown for readiness, skill gaps and the next action:
+   - written by fixed templates (`backend/src/services/explanations/summaries.ts`) from the same
+     verified facts, with no model involved;
+   - states the exact score, tier, the four dimensions and their weights, the gaps in the engine's
+     order (ties included) with importance, status and priority, and why the first action is ranked
+     first (hypothetical score change, required skills addressed, what must be learnt first, effort
+     and fit with your weekly hours);
+   - labelled "Verified summary · written by SkillBridge's rules". It makes no comparison,
+     prediction or market claim beyond what the engines compute.
+2. **Experimental local AI wording**: only when the server sets `ENABLE_LOCAL_AI_EXPLANATIONS=true`.
+   It is off by default and covers all four subjects, career match included. It is enforced on the
+   backend (`config/aiFeatures.ts`). While it is off:
+   - the API reports `aiEnabled: false`;
+   - every generation request, including a direct `POST`, gets 403 `AI_EXPLANATIONS_DISABLED`
+     after the usual sign-in and ownership checks, so another user's career is still 404;
+   - no saved AI text is returned. Saved records are kept, not deleted, and reappear only if the
+     flag is turned on again and they still match the facts.
+
+   While it is on, everything below applies unchanged:
+   - only the local model can generate;
+   - the checks and the single retry still apply;
+   - the busy, unavailable, timeout and rejected messages still apply;
+   - the wording appears in its own section labelled "Experimental local AI wording", with the
+     warning, and never replaces the verified summary.
+
+Docker Compose passes the flag to the backend from `.env` (default `false`).
+
+All four share one implementation: the backend `ExplanationService` (one cache per user, subject
+and career; the shared generation lock; labelled failures) and the AI service's `/api/v1/explain/<subject>`
+endpoints with shared checks (`ai/app/explanations/common.py`) plus checks per subject.
+
+### Phase 2 checks per subject
+
+- **Readiness** (`readiness.py`):
+  - the tier is named only as computed;
+  - a dimension is called strongest or weakest only if its score is the highest or lowest;
+  - no dimension is given another dimension's score;
+  - required-skill counts carry the right status;
+  - a missing required skill is never presented as held;
+  - readiness is never said to rest on one kind of evidence;
+  - the dimension name "Education & Certifications" does not count as a credential claim.
+- **Skill gaps** (`skill_gap.py`):
+  - only the first gap in the prioritiser's order may be called the most important;
+  - importance and status are stated as they are (missing, weakly shown, strength);
+  - an impact score is attached only to the gap it belongs to.
+- **Next-best action** (`next_action.py`):
+  - the score change is stated exactly ("from 64 to 70", "by 6") and only as hypothetical ("would", not "will");
+  - no other action or order is discussed;
+  - the action is called what it is (skill check, practice project, portfolio entry);
+  - durations appear only as the facts give them;
+  - "learn first" and "fits your hours" are claimed only where true.
+- **All subjects:** no market demand, trends or popularity; no SkillBridge data backs them.
 
 ## What the user sees
 
@@ -87,7 +160,7 @@ The Docker CI workflow never downloads a model, so no CI run can contain a real 
 |---|---|
 | Explanations reach only a local model… (`e2e/ci/explanation-tests.sh ai-service`) | The running AI service refuses requests without the internal key, refuses facts with injected instructions or inconsistent counts (422), and, with no local model, answers valid facts with `AI_UNAVAILABLE` (503) and no text. |
 | Smoke check "career explanation is answered honestly (none)" (`e2e/lib/explanationSmoke.mjs`) | Through nginx and the real backend: sign-in is required, another user gets 404, reading never generates, generating gives the labelled `AI_UNAVAILABLE`, nothing is stored, and the stored score is unchanged. A generated explanation fails this check in CI. |
-| Explanation routes with a stub AI service (`… backend`) | The full backend explanation suite, run in the backend build image against a dedicated `skillbridge_ci_*` database (dropped before and after): ownership, identities, caching, staleness, request de-duplication, the shared chat lock, labelled failures, account deletion and unchanged scores. |
-| Explanation checks in the AI service image (`… ai`) | The AI service's explanation tests (validator, untrusted facts, local-only routing, busy, timeout and rejected) against the image's own code, with a fake Ollama on loopback. Only pytest (pinned, about 1 MB) is installed into the throwaway container. |
+| Explanation routes with a stub AI service (`… backend`) | The backend explanation suites (career match, and readiness, skill gaps and next action), run in the backend build image against a dedicated `skillbridge_ci_*` database (dropped before and after): ownership, identities, caching, staleness, request de-duplication, the shared chat lock, labelled failures, account deletion and unchanged scores. |
+| Explanation checks in the AI service image (`… ai`) | The AI service's explanation tests for all four subjects (validator, untrusted facts, local-only routing, busy, timeout and rejected) against the image's own code, with a fake Ollama on loopback. Only pytest (pinned, about 1 MB) is installed into the throwaway container. |
 
 Real explanation quality, latency and memory use still need a run with the real local Ollama model.

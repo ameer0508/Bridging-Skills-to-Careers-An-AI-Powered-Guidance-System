@@ -74,6 +74,9 @@ export async function runCareerExplanationTests() {
   console.log('  ✓ The CI test database option refuses any database but a dedicated skillbridge_ci_* one');
 
   // --- Over HTTP ---------------------------------------------------------------------------------
+  // These checks exercise the AI wording path, which is off by default (config/aiFeatures.ts)
+  const originalFlag = process.env.ENABLE_LOCAL_AI_EXPLANATIONS;
+  process.env.ENABLE_LOCAL_AI_EXPLANATIONS = 'true';
   const fakeAi = await ensureFakeAiService();
   await CareerService.seedInitialTaxonomy();
   const [careerA, careerB, careerC] = await Career.find().sort({ title: 1 }).limit(3).lean();
@@ -258,6 +261,8 @@ export async function runCareerExplanationTests() {
 
     console.log('✅ Career Explanation Tests Passed\n');
   } finally {
+    if (originalFlag === undefined) delete process.env.ENABLE_LOCAL_AI_EXPLANATIONS;
+    else process.env.ENABLE_LOCAL_AI_EXPLANATIONS = originalFlag;
     if (originalTimeout === undefined) delete process.env.EXPLANATION_AI_TIMEOUT_MS;
     else process.env.EXPLANATION_AI_TIMEOUT_MS = originalTimeout;
     resetFake();

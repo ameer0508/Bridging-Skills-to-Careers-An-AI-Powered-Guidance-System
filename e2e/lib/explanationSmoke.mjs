@@ -1,6 +1,7 @@
 // The career-match explanation, checked through the deployed stack the way a browser reaches it.
 // Used by e2e/docker-smoke.mjs. `aiMode` is the smoke test's SMOKE_AI_MODE:
-//   none   no model may answer (CI): generating must give the labelled AI_UNAVAILABLE and store nothing
+//   none   no model may answer (CI): generating must give a labelled refusal (AI_EXPLANATIONS_DISABLED while
+//          the experimental flag is off, the default; AI_UNAVAILABLE with it on) and store nothing
 //   local  the local model must answer, labelled with it (or be rejected with the labelled code)
 //   auto   either, each correctly labelled
 // In every mode an external provider or the development mock answering fails, reading never
@@ -49,8 +50,11 @@ export async function checkCareerExplanation({ api, call, token, otherToken, aiM
     outcome = `written by ${e.provider} / ${e.model}`;
   } else {
     const code = res.body?.error?.code;
-    expect(aiMode !== 'local' || code === 'EXPLANATION_REJECTED', `the local model did not answer (${res.status} ${code})`);
-    const allowed = aiMode === 'none' ? ['AI_UNAVAILABLE'] : ['AI_UNAVAILABLE', 'AI_BUSY', 'AI_TIMEOUT', 'EXPLANATION_REJECTED'];
+    // AI wording is off by default (ENABLE_LOCAL_AI_EXPLANATIONS): then the server refuses before any model is asked
+    const disabled = res.status === 403 && code === 'AI_EXPLANATIONS_DISABLED';
+    expect(disabled || aiMode !== 'local' || code === 'EXPLANATION_REJECTED', `the local model did not answer (${res.status} ${code})`);
+    expect(!disabled || read.body.data.aiEnabled === false, 'refused as disabled although the server reports AI wording on');
+    const allowed = aiMode === 'none' ? ['AI_UNAVAILABLE', 'AI_EXPLANATIONS_DISABLED'] : ['AI_UNAVAILABLE', 'AI_BUSY', 'AI_TIMEOUT', 'EXPLANATION_REJECTED', 'AI_EXPLANATIONS_DISABLED'];
     expect(allowed.includes(code), `unexpected answer ${res.status} ${code}`);
     expect(!res.body.data, 'a failure carried data');
     expect((await call('GET', path, { token })).body.data.explanation === null, 'a failed generation stored something');

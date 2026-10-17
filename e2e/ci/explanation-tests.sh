@@ -7,8 +7,9 @@
 #
 #   ai-service  the running AI service: facts with injected instructions are refused before any
 #               model runs, and without a local model valid facts get the labelled AI_UNAVAILABLE
-#   backend     the backend explanation suite (ownership, identities, caching, staleness, locks,
-#               labelled failures, account deletion, unchanged scores) with its in-process stub AI
+#   backend     the backend explanation suites, career match and Phase 2 guidance (ownership,
+#               identities, caching, staleness, locks, labelled failures, account deletion,
+#               unchanged scores and rankings) with their in-process stub AI
 #               service, in the backend build image, against a dedicated skillbridge_ci_* database
 #               in this project's MongoDB (dropped before and after)
 #   ai          the AI service's explanation tests (validator, untrusted facts, local-only routing,
@@ -38,9 +39,12 @@ backend() {
   docker build --quiet --target builder -f backend/Dockerfile -t "$image" . >/dev/null
   docker network inspect "$network" >/dev/null 2>&1 || die "network $network not found; is the project up?"
   local status=0
-  docker run --rm --network "$network" -w /app/backend \
-    -e EXPLANATION_TEST_MONGODB_URI="mongodb://mongodb:27017/${database}" \
-    "$image" node_modules/.bin/tsx src/tests/career_explanations.test.ts || status=$?
+  local suite
+  for suite in career_explanations guidance_explanations explanation_flag; do
+    docker run --rm --network "$network" -w /app/backend \
+      -e EXPLANATION_TEST_MONGODB_URI="mongodb://mongodb:27017/${database}" \
+      "$image" node_modules/.bin/tsx "src/tests/${suite}.test.ts" || status=$?
+  done
   docker rmi "$image" >/dev/null || true
   return "$status"
 }
@@ -52,7 +56,8 @@ ai() {
   # is the image's own. Outbound connections are blocked by the tests once pytest is installed.
   docker run --rm --entrypoint sh -v "$PWD/ai/tests:/app/tests:ro" "$image" -c \
     "pip install --user --no-cache-dir --disable-pip-version-check --quiet pytest==${PYTEST_VERSION} \
-     && python -m pytest -q -p no:cacheprovider tests/test_career_explanation.py"
+     && python -m pytest -q -p no:cacheprovider tests/test_career_explanation.py tests/test_readiness_explanation.py \
+        tests/test_skill_gap_explanation.py tests/test_next_action_explanation.py"
 }
 
 case "${1:-}" in

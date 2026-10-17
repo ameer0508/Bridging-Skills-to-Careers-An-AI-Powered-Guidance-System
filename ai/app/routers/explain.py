@@ -8,20 +8,27 @@ failure (busy, unavailable, timeout or rejected) and nothing is invented.
 """
 import os
 import time
+from types import ModuleType
 from typing import Any, Dict, List
 
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
 from app.core.logging import logger
-from app.explanations.career_match import PROMPT_VERSION, build_prompt, build_retry_prompt, validate_explanation
+from app.explanations import career_match, next_action, readiness, skill_gap
 from app.gateway.ai_gateway import ai_gateway
 from app.providers.local_adapter import BUSY_MARKER
-from app.schemas.explanation import CareerMatchExplanationRequest
+from app.schemas.explanation import (
+    CareerMatchExplanationRequest,
+    NextActionExplanationRequest,
+    ReadinessExplanationRequest,
+    SkillGapExplanationRequest,
+)
 
 router = APIRouter(prefix="/api/v1/explain", tags=["Explanations"])
 
-SERVICE_NAME = "career_match_explanation"  # not in NON_PERSONAL_SERVICES: treated as personal data
+# Service names are not in NON_PERSONAL_SERVICES, so the gateway treats every one as personal data
+SERVICE_NAME = "career_match_explanation"
 LOCAL = "local"
 
 
@@ -65,19 +72,17 @@ def _add_usage(total: Dict[str, Any], usage: Dict[str, Any]) -> Dict[str, Any]:
     return out
 
 
-@router.post("/career-match")
-def explain_career_match(request: CareerMatchExplanationRequest):
+def _explain(service_name: str, subject: ModuleType, facts: Any):
     """
-    Synchronous on purpose, like chat: FastAPI runs it in a worker thread, so a slow local model
-    does not hold up the event loop.
+    One explanation of `facts` by the local model, using the subject module's prompt and checks
+    (build_prompt, build_retry_prompt, validate_explanation, PROMPT_VERSION).
 
     A reply that fails the checks gets one more attempt (EXPLANATION_MAX_ATTEMPTS, default 2), with
     the reasons added to the prompt. Every attempt is checked; if none passes, the caller gets a
     labelled rejection and no text.
     """
-    facts = request.facts
     if not _local_available():
-        ai_gateway.record_unavailable(SERVICE_NAME, "local_model_unavailable")
+        ai_gateway.record_unavailable(service_name, "local_model_unavailable")
         return _failure(503, "AI_UNAVAILABLE", "The local AI model is unavailable.")
 
     usage: Dict[str, Any] = {}
@@ -88,13 +93,13 @@ def explain_career_match(request: CareerMatchExplanationRequest):
     attempt = 0
     while attempt < attempts:
         attempt += 1
-        if attempt > 1 and time.monotonic() - started > _retry_budget_seconds():
+        if attempt > 1 and time.monotonic() - started >= _retry_budget_seconds():
             attempt -= 1
             break
-        prompt = build_prompt(facts) if attempt == 1 else build_retry_prompt(facts, reasons)
+        prompt = subject.build_prompt(facts) if attempt == 1 else subject.build_retry_prompt(facts, reasons)
         try:
             response = ai_gateway.route_request(
-                service_name=SERVICE_NAME,
+                service_name=service_name,
                 method_name="explain_facts",
                 payload=prompt,
                 requested_provider=LOCAL,
@@ -124,7 +129,7 @@ def explain_career_match(request: CareerMatchExplanationRequest):
         if response.metadata.get("done_reason") == "length":
             reasons = ["was cut off at the length limit"]
         else:
-            checked = validate_explanation(response.response, facts)
+            checked = subject.validate_explanation(response.response, facts)
             if checked.passed:
                 return {
                     "success": True,
@@ -134,11 +139,33 @@ def explain_career_match(request: CareerMatchExplanationRequest):
                     "latency": round(latency, 2),
                     "usage": usage,
                     "attempts": attempt,
-                    "prompt_version": PROMPT_VERSION,
+                    "prompt_version": subject.PROMPT_VERSION,
                     "validation": {"passed": True},
                 }
             reasons = checked.reasons
-        logger.info(f"[Explain] Attempt {attempt} rejected: {reasons}")
+        logger.info(f"[Explain] {service_name} attempt {attempt} rejected: {reasons}")
 
     return _failure(422, "EXPLANATION_REJECTED", "The explanation did not agree with the verified facts.",
                     reasons=reasons, attempts=attempt, provider=LOCAL, model=response.model, usage=usage)
+
+
+@router.post("/career-match")
+def explain_career_match(request: CareerMatchExplanationRequest):
+    """Synchronous on purpose, like chat: FastAPI runs it in a worker thread, so a slow local model
+    does not hold up the event loop."""
+    return _explain(SERVICE_NAME, career_match, request.facts)
+
+
+@router.post("/readiness")
+def explain_readiness(request: ReadinessExplanationRequest):
+    return _explain("readiness_explanation", readiness, request.facts)
+
+
+@router.post("/skill-gap")
+def explain_skill_gap(request: SkillGapExplanationRequest):
+    return _explain("skill_gap_explanation", skill_gap, request.facts)
+
+
+@router.post("/next-action")
+def explain_next_action(request: NextActionExplanationRequest):
+    return _explain("next_action_explanation", next_action, request.facts)

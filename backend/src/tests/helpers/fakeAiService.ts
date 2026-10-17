@@ -124,11 +124,12 @@ export interface FakeAiService {
   /** How /api/v1/chat behaves. Defaults to 'ok' (a deterministic reply from a named fake provider). */
   chat: { mode: 'ok' | 'unavailable' | 'busy' | 'slow' | 'error'; reply: string; delayMs: number; prompts: string[] };
   /**
-   * How /api/v1/explain/career-match behaves. Defaults to 'ok' (`text` from a named fake local
-   * provider). 'slow' answers after `delayMs`; 'rejected', 'busy', 'unavailable' and 'timeout'
-   * return the AI service's labelled failures. `payloads` records every request body received.
+   * How /api/v1/explain/<subject> behaves (career-match, readiness, skill-gap, next-action).
+   * Defaults to 'ok' (`text` from a named fake local provider). 'slow' answers after `delayMs`;
+   * 'rejected', 'busy', 'unavailable' and 'timeout' return the AI service's labelled failures.
+   * `payloads` records every request body received and `paths` the path of each.
    */
-  explain: { mode: 'ok' | 'slow' | 'rejected' | 'busy' | 'unavailable' | 'timeout'; text: string; delayMs: number; payloads: Array<Record<string, any>> };
+  explain: { mode: 'ok' | 'slow' | 'rejected' | 'busy' | 'unavailable' | 'timeout'; text: string; delayMs: number; payloads: Array<Record<string, any>>; paths: string[] };
   /** How /api/v1/extract behaves: 'ok', 'fail' (500) or 'slow' (answers after `delayMs`). */
   extract: { mode: 'ok' | 'fail' | 'slow'; delayMs: number };
   /** Paths requested since start, e.g. "POST /api/v1/extract". */
@@ -159,7 +160,7 @@ export async function startFakeAiService(serviceKey: string, listenPort = 0): Pr
   const extract: FakeAiService['extract'] = { mode: 'ok', delayMs: 400 };
   const chat: FakeAiService['chat'] = { mode: 'ok', reply: 'Deterministic test reply.', delayMs: 1500, prompts: [] };
   const questions: FakeAiService['questions'] = { mode: 'unavailable', set: [], payloads: [] };
-  const explain: FakeAiService['explain'] = { mode: 'ok', text: 'Deterministic test explanation of your match.', delayMs: 1500, payloads: [] };
+  const explain: FakeAiService['explain'] = { mode: 'ok', text: 'Deterministic test explanation of your match.', delayMs: 1500, payloads: [], paths: [] };
 
   const server = http.createServer((req, res) => {
     const chunks: Buffer[] = [];
@@ -199,7 +200,7 @@ export async function startFakeAiService(serviceKey: string, listenPort = 0): Pr
           extract: { mode: extract.mode },
           chat: { mode: chat.mode, prompts: chat.prompts.length },
           questions: { mode: questions.mode, payloads: questions.payloads.length },
-          explain: { mode: explain.mode, payloads: explain.payloads.length }
+          explain: { mode: explain.mode, payloads: explain.payloads.length, paths: explain.paths }
         });
       }
 
@@ -303,8 +304,9 @@ export async function startFakeAiService(serviceKey: string, listenPort = 0): Pr
         const set = questions.set.slice(0, questions.mode === 'short' ? count - 1 : count);
         return send(200, { success: true, provider: 'fake', model: 'fake-questions', data: { questions: set } });
       }
-      if (path === '/api/v1/explain/career-match') {
+      if (path.startsWith('/api/v1/explain/')) {
         explain.payloads.push(JSON.parse(raw.toString('utf8') || '{}'));
+        explain.paths.push(path);
         if (explain.mode === 'unavailable') return send(503, { success: false, code: 'AI_UNAVAILABLE', error: 'The local AI model is unavailable.' });
         if (explain.mode === 'busy') return send(503, { success: false, code: 'AI_BUSY', error: 'The local AI model is busy; try again shortly.' });
         if (explain.mode === 'timeout') return send(504, { success: false, code: 'AI_TIMEOUT', error: 'The local AI model did not answer in time.' });
@@ -313,7 +315,7 @@ export async function startFakeAiService(serviceKey: string, listenPort = 0): Pr
         }
         const reply = () => send(200, {
           success: true, data: { text: explain.text }, provider: 'fake_local', model: 'fake-explainer',
-          latency: 12, usage: { prompt_tokens: 210, completion_tokens: 90, source: 'provider' }, prompt_version: 'career-match-explanation-v1'
+          latency: 12, usage: { prompt_tokens: 210, completion_tokens: 90, source: 'provider' }, prompt_version: `${path.slice('/api/v1/explain/'.length)}-explanation-v1`
         });
         if (explain.mode === 'slow') {
           setTimeout(reply, explain.delayMs).unref();
