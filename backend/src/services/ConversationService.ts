@@ -9,6 +9,7 @@ import type { IConversation } from '../models/Conversation.js';
 import type { IConversationMessage } from '../models/ConversationMessage.js';
 import logger from '../config/logger.js';
 import { AppError } from '../middlewares/errorHandler.js';
+import { withUserAiGeneration } from './aiGenerationLock.js';
 
 /**
  * Longest prompt, in characters, sent for a chat reply. The local model has an 8192-token context
@@ -47,11 +48,6 @@ export function buildChatPrompt(
   }
   return { prompt: head + lines.slice(start).join('') + tail, droppedMessages: start, keptMessages: lines.length - start };
 }
-
-// Users with a chat reply being written right now. In process, like the other per-user limits
-// (docs/SECURITY_REVIEW.md): one reply at a time per user, so one account cannot queue several
-// slow local generations and crowd out everyone else.
-const repliesInProgress = new Set<string>();
 
 export class ConversationService {
   
@@ -140,17 +136,12 @@ export class ConversationService {
     });
   }
 
-  /** Refuses (409) while a reply for this user is still being written; nothing is stored then. */
+  /**
+   * Refuses (409) while a reply, or an explanation, for this user is still being written; nothing
+   * is stored then. The lock is shared with explanations (aiGenerationLock).
+   */
   private async oneReplyAtATime<T>(userId: string, work: () => Promise<T>): Promise<T> {
-    if (repliesInProgress.has(userId)) {
-      throw new AppError('A reply to your previous message is still being written. Please wait for it.', 409, 'REPLY_IN_PROGRESS');
-    }
-    repliesInProgress.add(userId);
-    try {
-      return await work();
-    } finally {
-      repliesInProgress.delete(userId);
-    }
+    return withUserAiGeneration(userId, 'chat', work);
   }
 
   private async findOwnedConversation(conversationId: string, userId: string): Promise<IConversation> {
@@ -207,7 +198,7 @@ export class ConversationService {
         contextTrimmed
       });
     } catch (error) {
-      const reason = error instanceof AiUnavailableError ? error.reason : 'error';
+      const reason = error instanceof AiUnavailableError && error.reason !== 'rejected' ? error.reason : 'error';
       logger.warn(`Chat reply fell back to the stored-data summary (${reason}).`);
       return await ConversationMessage.create({
         conversationId: conv._id,

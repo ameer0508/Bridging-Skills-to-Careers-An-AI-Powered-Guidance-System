@@ -32,9 +32,12 @@ export interface IUnifiedAIResponse<T = unknown> {
   metadata: Record<string, unknown>;
 }
 
-/** Raised when no AI reply could be obtained. Callers show their own labelled fallback. */
+/**
+ * Raised when no AI reply could be obtained. Callers show their own labelled fallback.
+ * 'rejected': the model answered, but the text failed the AI service's checks against the facts.
+ */
 export class AiUnavailableError extends Error {
-  constructor(message: string, public readonly reason: 'unavailable' | 'timeout' | 'error' | 'busy') {
+  constructor(message: string, public readonly reason: 'unavailable' | 'timeout' | 'error' | 'busy' | 'rejected') {
     super(message);
     this.name = 'AiUnavailableError';
   }
@@ -53,6 +56,38 @@ export interface ChatReply {
  * < browser request (160s).
  */
 export const chatAiTimeoutMs = (): number => Number(process.env.CHAT_AI_TIMEOUT_MS) || 130000;
+
+/** Same chain as chat: local model 120s < this < nginx 150s < browser 160s. */
+export const explanationAiTimeoutMs = (): number => Number(process.env.EXPLANATION_AI_TIMEOUT_MS) || chatAiTimeoutMs();
+
+/** The facts sent for a career-match explanation (built by the backend from the stored match). */
+export interface CareerMatchExplanationFacts {
+  career_title: string;
+  match_score: number;
+  evidence_share_percent: number;
+  requirements: Array<{ skill: string; importance: 'required' | 'preferred' | 'supporting'; status: 'applied' | 'listed' | 'inferred' | 'missing' }>;
+  required: ExplanationStatusCounts;
+  preferred: ExplanationStatusCounts;
+  supporting: ExplanationStatusCounts;
+  top_missing: string[];
+}
+
+export interface ExplanationStatusCounts {
+  total: number;
+  applied: number;
+  listed: number;
+  inferred: number;
+  missing: number;
+}
+
+export interface ExplanationReply {
+  text: string;
+  provider: string;
+  model: string;
+  promptVersion: string;
+  latencyMs: number;
+  usage: { promptTokens: number; completionTokens: number; source: string };
+}
 
 class AIClientService {
   /**
@@ -133,6 +168,54 @@ class AIClientService {
       }
     }
     throw new AiUnavailableError('The AI service could not be reached.', 'unavailable');
+  }
+
+  /**
+   * Asks the local model to explain a career-match result. The AI service only lets the local
+   * model answer and returns the text only after checking it against the facts; otherwise this
+   * throws AiUnavailableError ('busy', 'unavailable', 'timeout', 'rejected' or 'error'). Not
+   * retried: a repeat would only add a slow generation.
+   */
+  async explainCareerMatch(facts: CareerMatchExplanationFacts): Promise<ExplanationReply> {
+    try {
+      const response = await aiHttp.post(`/api/v1/explain/career-match`, { facts }, { timeout: explanationAiTimeoutMs() });
+      const body = response.data ?? {};
+      const text = body.data?.text;
+      if (!body.success || typeof text !== 'string' || !text.trim()) {
+        throw new AiUnavailableError('The AI service returned no explanation.', 'error');
+      }
+      if (body.provider === 'mock') {
+        // The development mock is canned text, never an explanation
+        throw new AiUnavailableError('The AI service answered with a test provider.', 'unavailable');
+      }
+      return {
+        text: text.trim(),
+        provider: String(body.provider || 'unknown'),
+        model: String(body.model || 'unknown'),
+        promptVersion: String(body.prompt_version || 'unknown'),
+        latencyMs: Number(body.latency) || 0,
+        usage: {
+          promptTokens: Number(body.usage?.prompt_tokens) || 0,
+          completionTokens: Number(body.usage?.completion_tokens) || 0,
+          source: String(body.usage?.source || 'unavailable'),
+        },
+      };
+    } catch (error: unknown) {
+      if (error instanceof AiUnavailableError) throw error;
+      const err = error as { code?: string; message?: string; response?: { status?: number; data?: { code?: string; reasons?: unknown } } };
+      const status = err.response?.status;
+      const code = err.response?.data?.code;
+      if (err.code === 'ECONNABORTED' || /timeout/i.test(err.message || '') || code === 'AI_TIMEOUT') {
+        throw new AiUnavailableError('The local AI model did not answer in time.', 'timeout');
+      }
+      if (code === 'AI_BUSY') throw new AiUnavailableError('The local AI model is busy with other requests.', 'busy');
+      if (code === 'EXPLANATION_REJECTED') {
+        logger.info(`Explanation rejected by the AI service's checks: ${JSON.stringify(err.response?.data?.reasons ?? [])}`);
+        throw new AiUnavailableError('The explanation did not agree with the verified facts.', 'rejected');
+      }
+      logger.warn(`Explanation request failed: ${status ? `HTTP ${status}` : err.code || err.message}`);
+      throw new AiUnavailableError('The local AI model is unavailable.', !status || status === 503 ? 'unavailable' : 'error');
+    }
   }
 
   /**

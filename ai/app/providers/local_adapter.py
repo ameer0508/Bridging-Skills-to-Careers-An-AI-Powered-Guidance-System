@@ -99,6 +99,11 @@ class LocalModelAdapter(BaseAIProvider):
     def structured_max_tokens() -> int:
         return int(_env_number("LOCAL_MODEL_STRUCTURED_MAX_TOKENS", 768, 16))
 
+    @staticmethod
+    def explanation_max_tokens() -> int:
+        # A short paragraph (at most about 150 words); longer output is cut off and then rejected
+        return int(_env_number("LOCAL_MODEL_EXPLANATION_MAX_TOKENS", 320, 16))
+
     def _check_local_only(self) -> List[str]:
         """
         Raises unless the endpoint is on this machine (or the Docker Ollama service) and the model
@@ -174,7 +179,8 @@ class LocalModelAdapter(BaseAIProvider):
             return False
         return self._model_downloaded(addresses)
 
-    def _call_local_api(self, prompt: str, num_predict: int, response_format: Optional[Dict[str, Any]] = None) -> Tuple[str, Dict[str, Any]]:
+    def _call_local_api(self, prompt: str, num_predict: int, response_format: Optional[Dict[str, Any]] = None,
+                        extra_options: Optional[Dict[str, Any]] = None) -> Tuple[str, Dict[str, Any]]:
         """One generation. Returns the reply text and Ollama's own measurements; raises on any failure."""
         addresses = self._check_local_only()
         num_ctx = self.num_ctx()
@@ -185,7 +191,7 @@ class LocalModelAdapter(BaseAIProvider):
             "model": self._model_name,
             "prompt": prompt,
             "stream": False,
-            "options": {"num_ctx": num_ctx, "num_predict": num_predict},
+            "options": {**(extra_options or {}), "num_ctx": num_ctx, "num_predict": num_predict},
         }
         if response_format is not None:
             payload["format"] = response_format
@@ -284,6 +290,35 @@ class LocalModelAdapter(BaseAIProvider):
                 model=self._model_name,
                 latency_ms=latency,
                 prompt_text=prompt
+            )
+
+    def explain_facts(self, prompt: str) -> UnifiedAIResponse:
+        """
+        One explanation paragraph for a prompt the caller built in full (no chat persona around it).
+        Same capacity limit, timeout and context checks as every other local generation; a low
+        temperature keeps the wording close to the facts. The caller validates the text.
+        """
+        start_time = time.time()
+        try:
+            result, stats = self._call_local_api(prompt, self.explanation_max_tokens(), extra_options={"temperature": 0.2})
+            latency = (time.time() - start_time) * 1000
+            metadata: Dict[str, Any] = {"done_reason": stats.get("done_reason")}
+            return ResponseNormalizer.normalize_success(
+                raw_data=result,
+                provider=self.provider_name,
+                model=self._model_name,
+                latency_ms=latency,
+                metadata=metadata,
+                actual_usage=self._usage(stats),
+            )
+        except Exception as e:
+            latency = (time.time() - start_time) * 1000
+            logger.error(f"LocalModelAdapter explain_facts failed: {e}")
+            return ResponseNormalizer.normalize_error(
+                error_msg=str(e),
+                provider=self.provider_name,
+                model=self._model_name,
+                latency_ms=latency,
             )
 
     def parse_resume_text(self, text: str, schema_class: Any) -> UnifiedAIResponse:

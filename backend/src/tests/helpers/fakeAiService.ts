@@ -123,6 +123,12 @@ export interface FakeAiService {
   questions: { mode: 'unavailable' | 'ok' | 'short'; set: Array<Record<string, unknown>>; payloads: Array<Record<string, any>> };
   /** How /api/v1/chat behaves. Defaults to 'ok' (a deterministic reply from a named fake provider). */
   chat: { mode: 'ok' | 'unavailable' | 'busy' | 'slow' | 'error'; reply: string; delayMs: number; prompts: string[] };
+  /**
+   * How /api/v1/explain/career-match behaves. Defaults to 'ok' (`text` from a named fake local
+   * provider). 'slow' answers after `delayMs`; 'rejected', 'busy', 'unavailable' and 'timeout'
+   * return the AI service's labelled failures. `payloads` records every request body received.
+   */
+  explain: { mode: 'ok' | 'slow' | 'rejected' | 'busy' | 'unavailable' | 'timeout'; text: string; delayMs: number; payloads: Array<Record<string, any>> };
   /** How /api/v1/extract behaves: 'ok', 'fail' (500) or 'slow' (answers after `delayMs`). */
   extract: { mode: 'ok' | 'fail' | 'slow'; delayMs: number };
   /** Paths requested since start, e.g. "POST /api/v1/extract". */
@@ -153,6 +159,7 @@ export async function startFakeAiService(serviceKey: string, listenPort = 0): Pr
   const extract: FakeAiService['extract'] = { mode: 'ok', delayMs: 400 };
   const chat: FakeAiService['chat'] = { mode: 'ok', reply: 'Deterministic test reply.', delayMs: 1500, prompts: [] };
   const questions: FakeAiService['questions'] = { mode: 'unavailable', set: [], payloads: [] };
+  const explain: FakeAiService['explain'] = { mode: 'ok', text: 'Deterministic test explanation of your match.', delayMs: 1500, payloads: [] };
 
   const server = http.createServer((req, res) => {
     const chunks: Buffer[] = [];
@@ -184,13 +191,15 @@ export async function startFakeAiService(serviceKey: string, listenPort = 0): Pr
           Object.assign(extract, patch.extract || {});
           Object.assign(chat, patch.chat || {});
           Object.assign(questions, patch.questions || {});
+          Object.assign(explain, patch.explain || {});
         }
         return send(200, {
           requests,
           interview: { mode: interview.mode },
           extract: { mode: extract.mode },
           chat: { mode: chat.mode, prompts: chat.prompts.length },
-          questions: { mode: questions.mode, payloads: questions.payloads.length }
+          questions: { mode: questions.mode, payloads: questions.payloads.length },
+          explain: { mode: explain.mode, payloads: explain.payloads.length }
         });
       }
 
@@ -294,6 +303,24 @@ export async function startFakeAiService(serviceKey: string, listenPort = 0): Pr
         const set = questions.set.slice(0, questions.mode === 'short' ? count - 1 : count);
         return send(200, { success: true, provider: 'fake', model: 'fake-questions', data: { questions: set } });
       }
+      if (path === '/api/v1/explain/career-match') {
+        explain.payloads.push(JSON.parse(raw.toString('utf8') || '{}'));
+        if (explain.mode === 'unavailable') return send(503, { success: false, code: 'AI_UNAVAILABLE', error: 'The local AI model is unavailable.' });
+        if (explain.mode === 'busy') return send(503, { success: false, code: 'AI_BUSY', error: 'The local AI model is busy; try again shortly.' });
+        if (explain.mode === 'timeout') return send(504, { success: false, code: 'AI_TIMEOUT', error: 'The local AI model did not answer in time.' });
+        if (explain.mode === 'rejected') {
+          return send(422, { success: false, code: 'EXPLANATION_REJECTED', error: 'The explanation did not agree with the verified facts.', reasons: ['uses numbers not in the facts: [99]'] });
+        }
+        const reply = () => send(200, {
+          success: true, data: { text: explain.text }, provider: 'fake_local', model: 'fake-explainer',
+          latency: 12, usage: { prompt_tokens: 210, completion_tokens: 90, source: 'provider' }, prompt_version: 'career-match-explanation-v1'
+        });
+        if (explain.mode === 'slow') {
+          setTimeout(reply, explain.delayMs).unref();
+          return;
+        }
+        return reply();
+      }
       if (path === '/api/v1/chat') {
         chat.prompts.push(String((JSON.parse(raw.toString('utf8') || '{}') as { prompt?: string }).prompt || ''));
         if (chat.mode === 'unavailable') return send(503, { success: false, code: 'AI_UNAVAILABLE', error: 'AI chat is unavailable.' });
@@ -321,6 +348,7 @@ export async function startFakeAiService(serviceKey: string, listenPort = 0): Pr
     extract,
     questions,
     chat,
+    explain,
     stop: () => new Promise<void>(resolve => server.close(() => resolve()))
   };
 }

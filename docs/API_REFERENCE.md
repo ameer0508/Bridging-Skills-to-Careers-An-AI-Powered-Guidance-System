@@ -95,6 +95,8 @@ Nothing in this group changes the user's skills or scores, except recording a co
 | `POST` | `/api/v1/careers/what-if` | Yes | Body `changes` (1 to 10 of `add_skill`, `remove_skill`, `add_project`, `add_certification`, `add_experience`, `pass_assessment`) and optional `careerIds`. Scores before and after with requirement-level changes. `400 UNKNOWN_SKILL` for a skill that is not recognised. Nothing is saved. |
 | `GET` | `/api/v1/careers/:id/counterfactuals` | Yes | Ranked single changes and a path to `targetScore` (query, 0-100). |
 | `GET` | `/api/v1/careers/:id/market-evidence` | Yes | Market evidence for one career: a posting count only for valid, fresh, sourced data, otherwise "unavailable" with the reason. |
+| `GET` | `/api/v1/careers/:id/explanation` | Yes | The saved local-AI explanation of your match for one career, with the facts it was based on and whether the match has changed since (`stale`). Never runs the model. 404 for a career you have no match for. |
+| `POST` | `/api/v1/careers/:id/explanation` | Yes | Returns the saved explanation if the match is unchanged (`cached: true`); otherwise the local model writes one from facts built on the server (the body is ignored). Errors: 409 `REPLY_IN_PROGRESS`, 422 `NO_EVIDENCE` or `EXPLANATION_REJECTED`, 503 `AI_BUSY` or `AI_UNAVAILABLE`, 504 `AI_TIMEOUT`. |
 | `GET` | `/api/v1/careers/transition-plans` | Yes | The caller's plans, each stage re-evaluated against current evidence. |
 | `POST` | `/api/v1/careers/transition-plans` | Yes | Body `targetCareerId`. Builds or replaces the plan. `409 NO_SKILL_PROFILE` without a resume. |
 | `DELETE` | `/api/v1/careers/transition-plans/:id` | Yes | Remove a plan. |

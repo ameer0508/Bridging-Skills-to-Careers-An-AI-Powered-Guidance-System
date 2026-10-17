@@ -7,6 +7,7 @@ import { Ring } from '../../../design/aurora/ui';
 import { auroraEase } from '../../../design/aurora/motion';
 import { quietButton } from '../../../design/aurora/labStyles';
 import type { CareerMatchData } from './types';
+import { CareerExplanationPanel } from './CareerExplanationPanel';
 
 type Row = NonNullable<CareerMatchData['breakdown']>[number];
 
@@ -209,6 +210,7 @@ export const CareerDetailDialog: React.FC<{ match: CareerMatchData | null; onClo
             </div>
           </section>
         )}
+        {match.careerId._id && <CareerExplanationPanel careerId={match.careerId._id} />}
         <div className="grid gap-4 md:grid-cols-2">
           <section className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4" aria-labelledby="detail-strengths">
             <h3 id="detail-strengths" className="mb-2 flex items-center gap-2 text-sm font-bold text-emerald-900">

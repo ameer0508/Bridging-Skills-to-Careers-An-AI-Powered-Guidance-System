@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import CareerController from '../controllers/CareerController.js';
 import CareerLabController from '../controllers/CareerLabController.js';
+import CareerExplanationController from '../controllers/CareerExplanationController.js';
 import { requireAuth } from '../middlewares/auth.js';
 
 const router = Router();
@@ -19,5 +20,9 @@ router.post('/transition-plans', CareerLabController.createPlan);
 router.delete('/transition-plans/:planId', CareerLabController.deletePlan);
 router.get('/:careerId/counterfactuals', CareerLabController.counterfactuals);
 router.get('/:careerId/market-evidence', CareerLabController.marketEvidence);
+
+// Optional local-AI explanation of a match (the score itself never changes); GET never runs the model
+router.get('/:careerId/explanation', CareerExplanationController.get);
+router.post('/:careerId/explanation', CareerExplanationController.generate);
 
 export default router;

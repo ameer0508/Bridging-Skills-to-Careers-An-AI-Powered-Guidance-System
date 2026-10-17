@@ -69,6 +69,15 @@ old refresh token is refused.
 
 Run it with `E2E_FRONTEND=preview` too, so chunk names match a production build.
 
+`E2E_TEST_FILE=./tests/careerExplanation.mjs` covers the optional local-AI explanation of a career
+match (docs/AI_EXPLANATIONS.md), with the stub standing in for the AI service:
+- opening matches and navigating never asks the model;
+- generating by keyboard shows the waiting indicator, the provider and model label, the warning and
+  the facts given to the model, moves focus to the result and leaves the score unchanged;
+- a saved explanation is reused;
+- busy, unavailable, timed-out and rejected answers each show their own message;
+- it works at phone width.
+
 ## Docker Compose checks, isolated
 
 `e2e/ci/compose-isolated.sh` runs the Compose stack as a throwaway project named

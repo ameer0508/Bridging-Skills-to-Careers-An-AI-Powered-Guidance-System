@@ -100,8 +100,10 @@ class AIGateway:
         schema_class: Optional[Type[BaseModel]] = None,
         requested_provider: Optional[str] = None,
         use_cache: bool = True,
+        restrict_to: Optional[List[str]] = None,
         **kwargs
     ) -> UnifiedAIResponse:
+        """restrict_to: when given, only these providers may answer; no other is tried as a fallback."""
         start_total = time.time()
 
         personal = carries_personal_data(service_name)
@@ -128,6 +130,8 @@ class AIGateway:
         except RuntimeError:
             audit_log.record("no_provider", service_name, personal_data=personal, skipped=self._skip_reasons([], personal))
             raise
+        if restrict_to is not None:
+            provider_chain = [p for p in provider_chain if p.provider_name in restrict_to]
         audit_log.record("chain_resolved", service_name, personal_data=personal, skipped=self._skip_reasons(provider_chain, personal))
         errors: List[str] = []
 
