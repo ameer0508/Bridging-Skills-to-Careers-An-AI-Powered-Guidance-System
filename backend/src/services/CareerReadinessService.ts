@@ -117,9 +117,11 @@ export class CareerReadinessService {
     });
 
     return readiness.map(r => {
+      // careerId is populated here: its own toString() is "[object Object]", so join on its _id
+      const careerKey = String((r.careerId as unknown as { _id?: mongoose.Types.ObjectId })?._id ?? r.careerId);
       return {
         ...r,
-        gaps: gapMap.get(r.careerId.toString()) || {
+        gaps: gapMap.get(careerKey) || {
           criticalGaps: [],
           weakAreas: [],
           strengthAreas: []

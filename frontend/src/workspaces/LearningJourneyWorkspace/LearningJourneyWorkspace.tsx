@@ -243,7 +243,8 @@ export const LearningJourneyWorkspace: React.FC = () => {
                       }`}
                     >
                       {g.skill}
-                      <span className={focusSkill === g.skill ? 'text-white/85' : 'opacity-80'}>· {g.kind === 'missing' ? 'missing' : 'weak'} · {g.items} item{g.items === 1 ? '' : 's'}</span>
+                      {/* Full-strength text: faded, it fell below 4.5:1 contrast on the amber and rose chips */}
+                      <span className={focusSkill === g.skill ? 'text-white/85' : 'font-medium'}>· {g.kind === 'missing' ? 'missing' : 'weak'} · {g.items} item{g.items === 1 ? '' : 's'}</span>
                     </button>
                   ))}
                 </div>

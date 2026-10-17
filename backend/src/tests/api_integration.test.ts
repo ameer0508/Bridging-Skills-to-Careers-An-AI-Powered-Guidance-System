@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import app from '../app.js';
 import CareerService from '../services/CareerService.js';
+import { GapAnalysis } from '../models/GapAnalysis.js';
 import { ensureFakeAiService } from './helpers/fakeAiService.js';
 
 /**
@@ -189,6 +190,12 @@ export async function runApiIntegrationTests() {
     assert.equal(readiness.status, 200);
     assert.ok(readiness.body.data.readiness.length > 0);
     assert.ok(Array.isArray(readiness.body.data.readiness[0].gaps.criticalGaps));
+    // Each entry carries its own career's stored gap analysis, not the empty fallback. The join used to
+    // compare against the populated careerId ("[object Object]") and never matched.
+    const entry = readiness.body.data.readiness[0];
+    const storedGaps = await GapAnalysis.findOne({ userId: entry.userId, careerId: entry.careerId._id }).lean();
+    assert.ok(storedGaps, 'a gap analysis is stored for the career');
+    assert.equal(String(entry.gaps._id), String(storedGaps!._id), 'GET /readiness attaches the stored gap analysis');
 
     const recs = await api('GET', '/recommendations', { token: aliceToken });
     assert.equal(recs.status, 200);
