@@ -65,6 +65,14 @@ export async function runCareerExplanationTests() {
   assert.equal(odd.career_title, 'Dev Ops');
   console.log('  ✓ The fact sheet holds the exact score, counts and statuses, and its hash is stable');
 
+  // The CI database option can only ever name a dedicated test database
+  assert.equal(ciTestDatabaseUri(undefined), null);
+  assert.equal(ciTestDatabaseUri('mongodb://mongodb:27017/skillbridge_ci_explanation_tests'), 'mongodb://mongodb:27017/skillbridge_ci_explanation_tests');
+  for (const real of ['mongodb://mongodb:27017/skillbridge', 'mongodb://mongodb:27017/', 'mongodb://mongodb:27017/skillbridge_ci']) {
+    assert.throws(() => ciTestDatabaseUri(real), /Refusing to run/, `${real} must be refused`);
+  }
+  console.log('  ✓ The CI test database option refuses any database but a dedicated skillbridge_ci_* one');
+
   // --- Over HTTP ---------------------------------------------------------------------------------
   const fakeAi = await ensureFakeAiService();
   await CareerService.seedInitialTaxonomy();
@@ -258,18 +266,36 @@ export async function runCareerExplanationTests() {
   }
 }
 
+/**
+ * Where the suite keeps its data when run on its own. By default a throwaway in-memory MongoDB.
+ * CI runs it inside the backend build image (Alpine, where mongodb-memory-server has no binary)
+ * against the CI stack's own MongoDB: EXPLANATION_TEST_MONGODB_URI then names a dedicated database,
+ * which must be called skillbridge_ci_*, and is dropped before and after the run.
+ */
+export function ciTestDatabaseUri(value: string | undefined): string | null {
+  if (!value) return null;
+  const name = new URL(value).pathname.replace(/^\//, '');
+  if (!/^skillbridge_ci_[a-z0-9_]+$/.test(name)) {
+    throw new Error(`Refusing to run against database "${name}": only a dedicated skillbridge_ci_* test database may be used.`);
+  }
+  return value;
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   (async () => {
-    const mongoServer = await MongoMemoryServer.create();
-    await mongoose.connect(mongoServer.getUri());
+    const ciUri = ciTestDatabaseUri(process.env.EXPLANATION_TEST_MONGODB_URI);
+    const mongoServer = ciUri ? null : await MongoMemoryServer.create();
+    await mongoose.connect(ciUri ?? mongoServer!.getUri());
+    if (ciUri) await mongoose.connection.dropDatabase();
     try {
       await runCareerExplanationTests();
     } catch (err) {
       console.error('❌ Career Explanation Test Failed:', err);
       process.exitCode = 1;
     } finally {
+      if (ciUri) await mongoose.connection.dropDatabase();
       await mongoose.disconnect();
-      await mongoServer.stop();
+      await mongoServer?.stop();
     }
   })();
 }

@@ -78,3 +78,16 @@ words" below the requirement breakdown:
   while the model loads.
 - The local model answers one request at a time, with at most 2 running or waiting. A third
   simultaneous request is refused at once as busy.
+
+## What CI verifies
+
+The Docker CI workflow never downloads a model, so no CI run can contain a real explanation.
+
+| CI step | What it proves |
+|---|---|
+| Explanations reach only a local model… (`e2e/ci/explanation-tests.sh ai-service`) | The running AI service refuses requests without the internal key, refuses facts with injected instructions or inconsistent counts (422), and, with no local model, answers valid facts with `AI_UNAVAILABLE` (503) and no text. |
+| Smoke check "career explanation is answered honestly (none)" (`e2e/lib/explanationSmoke.mjs`) | Through nginx and the real backend: sign-in is required, another user gets 404, reading never generates, generating gives the labelled `AI_UNAVAILABLE`, nothing is stored, and the stored score is unchanged. A generated explanation fails this check in CI. |
+| Explanation routes with a stub AI service (`… backend`) | The full backend explanation suite, run in the backend build image against a dedicated `skillbridge_ci_*` database (dropped before and after): ownership, identities, caching, staleness, request de-duplication, the shared chat lock, labelled failures, account deletion and unchanged scores. |
+| Explanation checks in the AI service image (`… ai`) | The AI service's explanation tests (validator, untrusted facts, local-only routing, busy, timeout and rejected) against the image's own code, with a fake Ollama on loopback. Only pytest (pinned, about 1 MB) is installed into the throwaway container. |
+
+Real explanation quality, latency and memory use still need a run with the real local Ollama model.

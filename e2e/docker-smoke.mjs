@@ -14,6 +14,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { makeTextPdf } from './lib/pdf.mjs';
+import { checkCareerExplanation } from './lib/explanationSmoke.mjs';
 
 const WEB = (process.env.WEB_URL || 'http://localhost:3000').replace(/\/$/, '');
 const BACKEND = (process.env.API_URL || 'http://localhost:5000').replace(/\/$/, '');
@@ -220,15 +221,21 @@ async function fullRun() {
     return `${jobs.opportunities.length} sample listings`;
   });
 
+  let otherToken = null;
   await check('a second user sees none of the first user\'s data', async () => {
     const other = { fullName: 'Other Person', email: `compose.other.${stamp}@example.com`, password: 'Password123!' };
     const registered = await call('POST', `${API}/auth/register`, { json: other });
     expect(registered.status === 201, `register ${registered.status}`);
-    const otherToken = registered.body.data.accessToken;
+    otherToken = registered.body.data.accessToken;
     expect((await call('GET', `${API}/resumes/me`, { token: otherToken })).body.data.resume === null, 'the other user sees a resume');
     expect((await call('GET', `${API}/skills/me`, { token: otherToken })).body.data.totalSkills === 0, 'the other user sees skills');
     expect((await call('GET', `${API}/resumes/download`, { token: otherToken })).status === 404, 'the other user can download the file');
   });
+
+  // The optional local-AI explanation of a match (docs/AI_EXPLANATIONS.md): owner only, reading never
+  // generates, and with no model (CI) generating gives the labelled AI_UNAVAILABLE and stores nothing
+  await check(`career explanation is answered honestly (${aiMode})`, () =>
+    checkCareerExplanation({ api: API, call, token, otherToken, aiMode, localModel }));
 
   await check('interview recordings: refused without consent, then stored privately and played back to their owner', async () => {
     const session = (await call('POST', `${API}/interviews`, { token, json: { mode: 'mixed', questionCount: 3 } })).body.data;

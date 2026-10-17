@@ -127,6 +127,9 @@ jobs:
           fi
           echo "AI service and MongoDB are reachable only inside the Compose network"
 
+      - name: Explanations reach only a local model; without one the answer is a labelled AI_UNAVAILABLE
+        run: bash e2e/ci/explanation-tests.sh ai-service
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -186,6 +189,15 @@ jobs:
           node e2e/docker-smoke.mjs --after-expiry
           # Running it again finds nothing to do
           docker compose exec -T backend node backend/dist/scripts/purgeVoiceRecordings.js | grep -q '"removed":0'
+
+      # Explanation generation needs a model, which CI never downloads. These two steps exercise the
+      # generation paths with stubs (an in-process stub AI service; a fake Ollama on loopback), so
+      # a passing run here is never evidence that a real model wrote an explanation.
+      - name: Explanation routes with a stub AI service (backend suite, dedicated test database)
+        run: bash e2e/ci/explanation-tests.sh backend
+
+      - name: Explanation checks in the AI service image (pytest, fake Ollama on loopback)
+        run: bash e2e/ci/explanation-tests.sh ai
 
       - name: 9. Check the logs for startup failures
         if: always()
