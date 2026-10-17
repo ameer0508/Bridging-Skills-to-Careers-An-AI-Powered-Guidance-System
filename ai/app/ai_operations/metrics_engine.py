@@ -10,12 +10,15 @@ class MetricsEngine:
         self._total_requests = 0
         self._total_latency_ms = 0.0
         self._total_tokens = 0
+        self._total_cost_usd = 0.0
         self._cache_hits = 0
 
-    def record_inference(self, latency_ms: float, tokens: int = 150, confidence: float = 0.95, cached: bool = False):
+    def record_inference(self, latency_ms: float, tokens: int = 0, cost_usd: float = 0.0, cached: bool = False):
+        """tokens and cost_usd are the values reported for the call (TokenUsage); nothing is assumed."""
         self._total_requests += 1
         self._total_latency_ms += latency_ms
         self._total_tokens += tokens
+        self._total_cost_usd += cost_usd
         if cached:
             self._cache_hits += 1
 
@@ -27,5 +30,6 @@ class MetricsEngine:
             "average_latency_ms": round(avg_lat, 2),
             "total_tokens_consumed": self._total_tokens,
             "cache_hit_ratio_percent": round(hit_ratio, 1),
-            "estimated_cost_usd": round(self._total_tokens * 0.000002, 4)
+            # The sum of reported per-call costs, not a per-token rate (all are 0 under the zero-cost policy)
+            "estimated_cost_usd": round(self._total_cost_usd, 6)
         }

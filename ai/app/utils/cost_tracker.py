@@ -1,32 +1,33 @@
-from typing import Dict, Tuple
-
 class CostTracker:
     """
-    Price matrix for tracking estimated USD cost per call across providers and models.
-    Prices expressed per 1,000 tokens (prompt_cost, completion_cost).
-    """
-    PRICING_TABLE: Dict[str, Tuple[float, float]] = {
-        # provider/model -> (prompt_price_per_1k, completion_price_per_1k)
-        "gemini/gemini-2.5-flash": (0.000075, 0.000300),
-        "gemini/gemini-1.5-pro": (0.001250, 0.005000),
-        "openai/gpt-4o": (0.002500, 0.010000),
-        "openai/gpt-4o-mini": (0.000150, 0.000600),
-        "huggingface/mistralai/Mistral-7B-Instruct-v0.2": (0.000100, 0.000200),
-        "local/llama3": (0.0, 0.0),
-        "mock/mock-v1": (0.0, 0.0),
-    }
+    The AI inference cost reported for a call, with the reason for it.
 
+    SkillBridge runs under a zero-cost policy (app/cost_policy/provider_registry.json): local models
+    cost nothing, and the only external model it may call (Gemini) is allowed solely on a free tier
+    the operator has attested has no billing linked. No price table is applied, so no monetary
+    figure is invented for a provider or model.
+    """
     # Run on this machine: nothing is billed, whatever the model
-    FREE_PROVIDERS = {"local", "mock"}
+    LOCAL_PROVIDERS = {"local", "mock"}
+    # Allowed only on an attested free tier with no billing linked (runtime_policy enforces it)
+    FREE_TIER_PROVIDERS = {"gemini"}
+
+    NO_CHARGE_LOCAL = "no_charge_local"
+    NO_CHARGE_FREE_TIER = "no_charge_free_tier"
+    NOT_APPLICABLE = "not_applicable"
+    # No price is known for the provider: the reported 0 is NOT a verified cost. The zero-cost
+    # policy blocks every such provider, so this is only seen on failures and unknown names.
+    UNPRICED = "unpriced"
+
+    @classmethod
+    def cost_basis(cls, provider: str) -> str:
+        if provider in cls.LOCAL_PROVIDERS:
+            return cls.NO_CHARGE_LOCAL
+        if provider in cls.FREE_TIER_PROVIDERS:
+            return cls.NO_CHARGE_FREE_TIER
+        return cls.UNPRICED
 
     @classmethod
     def calculate_cost(cls, provider: str, model: str, prompt_tokens: int, completion_tokens: int) -> float:
-        if provider in cls.FREE_PROVIDERS:
-            return 0.0
-        key = f"{provider}/{model}"
-        pricing = cls.PRICING_TABLE.get(key, (0.0001, 0.0003))
-        
-        prompt_cost = (prompt_tokens / 1000.0) * pricing[0]
-        completion_cost = (completion_tokens / 1000.0) * pricing[1]
-        
-        return round(prompt_cost + completion_cost, 6)
+        """Always 0.0. Only a no_charge_* basis means the call is known to be free; with "unpriced" the 0 is a placeholder."""
+        return 0.0

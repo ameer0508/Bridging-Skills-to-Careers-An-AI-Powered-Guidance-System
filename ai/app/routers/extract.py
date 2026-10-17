@@ -104,8 +104,7 @@ async def extract_resume(file: UploadFile = File(...)):
             provider="rule_based_parser",
             model="resume-rules-v1",
             latency_ms=latency,
-            prompt_text=text[:200],
-            completion_text=str(parsed_data.model_dump()),
+            model_invoked=False,
             metadata={"file_type": ext, "parsing_engine": "rule_based"}
         )
 

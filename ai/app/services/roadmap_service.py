@@ -33,8 +33,7 @@ def generate_roadmap_via_ai(request: RoadmapRequest) -> UnifiedAIResponse:
         provider="roadmap_pipeline",
         model="adaptive-sequencer-v1",
         latency_ms=latency_ms,
-        prompt_text=f"Level: {request.current_level}, Target: {request.target_role}, Months: {request.target_months}",
-        completion_text=str(pipeline_result),
+        model_invoked=False,
         metadata={
             "pipeline": "Adaptive AI Learning Roadmap Engine",
             "is_valid": pipeline_result.get("is_valid", True),

@@ -26,7 +26,8 @@ async def normalize_skills(request: RawSkillList):
             raw_data={"normalized_skills": [], "skill_clusters": {}, "total_skills_analyzed": 0, "emerging_skills_detected": 0},
             provider="semantic_skill_engine",
             model="semantic-skill-intelligence-v1",
-            latency_ms=0.0
+            latency_ms=0.0,
+            model_invoked=False
         )
         content_dict = empty_resp.model_dump()
         content_dict["normalized_skills"] = []
@@ -42,8 +43,7 @@ async def normalize_skills(request: RawSkillList):
             provider="semantic_skill_engine",
             model="semantic-skill-intelligence-v1",
             latency_ms=latency,
-            prompt_text=str(request.skills),
-            completion_text=str(analysis_result),
+            model_invoked=False,
             metadata={"skill_count": len(request.skills), "engine": "semantic_skill_intelligence"}
         )
 

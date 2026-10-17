@@ -15,6 +15,16 @@ export interface IUnifiedAIResponse<T = unknown> {
     completion_tokens: number;
     total_tokens: number;
     estimated_cost_usd: number;
+    /**
+     * 'provider': counts reported by the model runtime. 'unavailable': no counts were reported, so
+     * the zeros are not measurements. 'not_applicable': no language model ran (rule-based result).
+     */
+    source?: 'provider' | 'unavailable' | 'not_applicable';
+    /**
+     * Why the cost has its value: 'no_charge_local' or 'no_charge_free_tier' (known to be free),
+     * 'not_applicable' (no model ran) or 'unpriced' (no price is known; the 0 is not a verified cost).
+     */
+    cost_basis?: string;
   };
   response: T;
   data: T;

@@ -38,6 +38,7 @@ class MockProvider(BaseAIProvider):
             provider=self.provider_name,
             model=self._model_name,
             latency_ms=latency,
+            model_invoked=False,
             prompt_text=prompt,
             completion_text=text,
             metadata={"mock_mode": True}
@@ -90,6 +91,7 @@ class MockProvider(BaseAIProvider):
             provider=self.provider_name,
             model=self._model_name,
             latency_ms=latency,
+            model_invoked=False,
             prompt_text=text[:100],
             completion_text=str(mock_data),
             metadata={"mock_mode": True}
@@ -113,6 +115,7 @@ class MockProvider(BaseAIProvider):
             provider=self.provider_name,
             model=self._model_name,
             latency_ms=latency,
+            model_invoked=False,
             prompt_text=str(raw_skills),
             completion_text=str(mock_data),
             metadata={"mock_mode": True}
@@ -132,6 +135,7 @@ class MockProvider(BaseAIProvider):
             provider=self.provider_name,
             model=self._model_name,
             latency_ms=latency,
+            model_invoked=False,
             prompt_text=f"{user_skills} -> {target_role}",
             completion_text=str(mock_data),
             metadata={"mock_mode": True}
@@ -156,6 +160,7 @@ class MockProvider(BaseAIProvider):
             provider=self.provider_name,
             model=self._model_name,
             latency_ms=latency,
+            model_invoked=False,
             prompt_text=f"{user_skills} vs {required_skills}",
             completion_text=str(mock_data),
             metadata={"mock_mode": True}
@@ -185,6 +190,7 @@ class MockProvider(BaseAIProvider):
             provider=self.provider_name,
             model=self._model_name,
             latency_ms=latency,
+            model_invoked=False,
             prompt_text=f"{user_skills} -> {career_goal}",
             completion_text=str(mock_data),
             metadata={"mock_mode": True}
@@ -218,6 +224,7 @@ class MockProvider(BaseAIProvider):
             provider=self.provider_name,
             model=self._model_name,
             latency_ms=latency,
+            model_invoked=False,
             prompt_text=f"{current_level} -> {target_role}",
             completion_text=str(mock_data),
             metadata={"mock_mode": True}
@@ -243,6 +250,7 @@ class MockProvider(BaseAIProvider):
             provider=self.provider_name,
             model=self._model_name,
             latency_ms=latency,
+            model_invoked=False,
             prompt_text=user_id,
             completion_text=str(mock_data),
             metadata={"mock_mode": True}
@@ -263,6 +271,7 @@ class MockProvider(BaseAIProvider):
             provider=self.provider_name,
             model=self._model_name,
             latency_ms=latency,
+            model_invoked=False,
             prompt_text=resume_text[:100],
             completion_text=str(mock_data),
             metadata={"mock_mode": True}

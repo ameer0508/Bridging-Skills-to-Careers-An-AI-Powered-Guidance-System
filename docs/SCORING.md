@@ -160,9 +160,24 @@ under it (measured in the milestone-1 test run).
 
 - **Resume completeness score** (the field is named `atsScore` for compatibility): points for
   which sections and contact details were found. It is not the output of any applicant tracking system.
-- **Token usage**: counts reported by the AI provider when available (`source: provider`);
-  otherwise estimated from text length (`source: estimated`). Cost is always an estimate from a
-  static price table.
+- **Token usage** (`usage` in AI service responses) is never estimated:
+  - `source: provider`: a model ran and its runtime reported the counts (for Ollama,
+    `prompt_eval_count` and `eval_count`). A reported 0 is a real 0.
+  - `source: unavailable`: a model ran, or was attempted, but reported no counts, so the zeros are
+    not measurements. Failed calls are reported this way too.
+  - `source: not_applicable`: no language model ran. Resume extraction, skill normalisation, the
+    roadmap and recommendation pipelines and the development mock report 0 tokens, $0 and
+    `metadata.generation: deterministic`.
+
+  They used to estimate counts from text length and price them at a default rate, so rule-based
+  results showed invented tokens and costs (e.g. about 2,965 tokens and $0.0009 for one
+  recommendation request).
+- **Inference cost** (`estimated_cost_usd`) is 0 for every call, and `cost_basis` says why:
+  `no_charge_local` (runs on this machine), `no_charge_free_tier` (Gemini, allowed only on a free
+  tier the operator attests has no billing), `not_applicable` (no model ran) or `unpriced` (any
+  other provider name, such as the gateway's all-providers-failed error; no price is known, so this
+  0 is a placeholder, not a verified cost; the zero-cost policy blocks every such provider). No
+  price table or per-token rate is applied.
 - **Confidence** is never invented. Where nothing measures it, the value is `null`:
   - AI service response envelopes carry `confidence: null` and `confidence_basis: not_measured`.
     They used to carry a fixed number chosen by provider name (0.98 for Gemini).

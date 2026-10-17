@@ -86,7 +86,7 @@ export class AIGatewayService {
     if (p.includes('HUGGINGFACE')) return 'Hugging Face';
     if (p.includes('LOCAL')) return 'Local model';
     if (p.includes('MOCK')) return 'Development mock (not real AI)';
-    if (p.includes('SEMANTIC') || p.includes('INTELLIGENCE') || p.includes('RULE')) return 'SkillBridge rule engine';
+    if (p.includes('SEMANTIC') || p.includes('INTELLIGENCE') || p.includes('RULE') || p.includes('PIPELINE')) return 'SkillBridge rule engine';
     return provider || 'AI Gateway';
   }
 }

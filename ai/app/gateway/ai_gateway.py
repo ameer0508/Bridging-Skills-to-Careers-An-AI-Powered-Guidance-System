@@ -194,7 +194,7 @@ class AIGateway:
                     # Log Metrics
                     logger.info(
                         f"[AI Gateway Metric] Service={service_name} | Provider={response.provider} | Model={response.model} | "
-                        f"Latency={response.latency}ms | Tokens={response.usage.total_tokens} | Cost=${response.usage.estimated_cost_usd:.6f}"
+                        f"Latency={response.latency}ms | Tokens={response.usage.total_tokens} ({response.usage.source}) | Cost=${response.usage.estimated_cost_usd:.6f} ({response.usage.cost_basis})"
                     )
 
                     # Store in Caching Layer

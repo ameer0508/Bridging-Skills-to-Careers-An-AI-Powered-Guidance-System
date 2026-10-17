@@ -25,8 +25,7 @@ def generate_recommendations_via_ai(request: RecommendationRequest) -> UnifiedAI
             provider="recommendation_intelligence",
             model="explainable-recommendation-v1",
             latency_ms=latency,
-            prompt_text=f"{request.user_skills} -> {request.career_goal}",
-            completion_text=str(pipeline_result.model_dump()),
+            model_invoked=False,
             metadata={"recommendation_count": len(pipeline_result.recommendations)}
         )
     except Exception as e:

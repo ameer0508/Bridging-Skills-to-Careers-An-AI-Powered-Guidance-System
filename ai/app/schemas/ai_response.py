@@ -6,16 +6,21 @@ class TokenUsage(BaseModel):
     completion_tokens: int = 0
     total_tokens: int = 0
     estimated_cost_usd: float = 0.0
-    # "provider": counts reported by the AI provider. "estimated": derived from text length.
-    # The cost is always an estimate from a static price table.
-    source: str = "estimated"
+    # How the token counts were obtained:
+    #   "provider"       - reported by the model runtime for this request (a reported 0 is a real 0)
+    #   "unavailable"    - a model ran, or was attempted, but reported no counts; the zeros are not measurements
+    #   "not_applicable" - no language model was invoked (rule-based or template pipeline)
+    # Counts are never estimated from text length.
+    source: str = "unavailable"
+    # Why estimated_cost_usd has its value (see CostTracker). Nothing is priced from an invented rate.
+    cost_basis: str = "unpriced"
 
 class UnifiedAIResponse(BaseModel):
     success: bool = True
     confidence: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Estimate reported by an AI model when one produced this value. None when no confidence was measured, which is always the case for the rule-based parser.")
-    provider: str = Field(default="gemini")
+    provider: str = Field(default="unknown")
     latency: float = Field(default=0.0, description="Latency in milliseconds")
-    model: str = Field(default="gemini-2.5-flash")
+    model: str = Field(default="unknown")
     usage: TokenUsage = Field(default_factory=TokenUsage)
     response: Any = None
     data: Any = None  # Alias for backward compatibility

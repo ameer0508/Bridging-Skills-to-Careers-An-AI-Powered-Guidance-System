@@ -179,6 +179,7 @@ def test_structured_result_is_validated_and_usage_is_reported(ollama):
     assert resp.provider == "local" and resp.model == MODEL
     assert resp.usage.source == "provider" and resp.usage.prompt_tokens == 120 and resp.usage.completion_tokens == 40
     assert resp.usage.estimated_cost_usd == 0.0, "a local model costs nothing, whatever its name"
+    assert resp.usage.cost_basis == "no_charge_local"
     assert resp.confidence is None
     # The schema is handed to Ollama so it constrains the output
     assert ollama.generate_requests[-1]["format"]["required"] == ["match_score", "matched_skills", "missing_skills", "summary"]

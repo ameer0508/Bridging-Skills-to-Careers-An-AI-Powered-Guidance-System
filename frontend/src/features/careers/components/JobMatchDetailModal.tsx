@@ -123,7 +123,7 @@ export const JobMatchDetailModal: React.FC<JobMatchDetailModalProps> = ({
                 </h4>
               </div>
               <p className="text-xs text-aurora-muted leading-relaxed">
-                {job.whyMatchReason} Our Gemini 1.5 embedding engine vectorized your parsed resume experience against {job.company}'s active technical requirements with <strong className="text-aurora-violet">{job.confidence}% confidence</strong>.
+                {job.whyMatchReason} Scored by SkillBridge's rule-based comparison of your extracted skills with {job.company}'s listed requirements; no language model produced this match.
               </p>
             </GlassPanel>
 

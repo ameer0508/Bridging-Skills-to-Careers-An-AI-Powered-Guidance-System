@@ -77,13 +77,15 @@ def test_token_usage_comes_from_the_provider_when_reported(monkeypatch):
     usage = provider.generate_content("hello").usage
     assert (usage.prompt_tokens, usage.completion_tokens, usage.total_tokens) == (321, 45, 366)
     assert usage.source == "provider"
+    assert usage.estimated_cost_usd == 0.0 and usage.cost_basis == "no_charge_free_tier"
 
 
-def test_token_usage_is_labelled_as_estimated_otherwise():
+def test_token_usage_is_labelled_as_unavailable_otherwise():
     response = ResponseNormalizer.normalize_success(
-        raw_data="some text", provider="mock", model="mock-v1", latency_ms=1.0, prompt_text="a prompt of several words"
+        raw_data="some text", provider="gemini", model="gemini-2.5-flash", latency_ms=1.0, prompt_text="a prompt of several words"
     )
-    assert response.usage.source == "estimated"
+    assert response.usage.source == "unavailable", "counts the provider did not report are not estimated"
+    assert (response.usage.prompt_tokens, response.usage.completion_tokens, response.usage.total_tokens) == (0, 0, 0)
     assert response.confidence is None, "no confidence figure is invented for a response"
     assert response.metadata["confidence_basis"] == "not_measured"
     assert _reported_usage(SimpleNamespace()) is None
