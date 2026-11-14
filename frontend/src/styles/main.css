@@ -38,6 +38,7 @@
 
 /* The primary action gradient and the soft canvas wash, used by the Aurora Elite primitives */
 :root {
+  color-scheme: only light;
   --aurora-gradient-action: linear-gradient(110deg, #6e4bff 0%, #4631ec 100%);
   --aurora-gradient-canvas: radial-gradient(1200px 600px at 85% -10%, rgb(167 139 250 / 0.22), transparent 60%),
     radial-gradient(900px 500px at -10% 10%, rgb(93 150 255 / 0.16), transparent 60%), #f5f7ff;
